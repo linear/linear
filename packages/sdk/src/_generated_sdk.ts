@@ -464,7 +464,7 @@ export class AgentActivityWebhookPayload {
     this.signalMetadata = data.signalMetadata ?? undefined;
     this.sourceCommentId = data.sourceCommentId ?? undefined;
     this.updatedAt = data.updatedAt;
-    this.userId = data.userId ?? undefined;
+    this.userId = data.userId;
   }
 
   /** The ID of the agent session that this activity belongs to. */
@@ -486,7 +486,7 @@ export class AgentActivityWebhookPayload {
   /** The time at which the entity was updated. */
   public updatedAt: string;
   /** The ID of the user who created this agent activity. */
-  public userId?: string | null;
+  public userId: string;
 }
 /**
  * A session for agent activities and state management.
@@ -517,6 +517,7 @@ export class AgentSession extends Request {
     this.startedAt = parseDate(data.startedAt) ?? undefined;
     this.summary = data.summary ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.url = data.url ?? undefined;
     this.status = data.status;
     this.type = data.type ?? undefined;
     this._appUser = data.appUser;
@@ -556,6 +557,8 @@ export class AgentSession extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** Agent session URL. */
+  public url?: string | null;
   /** The current status of the agent session. */
   public status: L.AgentSessionStatus;
   /** [DEPRECATED] The type of the agent session. */
@@ -802,6 +805,7 @@ export class AgentSessionWebhookPayload {
     this.summary = data.summary ?? undefined;
     this.type = data.type;
     this.updatedAt = data.updatedAt;
+    this.url = data.url ?? undefined;
     this.comment = data.comment ? new CommentChildWebhookPayload(data.comment) : undefined;
     this.creator = data.creator ? new UserChildWebhookPayload(data.creator) : undefined;
     this.issue = data.issue ? new IssueWithDescriptionChildWebhookPayload(data.issue) : undefined;
@@ -839,6 +843,8 @@ export class AgentSessionWebhookPayload {
   public type: string;
   /** The time at which the entity was updated. */
   public updatedAt: string;
+  /** The URL of the agent session. */
+  public url?: string | null;
   /** The root comment of the thread this agent session is attached to. */
   public comment?: CommentChildWebhookPayload | null;
   /** The human user responsible for the agent session. Unset if the session was initiated via automation or by an agent user, with no responsible human user. */

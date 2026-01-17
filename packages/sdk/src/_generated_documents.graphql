@@ -2176,6 +2176,8 @@ fragment AgentSession on AgentSession {
   plan
   # A summary of the activities in this session.
   summary
+  # Agent session URL.
+  url
   # Metadata about the external source that created this agent session.
   sourceMetadata
   # Serialized JSON representing the contexts this session is related to, for direct chat sessions.
@@ -5806,6 +5808,8 @@ fragment AgentSessionWebhookPayload on AgentSessionWebhookPayload {
   organizationId
   # The ID of the root comment of the thread this agent session is attached to.
   commentId
+  # The URL of the agent session.
+  url
   # The current status of the agent session.
   status
   # The human user responsible for the agent session. Unset if the session was initiated via automation or by an agent user, with no responsible human user.

@@ -284,7 +284,7 @@ export type AgentActivityWebhookPayload = {
   /** The time at which the entity was updated. */
   updatedAt: Scalars["String"];
   /** The ID of the user who created this agent activity. */
-  userId?: Maybe<Scalars["String"]>;
+  userId: Scalars["String"];
 };
 
 /** A session for agent activities and state management. */
@@ -347,6 +347,8 @@ export type AgentSession = Node & {
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
+  /** Agent session URL. */
+  url?: Maybe<Scalars["String"]>;
 };
 
 /** A session for agent activities and state management. */
@@ -380,7 +382,7 @@ export type AgentSessionConnection = {
 export type AgentSessionCreateInput = {
   /** The app user (agent) to create a session for. */
   appUserId: Scalars["String"];
-  /** Serialized JSON representing the page contexts this session is related to. Used for direct chat sessions to provide context about the current page (e.g., Issue, Project). */
+  /** [Internal] Serialized JSON representing the page contexts this session is related to. Used for direct chat sessions to provide context about the current page (e.g., Issue, Project). */
   context?: InputMaybe<Scalars["JSONObject"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars["String"]>;
@@ -587,6 +589,8 @@ export type AgentSessionWebhookPayload = {
   type: Scalars["String"];
   /** The time at which the entity was updated. */
   updatedAt: Scalars["String"];
+  /** The URL of the agent session. */
+  url?: Maybe<Scalars["String"]>;
 };
 
 /** AI prompt rules for a team. */
@@ -7188,6 +7192,8 @@ export type IssueCollectionFilter = {
   hasDuplicateRelations?: InputMaybe<RelationExistsComparator>;
   /** Comparator for filtering issues with relations. */
   hasRelatedRelations?: InputMaybe<RelationExistsComparator>;
+  /** Comparator for filtering issues which have been shared with users outside of the team. */
+  hasSharedUsers?: InputMaybe<RelationExistsComparator>;
   /** [Internal] Comparator for filtering issues which have suggested assignees. */
   hasSuggestedAssignees?: InputMaybe<RelationExistsComparator>;
   /** [Internal] Comparator for filtering issues which have suggested labels. */
@@ -7230,6 +7236,8 @@ export type IssueCollectionFilter = {
   recurringIssueTemplate?: InputMaybe<NullableTemplateFilter>;
   /** [Internal] Comparator for the issues content. */
   searchableContent?: InputMaybe<ContentComparator>;
+  /** Filters that users the issue has been shared with must satisfy. */
+  sharedWith?: InputMaybe<UserCollectionFilter>;
   /** Comparator for the issues sla status. */
   slaStatus?: InputMaybe<SlaStatusComparator>;
   /** Filters that the issues snoozer must satisfy. */
@@ -7584,6 +7592,8 @@ export type IssueFilter = {
   hasDuplicateRelations?: InputMaybe<RelationExistsComparator>;
   /** Comparator for filtering issues with relations. */
   hasRelatedRelations?: InputMaybe<RelationExistsComparator>;
+  /** Comparator for filtering issues which have been shared with users outside of the team. */
+  hasSharedUsers?: InputMaybe<RelationExistsComparator>;
   /** [Internal] Comparator for filtering issues which have suggested assignees. */
   hasSuggestedAssignees?: InputMaybe<RelationExistsComparator>;
   /** [Internal] Comparator for filtering issues which have suggested labels. */
@@ -7624,6 +7634,8 @@ export type IssueFilter = {
   recurringIssueTemplate?: InputMaybe<NullableTemplateFilter>;
   /** [Internal] Comparator for the issues content. */
   searchableContent?: InputMaybe<ContentComparator>;
+  /** Filters that users the issue has been shared with must satisfy. */
+  sharedWith?: InputMaybe<UserCollectionFilter>;
   /** Comparator for the issues sla status. */
   slaStatus?: InputMaybe<SlaStatusComparator>;
   /** Filters that the issues snoozer must satisfy. */
@@ -12447,6 +12459,8 @@ export type NullableIssueFilter = {
   hasDuplicateRelations?: InputMaybe<RelationExistsComparator>;
   /** Comparator for filtering issues with relations. */
   hasRelatedRelations?: InputMaybe<RelationExistsComparator>;
+  /** Comparator for filtering issues which have been shared with users outside of the team. */
+  hasSharedUsers?: InputMaybe<RelationExistsComparator>;
   /** [Internal] Comparator for filtering issues which have suggested assignees. */
   hasSuggestedAssignees?: InputMaybe<RelationExistsComparator>;
   /** [Internal] Comparator for filtering issues which have suggested labels. */
@@ -12489,6 +12503,8 @@ export type NullableIssueFilter = {
   recurringIssueTemplate?: InputMaybe<NullableTemplateFilter>;
   /** [Internal] Comparator for the issues content. */
   searchableContent?: InputMaybe<ContentComparator>;
+  /** Filters that users the issue has been shared with must satisfy. */
+  sharedWith?: InputMaybe<UserCollectionFilter>;
   /** Comparator for the issues sla status. */
   slaStatus?: InputMaybe<SlaStatusComparator>;
   /** Filters that the issues snoozer must satisfy. */
@@ -13041,7 +13057,10 @@ export type Organization = Node & {
    * @deprecated Use `securitySettings.invitationsRole` instead.
    */
   allowMembersToInvite?: Maybe<Scalars["Boolean"]>;
-  /** [INTERNAL] Permitted AI providers in order of preference. Empty array means all providers are allowed. */
+  /**
+   * [INTERNAL] Permitted AI providers.
+   * @deprecated Use aiProviderConfiguration instead.
+   */
   allowedAiProviders: Array<Scalars["String"]>;
   /** Allowed authentication providers, empty array means all are allowed. */
   allowedAuthServices: Array<Scalars["String"]>;
@@ -13560,8 +13579,6 @@ export type OrganizationUpdateInput = {
   aiTelemetryEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** Whether the organization has enabled resolved thread AI summaries. */
   aiThreadSummariesEnabled?: InputMaybe<Scalars["Boolean"]>;
-  /** [INTERNAL] Permitted AI providers in order of preference. Empty array means all providers are allowed. */
-  allowedAiProviders?: InputMaybe<Array<Scalars["String"]>>;
   /** List of services that are allowed to be used for login. */
   allowedAuthServices?: InputMaybe<Array<Scalars["String"]>>;
   /** Allowed file upload content types. */
@@ -21014,6 +21031,7 @@ export enum ViewType {
   MyIssues = "myIssues",
   MyIssuesActivity = "myIssuesActivity",
   MyIssuesCreatedByMe = "myIssuesCreatedByMe",
+  MyIssuesSharedWithMe = "myIssuesSharedWithMe",
   MyIssuesSubscribedTo = "myIssuesSubscribedTo",
   MyReviews = "myReviews",
   Project = "project",
@@ -23888,6 +23906,7 @@ export type AgentSessionFragment = { __typename: "AgentSession" } & Pick<
   AgentSession,
   | "plan"
   | "summary"
+  | "url"
   | "sourceMetadata"
   | "context"
   | "externalLink"
@@ -26199,6 +26218,7 @@ export type AgentSessionEventWebhookPayloadFragment = { __typename: "AgentSessio
       | "issueId"
       | "organizationId"
       | "commentId"
+      | "url"
       | "status"
       | "archivedAt"
       | "createdAt"
@@ -26261,6 +26281,7 @@ export type AgentSessionWebhookPayloadFragment = { __typename: "AgentSessionWebh
   | "issueId"
   | "organizationId"
   | "commentId"
+  | "url"
   | "status"
   | "archivedAt"
   | "createdAt"
@@ -27267,6 +27288,7 @@ export type AgentSessionConnectionFragment = { __typename: "AgentSessionConnecti
       AgentSession,
       | "plan"
       | "summary"
+      | "url"
       | "sourceMetadata"
       | "context"
       | "externalLink"
@@ -32506,6 +32528,7 @@ export type AgentSessionQuery = { __typename?: "Query" } & {
     AgentSession,
     | "plan"
     | "summary"
+    | "url"
     | "sourceMetadata"
     | "context"
     | "externalLink"
@@ -32590,6 +32613,7 @@ export type AgentSessionsQuery = { __typename?: "Query" } & {
         AgentSession,
         | "plan"
         | "summary"
+        | "url"
         | "sourceMetadata"
         | "context"
         | "externalLink"
@@ -58913,6 +58937,7 @@ export const AgentSessionWebhookPayloadFragmentDoc = new TypedDocumentString(
   issueId
   organizationId
   commentId
+  url
   status
   creator {
     ...UserChildWebhookPayload
@@ -59058,6 +59083,7 @@ fragment AgentSessionWebhookPayload on AgentSessionWebhookPayload {
   issueId
   organizationId
   commentId
+  url
   status
   creator {
     ...UserChildWebhookPayload
@@ -60901,6 +60927,7 @@ export const AgentSessionFragmentDoc = new TypedDocumentString(
   __typename
   plan
   summary
+  url
   sourceMetadata
   context
   externalLink
@@ -60951,6 +60978,7 @@ export const AgentSessionConnectionFragmentDoc = new TypedDocumentString(
   __typename
   plan
   summary
+  url
   sourceMetadata
   context
   externalLink
@@ -70853,6 +70881,7 @@ export const AgentSessionDocument = new TypedDocumentString(`
   __typename
   plan
   summary
+  url
   sourceMetadata
   context
   externalLink
@@ -71006,6 +71035,7 @@ export const AgentSessionsDocument = new TypedDocumentString(`
   __typename
   plan
   summary
+  url
   sourceMetadata
   context
   externalLink
