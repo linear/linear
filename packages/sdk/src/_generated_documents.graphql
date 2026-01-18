@@ -7194,14 +7194,6 @@ fragment AsksChannelConnectPayload on AsksChannelConnectPayload {
   success
 }
 
-fragment AsksWebFormsAuthResponse on AsksWebFormsAuthResponse {
-  __typename
-  # User display name.
-  name
-  # User email.
-  email
-}
-
 fragment AttachmentConnection on AttachmentConnection {
   __typename
   nodes {
@@ -9410,6 +9402,16 @@ fragment WebhookPayload on WebhookPayload {
   webhook {
     id
   }
+  # Whether the operation was successful.
+  success
+}
+
+fragment WebhookRotateSecretPayload on WebhookRotateSecretPayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The new webhook signing secret.
+  secret
   # Whether the operation was successful.
   success
 }
@@ -15454,15 +15456,6 @@ mutation airbyteIntegrationConnect(
     ...IntegrationPayload
   }
 }
-# Authenticate a user to the Asks web forms app.
-mutation asksWebFormsAuth(
-  # The magic login code.
-  $token: String!
-) {
-  asksWebFormsAuth(token: $token) {
-    ...AsksWebFormsAuthResponse
-  }
-}
 # Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
 mutation createAttachment(
   # The attachment object to create.
@@ -18481,6 +18474,15 @@ mutation deleteWebhook(
 ) {
   webhookDelete(id: $id) {
     ...DeletePayload
+  }
+}
+# Rotates the signing secret for a Webhook.
+mutation rotateSecretWebhook(
+  # The identifier of the Webhook to rotate the secret for.
+  $id: String!
+) {
+  webhookRotateSecret(id: $id) {
+    ...WebhookRotateSecretPayload
   }
 }
 # Updates an existing Webhook.
