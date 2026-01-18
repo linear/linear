@@ -728,14 +728,6 @@ export type AsksChannelConnectPayload = {
   success: Scalars["Boolean"];
 };
 
-export type AsksWebFormsAuthResponse = {
-  __typename?: "AsksWebFormsAuthResponse";
-  /** User email. */
-  email: Scalars["String"];
-  /** User display name. */
-  name: Scalars["String"];
-};
-
 /** Issue assignee sorting options. */
 export type AssigneeSort = {
   /** Whether nulls should be sorted first or last */
@@ -9492,8 +9484,6 @@ export type Mutation = {
   agentSessionUpdateExternalUrl: AgentSessionPayload;
   /** Creates an integration api key for Airbyte to connect with Linear. */
   airbyteIntegrationConnect: IntegrationPayload;
-  /** Authenticate a user to the Asks web forms app. */
-  asksWebFormsAuth: AsksWebFormsAuthResponse;
   /** Creates a new attachment, or updates existing if the same `url` and `issueId` is used. */
   attachmentCreate: AttachmentPayload;
   /** Deletes an issue attachment. */
@@ -10184,6 +10174,8 @@ export type Mutation = {
   webhookCreate: WebhookPayload;
   /** Deletes a Webhook. */
   webhookDelete: DeletePayload;
+  /** Rotates the signing secret for a Webhook. */
+  webhookRotateSecret: WebhookRotateSecretPayload;
   /** Updates an existing Webhook. */
   webhookUpdate: WebhookPayload;
   /** Archives a state. Only states with issues that have all been archived can be archived. */
@@ -10226,10 +10218,6 @@ export type MutationAgentSessionUpdateExternalUrlArgs = {
 
 export type MutationAirbyteIntegrationConnectArgs = {
   input: AirbyteConfigurationInput;
-};
-
-export type MutationAsksWebFormsAuthArgs = {
-  token: Scalars["String"];
 };
 
 export type MutationAttachmentCreateArgs = {
@@ -11725,6 +11713,10 @@ export type MutationWebhookCreateArgs = {
 };
 
 export type MutationWebhookDeleteArgs = {
+  id: Scalars["String"];
+};
+
+export type MutationWebhookRotateSecretArgs = {
   id: Scalars["String"];
 };
 
@@ -18032,6 +18024,8 @@ export type ReleaseCreateInput = {
 
 /** Debug sink for release creation diagnostics. */
 export type ReleaseDebugSinkInput = {
+  /** List of paths applied during commit scanning. */
+  includePaths?: InputMaybe<Array<Scalars["String"]>>;
   /** List of commit SHAs that were inspected. */
   inspectedShas: Array<Scalars["String"]>;
   /** Map of issue identifiers to their source information. */
@@ -21156,6 +21150,16 @@ export type WebhookPayload = {
   success: Scalars["Boolean"];
   /** The webhook entity being mutated. */
   webhook: Webhook;
+};
+
+export type WebhookRotateSecretPayload = {
+  __typename?: "WebhookRotateSecretPayload";
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars["Float"];
+  /** The new webhook signing secret. */
+  secret: Scalars["String"];
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
 };
 
 export type WebhookUpdateInput = {
@@ -27358,11 +27362,6 @@ export type AsksChannelConnectPayloadFragment = { __typename: "AsksChannelConnec
     > & { teams: Array<{ __typename: "SlackAsksTeamSettings" } & Pick<SlackAsksTeamSettings, "id" | "hasDefaultAsk">> };
   };
 
-export type AsksWebFormsAuthResponseFragment = { __typename: "AsksWebFormsAuthResponse" } & Pick<
-  AsksWebFormsAuthResponse,
-  "name" | "email"
->;
-
 export type AttachmentConnectionFragment = { __typename: "AttachmentConnection" } & {
   nodes: Array<
     { __typename: "Attachment" } & Pick<
@@ -32340,6 +32339,11 @@ export type WebhookPayloadFragment = { __typename: "WebhookPayload" } & Pick<
   WebhookPayload,
   "lastSyncId" | "success"
 > & { webhook: { __typename?: "Webhook" } & Pick<Webhook, "id"> };
+
+export type WebhookRotateSecretPayloadFragment = { __typename: "WebhookRotateSecretPayload" } & Pick<
+  WebhookRotateSecretPayload,
+  "lastSyncId" | "secret" | "success"
+>;
 
 export type WorkflowStateConnectionFragment = { __typename: "WorkflowStateConnection" } & {
   nodes: Array<
@@ -47118,14 +47122,6 @@ export type AirbyteIntegrationConnectMutation = { __typename?: "Mutation" } & {
   > & { integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">> };
 };
 
-export type AsksWebFormsAuthMutationVariables = Exact<{
-  token: Scalars["String"];
-}>;
-
-export type AsksWebFormsAuthMutation = { __typename?: "Mutation" } & {
-  asksWebFormsAuth: { __typename: "AsksWebFormsAuthResponse" } & Pick<AsksWebFormsAuthResponse, "name" | "email">;
-};
-
 export type CreateAttachmentMutationVariables = Exact<{
   input: AttachmentCreateInput;
 }>;
@@ -54690,6 +54686,17 @@ export type DeleteWebhookMutation = { __typename?: "Mutation" } & {
   webhookDelete: { __typename: "DeletePayload" } & Pick<DeletePayload, "entityId" | "lastSyncId" | "success">;
 };
 
+export type RotateSecretWebhookMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type RotateSecretWebhookMutation = { __typename?: "Mutation" } & {
+  webhookRotateSecret: { __typename: "WebhookRotateSecretPayload" } & Pick<
+    WebhookRotateSecretPayload,
+    "lastSyncId" | "secret" | "success"
+  >;
+};
+
 export type UpdateWebhookMutationVariables = Exact<{
   id: Scalars["String"];
   input: WebhookUpdateInput;
@@ -61156,16 +61163,6 @@ fragment SlackAsksTeamSettings on SlackAsksTeamSettings {
 }`,
   { fragmentName: "AsksChannelConnectPayload" }
 ) as unknown as TypedDocumentString<AsksChannelConnectPayloadFragment, unknown>;
-export const AsksWebFormsAuthResponseFragmentDoc = new TypedDocumentString(
-  `
-    fragment AsksWebFormsAuthResponse on AsksWebFormsAuthResponse {
-  __typename
-  name
-  email
-}
-    `,
-  { fragmentName: "AsksWebFormsAuthResponse" }
-) as unknown as TypedDocumentString<AsksWebFormsAuthResponseFragment, unknown>;
 export const AttachmentFragmentDoc = new TypedDocumentString(
   `
     fragment Attachment on Attachment {
@@ -70491,6 +70488,17 @@ export const WebhookPayloadFragmentDoc = new TypedDocumentString(
     `,
   { fragmentName: "WebhookPayload" }
 ) as unknown as TypedDocumentString<WebhookPayloadFragment, unknown>;
+export const WebhookRotateSecretPayloadFragmentDoc = new TypedDocumentString(
+  `
+    fragment WebhookRotateSecretPayload on WebhookRotateSecretPayload {
+  __typename
+  lastSyncId
+  secret
+  success
+}
+    `,
+  { fragmentName: "WebhookRotateSecretPayload" }
+) as unknown as TypedDocumentString<WebhookRotateSecretPayloadFragment, unknown>;
 export const WorkflowStateFragmentDoc = new TypedDocumentString(
   `
     fragment WorkflowState on WorkflowState {
@@ -91621,17 +91629,6 @@ export const AirbyteIntegrationConnectDocument = new TypedDocumentString(`
   }
   success
 }`) as unknown as TypedDocumentString<AirbyteIntegrationConnectMutation, AirbyteIntegrationConnectMutationVariables>;
-export const AsksWebFormsAuthDocument = new TypedDocumentString(`
-    mutation asksWebFormsAuth($token: String!) {
-  asksWebFormsAuth(token: $token) {
-    ...AsksWebFormsAuthResponse
-  }
-}
-    fragment AsksWebFormsAuthResponse on AsksWebFormsAuthResponse {
-  __typename
-  name
-  email
-}`) as unknown as TypedDocumentString<AsksWebFormsAuthMutation, AsksWebFormsAuthMutationVariables>;
 export const CreateAttachmentDocument = new TypedDocumentString(`
     mutation createAttachment($input: AttachmentCreateInput!) {
   attachmentCreate(input: $input) {
@@ -100060,6 +100057,18 @@ export const DeleteWebhookDocument = new TypedDocumentString(`
   lastSyncId
   success
 }`) as unknown as TypedDocumentString<DeleteWebhookMutation, DeleteWebhookMutationVariables>;
+export const RotateSecretWebhookDocument = new TypedDocumentString(`
+    mutation rotateSecretWebhook($id: String!) {
+  webhookRotateSecret(id: $id) {
+    ...WebhookRotateSecretPayload
+  }
+}
+    fragment WebhookRotateSecretPayload on WebhookRotateSecretPayload {
+  __typename
+  lastSyncId
+  secret
+  success
+}`) as unknown as TypedDocumentString<RotateSecretWebhookMutation, RotateSecretWebhookMutationVariables>;
 export const UpdateWebhookDocument = new TypedDocumentString(`
     mutation updateWebhook($id: String!, $input: WebhookUpdateInput!) {
   webhookUpdate(id: $id, input: $input) {
