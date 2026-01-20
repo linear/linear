@@ -1078,24 +1078,6 @@ export class AsksChannelConnectPayload extends Request {
   }
 }
 /**
- * AsksWebFormsAuthResponse model
- *
- * @param request - function to call the graphql client
- * @param data - L.AsksWebFormsAuthResponseFragment response data
- */
-export class AsksWebFormsAuthResponse extends Request {
-  public constructor(request: LinearRequest, data: L.AsksWebFormsAuthResponseFragment) {
-    super(request);
-    this.email = data.email;
-    this.name = data.name;
-  }
-
-  /** User email. */
-  public email: string;
-  /** User display name. */
-  public name: string;
-}
-/**
  * Issue attachment (e.g. support ticket, pull request).
  *
  * @param request - function to call the graphql client
@@ -18394,6 +18376,10 @@ export class Webhook extends Request {
   public delete() {
     return new DeleteWebhookMutation(this._request).fetch(this.id);
   }
+  /** Rotates the signing secret for a Webhook. */
+  public rotateSecret() {
+    return new RotateSecretWebhookMutation(this._request).fetch(this.id);
+  }
   /** Updates an existing Webhook. */
   public update(input: L.WebhookUpdateInput) {
     return new UpdateWebhookMutation(this._request).fetch(this.id, input);
@@ -18489,6 +18475,27 @@ export class WebhookPayload extends Request {
   public get webhookId(): string | undefined {
     return this._webhook?.id;
   }
+}
+/**
+ * WebhookRotateSecretPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.WebhookRotateSecretPayloadFragment response data
+ */
+export class WebhookRotateSecretPayload extends Request {
+  public constructor(request: LinearRequest, data: L.WebhookRotateSecretPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.secret = data.secret;
+    this.success = data.success;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** The new webhook signing secret. */
+  public secret: string;
+  /** Whether the operation was successful. */
+  public success: boolean;
 }
 /**
  * A state in a team workflow.
@@ -22787,35 +22794,6 @@ export class AirbyteIntegrationConnectMutation extends Request {
     const data = response.airbyteIntegrationConnect;
 
     return new IntegrationPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable AsksWebFormsAuth Mutation
- *
- * @param request - function to call the graphql client
- */
-export class AsksWebFormsAuthMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the AsksWebFormsAuth mutation and return a AsksWebFormsAuthResponse
-   *
-   * @param token - required token to pass to asksWebFormsAuth
-   * @returns parsed response from AsksWebFormsAuthMutation
-   */
-  public async fetch(token: string): LinearFetch<AsksWebFormsAuthResponse> {
-    const response = await this._request<L.AsksWebFormsAuthMutation, L.AsksWebFormsAuthMutationVariables>(
-      L.AsksWebFormsAuthDocument.toString(),
-      {
-        token,
-      }
-    );
-    const data = response.asksWebFormsAuth;
-
-    return new AsksWebFormsAuthResponse(this._request, data);
   }
 }
 
@@ -31205,6 +31183,35 @@ export class DeleteWebhookMutation extends Request {
 }
 
 /**
+ * A fetchable RotateSecretWebhook Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class RotateSecretWebhookMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the RotateSecretWebhook mutation and return a WebhookRotateSecretPayload
+   *
+   * @param id - required id to pass to rotateSecretWebhook
+   * @returns parsed response from RotateSecretWebhookMutation
+   */
+  public async fetch(id: string): LinearFetch<WebhookRotateSecretPayload> {
+    const response = await this._request<L.RotateSecretWebhookMutation, L.RotateSecretWebhookMutationVariables>(
+      L.RotateSecretWebhookDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.webhookRotateSecret;
+
+    return new WebhookRotateSecretPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable UpdateWebhook Mutation
  *
  * @param request - function to call the graphql client
@@ -39500,15 +39507,6 @@ export class LinearSdk extends Request {
     return new AirbyteIntegrationConnectMutation(this._request).fetch(input);
   }
   /**
-   * Authenticate a user to the Asks web forms app.
-   *
-   * @param token - required token to pass to asksWebFormsAuth
-   * @returns AsksWebFormsAuthResponse
-   */
-  public asksWebFormsAuth(token: string): LinearFetch<AsksWebFormsAuthResponse> {
-    return new AsksWebFormsAuthMutation(this._request).fetch(token);
-  }
-  /**
    * Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
    *
    * @param input - required input to pass to createAttachment
@@ -42398,6 +42396,15 @@ export class LinearSdk extends Request {
    */
   public deleteWebhook(id: string): LinearFetch<DeletePayload> {
     return new DeleteWebhookMutation(this._request).fetch(id);
+  }
+  /**
+   * Rotates the signing secret for a Webhook.
+   *
+   * @param id - required id to pass to rotateSecretWebhook
+   * @returns WebhookRotateSecretPayload
+   */
+  public rotateSecretWebhook(id: string): LinearFetch<WebhookRotateSecretPayload> {
+    return new RotateSecretWebhookMutation(this._request).fetch(id);
   }
   /**
    * Updates an existing Webhook.
