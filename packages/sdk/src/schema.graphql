@@ -20059,13 +20059,22 @@ type Mutation {
     id: String!
   ): ReleaseArchivePayload!
   """
-  [ALPHA] Marks the most recent started release for a pipeline as completed.
+  [ALPHA] Marks a release as completed. If version is provided, completes that specific release; otherwise completes the most recent started release.
   """
   releaseComplete(
     """
-    The input containing the pipeline ID.
+    The input containing the pipeline ID and optional version.
     """
     input: ReleaseCompleteInput!
+  ): ReleasePayload!
+  """
+  [ALPHA] Creates a new release.
+  """
+  releaseCreate(
+    """
+    The release to create.
+    """
+    input: ReleaseCreateInput!
   ): ReleasePayload!
   """
   [ALPHA] Archives a release pipeline.
@@ -32335,15 +32344,61 @@ enum ReleaseChannel {
 
 input ReleaseCompleteInput {
   """
-  The identifier of the pipeline to mark the latest started release as completed.
+  The identifier of the pipeline to mark a release as completed.
   """
   pipelineId: String!
+  """
+  The version of the release to complete. If not provided, the latest started release will be completed.
+  """
+  version: String
 }
 
 type ReleaseConnection {
   edges: [ReleaseEdge!]!
   nodes: [Release!]!
   pageInfo: PageInfo!
+}
+
+"""
+The input for creating a release.
+"""
+input ReleaseCreateInput {
+  """
+  The commit SHA associated with this release.
+  """
+  commitSha: String
+  """
+  The description of the release.
+  """
+  description: String
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  The name of the release.
+  """
+  name: String!
+  """
+  The identifier of the pipeline this release belongs to.
+  """
+  pipelineId: String!
+  """
+  The current stage of the release. Defaults to the first 'started' stage.
+  """
+  stageId: String
+  """
+  The estimated start date of the release.
+  """
+  startDate: TimelessDate
+  """
+  The estimated completion date of the release.
+  """
+  targetDate: TimelessDate
+  """
+  The version of the release.
+  """
+  version: String
 }
 
 """
