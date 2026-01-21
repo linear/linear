@@ -10019,8 +10019,10 @@ export type Mutation = {
   refreshGoogleSheetsData: IntegrationPayload;
   /** [ALPHA] Archives a release. */
   releaseArchive: ReleaseArchivePayload;
-  /** [ALPHA] Marks the most recent started release for a pipeline as completed. */
+  /** [ALPHA] Marks a release as completed. If version is provided, completes that specific release; otherwise completes the most recent started release. */
   releaseComplete: ReleasePayload;
+  /** [ALPHA] Creates a new release. */
+  releaseCreate: ReleasePayload;
   /** [ALPHA] Archives a release pipeline. */
   releasePipelineArchive: ReleasePipelineArchivePayload;
   /** [ALPHA] Creates a new release pipeline. */
@@ -11440,6 +11442,10 @@ export type MutationReleaseArchiveArgs = {
 
 export type MutationReleaseCompleteArgs = {
   input: ReleaseCompleteInput;
+};
+
+export type MutationReleaseCreateArgs = {
+  input: ReleaseCreateInput;
 };
 
 export type MutationReleasePipelineArchiveArgs = {
@@ -17984,8 +17990,10 @@ export enum ReleaseChannel {
 }
 
 export type ReleaseCompleteInput = {
-  /** The identifier of the pipeline to mark the latest started release as completed. */
+  /** The identifier of the pipeline to mark a release as completed. */
   pipelineId: Scalars["String"];
+  /** The version of the release to complete. If not provided, the latest started release will be completed. */
+  version?: InputMaybe<Scalars["String"]>;
 };
 
 export type ReleaseConnection = {
@@ -17993,6 +18001,28 @@ export type ReleaseConnection = {
   edges: Array<ReleaseEdge>;
   nodes: Array<Release>;
   pageInfo: PageInfo;
+};
+
+/** The input for creating a release. */
+export type ReleaseCreateInput = {
+  /** The commit SHA associated with this release. */
+  commitSha?: InputMaybe<Scalars["String"]>;
+  /** The description of the release. */
+  description?: InputMaybe<Scalars["String"]>;
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
+  id?: InputMaybe<Scalars["String"]>;
+  /** The name of the release. */
+  name: Scalars["String"];
+  /** The identifier of the pipeline this release belongs to. */
+  pipelineId: Scalars["String"];
+  /** The current stage of the release. Defaults to the first 'started' stage. */
+  stageId?: InputMaybe<Scalars["String"]>;
+  /** The estimated start date of the release. */
+  startDate?: InputMaybe<Scalars["TimelessDate"]>;
+  /** The estimated completion date of the release. */
+  targetDate?: InputMaybe<Scalars["TimelessDate"]>;
+  /** The version of the release. */
+  version?: InputMaybe<Scalars["String"]>;
 };
 
 /** Debug sink for release creation diagnostics. */
