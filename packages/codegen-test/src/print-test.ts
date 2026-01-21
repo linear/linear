@@ -11,7 +11,7 @@ import {
   reduceTypeName,
 } from "@linear/codegen-doc";
 import { Sdk, SdkListField, SdkOperation, SdkPluginContext } from "@linear/codegen-sdk";
-import { ObjectTypeDefinitionNode } from "graphql";
+import { ObjectTypeDefinitionNode, isInputObjectType, isNonNullType, isListType, type GraphQLType } from "graphql";
 import lowerCase from "lodash/lowerCase.js";
 import startCase from "lodash/startCase.js";
 import { printTestHooks } from "./print-hooks.js";
@@ -70,14 +70,60 @@ function getConnectionNode(operation: SdkOperation): SdkListField | undefined {
 /**
  * Mock value mappings for primitive types
  */
-const PRIMITIVE_MOCK_VALUES: Record<string, string> = {
+const PRIMITIVE_TYPE_VALUES: Record<string, string> = {
   ["string"]: `"mock-{name}"`,
-  ["string[]"]: `["mock-{name}"]`,
   ["number"]: `123`,
-  ["number[]"]: `[123]`,
   ["boolean"]: `true`,
-  ["boolean[]"]: `[true]`,
+  ["String"]: `"mock-{name}"`,
+  ["ID"]: `"mock-{name}"`,
+  ["Int"]: `123`,
+  ["Float"]: `123`,
+  ["Boolean"]: `true`,
 };
+
+type MockValueOptions = {
+  visitedInputTypes: Set<string>;
+};
+
+function getMockPrimitiveValue(typeName: string, name: string, isArray: boolean): string | undefined {
+  const value = PRIMITIVE_TYPE_VALUES[typeName];
+  if (!value) {
+    return undefined;
+  }
+
+  const resolvedValue = value.replace("{name}", name);
+  return isArray ? `[${resolvedValue}]` : resolvedValue;
+}
+
+function getMockValueForType(
+  context: SdkPluginContext,
+  typeName: string,
+  name: string,
+  isArray: boolean,
+  options?: MockValueOptions
+): string | undefined {
+  const resolvedOptions = options ?? { visitedInputTypes: new Set<string>() };
+
+  return (
+    getMockPrimitiveValue(typeName, name, isArray) ??
+    getMockEnumValue(context, typeName, isArray) ??
+    getMockInputObjectValue(context, typeName, isArray, resolvedOptions)
+  );
+}
+
+function unwrapType(fieldType: GraphQLType): { baseType: string; isList: boolean } {
+  let currentType = fieldType;
+  let isList = false;
+
+  while (isNonNullType(currentType) || isListType(currentType)) {
+    if (isListType(currentType)) {
+      isList = true;
+    }
+    currentType = currentType.ofType;
+  }
+
+  return { baseType: currentType.toString(), isList };
+}
 
 /**
  * Get a mock value for an enum type
@@ -98,6 +144,44 @@ function getMockEnumValue(context: SdkPluginContext, typeName: string, isArray: 
 }
 
 /**
+ * Get a mock value for an input object type
+ */
+function getMockInputObjectValue(
+  context: SdkPluginContext,
+  typeName: string,
+  isArray: boolean,
+  options: MockValueOptions = { visitedInputTypes: new Set<string>() }
+): string | undefined {
+  const typeWithoutNamespace = typeName.replace(`${Sdk.NAMESPACE}.`, "");
+  if (options.visitedInputTypes.has(typeWithoutNamespace)) {
+    return isArray ? "[]" : "{}";
+  }
+
+  const inputType = context.schema.getType(typeWithoutNamespace);
+
+  if (!inputType || !isInputObjectType(inputType)) {
+    return undefined;
+  }
+
+  options.visitedInputTypes.add(typeWithoutNamespace);
+
+  const fields = inputType.getFields();
+  const requiredFields = Object.values(fields).filter(field => isNonNullType(field.type));
+
+  const mockFields = requiredFields.map(field => {
+    const { baseType, isList } = unwrapType(field.type);
+    const fallbackValue = isList ? `["mock-${field.name}"]` : `"mock-${field.name}"`;
+    const value = getMockValueForType(context, baseType, field.name, isList, options) ?? fallbackValue;
+    return `${field.name}: ${value}`;
+  });
+
+  options.visitedInputTypes.delete(typeWithoutNamespace);
+
+  const mockObject = mockFields.length > 0 ? `{ ${mockFields.join(", ")} }` : "{}";
+  return isArray ? `[${mockObject}]` : mockObject;
+}
+
+/**
  * Print mocked arguments for an operation
  */
 function printOperationArgs(context: SdkPluginContext, operation: SdkOperation): string {
@@ -108,20 +192,13 @@ function printOperationArgs(context: SdkPluginContext, operation: SdkOperation):
         return undefined;
       }
 
-      // Handle primitive types
-      const primitiveMock = PRIMITIVE_MOCK_VALUES[arg.type];
-      if (primitiveMock) {
-        return primitiveMock.replace("{name}", arg.name);
-      }
-
       // Check if it's an array type
       const isArray = arg.type.endsWith("[]");
       const baseType = isArray ? arg.type.slice(0, -2) : arg.type;
 
-      // Check if it's an enum type (with or without namespace prefix)
-      const enumMock = getMockEnumValue(context, baseType, isArray);
-      if (enumMock) {
-        return enumMock;
+      const mockValue = getMockValueForType(context, baseType, arg.name, isArray);
+      if (mockValue) {
+        return mockValue;
       }
 
       // Fallback for unmapped types

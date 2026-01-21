@@ -1151,17 +1151,6 @@ type AsksChannelConnectPayload {
   success: Boolean!
 }
 
-type AsksWebFormsAuthResponse {
-  """
-  User email.
-  """
-  email: String!
-  """
-  User display name.
-  """
-  name: String!
-}
-
 """
 Issue assignee sorting options.
 """
@@ -16919,15 +16908,6 @@ type Mutation {
     input: AirbyteConfigurationInput!
   ): IntegrationPayload!
   """
-  Authenticate a user to the Asks web forms app.
-  """
-  asksWebFormsAuth(
-    """
-    The magic login code.
-    """
-    token: String!
-  ): AsksWebFormsAuthResponse!
-  """
   Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
   """
   attachmentCreate(
@@ -20088,15 +20068,6 @@ type Mutation {
     input: ReleaseCompleteInput!
   ): ReleasePayload!
   """
-  [ALPHA] Creates a new release.
-  """
-  releaseCreate(
-    """
-    The Release object to create.
-    """
-    input: ReleaseCreateInput!
-  ): ReleasePayload!
-  """
   [ALPHA] Archives a release pipeline.
   """
   releasePipelineArchive(
@@ -20185,6 +20156,15 @@ type Mutation {
     """
     input: ReleaseStageUpdateInput!
   ): ReleaseStagePayload!
+  """
+  [ALPHA] Syncs release data.
+  """
+  releaseSync(
+    """
+    The release data to sync.
+    """
+    input: ReleaseSyncInput!
+  ): ReleasePayload!
   """
   [ALPHA] Unarchives a release.
   """
@@ -20746,6 +20726,15 @@ type Mutation {
     """
     id: String!
   ): DeletePayload!
+  """
+  Rotates the signing secret for a Webhook.
+  """
+  webhookRotateSecret(
+    """
+    The identifier of the Webhook to rotate the secret for.
+    """
+    id: String!
+  ): WebhookRotateSecretPayload!
   """
   Updates an existing Webhook.
   """
@@ -30707,7 +30696,7 @@ type Query {
     orderBy: PaginationOrderBy
   ): IssueRelationConnection!
   """
-  [Internal] Returns code repositories that are most likely to be relevant for implementing an issue.
+  Returns code repositories that are most likely to be relevant for implementing an issue.
   """
   issueRepositorySuggestions(
     """
@@ -32357,61 +32346,14 @@ type ReleaseConnection {
   pageInfo: PageInfo!
 }
 
-input ReleaseCreateInput {
-  """
-  The commit SHA associated with this release.
-  """
-  commitSha: String
-  """
-  Debug information for release creation diagnostics.
-  """
-  debugSink: ReleaseDebugSinkInput
-  """
-  The description of the release.
-  """
-  description: String
-  """
-  The identifier in UUID v4 format. If none is provided, the backend will generate one.
-  """
-  id: String
-  """
-  Issue identifiers (e.g. ENG-123) to associate with this release.
-  """
-  issueIdentifiers: [String!]
-  """
-  The name of the release.
-  """
-  name: String!
-  """
-  The identifier of the pipeline this release belongs to.
-  """
-  pipelineId: String!
-  """
-  Pull request references to look up. Issues linked to found PRs will be associated with this release.
-  """
-  pullRequestReferences: [PullRequestReferenceInput!]
-  """
-  The current stage of the release. Defaults to the first 'completed' stage.
-  """
-  stageId: String
-  """
-  The estimated start date of the release.
-  """
-  startDate: TimelessDate
-  """
-  The estimated completion date of the release.
-  """
-  targetDate: TimelessDate
-  """
-  The version of the release.
-  """
-  version: String
-}
-
 """
 Debug sink for release creation diagnostics.
 """
 input ReleaseDebugSinkInput {
+  """
+  List of paths applied during commit scanning.
+  """
+  includePaths: [String!]
   """
   List of commit SHAs that were inspected.
   """
@@ -32465,6 +32407,10 @@ type ReleasePipeline implements Node {
   The unique identifier of the entity.
   """
   id: ID!
+  """
+  Glob patterns to include commits affecting matching file paths.
+  """
+  includePathPatterns: [String!]!
   """
   The name of the pipeline.
   """
@@ -32572,6 +32518,10 @@ input ReleasePipelineCreateInput {
   """
   id: String
   """
+  Glob patterns to include commits affecting matching file paths.
+  """
+  includePathPatterns: [String!]
+  """
   The name of the pipeline.
   """
   name: String!
@@ -32617,6 +32567,10 @@ enum ReleasePipelineType {
 }
 
 input ReleasePipelineUpdateInput {
+  """
+  Glob patterns to include commits affecting matching file paths.
+  """
+  includePathPatterns: [String!]
   """
   The name of the pipeline.
   """
@@ -32804,6 +32758,60 @@ input ReleaseStageUpdateInput {
   The type of the stage.
   """
   type: ReleaseStageType
+}
+
+"""
+The release data to sync.
+"""
+input ReleaseSyncInput {
+  """
+  The commit SHA associated with this release.
+  """
+  commitSha: String
+  """
+  Debug information for release creation diagnostics.
+  """
+  debugSink: ReleaseDebugSinkInput
+  """
+  The description of the release.
+  """
+  description: String
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  Issue identifiers (e.g. ENG-123) to associate with this release.
+  """
+  issueIdentifiers: [String!]
+  """
+  The name of the release.
+  """
+  name: String!
+  """
+  The identifier of the pipeline this release belongs to.
+  """
+  pipelineId: String!
+  """
+  Pull request references to look up. Issues linked to found PRs will be associated with this release.
+  """
+  pullRequestReferences: [PullRequestReferenceInput!]
+  """
+  The current stage of the release. Defaults to the first 'completed' stage.
+  """
+  stageId: String
+  """
+  The estimated start date of the release.
+  """
+  startDate: TimelessDate
+  """
+  The estimated completion date of the release.
+  """
+  targetDate: TimelessDate
+  """
+  The version of the release.
+  """
+  version: String
 }
 
 input ReleaseUpdateInput {
@@ -37798,6 +37806,21 @@ type WebhookPayload {
   The webhook entity being mutated.
   """
   webhook: Webhook!
+}
+
+type WebhookRotateSecretPayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  The new webhook signing secret.
+  """
+  secret: String!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
 }
 
 input WebhookUpdateInput {
