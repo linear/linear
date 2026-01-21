@@ -1078,24 +1078,6 @@ export class AsksChannelConnectPayload extends Request {
   }
 }
 /**
- * AsksWebFormsAuthResponse model
- *
- * @param request - function to call the graphql client
- * @param data - L.AsksWebFormsAuthResponseFragment response data
- */
-export class AsksWebFormsAuthResponse extends Request {
-  public constructor(request: LinearRequest, data: L.AsksWebFormsAuthResponseFragment) {
-    super(request);
-    this.email = data.email;
-    this.name = data.name;
-  }
-
-  /** User email. */
-  public email: string;
-  /** User display name. */
-  public name: string;
-}
-/**
  * Issue attachment (e.g. support ticket, pull request).
  *
  * @param request - function to call the graphql client
@@ -18394,6 +18376,10 @@ export class Webhook extends Request {
   public delete() {
     return new DeleteWebhookMutation(this._request).fetch(this.id);
   }
+  /** Rotates the signing secret for a Webhook. */
+  public rotateSecret() {
+    return new RotateSecretWebhookMutation(this._request).fetch(this.id);
+  }
   /** Updates an existing Webhook. */
   public update(input: L.WebhookUpdateInput) {
     return new UpdateWebhookMutation(this._request).fetch(this.id, input);
@@ -18489,6 +18475,27 @@ export class WebhookPayload extends Request {
   public get webhookId(): string | undefined {
     return this._webhook?.id;
   }
+}
+/**
+ * WebhookRotateSecretPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.WebhookRotateSecretPayloadFragment response data
+ */
+export class WebhookRotateSecretPayload extends Request {
+  public constructor(request: LinearRequest, data: L.WebhookRotateSecretPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.secret = data.secret;
+    this.success = data.success;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** The new webhook signing secret. */
+  public secret: string;
+  /** Whether the operation was successful. */
+  public success: boolean;
 }
 /**
  * A state in a team workflow.
@@ -20769,6 +20776,43 @@ export class IssueRelationsQuery extends Request {
 }
 
 /**
+ * A fetchable IssueRepositorySuggestions Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueRepositorySuggestionsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueRepositorySuggestions query and return a RepositorySuggestionsPayload
+   *
+   * @param candidateRepositories - required candidateRepositories to pass to issueRepositorySuggestions
+   * @param issueId - required issueId to pass to issueRepositorySuggestions
+   * @param variables - variables without 'candidateRepositories', 'issueId' to pass into the IssueRepositorySuggestionsQuery
+   * @returns parsed response from IssueRepositorySuggestionsQuery
+   */
+  public async fetch(
+    candidateRepositories: L.CandidateRepository[],
+    issueId: string,
+    variables?: Omit<L.IssueRepositorySuggestionsQueryVariables, "candidateRepositories" | "issueId">
+  ): LinearFetch<RepositorySuggestionsPayload> {
+    const response = await this._request<L.IssueRepositorySuggestionsQuery, L.IssueRepositorySuggestionsQueryVariables>(
+      L.IssueRepositorySuggestionsDocument.toString(),
+      {
+        candidateRepositories,
+        issueId,
+        ...variables,
+      }
+    );
+    const data = response.issueRepositorySuggestions;
+
+    return new RepositorySuggestionsPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable IssueSearch Query
  *
  * @param request - function to call the graphql client
@@ -22787,35 +22831,6 @@ export class AirbyteIntegrationConnectMutation extends Request {
     const data = response.airbyteIntegrationConnect;
 
     return new IntegrationPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable AsksWebFormsAuth Mutation
- *
- * @param request - function to call the graphql client
- */
-export class AsksWebFormsAuthMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the AsksWebFormsAuth mutation and return a AsksWebFormsAuthResponse
-   *
-   * @param token - required token to pass to asksWebFormsAuth
-   * @returns parsed response from AsksWebFormsAuthMutation
-   */
-  public async fetch(token: string): LinearFetch<AsksWebFormsAuthResponse> {
-    const response = await this._request<L.AsksWebFormsAuthMutation, L.AsksWebFormsAuthMutationVariables>(
-      L.AsksWebFormsAuthDocument.toString(),
-      {
-        token,
-      }
-    );
-    const data = response.asksWebFormsAuth;
-
-    return new AsksWebFormsAuthResponse(this._request, data);
   }
 }
 
@@ -31205,6 +31220,35 @@ export class DeleteWebhookMutation extends Request {
 }
 
 /**
+ * A fetchable RotateSecretWebhook Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class RotateSecretWebhookMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the RotateSecretWebhook mutation and return a WebhookRotateSecretPayload
+   *
+   * @param id - required id to pass to rotateSecretWebhook
+   * @returns parsed response from RotateSecretWebhookMutation
+   */
+  public async fetch(id: string): LinearFetch<WebhookRotateSecretPayload> {
+    const response = await this._request<L.RotateSecretWebhookMutation, L.RotateSecretWebhookMutationVariables>(
+      L.RotateSecretWebhookDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.webhookRotateSecret;
+
+    return new WebhookRotateSecretPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable UpdateWebhook Mutation
  *
  * @param request - function to call the graphql client
@@ -38883,6 +38927,21 @@ export class LinearSdk extends Request {
     return new IssueRelationsQuery(this._request).fetch(variables);
   }
   /**
+   * Returns code repositories that are most likely to be relevant for implementing an issue.
+   *
+   * @param candidateRepositories - required candidateRepositories to pass to issueRepositorySuggestions
+   * @param issueId - required issueId to pass to issueRepositorySuggestions
+   * @param variables - variables without 'candidateRepositories', 'issueId' to pass into the IssueRepositorySuggestionsQuery
+   * @returns RepositorySuggestionsPayload
+   */
+  public issueRepositorySuggestions(
+    candidateRepositories: L.CandidateRepository[],
+    issueId: string,
+    variables?: Omit<L.IssueRepositorySuggestionsQueryVariables, "candidateRepositories" | "issueId">
+  ): LinearFetch<RepositorySuggestionsPayload> {
+    return new IssueRepositorySuggestionsQuery(this._request).fetch(candidateRepositories, issueId, variables);
+  }
+  /**
    * [DEPRECATED] Search issues. This endpoint is deprecated and will be removed in the future – use `searchIssues` instead.
    *
    * @param variables - variables to pass into the IssueSearchQuery
@@ -39498,15 +39557,6 @@ export class LinearSdk extends Request {
    */
   public airbyteIntegrationConnect(input: L.AirbyteConfigurationInput): LinearFetch<IntegrationPayload> {
     return new AirbyteIntegrationConnectMutation(this._request).fetch(input);
-  }
-  /**
-   * Authenticate a user to the Asks web forms app.
-   *
-   * @param token - required token to pass to asksWebFormsAuth
-   * @returns AsksWebFormsAuthResponse
-   */
-  public asksWebFormsAuth(token: string): LinearFetch<AsksWebFormsAuthResponse> {
-    return new AsksWebFormsAuthMutation(this._request).fetch(token);
   }
   /**
    * Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
@@ -42398,6 +42448,15 @@ export class LinearSdk extends Request {
    */
   public deleteWebhook(id: string): LinearFetch<DeletePayload> {
     return new DeleteWebhookMutation(this._request).fetch(id);
+  }
+  /**
+   * Rotates the signing secret for a Webhook.
+   *
+   * @param id - required id to pass to rotateSecretWebhook
+   * @returns WebhookRotateSecretPayload
+   */
+  public rotateSecretWebhook(id: string): LinearFetch<WebhookRotateSecretPayload> {
+    return new RotateSecretWebhookMutation(this._request).fetch(id);
   }
   /**
    * Updates an existing Webhook.

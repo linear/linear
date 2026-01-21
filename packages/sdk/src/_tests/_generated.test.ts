@@ -2758,6 +2758,19 @@ describe("generated", () => {
     });
   });
 
+  /** Test IssueRepositorySuggestions query */
+  describe("IssueRepositorySuggestions", () => {
+    /** Test the root model query for IssueRepositorySuggestions */
+    it("issueRepositorySuggestions", async () => {
+      const issueRepositorySuggestions: L.RepositorySuggestionsPayload | undefined | null =
+        await client.issueRepositorySuggestions(
+          [{ hostname: "mock-hostname", repositoryFullName: "mock-repositoryFullName" }],
+          "mock-issueId"
+        );
+      expect(issueRepositorySuggestions instanceof L.RepositorySuggestionsPayload);
+    });
+  });
+
   /** Test all Issue queries */
   describe("IssueSearch", () => {
     let _issue: L.Issue | undefined | null;
