@@ -2986,6 +2986,29 @@ fragment EmailIntakeAddress on EmailIntakeAddress {
   enabled
 }
 
+# An error that occurred during triage rule execution.
+fragment IssueHistoryTriageRuleError on IssueHistoryTriageRuleError {
+  __typename
+  # The conflicting labels.
+  conflictingLabels {
+    ...IssueLabel
+  }
+  # The property that caused the error.
+  property
+  # The team the issue was being moved from.
+  fromTeam {
+    id
+  }
+  # The team the issue was being moved to.
+  toTeam {
+    id
+  }
+  # The type of error that occurred.
+  type
+  # Whether the conflict was for the same child label.
+  conflictForSameChildLabel
+}
+
 # An external authenticated (e.g., through Slack) user which doesn't have a Linear account, but can
 # create and update entities in Linear from the external system that authenticated them.
 fragment ExternalUser on ExternalUser {
@@ -3863,6 +3886,8 @@ fragment Organization on Organization {
   customersEnabled
   # Whether the organization is using a roadmap.
   roadmapEnabled
+  # Whether to hide other organizations for new users signing up with email domains claimed by this organization.
+  hideNonPrimaryOrganizations
   # [DEPRECATED] The frequency at which to prompt for project updates.
   projectUpdatesReminderFrequency
   # [DEPRECATED] Whether member users are allowed to send invites.
@@ -3906,6 +3931,8 @@ fragment AuthOrganization on AuthOrganization {
   scimEnabled
   # Whether the organization is enabled. Used as a superuser tool to lock down the org.
   enabled
+  # Whether to hide other organizations for new users signing up with email domains claimed by this organization.
+  hideNonPrimaryOrganizations
   userCount
 }
 
@@ -4960,6 +4987,19 @@ fragment ProjectLabel on ProjectLabel {
   isGroup
 }
 
+# Metadata about a triage rule that made changes to an issue.
+fragment IssueHistoryTriageRuleMetadata on IssueHistoryTriageRuleMetadata {
+  __typename
+  # The error that occurred, if any.
+  triageRuleError {
+    ...IssueHistoryTriageRuleError
+  }
+  # The triage rule that triggered the issue update.
+  updatedByTriageRule {
+    ...WorkflowDefinition
+  }
+}
+
 # Metadata about the external GitHub entity.
 fragment ExternalEntityInfoGithubMetadata on ExternalEntityInfoGithubMetadata {
   __typename
@@ -5785,6 +5825,10 @@ fragment AgentActivityWebhookPayload on AgentActivityWebhookPayload {
   createdAt
   # The time at which the entity was updated.
   updatedAt
+  # The user who created this agent activity.
+  user {
+    ...UserChildWebhookPayload
+  }
 }
 
 # Payload for an agent session webhook.
@@ -6687,6 +6731,34 @@ fragment SesDomainIdentity on SesDomainIdentity {
   }
   # Whether the domain is fully verified and can be used for sending emails.
   canSendFromCustomDomain
+}
+
+# Settings for an Asks web form.
+fragment AsksWebSettings on AsksWebSettings {
+  __typename
+  # The custom domain for the Asks web form. If null, the default Linear-hosted domain will be used.
+  domain
+  # The email intake address associated with these Asks web settings.
+  emailIntakeAddress {
+    id
+  }
+  # The identity provider for SAML authentication on this Asks web form.
+  identityProvider {
+    ...IdentityProvider
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who created the Asks web settings.
+  creator {
+    id
+  }
 }
 
 # Team origin for guidance rules.
@@ -7831,6 +7903,24 @@ fragment GitLabIntegrationCreatePayload on GitLabIntegrationCreatePayload {
   }
   # The webhook secret to provide to GitLab.
   webhookSecret
+  # Whether the operation was successful.
+  success
+}
+
+fragment GitLabTestConnectionPayload on GitLabTestConnectionPayload {
+  __typename
+  # Error message if the connection test failed.
+  error
+  # Response body from GitLab for debugging.
+  errorResponseBody
+  # Response headers from GitLab for debugging (JSON stringified).
+  errorResponseHeaders
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The integration that was created or updated.
+  integration {
+    id
+  }
   # Whether the operation was successful.
   success
 }
@@ -9416,6 +9506,80 @@ fragment WebhookRotateSecretPayload on WebhookRotateSecretPayload {
   success
 }
 
+fragment WorkflowDefinition on WorkflowDefinition {
+  __typename
+  # An array of activities that will be executed as part of the workflow.
+  activities
+  # The conditions that need to be match for the workflow to be triggered.
+  conditions
+  # The context custom view associated with the workflow.
+  customView {
+    id
+  }
+  # The contextual cycle view associated with the workflow.
+  cycle {
+    id
+  }
+  # The contextual initiative view associated with the workflow.
+  initiative {
+    id
+  }
+  # The contextual label view associated with the workflow.
+  label {
+    id
+  }
+  # The contextual project view associated with the workflow.
+  project {
+    id
+  }
+  # The contextual user view associated with the workflow.
+  user {
+    id
+  }
+  # The date when the workflow was last executed.
+  lastExecutedAt
+  # The description of the workflow.
+  description
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The name of the group that the workflow belongs to.
+  groupName
+  # The name of the workflow.
+  name
+  # The object type (e.g. Issue) that triggers this workflow.
+  triggerType
+  # The sort order of the workflow definition within its siblings.
+  sortOrder
+  # The team associated with the workflow. If not set, the workflow is associated with the entire organization.
+  team {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The type of the event that triggers off the workflow.
+  trigger
+  # The type of the workflow.
+  type
+  # The type of user view to which this workflow's context is associated with.
+  userContextViewType
+  # The type of view to which this workflow's context is associated with.
+  contextViewType
+  # The unique identifier of the entity.
+  id
+  # The user who created the workflow.
+  creator {
+    id
+  }
+  # The user who last updated the workflow.
+  lastUpdatedBy {
+    id
+  }
+  enabled
+}
+
 fragment WorkflowStateConnection on WorkflowStateConnection {
   __typename
   nodes {
@@ -9581,6 +9745,26 @@ query applicationInfo(
 ) {
   applicationInfo(clientId: $clientId) {
     ...Application
+  }
+}
+# Asks web form settings by ID.
+query asksWebSetting(
+  # The identifier of the Asks web settings.
+  $id: String!
+) {
+  asksWebSetting(id: $id) {
+    ...AsksWebSettings
+  }
+}
+# The identity provider for SAML authentication on this Asks web form.
+query asksWebSetting_identityProvider(
+  # The identifier of the Asks web settings.
+  $id: String!
+) {
+  asksWebSetting(id: $id) {
+    identityProvider {
+      ...IdentityProvider
+    }
   }
 }
 # One specific issue attachment.
@@ -14736,6 +14920,15 @@ query user_teams(
     }
   }
 }
+# Lists the sessions of a user. Can only be called by an admin or owner.
+query userSessions(
+  # The identifier of the user to list sessions of.
+  $id: String!
+) {
+  userSessions(id: $id) {
+    ...AuthenticationSessionResponse
+  }
+}
 # The user's settings.
 query userSettings {
   userSettings {
@@ -16750,6 +16943,15 @@ mutation integrationGitlabConnect(
     ...GitLabIntegrationCreatePayload
   }
 }
+# Tests connectivity to a self-hosted GitLab instance and clears auth errors if successful.
+mutation integrationGitlabTestConnection(
+  # The ID of the GitLab integration to test.
+  $integrationId: String!
+) {
+  integrationGitlabTestConnection(integrationId: $integrationId) {
+    ...GitLabTestConnectionPayload
+  }
+}
 # Integrates the organization with Gong.
 mutation integrationGong(
   # The Gong OAuth code.
@@ -18384,6 +18586,26 @@ mutation userPromoteMember(
   $id: String!
 ) {
   userPromoteMember(id: $id) {
+    ...UserAdminPayload
+  }
+}
+# Revokes a user's sessions. Can only be called by an admin or owner.
+mutation userRevokeAllSessions(
+  # The identifier of the user to logout all sessions of.
+  $id: String!
+) {
+  userRevokeAllSessions(id: $id) {
+    ...UserAdminPayload
+  }
+}
+# Revokes a specific session for a user. Can only be called by an admin or owner.
+mutation userRevokeSession(
+  # The identifier of the user whose session to revoke.
+  $id: String!
+  # The identifier of the session to revoke.
+  $sessionId: String!
+) {
+  userRevokeSession(id: $id, sessionId: $sessionId) {
     ...UserAdminPayload
   }
 }

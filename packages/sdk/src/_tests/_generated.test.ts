@@ -457,6 +457,28 @@ describe("generated", () => {
     });
   });
 
+  /** Test AsksWebSetting query */
+  describe("AsksWebSetting", () => {
+    let _asksWebSetting: L.AsksWebSettings | undefined | null;
+
+    /** Test the root model query for AsksWebSetting */
+    it("asksWebSetting", async () => {
+      const asksWebSetting: L.AsksWebSettings | undefined | null = await client.asksWebSetting("mock-id");
+      _asksWebSetting = asksWebSetting;
+      expect(asksWebSetting instanceof L.AsksWebSettings);
+    });
+
+    /** Test the asksWebSetting model query for AsksWebSetting_IdentityProvider */
+    it("asksWebSetting.identityProvider", async () => {
+      if (_asksWebSetting) {
+        const identityProvider: L.IdentityProvider | undefined | null = _asksWebSetting.identityProvider;
+        expect(identityProvider instanceof L.IdentityProvider);
+      } else {
+        console.warn("codegen-doc:print: No asksWebSetting found - cannot test _asksWebSetting.identityProvider query");
+      }
+    });
+  });
+
   /** Test AttachmentIssue query */
   describe("AttachmentIssue", () => {
     let _attachmentIssue: L.Issue | undefined | null;
@@ -5261,6 +5283,15 @@ describe("generated", () => {
           "codegen-doc:print: No TriageResponsibility found - cannot test triageResponsibility.timeSchedule query"
         );
       }
+    });
+  });
+
+  /** Test UserSessions query */
+  describe("UserSessions", () => {
+    /** Test the root model query for UserSessions */
+    it("userSessions", async () => {
+      const userSessions: L.AuthenticationSessionResponse[] | undefined | null = await client.userSessions("mock-id");
+      userSessions?.map(node => expect(node instanceof L.AuthenticationSessionResponse));
     });
   });
 

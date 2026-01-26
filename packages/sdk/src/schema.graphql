@@ -391,6 +391,10 @@ type AgentActivityWebhookPayload {
   """
   updatedAt: String!
   """
+  The user who created this agent activity.
+  """
+  user: UserChildWebhookPayload!
+  """
   The ID of the user who created this agent activity.
   """
   userId: String!
@@ -1152,6 +1156,49 @@ type AsksChannelConnectPayload {
 }
 
 """
+Settings for an Asks web form.
+"""
+type AsksWebSettings implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who created the Asks web settings.
+  """
+  creator: User
+  """
+  The custom domain for the Asks web form. If null, the default Linear-hosted domain will be used.
+  """
+  domain: String
+  """
+  The email intake address associated with these Asks web settings.
+  """
+  emailIntakeAddress: EmailIntakeAddress
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The identity provider for SAML authentication on this Asks web form.
+  """
+  identityProvider: IdentityProvider
+  """
+  The organization that the Asks web settings are associated with.
+  """
+  organization: Organization!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+"""
 Issue assignee sorting options.
 """
 input AssigneeSort {
@@ -1756,6 +1803,10 @@ type AuthOrganization {
   """
   enabled: Boolean!
   """
+  Whether to hide other organizations for new users signing up with email domains claimed by this organization.
+  """
+  hideNonPrimaryOrganizations: Boolean!
+  """
   The unique identifier of the entity.
   """
   id: ID!
@@ -2164,6 +2215,10 @@ type Comment implements Node {
   The external user who wrote the comment.
   """
   externalUser: ExternalUser
+  """
+  [Internal] Whether the comment should be hidden from Linear clients. This is typically used for bot comments that provide redundant information (e.g., Slack Asks confirmation messages).
+  """
+  hideInLinear: Boolean!
   """
   The unique identifier of the entity.
   """
@@ -8937,6 +8992,33 @@ input GitLabSettingsInput {
   url: String
 }
 
+type GitLabTestConnectionPayload {
+  """
+  Error message if the connection test failed.
+  """
+  error: String
+  """
+  Response body from GitLab for debugging.
+  """
+  errorResponseBody: String
+  """
+  Response headers from GitLab for debugging (JSON stringified).
+  """
+  errorResponseHeaders: String
+  """
+  The integration that was created or updated.
+  """
+  integration: Integration
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
 """
 [Internal] The kind of link between an issue and a pull request.
 """
@@ -12653,6 +12735,10 @@ input IssueCollectionFilter {
   """
   recurringIssueTemplate: NullableTemplateFilter
   """
+  [ALPHA] Filters that the issue's releases must satisfy.
+  """
+  releases: ReleaseCollectionFilter
+  """
   [Internal] Comparator for the issues content.
   """
   searchableContent: ContentComparator
@@ -13410,6 +13496,10 @@ input IssueFilter {
   """
   recurringIssueTemplate: NullableTemplateFilter
   """
+  [ALPHA] Filters that the issue's releases must satisfy.
+  """
+  releases: ReleaseCollectionFilter
+  """
   [Internal] Comparator for the issues content.
   """
   searchableContent: ContentComparator
@@ -13747,6 +13837,10 @@ type IssueHistory implements Node {
   """
   triageResponsibilityNotifiedUsers: [User!]
   """
+  [INTERNAL] Metadata about the triage rule that made changes to the issue.
+  """
+  triageRuleMetadata: IssueHistoryTriageRuleMetadata
+  """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
@@ -13769,6 +13863,50 @@ type IssueHistoryEdge {
   """
   cursor: String!
   node: IssueHistory!
+}
+
+"""
+An error that occurred during triage rule execution.
+"""
+type IssueHistoryTriageRuleError {
+  """
+  Whether the conflict was for the same child label.
+  """
+  conflictForSameChildLabel: Boolean
+  """
+  The conflicting labels.
+  """
+  conflictingLabels: [IssueLabel!]
+  """
+  The team the issue was being moved from.
+  """
+  fromTeam: Team
+  """
+  The property that caused the error.
+  """
+  property: String
+  """
+  The team the issue was being moved to.
+  """
+  toTeam: Team
+  """
+  The type of error that occurred.
+  """
+  type: TriageRuleErrorType!
+}
+
+"""
+Metadata about a triage rule that made changes to an issue.
+"""
+type IssueHistoryTriageRuleMetadata {
+  """
+  The error that occurred, if any.
+  """
+  triageRuleError: IssueHistoryTriageRuleError
+  """
+  The triage rule that triggered the issue update.
+  """
+  updatedByTriageRule: WorkflowDefinition
 }
 
 """
@@ -18322,6 +18460,15 @@ type Mutation {
     gitlabUrl: String!
   ): GitLabIntegrationCreatePayload!
   """
+  Tests connectivity to a self-hosted GitLab instance and clears auth errors if successful.
+  """
+  integrationGitlabTestConnection(
+    """
+    The ID of the GitLab integration to test.
+    """
+    integrationId: String!
+  ): GitLabTestConnectionPayload!
+  """
   Integrates the organization with Gong.
   """
   integrationGong(
@@ -18737,7 +18884,7 @@ type Mutation {
     service: String!
   ): SlackChannelConnectPayload!
   """
-  [Internal] Enables Linear Agent Slack workflow access for a Slack integration.
+  [Internal] Enables Linear Agent Slack workflow access for a Slack or Slack Asks integration.
   """
   integrationSlackWorkflowAccessUpdate(
     """
@@ -20197,6 +20344,15 @@ type Mutation {
     input: ReleaseUpdateInput!
   ): ReleasePayload!
   """
+  [ALPHA] Updates a release by pipeline. If version is provided, updates that specific release; otherwise updates the most recent started release.
+  """
+  releaseUpdateByPipeline(
+    """
+    The input containing the pipeline ID, optional version, and optional stage name.
+    """
+    input: ReleaseUpdateByPipelineInput!
+  ): ReleasePayload!
+  """
   Re-send an organization invite.
   """
   resendOrganizationInvite(
@@ -20624,6 +20780,28 @@ type Mutation {
     id: String!
   ): UserAdminPayload!
     @deprecated(reason: "Use userChangeRole instead. This mutation will be removed in a future release.")
+  """
+  Revokes a user's sessions. Can only be called by an admin or owner.
+  """
+  userRevokeAllSessions(
+    """
+    The identifier of the user to logout all sessions of.
+    """
+    id: String!
+  ): UserAdminPayload!
+  """
+  Revokes a specific session for a user. Can only be called by an admin or owner.
+  """
+  userRevokeSession(
+    """
+    The identifier of the user whose session to revoke.
+    """
+    id: String!
+    """
+    The identifier of the session to revoke.
+    """
+    sessionId: String!
+  ): UserAdminPayload!
   """
   Resets user's setting flags.
   """
@@ -22123,6 +22301,10 @@ input NullableIssueFilter {
   """
   recurringIssueTemplate: NullableTemplateFilter
   """
+  [ALPHA] Filters that the issue's releases must satisfy.
+  """
+  releases: ReleaseCollectionFilter
+  """
   [Internal] Comparator for the issues content.
   """
   searchableContent: ContentComparator
@@ -23233,6 +23415,10 @@ type Organization implements Node {
   """
   gitPublicLinkbackMessagesEnabled: Boolean!
   """
+  Whether to hide other organizations for new users signing up with email domains claimed by this organization.
+  """
+  hideNonPrimaryOrganizations: Boolean!
+  """
   Whether HIPAA compliance is enabled for organization.
   """
   hipaaComplianceEnabled: Boolean!
@@ -24004,6 +24190,10 @@ input OrganizationSecuritySettingsInput {
   The minimum role required to import data.
   """
   importRole: UserRoleType
+  """
+  The minimum role required to install and connect new integrations.
+  """
+  integrationCreationRole: UserRoleType
   """
   The minimum role required to invite users.
   """
@@ -29696,6 +29886,15 @@ type Query {
   """
   archivedTeams: [Team!]!
   """
+  Asks web form settings by ID.
+  """
+  asksWebSetting(
+    """
+    The identifier of the Asks web settings.
+    """
+    id: String!
+  ): AsksWebSettings!
+  """
   One specific issue attachment.
   [Deprecated] 'url' can no longer be used as the 'id' parameter. Use 'attachmentsForUrl' instead
   """
@@ -31736,6 +31935,15 @@ type Query {
     id: String!
   ): User!
   """
+  Lists the sessions of a user. Can only be called by an admin or owner.
+  """
+  userSessions(
+    """
+    The identifier of the user to list sessions of.
+    """
+    id: String!
+  ): [AuthenticationSessionResponse!]!
+  """
   The user's settings.
   """
   userSettings: UserSettings!
@@ -32342,6 +32550,48 @@ enum ReleaseChannel {
   public
 }
 
+"""
+[ALPHA] Release collection filtering options.
+"""
+input ReleaseCollectionFilter {
+  """
+  Compound filters, all of which need to be matched by the release.
+  """
+  and: [ReleaseCollectionFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that needs to be matched by all releases.
+  """
+  every: ReleaseFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the collection length.
+  """
+  length: NumberComparator
+  """
+  Compound filters, one of which need to be matched by the release.
+  """
+  or: [ReleaseCollectionFilter!]
+  """
+  Filters that the release's pipeline must satisfy.
+  """
+  pipeline: ReleasePipelineFilter
+  """
+  Filters that needs to be matched by some releases.
+  """
+  some: ReleaseFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
 input ReleaseCompleteInput {
   """
   The identifier of the pipeline to mark a release as completed.
@@ -32429,6 +32679,36 @@ type ReleaseEdge {
   """
   cursor: String!
   node: Release!
+}
+
+"""
+[ALPHA] Release filtering options.
+"""
+input ReleaseFilter {
+  """
+  Compound filters, all of which need to be matched by the release.
+  """
+  and: [ReleaseFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Compound filters, one of which need to be matched by the release.
+  """
+  or: [ReleaseFilter!]
+  """
+  Filters that the release's pipeline must satisfy.
+  """
+  pipeline: ReleasePipelineFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 type ReleasePayload {
@@ -32596,6 +32876,32 @@ type ReleasePipelineEdge {
   """
   cursor: String!
   node: ReleasePipeline!
+}
+
+"""
+[ALPHA] Release pipeline filtering options.
+"""
+input ReleasePipelineFilter {
+  """
+  Compound filters, all of which need to be matched by the pipeline.
+  """
+  and: [ReleasePipelineFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Compound filters, one of which need to be matched by the pipeline.
+  """
+  or: [ReleasePipelineFilter!]
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 type ReleasePipelinePayload {
@@ -32865,6 +33171,24 @@ input ReleaseSyncInput {
   targetDate: TimelessDate
   """
   The version of the release.
+  """
+  version: String
+}
+
+"""
+Input for updating a release by pipeline.
+"""
+input ReleaseUpdateByPipelineInput {
+  """
+  The identifier of the pipeline.
+  """
+  pipelineId: String!
+  """
+  The stage name to set. First tries exact match, then falls back to case-insensitive matching with dashes/underscores treated as spaces.
+  """
+  stage: String
+  """
+  The version of the release to update. If not provided, the latest started release will be updated.
   """
   version: String
 }
@@ -33639,6 +33963,14 @@ input SlackAsksSettingsInput {
   Controls who can see and set Customers when creating Asks in Slack.
   """
   customerVisibility: CustomerVisibilityMode
+  """
+  Whether Linear Agent should be enabled for this Slack Asks integration.
+  """
+  enableAgent: Boolean
+  """
+  Whether Linear Agent should be given Org-wide access within Slack workflows.
+  """
+  enableLinearAgentWorkflowAccess: Boolean
   """
   Enterprise id of the connected Slack enterprise
   """
@@ -36224,6 +36556,15 @@ input TriageResponsibilityUpdateInput {
 }
 
 """
+The type of error that occurred during triage rule execution.
+"""
+enum TriageRuleErrorType {
+  cycle
+  default
+  labelGroupConflict
+}
+
+"""
 A universally unique identifier as specified by RFC 4122.
 """
 scalar UUID
@@ -37901,6 +38242,111 @@ input WebhookUpdateInput {
   url: String
 }
 
+type WorkflowDefinition implements Node {
+  """
+  An array of activities that will be executed as part of the workflow.
+  """
+  activities: JSONObject!
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The conditions that need to be match for the workflow to be triggered.
+  """
+  conditions: JSONObject
+  """
+  The type of view to which this workflow's context is associated with.
+  """
+  contextViewType: ContextViewType
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who created the workflow.
+  """
+  creator: User!
+  """
+  The context custom view associated with the workflow.
+  """
+  customView: CustomView
+  """
+  The contextual cycle view associated with the workflow.
+  """
+  cycle: Cycle
+  """
+  The description of the workflow.
+  """
+  description: String
+  enabled: Boolean!
+  """
+  The name of the group that the workflow belongs to.
+  """
+  groupName: String
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The contextual initiative view associated with the workflow.
+  """
+  initiative: Initiative
+  """
+  The contextual label view associated with the workflow.
+  """
+  label: IssueLabel
+  """
+  The date when the workflow was last executed.
+  """
+  lastExecutedAt: DateTime
+  """
+  The user who last updated the workflow.
+  """
+  lastUpdatedBy: User
+  """
+  The name of the workflow.
+  """
+  name: String!
+  """
+  The contextual project view associated with the workflow.
+  """
+  project: Project
+  """
+  The sort order of the workflow definition within its siblings.
+  """
+  sortOrder: String!
+  """
+  The team associated with the workflow. If not set, the workflow is associated with the entire organization.
+  """
+  team: Team
+  """
+  The type of the event that triggers off the workflow.
+  """
+  trigger: WorkflowTrigger!
+  """
+  The object type (e.g. Issue) that triggers this workflow.
+  """
+  triggerType: WorkflowTriggerType!
+  """
+  The type of the workflow.
+  """
+  type: WorkflowType!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The contextual user view associated with the workflow.
+  """
+  user: User
+  """
+  The type of user view to which this workflow's context is associated with.
+  """
+  userContextViewType: UserContextViewType
+}
+
 """
 A state in a team workflow.
 """
@@ -38170,6 +38616,26 @@ input WorkflowStateUpdateInput {
   The position of the state.
   """
   position: Float
+}
+
+enum WorkflowTrigger {
+  entityCreated
+  entityCreatedOrUpdated
+  entityRemoved
+  entityUnarchived
+  entityUpdated
+}
+
+enum WorkflowTriggerType {
+  issue
+  project
+}
+
+enum WorkflowType {
+  custom
+  sla
+  triage
+  viewSubscription
 }
 
 input ZendeskSettingsInput {
