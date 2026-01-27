@@ -283,6 +283,8 @@ export type AgentActivityWebhookPayload = {
   sourceCommentId?: Maybe<Scalars["String"]>;
   /** The time at which the entity was updated. */
   updatedAt: Scalars["String"];
+  /** The user who created this agent activity. */
+  user: UserChildWebhookPayload;
   /** The ID of the user who created this agent activity. */
   userId: Scalars["String"];
 };
@@ -728,6 +730,32 @@ export type AsksChannelConnectPayload = {
   success: Scalars["Boolean"];
 };
 
+/** Settings for an Asks web form. */
+export type AsksWebSettings = Node & {
+  __typename?: "AsksWebSettings";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The user who created the Asks web settings. */
+  creator?: Maybe<User>;
+  /** The custom domain for the Asks web form. If null, the default Linear-hosted domain will be used. */
+  domain?: Maybe<Scalars["String"]>;
+  /** The email intake address associated with these Asks web settings. */
+  emailIntakeAddress?: Maybe<EmailIntakeAddress>;
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The identity provider for SAML authentication on this Asks web form. */
+  identityProvider?: Maybe<IdentityProvider>;
+  /** The organization that the Asks web settings are associated with. */
+  organization: Organization;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+};
+
 /** Issue assignee sorting options. */
 export type AssigneeSort = {
   /** Whether nulls should be sorted first or last */
@@ -1075,6 +1103,8 @@ export type AuthOrganization = {
   deletionRequestedAt?: Maybe<Scalars["DateTime"]>;
   /** Whether the organization is enabled. Used as a superuser tool to lock down the org. */
   enabled: Scalars["Boolean"];
+  /** Whether to hide other organizations for new users signing up with email domains claimed by this organization. */
+  hideNonPrimaryOrganizations: Scalars["Boolean"];
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /** The organization's logo URL. */
@@ -1259,6 +1289,8 @@ export type Comment = Node & {
   externalThread?: Maybe<SyncedExternalThread>;
   /** The external user who wrote the comment. */
   externalUser?: Maybe<ExternalUser>;
+  /** [Internal] Whether the comment should be hidden from Linear clients. This is typically used for bot comments that provide redundant information (e.g., Slack Asks confirmation messages). */
+  hideInLinear: Scalars["Boolean"];
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /** The initiative update that the comment is associated with. */
@@ -5176,6 +5208,22 @@ export type GitLabSettingsInput = {
   url?: InputMaybe<Scalars["String"]>;
 };
 
+export type GitLabTestConnectionPayload = {
+  __typename?: "GitLabTestConnectionPayload";
+  /** Error message if the connection test failed. */
+  error?: Maybe<Scalars["String"]>;
+  /** Response body from GitLab for debugging. */
+  errorResponseBody?: Maybe<Scalars["String"]>;
+  /** Response headers from GitLab for debugging (JSON stringified). */
+  errorResponseHeaders?: Maybe<Scalars["String"]>;
+  /** The integration that was created or updated. */
+  integration?: Maybe<Integration>;
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars["Float"];
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
+};
+
 /** [Internal] The kind of link between an issue and a pull request. */
 export enum GitLinkKind {
   Closes = "closes",
@@ -7226,6 +7274,8 @@ export type IssueCollectionFilter = {
   reactions?: InputMaybe<ReactionCollectionFilter>;
   /** [ALPHA] Filters that the recurring issue template must satisfy. */
   recurringIssueTemplate?: InputMaybe<NullableTemplateFilter>;
+  /** [ALPHA] Filters that the issue's releases must satisfy. */
+  releases?: InputMaybe<ReleaseCollectionFilter>;
   /** [Internal] Comparator for the issues content. */
   searchableContent?: InputMaybe<ContentComparator>;
   /** Filters that users the issue has been shared with must satisfy. */
@@ -7624,6 +7674,8 @@ export type IssueFilter = {
   reactions?: InputMaybe<ReactionCollectionFilter>;
   /** [ALPHA] Filters that the recurring issue template must satisfy. */
   recurringIssueTemplate?: InputMaybe<NullableTemplateFilter>;
+  /** [ALPHA] Filters that the issue's releases must satisfy. */
+  releases?: InputMaybe<ReleaseCollectionFilter>;
   /** [Internal] Comparator for the issues content. */
   searchableContent?: InputMaybe<ContentComparator>;
   /** Filters that users the issue has been shared with must satisfy. */
@@ -7800,6 +7852,8 @@ export type IssueHistory = Node & {
   triageResponsibilityAutoAssigned?: Maybe<Scalars["Boolean"]>;
   /** The users that were notified of the issue. */
   triageResponsibilityNotifiedUsers?: Maybe<Array<User>>;
+  /** [INTERNAL] Metadata about the triage rule that made changes to the issue. */
+  triageRuleMetadata?: Maybe<IssueHistoryTriageRuleMetadata>;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -7821,6 +7875,32 @@ export type IssueHistoryEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: IssueHistory;
+};
+
+/** An error that occurred during triage rule execution. */
+export type IssueHistoryTriageRuleError = {
+  __typename?: "IssueHistoryTriageRuleError";
+  /** Whether the conflict was for the same child label. */
+  conflictForSameChildLabel?: Maybe<Scalars["Boolean"]>;
+  /** The conflicting labels. */
+  conflictingLabels?: Maybe<Array<IssueLabel>>;
+  /** The team the issue was being moved from. */
+  fromTeam?: Maybe<Team>;
+  /** The property that caused the error. */
+  property?: Maybe<Scalars["String"]>;
+  /** The team the issue was being moved to. */
+  toTeam?: Maybe<Team>;
+  /** The type of error that occurred. */
+  type: TriageRuleErrorType;
+};
+
+/** Metadata about a triage rule that made changes to an issue. */
+export type IssueHistoryTriageRuleMetadata = {
+  __typename?: "IssueHistoryTriageRuleMetadata";
+  /** The error that occurred, if any. */
+  triageRuleError?: Maybe<IssueHistoryTriageRuleError>;
+  /** The triage rule that triggered the issue update. */
+  updatedByTriageRule?: Maybe<WorkflowDefinition>;
 };
 
 /** Comparator for issue identifiers. */
@@ -9706,6 +9786,8 @@ export type Mutation = {
   integrationGithubImportRefresh: IntegrationPayload;
   /** Connects the organization with a GitLab Access Token. */
   integrationGitlabConnect: GitLabIntegrationCreatePayload;
+  /** Tests connectivity to a self-hosted GitLab instance and clears auth errors if successful. */
+  integrationGitlabTestConnection: GitLabTestConnectionPayload;
   /** Integrates the organization with Gong. */
   integrationGong: IntegrationPayload;
   /** [Internal] Connects the Google Calendar to the user to this Linear account via OAuth2. */
@@ -9783,7 +9865,7 @@ export type Mutation = {
   integrationSlackPost: SlackChannelConnectPayload;
   /** Slack integration for project notifications. */
   integrationSlackProjectPost: SlackChannelConnectPayload;
-  /** [Internal] Enables Linear Agent Slack workflow access for a Slack integration. */
+  /** [Internal] Enables Linear Agent Slack workflow access for a Slack or Slack Asks integration. */
   integrationSlackWorkflowAccessUpdate: IntegrationPayload;
   /** Creates a new integrationTemplate join. */
   integrationTemplateCreate: IntegrationTemplatePayload;
@@ -10047,6 +10129,8 @@ export type Mutation = {
   releaseUnarchive: ReleaseArchivePayload;
   /** [ALPHA] Updates a release. */
   releaseUpdate: ReleasePayload;
+  /** [ALPHA] Updates a release by pipeline. If version is provided, updates that specific release; otherwise updates the most recent started release. */
+  releaseUpdateByPipeline: ReleasePayload;
   /** Re-send an organization invite. */
   resendOrganizationInvite: DeletePayload;
   /** Re-send an organization invite tied to an email address. */
@@ -10154,6 +10238,10 @@ export type Mutation = {
    * @deprecated Use userChangeRole instead. This mutation will be removed in a future release.
    */
   userPromoteMember: UserAdminPayload;
+  /** Revokes a user's sessions. Can only be called by an admin or owner. */
+  userRevokeAllSessions: UserAdminPayload;
+  /** Revokes a specific session for a user. Can only be called by an admin or owner. */
+  userRevokeSession: UserAdminPayload;
   /** Resets user's setting flags. */
   userSettingsFlagsReset: UserSettingsFlagsResetPayload;
   /** Updates the user's settings. */
@@ -10767,6 +10855,10 @@ export type MutationIntegrationGithubImportRefreshArgs = {
 export type MutationIntegrationGitlabConnectArgs = {
   accessToken: Scalars["String"];
   gitlabUrl: Scalars["String"];
+};
+
+export type MutationIntegrationGitlabTestConnectionArgs = {
+  integrationId: Scalars["String"];
 };
 
 export type MutationIntegrationGongArgs = {
@@ -11499,6 +11591,10 @@ export type MutationReleaseUpdateArgs = {
   input: ReleaseUpdateInput;
 };
 
+export type MutationReleaseUpdateByPipelineArgs = {
+  input: ReleaseUpdateByPipelineInput;
+};
+
 export type MutationResendOrganizationInviteArgs = {
   id: Scalars["String"];
 };
@@ -11673,6 +11769,15 @@ export type MutationUserPromoteAdminArgs = {
 
 export type MutationUserPromoteMemberArgs = {
   id: Scalars["String"];
+};
+
+export type MutationUserRevokeAllSessionsArgs = {
+  id: Scalars["String"];
+};
+
+export type MutationUserRevokeSessionArgs = {
+  id: Scalars["String"];
+  sessionId: Scalars["String"];
 };
 
 export type MutationUserSettingsFlagsResetArgs = {
@@ -12499,6 +12604,8 @@ export type NullableIssueFilter = {
   reactions?: InputMaybe<ReactionCollectionFilter>;
   /** [ALPHA] Filters that the recurring issue template must satisfy. */
   recurringIssueTemplate?: InputMaybe<NullableTemplateFilter>;
+  /** [ALPHA] Filters that the issue's releases must satisfy. */
+  releases?: InputMaybe<ReleaseCollectionFilter>;
   /** [Internal] Comparator for the issues content. */
   searchableContent?: InputMaybe<ContentComparator>;
   /** Filters that users the issue has been shared with must satisfy. */
@@ -13100,6 +13207,8 @@ export type Organization = Node & {
   gitLinkbackMessagesEnabled: Scalars["Boolean"];
   /** Whether the Git integration linkback messages should be sent to public repositories. */
   gitPublicLinkbackMessagesEnabled: Scalars["Boolean"];
+  /** Whether to hide other organizations for new users signing up with email domains claimed by this organization. */
+  hideNonPrimaryOrganizations: Scalars["Boolean"];
   /** Whether HIPAA compliance is enabled for organization. */
   hipaaComplianceEnabled: Scalars["Boolean"];
   /** The unique identifier of the entity. */
@@ -13543,6 +13652,8 @@ export type OrganizationSecuritySettingsInput = {
   apiSettingsRole?: InputMaybe<UserRoleType>;
   /** The minimum role required to import data. */
   importRole?: InputMaybe<UserRoleType>;
+  /** The minimum role required to install and connect new integrations. */
+  integrationCreationRole?: InputMaybe<UserRoleType>;
   /** The minimum role required to invite users. */
   invitationsRole?: InputMaybe<UserRoleType>;
   /** The minimum role required to manage workspace labels. */
@@ -16599,6 +16710,8 @@ export type Query = {
   applicationInfo: Application;
   /** [Internal] All archived teams of the organization. */
   archivedTeams: Array<Team>;
+  /** Asks web form settings by ID. */
+  asksWebSetting: AsksWebSettings;
   /**
    * One specific issue attachment.
    * [Deprecated] 'url' can no longer be used as the 'id' parameter. Use 'attachmentsForUrl' instead
@@ -16868,6 +16981,8 @@ export type Query = {
   triageResponsibility: TriageResponsibility;
   /** One specific user. */
   user: User;
+  /** Lists the sessions of a user. Can only be called by an admin or owner. */
+  userSessions: Array<AuthenticationSessionResponse>;
   /** The user's settings. */
   userSettings: UserSettings;
   /** All users for the organization. */
@@ -16925,6 +17040,10 @@ export type QueryAgentSessionsArgs = {
 
 export type QueryApplicationInfoArgs = {
   clientId: Scalars["String"];
+};
+
+export type QueryAsksWebSettingArgs = {
+  id: Scalars["String"];
 };
 
 export type QueryAttachmentArgs = {
@@ -17686,6 +17805,10 @@ export type QueryUserArgs = {
   id: Scalars["String"];
 };
 
+export type QueryUserSessionsArgs = {
+  id: Scalars["String"];
+};
+
 export type QueryUsersArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -17989,6 +18112,28 @@ export enum ReleaseChannel {
   Public = "public",
 }
 
+/** [ALPHA] Release collection filtering options. */
+export type ReleaseCollectionFilter = {
+  /** Compound filters, all of which need to be matched by the release. */
+  and?: InputMaybe<Array<ReleaseCollectionFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: InputMaybe<DateComparator>;
+  /** Filters that needs to be matched by all releases. */
+  every?: InputMaybe<ReleaseFilter>;
+  /** Comparator for the identifier. */
+  id?: InputMaybe<IdComparator>;
+  /** Comparator for the collection length. */
+  length?: InputMaybe<NumberComparator>;
+  /** Compound filters, one of which need to be matched by the release. */
+  or?: InputMaybe<Array<ReleaseCollectionFilter>>;
+  /** Filters that the release's pipeline must satisfy. */
+  pipeline?: InputMaybe<ReleasePipelineFilter>;
+  /** Filters that needs to be matched by some releases. */
+  some?: InputMaybe<ReleaseFilter>;
+  /** Comparator for the updated at date. */
+  updatedAt?: InputMaybe<DateComparator>;
+};
+
 export type ReleaseCompleteInput = {
   /** The identifier of the pipeline to mark a release as completed. */
   pipelineId: Scalars["String"];
@@ -18042,6 +18187,22 @@ export type ReleaseEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: Release;
+};
+
+/** [ALPHA] Release filtering options. */
+export type ReleaseFilter = {
+  /** Compound filters, all of which need to be matched by the release. */
+  and?: InputMaybe<Array<ReleaseFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: InputMaybe<DateComparator>;
+  /** Comparator for the identifier. */
+  id?: InputMaybe<IdComparator>;
+  /** Compound filters, one of which need to be matched by the release. */
+  or?: InputMaybe<Array<ReleaseFilter>>;
+  /** Filters that the release's pipeline must satisfy. */
+  pipeline?: InputMaybe<ReleasePipelineFilter>;
+  /** Comparator for the updated at date. */
+  updatedAt?: InputMaybe<DateComparator>;
 };
 
 export type ReleasePayload = {
@@ -18138,6 +18299,20 @@ export type ReleasePipelineEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: ReleasePipeline;
+};
+
+/** [ALPHA] Release pipeline filtering options. */
+export type ReleasePipelineFilter = {
+  /** Compound filters, all of which need to be matched by the pipeline. */
+  and?: InputMaybe<Array<ReleasePipelineFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: InputMaybe<DateComparator>;
+  /** Comparator for the identifier. */
+  id?: InputMaybe<IdComparator>;
+  /** Compound filters, one of which need to be matched by the pipeline. */
+  or?: InputMaybe<Array<ReleasePipelineFilter>>;
+  /** Comparator for the updated at date. */
+  updatedAt?: InputMaybe<DateComparator>;
 };
 
 export type ReleasePipelinePayload = {
@@ -18299,6 +18474,16 @@ export type ReleaseSyncInput = {
   /** The estimated completion date of the release. */
   targetDate?: InputMaybe<Scalars["TimelessDate"]>;
   /** The version of the release. */
+  version?: InputMaybe<Scalars["String"]>;
+};
+
+/** Input for updating a release by pipeline. */
+export type ReleaseUpdateByPipelineInput = {
+  /** The identifier of the pipeline. */
+  pipelineId: Scalars["String"];
+  /** The stage name to set. First tries exact match, then falls back to case-insensitive matching with dashes/underscores treated as spaces. */
+  stage?: InputMaybe<Scalars["String"]>;
+  /** The version of the release to update. If not provided, the latest started release will be updated. */
   version?: InputMaybe<Scalars["String"]>;
 };
 
@@ -18766,6 +18951,10 @@ export type SlackAsksSettingsInput = {
   canAdministrate: UserRoleType;
   /** Controls who can see and set Customers when creating Asks in Slack. */
   customerVisibility?: InputMaybe<CustomerVisibilityMode>;
+  /** Whether Linear Agent should be enabled for this Slack Asks integration. */
+  enableAgent?: InputMaybe<Scalars["Boolean"]>;
+  /** Whether Linear Agent should be given Org-wide access within Slack workflows. */
+  enableLinearAgentWorkflowAccess?: InputMaybe<Scalars["Boolean"]>;
   /** Enterprise id of the connected Slack enterprise */
   enterpriseId?: InputMaybe<Scalars["String"]>;
   /** Enterprise name of the connected Slack enterprise */
@@ -20219,6 +20408,13 @@ export type TriageResponsibilityUpdateInput = {
   timeScheduleId?: InputMaybe<Scalars["String"]>;
 };
 
+/** The type of error that occurred during triage rule execution. */
+export enum TriageRuleErrorType {
+  Cycle = "cycle",
+  Default = "default",
+  LabelGroupConflict = "labelGroupConflict",
+}
+
 /** Issue update date sorting options. */
 export type UpdatedAtSort = {
   /** Whether nulls should be sorted first or last */
@@ -21212,6 +21408,64 @@ export type WebhookUpdateInput = {
   url?: InputMaybe<Scalars["String"]>;
 };
 
+export type WorkflowDefinition = Node & {
+  __typename?: "WorkflowDefinition";
+  /** An array of activities that will be executed as part of the workflow. */
+  activities: Scalars["JSONObject"];
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The conditions that need to be match for the workflow to be triggered. */
+  conditions?: Maybe<Scalars["JSONObject"]>;
+  /** The type of view to which this workflow's context is associated with. */
+  contextViewType?: Maybe<ContextViewType>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The user who created the workflow. */
+  creator: User;
+  /** The context custom view associated with the workflow. */
+  customView?: Maybe<CustomView>;
+  /** The contextual cycle view associated with the workflow. */
+  cycle?: Maybe<Cycle>;
+  /** The description of the workflow. */
+  description?: Maybe<Scalars["String"]>;
+  enabled: Scalars["Boolean"];
+  /** The name of the group that the workflow belongs to. */
+  groupName?: Maybe<Scalars["String"]>;
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The contextual initiative view associated with the workflow. */
+  initiative?: Maybe<Initiative>;
+  /** The contextual label view associated with the workflow. */
+  label?: Maybe<IssueLabel>;
+  /** The date when the workflow was last executed. */
+  lastExecutedAt?: Maybe<Scalars["DateTime"]>;
+  /** The user who last updated the workflow. */
+  lastUpdatedBy?: Maybe<User>;
+  /** The name of the workflow. */
+  name: Scalars["String"];
+  /** The contextual project view associated with the workflow. */
+  project?: Maybe<Project>;
+  /** The sort order of the workflow definition within its siblings. */
+  sortOrder: Scalars["String"];
+  /** The team associated with the workflow. If not set, the workflow is associated with the entire organization. */
+  team?: Maybe<Team>;
+  /** The type of the event that triggers off the workflow. */
+  trigger: WorkflowTrigger;
+  /** The object type (e.g. Issue) that triggers this workflow. */
+  triggerType: WorkflowTriggerType;
+  /** The type of the workflow. */
+  type: WorkflowType;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+  /** The contextual user view associated with the workflow. */
+  user?: Maybe<User>;
+  /** The type of user view to which this workflow's context is associated with. */
+  userContextViewType?: Maybe<UserContextViewType>;
+};
+
 /** A state in a team workflow. */
 export type WorkflowState = Node & {
   __typename?: "WorkflowState";
@@ -21366,6 +21620,26 @@ export type WorkflowStateUpdateInput = {
   /** The position of the state. */
   position?: InputMaybe<Scalars["Float"]>;
 };
+
+export enum WorkflowTrigger {
+  EntityCreated = "entityCreated",
+  EntityCreatedOrUpdated = "entityCreatedOrUpdated",
+  EntityRemoved = "entityRemoved",
+  EntityUnarchived = "entityUnarchived",
+  EntityUpdated = "entityUpdated",
+}
+
+export enum WorkflowTriggerType {
+  Issue = "issue",
+  Project = "project",
+}
+
+export enum WorkflowType {
+  Custom = "custom",
+  Sla = "sla",
+  Triage = "triage",
+  ViewSubscription = "viewSubscription",
+}
 
 export type ZendeskSettingsInput = {
   /** Whether a ticket should be automatically reopened when its linked Linear issue is cancelled. */
@@ -24128,6 +24402,7 @@ export type AuthUserFragment = { __typename: "AuthUser" } & Pick<
       | "samlEnabled"
       | "scimEnabled"
       | "enabled"
+      | "hideNonPrimaryOrganizations"
       | "userCount"
     >;
   };
@@ -24443,6 +24718,36 @@ export type EmailIntakeAddressFragment = { __typename: "EmailIntakeAddress" } & 
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
     template?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+  };
+
+export type IssueHistoryTriageRuleErrorFragment = { __typename: "IssueHistoryTriageRuleError" } & Pick<
+  IssueHistoryTriageRuleError,
+  "property" | "type" | "conflictForSameChildLabel"
+> & {
+    conflictingLabels?: Maybe<
+      Array<
+        { __typename: "IssueLabel" } & Pick<
+          IssueLabel,
+          | "lastAppliedAt"
+          | "color"
+          | "description"
+          | "name"
+          | "updatedAt"
+          | "archivedAt"
+          | "createdAt"
+          | "id"
+          | "isGroup"
+        > & {
+            inheritedFrom?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+            parent?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+            team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+            creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            retiredBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          }
+      >
+    >;
+    fromTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+    toTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
   };
 
 export type ExternalUserFragment = { __typename: "ExternalUser" } & Pick<
@@ -24997,6 +25302,7 @@ export type OrganizationFragment = { __typename: "Organization" } & Pick<
   | "feedEnabled"
   | "customersEnabled"
   | "roadmapEnabled"
+  | "hideNonPrimaryOrganizations"
   | "projectUpdatesReminderFrequency"
   | "allowMembersToInvite"
   | "restrictTeamCreationToAdmins"
@@ -25062,6 +25368,7 @@ export type AuthOrganizationFragment = { __typename: "AuthOrganization" } & Pick
   | "samlEnabled"
   | "scimEnabled"
   | "enabled"
+  | "hideNonPrimaryOrganizations"
   | "userCount"
 >;
 
@@ -25581,6 +25888,72 @@ export type ProjectLabelFragment = { __typename: "ProjectLabel" } & Pick<
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     retiredBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
+
+export type IssueHistoryTriageRuleMetadataFragment = { __typename: "IssueHistoryTriageRuleMetadata" } & {
+  triageRuleError?: Maybe<
+    { __typename: "IssueHistoryTriageRuleError" } & Pick<
+      IssueHistoryTriageRuleError,
+      "property" | "type" | "conflictForSameChildLabel"
+    > & {
+        conflictingLabels?: Maybe<
+          Array<
+            { __typename: "IssueLabel" } & Pick<
+              IssueLabel,
+              | "lastAppliedAt"
+              | "color"
+              | "description"
+              | "name"
+              | "updatedAt"
+              | "archivedAt"
+              | "createdAt"
+              | "id"
+              | "isGroup"
+            > & {
+                inheritedFrom?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                parent?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                retiredBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+              }
+          >
+        >;
+        fromTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+        toTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+      }
+  >;
+  updatedByTriageRule?: Maybe<
+    { __typename: "WorkflowDefinition" } & Pick<
+      WorkflowDefinition,
+      | "activities"
+      | "conditions"
+      | "lastExecutedAt"
+      | "description"
+      | "updatedAt"
+      | "groupName"
+      | "name"
+      | "triggerType"
+      | "sortOrder"
+      | "archivedAt"
+      | "createdAt"
+      | "trigger"
+      | "type"
+      | "userContextViewType"
+      | "contextViewType"
+      | "id"
+      | "enabled"
+    > & {
+        customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+        cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+        initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+        label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+        project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+        user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+        team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+        creator: { __typename?: "User" } & Pick<User, "id">;
+        lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+      }
+  >;
+};
 
 export type ExternalEntityInfoGithubMetadataFragment = { __typename: "ExternalEntityInfoGithubMetadata" } & Pick<
   ExternalEntityInfoGithubMetadata,
@@ -26246,7 +26619,12 @@ export type AgentSessionEventWebhookPayloadFragment = { __typename: "AgentSessio
         | "archivedAt"
         | "createdAt"
         | "updatedAt"
-      >
+      > & {
+          user: { __typename: "UserChildWebhookPayload" } & Pick<
+            UserChildWebhookPayload,
+            "id" | "url" | "avatarUrl" | "email" | "name"
+          >;
+        }
     >;
     agentSession: { __typename: "AgentSessionWebhookPayload" } & Pick<
       AgentSessionWebhookPayload,
@@ -26309,7 +26687,12 @@ export type AgentActivityWebhookPayloadFragment = { __typename: "AgentActivityWe
   | "archivedAt"
   | "createdAt"
   | "updatedAt"
->;
+> & {
+    user: { __typename: "UserChildWebhookPayload" } & Pick<
+      UserChildWebhookPayload,
+      "id" | "url" | "avatarUrl" | "email" | "name"
+    >;
+  };
 
 export type AgentSessionWebhookPayloadFragment = { __typename: "AgentSessionWebhookPayload" } & Pick<
   AgentSessionWebhookPayload,
@@ -26990,6 +27373,35 @@ export type SesDomainIdentityFragment = { __typename: "SesDomainIdentity" } & Pi
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
 
+export type AsksWebSettingsFragment = { __typename: "AsksWebSettings" } & Pick<
+  AsksWebSettings,
+  "domain" | "updatedAt" | "archivedAt" | "createdAt" | "id"
+> & {
+    emailIntakeAddress?: Maybe<{ __typename?: "EmailIntakeAddress" } & Pick<EmailIntakeAddress, "id">>;
+    identityProvider?: Maybe<
+      { __typename: "IdentityProvider" } & Pick<
+        IdentityProvider,
+        | "ssoBinding"
+        | "ssoEndpoint"
+        | "priority"
+        | "ssoSignAlgo"
+        | "issuerEntityId"
+        | "updatedAt"
+        | "spEntityId"
+        | "archivedAt"
+        | "createdAt"
+        | "type"
+        | "id"
+        | "samlEnabled"
+        | "scimEnabled"
+        | "defaultMigrated"
+        | "allowNameChange"
+        | "ssoSigningCert"
+      >
+    >;
+    creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+  };
+
 export type TeamOriginWebhookPayloadFragment = { __typename: "TeamOriginWebhookPayload" } & Pick<
   TeamOriginWebhookPayload,
   "type"
@@ -27487,6 +27899,7 @@ export type AuthResolverResponseFragment = { __typename: "AuthResolverResponse" 
             | "samlEnabled"
             | "scimEnabled"
             | "enabled"
+            | "hideNonPrimaryOrganizations"
             | "userCount"
           >;
         }
@@ -27512,6 +27925,7 @@ export type AuthResolverResponseFragment = { __typename: "AuthResolverResponse" 
             | "samlEnabled"
             | "scimEnabled"
             | "enabled"
+            | "hideNonPrimaryOrganizations"
             | "userCount"
           >;
         }
@@ -27534,6 +27948,7 @@ export type AuthResolverResponseFragment = { __typename: "AuthResolverResponse" 
           | "samlEnabled"
           | "scimEnabled"
           | "enabled"
+          | "hideNonPrimaryOrganizations"
           | "userCount"
         >
       >
@@ -27556,6 +27971,7 @@ export type AuthResolverResponseFragment = { __typename: "AuthResolverResponse" 
           | "samlEnabled"
           | "scimEnabled"
           | "enabled"
+          | "hideNonPrimaryOrganizations"
           | "userCount"
         >
       >
@@ -27697,6 +28113,7 @@ export type CreateOrJoinOrganizationResponseFragment = { __typename: "CreateOrJo
     | "samlEnabled"
     | "scimEnabled"
     | "enabled"
+    | "hideNonPrimaryOrganizations"
     | "userCount"
   >;
   user: { __typename: "AuthUser" } & Pick<
@@ -27719,6 +28136,7 @@ export type CreateOrJoinOrganizationResponseFragment = { __typename: "CreateOrJo
         | "samlEnabled"
         | "scimEnabled"
         | "enabled"
+        | "hideNonPrimaryOrganizations"
         | "userCount"
       >;
     };
@@ -28355,6 +28773,11 @@ export type GitHubEnterpriseServerPayloadFragment = { __typename: "GitHubEnterpr
 export type GitLabIntegrationCreatePayloadFragment = { __typename: "GitLabIntegrationCreatePayload" } & Pick<
   GitLabIntegrationCreatePayload,
   "lastSyncId" | "webhookSecret" | "success"
+> & { integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">> };
+
+export type GitLabTestConnectionPayloadFragment = { __typename: "GitLabTestConnectionPayload" } & Pick<
+  GitLabTestConnectionPayload,
+  "error" | "errorResponseBody" | "errorResponseHeaders" | "lastSyncId" | "success"
 > & { integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">> };
 
 export type ImageUploadFromUrlPayloadFragment = { __typename: "ImageUploadFromUrlPayload" } & Pick<
@@ -29484,6 +29907,8 @@ type Node_AgentSessionToPullRequest_Fragment = { __typename: "AgentSessionToPull
 
 type Node_AiPromptRules_Fragment = { __typename: "AiPromptRules" } & Pick<AiPromptRules, "id">;
 
+type Node_AsksWebSettings_Fragment = { __typename: "AsksWebSettings" } & Pick<AsksWebSettings, "id">;
+
 type Node_Attachment_Fragment = { __typename: "Attachment" } & Pick<Attachment, "id">;
 
 type Node_AuditEntry_Fragment = { __typename: "AuditEntry" } & Pick<AuditEntry, "id">;
@@ -29707,6 +30132,8 @@ type Node_ViewPreferences_Fragment = { __typename: "ViewPreferences" } & Pick<Vi
 
 type Node_Webhook_Fragment = { __typename: "Webhook" } & Pick<Webhook, "id">;
 
+type Node_WorkflowDefinition_Fragment = { __typename: "WorkflowDefinition" } & Pick<WorkflowDefinition, "id">;
+
 type Node_WorkflowState_Fragment = { __typename: "WorkflowState" } & Pick<WorkflowState, "id">;
 
 export type NodeFragment =
@@ -29714,6 +30141,7 @@ export type NodeFragment =
   | Node_AgentSession_Fragment
   | Node_AgentSessionToPullRequest_Fragment
   | Node_AiPromptRules_Fragment
+  | Node_AsksWebSettings_Fragment
   | Node_Attachment_Fragment
   | Node_AuditEntry_Fragment
   | Node_Comment_Fragment
@@ -29806,6 +30234,7 @@ export type NodeFragment =
   | Node_UserSettings_Fragment
   | Node_ViewPreferences_Fragment
   | Node_Webhook_Fragment
+  | Node_WorkflowDefinition_Fragment
   | Node_WorkflowState_Fragment;
 
 export type NotificationBatchActionPayloadFragment = { __typename: "NotificationBatchActionPayload" } & Pick<
@@ -32382,6 +32811,37 @@ export type WebhookRotateSecretPayloadFragment = { __typename: "WebhookRotateSec
   "lastSyncId" | "secret" | "success"
 >;
 
+export type WorkflowDefinitionFragment = { __typename: "WorkflowDefinition" } & Pick<
+  WorkflowDefinition,
+  | "activities"
+  | "conditions"
+  | "lastExecutedAt"
+  | "description"
+  | "updatedAt"
+  | "groupName"
+  | "name"
+  | "triggerType"
+  | "sortOrder"
+  | "archivedAt"
+  | "createdAt"
+  | "trigger"
+  | "type"
+  | "userContextViewType"
+  | "contextViewType"
+  | "id"
+  | "enabled"
+> & {
+    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+    creator: { __typename?: "User" } & Pick<User, "id">;
+    lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+  };
+
 export type WorkflowStateConnectionFragment = { __typename: "WorkflowStateConnection" } & {
   nodes: Array<
     { __typename: "WorkflowState" } & Pick<
@@ -32693,6 +33153,71 @@ export type ApplicationInfoQuery = { __typename?: "Query" } & {
     Application,
     "name" | "imageUrl" | "description" | "developer" | "id" | "clientId" | "developerUrl"
   >;
+};
+
+export type AsksWebSettingQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type AsksWebSettingQuery = { __typename?: "Query" } & {
+  asksWebSetting: { __typename: "AsksWebSettings" } & Pick<
+    AsksWebSettings,
+    "domain" | "updatedAt" | "archivedAt" | "createdAt" | "id"
+  > & {
+      emailIntakeAddress?: Maybe<{ __typename?: "EmailIntakeAddress" } & Pick<EmailIntakeAddress, "id">>;
+      identityProvider?: Maybe<
+        { __typename: "IdentityProvider" } & Pick<
+          IdentityProvider,
+          | "ssoBinding"
+          | "ssoEndpoint"
+          | "priority"
+          | "ssoSignAlgo"
+          | "issuerEntityId"
+          | "updatedAt"
+          | "spEntityId"
+          | "archivedAt"
+          | "createdAt"
+          | "type"
+          | "id"
+          | "samlEnabled"
+          | "scimEnabled"
+          | "defaultMigrated"
+          | "allowNameChange"
+          | "ssoSigningCert"
+        >
+      >;
+      creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+    };
+};
+
+export type AsksWebSetting_IdentityProviderQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type AsksWebSetting_IdentityProviderQuery = { __typename?: "Query" } & {
+  asksWebSetting: { __typename?: "AsksWebSettings" } & {
+    identityProvider?: Maybe<
+      { __typename: "IdentityProvider" } & Pick<
+        IdentityProvider,
+        | "ssoBinding"
+        | "ssoEndpoint"
+        | "priority"
+        | "ssoSignAlgo"
+        | "issuerEntityId"
+        | "updatedAt"
+        | "spEntityId"
+        | "archivedAt"
+        | "createdAt"
+        | "type"
+        | "id"
+        | "samlEnabled"
+        | "scimEnabled"
+        | "defaultMigrated"
+        | "allowNameChange"
+        | "ssoSigningCert"
+      >
+    >;
+  };
 };
 
 export type AttachmentQueryVariables = Exact<{
@@ -33932,6 +34457,7 @@ export type AvailableUsersQuery = { __typename?: "Query" } & {
               | "samlEnabled"
               | "scimEnabled"
               | "enabled"
+              | "hideNonPrimaryOrganizations"
               | "userCount"
             >;
           }
@@ -33957,6 +34483,7 @@ export type AvailableUsersQuery = { __typename?: "Query" } & {
               | "samlEnabled"
               | "scimEnabled"
               | "enabled"
+              | "hideNonPrimaryOrganizations"
               | "userCount"
             >;
           }
@@ -33979,6 +34506,7 @@ export type AvailableUsersQuery = { __typename?: "Query" } & {
             | "samlEnabled"
             | "scimEnabled"
             | "enabled"
+            | "hideNonPrimaryOrganizations"
             | "userCount"
           >
         >
@@ -34001,6 +34529,7 @@ export type AvailableUsersQuery = { __typename?: "Query" } & {
             | "samlEnabled"
             | "scimEnabled"
             | "enabled"
+            | "hideNonPrimaryOrganizations"
             | "userCount"
           >
         >
@@ -41052,6 +41581,7 @@ export type OrganizationQuery = { __typename?: "Query" } & {
     | "feedEnabled"
     | "customersEnabled"
     | "roadmapEnabled"
+    | "hideNonPrimaryOrganizations"
     | "projectUpdatesReminderFrequency"
     | "allowMembersToInvite"
     | "restrictTeamCreationToAdmins"
@@ -45443,6 +45973,37 @@ export type User_TeamsQuery = { __typename?: "Query" } & {
   };
 };
 
+export type UserSessionsQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type UserSessionsQuery = { __typename?: "Query" } & {
+  userSessions: Array<
+    { __typename: "AuthenticationSessionResponse" } & Pick<
+      AuthenticationSessionResponse,
+      | "client"
+      | "countryCodes"
+      | "updatedAt"
+      | "location"
+      | "ip"
+      | "isCurrentSession"
+      | "locationCity"
+      | "locationCountryCode"
+      | "locationCountry"
+      | "locationRegionCode"
+      | "name"
+      | "operatingSystem"
+      | "service"
+      | "userAgent"
+      | "createdAt"
+      | "type"
+      | "browserType"
+      | "lastActiveAt"
+      | "id"
+    >
+  >;
+};
+
 export type UserSettingsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type UserSettingsQuery = { __typename?: "Query" } & {
@@ -47492,6 +48053,7 @@ export type CreateOrganizationFromOnboardingMutation = { __typename?: "Mutation"
       | "samlEnabled"
       | "scimEnabled"
       | "enabled"
+      | "hideNonPrimaryOrganizations"
       | "userCount"
     >;
     user: { __typename: "AuthUser" } & Pick<
@@ -47514,6 +48076,7 @@ export type CreateOrganizationFromOnboardingMutation = { __typename?: "Mutation"
           | "samlEnabled"
           | "scimEnabled"
           | "enabled"
+          | "hideNonPrimaryOrganizations"
           | "userCount"
         >;
       };
@@ -47944,6 +48507,7 @@ export type EmailTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
               | "samlEnabled"
               | "scimEnabled"
               | "enabled"
+              | "hideNonPrimaryOrganizations"
               | "userCount"
             >;
           }
@@ -47969,6 +48533,7 @@ export type EmailTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
               | "samlEnabled"
               | "scimEnabled"
               | "enabled"
+              | "hideNonPrimaryOrganizations"
               | "userCount"
             >;
           }
@@ -47991,6 +48556,7 @@ export type EmailTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
             | "samlEnabled"
             | "scimEnabled"
             | "enabled"
+            | "hideNonPrimaryOrganizations"
             | "userCount"
           >
         >
@@ -48013,6 +48579,7 @@ export type EmailTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
             | "samlEnabled"
             | "scimEnabled"
             | "enabled"
+            | "hideNonPrimaryOrganizations"
             | "userCount"
           >
         >
@@ -48275,6 +48842,7 @@ export type GoogleUserAccountAuthMutation = { __typename?: "Mutation" } & {
               | "samlEnabled"
               | "scimEnabled"
               | "enabled"
+              | "hideNonPrimaryOrganizations"
               | "userCount"
             >;
           }
@@ -48300,6 +48868,7 @@ export type GoogleUserAccountAuthMutation = { __typename?: "Mutation" } & {
               | "samlEnabled"
               | "scimEnabled"
               | "enabled"
+              | "hideNonPrimaryOrganizations"
               | "userCount"
             >;
           }
@@ -48322,6 +48891,7 @@ export type GoogleUserAccountAuthMutation = { __typename?: "Mutation" } & {
             | "samlEnabled"
             | "scimEnabled"
             | "enabled"
+            | "hideNonPrimaryOrganizations"
             | "userCount"
           >
         >
@@ -48344,6 +48914,7 @@ export type GoogleUserAccountAuthMutation = { __typename?: "Mutation" } & {
             | "samlEnabled"
             | "scimEnabled"
             | "enabled"
+            | "hideNonPrimaryOrganizations"
             | "userCount"
           >
         >
@@ -48713,6 +49284,17 @@ export type IntegrationGitlabConnectMutation = { __typename?: "Mutation" } & {
   integrationGitlabConnect: { __typename: "GitLabIntegrationCreatePayload" } & Pick<
     GitLabIntegrationCreatePayload,
     "lastSyncId" | "webhookSecret" | "success"
+  > & { integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">> };
+};
+
+export type IntegrationGitlabTestConnectionMutationVariables = Exact<{
+  integrationId: Scalars["String"];
+}>;
+
+export type IntegrationGitlabTestConnectionMutation = { __typename?: "Mutation" } & {
+  integrationGitlabTestConnection: { __typename: "GitLabTestConnectionPayload" } & Pick<
+    GitLabTestConnectionPayload,
+    "error" | "errorResponseBody" | "errorResponseHeaders" | "lastSyncId" | "success"
   > & { integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">> };
 };
 
@@ -49717,6 +50299,7 @@ export type JoinOrganizationFromOnboardingMutation = { __typename?: "Mutation" }
       | "samlEnabled"
       | "scimEnabled"
       | "enabled"
+      | "hideNonPrimaryOrganizations"
       | "userCount"
     >;
     user: { __typename: "AuthUser" } & Pick<
@@ -49739,6 +50322,7 @@ export type JoinOrganizationFromOnboardingMutation = { __typename?: "Mutation" }
           | "samlEnabled"
           | "scimEnabled"
           | "enabled"
+          | "hideNonPrimaryOrganizations"
           | "userCount"
         >;
       };
@@ -49767,6 +50351,7 @@ export type LeaveOrganizationMutation = { __typename?: "Mutation" } & {
       | "samlEnabled"
       | "scimEnabled"
       | "enabled"
+      | "hideNonPrimaryOrganizations"
       | "userCount"
     >;
     user: { __typename: "AuthUser" } & Pick<
@@ -49789,6 +50374,7 @@ export type LeaveOrganizationMutation = { __typename?: "Mutation" } & {
           | "samlEnabled"
           | "scimEnabled"
           | "enabled"
+          | "hideNonPrimaryOrganizations"
           | "userCount"
         >;
       };
@@ -54260,6 +54846,7 @@ export type SamlTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
               | "samlEnabled"
               | "scimEnabled"
               | "enabled"
+              | "hideNonPrimaryOrganizations"
               | "userCount"
             >;
           }
@@ -54285,6 +54872,7 @@ export type SamlTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
               | "samlEnabled"
               | "scimEnabled"
               | "enabled"
+              | "hideNonPrimaryOrganizations"
               | "userCount"
             >;
           }
@@ -54307,6 +54895,7 @@ export type SamlTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
             | "samlEnabled"
             | "scimEnabled"
             | "enabled"
+            | "hideNonPrimaryOrganizations"
             | "userCount"
           >
         >
@@ -54329,6 +54918,7 @@ export type SamlTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
             | "samlEnabled"
             | "scimEnabled"
             | "enabled"
+            | "hideNonPrimaryOrganizations"
             | "userCount"
           >
         >
@@ -54614,6 +55204,23 @@ export type UserPromoteMemberMutationVariables = Exact<{
 
 export type UserPromoteMemberMutation = { __typename?: "Mutation" } & {
   userPromoteMember: { __typename: "UserAdminPayload" } & Pick<UserAdminPayload, "success">;
+};
+
+export type UserRevokeAllSessionsMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type UserRevokeAllSessionsMutation = { __typename?: "Mutation" } & {
+  userRevokeAllSessions: { __typename: "UserAdminPayload" } & Pick<UserAdminPayload, "success">;
+};
+
+export type UserRevokeSessionMutationVariables = Exact<{
+  id: Scalars["String"];
+  sessionId: Scalars["String"];
+}>;
+
+export type UserRevokeSessionMutation = { __typename?: "Mutation" } & {
+  userRevokeSession: { __typename: "UserAdminPayload" } & Pick<UserAdminPayload, "success">;
 };
 
 export type UserSettingsFlagsResetMutationVariables = Exact<{
@@ -57629,6 +58236,7 @@ export const OrganizationFragmentDoc = new TypedDocumentString(
   feedEnabled
   customersEnabled
   roadmapEnabled
+  hideNonPrimaryOrganizations
   projectUpdatesReminderFrequency
   allowMembersToInvite
   restrictTeamCreationToAdmins
@@ -58088,6 +58696,238 @@ export const IntegrationActorWebhookPayloadFragmentDoc = new TypedDocumentString
     `,
   { fragmentName: "IntegrationActorWebhookPayload" }
 ) as unknown as TypedDocumentString<IntegrationActorWebhookPayloadFragment, unknown>;
+export const IssueLabelFragmentDoc = new TypedDocumentString(
+  `
+    fragment IssueLabel on IssueLabel {
+  __typename
+  lastAppliedAt
+  color
+  description
+  name
+  updatedAt
+  inheritedFrom {
+    id
+  }
+  parent {
+    id
+  }
+  team {
+    id
+  }
+  archivedAt
+  createdAt
+  id
+  creator {
+    id
+  }
+  retiredBy {
+    id
+  }
+  isGroup
+}
+    `,
+  { fragmentName: "IssueLabel" }
+) as unknown as TypedDocumentString<IssueLabelFragment, unknown>;
+export const IssueHistoryTriageRuleErrorFragmentDoc = new TypedDocumentString(
+  `
+    fragment IssueHistoryTriageRuleError on IssueHistoryTriageRuleError {
+  __typename
+  conflictingLabels {
+    ...IssueLabel
+  }
+  property
+  fromTeam {
+    id
+  }
+  toTeam {
+    id
+  }
+  type
+  conflictForSameChildLabel
+}
+    fragment IssueLabel on IssueLabel {
+  __typename
+  lastAppliedAt
+  color
+  description
+  name
+  updatedAt
+  inheritedFrom {
+    id
+  }
+  parent {
+    id
+  }
+  team {
+    id
+  }
+  archivedAt
+  createdAt
+  id
+  creator {
+    id
+  }
+  retiredBy {
+    id
+  }
+  isGroup
+}`,
+  { fragmentName: "IssueHistoryTriageRuleError" }
+) as unknown as TypedDocumentString<IssueHistoryTriageRuleErrorFragment, unknown>;
+export const WorkflowDefinitionFragmentDoc = new TypedDocumentString(
+  `
+    fragment WorkflowDefinition on WorkflowDefinition {
+  __typename
+  activities
+  conditions
+  customView {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  project {
+    id
+  }
+  user {
+    id
+  }
+  lastExecutedAt
+  description
+  updatedAt
+  groupName
+  name
+  triggerType
+  sortOrder
+  team {
+    id
+  }
+  archivedAt
+  createdAt
+  trigger
+  type
+  userContextViewType
+  contextViewType
+  id
+  creator {
+    id
+  }
+  lastUpdatedBy {
+    id
+  }
+  enabled
+}
+    `,
+  { fragmentName: "WorkflowDefinition" }
+) as unknown as TypedDocumentString<WorkflowDefinitionFragment, unknown>;
+export const IssueHistoryTriageRuleMetadataFragmentDoc = new TypedDocumentString(
+  `
+    fragment IssueHistoryTriageRuleMetadata on IssueHistoryTriageRuleMetadata {
+  __typename
+  triageRuleError {
+    ...IssueHistoryTriageRuleError
+  }
+  updatedByTriageRule {
+    ...WorkflowDefinition
+  }
+}
+    fragment IssueHistoryTriageRuleError on IssueHistoryTriageRuleError {
+  __typename
+  conflictingLabels {
+    ...IssueLabel
+  }
+  property
+  fromTeam {
+    id
+  }
+  toTeam {
+    id
+  }
+  type
+  conflictForSameChildLabel
+}
+fragment IssueLabel on IssueLabel {
+  __typename
+  lastAppliedAt
+  color
+  description
+  name
+  updatedAt
+  inheritedFrom {
+    id
+  }
+  parent {
+    id
+  }
+  team {
+    id
+  }
+  archivedAt
+  createdAt
+  id
+  creator {
+    id
+  }
+  retiredBy {
+    id
+  }
+  isGroup
+}
+fragment WorkflowDefinition on WorkflowDefinition {
+  __typename
+  activities
+  conditions
+  customView {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  project {
+    id
+  }
+  user {
+    id
+  }
+  lastExecutedAt
+  description
+  updatedAt
+  groupName
+  name
+  triggerType
+  sortOrder
+  team {
+    id
+  }
+  archivedAt
+  createdAt
+  trigger
+  type
+  userContextViewType
+  contextViewType
+  id
+  creator {
+    id
+  }
+  lastUpdatedBy {
+    id
+  }
+  enabled
+}`,
+  { fragmentName: "IssueHistoryTriageRuleMetadata" }
+) as unknown as TypedDocumentString<IssueHistoryTriageRuleMetadataFragment, unknown>;
 export const OauthClientActorWebhookPayloadFragmentDoc = new TypedDocumentString(
   `
     fragment OauthClientActorWebhookPayload on OauthClientActorWebhookPayload {
@@ -58981,8 +59821,18 @@ export const AgentActivityWebhookPayloadFragmentDoc = new TypedDocumentString(
   archivedAt
   createdAt
   updatedAt
+  user {
+    ...UserChildWebhookPayload
+  }
 }
-    `,
+    fragment UserChildWebhookPayload on UserChildWebhookPayload {
+  __typename
+  id
+  url
+  avatarUrl
+  email
+  name
+}`,
   { fragmentName: "AgentActivityWebhookPayload" }
 ) as unknown as TypedDocumentString<AgentActivityWebhookPayloadFragment, unknown>;
 export const AgentSessionWebhookPayloadFragmentDoc = new TypedDocumentString(
@@ -59132,6 +59982,9 @@ fragment AgentActivityWebhookPayload on AgentActivityWebhookPayload {
   archivedAt
   createdAt
   updatedAt
+  user {
+    ...UserChildWebhookPayload
+  }
 }
 fragment AgentSessionWebhookPayload on AgentSessionWebhookPayload {
   __typename
@@ -60185,6 +61038,46 @@ export const ApplicationFragmentDoc = new TypedDocumentString(
     `,
   { fragmentName: "Application" }
 ) as unknown as TypedDocumentString<ApplicationFragment, unknown>;
+export const AsksWebSettingsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AsksWebSettings on AsksWebSettings {
+  __typename
+  domain
+  emailIntakeAddress {
+    id
+  }
+  identityProvider {
+    ...IdentityProvider
+  }
+  updatedAt
+  archivedAt
+  createdAt
+  id
+  creator {
+    id
+  }
+}
+    fragment IdentityProvider on IdentityProvider {
+  __typename
+  ssoBinding
+  ssoEndpoint
+  priority
+  ssoSignAlgo
+  issuerEntityId
+  updatedAt
+  spEntityId
+  archivedAt
+  createdAt
+  type
+  id
+  samlEnabled
+  scimEnabled
+  defaultMigrated
+  allowNameChange
+  ssoSigningCert
+}`,
+  { fragmentName: "AsksWebSettings" }
+) as unknown as TypedDocumentString<AsksWebSettingsFragment, unknown>;
 export const TeamWithParentWebhookPayloadFragmentDoc = new TypedDocumentString(
   `
     fragment TeamWithParentWebhookPayload on TeamWithParentWebhookPayload {
@@ -61403,6 +62296,7 @@ export const AuthOrganizationFragmentDoc = new TypedDocumentString(
   samlEnabled
   scimEnabled
   enabled
+  hideNonPrimaryOrganizations
   userCount
 }
     `,
@@ -61441,6 +62335,7 @@ export const AuthUserFragmentDoc = new TypedDocumentString(
   samlEnabled
   scimEnabled
   enabled
+  hideNonPrimaryOrganizations
   userCount
 }`,
   { fragmentName: "AuthUser" }
@@ -61498,6 +62393,7 @@ fragment AuthOrganization on AuthOrganization {
   samlEnabled
   scimEnabled
   enabled
+  hideNonPrimaryOrganizations
   userCount
 }`,
   { fragmentName: "AuthResolverResponse" }
@@ -62139,6 +63035,7 @@ fragment AuthOrganization on AuthOrganization {
   samlEnabled
   scimEnabled
   enabled
+  hideNonPrimaryOrganizations
   userCount
 }`,
   { fragmentName: "CreateOrJoinOrganizationResponse" }
@@ -63949,6 +64846,22 @@ export const GitLabIntegrationCreatePayloadFragmentDoc = new TypedDocumentString
     `,
   { fragmentName: "GitLabIntegrationCreatePayload" }
 ) as unknown as TypedDocumentString<GitLabIntegrationCreatePayloadFragment, unknown>;
+export const GitLabTestConnectionPayloadFragmentDoc = new TypedDocumentString(
+  `
+    fragment GitLabTestConnectionPayload on GitLabTestConnectionPayload {
+  __typename
+  error
+  errorResponseBody
+  errorResponseHeaders
+  lastSyncId
+  integration {
+    id
+  }
+  success
+}
+    `,
+  { fragmentName: "GitLabTestConnectionPayload" }
+) as unknown as TypedDocumentString<GitLabTestConnectionPayloadFragment, unknown>;
 export const ImageUploadFromUrlPayloadFragmentDoc = new TypedDocumentString(
   `
     fragment ImageUploadFromUrlPayload on ImageUploadFromUrlPayload {
@@ -65305,38 +66218,6 @@ export const IssueImportFragmentDoc = new TypedDocumentString(
     `,
   { fragmentName: "IssueImport" }
 ) as unknown as TypedDocumentString<IssueImportFragment, unknown>;
-export const IssueLabelFragmentDoc = new TypedDocumentString(
-  `
-    fragment IssueLabel on IssueLabel {
-  __typename
-  lastAppliedAt
-  color
-  description
-  name
-  updatedAt
-  inheritedFrom {
-    id
-  }
-  parent {
-    id
-  }
-  team {
-    id
-  }
-  archivedAt
-  createdAt
-  id
-  creator {
-    id
-  }
-  retiredBy {
-    id
-  }
-  isGroup
-}
-    `,
-  { fragmentName: "IssueLabel" }
-) as unknown as TypedDocumentString<IssueLabelFragment, unknown>;
 export const IssueHistoryFragmentDoc = new TypedDocumentString(
   `
     fragment IssueHistory on IssueHistory {
@@ -71162,6 +72043,78 @@ export const ApplicationInfoDocument = new TypedDocumentString(`
   clientId
   developerUrl
 }`) as unknown as TypedDocumentString<ApplicationInfoQuery, ApplicationInfoQueryVariables>;
+export const AsksWebSettingDocument = new TypedDocumentString(`
+    query asksWebSetting($id: String!) {
+  asksWebSetting(id: $id) {
+    ...AsksWebSettings
+  }
+}
+    fragment IdentityProvider on IdentityProvider {
+  __typename
+  ssoBinding
+  ssoEndpoint
+  priority
+  ssoSignAlgo
+  issuerEntityId
+  updatedAt
+  spEntityId
+  archivedAt
+  createdAt
+  type
+  id
+  samlEnabled
+  scimEnabled
+  defaultMigrated
+  allowNameChange
+  ssoSigningCert
+}
+fragment AsksWebSettings on AsksWebSettings {
+  __typename
+  domain
+  emailIntakeAddress {
+    id
+  }
+  identityProvider {
+    ...IdentityProvider
+  }
+  updatedAt
+  archivedAt
+  createdAt
+  id
+  creator {
+    id
+  }
+}`) as unknown as TypedDocumentString<AsksWebSettingQuery, AsksWebSettingQueryVariables>;
+export const AsksWebSetting_IdentityProviderDocument = new TypedDocumentString(`
+    query asksWebSetting_identityProvider($id: String!) {
+  asksWebSetting(id: $id) {
+    identityProvider {
+      ...IdentityProvider
+    }
+  }
+}
+    fragment IdentityProvider on IdentityProvider {
+  __typename
+  ssoBinding
+  ssoEndpoint
+  priority
+  ssoSignAlgo
+  issuerEntityId
+  updatedAt
+  spEntityId
+  archivedAt
+  createdAt
+  type
+  id
+  samlEnabled
+  scimEnabled
+  defaultMigrated
+  allowNameChange
+  ssoSigningCert
+}`) as unknown as TypedDocumentString<
+  AsksWebSetting_IdentityProviderQuery,
+  AsksWebSetting_IdentityProviderQueryVariables
+>;
 export const AttachmentDocument = new TypedDocumentString(`
     query attachment($id: String!) {
   attachment(id: $id) {
@@ -72859,6 +73812,7 @@ fragment AuthOrganization on AuthOrganization {
   samlEnabled
   scimEnabled
   enabled
+  hideNonPrimaryOrganizations
   userCount
 }
 fragment AuthResolverResponse on AuthResolverResponse {
@@ -82758,6 +83712,7 @@ fragment Organization on Organization {
   feedEnabled
   customersEnabled
   roadmapEnabled
+  hideNonPrimaryOrganizations
   projectUpdatesReminderFrequency
   allowMembersToInvite
   restrictTeamCreationToAdmins
@@ -89366,6 +90321,34 @@ fragment TeamConnection on TeamConnection {
     ...PageInfo
   }
 }`) as unknown as TypedDocumentString<User_TeamsQuery, User_TeamsQueryVariables>;
+export const UserSessionsDocument = new TypedDocumentString(`
+    query userSessions($id: String!) {
+  userSessions(id: $id) {
+    ...AuthenticationSessionResponse
+  }
+}
+    fragment AuthenticationSessionResponse on AuthenticationSessionResponse {
+  __typename
+  client
+  countryCodes
+  updatedAt
+  location
+  ip
+  isCurrentSession
+  locationCity
+  locationCountryCode
+  locationCountry
+  locationRegionCode
+  name
+  operatingSystem
+  service
+  userAgent
+  createdAt
+  type
+  browserType
+  lastActiveAt
+  id
+}`) as unknown as TypedDocumentString<UserSessionsQuery, UserSessionsQueryVariables>;
 export const UserSettingsDocument = new TypedDocumentString(`
     query userSettings {
   userSettings {
@@ -92138,6 +93121,7 @@ fragment AuthOrganization on AuthOrganization {
   samlEnabled
   scimEnabled
   enabled
+  hideNonPrimaryOrganizations
   userCount
 }
 fragment CreateOrJoinOrganizationResponse on CreateOrJoinOrganizationResponse {
@@ -92729,6 +93713,7 @@ fragment AuthOrganization on AuthOrganization {
   samlEnabled
   scimEnabled
   enabled
+  hideNonPrimaryOrganizations
   userCount
 }
 fragment AuthResolverResponse on AuthResolverResponse {
@@ -93128,6 +94113,7 @@ fragment AuthOrganization on AuthOrganization {
   samlEnabled
   scimEnabled
   enabled
+  hideNonPrimaryOrganizations
   userCount
 }
 fragment AuthResolverResponse on AuthResolverResponse {
@@ -93650,6 +94636,26 @@ export const IntegrationGitlabConnectDocument = new TypedDocumentString(`
   webhookSecret
   success
 }`) as unknown as TypedDocumentString<IntegrationGitlabConnectMutation, IntegrationGitlabConnectMutationVariables>;
+export const IntegrationGitlabTestConnectionDocument = new TypedDocumentString(`
+    mutation integrationGitlabTestConnection($integrationId: String!) {
+  integrationGitlabTestConnection(integrationId: $integrationId) {
+    ...GitLabTestConnectionPayload
+  }
+}
+    fragment GitLabTestConnectionPayload on GitLabTestConnectionPayload {
+  __typename
+  error
+  errorResponseBody
+  errorResponseHeaders
+  lastSyncId
+  integration {
+    id
+  }
+  success
+}`) as unknown as TypedDocumentString<
+  IntegrationGitlabTestConnectionMutation,
+  IntegrationGitlabTestConnectionMutationVariables
+>;
 export const IntegrationGongDocument = new TypedDocumentString(`
     mutation integrationGong($code: String!, $redirectUri: String!) {
   integrationGong(code: $code, redirectUri: $redirectUri) {
@@ -95030,6 +96036,7 @@ fragment AuthOrganization on AuthOrganization {
   samlEnabled
   scimEnabled
   enabled
+  hideNonPrimaryOrganizations
   userCount
 }
 fragment CreateOrJoinOrganizationResponse on CreateOrJoinOrganizationResponse {
@@ -95081,6 +96088,7 @@ fragment AuthOrganization on AuthOrganization {
   samlEnabled
   scimEnabled
   enabled
+  hideNonPrimaryOrganizations
   userCount
 }
 fragment CreateOrJoinOrganizationResponse on CreateOrJoinOrganizationResponse {
@@ -99576,6 +100584,7 @@ fragment AuthOrganization on AuthOrganization {
   samlEnabled
   scimEnabled
   enabled
+  hideNonPrimaryOrganizations
   userCount
 }
 fragment AuthResolverResponse on AuthResolverResponse {
@@ -99960,6 +100969,26 @@ export const UserPromoteMemberDocument = new TypedDocumentString(`
   __typename
   success
 }`) as unknown as TypedDocumentString<UserPromoteMemberMutation, UserPromoteMemberMutationVariables>;
+export const UserRevokeAllSessionsDocument = new TypedDocumentString(`
+    mutation userRevokeAllSessions($id: String!) {
+  userRevokeAllSessions(id: $id) {
+    ...UserAdminPayload
+  }
+}
+    fragment UserAdminPayload on UserAdminPayload {
+  __typename
+  success
+}`) as unknown as TypedDocumentString<UserRevokeAllSessionsMutation, UserRevokeAllSessionsMutationVariables>;
+export const UserRevokeSessionDocument = new TypedDocumentString(`
+    mutation userRevokeSession($id: String!, $sessionId: String!) {
+  userRevokeSession(id: $id, sessionId: $sessionId) {
+    ...UserAdminPayload
+  }
+}
+    fragment UserAdminPayload on UserAdminPayload {
+  __typename
+  success
+}`) as unknown as TypedDocumentString<UserRevokeSessionMutation, UserRevokeSessionMutationVariables>;
 export const UserSettingsFlagsResetDocument = new TypedDocumentString(`
     mutation userSettingsFlagsReset($flags: [UserFlagType!]) {
   userSettingsFlagsReset(flags: $flags) {

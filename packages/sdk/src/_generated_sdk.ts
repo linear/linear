@@ -465,6 +465,7 @@ export class AgentActivityWebhookPayload {
     this.sourceCommentId = data.sourceCommentId ?? undefined;
     this.updatedAt = data.updatedAt;
     this.userId = data.userId;
+    this.user = new UserChildWebhookPayload(data.user);
   }
 
   /** The ID of the agent session that this activity belongs to. */
@@ -487,6 +488,8 @@ export class AgentActivityWebhookPayload {
   public updatedAt: string;
   /** The ID of the user who created this agent activity. */
   public userId: string;
+  /** The user who created this agent activity. */
+  public user: UserChildWebhookPayload;
 }
 /**
  * A session for agent activities and state management.
@@ -1078,6 +1081,66 @@ export class AsksChannelConnectPayload extends Request {
   }
 }
 /**
+ * Settings for an Asks web form.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AsksWebSettingsFragment response data
+ */
+export class AsksWebSettings extends Request {
+  private _creator?: L.AsksWebSettingsFragment["creator"];
+  private _emailIntakeAddress?: L.AsksWebSettingsFragment["emailIntakeAddress"];
+
+  public constructor(request: LinearRequest, data: L.AsksWebSettingsFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.domain = data.domain ?? undefined;
+    this.id = data.id;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.identityProvider = data.identityProvider ? new IdentityProvider(request, data.identityProvider) : undefined;
+    this._creator = data.creator ?? undefined;
+    this._emailIntakeAddress = data.emailIntakeAddress ?? undefined;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The custom domain for the Asks web form. If null, the default Linear-hosted domain will be used. */
+  public domain?: string | null;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The identity provider for SAML authentication on this Asks web form. */
+  public identityProvider?: IdentityProvider | null;
+  /** The user who created the Asks web settings. */
+  public get creator(): LinearFetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+  }
+  /** The ID of user who created the asks web settings. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
+  /** The email intake address associated with these Asks web settings. */
+  public get emailIntakeAddress(): LinearFetch<EmailIntakeAddress> | undefined {
+    return this._emailIntakeAddress?.id
+      ? new EmailIntakeAddressQuery(this._request).fetch(this._emailIntakeAddress?.id)
+      : undefined;
+  }
+  /** The ID of email intake address associated with these asks web settings. */
+  public get emailIntakeAddressId(): string | undefined {
+    return this._emailIntakeAddress?.id;
+  }
+  /** The organization that the Asks web settings are associated with. */
+  public get organization(): LinearFetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
+  }
+}
+/**
  * Issue attachment (e.g. support ticket, pull request).
  *
  * @param request - function to call the graphql client
@@ -1505,6 +1568,7 @@ export class AuthOrganization extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.deletionRequestedAt = parseDate(data.deletionRequestedAt) ?? undefined;
     this.enabled = data.enabled;
+    this.hideNonPrimaryOrganizations = data.hideNonPrimaryOrganizations;
     this.id = data.id;
     this.logoUrl = data.logoUrl ?? undefined;
     this.name = data.name;
@@ -1526,6 +1590,8 @@ export class AuthOrganization extends Request {
   public deletionRequestedAt?: Date | null;
   /** Whether the organization is enabled. Used as a superuser tool to lock down the org. */
   public enabled: boolean;
+  /** Whether to hide other organizations for new users signing up with email domains claimed by this organization. */
+  public hideNonPrimaryOrganizations: boolean;
   /** The unique identifier of the entity. */
   public id: string;
   /** The organization's logo URL. */
@@ -6398,6 +6464,44 @@ export class GitLabIntegrationCreatePayload extends Request {
   }
 }
 /**
+ * GitLabTestConnectionPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.GitLabTestConnectionPayloadFragment response data
+ */
+export class GitLabTestConnectionPayload extends Request {
+  private _integration?: L.GitLabTestConnectionPayloadFragment["integration"];
+
+  public constructor(request: LinearRequest, data: L.GitLabTestConnectionPayloadFragment) {
+    super(request);
+    this.error = data.error ?? undefined;
+    this.errorResponseBody = data.errorResponseBody ?? undefined;
+    this.errorResponseHeaders = data.errorResponseHeaders ?? undefined;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._integration = data.integration ?? undefined;
+  }
+
+  /** Error message if the connection test failed. */
+  public error?: string | null;
+  /** Response body from GitLab for debugging. */
+  public errorResponseBody?: string | null;
+  /** Response headers from GitLab for debugging (JSON stringified). */
+  public errorResponseHeaders?: string | null;
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The integration that was created or updated. */
+  public get integration(): LinearFetch<Integration> | undefined {
+    return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
+  }
+  /** The ID of integration that was created or updated. */
+  public get integrationId(): string | undefined {
+    return this._integration?.id;
+  }
+}
+/**
  * Metadata for guidance that should be provided to an AI agent.
  *
  * @param data - L.GuidanceRuleWebhookPayloadFragment response data
@@ -9194,6 +9298,75 @@ export class IssueHistoryConnection extends Connection<IssueHistory> {
   }
 }
 /**
+ * An error that occurred during triage rule execution.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssueHistoryTriageRuleErrorFragment response data
+ */
+export class IssueHistoryTriageRuleError extends Request {
+  private _fromTeam?: L.IssueHistoryTriageRuleErrorFragment["fromTeam"];
+  private _toTeam?: L.IssueHistoryTriageRuleErrorFragment["toTeam"];
+
+  public constructor(request: LinearRequest, data: L.IssueHistoryTriageRuleErrorFragment) {
+    super(request);
+    this.conflictForSameChildLabel = data.conflictForSameChildLabel ?? undefined;
+    this.property = data.property ?? undefined;
+    this.conflictingLabels = data.conflictingLabels
+      ? data.conflictingLabels.map(node => new IssueLabel(request, node))
+      : undefined;
+    this.type = data.type;
+    this._fromTeam = data.fromTeam ?? undefined;
+    this._toTeam = data.toTeam ?? undefined;
+  }
+
+  /** Whether the conflict was for the same child label. */
+  public conflictForSameChildLabel?: boolean | null;
+  /** The property that caused the error. */
+  public property?: string | null;
+  /** The conflicting labels. */
+  public conflictingLabels?: IssueLabel[] | null;
+  /** The type of error that occurred. */
+  public type: L.TriageRuleErrorType;
+  /** The team the issue was being moved from. */
+  public get fromTeam(): LinearFetch<Team> | undefined {
+    return this._fromTeam?.id ? new TeamQuery(this._request).fetch(this._fromTeam?.id) : undefined;
+  }
+  /** The ID of team the issue was being moved from. */
+  public get fromTeamId(): string | undefined {
+    return this._fromTeam?.id;
+  }
+  /** The team the issue was being moved to. */
+  public get toTeam(): LinearFetch<Team> | undefined {
+    return this._toTeam?.id ? new TeamQuery(this._request).fetch(this._toTeam?.id) : undefined;
+  }
+  /** The ID of team the issue was being moved to. */
+  public get toTeamId(): string | undefined {
+    return this._toTeam?.id;
+  }
+}
+/**
+ * Metadata about a triage rule that made changes to an issue.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssueHistoryTriageRuleMetadataFragment response data
+ */
+export class IssueHistoryTriageRuleMetadata extends Request {
+  public constructor(request: LinearRequest, data: L.IssueHistoryTriageRuleMetadataFragment) {
+    super(request);
+    this.triageRuleError = data.triageRuleError
+      ? new IssueHistoryTriageRuleError(request, data.triageRuleError)
+      : undefined;
+    this.updatedByTriageRule = data.updatedByTriageRule
+      ? new WorkflowDefinition(request, data.updatedByTriageRule)
+      : undefined;
+  }
+
+  /** The error that occurred, if any. */
+  public triageRuleError?: IssueHistoryTriageRuleError | null;
+  /** The triage rule that triggered the issue update. */
+  public updatedByTriageRule?: WorkflowDefinition | null;
+}
+/**
  * An import job for data from an external service.
  *
  * @param request - function to call the graphql client
@@ -11969,6 +12142,7 @@ export class Organization extends Request {
     this.gitLinkbackDescriptionsEnabled = data.gitLinkbackDescriptionsEnabled;
     this.gitLinkbackMessagesEnabled = data.gitLinkbackMessagesEnabled;
     this.gitPublicLinkbackMessagesEnabled = data.gitPublicLinkbackMessagesEnabled;
+    this.hideNonPrimaryOrganizations = data.hideNonPrimaryOrganizations;
     this.hipaaComplianceEnabled = data.hipaaComplianceEnabled;
     this.id = data.id;
     this.initiativeUpdateReminderFrequencyInWeeks = data.initiativeUpdateReminderFrequencyInWeeks ?? undefined;
@@ -12039,6 +12213,8 @@ export class Organization extends Request {
   public gitLinkbackMessagesEnabled: boolean;
   /** Whether the Git integration linkback messages should be sent to public repositories. */
   public gitPublicLinkbackMessagesEnabled: boolean;
+  /** Whether to hide other organizations for new users signing up with email domains claimed by this organization. */
+  public hideNonPrimaryOrganizations: boolean;
   /** Whether HIPAA compliance is enabled for organization. */
   public hipaaComplianceEnabled: boolean;
   /** The unique identifier of the entity. */
@@ -18498,6 +18674,162 @@ export class WebhookRotateSecretPayload extends Request {
   public success: boolean;
 }
 /**
+ * WorkflowDefinition model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.WorkflowDefinitionFragment response data
+ */
+export class WorkflowDefinition extends Request {
+  private _creator: L.WorkflowDefinitionFragment["creator"];
+  private _customView?: L.WorkflowDefinitionFragment["customView"];
+  private _cycle?: L.WorkflowDefinitionFragment["cycle"];
+  private _initiative?: L.WorkflowDefinitionFragment["initiative"];
+  private _label?: L.WorkflowDefinitionFragment["label"];
+  private _lastUpdatedBy?: L.WorkflowDefinitionFragment["lastUpdatedBy"];
+  private _project?: L.WorkflowDefinitionFragment["project"];
+  private _team?: L.WorkflowDefinitionFragment["team"];
+  private _user?: L.WorkflowDefinitionFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.WorkflowDefinitionFragment) {
+    super(request);
+    this.activities = data.activities;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.conditions = data.conditions ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.description = data.description ?? undefined;
+    this.enabled = data.enabled;
+    this.groupName = data.groupName ?? undefined;
+    this.id = data.id;
+    this.lastExecutedAt = parseDate(data.lastExecutedAt) ?? undefined;
+    this.name = data.name;
+    this.sortOrder = data.sortOrder;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.contextViewType = data.contextViewType ?? undefined;
+    this.trigger = data.trigger;
+    this.triggerType = data.triggerType;
+    this.type = data.type;
+    this.userContextViewType = data.userContextViewType ?? undefined;
+    this._creator = data.creator;
+    this._customView = data.customView ?? undefined;
+    this._cycle = data.cycle ?? undefined;
+    this._initiative = data.initiative ?? undefined;
+    this._label = data.label ?? undefined;
+    this._lastUpdatedBy = data.lastUpdatedBy ?? undefined;
+    this._project = data.project ?? undefined;
+    this._team = data.team ?? undefined;
+    this._user = data.user ?? undefined;
+  }
+
+  /** An array of activities that will be executed as part of the workflow. */
+  public activities: L.Scalars["JSONObject"];
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The conditions that need to be match for the workflow to be triggered. */
+  public conditions?: L.Scalars["JSONObject"] | null;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The description of the workflow. */
+  public description?: string | null;
+  public enabled: boolean;
+  /** The name of the group that the workflow belongs to. */
+  public groupName?: string | null;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The date when the workflow was last executed. */
+  public lastExecutedAt?: Date | null;
+  /** The name of the workflow. */
+  public name: string;
+  /** The sort order of the workflow definition within its siblings. */
+  public sortOrder: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The type of view to which this workflow's context is associated with. */
+  public contextViewType?: L.ContextViewType | null;
+  /** The type of the event that triggers off the workflow. */
+  public trigger: L.WorkflowTrigger;
+  /** The object type (e.g. Issue) that triggers this workflow. */
+  public triggerType: L.WorkflowTriggerType;
+  /** The type of the workflow. */
+  public type: L.WorkflowType;
+  /** The type of user view to which this workflow's context is associated with. */
+  public userContextViewType?: L.UserContextViewType | null;
+  /** The user who created the workflow. */
+  public get creator(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._creator.id);
+  }
+  /** The ID of user who created the workflow. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
+  /** The context custom view associated with the workflow. */
+  public get customView(): LinearFetch<CustomView> | undefined {
+    return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
+  }
+  /** The ID of context custom view associated with the workflow. */
+  public get customViewId(): string | undefined {
+    return this._customView?.id;
+  }
+  /** The contextual cycle view associated with the workflow. */
+  public get cycle(): LinearFetch<Cycle> | undefined {
+    return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
+  }
+  /** The ID of contextual cycle view associated with the workflow. */
+  public get cycleId(): string | undefined {
+    return this._cycle?.id;
+  }
+  /** The contextual initiative view associated with the workflow. */
+  public get initiative(): LinearFetch<Initiative> | undefined {
+    return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
+  }
+  /** The ID of contextual initiative view associated with the workflow. */
+  public get initiativeId(): string | undefined {
+    return this._initiative?.id;
+  }
+  /** The contextual label view associated with the workflow. */
+  public get label(): LinearFetch<IssueLabel> | undefined {
+    return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
+  }
+  /** The ID of contextual label view associated with the workflow. */
+  public get labelId(): string | undefined {
+    return this._label?.id;
+  }
+  /** The user who last updated the workflow. */
+  public get lastUpdatedBy(): LinearFetch<User> | undefined {
+    return this._lastUpdatedBy?.id ? new UserQuery(this._request).fetch(this._lastUpdatedBy?.id) : undefined;
+  }
+  /** The ID of user who last updated the workflow. */
+  public get lastUpdatedById(): string | undefined {
+    return this._lastUpdatedBy?.id;
+  }
+  /** The contextual project view associated with the workflow. */
+  public get project(): LinearFetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The ID of contextual project view associated with the workflow. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
+  }
+  /** The team associated with the workflow. If not set, the workflow is associated with the entire organization. */
+  public get team(): LinearFetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+  }
+  /** The ID of team associated with the workflow. if not set, the workflow is associated with the entire organization. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
+  }
+  /** The contextual user view associated with the workflow. */
+  public get user(): LinearFetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+  /** The ID of contextual user view associated with the workflow. */
+  public get userId(): string | undefined {
+    return this._user?.id;
+  }
+}
+/**
  * A state in a team workflow.
  *
  * @param request - function to call the graphql client
@@ -18872,6 +19204,35 @@ export class ApplicationInfoQuery extends Request {
     const data = response.applicationInfo;
 
     return new Application(this._request, data);
+  }
+}
+
+/**
+ * A fetchable AsksWebSetting Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AsksWebSettingQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AsksWebSetting query and return a AsksWebSettings
+   *
+   * @param id - required id to pass to asksWebSetting
+   * @returns parsed response from AsksWebSettingQuery
+   */
+  public async fetch(id: string): LinearFetch<AsksWebSettings> {
+    const response = await this._request<L.AsksWebSettingQuery, L.AsksWebSettingQueryVariables>(
+      L.AsksWebSettingDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.asksWebSetting;
+
+    return new AsksWebSettings(this._request, data);
   }
 }
 
@@ -22412,6 +22773,37 @@ export class UserQuery extends Request {
     const data = response.user;
 
     return new User(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UserSessions Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSessionsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSessions query and return a AuthenticationSessionResponse list
+   *
+   * @param id - required id to pass to userSessions
+   * @returns parsed response from UserSessionsQuery
+   */
+  public async fetch(id: string): LinearFetch<AuthenticationSessionResponse[]> {
+    const response = await this._request<L.UserSessionsQuery, L.UserSessionsQueryVariables>(
+      L.UserSessionsDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.userSessions;
+
+    return data.map(node => {
+      return new AuthenticationSessionResponse(this._request, node);
+    });
   }
 }
 
@@ -26187,6 +26579,35 @@ export class IntegrationGitlabConnectMutation extends Request {
     const data = response.integrationGitlabConnect;
 
     return new GitLabIntegrationCreatePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IntegrationGitlabTestConnection Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationGitlabTestConnectionMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationGitlabTestConnection mutation and return a GitLabTestConnectionPayload
+   *
+   * @param integrationId - required integrationId to pass to integrationGitlabTestConnection
+   * @returns parsed response from IntegrationGitlabTestConnectionMutation
+   */
+  public async fetch(integrationId: string): LinearFetch<GitLabTestConnectionPayload> {
+    const response = await this._request<
+      L.IntegrationGitlabTestConnectionMutation,
+      L.IntegrationGitlabTestConnectionMutationVariables
+    >(L.IntegrationGitlabTestConnectionDocument.toString(), {
+      integrationId,
+    });
+    const data = response.integrationGitlabTestConnection;
+
+    return new GitLabTestConnectionPayload(this._request, data);
   }
 }
 
@@ -30895,6 +31316,66 @@ export class UserPromoteMemberMutation extends Request {
 }
 
 /**
+ * A fetchable UserRevokeAllSessions Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserRevokeAllSessionsMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserRevokeAllSessions mutation and return a UserAdminPayload
+   *
+   * @param id - required id to pass to userRevokeAllSessions
+   * @returns parsed response from UserRevokeAllSessionsMutation
+   */
+  public async fetch(id: string): LinearFetch<UserAdminPayload> {
+    const response = await this._request<L.UserRevokeAllSessionsMutation, L.UserRevokeAllSessionsMutationVariables>(
+      L.UserRevokeAllSessionsDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.userRevokeAllSessions;
+
+    return new UserAdminPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UserRevokeSession Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserRevokeSessionMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserRevokeSession mutation and return a UserAdminPayload
+   *
+   * @param id - required id to pass to userRevokeSession
+   * @param sessionId - required sessionId to pass to userRevokeSession
+   * @returns parsed response from UserRevokeSessionMutation
+   */
+  public async fetch(id: string, sessionId: string): LinearFetch<UserAdminPayload> {
+    const response = await this._request<L.UserRevokeSessionMutation, L.UserRevokeSessionMutationVariables>(
+      L.UserRevokeSessionDocument.toString(),
+      {
+        id,
+        sessionId,
+      }
+    );
+    const data = response.userRevokeSession;
+
+    return new UserAdminPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable UserSettingsFlagsReset Mutation
  *
  * @param request - function to call the graphql client
@@ -31420,6 +31901,38 @@ export class AgentSession_ActivitiesQuery extends Request {
         ),
       data
     );
+  }
+}
+
+/**
+ * A fetchable AsksWebSetting_IdentityProvider Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to asksWebSetting
+ */
+export class AsksWebSetting_IdentityProviderQuery extends Request {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the AsksWebSetting_IdentityProvider query and return a IdentityProvider
+   *
+   * @returns parsed response from AsksWebSetting_IdentityProviderQuery
+   */
+  public async fetch(): LinearFetch<IdentityProvider | undefined> {
+    const response = await this._request<
+      L.AsksWebSetting_IdentityProviderQuery,
+      L.AsksWebSetting_IdentityProviderQueryVariables
+    >(L.AsksWebSetting_IdentityProviderDocument.toString(), {
+      id: this._id,
+    });
+    const data = response.asksWebSetting.identityProvider;
+
+    return data ? new IdentityProvider(this._request, data) : undefined;
   }
 }
 
@@ -38367,6 +38880,15 @@ export class LinearSdk extends Request {
     return new ApplicationInfoQuery(this._request).fetch(clientId);
   }
   /**
+   * Asks web form settings by ID.
+   *
+   * @param id - required id to pass to asksWebSetting
+   * @returns AsksWebSettings
+   */
+  public asksWebSetting(id: string): LinearFetch<AsksWebSettings> {
+    return new AsksWebSettingQuery(this._request).fetch(id);
+  }
+  /**
    * One specific issue attachment.
    * [Deprecated] 'url' can no longer be used as the 'id' parameter. Use 'attachmentsForUrl' instead
    *
@@ -39426,6 +39948,15 @@ export class LinearSdk extends Request {
    */
   public user(id: string): LinearFetch<User> {
     return new UserQuery(this._request).fetch(id);
+  }
+  /**
+   * Lists the sessions of a user. Can only be called by an admin or owner.
+   *
+   * @param id - required id to pass to userSessions
+   * @returns AuthenticationSessionResponse[]
+   */
+  public userSessions(id: string): LinearFetch<AuthenticationSessionResponse[]> {
+    return new UserSessionsQuery(this._request).fetch(id);
   }
   /**
    * The user's settings.
@@ -40721,6 +41252,15 @@ export class LinearSdk extends Request {
    */
   public integrationGitlabConnect(accessToken: string, gitlabUrl: string): LinearFetch<GitLabIntegrationCreatePayload> {
     return new IntegrationGitlabConnectMutation(this._request).fetch(accessToken, gitlabUrl);
+  }
+  /**
+   * Tests connectivity to a self-hosted GitLab instance and clears auth errors if successful.
+   *
+   * @param integrationId - required integrationId to pass to integrationGitlabTestConnection
+   * @returns GitLabTestConnectionPayload
+   */
+  public integrationGitlabTestConnection(integrationId: string): LinearFetch<GitLabTestConnectionPayload> {
+    return new IntegrationGitlabTestConnectionMutation(this._request).fetch(integrationId);
   }
   /**
    * Integrates the organization with Gong.
@@ -42346,6 +42886,25 @@ export class LinearSdk extends Request {
     return new UserPromoteMemberMutation(this._request).fetch(id);
   }
   /**
+   * Revokes a user's sessions. Can only be called by an admin or owner.
+   *
+   * @param id - required id to pass to userRevokeAllSessions
+   * @returns UserAdminPayload
+   */
+  public userRevokeAllSessions(id: string): LinearFetch<UserAdminPayload> {
+    return new UserRevokeAllSessionsMutation(this._request).fetch(id);
+  }
+  /**
+   * Revokes a specific session for a user. Can only be called by an admin or owner.
+   *
+   * @param id - required id to pass to userRevokeSession
+   * @param sessionId - required sessionId to pass to userRevokeSession
+   * @returns UserAdminPayload
+   */
+  public userRevokeSession(id: string, sessionId: string): LinearFetch<UserAdminPayload> {
+    return new UserRevokeSessionMutation(this._request).fetch(id, sessionId);
+  }
+  /**
    * Resets user's setting flags.
    *
    * @param variables - variables to pass into the UserSettingsFlagsResetMutation
@@ -42556,6 +43115,7 @@ export {
   TeamRetirementSubTeamHandling,
   TeamRoleType,
   TriageResponsibilityAction,
+  TriageRuleErrorType,
   UserContextViewType,
   UserFlagType,
   UserFlagUpdateOperation,
@@ -42565,4 +43125,7 @@ export {
   UserSettingsThemePreset,
   ViewPreferencesType,
   ViewType,
+  WorkflowTrigger,
+  WorkflowTriggerType,
+  WorkflowType,
 } from "./_generated_documents.js";
