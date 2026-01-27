@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.2.0
+
+### Minor Changes
+
+- 78f6cba: Added support for generating mock values for GraphQL input object types (with proper handling of required fields, nested objects, enums, and list types) in test mock generation.
+
 ## 2.1.3
 
 ### Patch Changes

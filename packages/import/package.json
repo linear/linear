@@ -1,7 +1,7 @@
 {
   "name": "@linear/import",
   "description": "Import helpers for uploading issues to Linear",
-  "version": "3.0.6",
+  "version": "3.0.7",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
   "type": "module",
