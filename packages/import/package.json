@@ -35,7 +35,7 @@
     "inquirer": "7.3.3",
     "inquirer-file-path": "1.0.1",
     "jira2md": "2.0.4",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "node-fetch": "2.6.1",
     "ora": "^5.4.1"
   },
