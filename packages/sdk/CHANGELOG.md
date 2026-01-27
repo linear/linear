@@ -1,5 +1,111 @@
 # Change Log
 
+## 72.0.0
+
+### Major Changes
+
+- 78f6cba: feat(schema): [breaking] Type 'AsksWebFormsAuthResponse' was removed (AsksWebFormsAuthResponse)
+
+  feat(schema): [breaking] Type 'ReleaseCreateInput' was removed (ReleaseCreateInput)
+
+  feat(schema): [breaking] Field 'asksWebFormsAuth' was removed from object type 'Mutation' (Mutation.asksWebFormsAuth)
+
+  feat(schema): [breaking] Field 'releaseCreate' was removed from object type 'Mutation' (Mutation.releaseCreate)
+
+  feat(schema): [dangerous] Input field 'includePaths' was added to input object type 'ReleaseDebugSinkInput' (ReleaseDebugSinkInput.includePaths)
+
+  feat(schema): [dangerous] Input field 'includePathPatterns' was added to input object type 'ReleasePipelineCreateInput' (ReleasePipelineCreateInput.includePathPatterns)
+
+  feat(schema): [dangerous] Input field 'includePathPatterns' was added to input object type 'ReleasePipelineUpdateInput' (ReleasePipelineUpdateInput.includePathPatterns)
+
+  feat(schema): [non_breaking] Type 'ReleaseSyncInput' was added (ReleaseSyncInput)
+
+  feat(schema): [non_breaking] Type 'WebhookRotateSecretPayload' was added (WebhookRotateSecretPayload)
+
+  feat(schema): [non_breaking] Field 'releaseSync' was added to object type 'Mutation' (Mutation.releaseSync)
+
+  feat(schema): [non_breaking] Field 'webhookRotateSecret' was added to object type 'Mutation' (Mutation.webhookRotateSecret)
+
+  feat(schema): [non_breaking] Field 'Query.issueRepositorySuggestions' description changed from '[Internal] Returns code repositories that are most likely to be relevant for implementing an issue.' to 'Returns code repositories that are most likely to be relevant for implementing an issue.' (Query.issueRepositorySuggestions)
+
+  feat(schema): [non_breaking] Field 'includePathPatterns' was added to object type 'ReleasePipeline' (ReleasePipeline.includePathPatterns)
+
+### Minor Changes
+
+- b3a1ed2: feat(schema): [dangerous] Input field 'releases' was added to input object type 'IssueCollectionFilter' (IssueCollectionFilter.releases)
+
+  feat(schema): [dangerous] Input field 'releases' was added to input object type 'IssueFilter' (IssueFilter.releases)
+
+  feat(schema): [dangerous] Input field 'releases' was added to input object type 'NullableIssueFilter' (NullableIssueFilter.releases)
+
+  feat(schema): [dangerous] Input field 'integrationCreationRole' was added to input object type 'OrganizationSecuritySettingsInput' (OrganizationSecuritySettingsInput.integrationCreationRole)
+
+  feat(schema): [dangerous] Input field 'enableAgent' was added to input object type 'SlackAsksSettingsInput' (SlackAsksSettingsInput.enableAgent)
+
+  feat(schema): [dangerous] Input field 'enableLinearAgentWorkflowAccess' was added to input object type 'SlackAsksSettingsInput' (SlackAsksSettingsInput.enableLinearAgentWorkflowAccess)
+
+  feat(schema): [non_breaking] Type 'AsksWebSettings' was added (AsksWebSettings)
+
+  feat(schema): [non_breaking] Type 'GitLabTestConnectionPayload' was added (GitLabTestConnectionPayload)
+
+  feat(schema): [non_breaking] Type 'IssueHistoryTriageRuleError' was added (IssueHistoryTriageRuleError)
+
+  feat(schema): [non_breaking] Type 'IssueHistoryTriageRuleMetadata' was added (IssueHistoryTriageRuleMetadata)
+
+  feat(schema): [non_breaking] Type 'ReleaseCollectionFilter' was added (ReleaseCollectionFilter)
+
+  feat(schema): [non_breaking] Type 'ReleaseFilter' was added (ReleaseFilter)
+
+  feat(schema): [non_breaking] Type 'ReleasePipelineFilter' was added (ReleasePipelineFilter)
+
+  feat(schema): [non_breaking] Type 'ReleaseUpdateByPipelineInput' was added (ReleaseUpdateByPipelineInput)
+
+  feat(schema): [non_breaking] Type 'TriageRuleErrorType' was added (TriageRuleErrorType)
+
+  feat(schema): [non_breaking] Type 'WorkflowDefinition' was added (WorkflowDefinition)
+
+  feat(schema): [non_breaking] Type 'WorkflowTrigger' was added (WorkflowTrigger)
+
+  feat(schema): [non_breaking] Type 'WorkflowTriggerType' was added (WorkflowTriggerType)
+
+  feat(schema): [non_breaking] Type 'WorkflowType' was added (WorkflowType)
+
+  feat(schema): [non_breaking] Field 'user' was added to object type 'AgentActivityWebhookPayload' (AgentActivityWebhookPayload.user)
+
+  feat(schema): [non_breaking] Field 'hideNonPrimaryOrganizations' was added to object type 'AuthOrganization' (AuthOrganization.hideNonPrimaryOrganizations)
+
+  feat(schema): [non_breaking] Field 'hideInLinear' was added to object type 'Comment' (Comment.hideInLinear)
+
+  feat(schema): [non_breaking] Field 'triageRuleMetadata' was added to object type 'IssueHistory' (IssueHistory.triageRuleMetadata)
+
+  feat(schema): [non_breaking] Field 'integrationGitlabTestConnection' was added to object type 'Mutation' (Mutation.integrationGitlabTestConnection)
+
+  feat(schema): [non_breaking] Field 'releaseUpdateByPipeline' was added to object type 'Mutation' (Mutation.releaseUpdateByPipeline)
+
+  feat(schema): [non_breaking] Field 'userRevokeAllSessions' was added to object type 'Mutation' (Mutation.userRevokeAllSessions)
+
+  feat(schema): [non_breaking] Field 'userRevokeSession' was added to object type 'Mutation' (Mutation.userRevokeSession)
+
+  feat(schema): [non_breaking] Field 'Mutation.integrationSlackWorkflowAccessUpdate' description changed from '[Internal] Enables Linear Agent Slack workflow access for a Slack integration.' to '[Internal] Enables Linear Agent Slack workflow access for a Slack or Slack Asks integration.' (Mutation.integrationSlackWorkflowAccessUpdate)
+
+  feat(schema): [non_breaking] Field 'hideNonPrimaryOrganizations' was added to object type 'Organization' (Organization.hideNonPrimaryOrganizations)
+
+  feat(schema): [non_breaking] Field 'asksWebSetting' was added to object type 'Query' (Query.asksWebSetting)
+
+  feat(schema): [non_breaking] Field 'userSessions' was added to object type 'Query' (Query.userSessions)
+
+- dbbaa78: feat(schema): [dangerous] Input field 'version' was added to input object type 'ReleaseCompleteInput' (ReleaseCompleteInput.version)
+
+  feat(schema): [non_breaking] Type 'ReleaseCreateInput' was added (ReleaseCreateInput)
+
+  feat(schema): [non_breaking] Field 'releaseCreate' was added to object type 'Mutation' (Mutation.releaseCreate)
+
+  feat(schema): [non_breaking] Field 'Mutation.releaseComplete' description changed from '[ALPHA] Marks the most recent started release for a pipeline as completed.' to '[ALPHA] Marks a release as completed. If version is provided, completes that specific release; otherwise completes the most recent started release.' (Mutation.releaseComplete)
+
+  feat(schema): [non_breaking] Description for argument 'input' on field 'Mutation.releaseComplete' changed from 'The input containing the pipeline ID.' to 'The input containing the pipeline ID and optional version.' (Mutation.releaseComplete.input)
+
+  feat(schema): [non_breaking] Input field 'ReleaseCompleteInput.pipelineId' description changed from 'The identifier of the pipeline to mark the latest started release as completed.' to 'The identifier of the pipeline to mark a release as completed.' (ReleaseCompleteInput.pipelineId)
+
 ## 71.0.0
 
 ### Major Changes
