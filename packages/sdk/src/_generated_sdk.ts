@@ -521,6 +521,7 @@ export class AgentSession extends Request {
     this.summary = data.summary ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url ?? undefined;
+    this.externalLinks = data.externalLinks.map(node => new AgentSessionExternalLink(request, node));
     this.status = data.status;
     this.type = data.type ?? undefined;
     this._appUser = data.appUser;
@@ -562,6 +563,8 @@ export class AgentSession extends Request {
   public updatedAt: Date;
   /** Agent session URL. */
   public url?: string | null;
+  /** External links associated with this session. */
+  public externalLinks: AgentSessionExternalLink[];
   /** The current status of the agent session. */
   public status: L.AgentSessionStatus;
   /** [DEPRECATED] The type of the agent session. */
@@ -694,6 +697,24 @@ export class AgentSessionEventWebhookPayload {
   public agentActivity?: AgentActivityWebhookPayload | null;
   /** The agent session that the event belongs to. */
   public agentSession: AgentSessionWebhookPayload;
+}
+/**
+ * An external link associated with an agent session.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentSessionExternalLinkFragment response data
+ */
+export class AgentSessionExternalLink extends Request {
+  public constructor(request: LinearRequest, data: L.AgentSessionExternalLinkFragment) {
+    super(request);
+    this.label = data.label;
+    this.url = data.url;
+  }
+
+  /** Label for the link. */
+  public label: string;
+  /** The URL of the external resource. */
+  public url: string;
 }
 /**
  * AgentSessionPayload model
@@ -1627,6 +1648,7 @@ export class AuthResolverResponse extends Request {
     this.email = data.email;
     this.id = data.id;
     this.lastUsedOrganizationId = data.lastUsedOrganizationId ?? undefined;
+    this.service = data.service ?? undefined;
     this.token = data.token ?? undefined;
     this.availableOrganizations = data.availableOrganizations
       ? data.availableOrganizations.map(node => new AuthOrganization(request, node))
@@ -1646,6 +1668,8 @@ export class AuthResolverResponse extends Request {
   public id: string;
   /** ID of the organization last accessed by the user. */
   public lastUsedOrganizationId?: string | null;
+  /** The authentication service used for the current session (e.g., google, email, saml). */
+  public service?: string | null;
   /** Application token. */
   public token?: string | null;
   /** List of organizations allowing this user account to join automatically. */
@@ -16383,6 +16407,56 @@ export class SuccessPayload extends Request {
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
+}
+/**
+ * An AI-generated summary.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.SummaryFragment response data
+ */
+export class Summary extends Request {
+  private _issue: L.SummaryFragment["issue"];
+
+  public constructor(request: LinearRequest, data: L.SummaryFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.content = data.content;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.evalLogId = data.evalLogId ?? undefined;
+    this.generatedAt = parseDate(data.generatedAt) ?? new Date();
+    this.id = data.id;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.generationStatus = data.generationStatus;
+    this._issue = data.issue;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The summary content as a Prosemirror document. */
+  public content: L.Scalars["JSONObject"];
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The evaluation log id for this summary generation. */
+  public evalLogId?: string | null;
+  /** The time at which the summary was generated. */
+  public generatedAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The generation status of the summary. */
+  public generationStatus: L.SummaryGenerationStatus;
+  /** The issue this summary belongs to. */
+  public get issue(): LinearFetch<Issue> | undefined {
+    return new IssueQuery(this._request).fetch(this._issue.id);
+  }
+  /** The ID of issue this summary belongs to. */
+  public get issueId(): string | undefined {
+    return this._issue?.id;
+  }
 }
 /**
  * A comment thread that is synced with an external source.
@@ -43112,6 +43186,7 @@ export {
   SendStrategy,
   SlaStatus,
   SlackChannelType,
+  SummaryGenerationStatus,
   TeamRetirementSubTeamHandling,
   TeamRoleType,
   TriageResponsibilityAction,
