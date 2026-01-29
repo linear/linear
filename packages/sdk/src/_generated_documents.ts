@@ -317,7 +317,12 @@ export type AgentSession = Node & {
    * @deprecated Use externalUrls instead.
    */
   externalLink?: Maybe<Scalars["String"]>;
-  /** URLs of external resources associated with this session. */
+  /** External links associated with this session. */
+  externalLinks: Array<AgentSessionExternalLink>;
+  /**
+   * URLs of external resources associated with this session.
+   * @deprecated Use externalLinks instead.
+   */
   externalUrls: Scalars["JSON"];
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
@@ -446,6 +451,15 @@ export type AgentSessionEventWebhookPayload = {
   webhookId: Scalars["String"];
   /** Unix timestamp in milliseconds when the webhook was sent. */
   webhookTimestamp: Scalars["Float"];
+};
+
+/** An external link associated with an agent session. */
+export type AgentSessionExternalLink = {
+  __typename?: "AgentSessionExternalLink";
+  /** Label for the link. */
+  label: Scalars["String"];
+  /** The URL of the external resource. */
+  url: Scalars["String"];
 };
 
 /** Input for an external URL associated with an agent session. */
@@ -1146,6 +1160,8 @@ export type AuthResolverResponse = {
   lockedOrganizations?: Maybe<Array<AuthOrganization>>;
   /** List of locked users that are locked by login restrictions */
   lockedUsers: Array<AuthUser>;
+  /** The authentication service used for the current session (e.g., google, email, saml). */
+  service?: Maybe<Scalars["String"]>;
   /**
    * Application token.
    * @deprecated Deprecated and not used anymore. Never populated.
@@ -6925,6 +6941,8 @@ export type Issue = Node & {
   suggestions: IssueSuggestionConnection;
   /** [Internal] The time at which the most recent suggestions for this issue were generated. */
   suggestionsGeneratedAt?: Maybe<Scalars["DateTime"]>;
+  /** [Internal] AI-generated activity summary for this issue. */
+  summary?: Maybe<Summary>;
   /** The external services the issue is synced with. */
   syncedWith?: Maybe<Array<ExternalEntityInfo>>;
   /** The team that the issue is associated with. */
@@ -8636,6 +8654,8 @@ export type IssueSearchResult = Node & {
   suggestions: IssueSuggestionConnection;
   /** [Internal] The time at which the most recent suggestions for this issue were generated. */
   suggestionsGeneratedAt?: Maybe<Scalars["DateTime"]>;
+  /** [Internal] AI-generated activity summary for this issue. */
+  summary?: Maybe<Summary>;
   /** The external services the issue is synced with. */
   syncedWith?: Maybe<Array<ExternalEntityInfo>>;
   /** The team that the issue is associated with. */
@@ -10105,6 +10125,8 @@ export type Mutation = {
   releaseComplete: ReleasePayload;
   /** [ALPHA] Creates a new release. */
   releaseCreate: ReleasePayload;
+  /** [ALPHA] Deletes a release. */
+  releaseDelete: DeletePayload;
   /** [ALPHA] Archives a release pipeline. */
   releasePipelineArchive: ReleasePipelineArchivePayload;
   /** [ALPHA] Creates a new release pipeline. */
@@ -11538,6 +11560,10 @@ export type MutationReleaseCompleteArgs = {
 
 export type MutationReleaseCreateArgs = {
   input: ReleaseCreateInput;
+};
+
+export type MutationReleaseDeleteArgs = {
+  id: Scalars["String"];
 };
 
 export type MutationReleasePipelineArchiveArgs = {
@@ -13716,6 +13742,8 @@ export type OrganizationUpdateInput = {
   gitLinkbackMessagesEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** Whether the Git integration linkback messages should be sent for public repositories. */
   gitPublicLinkbackMessagesEnabled?: InputMaybe<Scalars["Boolean"]>;
+  /** Whether to hide other workspaces for new users signing up with email domains claimed by this organization. */
+  hideNonPrimaryOrganizations?: InputMaybe<Scalars["Boolean"]>;
   /** Whether HIPAA compliance is enabled for organization. */
   hipaaComplianceEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** [ALPHA] The n-weekly frequency at which to prompt for initiative updates. */
@@ -18130,6 +18158,8 @@ export type ReleaseCollectionFilter = {
   pipeline?: InputMaybe<ReleasePipelineFilter>;
   /** Filters that needs to be matched by some releases. */
   some?: InputMaybe<ReleaseFilter>;
+  /** Filters that the release's stage must satisfy. */
+  stage?: InputMaybe<ReleaseStageFilter>;
   /** Comparator for the updated at date. */
   updatedAt?: InputMaybe<DateComparator>;
 };
@@ -18201,6 +18231,8 @@ export type ReleaseFilter = {
   or?: InputMaybe<Array<ReleaseFilter>>;
   /** Filters that the release's pipeline must satisfy. */
   pipeline?: InputMaybe<ReleasePipelineFilter>;
+  /** Filters that the release's stage must satisfy. */
+  stage?: InputMaybe<ReleaseStageFilter>;
   /** Comparator for the updated at date. */
   updatedAt?: InputMaybe<DateComparator>;
 };
@@ -18420,6 +18452,24 @@ export type ReleaseStageEdge = {
   node: ReleaseStage;
 };
 
+/** [ALPHA] Release stage filtering options. */
+export type ReleaseStageFilter = {
+  /** Compound filters, all of which need to be matched by the stage. */
+  and?: InputMaybe<Array<ReleaseStageFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: InputMaybe<DateComparator>;
+  /** Comparator for the identifier. */
+  id?: InputMaybe<IdComparator>;
+  /** Comparator for the stage name. */
+  name?: InputMaybe<StringComparator>;
+  /** Compound filters, one of which need to be matched by the stage. */
+  or?: InputMaybe<Array<ReleaseStageFilter>>;
+  /** Comparator for the stage type. */
+  type?: InputMaybe<ReleaseStageTypeComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: InputMaybe<DateComparator>;
+};
+
 export type ReleaseStagePayload = {
   __typename?: "ReleaseStagePayload";
   /** The identifier of the last sync operation. */
@@ -18437,6 +18487,20 @@ export enum ReleaseStageType {
   Planned = "planned",
   Started = "started",
 }
+
+/** [ALPHA] Comparator for release stage type. */
+export type ReleaseStageTypeComparator = {
+  /** Equals constraint. */
+  eq?: InputMaybe<ReleaseStageType>;
+  /** In-array constraint. */
+  in?: InputMaybe<Array<ReleaseStageType>>;
+  /** Not-equals constraint. */
+  neq?: InputMaybe<ReleaseStageType>;
+  /** Not-in-array constraint. */
+  nin?: InputMaybe<Array<ReleaseStageType>>;
+  /** Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values. */
+  null?: InputMaybe<Scalars["Boolean"]>;
+};
 
 export type ReleaseStageUpdateInput = {
   /** The UI color of the stage as a HEX string. */
@@ -19282,6 +19346,39 @@ export type SuccessPayload = {
   /** Whether the operation was successful. */
   success: Scalars["Boolean"];
 };
+
+/** An AI-generated summary. */
+export type Summary = Node & {
+  __typename?: "Summary";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The summary content as a Prosemirror document. */
+  content: Scalars["JSONObject"];
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The evaluation log id for this summary generation. */
+  evalLogId?: Maybe<Scalars["String"]>;
+  /** The time at which the summary was generated. */
+  generatedAt: Scalars["DateTime"];
+  /** The generation status of the summary. */
+  generationStatus: SummaryGenerationStatus;
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The issue this summary belongs to. */
+  issue: Issue;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+};
+
+/** The generation status of a summary. */
+export enum SummaryGenerationStatus {
+  Completed = "completed",
+  Failed = "failed",
+  Pending = "pending",
+}
 
 /** A comment thread that is synced with an external source. */
 export type SyncedExternalThread = {
@@ -24236,6 +24333,7 @@ export type AgentSessionFragment = { __typename: "AgentSession" } & Pick<
   | "externalUrls"
   | "type"
 > & {
+    externalLinks: Array<{ __typename: "AgentSessionExternalLink" } & Pick<AgentSessionExternalLink, "label" | "url">>;
     appUser: { __typename?: "User" } & Pick<User, "id">;
     sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
     comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
@@ -24661,6 +24759,11 @@ export type AiPromptRulesFragment = { __typename: "AiPromptRules" } & Pick<
   "updatedAt" | "archivedAt" | "createdAt" | "id"
 > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
 
+export type SummaryFragment = { __typename: "Summary" } & Pick<
+  Summary,
+  "evalLogId" | "generationStatus" | "updatedAt" | "content" | "archivedAt" | "createdAt" | "generatedAt" | "id"
+> & { issue: { __typename?: "Issue" } & Pick<Issue, "id"> };
+
 export type AgentActivityFragment = { __typename: "AgentActivity" } & Pick<
   AgentActivity,
   "signal" | "sourceMetadata" | "signalMetadata" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "ephemeral"
@@ -24753,6 +24856,11 @@ export type IssueHistoryTriageRuleErrorFragment = { __typename: "IssueHistoryTri
 export type ExternalUserFragment = { __typename: "ExternalUser" } & Pick<
   ExternalUser,
   "avatarUrl" | "displayName" | "email" | "name" | "updatedAt" | "lastSeen" | "archivedAt" | "createdAt" | "id"
+>;
+
+export type AgentSessionExternalLinkFragment = { __typename: "AgentSessionExternalLink" } & Pick<
+  AgentSessionExternalLink,
+  "label" | "url"
 >;
 
 export type EntityExternalLinkFragment = { __typename: "EntityExternalLink" } & Pick<
@@ -27756,6 +27864,9 @@ export type AgentSessionConnectionFragment = { __typename: "AgentSessionConnecti
       | "externalUrls"
       | "type"
     > & {
+        externalLinks: Array<
+          { __typename: "AgentSessionExternalLink" } & Pick<AgentSessionExternalLink, "label" | "url">
+        >;
         appUser: { __typename?: "User" } & Pick<User, "id">;
         sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
         comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
@@ -27876,7 +27987,7 @@ export type AuditEntryTypeFragment = { __typename: "AuditEntryType" } & Pick<Aud
 
 export type AuthResolverResponseFragment = { __typename: "AuthResolverResponse" } & Pick<
   AuthResolverResponse,
-  "token" | "email" | "lastUsedOrganizationId" | "allowDomainAccess" | "id"
+  "token" | "email" | "lastUsedOrganizationId" | "allowDomainAccess" | "service" | "id"
 > & {
     users: Array<
       { __typename: "AuthUser" } & Pick<
@@ -30104,6 +30215,8 @@ type Node_SemanticSearchResult_Fragment = { __typename: "SemanticSearchResult" }
 
 type Node_SesDomainIdentity_Fragment = { __typename: "SesDomainIdentity" } & Pick<SesDomainIdentity, "id">;
 
+type Node_Summary_Fragment = { __typename: "Summary" } & Pick<Summary, "id">;
+
 type Node_Team_Fragment = { __typename: "Team" } & Pick<Team, "id">;
 
 type Node_TeamMembership_Fragment = { __typename: "TeamMembership" } & Pick<TeamMembership, "id">;
@@ -30223,6 +30336,7 @@ export type NodeFragment =
   | Node_RoadmapToProject_Fragment
   | Node_SemanticSearchResult_Fragment
   | Node_SesDomainIdentity_Fragment
+  | Node_Summary_Fragment
   | Node_Team_Fragment
   | Node_TeamMembership_Fragment
   | Node_TeamNotificationSubscription_Fragment
@@ -33044,6 +33158,9 @@ export type AgentSessionQuery = { __typename?: "Query" } & {
     | "externalUrls"
     | "type"
   > & {
+      externalLinks: Array<
+        { __typename: "AgentSessionExternalLink" } & Pick<AgentSessionExternalLink, "label" | "url">
+      >;
       appUser: { __typename?: "User" } & Pick<User, "id">;
       sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
       comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
@@ -33129,6 +33246,9 @@ export type AgentSessionsQuery = { __typename?: "Query" } & {
         | "externalUrls"
         | "type"
       > & {
+          externalLinks: Array<
+            { __typename: "AgentSessionExternalLink" } & Pick<AgentSessionExternalLink, "label" | "url">
+          >;
           appUser: { __typename?: "User" } & Pick<User, "id">;
           sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
           comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
@@ -34434,7 +34554,7 @@ export type AvailableUsersQueryVariables = Exact<{ [key: string]: never }>;
 export type AvailableUsersQuery = { __typename?: "Query" } & {
   availableUsers: { __typename: "AuthResolverResponse" } & Pick<
     AuthResolverResponse,
-    "token" | "email" | "lastUsedOrganizationId" | "allowDomainAccess" | "id"
+    "token" | "email" | "lastUsedOrganizationId" | "allowDomainAccess" | "service" | "id"
   > & {
       users: Array<
         { __typename: "AuthUser" } & Pick<
@@ -48484,7 +48604,7 @@ export type EmailTokenUserAccountAuthMutationVariables = Exact<{
 export type EmailTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
   emailTokenUserAccountAuth: { __typename: "AuthResolverResponse" } & Pick<
     AuthResolverResponse,
-    "token" | "email" | "lastUsedOrganizationId" | "allowDomainAccess" | "id"
+    "token" | "email" | "lastUsedOrganizationId" | "allowDomainAccess" | "service" | "id"
   > & {
       users: Array<
         { __typename: "AuthUser" } & Pick<
@@ -48819,7 +48939,7 @@ export type GoogleUserAccountAuthMutationVariables = Exact<{
 export type GoogleUserAccountAuthMutation = { __typename?: "Mutation" } & {
   googleUserAccountAuth: { __typename: "AuthResolverResponse" } & Pick<
     AuthResolverResponse,
-    "token" | "email" | "lastUsedOrganizationId" | "allowDomainAccess" | "id"
+    "token" | "email" | "lastUsedOrganizationId" | "allowDomainAccess" | "service" | "id"
   > & {
       users: Array<
         { __typename: "AuthUser" } & Pick<
@@ -54823,7 +54943,7 @@ export type SamlTokenUserAccountAuthMutationVariables = Exact<{
 export type SamlTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
   samlTokenUserAccountAuth: { __typename: "AuthResolverResponse" } & Pick<
     AuthResolverResponse,
-    "token" | "email" | "lastUsedOrganizationId" | "allowDomainAccess" | "id"
+    "token" | "email" | "lastUsedOrganizationId" | "allowDomainAccess" | "service" | "id"
   > & {
       users: Array<
         { __typename: "AuthUser" } & Pick<
@@ -57966,6 +58086,25 @@ export const UserNotificationSubscriptionFragmentDoc = new TypedDocumentString(
     `,
   { fragmentName: "UserNotificationSubscription" }
 ) as unknown as TypedDocumentString<UserNotificationSubscriptionFragment, unknown>;
+export const SummaryFragmentDoc = new TypedDocumentString(
+  `
+    fragment Summary on Summary {
+  __typename
+  evalLogId
+  generationStatus
+  issue {
+    id
+  }
+  updatedAt
+  content
+  archivedAt
+  createdAt
+  generatedAt
+  id
+}
+    `,
+  { fragmentName: "Summary" }
+) as unknown as TypedDocumentString<SummaryFragment, unknown>;
 export const SesDomainIdentityDnsRecordFragmentDoc = new TypedDocumentString(
   `
     fragment SesDomainIdentityDnsRecord on SesDomainIdentityDnsRecord {
@@ -61875,6 +62014,16 @@ export const AgentActivityPayloadFragmentDoc = new TypedDocumentString(
     `,
   { fragmentName: "AgentActivityPayload" }
 ) as unknown as TypedDocumentString<AgentActivityPayloadFragment, unknown>;
+export const AgentSessionExternalLinkFragmentDoc = new TypedDocumentString(
+  `
+    fragment AgentSessionExternalLink on AgentSessionExternalLink {
+  __typename
+  label
+  url
+}
+    `,
+  { fragmentName: "AgentSessionExternalLink" }
+) as unknown as TypedDocumentString<AgentSessionExternalLinkFragment, unknown>;
 export const AgentSessionFragmentDoc = new TypedDocumentString(
   `
     fragment AgentSession on AgentSession {
@@ -61882,6 +62031,9 @@ export const AgentSessionFragmentDoc = new TypedDocumentString(
   plan
   summary
   url
+  externalLinks {
+    ...AgentSessionExternalLink
+  }
   sourceMetadata
   context
   externalLink
@@ -61914,7 +62066,11 @@ export const AgentSessionFragmentDoc = new TypedDocumentString(
   externalUrls
   type
 }
-    `,
+    fragment AgentSessionExternalLink on AgentSessionExternalLink {
+  __typename
+  label
+  url
+}`,
   { fragmentName: "AgentSession" }
 ) as unknown as TypedDocumentString<AgentSessionFragment, unknown>;
 export const AgentSessionConnectionFragmentDoc = new TypedDocumentString(
@@ -61933,6 +62089,9 @@ export const AgentSessionConnectionFragmentDoc = new TypedDocumentString(
   plan
   summary
   url
+  externalLinks {
+    ...AgentSessionExternalLink
+  }
   sourceMetadata
   context
   externalLink
@@ -61964,6 +62123,11 @@ export const AgentSessionConnectionFragmentDoc = new TypedDocumentString(
   }
   externalUrls
   type
+}
+fragment AgentSessionExternalLink on AgentSessionExternalLink {
+  __typename
+  label
+  url
 }
 fragment PageInfo on PageInfo {
   __typename
@@ -62360,6 +62524,7 @@ export const AuthResolverResponseFragmentDoc = new TypedDocumentString(
     ...AuthOrganization
   }
   allowDomainAccess
+  service
   id
 }
     fragment AuthUser on AuthUser {
@@ -71825,6 +71990,9 @@ export const AgentSessionDocument = new TypedDocumentString(`
   plan
   summary
   url
+  externalLinks {
+    ...AgentSessionExternalLink
+  }
   sourceMetadata
   context
   externalLink
@@ -71856,6 +72024,11 @@ export const AgentSessionDocument = new TypedDocumentString(`
   }
   externalUrls
   type
+}
+fragment AgentSessionExternalLink on AgentSessionExternalLink {
+  __typename
+  label
+  url
 }`) as unknown as TypedDocumentString<AgentSessionQuery, AgentSessionQueryVariables>;
 export const AgentSession_ActivitiesDocument = new TypedDocumentString(`
     query agentSession_activities($id: String!, $after: String, $before: String, $filter: AgentActivityFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
@@ -71979,6 +72152,9 @@ export const AgentSessionsDocument = new TypedDocumentString(`
   plan
   summary
   url
+  externalLinks {
+    ...AgentSessionExternalLink
+  }
   sourceMetadata
   context
   externalLink
@@ -72010,6 +72186,11 @@ export const AgentSessionsDocument = new TypedDocumentString(`
   }
   externalUrls
   type
+}
+fragment AgentSessionExternalLink on AgentSessionExternalLink {
+  __typename
+  label
+  url
 }
 fragment AgentSessionConnection on AgentSessionConnection {
   __typename
@@ -73833,6 +74014,7 @@ fragment AuthResolverResponse on AuthResolverResponse {
     ...AuthOrganization
   }
   allowDomainAccess
+  service
   id
 }`) as unknown as TypedDocumentString<AvailableUsersQuery, AvailableUsersQueryVariables>;
 export const CommentDocument = new TypedDocumentString(`
@@ -93734,6 +93916,7 @@ fragment AuthResolverResponse on AuthResolverResponse {
     ...AuthOrganization
   }
   allowDomainAccess
+  service
   id
 }`) as unknown as TypedDocumentString<EmailTokenUserAccountAuthMutation, EmailTokenUserAccountAuthMutationVariables>;
 export const EmailUnsubscribeDocument = new TypedDocumentString(`
@@ -94134,6 +94317,7 @@ fragment AuthResolverResponse on AuthResolverResponse {
     ...AuthOrganization
   }
   allowDomainAccess
+  service
   id
 }`) as unknown as TypedDocumentString<GoogleUserAccountAuthMutation, GoogleUserAccountAuthMutationVariables>;
 export const ImageUploadFromUrlDocument = new TypedDocumentString(`
@@ -100605,6 +100789,7 @@ fragment AuthResolverResponse on AuthResolverResponse {
     ...AuthOrganization
   }
   allowDomainAccess
+  service
   id
 }`) as unknown as TypedDocumentString<SamlTokenUserAccountAuthMutation, SamlTokenUserAccountAuthMutationVariables>;
 export const CreateTeamDocument = new TypedDocumentString(`

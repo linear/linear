@@ -478,9 +478,13 @@ type AgentSession implements Node {
   """
   externalLink: String @deprecated(reason: "Use externalUrls instead.")
   """
+  External links associated with this session.
+  """
+  externalLinks: [AgentSessionExternalLink!]!
+  """
   URLs of external resources associated with this session.
   """
-  externalUrls: JSON!
+  externalUrls: JSON! @deprecated(reason: "Use externalLinks instead.")
   """
   The unique identifier of the entity.
   """
@@ -680,6 +684,20 @@ type AgentSessionEventWebhookPayload {
   Unix timestamp in milliseconds when the webhook was sent.
   """
   webhookTimestamp: Float!
+}
+
+"""
+An external link associated with an agent session.
+"""
+type AgentSessionExternalLink {
+  """
+  Label for the link.
+  """
+  label: String!
+  """
+  The URL of the external resource.
+  """
+  url: String!
 }
 
 """
@@ -1882,6 +1900,10 @@ type AuthResolverResponse {
   List of locked users that are locked by login restrictions
   """
   lockedUsers: [AuthUser!]!
+  """
+  The authentication service used for the current session (e.g., google, email, saml).
+  """
+  service: String
   """
   Application token.
   """
@@ -12375,6 +12397,10 @@ type Issue implements Node {
   """
   suggestionsGeneratedAt: DateTime
   """
+  [Internal] AI-generated activity summary for this issue.
+  """
+  summary: Summary
+  """
   The external services the issue is synced with.
   """
   syncedWith: [ExternalEntityInfo!]
@@ -15623,6 +15649,10 @@ type IssueSearchResult implements Node {
   [Internal] The time at which the most recent suggestions for this issue were generated.
   """
   suggestionsGeneratedAt: DateTime
+  """
+  [Internal] AI-generated activity summary for this issue.
+  """
+  summary: Summary
   """
   The external services the issue is synced with.
   """
@@ -20224,6 +20254,15 @@ type Mutation {
     input: ReleaseCreateInput!
   ): ReleasePayload!
   """
+  [ALPHA] Deletes a release.
+  """
+  releaseDelete(
+    """
+    The identifier of the release to delete.
+    """
+    id: String!
+  ): DeletePayload!
+  """
   [ALPHA] Archives a release pipeline.
   """
   releasePipelineArchive(
@@ -24307,6 +24346,10 @@ input OrganizationUpdateInput {
   Whether the Git integration linkback messages should be sent for public repositories.
   """
   gitPublicLinkbackMessagesEnabled: Boolean
+  """
+  Whether to hide other workspaces for new users signing up with email domains claimed by this organization.
+  """
+  hideNonPrimaryOrganizations: Boolean
   """
   Whether HIPAA compliance is enabled for organization.
   """
@@ -32587,6 +32630,10 @@ input ReleaseCollectionFilter {
   """
   some: ReleaseFilter
   """
+  Filters that the release's stage must satisfy.
+  """
+  stage: ReleaseStageFilter
+  """
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
@@ -32705,6 +32752,10 @@ input ReleaseFilter {
   Filters that the release's pipeline must satisfy.
   """
   pipeline: ReleasePipelineFilter
+  """
+  Filters that the release's stage must satisfy.
+  """
+  stage: ReleaseStageFilter
   """
   Comparator for the updated at date.
   """
@@ -33077,6 +33128,40 @@ type ReleaseStageEdge {
   node: ReleaseStage!
 }
 
+"""
+[ALPHA] Release stage filtering options.
+"""
+input ReleaseStageFilter {
+  """
+  Compound filters, all of which need to be matched by the stage.
+  """
+  and: [ReleaseStageFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the stage name.
+  """
+  name: StringComparator
+  """
+  Compound filters, one of which need to be matched by the stage.
+  """
+  or: [ReleaseStageFilter!]
+  """
+  Comparator for the stage type.
+  """
+  type: ReleaseStageTypeComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
 type ReleaseStagePayload {
   """
   The identifier of the last sync operation.
@@ -33100,6 +33185,32 @@ enum ReleaseStageType {
   completed
   planned
   started
+}
+
+"""
+[ALPHA] Comparator for release stage type.
+"""
+input ReleaseStageTypeComparator {
+  """
+  Equals constraint.
+  """
+  eq: ReleaseStageType
+  """
+  In-array constraint.
+  """
+  in: [ReleaseStageType!]
+  """
+  Not-equals constraint.
+  """
+  neq: ReleaseStageType
+  """
+  Not-in-array constraint.
+  """
+  nin: [ReleaseStageType!]
+  """
+  Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.
+  """
+  null: Boolean
 }
 
 input ReleaseStageUpdateInput {
@@ -34562,6 +34673,58 @@ type SuccessPayload {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+
+"""
+An AI-generated summary.
+"""
+type Summary implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The summary content as a Prosemirror document.
+  """
+  content: JSONObject!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The evaluation log id for this summary generation.
+  """
+  evalLogId: String
+  """
+  The time at which the summary was generated.
+  """
+  generatedAt: DateTime!
+  """
+  The generation status of the summary.
+  """
+  generationStatus: SummaryGenerationStatus!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The issue this summary belongs to.
+  """
+  issue: Issue!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+"""
+The generation status of a summary.
+"""
+enum SummaryGenerationStatus {
+  completed
+  failed
+  pending
 }
 
 """
