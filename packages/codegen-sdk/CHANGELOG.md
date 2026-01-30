@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.0.1
+
+### Patch Changes
+
+- cf75e2e: fix(codegen-sdk): use fragment type for union fields instead of schema type
+
+  Union fields pass through raw fragment data directly without a wrapper class, unlike object fields. This fixes a TypeScript error when the schema has required [Internal] fields on union members that are excluded from fragments.
+
 ## 4.0.0
 
 ### Major Changes
