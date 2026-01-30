@@ -214,9 +214,13 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
               // Skip webhook payload union types as they are manually typed
               return undefined;
             }
+            // Unlike object fields (which are wrapped in SDK classes that handle type narrowing), union fields pass
+            // through raw fragment data directly without a wrapper class. Therefore, the property type must reference
+            // the fragment's narrower type (which will exclude any [Internal] fields) rather than the full schema union
+            // type.
             return printModelField(
               field,
-              `public ${field.name}${field.nonNull ? "" : "?"}: ${field.type}${field.nonNull ? "" : " | null"}`
+              `public ${field.name}${field.nonNull ? "" : "?"}: ${model.fragment}["${field.name}"]${field.nonNull ? "" : " | null"}`
             );
           })
         ),
