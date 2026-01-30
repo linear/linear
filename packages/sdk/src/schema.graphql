@@ -109,6 +109,10 @@ type AgentActivityActionContent {
   """
   result: String
   """
+  [Internal] The result content as ProseMirror document.
+  """
+  resultData: JSONObject
+  """
   The type of activity.
   """
   type: AgentActivityType!
@@ -214,6 +218,10 @@ type AgentActivityElicitationContent {
   """
   body: String!
   """
+  [Internal] The elicitation content as ProseMirror document.
+  """
+  bodyData: JSONObject!
+  """
   The type of activity.
   """
   type: AgentActivityType!
@@ -227,6 +235,10 @@ type AgentActivityErrorContent {
   The error message in Markdown format.
   """
   body: String!
+  """
+  [Internal] The error content as ProseMirror document.
+  """
+  bodyData: JSONObject!
   """
   The type of activity.
   """
@@ -295,6 +307,10 @@ type AgentActivityPromptContent {
   """
   body: String!
   """
+  [Internal] The prompt content as ProseMirror document.
+  """
+  bodyData: JSONObject!
+  """
   The type of activity.
   """
   type: AgentActivityType!
@@ -308,6 +324,10 @@ type AgentActivityResponseContent {
   The response content in Markdown format.
   """
   body: String!
+  """
+  [Internal] The response content as ProseMirror document.
+  """
+  bodyData: JSONObject!
   """
   The type of activity.
   """
@@ -332,6 +352,10 @@ type AgentActivityThoughtContent {
   The thought content in Markdown format.
   """
   body: String!
+  """
+  [Internal] The thought content as ProseMirror document.
+  """
+  bodyData: JSONObject!
   """
   The type of activity.
   """
@@ -478,9 +502,13 @@ type AgentSession implements Node {
   """
   externalLink: String @deprecated(reason: "Use externalUrls instead.")
   """
+  External links associated with this session.
+  """
+  externalLinks: [AgentSessionExternalLink!]!
+  """
   URLs of external resources associated with this session.
   """
-  externalUrls: JSON!
+  externalUrls: JSON! @deprecated(reason: "Use externalLinks instead.")
   """
   The unique identifier of the entity.
   """
@@ -680,6 +708,20 @@ type AgentSessionEventWebhookPayload {
   Unix timestamp in milliseconds when the webhook was sent.
   """
   webhookTimestamp: Float!
+}
+
+"""
+An external link associated with an agent session.
+"""
+type AgentSessionExternalLink {
+  """
+  Label for the link.
+  """
+  label: String!
+  """
+  The URL of the external resource.
+  """
+  url: String!
 }
 
 """
@@ -1883,6 +1925,10 @@ type AuthResolverResponse {
   """
   lockedUsers: [AuthUser!]!
   """
+  The authentication service used for the current session (e.g., google, email, saml).
+  """
+  service: String
+  """
   Application token.
   """
   token: String @deprecated(reason: "Deprecated and not used anymore. Never populated.")
@@ -2231,6 +2277,10 @@ type Comment implements Node {
   The ID of the initiative update that the comment is associated with.
   """
   initiativeUpdateId: String
+  """
+  [Internal] Whether the comment is an artificial placeholder for an agent session thread created without a comment mention.
+  """
+  isArtificialAgentSessionRoot: Boolean!
   """
   The issue that the comment is associated with.
   """
@@ -11261,6 +11311,7 @@ enum IntegrationService {
   loom
   mcpServer
   mcpServerPersonal
+  microsoftTeams
   notion
   opsgenie
   pagerDuty
@@ -11291,6 +11342,7 @@ input IntegrationSettingsInput {
   jira: JiraSettingsInput
   jiraPersonal: JiraPersonalSettingsInput
   launchDarkly: LaunchDarklySettingsInput
+  microsoftTeams: MicrosoftTeamsSettingsInput
   notion: NotionSettingsInput
   opsgenie: OpsgenieInput
   pagerDuty: PagerDutyInput
@@ -12280,7 +12332,7 @@ type Issue implements Node {
   """
   state: WorkflowState!
   """
-  [ALPHA] The issue's workflow states over time.
+  The issue's workflow states over time.
   """
   stateHistory(
     """
@@ -12374,6 +12426,10 @@ type Issue implements Node {
   [Internal] The time at which the most recent suggestions for this issue were generated.
   """
   suggestionsGeneratedAt: DateTime
+  """
+  [Internal] AI-generated activity summary for this issue.
+  """
+  summary: Summary
   """
   The external services the issue is synced with.
   """
@@ -15529,7 +15585,7 @@ type IssueSearchResult implements Node {
   """
   state: WorkflowState!
   """
-  [ALPHA] The issue's workflow states over time.
+  The issue's workflow states over time.
   """
   stateHistory(
     """
@@ -15623,6 +15679,10 @@ type IssueSearchResult implements Node {
   [Internal] The time at which the most recent suggestions for this issue were generated.
   """
   suggestionsGeneratedAt: DateTime
+  """
+  [Internal] AI-generated activity summary for this issue.
+  """
+  summary: Summary
   """
   The external services the issue is synced with.
   """
@@ -16948,6 +17008,13 @@ input ManualSort {
   The order for the individual sort
   """
   order: PaginationSortOrder
+}
+
+input MicrosoftTeamsSettingsInput {
+  """
+  The display name of the Azure AD tenant.
+  """
+  tenantName: String
 }
 
 """
@@ -18605,6 +18672,19 @@ type Mutation {
     serverUrl: String!
   ): IntegrationPayload!
   """
+  [ALPHA] Integrates the organization with Microsoft Teams.
+  """
+  integrationMicrosoftTeams(
+    """
+    The Microsoft OAuth code.
+    """
+    code: String!
+    """
+    The Microsoft OAuth redirect URI.
+    """
+    redirectUri: String!
+  ): IntegrationPayload!
+  """
   [INTERNAL] Integrates the organization with Opsgenie.
   """
   integrationOpsgenieConnect(
@@ -20215,6 +20295,15 @@ type Mutation {
     input: ReleaseCompleteInput!
   ): ReleasePayload!
   """
+  [ALPHA] Marks a release as completed using an access key. If version is provided, completes that specific release; otherwise completes the most recent started release. The pipeline is inferred from the access key.
+  """
+  releaseCompleteByAccessKey(
+    """
+    The input containing the optional version.
+    """
+    input: ReleaseCompleteInputBase!
+  ): ReleasePayload!
+  """
   [ALPHA] Creates a new release.
   """
   releaseCreate(
@@ -20223,6 +20312,15 @@ type Mutation {
     """
     input: ReleaseCreateInput!
   ): ReleasePayload!
+  """
+  [ALPHA] Deletes a release.
+  """
+  releaseDelete(
+    """
+    The identifier of the release to delete.
+    """
+    id: String!
+  ): DeletePayload!
   """
   [ALPHA] Archives a release pipeline.
   """
@@ -20322,6 +20420,15 @@ type Mutation {
     input: ReleaseSyncInput!
   ): ReleasePayload!
   """
+  [ALPHA] Syncs release data using an access key. The pipeline is inferred from the access key.
+  """
+  releaseSyncByAccessKey(
+    """
+    The release data to sync.
+    """
+    input: ReleaseSyncInputBase!
+  ): ReleasePayload!
+  """
   [ALPHA] Unarchives a release.
   """
   releaseUnarchive(
@@ -20351,6 +20458,15 @@ type Mutation {
     The input containing the pipeline ID, optional version, and optional stage name.
     """
     input: ReleaseUpdateByPipelineInput!
+  ): ReleasePayload!
+  """
+  [ALPHA] Updates a release by pipeline using an access key. If version is provided, updates that specific release; otherwise updates the most recent started release. The pipeline is inferred from the access key.
+  """
+  releaseUpdateByPipelineByAccessKey(
+    """
+    The input containing the optional version and optional stage name.
+    """
+    input: ReleaseUpdateByPipelineInputBase!
   ): ReleasePayload!
   """
   Re-send an organization invite.
@@ -23505,6 +23621,10 @@ type Organization implements Node {
     orderBy: PaginationOrderBy
   ): IssueLabelConnection!
   """
+  [Internal] Whether the organization has enabled Linear Agent.
+  """
+  linearAgentEnabled: Boolean!
+  """
   The organization's logo URL.
   """
   logoUrl: String
@@ -24308,6 +24428,10 @@ input OrganizationUpdateInput {
   """
   gitPublicLinkbackMessagesEnabled: Boolean
   """
+  Whether to hide other workspaces for new users signing up with email domains claimed by this organization.
+  """
+  hideNonPrimaryOrganizations: Boolean
+  """
   Whether HIPAA compliance is enabled for organization.
   """
   hipaaComplianceEnabled: Boolean
@@ -24327,6 +24451,10 @@ input OrganizationUpdateInput {
   IP restriction configurations controlling allowed access the workspace.
   """
   ipRestrictions: [OrganizationIpRestrictionInput!]
+  """
+  [Internal] Whether the organization has enabled Linear Agent.
+  """
+  linearAgentEnabled: Boolean
   """
   The logo of the organization.
   """
@@ -29417,6 +29545,10 @@ type PullRequest implements Node {
   """
   number: Float!
   """
+  The pull request's unique URL slug.
+  """
+  slugId: String!
+  """
   The source branch of the pull request.
   """
   sourceBranch: String!
@@ -31041,6 +31173,10 @@ type Query {
     sort: [IssueSortInput!]
   ): IssueConnection!
   """
+  [ALPHA] Returns the latest release for the pipeline associated with the access key.
+  """
+  latestReleaseByAccessKey: Release
+  """
   One specific notification.
   """
   notification(id: String!): Notification!
@@ -31433,6 +31569,10 @@ type Query {
   [ALPHA] One specific release pipeline.
   """
   releasePipeline(id: String!): ReleasePipeline!
+  """
+  [ALPHA] Returns a release pipeline by ID. Requires the access key to have access to the pipeline.
+  """
+  releasePipelineByAccessKey: ReleasePipeline!
   """
   [ALPHA] All release pipelines.
   """
@@ -32587,6 +32727,10 @@ input ReleaseCollectionFilter {
   """
   some: ReleaseFilter
   """
+  Filters that the release's stage must satisfy.
+  """
+  stage: ReleaseStageFilter
+  """
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
@@ -32594,9 +32738,24 @@ input ReleaseCollectionFilter {
 
 input ReleaseCompleteInput {
   """
+  The commit SHA associated with this completion. If a completed release with this SHA already exists, it will be returned instead of completing a new release.
+  """
+  commitSha: String
+  """
   The identifier of the pipeline to mark a release as completed.
   """
   pipelineId: String!
+  """
+  The version of the release to complete. If not provided, the latest started release will be completed.
+  """
+  version: String
+}
+
+input ReleaseCompleteInputBase {
+  """
+  The commit SHA associated with this completion. If a completed release with this SHA already exists, it will be returned instead of completing a new release.
+  """
+  commitSha: String
   """
   The version of the release to complete. If not provided, the latest started release will be completed.
   """
@@ -32705,6 +32864,10 @@ input ReleaseFilter {
   Filters that the release's pipeline must satisfy.
   """
   pipeline: ReleasePipelineFilter
+  """
+  Filters that the release's stage must satisfy.
+  """
+  stage: ReleaseStageFilter
   """
   Comparator for the updated at date.
   """
@@ -33077,6 +33240,40 @@ type ReleaseStageEdge {
   node: ReleaseStage!
 }
 
+"""
+[ALPHA] Release stage filtering options.
+"""
+input ReleaseStageFilter {
+  """
+  Compound filters, all of which need to be matched by the stage.
+  """
+  and: [ReleaseStageFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the stage name.
+  """
+  name: StringComparator
+  """
+  Compound filters, one of which need to be matched by the stage.
+  """
+  or: [ReleaseStageFilter!]
+  """
+  Comparator for the stage type.
+  """
+  type: ReleaseStageTypeComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
 type ReleaseStagePayload {
   """
   The identifier of the last sync operation.
@@ -33100,6 +33297,32 @@ enum ReleaseStageType {
   completed
   planned
   started
+}
+
+"""
+[ALPHA] Comparator for release stage type.
+"""
+input ReleaseStageTypeComparator {
+  """
+  Equals constraint.
+  """
+  eq: ReleaseStageType
+  """
+  In-array constraint.
+  """
+  in: [ReleaseStageType!]
+  """
+  Not-equals constraint.
+  """
+  neq: ReleaseStageType
+  """
+  Not-in-array constraint.
+  """
+  nin: [ReleaseStageType!]
+  """
+  Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.
+  """
+  null: Boolean
 }
 
 input ReleaseStageUpdateInput {
@@ -33128,7 +33351,7 @@ input ReleaseSyncInput {
   """
   The commit SHA associated with this release.
   """
-  commitSha: String
+  commitSha: String!
   """
   Debug information for release creation diagnostics.
   """
@@ -33148,11 +33371,61 @@ input ReleaseSyncInput {
   """
   The name of the release.
   """
-  name: String!
+  name: String
   """
   The identifier of the pipeline this release belongs to.
   """
   pipelineId: String!
+  """
+  Pull request references to look up. Issues linked to found PRs will be associated with this release.
+  """
+  pullRequestReferences: [PullRequestReferenceInput!]
+  """
+  The current stage of the release. Defaults to the first 'completed' stage.
+  """
+  stageId: String
+  """
+  The estimated start date of the release.
+  """
+  startDate: TimelessDate
+  """
+  The estimated completion date of the release.
+  """
+  targetDate: TimelessDate
+  """
+  The version of the release.
+  """
+  version: String
+}
+
+"""
+Base release sync data without pipeline specification.
+"""
+input ReleaseSyncInputBase {
+  """
+  The commit SHA associated with this release.
+  """
+  commitSha: String!
+  """
+  Debug information for release creation diagnostics.
+  """
+  debugSink: ReleaseDebugSinkInput
+  """
+  The description of the release.
+  """
+  description: String
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  Issue identifiers (e.g. ENG-123) to associate with this release.
+  """
+  issueIdentifiers: [String!]
+  """
+  The name of the release.
+  """
+  name: String
   """
   Pull request references to look up. Issues linked to found PRs will be associated with this release.
   """
@@ -33183,6 +33456,17 @@ input ReleaseUpdateByPipelineInput {
   The identifier of the pipeline.
   """
   pipelineId: String!
+  """
+  The stage name to set. First tries exact match, then falls back to case-insensitive matching with dashes/underscores treated as spaces.
+  """
+  stage: String
+  """
+  The version of the release to update. If not provided, the latest started release will be updated.
+  """
+  version: String
+}
+
+input ReleaseUpdateByPipelineInputBase {
   """
   The stage name to set. First tries exact match, then falls back to case-insensitive matching with dashes/underscores treated as spaces.
   """
@@ -34562,6 +34846,58 @@ type SuccessPayload {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+
+"""
+An AI-generated summary.
+"""
+type Summary implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The summary content as a Prosemirror document.
+  """
+  content: JSONObject!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The evaluation log id for this summary generation.
+  """
+  evalLogId: String
+  """
+  The time at which the summary was generated.
+  """
+  generatedAt: DateTime!
+  """
+  The generation status of the summary.
+  """
+  generationStatus: SummaryGenerationStatus!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The issue this summary belongs to.
+  """
+  issue: Issue!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+"""
+The generation status of a summary.
+"""
+enum SummaryGenerationStatus {
+  completed
+  failed
+  pending
 }
 
 """
@@ -38027,6 +38363,7 @@ enum ViewType {
   projectsClosed
   quickView
   release
+  releasePipelines
   reviews
   roadmap
   roadmapAll

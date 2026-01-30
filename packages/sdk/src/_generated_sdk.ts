@@ -253,7 +253,7 @@ export class AgentActivity extends Request {
   /** An optional modifier that provides additional instructions on how the activity should be interpreted. */
   public signal?: L.AgentActivitySignal | null;
   /** The content of the activity */
-  public content: L.AgentActivityContent;
+  public content: L.AgentActivityFragment["content"];
   /** The agent session this activity belongs to. */
   public get agentSession(): LinearFetch<AgentSession> | undefined {
     return new AgentSessionQuery(this._request).fetch(this._agentSession.id);
@@ -521,6 +521,7 @@ export class AgentSession extends Request {
     this.summary = data.summary ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url ?? undefined;
+    this.externalLinks = data.externalLinks.map(node => new AgentSessionExternalLink(request, node));
     this.status = data.status;
     this.type = data.type ?? undefined;
     this._appUser = data.appUser;
@@ -562,6 +563,8 @@ export class AgentSession extends Request {
   public updatedAt: Date;
   /** Agent session URL. */
   public url?: string | null;
+  /** External links associated with this session. */
+  public externalLinks: AgentSessionExternalLink[];
   /** The current status of the agent session. */
   public status: L.AgentSessionStatus;
   /** [DEPRECATED] The type of the agent session. */
@@ -694,6 +697,24 @@ export class AgentSessionEventWebhookPayload {
   public agentActivity?: AgentActivityWebhookPayload | null;
   /** The agent session that the event belongs to. */
   public agentSession: AgentSessionWebhookPayload;
+}
+/**
+ * An external link associated with an agent session.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentSessionExternalLinkFragment response data
+ */
+export class AgentSessionExternalLink extends Request {
+  public constructor(request: LinearRequest, data: L.AgentSessionExternalLinkFragment) {
+    super(request);
+    this.label = data.label;
+    this.url = data.url;
+  }
+
+  /** Label for the link. */
+  public label: string;
+  /** The URL of the external resource. */
+  public url: string;
 }
 /**
  * AgentSessionPayload model
@@ -1627,6 +1648,7 @@ export class AuthResolverResponse extends Request {
     this.email = data.email;
     this.id = data.id;
     this.lastUsedOrganizationId = data.lastUsedOrganizationId ?? undefined;
+    this.service = data.service ?? undefined;
     this.token = data.token ?? undefined;
     this.availableOrganizations = data.availableOrganizations
       ? data.availableOrganizations.map(node => new AuthOrganization(request, node))
@@ -1646,6 +1668,8 @@ export class AuthResolverResponse extends Request {
   public id: string;
   /** ID of the organization last accessed by the user. */
   public lastUsedOrganizationId?: string | null;
+  /** The authentication service used for the current session (e.g., google, email, saml). */
+  public service?: string | null;
   /** Application token. */
   public token?: string | null;
   /** List of organizations allowing this user account to join automatically. */
@@ -5566,7 +5590,7 @@ export class ExternalEntityInfo extends Request {
   /** The name of the service this entity is synced with. */
   public service: L.ExternalSyncService;
   /** Metadata about the external entity. */
-  public metadata?: L.ExternalEntityInfoMetadata | null;
+  public metadata?: L.ExternalEntityInfoFragment["metadata"] | null;
 }
 /**
  * Metadata about the external GitHub entity.
@@ -8655,6 +8679,10 @@ export class Issue extends Request {
   /** Relations associated with this issue. */
   public relations(variables?: Omit<L.Issue_RelationsQueryVariables, "id">) {
     return new Issue_RelationsQuery(this._request, this.id, variables).fetch(variables);
+  }
+  /** The issue's workflow states over time. */
+  public stateHistory(variables?: Omit<L.Issue_StateHistoryQueryVariables, "id">) {
+    return new Issue_StateHistoryQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Users who are subscribed to the issue. */
   public subscribers(variables?: Omit<L.Issue_SubscribersQueryVariables, "id">) {
@@ -16383,6 +16411,56 @@ export class SuccessPayload extends Request {
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
+}
+/**
+ * An AI-generated summary.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.SummaryFragment response data
+ */
+export class Summary extends Request {
+  private _issue: L.SummaryFragment["issue"];
+
+  public constructor(request: LinearRequest, data: L.SummaryFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.content = data.content;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.evalLogId = data.evalLogId ?? undefined;
+    this.generatedAt = parseDate(data.generatedAt) ?? new Date();
+    this.id = data.id;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.generationStatus = data.generationStatus;
+    this._issue = data.issue;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The summary content as a Prosemirror document. */
+  public content: L.Scalars["JSONObject"];
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The evaluation log id for this summary generation. */
+  public evalLogId?: string | null;
+  /** The time at which the summary was generated. */
+  public generatedAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The generation status of the summary. */
+  public generationStatus: L.SummaryGenerationStatus;
+  /** The issue this summary belongs to. */
+  public get issue(): LinearFetch<Issue> | undefined {
+    return new IssueQuery(this._request).fetch(this._issue.id);
+  }
+  /** The ID of issue this summary belongs to. */
+  public get issueId(): string | undefined {
+    return this._issue?.id;
+  }
 }
 /**
  * A comment thread that is synced with an external source.
@@ -32570,6 +32648,61 @@ export class AttachmentIssue_RelationsQuery extends Request {
 }
 
 /**
+ * A fetchable AttachmentIssue_StateHistory Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to attachmentIssue
+ * @param variables - variables without 'id' to pass into the AttachmentIssue_StateHistoryQuery
+ */
+export class AttachmentIssue_StateHistoryQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.AttachmentIssue_StateHistoryQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.AttachmentIssue_StateHistoryQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the AttachmentIssue_StateHistory query and return a IssueStateSpanConnection
+   *
+   * @param variables - variables without 'id' to pass into the AttachmentIssue_StateHistoryQuery
+   * @returns parsed response from AttachmentIssue_StateHistoryQuery
+   */
+  public async fetch(
+    variables?: Omit<L.AttachmentIssue_StateHistoryQueryVariables, "id">
+  ): LinearFetch<IssueStateSpanConnection> {
+    const response = await this._request<
+      L.AttachmentIssue_StateHistoryQuery,
+      L.AttachmentIssue_StateHistoryQueryVariables
+    >(L.AttachmentIssue_StateHistoryDocument.toString(), {
+      id: this._id,
+      ...this._variables,
+      ...variables,
+    });
+    const data = response.attachmentIssue.stateHistory;
+
+    return new IssueStateSpanConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable AttachmentIssue_Subscribers Query
  *
  * @param request - function to call the graphql client
@@ -34434,6 +34567,57 @@ export class Issue_RelationsQuery extends Request {
 }
 
 /**
+ * A fetchable Issue_StateHistory Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to issue
+ * @param variables - variables without 'id' to pass into the Issue_StateHistoryQuery
+ */
+export class Issue_StateHistoryQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Issue_StateHistoryQueryVariables, "id">;
+
+  public constructor(request: LinearRequest, id: string, variables?: Omit<L.Issue_StateHistoryQueryVariables, "id">) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Issue_StateHistory query and return a IssueStateSpanConnection
+   *
+   * @param variables - variables without 'id' to pass into the Issue_StateHistoryQuery
+   * @returns parsed response from Issue_StateHistoryQuery
+   */
+  public async fetch(
+    variables?: Omit<L.Issue_StateHistoryQueryVariables, "id">
+  ): LinearFetch<IssueStateSpanConnection> {
+    const response = await this._request<L.Issue_StateHistoryQuery, L.Issue_StateHistoryQueryVariables>(
+      L.Issue_StateHistoryDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.issue.stateHistory;
+
+    return new IssueStateSpanConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable Issue_Subscribers Query
  *
  * @param request - function to call the graphql client
@@ -35233,6 +35417,64 @@ export class IssueVcsBranchSearch_RelationsQuery extends Request {
     const data = response.issueVcsBranchSearch?.relations;
     if (data) {
       return new IssueRelationConnection(
+        this._request,
+        connection =>
+          this.fetch(
+            defaultConnection({
+              ...this._variables,
+              ...variables,
+              ...connection,
+            })
+          ),
+        data
+      );
+    } else {
+      return undefined;
+    }
+  }
+}
+
+/**
+ * A fetchable IssueVcsBranchSearch_StateHistory Query
+ *
+ * @param request - function to call the graphql client
+ * @param branchName - required branchName to pass to issueVcsBranchSearch
+ * @param variables - variables without 'branchName' to pass into the IssueVcsBranchSearch_StateHistoryQuery
+ */
+export class IssueVcsBranchSearch_StateHistoryQuery extends Request {
+  private _branchName: string;
+  private _variables?: Omit<L.IssueVcsBranchSearch_StateHistoryQueryVariables, "branchName">;
+
+  public constructor(
+    request: LinearRequest,
+    branchName: string,
+    variables?: Omit<L.IssueVcsBranchSearch_StateHistoryQueryVariables, "branchName">
+  ) {
+    super(request);
+    this._branchName = branchName;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the IssueVcsBranchSearch_StateHistory query and return a IssueStateSpanConnection
+   *
+   * @param variables - variables without 'branchName' to pass into the IssueVcsBranchSearch_StateHistoryQuery
+   * @returns parsed response from IssueVcsBranchSearch_StateHistoryQuery
+   */
+  public async fetch(
+    variables?: Omit<L.IssueVcsBranchSearch_StateHistoryQueryVariables, "branchName">
+  ): LinearFetch<IssueStateSpanConnection | undefined> {
+    const response = await this._request<
+      L.IssueVcsBranchSearch_StateHistoryQuery,
+      L.IssueVcsBranchSearch_StateHistoryQueryVariables
+    >(L.IssueVcsBranchSearch_StateHistoryDocument.toString(), {
+      branchName: this._branchName,
+      ...this._variables,
+      ...variables,
+    });
+    const data = response.issueVcsBranchSearch?.stateHistory;
+    if (data) {
+      return new IssueStateSpanConnection(
         this._request,
         connection =>
           this.fetch(
@@ -43112,6 +43354,7 @@ export {
   SendStrategy,
   SlaStatus,
   SlackChannelType,
+  SummaryGenerationStatus,
   TeamRetirementSubTeamHandling,
   TeamRoleType,
   TriageResponsibilityAction,

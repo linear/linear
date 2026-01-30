@@ -104,6 +104,8 @@ export type AgentActivityActionContent = {
   parameter: Scalars["String"];
   /** The result of the action in Markdown format. */
   result?: Maybe<Scalars["String"]>;
+  /** [Internal] The result content as ProseMirror document. */
+  resultData?: Maybe<Scalars["JSONObject"]>;
   /** The type of activity. */
   type: AgentActivityType;
 };
@@ -174,6 +176,8 @@ export type AgentActivityElicitationContent = {
   __typename?: "AgentActivityElicitationContent";
   /** The elicitation message in Markdown format. */
   body: Scalars["String"];
+  /** [Internal] The elicitation content as ProseMirror document. */
+  bodyData: Scalars["JSONObject"];
   /** The type of activity. */
   type: AgentActivityType;
 };
@@ -183,6 +187,8 @@ export type AgentActivityErrorContent = {
   __typename?: "AgentActivityErrorContent";
   /** The error message in Markdown format. */
   body: Scalars["String"];
+  /** [Internal] The error content as ProseMirror document. */
+  bodyData: Scalars["JSONObject"];
   /** The type of activity. */
   type: AgentActivityType;
 };
@@ -222,6 +228,8 @@ export type AgentActivityPromptContent = {
   __typename?: "AgentActivityPromptContent";
   /** A message requesting additional information or action from user. */
   body: Scalars["String"];
+  /** [Internal] The prompt content as ProseMirror document. */
+  bodyData: Scalars["JSONObject"];
   /** The type of activity. */
   type: AgentActivityType;
 };
@@ -231,6 +239,8 @@ export type AgentActivityResponseContent = {
   __typename?: "AgentActivityResponseContent";
   /** The response content in Markdown format. */
   body: Scalars["String"];
+  /** [Internal] The response content as ProseMirror document. */
+  bodyData: Scalars["JSONObject"];
   /** The type of activity. */
   type: AgentActivityType;
 };
@@ -248,6 +258,8 @@ export type AgentActivityThoughtContent = {
   __typename?: "AgentActivityThoughtContent";
   /** The thought content in Markdown format. */
   body: Scalars["String"];
+  /** [Internal] The thought content as ProseMirror document. */
+  bodyData: Scalars["JSONObject"];
   /** The type of activity. */
   type: AgentActivityType;
 };
@@ -317,7 +329,12 @@ export type AgentSession = Node & {
    * @deprecated Use externalUrls instead.
    */
   externalLink?: Maybe<Scalars["String"]>;
-  /** URLs of external resources associated with this session. */
+  /** External links associated with this session. */
+  externalLinks: Array<AgentSessionExternalLink>;
+  /**
+   * URLs of external resources associated with this session.
+   * @deprecated Use externalLinks instead.
+   */
   externalUrls: Scalars["JSON"];
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
@@ -446,6 +463,15 @@ export type AgentSessionEventWebhookPayload = {
   webhookId: Scalars["String"];
   /** Unix timestamp in milliseconds when the webhook was sent. */
   webhookTimestamp: Scalars["Float"];
+};
+
+/** An external link associated with an agent session. */
+export type AgentSessionExternalLink = {
+  __typename?: "AgentSessionExternalLink";
+  /** Label for the link. */
+  label: Scalars["String"];
+  /** The URL of the external resource. */
+  url: Scalars["String"];
 };
 
 /** Input for an external URL associated with an agent session. */
@@ -1146,6 +1172,8 @@ export type AuthResolverResponse = {
   lockedOrganizations?: Maybe<Array<AuthOrganization>>;
   /** List of locked users that are locked by login restrictions */
   lockedUsers: Array<AuthUser>;
+  /** The authentication service used for the current session (e.g., google, email, saml). */
+  service?: Maybe<Scalars["String"]>;
   /**
    * Application token.
    * @deprecated Deprecated and not used anymore. Never populated.
@@ -1297,6 +1325,8 @@ export type Comment = Node & {
   initiativeUpdate?: Maybe<InitiativeUpdate>;
   /** The ID of the initiative update that the comment is associated with. */
   initiativeUpdateId?: Maybe<Scalars["String"]>;
+  /** [Internal] Whether the comment is an artificial placeholder for an agent session thread created without a comment mention. */
+  isArtificialAgentSessionRoot: Scalars["Boolean"];
   /** The issue that the comment is associated with. */
   issue?: Maybe<Issue>;
   /** The ID of the issue that the comment is associated with. */
@@ -6511,6 +6541,7 @@ export enum IntegrationService {
   Loom = "loom",
   McpServer = "mcpServer",
   McpServerPersonal = "mcpServerPersonal",
+  MicrosoftTeams = "microsoftTeams",
   Notion = "notion",
   Opsgenie = "opsgenie",
   PagerDuty = "pagerDuty",
@@ -6541,6 +6572,7 @@ export type IntegrationSettingsInput = {
   jira?: InputMaybe<JiraSettingsInput>;
   jiraPersonal?: InputMaybe<JiraPersonalSettingsInput>;
   launchDarkly?: InputMaybe<LaunchDarklySettingsInput>;
+  microsoftTeams?: InputMaybe<MicrosoftTeamsSettingsInput>;
   notion?: InputMaybe<NotionSettingsInput>;
   opsgenie?: InputMaybe<OpsgenieInput>;
   pagerDuty?: InputMaybe<PagerDutyInput>;
@@ -6915,7 +6947,7 @@ export type Issue = Node & {
   startedTriageAt?: Maybe<Scalars["DateTime"]>;
   /** The workflow state that the issue is associated with. */
   state: WorkflowState;
-  /** [ALPHA] The issue's workflow states over time. */
+  /** The issue's workflow states over time. */
   stateHistory: IssueStateSpanConnection;
   /** The order of the item in the sub-issue list. Only set if the issue has a parent. */
   subIssueSortOrder?: Maybe<Scalars["Float"]>;
@@ -6925,6 +6957,8 @@ export type Issue = Node & {
   suggestions: IssueSuggestionConnection;
   /** [Internal] The time at which the most recent suggestions for this issue were generated. */
   suggestionsGeneratedAt?: Maybe<Scalars["DateTime"]>;
+  /** [Internal] AI-generated activity summary for this issue. */
+  summary?: Maybe<Summary>;
   /** The external services the issue is synced with. */
   syncedWith?: Maybe<Array<ExternalEntityInfo>>;
   /** The team that the issue is associated with. */
@@ -8626,7 +8660,7 @@ export type IssueSearchResult = Node & {
   startedTriageAt?: Maybe<Scalars["DateTime"]>;
   /** The workflow state that the issue is associated with. */
   state: WorkflowState;
-  /** [ALPHA] The issue's workflow states over time. */
+  /** The issue's workflow states over time. */
   stateHistory: IssueStateSpanConnection;
   /** The order of the item in the sub-issue list. Only set if the issue has a parent. */
   subIssueSortOrder?: Maybe<Scalars["Float"]>;
@@ -8636,6 +8670,8 @@ export type IssueSearchResult = Node & {
   suggestions: IssueSuggestionConnection;
   /** [Internal] The time at which the most recent suggestions for this issue were generated. */
   suggestionsGeneratedAt?: Maybe<Scalars["DateTime"]>;
+  /** [Internal] AI-generated activity summary for this issue. */
+  summary?: Maybe<Summary>;
   /** The external services the issue is synced with. */
   syncedWith?: Maybe<Array<ExternalEntityInfo>>;
   /** The team that the issue is associated with. */
@@ -9538,6 +9574,11 @@ export type ManualSort = {
   order?: InputMaybe<PaginationSortOrder>;
 };
 
+export type MicrosoftTeamsSettingsInput = {
+  /** The display name of the Azure AD tenant. */
+  tenantName?: InputMaybe<Scalars["String"]>;
+};
+
 /** Issue project milestone options. */
 export type MilestoneSort = {
   /** Whether nulls should be sorted first or last */
@@ -9820,6 +9861,8 @@ export type Mutation = {
   integrationMcpServerConnect: IntegrationPayload;
   /** [INTERNAL] Connects the user's personal account with an MCP server. */
   integrationMcpServerPersonalConnect: IntegrationPayload;
+  /** [ALPHA] Integrates the organization with Microsoft Teams. */
+  integrationMicrosoftTeams: IntegrationPayload;
   /** [INTERNAL] Integrates the organization with Opsgenie. */
   integrationOpsgenieConnect: IntegrationPayload;
   /** [INTERNAL] Refresh Opsgenie schedule mappings. */
@@ -10103,8 +10146,12 @@ export type Mutation = {
   releaseArchive: ReleaseArchivePayload;
   /** [ALPHA] Marks a release as completed. If version is provided, completes that specific release; otherwise completes the most recent started release. */
   releaseComplete: ReleasePayload;
+  /** [ALPHA] Marks a release as completed using an access key. If version is provided, completes that specific release; otherwise completes the most recent started release. The pipeline is inferred from the access key. */
+  releaseCompleteByAccessKey: ReleasePayload;
   /** [ALPHA] Creates a new release. */
   releaseCreate: ReleasePayload;
+  /** [ALPHA] Deletes a release. */
+  releaseDelete: DeletePayload;
   /** [ALPHA] Archives a release pipeline. */
   releasePipelineArchive: ReleasePipelineArchivePayload;
   /** [ALPHA] Creates a new release pipeline. */
@@ -10125,12 +10172,16 @@ export type Mutation = {
   releaseStageUpdate: ReleaseStagePayload;
   /** [ALPHA] Syncs release data. */
   releaseSync: ReleasePayload;
+  /** [ALPHA] Syncs release data using an access key. The pipeline is inferred from the access key. */
+  releaseSyncByAccessKey: ReleasePayload;
   /** [ALPHA] Unarchives a release. */
   releaseUnarchive: ReleaseArchivePayload;
   /** [ALPHA] Updates a release. */
   releaseUpdate: ReleasePayload;
   /** [ALPHA] Updates a release by pipeline. If version is provided, updates that specific release; otherwise updates the most recent started release. */
   releaseUpdateByPipeline: ReleasePayload;
+  /** [ALPHA] Updates a release by pipeline using an access key. If version is provided, updates that specific release; otherwise updates the most recent started release. The pipeline is inferred from the access key. */
+  releaseUpdateByPipelineByAccessKey: ReleasePayload;
   /** Re-send an organization invite. */
   resendOrganizationInvite: DeletePayload;
   /** Re-send an organization invite tied to an email address. */
@@ -10912,6 +10963,11 @@ export type MutationIntegrationMcpServerPersonalConnectArgs = {
   serverUrl: Scalars["String"];
 };
 
+export type MutationIntegrationMicrosoftTeamsArgs = {
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+};
+
 export type MutationIntegrationOpsgenieConnectArgs = {
   apiKey: Scalars["String"];
 };
@@ -11536,8 +11592,16 @@ export type MutationReleaseCompleteArgs = {
   input: ReleaseCompleteInput;
 };
 
+export type MutationReleaseCompleteByAccessKeyArgs = {
+  input: ReleaseCompleteInputBase;
+};
+
 export type MutationReleaseCreateArgs = {
   input: ReleaseCreateInput;
+};
+
+export type MutationReleaseDeleteArgs = {
+  id: Scalars["String"];
 };
 
 export type MutationReleasePipelineArchiveArgs = {
@@ -11582,6 +11646,10 @@ export type MutationReleaseSyncArgs = {
   input: ReleaseSyncInput;
 };
 
+export type MutationReleaseSyncByAccessKeyArgs = {
+  input: ReleaseSyncInputBase;
+};
+
 export type MutationReleaseUnarchiveArgs = {
   id: Scalars["String"];
 };
@@ -11593,6 +11661,10 @@ export type MutationReleaseUpdateArgs = {
 
 export type MutationReleaseUpdateByPipelineArgs = {
   input: ReleaseUpdateByPipelineInput;
+};
+
+export type MutationReleaseUpdateByPipelineByAccessKeyArgs = {
+  input: ReleaseUpdateByPipelineInputBase;
 };
 
 export type MutationResendOrganizationInviteArgs = {
@@ -13225,6 +13297,8 @@ export type Organization = Node & {
   ipRestrictions?: Maybe<Array<OrganizationIpRestriction>>;
   /** Labels associated with the organization. */
   labels: IssueLabelConnection;
+  /** [Internal] Whether the organization has enabled Linear Agent. */
+  linearAgentEnabled: Scalars["Boolean"];
   /** The organization's logo URL. */
   logoUrl?: Maybe<Scalars["String"]>;
   /** The organization's name. */
@@ -13716,6 +13790,8 @@ export type OrganizationUpdateInput = {
   gitLinkbackMessagesEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** Whether the Git integration linkback messages should be sent for public repositories. */
   gitPublicLinkbackMessagesEnabled?: InputMaybe<Scalars["Boolean"]>;
+  /** Whether to hide other workspaces for new users signing up with email domains claimed by this organization. */
+  hideNonPrimaryOrganizations?: InputMaybe<Scalars["Boolean"]>;
   /** Whether HIPAA compliance is enabled for organization. */
   hipaaComplianceEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** [ALPHA] The n-weekly frequency at which to prompt for initiative updates. */
@@ -13726,6 +13802,8 @@ export type OrganizationUpdateInput = {
   initiativeUpdateRemindersHour?: InputMaybe<Scalars["Float"]>;
   /** IP restriction configurations controlling allowed access the workspace. */
   ipRestrictions?: InputMaybe<Array<OrganizationIpRestrictionInput>>;
+  /** [Internal] Whether the organization has enabled Linear Agent. */
+  linearAgentEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** The logo of the organization. */
   logoUrl?: InputMaybe<Scalars["String"]>;
   /** The name of the organization. */
@@ -16482,6 +16560,8 @@ export type PullRequest = Node & {
   mergeSettings?: Maybe<PullRequestMergeSettings>;
   /** The number of the pull request in the version control system. */
   number: Scalars["Float"];
+  /** The pull request's unique URL slug. */
+  slugId: Scalars["String"];
   /** The source branch of the pull request. */
   sourceBranch: Scalars["String"];
   /** The status of the pull request. */
@@ -16862,6 +16942,8 @@ export type Query = {
   issueVcsBranchSearch?: Maybe<Issue>;
   /** All issues. */
   issues: IssueConnection;
+  /** [ALPHA] Returns the latest release for the pipeline associated with the access key. */
+  latestReleaseByAccessKey?: Maybe<Release>;
   /** One specific notification. */
   notification: Notification;
   /** One specific notification subscription. */
@@ -16922,6 +17004,8 @@ export type Query = {
   release: Release;
   /** [ALPHA] One specific release pipeline. */
   releasePipeline: ReleasePipeline;
+  /** [ALPHA] Returns a release pipeline by ID. Requires the access key to have access to the pipeline. */
+  releasePipelineByAccessKey: ReleasePipeline;
   /** [ALPHA] All release pipelines. */
   releasePipelines: ReleasePipelineConnection;
   /** [ALPHA] One specific release stage. */
@@ -18130,13 +18214,24 @@ export type ReleaseCollectionFilter = {
   pipeline?: InputMaybe<ReleasePipelineFilter>;
   /** Filters that needs to be matched by some releases. */
   some?: InputMaybe<ReleaseFilter>;
+  /** Filters that the release's stage must satisfy. */
+  stage?: InputMaybe<ReleaseStageFilter>;
   /** Comparator for the updated at date. */
   updatedAt?: InputMaybe<DateComparator>;
 };
 
 export type ReleaseCompleteInput = {
+  /** The commit SHA associated with this completion. If a completed release with this SHA already exists, it will be returned instead of completing a new release. */
+  commitSha?: InputMaybe<Scalars["String"]>;
   /** The identifier of the pipeline to mark a release as completed. */
   pipelineId: Scalars["String"];
+  /** The version of the release to complete. If not provided, the latest started release will be completed. */
+  version?: InputMaybe<Scalars["String"]>;
+};
+
+export type ReleaseCompleteInputBase = {
+  /** The commit SHA associated with this completion. If a completed release with this SHA already exists, it will be returned instead of completing a new release. */
+  commitSha?: InputMaybe<Scalars["String"]>;
   /** The version of the release to complete. If not provided, the latest started release will be completed. */
   version?: InputMaybe<Scalars["String"]>;
 };
@@ -18201,6 +18296,8 @@ export type ReleaseFilter = {
   or?: InputMaybe<Array<ReleaseFilter>>;
   /** Filters that the release's pipeline must satisfy. */
   pipeline?: InputMaybe<ReleasePipelineFilter>;
+  /** Filters that the release's stage must satisfy. */
+  stage?: InputMaybe<ReleaseStageFilter>;
   /** Comparator for the updated at date. */
   updatedAt?: InputMaybe<DateComparator>;
 };
@@ -18420,6 +18517,24 @@ export type ReleaseStageEdge = {
   node: ReleaseStage;
 };
 
+/** [ALPHA] Release stage filtering options. */
+export type ReleaseStageFilter = {
+  /** Compound filters, all of which need to be matched by the stage. */
+  and?: InputMaybe<Array<ReleaseStageFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: InputMaybe<DateComparator>;
+  /** Comparator for the identifier. */
+  id?: InputMaybe<IdComparator>;
+  /** Comparator for the stage name. */
+  name?: InputMaybe<StringComparator>;
+  /** Compound filters, one of which need to be matched by the stage. */
+  or?: InputMaybe<Array<ReleaseStageFilter>>;
+  /** Comparator for the stage type. */
+  type?: InputMaybe<ReleaseStageTypeComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: InputMaybe<DateComparator>;
+};
+
 export type ReleaseStagePayload = {
   __typename?: "ReleaseStagePayload";
   /** The identifier of the last sync operation. */
@@ -18438,6 +18553,20 @@ export enum ReleaseStageType {
   Started = "started",
 }
 
+/** [ALPHA] Comparator for release stage type. */
+export type ReleaseStageTypeComparator = {
+  /** Equals constraint. */
+  eq?: InputMaybe<ReleaseStageType>;
+  /** In-array constraint. */
+  in?: InputMaybe<Array<ReleaseStageType>>;
+  /** Not-equals constraint. */
+  neq?: InputMaybe<ReleaseStageType>;
+  /** Not-in-array constraint. */
+  nin?: InputMaybe<Array<ReleaseStageType>>;
+  /** Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values. */
+  null?: InputMaybe<Scalars["Boolean"]>;
+};
+
 export type ReleaseStageUpdateInput = {
   /** The UI color of the stage as a HEX string. */
   color?: InputMaybe<Scalars["String"]>;
@@ -18452,7 +18581,7 @@ export type ReleaseStageUpdateInput = {
 /** The release data to sync. */
 export type ReleaseSyncInput = {
   /** The commit SHA associated with this release. */
-  commitSha?: InputMaybe<Scalars["String"]>;
+  commitSha: Scalars["String"];
   /** Debug information for release creation diagnostics. */
   debugSink?: InputMaybe<ReleaseDebugSinkInput>;
   /** The description of the release. */
@@ -18462,9 +18591,35 @@ export type ReleaseSyncInput = {
   /** Issue identifiers (e.g. ENG-123) to associate with this release. */
   issueIdentifiers?: InputMaybe<Array<Scalars["String"]>>;
   /** The name of the release. */
-  name: Scalars["String"];
+  name?: InputMaybe<Scalars["String"]>;
   /** The identifier of the pipeline this release belongs to. */
   pipelineId: Scalars["String"];
+  /** Pull request references to look up. Issues linked to found PRs will be associated with this release. */
+  pullRequestReferences?: InputMaybe<Array<PullRequestReferenceInput>>;
+  /** The current stage of the release. Defaults to the first 'completed' stage. */
+  stageId?: InputMaybe<Scalars["String"]>;
+  /** The estimated start date of the release. */
+  startDate?: InputMaybe<Scalars["TimelessDate"]>;
+  /** The estimated completion date of the release. */
+  targetDate?: InputMaybe<Scalars["TimelessDate"]>;
+  /** The version of the release. */
+  version?: InputMaybe<Scalars["String"]>;
+};
+
+/** Base release sync data without pipeline specification. */
+export type ReleaseSyncInputBase = {
+  /** The commit SHA associated with this release. */
+  commitSha: Scalars["String"];
+  /** Debug information for release creation diagnostics. */
+  debugSink?: InputMaybe<ReleaseDebugSinkInput>;
+  /** The description of the release. */
+  description?: InputMaybe<Scalars["String"]>;
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
+  id?: InputMaybe<Scalars["String"]>;
+  /** Issue identifiers (e.g. ENG-123) to associate with this release. */
+  issueIdentifiers?: InputMaybe<Array<Scalars["String"]>>;
+  /** The name of the release. */
+  name?: InputMaybe<Scalars["String"]>;
   /** Pull request references to look up. Issues linked to found PRs will be associated with this release. */
   pullRequestReferences?: InputMaybe<Array<PullRequestReferenceInput>>;
   /** The current stage of the release. Defaults to the first 'completed' stage. */
@@ -18481,6 +18636,13 @@ export type ReleaseSyncInput = {
 export type ReleaseUpdateByPipelineInput = {
   /** The identifier of the pipeline. */
   pipelineId: Scalars["String"];
+  /** The stage name to set. First tries exact match, then falls back to case-insensitive matching with dashes/underscores treated as spaces. */
+  stage?: InputMaybe<Scalars["String"]>;
+  /** The version of the release to update. If not provided, the latest started release will be updated. */
+  version?: InputMaybe<Scalars["String"]>;
+};
+
+export type ReleaseUpdateByPipelineInputBase = {
   /** The stage name to set. First tries exact match, then falls back to case-insensitive matching with dashes/underscores treated as spaces. */
   stage?: InputMaybe<Scalars["String"]>;
   /** The version of the release to update. If not provided, the latest started release will be updated. */
@@ -19282,6 +19444,39 @@ export type SuccessPayload = {
   /** Whether the operation was successful. */
   success: Scalars["Boolean"];
 };
+
+/** An AI-generated summary. */
+export type Summary = Node & {
+  __typename?: "Summary";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The summary content as a Prosemirror document. */
+  content: Scalars["JSONObject"];
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The evaluation log id for this summary generation. */
+  evalLogId?: Maybe<Scalars["String"]>;
+  /** The time at which the summary was generated. */
+  generatedAt: Scalars["DateTime"];
+  /** The generation status of the summary. */
+  generationStatus: SummaryGenerationStatus;
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The issue this summary belongs to. */
+  issue: Issue;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+};
+
+/** The generation status of a summary. */
+export enum SummaryGenerationStatus {
+  Completed = "completed",
+  Failed = "failed",
+  Pending = "pending",
+}
 
 /** A comment thread that is synced with an external source. */
 export type SyncedExternalThread = {
@@ -21271,6 +21466,7 @@ export enum ViewType {
   ProjectsClosed = "projectsClosed",
   QuickView = "quickView",
   Release = "release",
+  ReleasePipelines = "releasePipelines",
   Reviews = "reviews",
   Roadmap = "roadmap",
   RoadmapAll = "roadmapAll",
@@ -24236,6 +24432,7 @@ export type AgentSessionFragment = { __typename: "AgentSession" } & Pick<
   | "externalUrls"
   | "type"
 > & {
+    externalLinks: Array<{ __typename: "AgentSessionExternalLink" } & Pick<AgentSessionExternalLink, "label" | "url">>;
     appUser: { __typename?: "User" } & Pick<User, "id">;
     sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
     comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
@@ -24661,6 +24858,11 @@ export type AiPromptRulesFragment = { __typename: "AiPromptRules" } & Pick<
   "updatedAt" | "archivedAt" | "createdAt" | "id"
 > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
 
+export type SummaryFragment = { __typename: "Summary" } & Pick<
+  Summary,
+  "evalLogId" | "generationStatus" | "updatedAt" | "content" | "archivedAt" | "createdAt" | "generatedAt" | "id"
+> & { issue: { __typename?: "Issue" } & Pick<Issue, "id"> };
+
 export type AgentActivityFragment = { __typename: "AgentActivity" } & Pick<
   AgentActivity,
   "signal" | "sourceMetadata" | "signalMetadata" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "ephemeral"
@@ -24753,6 +24955,11 @@ export type IssueHistoryTriageRuleErrorFragment = { __typename: "IssueHistoryTri
 export type ExternalUserFragment = { __typename: "ExternalUser" } & Pick<
   ExternalUser,
   "avatarUrl" | "displayName" | "email" | "name" | "updatedAt" | "lastSeen" | "archivedAt" | "createdAt" | "id"
+>;
+
+export type AgentSessionExternalLinkFragment = { __typename: "AgentSessionExternalLink" } & Pick<
+  AgentSessionExternalLink,
+  "label" | "url"
 >;
 
 export type EntityExternalLinkFragment = { __typename: "EntityExternalLink" } & Pick<
@@ -27756,6 +27963,9 @@ export type AgentSessionConnectionFragment = { __typename: "AgentSessionConnecti
       | "externalUrls"
       | "type"
     > & {
+        externalLinks: Array<
+          { __typename: "AgentSessionExternalLink" } & Pick<AgentSessionExternalLink, "label" | "url">
+        >;
         appUser: { __typename?: "User" } & Pick<User, "id">;
         sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
         comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
@@ -27876,7 +28086,7 @@ export type AuditEntryTypeFragment = { __typename: "AuditEntryType" } & Pick<Aud
 
 export type AuthResolverResponseFragment = { __typename: "AuthResolverResponse" } & Pick<
   AuthResolverResponse,
-  "token" | "email" | "lastUsedOrganizationId" | "allowDomainAccess" | "id"
+  "token" | "email" | "lastUsedOrganizationId" | "allowDomainAccess" | "service" | "id"
 > & {
     users: Array<
       { __typename: "AuthUser" } & Pick<
@@ -30104,6 +30314,8 @@ type Node_SemanticSearchResult_Fragment = { __typename: "SemanticSearchResult" }
 
 type Node_SesDomainIdentity_Fragment = { __typename: "SesDomainIdentity" } & Pick<SesDomainIdentity, "id">;
 
+type Node_Summary_Fragment = { __typename: "Summary" } & Pick<Summary, "id">;
+
 type Node_Team_Fragment = { __typename: "Team" } & Pick<Team, "id">;
 
 type Node_TeamMembership_Fragment = { __typename: "TeamMembership" } & Pick<TeamMembership, "id">;
@@ -30223,6 +30435,7 @@ export type NodeFragment =
   | Node_RoadmapToProject_Fragment
   | Node_SemanticSearchResult_Fragment
   | Node_SesDomainIdentity_Fragment
+  | Node_Summary_Fragment
   | Node_Team_Fragment
   | Node_TeamMembership_Fragment
   | Node_TeamNotificationSubscription_Fragment
@@ -33044,6 +33257,9 @@ export type AgentSessionQuery = { __typename?: "Query" } & {
     | "externalUrls"
     | "type"
   > & {
+      externalLinks: Array<
+        { __typename: "AgentSessionExternalLink" } & Pick<AgentSessionExternalLink, "label" | "url">
+      >;
       appUser: { __typename?: "User" } & Pick<User, "id">;
       sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
       comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
@@ -33129,6 +33345,9 @@ export type AgentSessionsQuery = { __typename?: "Query" } & {
         | "externalUrls"
         | "type"
       > & {
+          externalLinks: Array<
+            { __typename: "AgentSessionExternalLink" } & Pick<AgentSessionExternalLink, "label" | "url">
+          >;
           appUser: { __typename?: "User" } & Pick<User, "id">;
           sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
           comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
@@ -34218,6 +34437,30 @@ export type AttachmentIssue_RelationsQuery = { __typename?: "Query" } & {
   };
 };
 
+export type AttachmentIssue_StateHistoryQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+}>;
+
+export type AttachmentIssue_StateHistoryQuery = { __typename?: "Query" } & {
+  attachmentIssue: { __typename?: "Issue" } & {
+    stateHistory: { __typename: "IssueStateSpanConnection" } & {
+      nodes: Array<
+        { __typename: "IssueStateSpan" } & Pick<IssueStateSpan, "startedAt" | "endedAt" | "id" | "stateId"> & {
+            state?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
+          }
+      >;
+      pageInfo: { __typename: "PageInfo" } & Pick<
+        PageInfo,
+        "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
+      >;
+    };
+  };
+};
+
 export type AttachmentIssue_SubscribersQueryVariables = Exact<{
   id: Scalars["String"];
   after?: InputMaybe<Scalars["String"]>;
@@ -34434,7 +34677,7 @@ export type AvailableUsersQueryVariables = Exact<{ [key: string]: never }>;
 export type AvailableUsersQuery = { __typename?: "Query" } & {
   availableUsers: { __typename: "AuthResolverResponse" } & Pick<
     AuthResolverResponse,
-    "token" | "email" | "lastUsedOrganizationId" | "allowDomainAccess" | "id"
+    "token" | "email" | "lastUsedOrganizationId" | "allowDomainAccess" | "service" | "id"
   > & {
       users: Array<
         { __typename: "AuthUser" } & Pick<
@@ -38619,6 +38862,30 @@ export type Issue_RelationsQuery = { __typename?: "Query" } & {
   };
 };
 
+export type Issue_StateHistoryQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+}>;
+
+export type Issue_StateHistoryQuery = { __typename?: "Query" } & {
+  issue: { __typename?: "Issue" } & {
+    stateHistory: { __typename: "IssueStateSpanConnection" } & {
+      nodes: Array<
+        { __typename: "IssueStateSpan" } & Pick<IssueStateSpan, "startedAt" | "endedAt" | "id" | "stateId"> & {
+            state?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
+          }
+      >;
+      pageInfo: { __typename: "PageInfo" } & Pick<
+        PageInfo,
+        "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
+      >;
+    };
+  };
+};
+
 export type Issue_SubscribersQueryVariables = Exact<{
   id: Scalars["String"];
   after?: InputMaybe<Scalars["String"]>;
@@ -40247,6 +40514,32 @@ export type IssueVcsBranchSearch_RelationsQuery = { __typename?: "Query" } & {
           > & {
               issue: { __typename?: "Issue" } & Pick<Issue, "id">;
               relatedIssue: { __typename?: "Issue" } & Pick<Issue, "id">;
+            }
+        >;
+        pageInfo: { __typename: "PageInfo" } & Pick<
+          PageInfo,
+          "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
+        >;
+      };
+    }
+  >;
+};
+
+export type IssueVcsBranchSearch_StateHistoryQueryVariables = Exact<{
+  branchName: Scalars["String"];
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+}>;
+
+export type IssueVcsBranchSearch_StateHistoryQuery = { __typename?: "Query" } & {
+  issueVcsBranchSearch?: Maybe<
+    { __typename?: "Issue" } & {
+      stateHistory: { __typename: "IssueStateSpanConnection" } & {
+        nodes: Array<
+          { __typename: "IssueStateSpan" } & Pick<IssueStateSpan, "startedAt" | "endedAt" | "id" | "stateId"> & {
+              state?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
             }
         >;
         pageInfo: { __typename: "PageInfo" } & Pick<
@@ -48484,7 +48777,7 @@ export type EmailTokenUserAccountAuthMutationVariables = Exact<{
 export type EmailTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
   emailTokenUserAccountAuth: { __typename: "AuthResolverResponse" } & Pick<
     AuthResolverResponse,
-    "token" | "email" | "lastUsedOrganizationId" | "allowDomainAccess" | "id"
+    "token" | "email" | "lastUsedOrganizationId" | "allowDomainAccess" | "service" | "id"
   > & {
       users: Array<
         { __typename: "AuthUser" } & Pick<
@@ -48819,7 +49112,7 @@ export type GoogleUserAccountAuthMutationVariables = Exact<{
 export type GoogleUserAccountAuthMutation = { __typename?: "Mutation" } & {
   googleUserAccountAuth: { __typename: "AuthResolverResponse" } & Pick<
     AuthResolverResponse,
-    "token" | "email" | "lastUsedOrganizationId" | "allowDomainAccess" | "id"
+    "token" | "email" | "lastUsedOrganizationId" | "allowDomainAccess" | "service" | "id"
   > & {
       users: Array<
         { __typename: "AuthUser" } & Pick<
@@ -54823,7 +55116,7 @@ export type SamlTokenUserAccountAuthMutationVariables = Exact<{
 export type SamlTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
   samlTokenUserAccountAuth: { __typename: "AuthResolverResponse" } & Pick<
     AuthResolverResponse,
-    "token" | "email" | "lastUsedOrganizationId" | "allowDomainAccess" | "id"
+    "token" | "email" | "lastUsedOrganizationId" | "allowDomainAccess" | "service" | "id"
   > & {
       users: Array<
         { __typename: "AuthUser" } & Pick<
@@ -57966,6 +58259,25 @@ export const UserNotificationSubscriptionFragmentDoc = new TypedDocumentString(
     `,
   { fragmentName: "UserNotificationSubscription" }
 ) as unknown as TypedDocumentString<UserNotificationSubscriptionFragment, unknown>;
+export const SummaryFragmentDoc = new TypedDocumentString(
+  `
+    fragment Summary on Summary {
+  __typename
+  evalLogId
+  generationStatus
+  issue {
+    id
+  }
+  updatedAt
+  content
+  archivedAt
+  createdAt
+  generatedAt
+  id
+}
+    `,
+  { fragmentName: "Summary" }
+) as unknown as TypedDocumentString<SummaryFragment, unknown>;
 export const SesDomainIdentityDnsRecordFragmentDoc = new TypedDocumentString(
   `
     fragment SesDomainIdentityDnsRecord on SesDomainIdentityDnsRecord {
@@ -61875,6 +62187,16 @@ export const AgentActivityPayloadFragmentDoc = new TypedDocumentString(
     `,
   { fragmentName: "AgentActivityPayload" }
 ) as unknown as TypedDocumentString<AgentActivityPayloadFragment, unknown>;
+export const AgentSessionExternalLinkFragmentDoc = new TypedDocumentString(
+  `
+    fragment AgentSessionExternalLink on AgentSessionExternalLink {
+  __typename
+  label
+  url
+}
+    `,
+  { fragmentName: "AgentSessionExternalLink" }
+) as unknown as TypedDocumentString<AgentSessionExternalLinkFragment, unknown>;
 export const AgentSessionFragmentDoc = new TypedDocumentString(
   `
     fragment AgentSession on AgentSession {
@@ -61882,6 +62204,9 @@ export const AgentSessionFragmentDoc = new TypedDocumentString(
   plan
   summary
   url
+  externalLinks {
+    ...AgentSessionExternalLink
+  }
   sourceMetadata
   context
   externalLink
@@ -61914,7 +62239,11 @@ export const AgentSessionFragmentDoc = new TypedDocumentString(
   externalUrls
   type
 }
-    `,
+    fragment AgentSessionExternalLink on AgentSessionExternalLink {
+  __typename
+  label
+  url
+}`,
   { fragmentName: "AgentSession" }
 ) as unknown as TypedDocumentString<AgentSessionFragment, unknown>;
 export const AgentSessionConnectionFragmentDoc = new TypedDocumentString(
@@ -61933,6 +62262,9 @@ export const AgentSessionConnectionFragmentDoc = new TypedDocumentString(
   plan
   summary
   url
+  externalLinks {
+    ...AgentSessionExternalLink
+  }
   sourceMetadata
   context
   externalLink
@@ -61964,6 +62296,11 @@ export const AgentSessionConnectionFragmentDoc = new TypedDocumentString(
   }
   externalUrls
   type
+}
+fragment AgentSessionExternalLink on AgentSessionExternalLink {
+  __typename
+  label
+  url
 }
 fragment PageInfo on PageInfo {
   __typename
@@ -62360,6 +62697,7 @@ export const AuthResolverResponseFragmentDoc = new TypedDocumentString(
     ...AuthOrganization
   }
   allowDomainAccess
+  service
   id
 }
     fragment AuthUser on AuthUser {
@@ -71825,6 +72163,9 @@ export const AgentSessionDocument = new TypedDocumentString(`
   plan
   summary
   url
+  externalLinks {
+    ...AgentSessionExternalLink
+  }
   sourceMetadata
   context
   externalLink
@@ -71856,6 +72197,11 @@ export const AgentSessionDocument = new TypedDocumentString(`
   }
   externalUrls
   type
+}
+fragment AgentSessionExternalLink on AgentSessionExternalLink {
+  __typename
+  label
+  url
 }`) as unknown as TypedDocumentString<AgentSessionQuery, AgentSessionQueryVariables>;
 export const AgentSession_ActivitiesDocument = new TypedDocumentString(`
     query agentSession_activities($id: String!, $after: String, $before: String, $filter: AgentActivityFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
@@ -71979,6 +72325,9 @@ export const AgentSessionsDocument = new TypedDocumentString(`
   plan
   summary
   url
+  externalLinks {
+    ...AgentSessionExternalLink
+  }
   sourceMetadata
   context
   externalLink
@@ -72010,6 +72359,11 @@ export const AgentSessionsDocument = new TypedDocumentString(`
   }
   externalUrls
   type
+}
+fragment AgentSessionExternalLink on AgentSessionExternalLink {
+  __typename
+  label
+  url
 }
 fragment AgentSessionConnection on AgentSessionConnection {
   __typename
@@ -73508,6 +73862,40 @@ fragment PageInfo on PageInfo {
   hasPreviousPage
   hasNextPage
 }`) as unknown as TypedDocumentString<AttachmentIssue_RelationsQuery, AttachmentIssue_RelationsQueryVariables>;
+export const AttachmentIssue_StateHistoryDocument = new TypedDocumentString(`
+    query attachmentIssue_stateHistory($id: String!, $after: String, $before: String, $first: Int, $last: Int) {
+  attachmentIssue(id: $id) {
+    stateHistory(after: $after, before: $before, first: $first, last: $last) {
+      ...IssueStateSpanConnection
+    }
+  }
+}
+    fragment IssueStateSpan on IssueStateSpan {
+  __typename
+  startedAt
+  endedAt
+  id
+  state {
+    id
+  }
+  stateId
+}
+fragment IssueStateSpanConnection on IssueStateSpanConnection {
+  __typename
+  nodes {
+    ...IssueStateSpan
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+fragment PageInfo on PageInfo {
+  __typename
+  startCursor
+  endCursor
+  hasPreviousPage
+  hasNextPage
+}`) as unknown as TypedDocumentString<AttachmentIssue_StateHistoryQuery, AttachmentIssue_StateHistoryQueryVariables>;
 export const AttachmentIssue_SubscribersDocument = new TypedDocumentString(`
     query attachmentIssue_subscribers($id: String!, $after: String, $before: String, $filter: UserFilter, $first: Int, $includeArchived: Boolean, $includeDisabled: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
   attachmentIssue(id: $id) {
@@ -73833,6 +74221,7 @@ fragment AuthResolverResponse on AuthResolverResponse {
     ...AuthOrganization
   }
   allowDomainAccess
+  service
   id
 }`) as unknown as TypedDocumentString<AvailableUsersQuery, AvailableUsersQueryVariables>;
 export const CommentDocument = new TypedDocumentString(`
@@ -80009,6 +80398,40 @@ fragment PageInfo on PageInfo {
   hasPreviousPage
   hasNextPage
 }`) as unknown as TypedDocumentString<Issue_RelationsQuery, Issue_RelationsQueryVariables>;
+export const Issue_StateHistoryDocument = new TypedDocumentString(`
+    query issue_stateHistory($id: String!, $after: String, $before: String, $first: Int, $last: Int) {
+  issue(id: $id) {
+    stateHistory(after: $after, before: $before, first: $first, last: $last) {
+      ...IssueStateSpanConnection
+    }
+  }
+}
+    fragment IssueStateSpan on IssueStateSpan {
+  __typename
+  startedAt
+  endedAt
+  id
+  state {
+    id
+  }
+  stateId
+}
+fragment IssueStateSpanConnection on IssueStateSpanConnection {
+  __typename
+  nodes {
+    ...IssueStateSpan
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+fragment PageInfo on PageInfo {
+  __typename
+  startCursor
+  endCursor
+  hasPreviousPage
+  hasNextPage
+}`) as unknown as TypedDocumentString<Issue_StateHistoryQuery, Issue_StateHistoryQueryVariables>;
 export const Issue_SubscribersDocument = new TypedDocumentString(`
     query issue_subscribers($id: String!, $after: String, $before: String, $filter: UserFilter, $first: Int, $includeArchived: Boolean, $includeDisabled: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
   issue(id: $id) {
@@ -82369,6 +82792,43 @@ fragment PageInfo on PageInfo {
 }`) as unknown as TypedDocumentString<
   IssueVcsBranchSearch_RelationsQuery,
   IssueVcsBranchSearch_RelationsQueryVariables
+>;
+export const IssueVcsBranchSearch_StateHistoryDocument = new TypedDocumentString(`
+    query issueVcsBranchSearch_stateHistory($branchName: String!, $after: String, $before: String, $first: Int, $last: Int) {
+  issueVcsBranchSearch(branchName: $branchName) {
+    stateHistory(after: $after, before: $before, first: $first, last: $last) {
+      ...IssueStateSpanConnection
+    }
+  }
+}
+    fragment IssueStateSpan on IssueStateSpan {
+  __typename
+  startedAt
+  endedAt
+  id
+  state {
+    id
+  }
+  stateId
+}
+fragment IssueStateSpanConnection on IssueStateSpanConnection {
+  __typename
+  nodes {
+    ...IssueStateSpan
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+fragment PageInfo on PageInfo {
+  __typename
+  startCursor
+  endCursor
+  hasPreviousPage
+  hasNextPage
+}`) as unknown as TypedDocumentString<
+  IssueVcsBranchSearch_StateHistoryQuery,
+  IssueVcsBranchSearch_StateHistoryQueryVariables
 >;
 export const IssueVcsBranchSearch_SubscribersDocument = new TypedDocumentString(`
     query issueVcsBranchSearch_subscribers($branchName: String!, $after: String, $before: String, $filter: UserFilter, $first: Int, $includeArchived: Boolean, $includeDisabled: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
@@ -93734,6 +94194,7 @@ fragment AuthResolverResponse on AuthResolverResponse {
     ...AuthOrganization
   }
   allowDomainAccess
+  service
   id
 }`) as unknown as TypedDocumentString<EmailTokenUserAccountAuthMutation, EmailTokenUserAccountAuthMutationVariables>;
 export const EmailUnsubscribeDocument = new TypedDocumentString(`
@@ -94134,6 +94595,7 @@ fragment AuthResolverResponse on AuthResolverResponse {
     ...AuthOrganization
   }
   allowDomainAccess
+  service
   id
 }`) as unknown as TypedDocumentString<GoogleUserAccountAuthMutation, GoogleUserAccountAuthMutationVariables>;
 export const ImageUploadFromUrlDocument = new TypedDocumentString(`
@@ -100605,6 +101067,7 @@ fragment AuthResolverResponse on AuthResolverResponse {
     ...AuthOrganization
   }
   allowDomainAccess
+  service
   id
 }`) as unknown as TypedDocumentString<SamlTokenUserAccountAuthMutation, SamlTokenUserAccountAuthMutationVariables>;
 export const CreateTeamDocument = new TypedDocumentString(`

@@ -2178,6 +2178,10 @@ fragment AgentSession on AgentSession {
   summary
   # Agent session URL.
   url
+  # External links associated with this session.
+  externalLinks {
+    ...AgentSessionExternalLink
+  }
   # Metadata about the external source that created this agent session.
   sourceMetadata
   # Serialized JSON representing the contexts this session is related to, for direct chat sessions.
@@ -2873,6 +2877,32 @@ fragment AiPromptRules on AiPromptRules {
   }
 }
 
+# An AI-generated summary.
+fragment Summary on Summary {
+  __typename
+  # The evaluation log id for this summary generation.
+  evalLogId
+  # The generation status of the summary.
+  generationStatus
+  # The issue this summary belongs to.
+  issue {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The summary content as a Prosemirror document.
+  content
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the summary was generated.
+  generatedAt
+  # The unique identifier of the entity.
+  id
+}
+
 # An activity within an agent context.
 fragment AgentActivity on AgentActivity {
   __typename
@@ -3032,6 +3062,15 @@ fragment ExternalUser on ExternalUser {
   createdAt
   # The unique identifier of the entity.
   id
+}
+
+# An external link associated with an agent session.
+fragment AgentSessionExternalLink on AgentSessionExternalLink {
+  __typename
+  # Label for the link.
+  label
+  # The URL of the external resource.
+  url
 }
 
 # An external link for an entity like initiative, etc...
@@ -7338,6 +7377,8 @@ fragment AuthResolverResponse on AuthResolverResponse {
   }
   # Should the signup flow allow access for the domain.
   allowDomainAccess
+  # The authentication service used for the current session (e.g., google, email, saml).
+  service
   # User account ID.
   id
 }
@@ -10148,6 +10189,25 @@ query attachmentIssue_relations(
     }
   }
 }
+# The issue's workflow states over time.
+query attachmentIssue_stateHistory(
+  # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+) {
+  attachmentIssue(id: $id) {
+    stateHistory(after: $after, before: $before, first: $first, last: $last) {
+      ...IssueStateSpanConnection
+    }
+  }
+}
 # Users who are subscribed to the issue.
 query attachmentIssue_subscribers(
   # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
@@ -11953,6 +12013,24 @@ query issue_relations(
     }
   }
 }
+# The issue's workflow states over time.
+query issue_stateHistory(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+) {
+  issue(id: $id) {
+    stateHistory(after: $after, before: $before, first: $first, last: $last) {
+      ...IssueStateSpanConnection
+    }
+  }
+}
 # Users who are subscribed to the issue.
 query issue_subscribers(
   $id: String!
@@ -12634,6 +12712,25 @@ query issueVcsBranchSearch_relations(
       orderBy: $orderBy
     ) {
       ...IssueRelationConnection
+    }
+  }
+}
+# The issue's workflow states over time.
+query issueVcsBranchSearch_stateHistory(
+  # The VCS branch name to search for.
+  $branchName: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+) {
+  issueVcsBranchSearch(branchName: $branchName) {
+    stateHistory(after: $after, before: $before, first: $first, last: $last) {
+      ...IssueStateSpanConnection
     }
   }
 }

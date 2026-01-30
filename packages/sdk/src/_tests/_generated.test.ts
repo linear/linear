@@ -615,6 +615,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the attachmentIssue connection query for the IssueStateSpan */
+    it("attachmentIssue.stateHistory", async () => {
+      if (_attachmentIssue) {
+        const stateHistory: L.IssueStateSpanConnection | undefined | null = await _attachmentIssue.stateHistory();
+        expect(stateHistory instanceof L.IssueStateSpanConnection);
+      } else {
+        console.warn("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.stateHistory query");
+      }
+    });
+
     /** Test the attachmentIssue connection query for the User */
     it("attachmentIssue.subscribers", async () => {
       if (_attachmentIssue) {
@@ -2392,6 +2402,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issue connection query for the IssueStateSpan */
+    it("issue.stateHistory", async () => {
+      if (_issue) {
+        const stateHistory: L.IssueStateSpanConnection | undefined | null = await _issue.stateHistory();
+        expect(stateHistory instanceof L.IssueStateSpanConnection);
+      } else {
+        console.warn("codegen-doc:print: No issue found - cannot test _issue.stateHistory query");
+      }
+    });
+
     /** Test the issue connection query for the User */
     it("issue.subscribers", async () => {
       if (_issue) {
@@ -2937,6 +2957,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issue connection query for the IssueStateSpan */
+    it("issue.stateHistory", async () => {
+      if (_issue) {
+        const stateHistory: L.IssueStateSpanConnection | undefined | null = await _issue.stateHistory();
+        expect(stateHistory instanceof L.IssueStateSpanConnection);
+      } else {
+        console.warn("codegen-doc:print: No issue found - cannot test _issue.stateHistory query");
+      }
+    });
+
     /** Test the issue connection query for the User */
     it("issue.subscribers", async () => {
       if (_issue) {
@@ -3288,6 +3318,18 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issueVcsBranchSearch connection query for the IssueStateSpan */
+    it("issueVcsBranchSearch.stateHistory", async () => {
+      if (_issueVcsBranchSearch) {
+        const stateHistory: L.IssueStateSpanConnection | undefined | null = await _issueVcsBranchSearch.stateHistory();
+        expect(stateHistory instanceof L.IssueStateSpanConnection);
+      } else {
+        console.warn(
+          "codegen-doc:print: No issueVcsBranchSearch found - cannot test _issueVcsBranchSearch.stateHistory query"
+        );
+      }
+    });
+
     /** Test the issueVcsBranchSearch connection query for the User */
     it("issueVcsBranchSearch.subscribers", async () => {
       if (_issueVcsBranchSearch) {
@@ -3442,6 +3484,16 @@ describe("generated", () => {
         expect(relations instanceof L.IssueRelationConnection);
       } else {
         console.warn("codegen-doc:print: No issue found - cannot test _issue.relations query");
+      }
+    });
+
+    /** Test the issue connection query for the IssueStateSpan */
+    it("issue.stateHistory", async () => {
+      if (_issue) {
+        const stateHistory: L.IssueStateSpanConnection | undefined | null = await _issue.stateHistory();
+        expect(stateHistory instanceof L.IssueStateSpanConnection);
+      } else {
+        console.warn("codegen-doc:print: No issue found - cannot test _issue.stateHistory query");
       }
     });
 
