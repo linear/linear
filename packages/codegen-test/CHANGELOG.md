@@ -1,5 +1,12 @@
 # Change Log
 
+## 2.2.1
+
+### Patch Changes
+
+- Updated dependencies [cf75e2e]
+  - @linear/codegen-sdk@4.0.1
+
 ## 2.2.0
 
 ### Minor Changes
