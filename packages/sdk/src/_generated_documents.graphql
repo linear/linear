@@ -762,6 +762,10 @@ fragment DocumentContent on DocumentContent {
   createdAt
   # The unique identifier of the entity.
   id
+  # The welcome message that the content is associated with.
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 
 # A document related notification.
@@ -2856,6 +2860,28 @@ fragment Webhook on Webhook {
   # Whether the Webhook is enabled for all public teams, including teams created after the webhook was created.
   allPublicTeams
   # Whether the Webhook is enabled.
+  enabled
+}
+
+# A welcome message for new users joining the workspace.
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The title of the welcome message notification.
+  title
+  # The unique identifier of the entity.
+  id
+  # The user who last updated the welcome message.
+  updatedBy {
+    id
+  }
+  # Whether the welcome message is enabled.
   enabled
 }
 
@@ -10473,6 +10499,21 @@ query comment_documentContent_aiPromptRules(
     }
   }
 }
+# The welcome message that the content is associated with.
+query comment_documentContent_welcomeMessage(
+  # The hash of the comment to retrieve.
+  $hash: String
+  # The identifier of the comment to retrieve.
+  $id: String
+) {
+  comment(hash: $hash, id: $id) {
+    documentContent {
+      welcomeMessage {
+        ...WelcomeMessage
+      }
+    }
+  }
+}
 # The external thread that the comment is synced with.
 query comment_externalThread(
   # The hash of the comment to retrieve.
@@ -11212,6 +11253,16 @@ query initiative_documentContent_aiPromptRules($id: String!) {
     documentContent {
       aiPromptRules {
         ...AiPromptRules
+      }
+    }
+  }
+}
+# The welcome message that the content is associated with.
+query initiative_documentContent_welcomeMessage($id: String!) {
+  initiative(id: $id) {
+    documentContent {
+      welcomeMessage {
+        ...WelcomeMessage
       }
     }
   }
@@ -13160,6 +13211,16 @@ query project_documentContent_aiPromptRules($id: String!) {
     }
   }
 }
+# The welcome message that the content is associated with.
+query project_documentContent_welcomeMessage($id: String!) {
+  project(id: $id) {
+    documentContent {
+      welcomeMessage {
+        ...WelcomeMessage
+      }
+    }
+  }
+}
 # Documents associated with the project.
 query project_documents(
   $id: String!
@@ -13718,6 +13779,16 @@ query projectMilestone_documentContent_aiPromptRules($id: String!) {
     documentContent {
       aiPromptRules {
         ...AiPromptRules
+      }
+    }
+  }
+}
+# The welcome message that the content is associated with.
+query projectMilestone_documentContent_welcomeMessage($id: String!) {
+  projectMilestone(id: $id) {
+    documentContent {
+      welcomeMessage {
+        ...WelcomeMessage
       }
     }
   }
