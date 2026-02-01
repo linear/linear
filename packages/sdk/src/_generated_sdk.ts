@@ -4477,6 +4477,7 @@ export class DocumentContent extends Request {
     this.restoredAt = parseDate(data.restoredAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.aiPromptRules = data.aiPromptRules ? new AiPromptRules(request, data.aiPromptRules) : undefined;
+    this.welcomeMessage = data.welcomeMessage ? new WelcomeMessage(request, data.welcomeMessage) : undefined;
     this._document = data.document ?? undefined;
     this._initiative = data.initiative ?? undefined;
     this._issue = data.issue ?? undefined;
@@ -4503,6 +4504,8 @@ export class DocumentContent extends Request {
   public updatedAt: Date;
   /** The AI prompt rules that the content is associated with. */
   public aiPromptRules?: AiPromptRules | null;
+  /** The welcome message that the content is associated with. */
+  public welcomeMessage?: WelcomeMessage | null;
   /** The document that the content is associated with. */
   public get document(): LinearFetch<Document> | undefined {
     return this._document?.id ? new DocumentQuery(this._request).fetch(this._document?.id) : undefined;
@@ -18752,6 +18755,50 @@ export class WebhookRotateSecretPayload extends Request {
   public success: boolean;
 }
 /**
+ * A welcome message for new users joining the workspace.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.WelcomeMessageFragment response data
+ */
+export class WelcomeMessage extends Request {
+  private _updatedBy?: L.WelcomeMessageFragment["updatedBy"];
+
+  public constructor(request: LinearRequest, data: L.WelcomeMessageFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.enabled = data.enabled;
+    this.id = data.id;
+    this.title = data.title ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._updatedBy = data.updatedBy ?? undefined;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** Whether the welcome message is enabled. */
+  public enabled: boolean;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The title of the welcome message notification. */
+  public title?: string | null;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The user who last updated the welcome message. */
+  public get updatedBy(): LinearFetch<User> | undefined {
+    return this._updatedBy?.id ? new UserQuery(this._request).fetch(this._updatedBy?.id) : undefined;
+  }
+  /** The ID of user who last updated the welcome message. */
+  public get updatedById(): string | undefined {
+    return this._updatedBy?.id;
+  }
+}
+/**
  * WorkflowDefinition model
  *
  * @param request - function to call the graphql client
@@ -32974,6 +33021,40 @@ export class Comment_DocumentContent_AiPromptRulesQuery extends Request {
 }
 
 /**
+ * A fetchable Comment_DocumentContent_WelcomeMessage Query
+ *
+ * @param request - function to call the graphql client
+ * @param variables - variables to pass into the Comment_DocumentContent_WelcomeMessageQuery
+ */
+export class Comment_DocumentContent_WelcomeMessageQuery extends Request {
+  private _variables?: L.Comment_DocumentContent_WelcomeMessageQueryVariables;
+
+  public constructor(request: LinearRequest, variables?: L.Comment_DocumentContent_WelcomeMessageQueryVariables) {
+    super(request);
+
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Comment_DocumentContent_WelcomeMessage query and return a WelcomeMessage
+   *
+   * @param variables - variables to pass into the Comment_DocumentContent_WelcomeMessageQuery
+   * @returns parsed response from Comment_DocumentContent_WelcomeMessageQuery
+   */
+  public async fetch(
+    variables?: L.Comment_DocumentContent_WelcomeMessageQueryVariables
+  ): LinearFetch<WelcomeMessage | undefined> {
+    const response = await this._request<
+      L.Comment_DocumentContent_WelcomeMessageQuery,
+      L.Comment_DocumentContent_WelcomeMessageQueryVariables
+    >(L.Comment_DocumentContent_WelcomeMessageDocument.toString(), variables);
+    const data = response.comment.documentContent?.welcomeMessage;
+
+    return data ? new WelcomeMessage(this._request, data) : undefined;
+  }
+}
+
+/**
  * A fetchable CustomView_Initiatives Query
  *
  * @param request - function to call the graphql client
@@ -33925,6 +34006,38 @@ export class Initiative_DocumentContent_AiPromptRulesQuery extends Request {
     const data = response.initiative.documentContent?.aiPromptRules;
 
     return data ? new AiPromptRules(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable Initiative_DocumentContent_WelcomeMessage Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to initiative_documentContent
+ */
+export class Initiative_DocumentContent_WelcomeMessageQuery extends Request {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the Initiative_DocumentContent_WelcomeMessage query and return a WelcomeMessage
+   *
+   * @returns parsed response from Initiative_DocumentContent_WelcomeMessageQuery
+   */
+  public async fetch(): LinearFetch<WelcomeMessage | undefined> {
+    const response = await this._request<
+      L.Initiative_DocumentContent_WelcomeMessageQuery,
+      L.Initiative_DocumentContent_WelcomeMessageQueryVariables
+    >(L.Initiative_DocumentContent_WelcomeMessageDocument.toString(), {
+      id: this._id,
+    });
+    const data = response.initiative.documentContent?.welcomeMessage;
+
+    return data ? new WelcomeMessage(this._request, data) : undefined;
   }
 }
 
@@ -36666,6 +36779,38 @@ export class Project_DocumentContent_AiPromptRulesQuery extends Request {
 }
 
 /**
+ * A fetchable Project_DocumentContent_WelcomeMessage Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to project_documentContent
+ */
+export class Project_DocumentContent_WelcomeMessageQuery extends Request {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the Project_DocumentContent_WelcomeMessage query and return a WelcomeMessage
+   *
+   * @returns parsed response from Project_DocumentContent_WelcomeMessageQuery
+   */
+  public async fetch(): LinearFetch<WelcomeMessage | undefined> {
+    const response = await this._request<
+      L.Project_DocumentContent_WelcomeMessageQuery,
+      L.Project_DocumentContent_WelcomeMessageQueryVariables
+    >(L.Project_DocumentContent_WelcomeMessageDocument.toString(), {
+      id: this._id,
+    });
+    const data = response.project.documentContent?.welcomeMessage;
+
+    return data ? new WelcomeMessage(this._request, data) : undefined;
+  }
+}
+
+/**
  * A fetchable ProjectLabel_Children Query
  *
  * @param request - function to call the graphql client
@@ -36887,6 +37032,38 @@ export class ProjectMilestone_DocumentContent_AiPromptRulesQuery extends Request
     const data = response.projectMilestone.documentContent?.aiPromptRules;
 
     return data ? new AiPromptRules(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable ProjectMilestone_DocumentContent_WelcomeMessage Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to projectMilestone_documentContent
+ */
+export class ProjectMilestone_DocumentContent_WelcomeMessageQuery extends Request {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the ProjectMilestone_DocumentContent_WelcomeMessage query and return a WelcomeMessage
+   *
+   * @returns parsed response from ProjectMilestone_DocumentContent_WelcomeMessageQuery
+   */
+  public async fetch(): LinearFetch<WelcomeMessage | undefined> {
+    const response = await this._request<
+      L.ProjectMilestone_DocumentContent_WelcomeMessageQuery,
+      L.ProjectMilestone_DocumentContent_WelcomeMessageQueryVariables
+    >(L.ProjectMilestone_DocumentContent_WelcomeMessageDocument.toString(), {
+      id: this._id,
+    });
+    const data = response.projectMilestone.documentContent?.welcomeMessage;
+
+    return data ? new WelcomeMessage(this._request, data) : undefined;
   }
 }
 

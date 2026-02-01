@@ -880,6 +880,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the comment_documentContent model query for Comment_DocumentContent_WelcomeMessage */
+    it("comment_documentContent.welcomeMessage", async () => {
+      if (_documentContent) {
+        const welcomeMessage: L.WelcomeMessage | undefined | null = _documentContent.welcomeMessage;
+        expect(welcomeMessage instanceof L.WelcomeMessage);
+      } else {
+        console.warn("codegen-doc:print: No documentContent found - cannot test _documentContent.welcomeMessage query");
+      }
+    });
+
     /** Test the comment model query for Comment_ExternalThread */
     it("comment.externalThread", async () => {
       if (_comment) {
@@ -2000,6 +2010,16 @@ describe("generated", () => {
         expect(aiPromptRules instanceof L.AiPromptRules);
       } else {
         console.warn("codegen-doc:print: No documentContent found - cannot test _documentContent.aiPromptRules query");
+      }
+    });
+
+    /** Test the initiative_documentContent model query for Initiative_DocumentContent_WelcomeMessage */
+    it("initiative_documentContent.welcomeMessage", async () => {
+      if (_documentContent) {
+        const welcomeMessage: L.WelcomeMessage | undefined | null = _documentContent.welcomeMessage;
+        expect(welcomeMessage instanceof L.WelcomeMessage);
+      } else {
+        console.warn("codegen-doc:print: No documentContent found - cannot test _documentContent.welcomeMessage query");
       }
     });
 
@@ -4220,6 +4240,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the projectMilestone_documentContent model query for ProjectMilestone_DocumentContent_WelcomeMessage */
+    it("projectMilestone_documentContent.welcomeMessage", async () => {
+      if (_documentContent) {
+        const welcomeMessage: L.WelcomeMessage | undefined | null = _documentContent.welcomeMessage;
+        expect(welcomeMessage instanceof L.WelcomeMessage);
+      } else {
+        console.warn("codegen-doc:print: No documentContent found - cannot test _documentContent.welcomeMessage query");
+      }
+    });
+
     /** Test the projectMilestone connection query for the Issue */
     it("projectMilestone.issues", async () => {
       if (_projectMilestone) {
@@ -4457,6 +4487,16 @@ describe("generated", () => {
         expect(aiPromptRules instanceof L.AiPromptRules);
       } else {
         console.warn("codegen-doc:print: No documentContent found - cannot test _documentContent.aiPromptRules query");
+      }
+    });
+
+    /** Test the project_documentContent model query for Project_DocumentContent_WelcomeMessage */
+    it("project_documentContent.welcomeMessage", async () => {
+      if (_documentContent) {
+        const welcomeMessage: L.WelcomeMessage | undefined | null = _documentContent.welcomeMessage;
+        expect(welcomeMessage instanceof L.WelcomeMessage);
+      } else {
+        console.warn("codegen-doc:print: No documentContent found - cannot test _documentContent.welcomeMessage query");
       }
     });
 

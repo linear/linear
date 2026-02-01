@@ -3698,6 +3698,8 @@ export type DocumentContent = Node & {
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
+  /** The welcome message that the content is associated with. */
+  welcomeMessage?: Maybe<WelcomeMessage>;
 };
 
 /** Certain properties of a document content. */
@@ -21604,6 +21606,28 @@ export type WebhookUpdateInput = {
   url?: InputMaybe<Scalars["String"]>;
 };
 
+/** A welcome message for new users joining the workspace. */
+export type WelcomeMessage = Node & {
+  __typename?: "WelcomeMessage";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** Whether the welcome message is enabled. */
+  enabled: Scalars["Boolean"];
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The title of the welcome message notification. */
+  title?: Maybe<Scalars["String"]>;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+  /** The user who last updated the welcome message. */
+  updatedBy?: Maybe<User>;
+};
+
 export type WorkflowDefinition = Node & {
   __typename?: "WorkflowDefinition";
   /** An array of activities that will be executed as part of the workflow. */
@@ -22036,6 +22060,12 @@ export type CommentFragment = { __typename: "Comment" } & Pick<
           issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
           projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
           project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+          welcomeMessage?: Maybe<
+            { __typename: "WelcomeMessage" } & Pick<
+              WelcomeMessage,
+              "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+            > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+          >;
         }
     >;
     syncedWith?: Maybe<
@@ -22356,6 +22386,12 @@ export type DocumentContentFragment = { __typename: "DocumentContent" } & Pick<
     issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
     projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+    welcomeMessage?: Maybe<
+      { __typename: "WelcomeMessage" } & Pick<
+        WelcomeMessage,
+        "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+      > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+    >;
   };
 
 export type DocumentNotificationFragment = { __typename: "DocumentNotification" } & Pick<
@@ -23548,6 +23584,12 @@ export type ProjectMilestoneFragment = { __typename: "ProjectMilestone" } & Pick
           issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
           projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
           project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+          welcomeMessage?: Maybe<
+            { __typename: "WelcomeMessage" } & Pick<
+              WelcomeMessage,
+              "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+            > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+          >;
         }
     >;
     project: { __typename?: "Project" } & Pick<Project, "id">;
@@ -24086,6 +24128,12 @@ export type ProjectFragment = { __typename: "Project" } & Pick<
           issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
           projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
           project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+          welcomeMessage?: Maybe<
+            { __typename: "WelcomeMessage" } & Pick<
+              WelcomeMessage,
+              "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+            > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+          >;
         }
     >;
     lastUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
@@ -24853,6 +24901,11 @@ export type WebhookFragment = { __typename: "Webhook" } & Pick<
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
 
+export type WelcomeMessageFragment = { __typename: "WelcomeMessage" } & Pick<
+  WelcomeMessage,
+  "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+> & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
+
 export type AiPromptRulesFragment = { __typename: "AiPromptRules" } & Pick<
   AiPromptRules,
   "updatedAt" | "archivedAt" | "createdAt" | "id"
@@ -25129,6 +25182,12 @@ export type InitiativeFragment = { __typename: "Initiative" } & Pick<
           issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
           projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
           project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+          welcomeMessage?: Maybe<
+            { __typename: "WelcomeMessage" } & Pick<
+              WelcomeMessage,
+              "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+            > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+          >;
         }
     >;
     lastUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
@@ -28243,6 +28302,12 @@ export type CommentConnectionFragment = { __typename: "CommentConnection" } & {
               issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
               projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+              welcomeMessage?: Maybe<
+                { __typename: "WelcomeMessage" } & Pick<
+                  WelcomeMessage,
+                  "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+              >;
             }
         >;
         syncedWith?: Maybe<
@@ -29043,6 +29108,12 @@ export type InitiativeConnectionFragment = { __typename: "InitiativeConnection" 
               issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
               projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+              welcomeMessage?: Maybe<
+                { __typename: "WelcomeMessage" } & Pick<
+                  WelcomeMessage,
+                  "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+              >;
             }
         >;
         lastUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
@@ -30344,6 +30415,8 @@ type Node_ViewPreferences_Fragment = { __typename: "ViewPreferences" } & Pick<Vi
 
 type Node_Webhook_Fragment = { __typename: "Webhook" } & Pick<Webhook, "id">;
 
+type Node_WelcomeMessage_Fragment = { __typename: "WelcomeMessage" } & Pick<WelcomeMessage, "id">;
+
 type Node_WorkflowDefinition_Fragment = { __typename: "WorkflowDefinition" } & Pick<WorkflowDefinition, "id">;
 
 type Node_WorkflowState_Fragment = { __typename: "WorkflowState" } & Pick<WorkflowState, "id">;
@@ -30447,6 +30520,7 @@ export type NodeFragment =
   | Node_UserSettings_Fragment
   | Node_ViewPreferences_Fragment
   | Node_Webhook_Fragment
+  | Node_WelcomeMessage_Fragment
   | Node_WorkflowDefinition_Fragment
   | Node_WorkflowState_Fragment;
 
@@ -32124,6 +32198,12 @@ export type ProjectConnectionFragment = { __typename: "ProjectConnection" } & {
               issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
               projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+              welcomeMessage?: Maybe<
+                { __typename: "WelcomeMessage" } & Pick<
+                  WelcomeMessage,
+                  "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+              >;
             }
         >;
         lastUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
@@ -32212,6 +32292,12 @@ export type ProjectMilestoneConnectionFragment = { __typename: "ProjectMilestone
               issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
               projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+              welcomeMessage?: Maybe<
+                { __typename: "WelcomeMessage" } & Pick<
+                  WelcomeMessage,
+                  "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+              >;
             }
         >;
         project: { __typename?: "Project" } & Pick<Project, "id">;
@@ -32359,6 +32445,12 @@ export type ProjectSearchPayloadFragment = { __typename: "ProjectSearchPayload" 
                 issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
                 projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
                 project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                welcomeMessage?: Maybe<
+                  { __typename: "WelcomeMessage" } & Pick<
+                    WelcomeMessage,
+                    "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                  > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+                >;
               }
           >;
           lastUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
@@ -32440,6 +32532,12 @@ export type ProjectSearchResultFragment = { __typename: "ProjectSearchResult" } 
           issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
           projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
           project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+          welcomeMessage?: Maybe<
+            { __typename: "WelcomeMessage" } & Pick<
+              WelcomeMessage,
+              "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+            > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+          >;
         }
     >;
     lastUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
@@ -33815,6 +33913,12 @@ export type AttachmentIssue_CommentsQuery = { __typename?: "Query" } & {
                   issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
                   projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
                   project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                  welcomeMessage?: Maybe<
+                    { __typename: "WelcomeMessage" } & Pick<
+                      WelcomeMessage,
+                      "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                    > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+                  >;
                 }
             >;
             syncedWith?: Maybe<
@@ -34838,6 +34942,12 @@ export type CommentQuery = { __typename?: "Query" } & {
             issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
             projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+            welcomeMessage?: Maybe<
+              { __typename: "WelcomeMessage" } & Pick<
+                WelcomeMessage,
+                "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+              > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+            >;
           }
       >;
       syncedWith?: Maybe<
@@ -34966,6 +35076,12 @@ export type Comment_ChildrenQuery = { __typename?: "Query" } & {
                   issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
                   projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
                   project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                  welcomeMessage?: Maybe<
+                    { __typename: "WelcomeMessage" } & Pick<
+                      WelcomeMessage,
+                      "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                    > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+                  >;
                 }
             >;
             syncedWith?: Maybe<
@@ -35163,6 +35279,12 @@ export type Comment_DocumentContentQuery = { __typename?: "Query" } & {
           issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
           projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
           project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+          welcomeMessage?: Maybe<
+            { __typename: "WelcomeMessage" } & Pick<
+              WelcomeMessage,
+              "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+            > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+          >;
         }
     >;
   };
@@ -35181,6 +35303,26 @@ export type Comment_DocumentContent_AiPromptRulesQuery = { __typename?: "Query" 
           { __typename: "AiPromptRules" } & Pick<AiPromptRules, "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
               updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             }
+        >;
+      }
+    >;
+  };
+};
+
+export type Comment_DocumentContent_WelcomeMessageQueryVariables = Exact<{
+  hash?: InputMaybe<Scalars["String"]>;
+  id?: InputMaybe<Scalars["String"]>;
+}>;
+
+export type Comment_DocumentContent_WelcomeMessageQuery = { __typename?: "Query" } & {
+  comment: { __typename?: "Comment" } & {
+    documentContent?: Maybe<
+      { __typename?: "DocumentContent" } & {
+        welcomeMessage?: Maybe<
+          { __typename: "WelcomeMessage" } & Pick<
+            WelcomeMessage,
+            "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+          > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
         >;
       }
     >;
@@ -35277,6 +35419,12 @@ export type CommentsQuery = { __typename?: "Query" } & {
                 issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
                 projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
                 project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                welcomeMessage?: Maybe<
+                  { __typename: "WelcomeMessage" } & Pick<
+                    WelcomeMessage,
+                    "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                  > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+                >;
               }
           >;
           syncedWith?: Maybe<
@@ -35449,6 +35597,12 @@ export type CustomView_InitiativesQuery = { __typename?: "Query" } & {
                   issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
                   projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
                   project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                  welcomeMessage?: Maybe<
+                    { __typename: "WelcomeMessage" } & Pick<
+                      WelcomeMessage,
+                      "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                    > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+                  >;
                 }
             >;
             lastUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
@@ -35705,6 +35859,12 @@ export type CustomView_ProjectsQuery = { __typename?: "Query" } & {
                   issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
                   projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
                   project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                  welcomeMessage?: Maybe<
+                    { __typename: "WelcomeMessage" } & Pick<
+                      WelcomeMessage,
+                      "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                    > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+                  >;
                 }
             >;
             lastUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
@@ -36557,6 +36717,12 @@ export type Document_CommentsQuery = { __typename?: "Query" } & {
                   issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
                   projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
                   project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                  welcomeMessage?: Maybe<
+                    { __typename: "WelcomeMessage" } & Pick<
+                      WelcomeMessage,
+                      "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                    > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+                  >;
                 }
             >;
             syncedWith?: Maybe<
@@ -37013,6 +37179,12 @@ export type InitiativeQuery = { __typename?: "Query" } & {
             issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
             projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+            welcomeMessage?: Maybe<
+              { __typename: "WelcomeMessage" } & Pick<
+                WelcomeMessage,
+                "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+              > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+            >;
           }
       >;
       lastUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
@@ -37042,6 +37214,12 @@ export type Initiative_DocumentContentQuery = { __typename?: "Query" } & {
           issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
           projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
           project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+          welcomeMessage?: Maybe<
+            { __typename: "WelcomeMessage" } & Pick<
+              WelcomeMessage,
+              "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+            > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+          >;
         }
     >;
   };
@@ -37059,6 +37237,25 @@ export type Initiative_DocumentContent_AiPromptRulesQuery = { __typename?: "Quer
           { __typename: "AiPromptRules" } & Pick<AiPromptRules, "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
               updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             }
+        >;
+      }
+    >;
+  };
+};
+
+export type Initiative_DocumentContent_WelcomeMessageQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type Initiative_DocumentContent_WelcomeMessageQuery = { __typename?: "Query" } & {
+  initiative: { __typename?: "Initiative" } & {
+    documentContent?: Maybe<
+      { __typename?: "DocumentContent" } & {
+        welcomeMessage?: Maybe<
+          { __typename: "WelcomeMessage" } & Pick<
+            WelcomeMessage,
+            "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+          > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
         >;
       }
     >;
@@ -37305,6 +37502,12 @@ export type Initiative_ProjectsQuery = { __typename?: "Query" } & {
                   issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
                   projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
                   project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                  welcomeMessage?: Maybe<
+                    { __typename: "WelcomeMessage" } & Pick<
+                      WelcomeMessage,
+                      "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                    > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+                  >;
                 }
             >;
             lastUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
@@ -37386,6 +37589,12 @@ export type Initiative_SubInitiativesQuery = { __typename?: "Query" } & {
                   issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
                   projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
                   project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                  welcomeMessage?: Maybe<
+                    { __typename: "WelcomeMessage" } & Pick<
+                      WelcomeMessage,
+                      "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                    > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+                  >;
                 }
             >;
             lastUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
@@ -37593,6 +37802,12 @@ export type InitiativeUpdate_CommentsQuery = { __typename?: "Query" } & {
                   issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
                   projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
                   project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                  welcomeMessage?: Maybe<
+                    { __typename: "WelcomeMessage" } & Pick<
+                      WelcomeMessage,
+                      "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                    > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+                  >;
                 }
             >;
             syncedWith?: Maybe<
@@ -37758,6 +37973,12 @@ export type InitiativesQuery = { __typename?: "Query" } & {
                 issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
                 projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
                 project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                welcomeMessage?: Maybe<
+                  { __typename: "WelcomeMessage" } & Pick<
+                    WelcomeMessage,
+                    "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                  > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+                >;
               }
           >;
           lastUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
@@ -38240,6 +38461,12 @@ export type Issue_CommentsQuery = { __typename?: "Query" } & {
                   issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
                   projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
                   project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                  welcomeMessage?: Maybe<
+                    { __typename: "WelcomeMessage" } & Pick<
+                      WelcomeMessage,
+                      "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                    > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+                  >;
                 }
             >;
             syncedWith?: Maybe<
@@ -39883,6 +40110,12 @@ export type IssueVcsBranchSearch_CommentsQuery = { __typename?: "Query" } & {
                     issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
                     projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    welcomeMessage?: Maybe<
+                      { __typename: "WelcomeMessage" } & Pick<
+                        WelcomeMessage,
+                        "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                      > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+                    >;
                   }
               >;
               syncedWith?: Maybe<
@@ -42388,6 +42621,12 @@ export type ProjectQuery = { __typename?: "Query" } & {
             issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
             projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+            welcomeMessage?: Maybe<
+              { __typename: "WelcomeMessage" } & Pick<
+                WelcomeMessage,
+                "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+              > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+            >;
           }
       >;
       lastUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
@@ -42468,6 +42707,12 @@ export type Project_CommentsQuery = { __typename?: "Query" } & {
                   issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
                   projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
                   project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                  welcomeMessage?: Maybe<
+                    { __typename: "WelcomeMessage" } & Pick<
+                      WelcomeMessage,
+                      "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                    > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+                  >;
                 }
             >;
             syncedWith?: Maybe<
@@ -42542,6 +42787,12 @@ export type Project_DocumentContentQuery = { __typename?: "Query" } & {
           issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
           projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
           project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+          welcomeMessage?: Maybe<
+            { __typename: "WelcomeMessage" } & Pick<
+              WelcomeMessage,
+              "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+            > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+          >;
         }
     >;
   };
@@ -42559,6 +42810,25 @@ export type Project_DocumentContent_AiPromptRulesQuery = { __typename?: "Query" 
           { __typename: "AiPromptRules" } & Pick<AiPromptRules, "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
               updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             }
+        >;
+      }
+    >;
+  };
+};
+
+export type Project_DocumentContent_WelcomeMessageQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type Project_DocumentContent_WelcomeMessageQuery = { __typename?: "Query" } & {
+  project: { __typename?: "Project" } & {
+    documentContent?: Maybe<
+      { __typename?: "DocumentContent" } & {
+        welcomeMessage?: Maybe<
+          { __typename: "WelcomeMessage" } & Pick<
+            WelcomeMessage,
+            "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+          > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
         >;
       }
     >;
@@ -42760,6 +43030,12 @@ export type Project_InitiativesQuery = { __typename?: "Query" } & {
                   issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
                   projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
                   project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                  welcomeMessage?: Maybe<
+                    { __typename: "WelcomeMessage" } & Pick<
+                      WelcomeMessage,
+                      "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                    > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+                  >;
                 }
             >;
             lastUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
@@ -43124,6 +43400,12 @@ export type Project_ProjectMilestonesQuery = { __typename?: "Query" } & {
                   issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
                   projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
                   project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                  welcomeMessage?: Maybe<
+                    { __typename: "WelcomeMessage" } & Pick<
+                      WelcomeMessage,
+                      "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                    > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+                  >;
                 }
             >;
             project: { __typename?: "Project" } & Pick<Project, "id">;
@@ -43463,6 +43745,12 @@ export type ProjectLabel_ProjectsQuery = { __typename?: "Query" } & {
                   issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
                   projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
                   project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                  welcomeMessage?: Maybe<
+                    { __typename: "WelcomeMessage" } & Pick<
+                      WelcomeMessage,
+                      "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                    > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+                  >;
                 }
             >;
             lastUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
@@ -43544,6 +43832,12 @@ export type ProjectMilestoneQuery = { __typename?: "Query" } & {
             issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
             projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+            welcomeMessage?: Maybe<
+              { __typename: "WelcomeMessage" } & Pick<
+                WelcomeMessage,
+                "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+              > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+            >;
           }
       >;
       project: { __typename?: "Project" } & Pick<Project, "id">;
@@ -43571,6 +43865,12 @@ export type ProjectMilestone_DocumentContentQuery = { __typename?: "Query" } & {
           issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
           projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
           project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+          welcomeMessage?: Maybe<
+            { __typename: "WelcomeMessage" } & Pick<
+              WelcomeMessage,
+              "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+            > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+          >;
         }
     >;
   };
@@ -43588,6 +43888,25 @@ export type ProjectMilestone_DocumentContent_AiPromptRulesQuery = { __typename?:
           { __typename: "AiPromptRules" } & Pick<AiPromptRules, "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
               updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             }
+        >;
+      }
+    >;
+  };
+};
+
+export type ProjectMilestone_DocumentContent_WelcomeMessageQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type ProjectMilestone_DocumentContent_WelcomeMessageQuery = { __typename?: "Query" } & {
+  projectMilestone: { __typename?: "ProjectMilestone" } & {
+    documentContent?: Maybe<
+      { __typename?: "DocumentContent" } & {
+        welcomeMessage?: Maybe<
+          { __typename: "WelcomeMessage" } & Pick<
+            WelcomeMessage,
+            "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+          > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
         >;
       }
     >;
@@ -43757,6 +44076,12 @@ export type ProjectMilestonesQuery = { __typename?: "Query" } & {
                 issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
                 projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
                 project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                welcomeMessage?: Maybe<
+                  { __typename: "WelcomeMessage" } & Pick<
+                    WelcomeMessage,
+                    "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                  > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+                >;
               }
           >;
           project: { __typename?: "Project" } & Pick<Project, "id">;
@@ -43975,6 +44300,12 @@ export type ProjectUpdate_CommentsQuery = { __typename?: "Query" } & {
                   issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
                   projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
                   project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                  welcomeMessage?: Maybe<
+                    { __typename: "WelcomeMessage" } & Pick<
+                      WelcomeMessage,
+                      "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                    > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+                  >;
                 }
             >;
             syncedWith?: Maybe<
@@ -44158,6 +44489,12 @@ export type ProjectsQuery = { __typename?: "Query" } & {
                 issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
                 projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
                 project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                welcomeMessage?: Maybe<
+                  { __typename: "WelcomeMessage" } & Pick<
+                    WelcomeMessage,
+                    "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                  > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+                >;
               }
           >;
           lastUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
@@ -44291,6 +44628,12 @@ export type Roadmap_ProjectsQuery = { __typename?: "Query" } & {
                   issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
                   projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
                   project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                  welcomeMessage?: Maybe<
+                    { __typename: "WelcomeMessage" } & Pick<
+                      WelcomeMessage,
+                      "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                    > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+                  >;
                 }
             >;
             lastUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
@@ -44692,6 +45035,12 @@ export type SearchProjectsQuery = { __typename?: "Query" } & {
                   issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
                   projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
                   project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                  welcomeMessage?: Maybe<
+                    { __typename: "WelcomeMessage" } & Pick<
+                      WelcomeMessage,
+                      "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                    > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+                  >;
                 }
             >;
             lastUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
@@ -45258,6 +45607,12 @@ export type Team_ProjectsQuery = { __typename?: "Query" } & {
                   issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
                   projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
                   project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                  welcomeMessage?: Maybe<
+                    { __typename: "WelcomeMessage" } & Pick<
+                      WelcomeMessage,
+                      "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+                    > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+                  >;
                 }
             >;
             lastUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
@@ -62782,6 +63137,23 @@ export const AiPromptRulesFragmentDoc = new TypedDocumentString(
     `,
   { fragmentName: "AiPromptRules" }
 ) as unknown as TypedDocumentString<AiPromptRulesFragment, unknown>;
+export const WelcomeMessageFragmentDoc = new TypedDocumentString(
+  `
+    fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
+}
+    `,
+  { fragmentName: "WelcomeMessage" }
+) as unknown as TypedDocumentString<WelcomeMessageFragment, unknown>;
 export const DocumentContentFragmentDoc = new TypedDocumentString(
   `
     fragment DocumentContent on DocumentContent {
@@ -62811,8 +63183,23 @@ export const DocumentContentFragmentDoc = new TypedDocumentString(
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
-    fragment AiPromptRules on AiPromptRules {
+    fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
+}
+fragment AiPromptRules on AiPromptRules {
   __typename
   updatedAt
   archivedAt
@@ -63025,6 +63412,9 @@ fragment DocumentContent on DocumentContent {
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 fragment Reaction on Reaction {
   __typename
@@ -63051,6 +63441,18 @@ fragment Reaction on Reaction {
   user {
     id
   }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -63219,6 +63621,9 @@ fragment DocumentContent on DocumentContent {
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 fragment Reaction on Reaction {
   __typename
@@ -63245,6 +63650,18 @@ fragment Reaction on Reaction {
   user {
     id
   }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -65286,6 +65703,21 @@ export const InitiativeFragmentDoc = new TypedDocumentString(
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -65337,6 +65769,21 @@ export const InitiativeConnectionFragmentDoc = new TypedDocumentString(
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -69509,6 +69956,21 @@ export const ProjectFragmentDoc = new TypedDocumentString(
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -69560,6 +70022,9 @@ export const ProjectConnectionFragmentDoc = new TypedDocumentString(
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 fragment Project on Project {
   __typename
@@ -69634,6 +70099,18 @@ fragment Project on Project {
   slackNewIssue
   slackIssueStatuses
   state
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -69839,6 +70316,21 @@ export const ProjectMilestoneFragmentDoc = new TypedDocumentString(
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -69890,6 +70382,9 @@ export const ProjectMilestoneConnectionFragmentDoc = new TypedDocumentString(
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 fragment ProjectMilestone on ProjectMilestone {
   __typename
@@ -69909,6 +70404,18 @@ fragment ProjectMilestone on ProjectMilestone {
   archivedAt
   createdAt
   id
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -70195,6 +70702,21 @@ export const ProjectSearchResultFragmentDoc = new TypedDocumentString(
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -70250,6 +70772,21 @@ export const ProjectSearchPayloadFragmentDoc = new TypedDocumentString(
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -73087,6 +73624,9 @@ fragment DocumentContent on DocumentContent {
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 fragment Reaction on Reaction {
   __typename
@@ -73113,6 +73653,18 @@ fragment Reaction on Reaction {
   user {
     id
   }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -74339,6 +74891,9 @@ fragment DocumentContent on DocumentContent {
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 fragment Reaction on Reaction {
   __typename
@@ -74365,6 +74920,18 @@ fragment Reaction on Reaction {
   user {
     id
   }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -74553,6 +75120,9 @@ fragment DocumentContent on DocumentContent {
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 fragment Reaction on Reaction {
   __typename
@@ -74579,6 +75149,18 @@ fragment Reaction on Reaction {
   user {
     id
   }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -74881,6 +75463,21 @@ export const Comment_DocumentContentDocument = new TypedDocumentString(`
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -74914,6 +75511,31 @@ export const Comment_DocumentContent_AiPromptRulesDocument = new TypedDocumentSt
 }`) as unknown as TypedDocumentString<
   Comment_DocumentContent_AiPromptRulesQuery,
   Comment_DocumentContent_AiPromptRulesQueryVariables
+>;
+export const Comment_DocumentContent_WelcomeMessageDocument = new TypedDocumentString(`
+    query comment_documentContent_welcomeMessage($hash: String, $id: String) {
+  comment(hash: $hash, id: $id) {
+    documentContent {
+      welcomeMessage {
+        ...WelcomeMessage
+      }
+    }
+  }
+}
+    fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
+}`) as unknown as TypedDocumentString<
+  Comment_DocumentContent_WelcomeMessageQuery,
+  Comment_DocumentContent_WelcomeMessageQueryVariables
 >;
 export const Comment_ExternalThreadDocument = new TypedDocumentString(`
     query comment_externalThread($hash: String, $id: String) {
@@ -75058,6 +75680,9 @@ fragment DocumentContent on DocumentContent {
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 fragment Reaction on Reaction {
   __typename
@@ -75084,6 +75709,18 @@ fragment Reaction on Reaction {
   user {
     id
   }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -75254,6 +75891,21 @@ export const CustomView_InitiativesDocument = new TypedDocumentString(`
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -75629,6 +76281,9 @@ export const CustomView_ProjectsDocument = new TypedDocumentString(`
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 fragment Project on Project {
   __typename
@@ -75703,6 +76358,18 @@ fragment Project on Project {
   slackNewIssue
   slackIssueStatuses
   state
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -76955,6 +77622,9 @@ fragment DocumentContent on DocumentContent {
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 fragment Reaction on Reaction {
   __typename
@@ -76981,6 +77651,18 @@ fragment Reaction on Reaction {
   user {
     id
   }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -77633,6 +78315,21 @@ export const InitiativeDocument = new TypedDocumentString(`
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -77725,6 +78422,21 @@ export const Initiative_DocumentContentDocument = new TypedDocumentString(`
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -77758,6 +78470,31 @@ export const Initiative_DocumentContent_AiPromptRulesDocument = new TypedDocumen
 }`) as unknown as TypedDocumentString<
   Initiative_DocumentContent_AiPromptRulesQuery,
   Initiative_DocumentContent_AiPromptRulesQueryVariables
+>;
+export const Initiative_DocumentContent_WelcomeMessageDocument = new TypedDocumentString(`
+    query initiative_documentContent_welcomeMessage($id: String!) {
+  initiative(id: $id) {
+    documentContent {
+      welcomeMessage {
+        ...WelcomeMessage
+      }
+    }
+  }
+}
+    fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
+}`) as unknown as TypedDocumentString<
+  Initiative_DocumentContent_WelcomeMessageQuery,
+  Initiative_DocumentContent_WelcomeMessageQueryVariables
 >;
 export const Initiative_DocumentsDocument = new TypedDocumentString(`
     query initiative_documents($id: String!, $after: String, $before: String, $filter: DocumentFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
@@ -78044,6 +78781,9 @@ export const Initiative_ProjectsDocument = new TypedDocumentString(`
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 fragment Project on Project {
   __typename
@@ -78119,6 +78859,18 @@ fragment Project on Project {
   slackIssueStatuses
   state
 }
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
+}
 fragment AiPromptRules on AiPromptRules {
   __typename
   updatedAt
@@ -78189,6 +78941,21 @@ export const Initiative_SubInitiativesDocument = new TypedDocumentString(`
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -78586,6 +79353,9 @@ fragment DocumentContent on DocumentContent {
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 fragment Reaction on Reaction {
   __typename
@@ -78612,6 +79382,18 @@ fragment Reaction on Reaction {
   user {
     id
   }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -78799,6 +79581,21 @@ export const InitiativesDocument = new TypedDocumentString(`
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -79629,6 +80426,9 @@ fragment DocumentContent on DocumentContent {
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 fragment Reaction on Reaction {
   __typename
@@ -79655,6 +80455,18 @@ fragment Reaction on Reaction {
   user {
     id
   }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -82009,6 +82821,9 @@ fragment DocumentContent on DocumentContent {
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 fragment Reaction on Reaction {
   __typename
@@ -82035,6 +82850,18 @@ fragment Reaction on Reaction {
   user {
     id
   }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -84758,6 +85585,9 @@ export const ProjectDocument = new TypedDocumentString(`
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 fragment Project on Project {
   __typename
@@ -84832,6 +85662,18 @@ fragment Project on Project {
   slackNewIssue
   slackIssueStatuses
   state
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -84968,6 +85810,9 @@ fragment DocumentContent on DocumentContent {
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 fragment Reaction on Reaction {
   __typename
@@ -84994,6 +85839,18 @@ fragment Reaction on Reaction {
   user {
     id
   }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -85091,6 +85948,21 @@ export const Project_DocumentContentDocument = new TypedDocumentString(`
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -85124,6 +85996,31 @@ export const Project_DocumentContent_AiPromptRulesDocument = new TypedDocumentSt
 }`) as unknown as TypedDocumentString<
   Project_DocumentContent_AiPromptRulesQuery,
   Project_DocumentContent_AiPromptRulesQueryVariables
+>;
+export const Project_DocumentContent_WelcomeMessageDocument = new TypedDocumentString(`
+    query project_documentContent_welcomeMessage($id: String!) {
+  project(id: $id) {
+    documentContent {
+      welcomeMessage {
+        ...WelcomeMessage
+      }
+    }
+  }
+}
+    fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
+}`) as unknown as TypedDocumentString<
+  Project_DocumentContent_WelcomeMessageQuery,
+  Project_DocumentContent_WelcomeMessageQueryVariables
 >;
 export const Project_DocumentsDocument = new TypedDocumentString(`
     query project_documents($id: String!, $after: String, $before: String, $filter: DocumentFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
@@ -85368,6 +86265,21 @@ export const Project_InitiativesDocument = new TypedDocumentString(`
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -85948,6 +86860,9 @@ export const Project_ProjectMilestonesDocument = new TypedDocumentString(`
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 fragment ProjectMilestone on ProjectMilestone {
   __typename
@@ -85967,6 +86882,18 @@ fragment ProjectMilestone on ProjectMilestone {
   archivedAt
   createdAt
   id
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -86397,6 +87324,9 @@ export const ProjectLabel_ProjectsDocument = new TypedDocumentString(`
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 fragment Project on Project {
   __typename
@@ -86471,6 +87401,18 @@ fragment Project on Project {
   slackNewIssue
   slackIssueStatuses
   state
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -86582,6 +87524,9 @@ export const ProjectMilestoneDocument = new TypedDocumentString(`
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 fragment ProjectMilestone on ProjectMilestone {
   __typename
@@ -86601,6 +87546,18 @@ fragment ProjectMilestone on ProjectMilestone {
   archivedAt
   createdAt
   id
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -86647,6 +87604,21 @@ export const ProjectMilestone_DocumentContentDocument = new TypedDocumentString(
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -86683,6 +87655,31 @@ export const ProjectMilestone_DocumentContent_AiPromptRulesDocument = new TypedD
 }`) as unknown as TypedDocumentString<
   ProjectMilestone_DocumentContent_AiPromptRulesQuery,
   ProjectMilestone_DocumentContent_AiPromptRulesQueryVariables
+>;
+export const ProjectMilestone_DocumentContent_WelcomeMessageDocument = new TypedDocumentString(`
+    query projectMilestone_documentContent_welcomeMessage($id: String!) {
+  projectMilestone(id: $id) {
+    documentContent {
+      welcomeMessage {
+        ...WelcomeMessage
+      }
+    }
+  }
+}
+    fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
+}`) as unknown as TypedDocumentString<
+  ProjectMilestone_DocumentContent_WelcomeMessageQuery,
+  ProjectMilestone_DocumentContent_WelcomeMessageQueryVariables
 >;
 export const ProjectMilestone_IssuesDocument = new TypedDocumentString(`
     query projectMilestone_issues($id: String!, $after: String, $before: String, $filter: IssueFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
@@ -86930,6 +87927,9 @@ export const ProjectMilestonesDocument = new TypedDocumentString(`
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 fragment ProjectMilestone on ProjectMilestone {
   __typename
@@ -86949,6 +87949,18 @@ fragment ProjectMilestone on ProjectMilestone {
   archivedAt
   createdAt
   id
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -87306,6 +88318,9 @@ fragment DocumentContent on DocumentContent {
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 fragment Reaction on Reaction {
   __typename
@@ -87332,6 +88347,18 @@ fragment Reaction on Reaction {
   user {
     id
   }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -87519,6 +88546,9 @@ export const ProjectsDocument = new TypedDocumentString(`
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 fragment Project on Project {
   __typename
@@ -87593,6 +88623,18 @@ fragment Project on Project {
   slackNewIssue
   slackIssueStatuses
   state
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -87721,6 +88763,9 @@ export const Roadmap_ProjectsDocument = new TypedDocumentString(`
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 fragment Project on Project {
   __typename
@@ -87795,6 +88840,18 @@ fragment Project on Project {
   slackNewIssue
   slackIssueStatuses
   state
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -88327,6 +89384,21 @@ export const SearchProjectsDocument = new TypedDocumentString(`
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -89162,6 +90234,9 @@ export const Team_ProjectsDocument = new TypedDocumentString(`
   archivedAt
   createdAt
   id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 fragment Project on Project {
   __typename
@@ -89236,6 +90311,18 @@ fragment Project on Project {
   slackNewIssue
   slackIssueStatuses
   state
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
 }
 fragment AiPromptRules on AiPromptRules {
   __typename

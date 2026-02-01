@@ -6449,6 +6449,10 @@ type DocumentContent implements Node {
       been updated after creation.
   """
   updatedAt: DateTime!
+  """
+  The welcome message that the content is associated with.
+  """
+  welcomeMessage: WelcomeMessage
 }
 
 """
@@ -38577,6 +38581,41 @@ input WebhookUpdateInput {
   The URL that will be called on data changes.
   """
   url: String
+}
+
+"""
+A welcome message for new users joining the workspace.
+"""
+type WelcomeMessage implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  Whether the welcome message is enabled.
+  """
+  enabled: Boolean!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The title of the welcome message notification.
+  """
+  title: String
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The user who last updated the welcome message.
+  """
+  updatedBy: User
 }
 
 type WorkflowDefinition implements Node {
