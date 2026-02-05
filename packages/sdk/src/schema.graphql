@@ -19932,6 +19932,37 @@ type Mutation {
     trash: Boolean
   ): ProjectArchivePayload! @deprecated(reason: "Deprecated in favor of projectDelete.")
   """
+  Creates a new project attachment
+  """
+  projectAttachmentCreate(
+    """
+    The attachment object to create.
+    """
+    input: ProjectAttachmentCreateInput!
+  ): ProjectAttachmentPayload!
+  """
+  Deletes a project attachment.
+  """
+  projectAttachmentDelete(
+    """
+    The identifier of the project attachment to delete.
+    """
+    id: String!
+  ): DeletePayload!
+  """
+  Updates an existing project attachment.
+  """
+  projectAttachmentUpdate(
+    """
+    The identifier of the project attachment to update.
+    """
+    id: String!
+    """
+    A partial project attachment object to update the attachment with.
+    """
+    input: ProjectAttachmentUpdateInput!
+  ): ProjectAttachmentPayload!
+  """
   Creates a new project.
   """
   projectCreate(
@@ -25839,6 +25870,10 @@ type ProjectAttachment implements Node {
   """
   archivedAt: DateTime
   """
+  The body data of the attachment, if any.
+  """
+  bodyData: String
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
@@ -25854,6 +25889,10 @@ type ProjectAttachment implements Node {
   Custom metadata related to the attachment.
   """
   metadata: JSONObject!
+  """
+  The project this attachment belongs to.
+  """
+  project: Project!
   """
   Information about the external source which created the attachment.
   """
@@ -25879,6 +25918,127 @@ type ProjectAttachment implements Node {
   URL of the attachment.
   """
   url: String!
+}
+
+type ProjectAttachmentConnection {
+  edges: [ProjectAttachmentEdge!]!
+  nodes: [ProjectAttachment!]!
+  pageInfo: PageInfo!
+}
+
+input ProjectAttachmentCreateInput {
+  """
+  Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
+  """
+  createAsUser: String
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  Attachment metadata object with string and number values.
+  """
+  metadata: JSONObject
+  """
+  Note to be persisted alongside the attachent, in a CustomerNeed
+  """
+  noteBody: String
+  """
+  The project to associate the attachment with.
+  """
+  projectId: String!
+  """
+  The attachment subtitle.
+  """
+  subtitle: String
+  """
+  The attachment title.
+  """
+  title: String!
+  """
+  Attachment location which is also used as an unique identifier for the attachment.
+  """
+  url: String!
+}
+
+type ProjectAttachmentEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: ProjectAttachment!
+}
+
+"""
+ProjectAttachment filtering options.
+"""
+input ProjectAttachmentFilter {
+  """
+  Compound filters, all of which need to be matched by the project attachment.
+  """
+  and: [ProjectAttachmentFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that the attachments creator must satisfy.
+  """
+  creator: NullableUserFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Compound filters, one of which need to be matched by the project attachment.
+  """
+  or: [ProjectAttachmentFilter!]
+  """
+  Comparator for the subtitle.
+  """
+  subtitle: NullableStringComparator
+  """
+  Comparator for the title.
+  """
+  title: StringComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+  """
+  Comparator for the url.
+  """
+  url: StringComparator
+}
+
+type ProjectAttachmentPayload {
+  """
+  The project attachment that was created.
+  """
+  attachment: ProjectAttachment!
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+input ProjectAttachmentUpdateInput {
+  """
+  Attachment metadata object with string and number values.
+  """
+  metadata: JSONObject
+  """
+  The attachment subtitle.
+  """
+  subtitle: String
+  """
+  The attachment title.
+  """
+  title: String!
 }
 
 """
@@ -31544,6 +31704,40 @@ type Query {
     """
     sort: [ProjectSortInput!]
   ): ProjectConnection!
+  projectAttachment(id: String!): ProjectAttachment!
+  """
+  All project attachments.
+  """
+  projectAttachments(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned attachments.
+    """
+    filter: ProjectAttachmentFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ProjectAttachmentConnection!
   """
   Sends a test push message.
   """

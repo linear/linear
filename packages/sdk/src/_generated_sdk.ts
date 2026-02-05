@@ -2772,6 +2772,7 @@ export class CustomerNeed extends Request {
   private _issue?: L.CustomerNeedFragment["issue"];
   private _originalIssue?: L.CustomerNeedFragment["originalIssue"];
   private _project?: L.CustomerNeedFragment["project"];
+  private _projectAttachment?: L.CustomerNeedFragment["projectAttachment"];
 
   public constructor(request: LinearRequest, data: L.CustomerNeedFragment) {
     super(request);
@@ -2782,9 +2783,6 @@ export class CustomerNeed extends Request {
     this.priority = data.priority;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url ?? undefined;
-    this.projectAttachment = data.projectAttachment
-      ? new ProjectAttachment(request, data.projectAttachment)
-      : undefined;
     this._attachment = data.attachment ?? undefined;
     this._comment = data.comment ?? undefined;
     this._creator = data.creator ?? undefined;
@@ -2792,6 +2790,7 @@ export class CustomerNeed extends Request {
     this._issue = data.issue ?? undefined;
     this._originalIssue = data.originalIssue ?? undefined;
     this._project = data.project ?? undefined;
+    this._projectAttachment = data.projectAttachment ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -2811,8 +2810,6 @@ export class CustomerNeed extends Request {
   public updatedAt: Date;
   /** The URL of the underlying attachment, if any */
   public url?: string | null;
-  /** The project attachment this need is referencing. */
-  public projectAttachment?: ProjectAttachment | null;
   /** The attachment this need is referencing. */
   public get attachment(): LinearFetch<Attachment> | undefined {
     return this._attachment?.id ? new AttachmentQuery(this._request).fetch(this._attachment?.id) : undefined;
@@ -2868,6 +2865,16 @@ export class CustomerNeed extends Request {
   /** The ID of project this need is referencing. */
   public get projectId(): string | undefined {
     return this._project?.id;
+  }
+  /** The project attachment this need is referencing. */
+  public get projectAttachment(): LinearFetch<ProjectAttachment> | undefined {
+    return this._projectAttachment?.id
+      ? new ProjectAttachmentQuery(this._request).fetch(this._projectAttachment?.id)
+      : undefined;
+  }
+  /** The ID of project attachment this need is referencing. */
+  public get projectAttachmentId(): string | undefined {
+    return this._projectAttachment?.id;
   }
 
   /** Archives a customer need. */
@@ -13370,10 +13377,12 @@ export class ProjectArchivePayload extends Request {
  */
 export class ProjectAttachment extends Request {
   private _creator?: L.ProjectAttachmentFragment["creator"];
+  private _project: L.ProjectAttachmentFragment["project"];
 
   public constructor(request: LinearRequest, data: L.ProjectAttachmentFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.bodyData = data.bodyData ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
     this.metadata = data.metadata;
@@ -13384,10 +13393,13 @@ export class ProjectAttachment extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this._creator = data.creator ?? undefined;
+    this._project = data.project;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
+  /** The body data of the attachment, if any. */
+  public bodyData?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -13416,6 +13428,77 @@ export class ProjectAttachment extends Request {
   /** The ID of creator of the attachment. */
   public get creatorId(): string | undefined {
     return this._creator?.id;
+  }
+  /** The project this attachment belongs to. */
+  public get project(): LinearFetch<Project> | undefined {
+    return new ProjectQuery(this._request).fetch(this._project.id);
+  }
+  /** The ID of project this attachment belongs to. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
+  }
+
+  /** Creates a new project attachment */
+  public create(input: L.ProjectAttachmentCreateInput) {
+    return new CreateProjectAttachmentMutation(this._request).fetch(input);
+  }
+  /** Deletes a project attachment. */
+  public delete() {
+    return new DeleteProjectAttachmentMutation(this._request).fetch(this.id);
+  }
+  /** Updates an existing project attachment. */
+  public update(input: L.ProjectAttachmentUpdateInput) {
+    return new UpdateProjectAttachmentMutation(this._request).fetch(this.id, input);
+  }
+}
+/**
+ * ProjectAttachmentConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this ProjectAttachmentConnection model
+ * @param data - ProjectAttachmentConnection response data
+ */
+export class ProjectAttachmentConnection extends Connection<ProjectAttachment> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<ProjectAttachment> | undefined>,
+    data: L.ProjectAttachmentConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new ProjectAttachment(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
+ * ProjectAttachmentPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ProjectAttachmentPayloadFragment response data
+ */
+export class ProjectAttachmentPayload extends Request {
+  private _attachment: L.ProjectAttachmentPayloadFragment["attachment"];
+
+  public constructor(request: LinearRequest, data: L.ProjectAttachmentPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._attachment = data.attachment;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The project attachment that was created. */
+  public get attachment(): LinearFetch<ProjectAttachment> | undefined {
+    return new ProjectAttachmentQuery(this._request).fetch(this._attachment.id);
+  }
+  /** The ID of project attachment that was created. */
+  public get attachmentId(): string | undefined {
+    return this._attachment?.id;
   }
 }
 /**
@@ -21735,6 +21818,72 @@ export class ProjectQuery extends Request {
 }
 
 /**
+ * A fetchable ProjectAttachment Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ProjectAttachmentQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ProjectAttachment query and return a ProjectAttachment
+   *
+   * @param id - required id to pass to projectAttachment
+   * @returns parsed response from ProjectAttachmentQuery
+   */
+  public async fetch(id: string): LinearFetch<ProjectAttachment> {
+    const response = await this._request<L.ProjectAttachmentQuery, L.ProjectAttachmentQueryVariables>(
+      L.ProjectAttachmentDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.projectAttachment;
+
+    return new ProjectAttachment(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ProjectAttachments Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ProjectAttachmentsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ProjectAttachments query and return a ProjectAttachmentConnection
+   *
+   * @param variables - variables to pass into the ProjectAttachmentsQuery
+   * @returns parsed response from ProjectAttachmentsQuery
+   */
+  public async fetch(variables?: L.ProjectAttachmentsQueryVariables): LinearFetch<ProjectAttachmentConnection> {
+    const response = await this._request<L.ProjectAttachmentsQuery, L.ProjectAttachmentsQueryVariables>(
+      L.ProjectAttachmentsDocument.toString(),
+      variables
+    );
+    const data = response.projectAttachments;
+
+    return new ProjectAttachmentConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable ProjectFilterSuggestion Query
  *
  * @param request - function to call the graphql client
@@ -29300,6 +29449,95 @@ export class ArchiveProjectMutation extends Request {
 }
 
 /**
+ * A fetchable CreateProjectAttachment Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class CreateProjectAttachmentMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CreateProjectAttachment mutation and return a ProjectAttachmentPayload
+   *
+   * @param input - required input to pass to createProjectAttachment
+   * @returns parsed response from CreateProjectAttachmentMutation
+   */
+  public async fetch(input: L.ProjectAttachmentCreateInput): LinearFetch<ProjectAttachmentPayload> {
+    const response = await this._request<L.CreateProjectAttachmentMutation, L.CreateProjectAttachmentMutationVariables>(
+      L.CreateProjectAttachmentDocument.toString(),
+      {
+        input,
+      }
+    );
+    const data = response.projectAttachmentCreate;
+
+    return new ProjectAttachmentPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable DeleteProjectAttachment Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class DeleteProjectAttachmentMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DeleteProjectAttachment mutation and return a DeletePayload
+   *
+   * @param id - required id to pass to deleteProjectAttachment
+   * @returns parsed response from DeleteProjectAttachmentMutation
+   */
+  public async fetch(id: string): LinearFetch<DeletePayload> {
+    const response = await this._request<L.DeleteProjectAttachmentMutation, L.DeleteProjectAttachmentMutationVariables>(
+      L.DeleteProjectAttachmentDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.projectAttachmentDelete;
+
+    return new DeletePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UpdateProjectAttachment Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UpdateProjectAttachmentMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UpdateProjectAttachment mutation and return a ProjectAttachmentPayload
+   *
+   * @param id - required id to pass to updateProjectAttachment
+   * @param input - required input to pass to updateProjectAttachment
+   * @returns parsed response from UpdateProjectAttachmentMutation
+   */
+  public async fetch(id: string, input: L.ProjectAttachmentUpdateInput): LinearFetch<ProjectAttachmentPayload> {
+    const response = await this._request<L.UpdateProjectAttachmentMutation, L.UpdateProjectAttachmentMutationVariables>(
+      L.UpdateProjectAttachmentDocument.toString(),
+      {
+        id,
+        input,
+      }
+    );
+    const data = response.projectAttachmentUpdate;
+
+    return new ProjectAttachmentPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable CreateProject Mutation
  *
  * @param request - function to call the graphql client
@@ -33283,40 +33521,6 @@ export class CustomView_UserViewPreferences_PreferencesQuery extends Request {
     const data = response.customView.userViewPreferences?.preferences;
 
     return data ? new ViewPreferencesValues(this._request, data) : undefined;
-  }
-}
-
-/**
- * A fetchable CustomerNeed_ProjectAttachment Query
- *
- * @param request - function to call the graphql client
- * @param variables - variables to pass into the CustomerNeed_ProjectAttachmentQuery
- */
-export class CustomerNeed_ProjectAttachmentQuery extends Request {
-  private _variables?: L.CustomerNeed_ProjectAttachmentQueryVariables;
-
-  public constructor(request: LinearRequest, variables?: L.CustomerNeed_ProjectAttachmentQueryVariables) {
-    super(request);
-
-    this._variables = variables;
-  }
-
-  /**
-   * Call the CustomerNeed_ProjectAttachment query and return a ProjectAttachment
-   *
-   * @param variables - variables to pass into the CustomerNeed_ProjectAttachmentQuery
-   * @returns parsed response from CustomerNeed_ProjectAttachmentQuery
-   */
-  public async fetch(
-    variables?: L.CustomerNeed_ProjectAttachmentQueryVariables
-  ): LinearFetch<ProjectAttachment | undefined> {
-    const response = await this._request<
-      L.CustomerNeed_ProjectAttachmentQuery,
-      L.CustomerNeed_ProjectAttachmentQueryVariables
-    >(L.CustomerNeed_ProjectAttachmentDocument.toString(), variables);
-    const data = response.customerNeed.projectAttachment;
-
-    return data ? new ProjectAttachment(this._request, data) : undefined;
   }
 }
 
@@ -39853,6 +40057,24 @@ export class LinearSdk extends Request {
     return new ProjectQuery(this._request).fetch(id);
   }
   /**
+   * Query projectAttachment for ProjectAttachment
+   *
+   * @param id - required id to pass to projectAttachment
+   * @returns ProjectAttachment
+   */
+  public projectAttachment(id: string): LinearFetch<ProjectAttachment> {
+    return new ProjectAttachmentQuery(this._request).fetch(id);
+  }
+  /**
+   * All project attachments.
+   *
+   * @param variables - variables to pass into the ProjectAttachmentsQuery
+   * @returns ProjectAttachmentConnection
+   */
+  public projectAttachments(variables?: L.ProjectAttachmentsQueryVariables): LinearFetch<ProjectAttachmentConnection> {
+    return new ProjectAttachmentsQuery(this._request).fetch(variables);
+  }
+  /**
    * Suggests filters for a project view based on a text prompt.
    *
    * @param prompt - required prompt to pass to projectFilterSuggestion
@@ -42439,6 +42661,37 @@ export class LinearSdk extends Request {
     variables?: Omit<L.ArchiveProjectMutationVariables, "id">
   ): LinearFetch<ProjectArchivePayload> {
     return new ArchiveProjectMutation(this._request).fetch(id, variables);
+  }
+  /**
+   * Creates a new project attachment
+   *
+   * @param input - required input to pass to createProjectAttachment
+   * @returns ProjectAttachmentPayload
+   */
+  public createProjectAttachment(input: L.ProjectAttachmentCreateInput): LinearFetch<ProjectAttachmentPayload> {
+    return new CreateProjectAttachmentMutation(this._request).fetch(input);
+  }
+  /**
+   * Deletes a project attachment.
+   *
+   * @param id - required id to pass to deleteProjectAttachment
+   * @returns DeletePayload
+   */
+  public deleteProjectAttachment(id: string): LinearFetch<DeletePayload> {
+    return new DeleteProjectAttachmentMutation(this._request).fetch(id);
+  }
+  /**
+   * Updates an existing project attachment.
+   *
+   * @param id - required id to pass to updateProjectAttachment
+   * @param input - required input to pass to updateProjectAttachment
+   * @returns ProjectAttachmentPayload
+   */
+  public updateProjectAttachment(
+    id: string,
+    input: L.ProjectAttachmentUpdateInput
+  ): LinearFetch<ProjectAttachmentPayload> {
+    return new UpdateProjectAttachmentMutation(this._request).fetch(id, input);
   }
   /**
    * Creates a new project.

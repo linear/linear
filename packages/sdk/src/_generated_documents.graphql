@@ -437,7 +437,7 @@ fragment CustomerNeed on CustomerNeed {
   body
   # The project attachment this need is referencing.
   projectAttachment {
-    ...ProjectAttachment
+    id
   }
   # The project this need is referencing.
   project {
@@ -6676,6 +6676,8 @@ fragment ProjectAttachment on ProjectAttachment {
   source
   # Optional subtitle of the attachment
   subtitle
+  # The body data of the attachment, if any.
+  bodyData
   # The creator of the attachment.
   creator {
     id
@@ -6683,6 +6685,10 @@ fragment ProjectAttachment on ProjectAttachment {
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The project this attachment belongs to.
+  project {
+    id
+  }
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
@@ -8728,6 +8734,28 @@ fragment PasskeyLoginStartResponse on PasskeyLoginStartResponse {
   success
 }
 
+fragment ProjectAttachmentConnection on ProjectAttachmentConnection {
+  __typename
+  nodes {
+    ...ProjectAttachment
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment ProjectAttachmentPayload on ProjectAttachmentPayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The project attachment that was created.
+  attachment {
+    id
+  }
+  # Whether the operation was successful.
+  success
+}
+
 fragment ProjectConnection on ProjectConnection {
   __typename
   nodes {
@@ -10729,19 +10757,6 @@ query customerNeed(
 ) {
   customerNeed(hash: $hash, id: $id) {
     ...CustomerNeed
-  }
-}
-# The project attachment this need is referencing.
-query customerNeed_projectAttachment(
-  # The hash of the need to retrieve.
-  $hash: String
-  # The identifier of the need to retrieve.
-  $id: String
-) {
-  customerNeed(hash: $hash, id: $id) {
-    projectAttachment {
-      ...ProjectAttachment
-    }
   }
 }
 # All customer needs.
@@ -13588,6 +13603,40 @@ query project_teams(
     ) {
       ...TeamConnection
     }
+  }
+}
+query projectAttachment($id: String!) {
+  projectAttachment(id: $id) {
+    ...ProjectAttachment
+  }
+}
+# All project attachments.
+query projectAttachments(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned attachments.
+  $filter: ProjectAttachmentFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  projectAttachments(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...ProjectAttachmentConnection
   }
 }
 # Suggests filters for a project view based on a text prompt.
@@ -18005,6 +18054,35 @@ mutation archiveProject(
 ) {
   projectArchive(id: $id, trash: $trash) {
     ...ProjectArchivePayload
+  }
+}
+# Creates a new project attachment
+mutation createProjectAttachment(
+  # The attachment object to create.
+  $input: ProjectAttachmentCreateInput!
+) {
+  projectAttachmentCreate(input: $input) {
+    ...ProjectAttachmentPayload
+  }
+}
+# Deletes a project attachment.
+mutation deleteProjectAttachment(
+  # The identifier of the project attachment to delete.
+  $id: String!
+) {
+  projectAttachmentDelete(id: $id) {
+    ...DeletePayload
+  }
+}
+# Updates an existing project attachment.
+mutation updateProjectAttachment(
+  # The identifier of the project attachment to update.
+  $id: String!
+  # A partial project attachment object to update the attachment with.
+  $input: ProjectAttachmentUpdateInput!
+) {
+  projectAttachmentUpdate(id: $id, input: $input) {
+    ...ProjectAttachmentPayload
   }
 }
 # Creates a new project.

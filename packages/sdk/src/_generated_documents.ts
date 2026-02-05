@@ -10073,6 +10073,12 @@ export type Mutation = {
    * @deprecated Deprecated in favor of projectDelete.
    */
   projectArchive: ProjectArchivePayload;
+  /** Creates a new project attachment */
+  projectAttachmentCreate: ProjectAttachmentPayload;
+  /** Deletes a project attachment. */
+  projectAttachmentDelete: DeletePayload;
+  /** Updates an existing project attachment. */
+  projectAttachmentUpdate: ProjectAttachmentPayload;
   /** Creates a new project. */
   projectCreate: ProjectPayload;
   /** Deletes (trashes) a project. */
@@ -11438,6 +11444,19 @@ export type MutationProjectAddLabelArgs = {
 export type MutationProjectArchiveArgs = {
   id: Scalars["String"];
   trash?: InputMaybe<Scalars["Boolean"]>;
+};
+
+export type MutationProjectAttachmentCreateArgs = {
+  input: ProjectAttachmentCreateInput;
+};
+
+export type MutationProjectAttachmentDeleteArgs = {
+  id: Scalars["String"];
+};
+
+export type MutationProjectAttachmentUpdateArgs = {
+  id: Scalars["String"];
+  input: ProjectAttachmentUpdateInput;
 };
 
 export type MutationProjectCreateArgs = {
@@ -14556,6 +14575,8 @@ export type ProjectAttachment = Node & {
   __typename?: "ProjectAttachment";
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The body data of the attachment, if any. */
+  bodyData?: Maybe<Scalars["String"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /** The creator of the attachment. */
@@ -14564,6 +14585,8 @@ export type ProjectAttachment = Node & {
   id: Scalars["ID"];
   /** Custom metadata related to the attachment. */
   metadata: Scalars["JSONObject"];
+  /** The project this attachment belongs to. */
+  project: Project;
   /** Information about the external source which created the attachment. */
   source?: Maybe<Scalars["JSONObject"]>;
   /** An accessor helper to source.type, defines the source type of the attachment. */
@@ -14579,6 +14602,80 @@ export type ProjectAttachment = Node & {
   updatedAt: Scalars["DateTime"];
   /** URL of the attachment. */
   url: Scalars["String"];
+};
+
+export type ProjectAttachmentConnection = {
+  __typename?: "ProjectAttachmentConnection";
+  edges: Array<ProjectAttachmentEdge>;
+  nodes: Array<ProjectAttachment>;
+  pageInfo: PageInfo;
+};
+
+export type ProjectAttachmentCreateInput = {
+  /** Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode. */
+  createAsUser?: InputMaybe<Scalars["String"]>;
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
+  id?: InputMaybe<Scalars["String"]>;
+  /** Attachment metadata object with string and number values. */
+  metadata?: InputMaybe<Scalars["JSONObject"]>;
+  /** Note to be persisted alongside the attachent, in a CustomerNeed */
+  noteBody?: InputMaybe<Scalars["String"]>;
+  /** The project to associate the attachment with. */
+  projectId: Scalars["String"];
+  /** The attachment subtitle. */
+  subtitle?: InputMaybe<Scalars["String"]>;
+  /** The attachment title. */
+  title: Scalars["String"];
+  /** Attachment location which is also used as an unique identifier for the attachment. */
+  url: Scalars["String"];
+};
+
+export type ProjectAttachmentEdge = {
+  __typename?: "ProjectAttachmentEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: ProjectAttachment;
+};
+
+/** ProjectAttachment filtering options. */
+export type ProjectAttachmentFilter = {
+  /** Compound filters, all of which need to be matched by the project attachment. */
+  and?: InputMaybe<Array<ProjectAttachmentFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: InputMaybe<DateComparator>;
+  /** Filters that the attachments creator must satisfy. */
+  creator?: InputMaybe<NullableUserFilter>;
+  /** Comparator for the identifier. */
+  id?: InputMaybe<IdComparator>;
+  /** Compound filters, one of which need to be matched by the project attachment. */
+  or?: InputMaybe<Array<ProjectAttachmentFilter>>;
+  /** Comparator for the subtitle. */
+  subtitle?: InputMaybe<NullableStringComparator>;
+  /** Comparator for the title. */
+  title?: InputMaybe<StringComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: InputMaybe<DateComparator>;
+  /** Comparator for the url. */
+  url?: InputMaybe<StringComparator>;
+};
+
+export type ProjectAttachmentPayload = {
+  __typename?: "ProjectAttachmentPayload";
+  /** The project attachment that was created. */
+  attachment: ProjectAttachment;
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars["Float"];
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
+};
+
+export type ProjectAttachmentUpdateInput = {
+  /** Attachment metadata object with string and number values. */
+  metadata?: InputMaybe<Scalars["JSONObject"]>;
+  /** The attachment subtitle. */
+  subtitle?: InputMaybe<Scalars["String"]>;
+  /** The attachment title. */
+  title: Scalars["String"];
 };
 
 /** Certain properties of a project. */
@@ -16970,6 +17067,9 @@ export type Query = {
   organizationMeta?: Maybe<OrganizationMeta>;
   /** One specific project. */
   project: Project;
+  projectAttachment: ProjectAttachment;
+  /** All project attachments. */
+  projectAttachments: ProjectAttachmentConnection;
   /** Suggests filters for a project view based on a text prompt. */
   projectFilterSuggestion: ProjectFilterSuggestionPayload;
   /** One specific label. */
@@ -17614,6 +17714,20 @@ export type QueryOrganizationMetaArgs = {
 
 export type QueryProjectArgs = {
   id: Scalars["String"];
+};
+
+export type QueryProjectAttachmentArgs = {
+  id: Scalars["String"];
+};
+
+export type QueryProjectAttachmentsArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  filter?: InputMaybe<ProjectAttachmentFilter>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
 };
 
 export type QueryProjectFilterSuggestionArgs = {
@@ -22214,21 +22328,7 @@ export type CustomerNeedFragment = { __typename: "CustomerNeed" } & Pick<
     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
     originalIssue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
     issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-    projectAttachment?: Maybe<
-      { __typename: "ProjectAttachment" } & Pick<
-        ProjectAttachment,
-        | "sourceType"
-        | "metadata"
-        | "source"
-        | "subtitle"
-        | "updatedAt"
-        | "archivedAt"
-        | "createdAt"
-        | "id"
-        | "title"
-        | "url"
-      > & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
-    >;
+    projectAttachment?: Maybe<{ __typename?: "ProjectAttachment" } & Pick<ProjectAttachment, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
   };
 
@@ -27543,8 +27643,21 @@ export type SemanticSearchPayloadFragment = { __typename: "SemanticSearchPayload
 
 export type ProjectAttachmentFragment = { __typename: "ProjectAttachment" } & Pick<
   ProjectAttachment,
-  "sourceType" | "metadata" | "source" | "subtitle" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "title" | "url"
-> & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
+  | "sourceType"
+  | "metadata"
+  | "source"
+  | "subtitle"
+  | "bodyData"
+  | "updatedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "id"
+  | "title"
+  | "url"
+> & {
+    creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+    project: { __typename?: "Project" } & Pick<Project, "id">;
+  };
 
 export type ApplicationFragment = { __typename: "Application" } & Pick<
   Application,
@@ -28472,21 +28585,7 @@ export type CustomerNeedConnectionFragment = { __typename: "CustomerNeedConnecti
         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
         originalIssue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
         issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-        projectAttachment?: Maybe<
-          { __typename: "ProjectAttachment" } & Pick<
-            ProjectAttachment,
-            | "sourceType"
-            | "metadata"
-            | "source"
-            | "subtitle"
-            | "updatedAt"
-            | "archivedAt"
-            | "createdAt"
-            | "id"
-            | "title"
-            | "url"
-          > & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
-        >;
+        projectAttachment?: Maybe<{ __typename?: "ProjectAttachment" } & Pick<ProjectAttachment, "id">>;
         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
       }
   >;
@@ -28517,21 +28616,7 @@ export type CustomerNeedUpdatePayloadFragment = { __typename: "CustomerNeedUpdat
           customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
           originalIssue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
           issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-          projectAttachment?: Maybe<
-            { __typename: "ProjectAttachment" } & Pick<
-              ProjectAttachment,
-              | "sourceType"
-              | "metadata"
-              | "source"
-              | "subtitle"
-              | "updatedAt"
-              | "archivedAt"
-              | "createdAt"
-              | "id"
-              | "title"
-              | "url"
-            > & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
-          >;
+          projectAttachment?: Maybe<{ __typename?: "ProjectAttachment" } & Pick<ProjectAttachment, "id">>;
           project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
         }
     >;
@@ -32058,6 +32143,37 @@ export type PasskeyLoginStartResponseFragment = { __typename: "PasskeyLoginStart
   "options" | "success"
 >;
 
+export type ProjectAttachmentConnectionFragment = { __typename: "ProjectAttachmentConnection" } & {
+  nodes: Array<
+    { __typename: "ProjectAttachment" } & Pick<
+      ProjectAttachment,
+      | "sourceType"
+      | "metadata"
+      | "source"
+      | "subtitle"
+      | "bodyData"
+      | "updatedAt"
+      | "archivedAt"
+      | "createdAt"
+      | "id"
+      | "title"
+      | "url"
+    > & {
+        creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+        project: { __typename?: "Project" } & Pick<Project, "id">;
+      }
+  >;
+  pageInfo: { __typename: "PageInfo" } & Pick<
+    PageInfo,
+    "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
+  >;
+};
+
+export type ProjectAttachmentPayloadFragment = { __typename: "ProjectAttachmentPayload" } & Pick<
+  ProjectAttachmentPayload,
+  "lastSyncId" | "success"
+> & { attachment: { __typename?: "ProjectAttachment" } & Pick<ProjectAttachment, "id"> };
+
 export type ProjectConnectionFragment = { __typename: "ProjectConnection" } & {
   nodes: Array<
     { __typename: "Project" } & Pick<
@@ -33985,21 +34101,7 @@ export type AttachmentIssue_FormerNeedsQuery = { __typename?: "Query" } & {
             customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
             originalIssue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
             issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-            projectAttachment?: Maybe<
-              { __typename: "ProjectAttachment" } & Pick<
-                ProjectAttachment,
-                | "sourceType"
-                | "metadata"
-                | "source"
-                | "subtitle"
-                | "updatedAt"
-                | "archivedAt"
-                | "createdAt"
-                | "id"
-                | "title"
-                | "url"
-              > & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
-            >;
+            projectAttachment?: Maybe<{ __typename?: "ProjectAttachment" } & Pick<ProjectAttachment, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
           }
       >;
@@ -34381,21 +34483,7 @@ export type AttachmentIssue_NeedsQuery = { __typename?: "Query" } & {
             customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
             originalIssue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
             issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-            projectAttachment?: Maybe<
-              { __typename: "ProjectAttachment" } & Pick<
-                ProjectAttachment,
-                | "sourceType"
-                | "metadata"
-                | "source"
-                | "subtitle"
-                | "updatedAt"
-                | "archivedAt"
-                | "createdAt"
-                | "id"
-                | "title"
-                | "url"
-              > & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
-            >;
+            projectAttachment?: Maybe<{ __typename?: "ProjectAttachment" } & Pick<ProjectAttachment, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
           }
       >;
@@ -35907,48 +35995,9 @@ export type CustomerNeedQuery = { __typename?: "Query" } & {
       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
       originalIssue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
       issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-      projectAttachment?: Maybe<
-        { __typename: "ProjectAttachment" } & Pick<
-          ProjectAttachment,
-          | "sourceType"
-          | "metadata"
-          | "source"
-          | "subtitle"
-          | "updatedAt"
-          | "archivedAt"
-          | "createdAt"
-          | "id"
-          | "title"
-          | "url"
-        > & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
-      >;
+      projectAttachment?: Maybe<{ __typename?: "ProjectAttachment" } & Pick<ProjectAttachment, "id">>;
       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
     };
-};
-
-export type CustomerNeed_ProjectAttachmentQueryVariables = Exact<{
-  hash?: InputMaybe<Scalars["String"]>;
-  id?: InputMaybe<Scalars["String"]>;
-}>;
-
-export type CustomerNeed_ProjectAttachmentQuery = { __typename?: "Query" } & {
-  customerNeed: { __typename?: "CustomerNeed" } & {
-    projectAttachment?: Maybe<
-      { __typename: "ProjectAttachment" } & Pick<
-        ProjectAttachment,
-        | "sourceType"
-        | "metadata"
-        | "source"
-        | "subtitle"
-        | "updatedAt"
-        | "archivedAt"
-        | "createdAt"
-        | "id"
-        | "title"
-        | "url"
-      > & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
-    >;
-  };
 };
 
 export type CustomerNeedsQueryVariables = Exact<{
@@ -35974,21 +36023,7 @@ export type CustomerNeedsQuery = { __typename?: "Query" } & {
           customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
           originalIssue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
           issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-          projectAttachment?: Maybe<
-            { __typename: "ProjectAttachment" } & Pick<
-              ProjectAttachment,
-              | "sourceType"
-              | "metadata"
-              | "source"
-              | "subtitle"
-              | "updatedAt"
-              | "archivedAt"
-              | "createdAt"
-              | "id"
-              | "title"
-              | "url"
-            > & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
-          >;
+          projectAttachment?: Maybe<{ __typename?: "ProjectAttachment" } & Pick<ProjectAttachment, "id">>;
           project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
         }
     >;
@@ -38410,21 +38445,7 @@ export type Issue_FormerNeedsQuery = { __typename?: "Query" } & {
             customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
             originalIssue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
             issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-            projectAttachment?: Maybe<
-              { __typename: "ProjectAttachment" } & Pick<
-                ProjectAttachment,
-                | "sourceType"
-                | "metadata"
-                | "source"
-                | "subtitle"
-                | "updatedAt"
-                | "archivedAt"
-                | "createdAt"
-                | "id"
-                | "title"
-                | "url"
-              > & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
-            >;
+            projectAttachment?: Maybe<{ __typename?: "ProjectAttachment" } & Pick<ProjectAttachment, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
           }
       >;
@@ -38806,21 +38827,7 @@ export type Issue_NeedsQuery = { __typename?: "Query" } & {
             customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
             originalIssue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
             issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-            projectAttachment?: Maybe<
-              { __typename: "ProjectAttachment" } & Pick<
-                ProjectAttachment,
-                | "sourceType"
-                | "metadata"
-                | "source"
-                | "subtitle"
-                | "updatedAt"
-                | "archivedAt"
-                | "createdAt"
-                | "id"
-                | "title"
-                | "url"
-              > & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
-            >;
+            projectAttachment?: Maybe<{ __typename?: "ProjectAttachment" } & Pick<ProjectAttachment, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
           }
       >;
@@ -40059,21 +40066,7 @@ export type IssueVcsBranchSearch_FormerNeedsQuery = { __typename?: "Query" } & {
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
               originalIssue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
               issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-              projectAttachment?: Maybe<
-                { __typename: "ProjectAttachment" } & Pick<
-                  ProjectAttachment,
-                  | "sourceType"
-                  | "metadata"
-                  | "source"
-                  | "subtitle"
-                  | "updatedAt"
-                  | "archivedAt"
-                  | "createdAt"
-                  | "id"
-                  | "title"
-                  | "url"
-                > & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
-              >;
+              projectAttachment?: Maybe<{ __typename?: "ProjectAttachment" } & Pick<ProjectAttachment, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
             }
         >;
@@ -40466,21 +40459,7 @@ export type IssueVcsBranchSearch_NeedsQuery = { __typename?: "Query" } & {
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
               originalIssue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
               issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-              projectAttachment?: Maybe<
-                { __typename: "ProjectAttachment" } & Pick<
-                  ProjectAttachment,
-                  | "sourceType"
-                  | "metadata"
-                  | "source"
-                  | "subtitle"
-                  | "updatedAt"
-                  | "archivedAt"
-                  | "createdAt"
-                  | "id"
-                  | "title"
-                  | "url"
-                > & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
-              >;
+              projectAttachment?: Maybe<{ __typename?: "ProjectAttachment" } & Pick<ProjectAttachment, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
             }
         >;
@@ -43054,21 +43033,7 @@ export type Project_NeedsQuery = { __typename?: "Query" } & {
             customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
             originalIssue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
             issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-            projectAttachment?: Maybe<
-              { __typename: "ProjectAttachment" } & Pick<
-                ProjectAttachment,
-                | "sourceType"
-                | "metadata"
-                | "source"
-                | "subtitle"
-                | "updatedAt"
-                | "archivedAt"
-                | "createdAt"
-                | "id"
-                | "title"
-                | "url"
-              > & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
-            >;
+            projectAttachment?: Maybe<{ __typename?: "ProjectAttachment" } & Pick<ProjectAttachment, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
           }
       >;
@@ -43314,6 +43279,68 @@ export type Project_TeamsQuery = { __typename?: "Query" } & {
         "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
       >;
     };
+  };
+};
+
+export type ProjectAttachmentQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type ProjectAttachmentQuery = { __typename?: "Query" } & {
+  projectAttachment: { __typename: "ProjectAttachment" } & Pick<
+    ProjectAttachment,
+    | "sourceType"
+    | "metadata"
+    | "source"
+    | "subtitle"
+    | "bodyData"
+    | "updatedAt"
+    | "archivedAt"
+    | "createdAt"
+    | "id"
+    | "title"
+    | "url"
+  > & {
+      creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+      project: { __typename?: "Project" } & Pick<Project, "id">;
+    };
+};
+
+export type ProjectAttachmentsQueryVariables = Exact<{
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  filter?: InputMaybe<ProjectAttachmentFilter>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+}>;
+
+export type ProjectAttachmentsQuery = { __typename?: "Query" } & {
+  projectAttachments: { __typename: "ProjectAttachmentConnection" } & {
+    nodes: Array<
+      { __typename: "ProjectAttachment" } & Pick<
+        ProjectAttachment,
+        | "sourceType"
+        | "metadata"
+        | "source"
+        | "subtitle"
+        | "bodyData"
+        | "updatedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "id"
+        | "title"
+        | "url"
+      > & {
+          creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          project: { __typename?: "Project" } & Pick<Project, "id">;
+        }
+    >;
+    pageInfo: { __typename: "PageInfo" } & Pick<
+      PageInfo,
+      "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
+    >;
   };
 };
 
@@ -48520,21 +48547,7 @@ export type UpdateCustomerNeedMutation = { __typename?: "Mutation" } & {
             customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
             originalIssue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
             issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-            projectAttachment?: Maybe<
-              { __typename: "ProjectAttachment" } & Pick<
-                ProjectAttachment,
-                | "sourceType"
-                | "metadata"
-                | "source"
-                | "subtitle"
-                | "updatedAt"
-                | "archivedAt"
-                | "createdAt"
-                | "id"
-                | "title"
-                | "url"
-              > & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
-            >;
+            projectAttachment?: Maybe<{ __typename?: "ProjectAttachment" } & Pick<ProjectAttachment, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
           }
       >;
@@ -54665,6 +54678,37 @@ export type ArchiveProjectMutation = { __typename?: "Mutation" } & {
   projectArchive: { __typename: "ProjectArchivePayload" } & Pick<ProjectArchivePayload, "lastSyncId" | "success"> & {
       entity?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
     };
+};
+
+export type CreateProjectAttachmentMutationVariables = Exact<{
+  input: ProjectAttachmentCreateInput;
+}>;
+
+export type CreateProjectAttachmentMutation = { __typename?: "Mutation" } & {
+  projectAttachmentCreate: { __typename: "ProjectAttachmentPayload" } & Pick<
+    ProjectAttachmentPayload,
+    "lastSyncId" | "success"
+  > & { attachment: { __typename?: "ProjectAttachment" } & Pick<ProjectAttachment, "id"> };
+};
+
+export type DeleteProjectAttachmentMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteProjectAttachmentMutation = { __typename?: "Mutation" } & {
+  projectAttachmentDelete: { __typename: "DeletePayload" } & Pick<DeletePayload, "entityId" | "lastSyncId" | "success">;
+};
+
+export type UpdateProjectAttachmentMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: ProjectAttachmentUpdateInput;
+}>;
+
+export type UpdateProjectAttachmentMutation = { __typename?: "Mutation" } & {
+  projectAttachmentUpdate: { __typename: "ProjectAttachmentPayload" } & Pick<
+    ProjectAttachmentPayload,
+    "lastSyncId" | "success"
+  > & { attachment: { __typename?: "ProjectAttachment" } & Pick<ProjectAttachment, "id"> };
 };
 
 export type CreateProjectMutationVariables = Exact<{
@@ -63673,27 +63717,6 @@ fragment PageInfo on PageInfo {
 }`,
   { fragmentName: "CustomerConnection" }
 ) as unknown as TypedDocumentString<CustomerConnectionFragment, unknown>;
-export const ProjectAttachmentFragmentDoc = new TypedDocumentString(
-  `
-    fragment ProjectAttachment on ProjectAttachment {
-  __typename
-  sourceType
-  metadata
-  source
-  subtitle
-  creator {
-    id
-  }
-  updatedAt
-  archivedAt
-  createdAt
-  id
-  title
-  url
-}
-    `,
-  { fragmentName: "ProjectAttachment" }
-) as unknown as TypedDocumentString<ProjectAttachmentFragment, unknown>;
 export const CustomerNeedFragmentDoc = new TypedDocumentString(
   `
     fragment CustomerNeed on CustomerNeed {
@@ -63720,7 +63743,7 @@ export const CustomerNeedFragmentDoc = new TypedDocumentString(
   updatedAt
   body
   projectAttachment {
-    ...ProjectAttachment
+    id
   }
   project {
     id
@@ -63730,22 +63753,7 @@ export const CustomerNeedFragmentDoc = new TypedDocumentString(
   id
   priority
 }
-    fragment ProjectAttachment on ProjectAttachment {
-  __typename
-  sourceType
-  metadata
-  source
-  subtitle
-  creator {
-    id
-  }
-  updatedAt
-  archivedAt
-  createdAt
-  id
-  title
-  url
-}`,
+    `,
   { fragmentName: "CustomerNeed" }
 ) as unknown as TypedDocumentString<CustomerNeedFragment, unknown>;
 export const CustomerNeedConnectionFragmentDoc = new TypedDocumentString(
@@ -63783,7 +63791,7 @@ export const CustomerNeedConnectionFragmentDoc = new TypedDocumentString(
   updatedAt
   body
   projectAttachment {
-    ...ProjectAttachment
+    id
   }
   project {
     id
@@ -63792,22 +63800,6 @@ export const CustomerNeedConnectionFragmentDoc = new TypedDocumentString(
   createdAt
   id
   priority
-}
-fragment ProjectAttachment on ProjectAttachment {
-  __typename
-  sourceType
-  metadata
-  source
-  subtitle
-  creator {
-    id
-  }
-  updatedAt
-  archivedAt
-  createdAt
-  id
-  title
-  url
 }
 fragment PageInfo on PageInfo {
   __typename
@@ -63868,7 +63860,7 @@ export const CustomerNeedUpdatePayloadFragmentDoc = new TypedDocumentString(
   updatedAt
   body
   projectAttachment {
-    ...ProjectAttachment
+    id
   }
   project {
     id
@@ -63877,22 +63869,6 @@ export const CustomerNeedUpdatePayloadFragmentDoc = new TypedDocumentString(
   createdAt
   id
   priority
-}
-fragment ProjectAttachment on ProjectAttachment {
-  __typename
-  sourceType
-  metadata
-  source
-  subtitle
-  creator {
-    id
-  }
-  updatedAt
-  archivedAt
-  createdAt
-  id
-  title
-  url
 }`,
   { fragmentName: "CustomerNeedUpdatePayload" }
 ) as unknown as TypedDocumentString<CustomerNeedUpdatePayloadFragment, unknown>;
@@ -69406,6 +69382,84 @@ export const PasskeyLoginStartResponseFragmentDoc = new TypedDocumentString(
     `,
   { fragmentName: "PasskeyLoginStartResponse" }
 ) as unknown as TypedDocumentString<PasskeyLoginStartResponseFragment, unknown>;
+export const ProjectAttachmentFragmentDoc = new TypedDocumentString(
+  `
+    fragment ProjectAttachment on ProjectAttachment {
+  __typename
+  sourceType
+  metadata
+  source
+  subtitle
+  bodyData
+  creator {
+    id
+  }
+  updatedAt
+  project {
+    id
+  }
+  archivedAt
+  createdAt
+  id
+  title
+  url
+}
+    `,
+  { fragmentName: "ProjectAttachment" }
+) as unknown as TypedDocumentString<ProjectAttachmentFragment, unknown>;
+export const ProjectAttachmentConnectionFragmentDoc = new TypedDocumentString(
+  `
+    fragment ProjectAttachmentConnection on ProjectAttachmentConnection {
+  __typename
+  nodes {
+    ...ProjectAttachment
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+    fragment ProjectAttachment on ProjectAttachment {
+  __typename
+  sourceType
+  metadata
+  source
+  subtitle
+  bodyData
+  creator {
+    id
+  }
+  updatedAt
+  project {
+    id
+  }
+  archivedAt
+  createdAt
+  id
+  title
+  url
+}
+fragment PageInfo on PageInfo {
+  __typename
+  startCursor
+  endCursor
+  hasPreviousPage
+  hasNextPage
+}`,
+  { fragmentName: "ProjectAttachmentConnection" }
+) as unknown as TypedDocumentString<ProjectAttachmentConnectionFragment, unknown>;
+export const ProjectAttachmentPayloadFragmentDoc = new TypedDocumentString(
+  `
+    fragment ProjectAttachmentPayload on ProjectAttachmentPayload {
+  __typename
+  lastSyncId
+  attachment {
+    id
+  }
+  success
+}
+    `,
+  { fragmentName: "ProjectAttachmentPayload" }
+) as unknown as TypedDocumentString<ProjectAttachmentPayloadFragment, unknown>;
 export const ProjectFragmentDoc = new TypedDocumentString(
   `
     fragment Project on Project {
@@ -73344,7 +73398,7 @@ export const AttachmentIssue_FormerNeedsDocument = new TypedDocumentString(`
   updatedAt
   body
   projectAttachment {
-    ...ProjectAttachment
+    id
   }
   project {
     id
@@ -73353,22 +73407,6 @@ export const AttachmentIssue_FormerNeedsDocument = new TypedDocumentString(`
   createdAt
   id
   priority
-}
-fragment ProjectAttachment on ProjectAttachment {
-  __typename
-  sourceType
-  metadata
-  source
-  subtitle
-  creator {
-    id
-  }
-  updatedAt
-  archivedAt
-  createdAt
-  id
-  title
-  url
 }
 fragment CustomerNeedConnection on CustomerNeedConnection {
   __typename
@@ -73775,7 +73813,7 @@ export const AttachmentIssue_NeedsDocument = new TypedDocumentString(`
   updatedAt
   body
   projectAttachment {
-    ...ProjectAttachment
+    id
   }
   project {
     id
@@ -73784,22 +73822,6 @@ export const AttachmentIssue_NeedsDocument = new TypedDocumentString(`
   createdAt
   id
   priority
-}
-fragment ProjectAttachment on ProjectAttachment {
-  __typename
-  sourceType
-  metadata
-  source
-  subtitle
-  creator {
-    id
-  }
-  updatedAt
-  archivedAt
-  createdAt
-  id
-  title
-  url
 }
 fragment CustomerNeedConnection on CustomerNeedConnection {
   __typename
@@ -75964,7 +75986,7 @@ export const CustomerNeedDocument = new TypedDocumentString(`
   updatedAt
   body
   projectAttachment {
-    ...ProjectAttachment
+    id
   }
   project {
     id
@@ -75973,50 +75995,7 @@ export const CustomerNeedDocument = new TypedDocumentString(`
   createdAt
   id
   priority
-}
-fragment ProjectAttachment on ProjectAttachment {
-  __typename
-  sourceType
-  metadata
-  source
-  subtitle
-  creator {
-    id
-  }
-  updatedAt
-  archivedAt
-  createdAt
-  id
-  title
-  url
 }`) as unknown as TypedDocumentString<CustomerNeedQuery, CustomerNeedQueryVariables>;
-export const CustomerNeed_ProjectAttachmentDocument = new TypedDocumentString(`
-    query customerNeed_projectAttachment($hash: String, $id: String) {
-  customerNeed(hash: $hash, id: $id) {
-    projectAttachment {
-      ...ProjectAttachment
-    }
-  }
-}
-    fragment ProjectAttachment on ProjectAttachment {
-  __typename
-  sourceType
-  metadata
-  source
-  subtitle
-  creator {
-    id
-  }
-  updatedAt
-  archivedAt
-  createdAt
-  id
-  title
-  url
-}`) as unknown as TypedDocumentString<
-  CustomerNeed_ProjectAttachmentQuery,
-  CustomerNeed_ProjectAttachmentQueryVariables
->;
 export const CustomerNeedsDocument = new TypedDocumentString(`
     query customerNeeds($after: String, $before: String, $filter: CustomerNeedFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
   customerNeeds(
@@ -76055,7 +76034,7 @@ export const CustomerNeedsDocument = new TypedDocumentString(`
   updatedAt
   body
   projectAttachment {
-    ...ProjectAttachment
+    id
   }
   project {
     id
@@ -76064,22 +76043,6 @@ export const CustomerNeedsDocument = new TypedDocumentString(`
   createdAt
   id
   priority
-}
-fragment ProjectAttachment on ProjectAttachment {
-  __typename
-  sourceType
-  metadata
-  source
-  subtitle
-  creator {
-    id
-  }
-  updatedAt
-  archivedAt
-  createdAt
-  id
-  title
-  url
 }
 fragment CustomerNeedConnection on CustomerNeedConnection {
   __typename
@@ -79883,7 +79846,7 @@ export const Issue_FormerNeedsDocument = new TypedDocumentString(`
   updatedAt
   body
   projectAttachment {
-    ...ProjectAttachment
+    id
   }
   project {
     id
@@ -79892,22 +79855,6 @@ export const Issue_FormerNeedsDocument = new TypedDocumentString(`
   createdAt
   id
   priority
-}
-fragment ProjectAttachment on ProjectAttachment {
-  __typename
-  sourceType
-  metadata
-  source
-  subtitle
-  creator {
-    id
-  }
-  updatedAt
-  archivedAt
-  createdAt
-  id
-  title
-  url
 }
 fragment CustomerNeedConnection on CustomerNeedConnection {
   __typename
@@ -80311,7 +80258,7 @@ export const Issue_NeedsDocument = new TypedDocumentString(`
   updatedAt
   body
   projectAttachment {
-    ...ProjectAttachment
+    id
   }
   project {
     id
@@ -80320,22 +80267,6 @@ export const Issue_NeedsDocument = new TypedDocumentString(`
   createdAt
   id
   priority
-}
-fragment ProjectAttachment on ProjectAttachment {
-  __typename
-  sourceType
-  metadata
-  source
-  subtitle
-  creator {
-    id
-  }
-  updatedAt
-  archivedAt
-  createdAt
-  id
-  title
-  url
 }
 fragment CustomerNeedConnection on CustomerNeedConnection {
   __typename
@@ -82269,7 +82200,7 @@ export const IssueVcsBranchSearch_FormerNeedsDocument = new TypedDocumentString(
   updatedAt
   body
   projectAttachment {
-    ...ProjectAttachment
+    id
   }
   project {
     id
@@ -82278,22 +82209,6 @@ export const IssueVcsBranchSearch_FormerNeedsDocument = new TypedDocumentString(
   createdAt
   id
   priority
-}
-fragment ProjectAttachment on ProjectAttachment {
-  __typename
-  sourceType
-  metadata
-  source
-  subtitle
-  creator {
-    id
-  }
-  updatedAt
-  archivedAt
-  createdAt
-  id
-  title
-  url
 }
 fragment CustomerNeedConnection on CustomerNeedConnection {
   __typename
@@ -82703,7 +82618,7 @@ export const IssueVcsBranchSearch_NeedsDocument = new TypedDocumentString(`
   updatedAt
   body
   projectAttachment {
-    ...ProjectAttachment
+    id
   }
   project {
     id
@@ -82712,22 +82627,6 @@ export const IssueVcsBranchSearch_NeedsDocument = new TypedDocumentString(`
   createdAt
   id
   priority
-}
-fragment ProjectAttachment on ProjectAttachment {
-  __typename
-  sourceType
-  metadata
-  source
-  subtitle
-  creator {
-    id
-  }
-  updatedAt
-  archivedAt
-  createdAt
-  id
-  title
-  url
 }
 fragment CustomerNeedConnection on CustomerNeedConnection {
   __typename
@@ -85863,7 +85762,7 @@ export const Project_NeedsDocument = new TypedDocumentString(`
   updatedAt
   body
   projectAttachment {
-    ...ProjectAttachment
+    id
   }
   project {
     id
@@ -85872,22 +85771,6 @@ export const Project_NeedsDocument = new TypedDocumentString(`
   createdAt
   id
   priority
-}
-fragment ProjectAttachment on ProjectAttachment {
-  __typename
-  sourceType
-  metadata
-  source
-  subtitle
-  creator {
-    id
-  }
-  updatedAt
-  archivedAt
-  createdAt
-  id
-  title
-  url
 }
 fragment CustomerNeedConnection on CustomerNeedConnection {
   __typename
@@ -86262,6 +86145,82 @@ fragment TeamConnection on TeamConnection {
     ...PageInfo
   }
 }`) as unknown as TypedDocumentString<Project_TeamsQuery, Project_TeamsQueryVariables>;
+export const ProjectAttachmentDocument = new TypedDocumentString(`
+    query projectAttachment($id: String!) {
+  projectAttachment(id: $id) {
+    ...ProjectAttachment
+  }
+}
+    fragment ProjectAttachment on ProjectAttachment {
+  __typename
+  sourceType
+  metadata
+  source
+  subtitle
+  bodyData
+  creator {
+    id
+  }
+  updatedAt
+  project {
+    id
+  }
+  archivedAt
+  createdAt
+  id
+  title
+  url
+}`) as unknown as TypedDocumentString<ProjectAttachmentQuery, ProjectAttachmentQueryVariables>;
+export const ProjectAttachmentsDocument = new TypedDocumentString(`
+    query projectAttachments($after: String, $before: String, $filter: ProjectAttachmentFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  projectAttachments(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...ProjectAttachmentConnection
+  }
+}
+    fragment ProjectAttachment on ProjectAttachment {
+  __typename
+  sourceType
+  metadata
+  source
+  subtitle
+  bodyData
+  creator {
+    id
+  }
+  updatedAt
+  project {
+    id
+  }
+  archivedAt
+  createdAt
+  id
+  title
+  url
+}
+fragment PageInfo on PageInfo {
+  __typename
+  startCursor
+  endCursor
+  hasPreviousPage
+  hasNextPage
+}
+fragment ProjectAttachmentConnection on ProjectAttachmentConnection {
+  __typename
+  nodes {
+    ...ProjectAttachment
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}`) as unknown as TypedDocumentString<ProjectAttachmentsQuery, ProjectAttachmentsQueryVariables>;
 export const ProjectFilterSuggestionDocument = new TypedDocumentString(`
     query projectFilterSuggestion($prompt: String!) {
   projectFilterSuggestion(prompt: $prompt) {
@@ -93794,7 +93753,7 @@ export const UpdateCustomerNeedDocument = new TypedDocumentString(`
   updatedAt
   body
   projectAttachment {
-    ...ProjectAttachment
+    id
   }
   project {
     id
@@ -93803,22 +93762,6 @@ export const UpdateCustomerNeedDocument = new TypedDocumentString(`
   createdAt
   id
   priority
-}
-fragment ProjectAttachment on ProjectAttachment {
-  __typename
-  sourceType
-  metadata
-  source
-  subtitle
-  creator {
-    id
-  }
-  updatedAt
-  archivedAt
-  createdAt
-  id
-  title
-  url
 }
 fragment CustomerNeedUpdatePayload on CustomerNeedUpdatePayload {
   __typename
@@ -100410,6 +100353,46 @@ export const ArchiveProjectDocument = new TypedDocumentString(`
   lastSyncId
   success
 }`) as unknown as TypedDocumentString<ArchiveProjectMutation, ArchiveProjectMutationVariables>;
+export const CreateProjectAttachmentDocument = new TypedDocumentString(`
+    mutation createProjectAttachment($input: ProjectAttachmentCreateInput!) {
+  projectAttachmentCreate(input: $input) {
+    ...ProjectAttachmentPayload
+  }
+}
+    fragment ProjectAttachmentPayload on ProjectAttachmentPayload {
+  __typename
+  lastSyncId
+  attachment {
+    id
+  }
+  success
+}`) as unknown as TypedDocumentString<CreateProjectAttachmentMutation, CreateProjectAttachmentMutationVariables>;
+export const DeleteProjectAttachmentDocument = new TypedDocumentString(`
+    mutation deleteProjectAttachment($id: String!) {
+  projectAttachmentDelete(id: $id) {
+    ...DeletePayload
+  }
+}
+    fragment DeletePayload on DeletePayload {
+  __typename
+  entityId
+  lastSyncId
+  success
+}`) as unknown as TypedDocumentString<DeleteProjectAttachmentMutation, DeleteProjectAttachmentMutationVariables>;
+export const UpdateProjectAttachmentDocument = new TypedDocumentString(`
+    mutation updateProjectAttachment($id: String!, $input: ProjectAttachmentUpdateInput!) {
+  projectAttachmentUpdate(id: $id, input: $input) {
+    ...ProjectAttachmentPayload
+  }
+}
+    fragment ProjectAttachmentPayload on ProjectAttachmentPayload {
+  __typename
+  lastSyncId
+  attachment {
+    id
+  }
+  success
+}`) as unknown as TypedDocumentString<UpdateProjectAttachmentMutation, UpdateProjectAttachmentMutationVariables>;
 export const CreateProjectDocument = new TypedDocumentString(`
     mutation createProject($connectSlackChannel: Boolean, $input: ProjectCreateInput!) {
   projectCreate(connectSlackChannel: $connectSlackChannel, input: $input) {

@@ -174,6 +174,81 @@ Object.entries(bundles).map(([bundleFormat, bundle]) =>
           expect(noIssue?.archivedAt instanceof Date).toBeTruthy();
         }
       });
+
+      it("create a project attachment, update and delete it", async () => {
+        const client = linearClient;
+
+        /** Get a project to attach to */
+        const projects = await client.projects();
+        const project = projects?.nodes?.[0];
+
+        if (!project?.id) {
+          // Skip test if no project is available
+          return;
+        }
+
+        /** Create project attachment */
+        const createdInput = {
+          projectId: project.id,
+          title: `Test Attachment ${uuid()}`,
+          url: `https://example.com/${uuid()}`,
+        };
+        const created = await client.createProjectAttachment(createdInput);
+        const createdAttachment = await created?.attachment;
+
+        if (process.env.E2E) {
+          expect(created?.success).toBe(true);
+          expect(createdAttachment?.title).toBe(createdInput.title);
+          expect(createdAttachment?.url).toBe(createdInput.url);
+        }
+
+        /** Query for project attachment */
+        const createdId = createdAttachment?.id ?? "";
+        const attachment = await client.projectAttachment(createdId);
+
+        if (process.env.E2E) {
+          expect(attachment?.id).toBe(createdId);
+          expect(attachment?.title).toBe(createdInput.title);
+        }
+
+        /** Query for all project attachments */
+        const attachments = await client.projectAttachments();
+        if (process.env.E2E) {
+          expect(attachments?.nodes.length).toBeGreaterThan(0);
+        }
+
+        /** Update project attachment */
+        const updatedInput = {
+          title: `Updated Attachment ${uuid()}`,
+        };
+        const updated = await client.updateProjectAttachment(createdId, updatedInput);
+        const updatedAttachment = await updated?.attachment;
+
+        if (process.env.E2E) {
+          expect(updated?.success).toBe(true);
+          expect(updatedAttachment?.title).toBe(updatedInput.title);
+        }
+
+        /** Delete project attachment */
+        const deleted = await client.deleteProjectAttachment(createdId);
+        if (process.env.E2E) {
+          expect(deleted?.success).toBe(true);
+        }
+
+        /** Confirm attachment is deleted */
+        try {
+          await client.projectAttachment(createdId);
+          if (process.env.E2E) {
+            // Should throw an error since the attachment was deleted
+            expect(false).toBe(true);
+          }
+        } catch (error) {
+          if (process.env.E2E) {
+            // Expected to throw an error
+            expect(error).toBeDefined();
+          }
+        }
+      });
     });
   })
 );
