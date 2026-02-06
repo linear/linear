@@ -1240,6 +1240,50 @@ type AsksWebSettings implements Node {
   updatedAt: DateTime!
 }
 
+input AsksWebSettingsCreateInput {
+  """
+  The custom domain for the Asks web form. If null, the default Linear-hosted domain will be used.
+  """
+  domain: String
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+}
+
+input AsksWebSettingsEmailIntakeAddressInput {
+  """
+  The email address for forwarding.
+  """
+  forwardingEmailAddress: String
+  """
+  The sender name for outgoing emails.
+  """
+  senderName: String
+}
+
+type AsksWebSettingsPayload {
+  """
+  The Asks web settings that were created or updated.
+  """
+  asksWebSettings: AsksWebSettings!
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+input AsksWebSettingsUpdateInput {
+  """
+  The custom domain for the Asks web form. If null, the default Linear-hosted domain will be used.
+  """
+  domain: String
+}
+
 """
 Issue assignee sorting options.
 """
@@ -2843,6 +2887,10 @@ input ContactSalesCreateInput {
   Name of the person requesting information.
   """
   name: String!
+  """
+  Session ID for analytics correlation.
+  """
+  sessionId: String
   """
   The URL this request was sent from.
   """
@@ -6449,6 +6497,10 @@ type DocumentContent implements Node {
       been updated after creation.
   """
   updatedAt: DateTime!
+  """
+  The welcome message that the content is associated with.
+  """
+  welcomeMessage: WelcomeMessage
 }
 
 """
@@ -7377,6 +7429,7 @@ The type of the email address.
 """
 enum EmailIntakeAddressType {
   asks
+  asksWeb
   team
   template
 }
@@ -9009,6 +9062,18 @@ input GitHubSettingsInput {
 }
 
 type GitLabIntegrationCreatePayload {
+  """
+  Error message if the connection failed.
+  """
+  error: String
+  """
+  Response body from GitLab for debugging.
+  """
+  errorResponseBody: String
+  """
+  Response headers from GitLab for debugging (JSON stringified).
+  """
+  errorResponseHeaders: String
   """
   The integration that was created or updated.
   """
@@ -13753,6 +13818,26 @@ type IssueHistory implements Node {
   """
   fromProjectId: String
   """
+  The project milestone that the issue was moved from.
+  """
+  fromProjectMilestone: ProjectMilestone
+  """
+  Whether the issue had previously breached its SLA.
+  """
+  fromSlaBreached: Boolean
+  """
+  The SLA breach time that was previously set on the issue.
+  """
+  fromSlaBreachesAt: DateTime
+  """
+  The time at which the issue's SLA was previously started.
+  """
+  fromSlaStartedAt: DateTime
+  """
+  The type of SLA that was previously set on the issue.
+  """
+  fromSlaType: String
+  """
   The state that the issue was moved from.
   """
   fromState: WorkflowState
@@ -13861,6 +13946,26 @@ type IssueHistory implements Node {
   """
   toProjectId: String
   """
+  The project milestone that the issue was moved to.
+  """
+  toProjectMilestone: ProjectMilestone
+  """
+  Whether the issue has now breached its SLA.
+  """
+  toSlaBreached: Boolean
+  """
+  The SLA breach time that is now set on the issue.
+  """
+  toSlaBreachesAt: DateTime
+  """
+  The time at which the issue's SLA is now started.
+  """
+  toSlaStartedAt: DateTime
+  """
+  The type of SLA that is now set on the issue.
+  """
+  toSlaType: String
+  """
   The state that the issue was moved to.
   """
   toState: WorkflowState
@@ -13892,6 +13997,10 @@ type IssueHistory implements Node {
   The users that were notified of the issue.
   """
   triageResponsibilityNotifiedUsers: [User!]
+  """
+  The team that triggered the triage responsibility action.
+  """
+  triageResponsibilityTeam: Team
   """
   [INTERNAL] Metadata about the triage rule that made changes to the issue.
   """
@@ -16809,6 +16918,10 @@ input JiraSettingsInput {
   Whether the user needs to provide setup information about the webhook to complete the integration setup. Only relevant for integrations that use a manual setup flow
   """
   setupPending: Boolean
+  """
+  The status names per issue type, per project.
+  """
+  statusNamesPerIssueType: JSONObject
 }
 
 input JiraUpdateInput {
@@ -17112,6 +17225,36 @@ type Mutation {
     """
     input: AirbyteConfigurationInput!
   ): IntegrationPayload!
+  """
+  Creates a new Asks web form settings.
+  """
+  asksWebSettingsCreate(
+    """
+    Optional email intake address settings.
+    """
+    emailIntakeAddress: AsksWebSettingsEmailIntakeAddressInput
+    """
+    The Asks web settings object to create.
+    """
+    input: AsksWebSettingsCreateInput!
+  ): AsksWebSettingsPayload!
+  """
+  Updates Asks web form settings.
+  """
+  asksWebSettingsUpdate(
+    """
+    Optional email intake address settings.
+    """
+    emailIntakeAddress: AsksWebSettingsEmailIntakeAddressInput
+    """
+    The identifier of the Asks web settings to update.
+    """
+    id: String!
+    """
+    The fields to update.
+    """
+    input: AsksWebSettingsUpdateInput!
+  ): AsksWebSettingsPayload!
   """
   Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
   """
@@ -17604,6 +17747,10 @@ type Mutation {
     Organization details for the new organization.
     """
     input: CreateOrganizationInput!
+    """
+    PostHog session ID for attribution tracking.
+    """
+    sessionId: String
     """
     Onboarding survey.
     """
@@ -18486,6 +18633,10 @@ type Mutation {
     Whether the integration should have code access
     """
     codeAccess: Boolean = false
+    """
+    The GitHub Enterprise Cloud host (e.g., 'linear-development.ghe.com'). When provided, this creates a GEC integration.
+    """
+    githubHost: String
     """
     The GitHub data to connect with.
     """
@@ -19936,13 +20087,13 @@ type Mutation {
   """
   projectCreate(
     """
-    Whether to connect a Slack channel to the project.
-    """
-    connectSlackChannel: Boolean
-    """
     The issue object to create.
     """
     input: ProjectCreateInput!
+    """
+    The full name for the Slack channel to create (including prefix). When provided, a Slack channel will be created and connected to the project.
+    """
+    slackChannelName: String
   ): ProjectPayload!
   """
   Deletes (trashes) a project.
@@ -20451,7 +20602,7 @@ type Mutation {
     input: ReleaseUpdateInput!
   ): ReleasePayload!
   """
-  [ALPHA] Updates a release by pipeline. If version is provided, updates that specific release; otherwise updates the most recent started release.
+  [ALPHA] Updates a release by pipeline.
   """
   releaseUpdateByPipeline(
     """
@@ -20460,7 +20611,7 @@ type Mutation {
     input: ReleaseUpdateByPipelineInput!
   ): ReleasePayload!
   """
-  [ALPHA] Updates a release by pipeline using an access key. If version is provided, updates that specific release; otherwise updates the most recent started release. The pipeline is inferred from the access key.
+  [ALPHA] Updates a release by pipeline using an access key.
   """
   releaseUpdateByPipelineByAccessKey(
     """
@@ -20822,26 +20973,6 @@ type Mutation {
     role: UserRoleType!
   ): UserAdminPayload!
   """
-  [DEPRECATED] Makes user a regular user. Can only be called by an admin or owner.
-  """
-  userDemoteAdmin(
-    """
-    The identifier of the user to make a regular user.
-    """
-    id: String!
-  ): UserAdminPayload!
-    @deprecated(reason: "Use userChangeRole instead. This mutation will be removed in a future release.")
-  """
-  [DEPRECATED] Makes user a guest. Can only be called by an admin.
-  """
-  userDemoteMember(
-    """
-    The identifier of the user to make a guest.
-    """
-    id: String!
-  ): UserAdminPayload!
-    @deprecated(reason: "Use userChangeRole instead. This mutation will be removed in a future release.")
-  """
   Connects the Discord user to this Linear account via OAuth2.
   """
   userDiscordConnect(
@@ -20876,26 +21007,6 @@ type Mutation {
     """
     operation: UserFlagUpdateOperation!
   ): UserSettingsFlagPayload!
-  """
-  [DEPRECATED] Makes user an admin. Can only be called by an admin or owner.
-  """
-  userPromoteAdmin(
-    """
-    The identifier of the user to make an admin.
-    """
-    id: String!
-  ): UserAdminPayload!
-    @deprecated(reason: "Use userChangeRole instead. This mutation will be removed in a future release.")
-  """
-  [DEPRECATED] Makes user a regular user. Can only be called by an admin.
-  """
-  userPromoteMember(
-    """
-    The identifier of the user to make a regular user.
-    """
-    id: String!
-  ): UserAdminPayload!
-    @deprecated(reason: "Use userChangeRole instead. This mutation will be removed in a future release.")
   """
   Revokes a user's sessions. Can only be called by an admin or owner.
   """
@@ -23059,7 +23170,7 @@ input NullableUserFilter {
   """
   or: [NullableUserFilter!]
   """
-  [Internal] Comparator for the user's owner status.
+  Comparator for the user's owner status.
   """
   owner: BooleanComparator
   """
@@ -23734,6 +23845,14 @@ type Organization implements Node {
   [DEPRECATED] Which day count to use for SLA calculations.
   """
   slaDayCount: SLADayCountType! @deprecated(reason: "No longer in use")
+  """
+  The Slack integration used for auto-creating project channels.
+  """
+  slackProjectChannelIntegration: Integration
+  """
+  The prefix used for auto-created Slack project channels.
+  """
+  slackProjectChannelPrefix: String!
   """
   The organization's subscription to a paid plan.
   """
@@ -24500,6 +24619,14 @@ input OrganizationUpdateInput {
   """
   slaEnabled: Boolean
   """
+  The ID of the Slack integration to use for auto-creating project channels.
+  """
+  slackProjectChannelIntegrationId: String
+  """
+  The prefix to use for auto-created Slack project channels (p-, proj-, or project-).
+  """
+  slackProjectChannelPrefix: String
+  """
   [ALPHA] Theme settings for the organization.
   """
   themeSettings: JSONObject
@@ -25114,6 +25241,35 @@ type Project implements Node {
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
+  """
+  Attachments associated with the project.
+  """
+  attachments(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ProjectAttachmentConnection!
   """
   The time at which the project was automatically archived by the auto pruning process.
   """
@@ -25879,6 +26035,20 @@ type ProjectAttachment implements Node {
   URL of the attachment.
   """
   url: String!
+}
+
+type ProjectAttachmentConnection {
+  edges: [ProjectAttachmentEdge!]!
+  nodes: [ProjectAttachment!]!
+  pageInfo: PageInfo!
+}
+
+type ProjectAttachmentEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: ProjectAttachment!
 }
 
 """
@@ -27703,6 +27873,35 @@ type ProjectSearchResult implements Node {
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
+  """
+  Attachments associated with the project.
+  """
+  attachments(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ProjectAttachmentConnection!
   """
   The time at which the project was automatically archived by the auto pruning process.
   """
@@ -33461,7 +33660,7 @@ input ReleaseUpdateByPipelineInput {
   """
   stage: String
   """
-  The version of the release to update. If not provided, the latest started release will be updated.
+  The version of the release to update. If not provided, the latest started or latest planned release will be updated.
   """
   version: String
 }
@@ -33472,7 +33671,7 @@ input ReleaseUpdateByPipelineInputBase {
   """
   stage: String
   """
-  The version of the release to update. If not provided, the latest started release will be updated.
+  The version of the release to update. If not provided, the latest started or latest planned release will be updated.
   """
   version: String
 }
@@ -35443,6 +35642,10 @@ type Team implements Node {
   """
   requirePriorityToLeaveTriage: Boolean!
   """
+  The time at which the team was retired. Null if the team has not been retired.
+  """
+  retiredAt: DateTime
+  """
   The workflow state into which issues are moved when a review has been requested for the PR.
   """
   reviewWorkflowState: WorkflowState @deprecated(reason: "Use team.gitAutomationStates instead.")
@@ -36306,7 +36509,7 @@ input TeamUpdateInput {
   """
   requirePriorityToLeaveTriage: Boolean
   """
-  [Internal] When the team was retired.
+  When the team was retired.
   """
   retiredAt: DateTime
   """
@@ -37496,7 +37699,7 @@ input UserCollectionFilter {
   """
   or: [UserCollectionFilter!]
   """
-  [Internal] Comparator for the user's owner status.
+  Comparator for the user's owner status.
   """
   owner: BooleanComparator
   """
@@ -37602,7 +37805,7 @@ input UserFilter {
   """
   or: [UserFilter!]
   """
-  [Internal] Comparator for the user's owner status.
+  Comparator for the user's owner status.
   """
   owner: BooleanComparator
   """
@@ -38577,6 +38780,161 @@ input WebhookUpdateInput {
   The URL that will be called on data changes.
   """
   url: String
+}
+
+"""
+A welcome message for new users joining the workspace.
+"""
+type WelcomeMessage implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  Whether the welcome message is enabled.
+  """
+  enabled: Boolean!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The title of the welcome message notification.
+  """
+  title: String
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The user who last updated the welcome message.
+  """
+  updatedBy: User
+}
+
+"""
+A welcome message related notification.
+"""
+type WelcomeMessageNotification implements Entity & Node & Notification {
+  """
+  The user that caused the notification.
+  """
+  actor: User
+  """
+  [Internal] Notification actor initials if avatar is not available.
+  """
+  actorAvatarColor: String!
+  """
+  [Internal] Notification avatar URL.
+  """
+  actorAvatarUrl: String
+  """
+  [Internal] Notification actor initials if avatar is not available.
+  """
+  actorInitials: String
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The bot that caused the notification.
+  """
+  botActor: ActorBot
+  """
+  The category of the notification.
+  """
+  category: NotificationCategory!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The time at when an email reminder for this notification was sent to the user. Null, if no email
+      reminder has been sent.
+  """
+  emailedAt: DateTime
+  """
+  The external user that caused the notification.
+  """
+  externalUserActor: ExternalUser
+  """
+  [Internal] Notifications with the same grouping key will be grouped together in the UI.
+  """
+  groupingKey: String!
+  """
+  [Internal] Priority of the notification with the same grouping key. Higher number means higher priority. If priority is the same, notifications should be sorted by `createdAt`.
+  """
+  groupingPriority: Float!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  [Internal] Inbox URL for the notification.
+  """
+  inboxUrl: String!
+  """
+  [Internal] Initiative update health for new updates.
+  """
+  initiativeUpdateHealth: String
+  """
+  [Internal] If notification actor was Linear.
+  """
+  isLinearActor: Boolean!
+  """
+  [Internal] Issue's status type for issue notifications.
+  """
+  issueStatusType: String
+  """
+  [Internal] Project update health for new updates.
+  """
+  projectUpdateHealth: String
+  """
+  The time at when the user marked the notification as read. Null, if the the user hasn't read the notification
+  """
+  readAt: DateTime
+  """
+  The time until a notification will be snoozed. After that it will appear in the inbox again.
+  """
+  snoozedUntilAt: DateTime
+  """
+  [Internal] Notification subtitle.
+  """
+  subtitle: String!
+  """
+  [Internal] Notification title.
+  """
+  title: String!
+  """
+  Notification type.
+  """
+  type: String!
+  """
+  The time at which a notification was unsnoozed..
+  """
+  unsnoozedAt: DateTime
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  [Internal] URL to the target of the notification.
+  """
+  url: String!
+  """
+  The user that received the notification.
+  """
+  user: User!
+  """
+  Related welcome message.
+  """
+  welcomeMessageId: String!
 }
 
 type WorkflowDefinition implements Node {

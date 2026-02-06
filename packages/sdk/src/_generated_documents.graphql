@@ -762,6 +762,10 @@ fragment DocumentContent on DocumentContent {
   createdAt
   # The unique identifier of the entity.
   id
+  # The welcome message that the content is associated with.
+  welcomeMessage {
+    ...WelcomeMessage
+  }
 }
 
 # A document related notification.
@@ -1441,6 +1445,10 @@ fragment Notification on Notification {
   ... on PullRequestNotification {
     ...PullRequestNotification
   }
+
+  ... on WelcomeMessageNotification {
+    ...WelcomeMessageNotification
+  }
 }
 
 # A post related notification.
@@ -1883,6 +1891,10 @@ fragment IssueHistory on IssueHistory {
   addedLabelIds
   # ID's of labels that were removed.
   removedLabelIds
+  # The SLA breach time that is now set on the issue.
+  toSlaBreachesAt
+  # The SLA breach time that was previously set on the issue.
+  fromSlaBreachesAt
   # The actor that performed the actions. This field may be empty in the case of integrations or automations.
   actor {
     id
@@ -1982,6 +1994,14 @@ fragment IssueHistory on IssueHistory {
   toParent {
     id
   }
+  # The project milestone that the issue was moved from.
+  fromProjectMilestone {
+    id
+  }
+  # The project milestone that the issue was moved to.
+  toProjectMilestone {
+    id
+  }
   # The project that the issue was moved from.
   fromProject {
     id
@@ -2006,10 +2026,22 @@ fragment IssueHistory on IssueHistory {
   toTeam {
     id
   }
+  # The team that triggered the triage responsibility action.
+  triageResponsibilityTeam {
+    id
+  }
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
   createdAt
+  # The time at which the issue's SLA is now started.
+  toSlaStartedAt
+  # The time at which the issue's SLA was previously started.
+  fromSlaStartedAt
+  # The type of SLA that is now set on the issue.
+  toSlaType
+  # The type of SLA that was previously set on the issue.
+  fromSlaType
   # The unique identifier of the entity.
   id
   # The user that was assigned to the issue.
@@ -2040,6 +2072,10 @@ fragment IssueHistory on IssueHistory {
   fromTitle
   # What the title was changed to.
   toTitle
+  # Whether the issue had previously breached its SLA.
+  fromSlaBreached
+  # Whether the issue has now breached its SLA.
+  toSlaBreached
   # Whether the issue is archived at the time of this history entry.
   archived
   # Whether the issue was auto-archived.
@@ -2857,6 +2893,73 @@ fragment Webhook on Webhook {
   allPublicTeams
   # Whether the Webhook is enabled.
   enabled
+}
+
+# A welcome message for new users joining the workspace.
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The title of the welcome message notification.
+  title
+  # The unique identifier of the entity.
+  id
+  # The user who last updated the welcome message.
+  updatedBy {
+    id
+  }
+  # Whether the welcome message is enabled.
+  enabled
+}
+
+# A welcome message related notification.
+fragment WelcomeMessageNotification on WelcomeMessageNotification {
+  __typename
+  # Notification type.
+  type
+  # Related welcome message.
+  welcomeMessageId
+  # The bot that caused the notification.
+  botActor {
+    ...ActorBot
+  }
+  # The category of the notification.
+  category
+  # The external user that caused the notification.
+  externalUserActor {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at when an email reminder for this notification was sent to the user. Null, if no email
+  #     reminder has been sent.
+  emailedAt
+  # The time at when the user marked the notification as read. Null, if the the user hasn't read the notification
+  readAt
+  # The time at which a notification was unsnoozed..
+  unsnoozedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time until a notification will be snoozed. After that it will appear in the inbox again.
+  snoozedUntilAt
+  # The unique identifier of the entity.
+  id
+  # The user that caused the notification.
+  actor {
+    id
+  }
+  # The user that received the notification.
+  user {
+    id
+  }
 }
 
 # AI prompt rules for a team.
@@ -3858,6 +3961,10 @@ fragment Organization on Organization {
   periodUploadVolume
   # Security settings for the organization.
   securitySettings
+  # The Slack integration used for auto-creating project channels.
+  slackProjectChannelIntegration {
+    id
+  }
   # The day at which to prompt for initiative updates.
   initiativeUpdateRemindersDay
   # The day at which to prompt for project updates.
@@ -3891,6 +3998,8 @@ fragment Organization on Organization {
   }
   # The organization's unique URL key.
   urlKey
+  # The prefix used for auto-created Slack project channels.
+  slackProjectChannelPrefix
   # The time at which deletion of the organization was requested.
   deletionRequestedAt
   # The time at which the entity was archived. Null if the entity has not been archived.
@@ -4059,6 +4168,8 @@ fragment Team on Team {
   archivedAt
   # The time at which the entity was created.
   createdAt
+  # The time at which the team was retired. Null if the team has not been retired.
+  retiredAt
   # The timezone of the team. Defaults to "America/Los_Angeles"
   timezone
   # The unique identifier of the entity.
@@ -7305,6 +7416,18 @@ fragment AsksChannelConnectPayload on AsksChannelConnectPayload {
   success
 }
 
+fragment AsksWebSettingsPayload on AsksWebSettingsPayload {
+  __typename
+  # The Asks web settings that were created or updated.
+  asksWebSettings {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
 fragment AttachmentConnection on AttachmentConnection {
   __typename
   nodes {
@@ -7936,6 +8059,12 @@ fragment GitHubEnterpriseServerPayload on GitHubEnterpriseServerPayload {
 
 fragment GitLabIntegrationCreatePayload on GitLabIntegrationCreatePayload {
   __typename
+  # Error message if the connection failed.
+  error
+  # Response body from GitLab for debugging.
+  errorResponseBody
+  # Response headers from GitLab for debugging (JSON stringified).
+  errorResponseHeaders
   # The identifier of the last sync operation.
   lastSyncId
   # The integration that was created or updated.
@@ -8726,6 +8855,16 @@ fragment PasskeyLoginStartResponse on PasskeyLoginStartResponse {
   __typename
   options
   success
+}
+
+fragment ProjectAttachmentConnection on ProjectAttachmentConnection {
+  __typename
+  nodes {
+    ...ProjectAttachment
+  }
+  pageInfo {
+    ...PageInfo
+  }
 }
 
 fragment ProjectConnection on ProjectConnection {
@@ -10473,6 +10612,21 @@ query comment_documentContent_aiPromptRules(
     }
   }
 }
+# The welcome message that the content is associated with.
+query comment_documentContent_welcomeMessage(
+  # The hash of the comment to retrieve.
+  $hash: String
+  # The identifier of the comment to retrieve.
+  $id: String
+) {
+  comment(hash: $hash, id: $id) {
+    documentContent {
+      welcomeMessage {
+        ...WelcomeMessage
+      }
+    }
+  }
+}
 # The external thread that the comment is synced with.
 query comment_externalThread(
   # The hash of the comment to retrieve.
@@ -11212,6 +11366,16 @@ query initiative_documentContent_aiPromptRules($id: String!) {
     documentContent {
       aiPromptRules {
         ...AiPromptRules
+      }
+    }
+  }
+}
+# The welcome message that the content is associated with.
+query initiative_documentContent_welcomeMessage($id: String!) {
+  initiative(id: $id) {
+    documentContent {
+      welcomeMessage {
+        ...WelcomeMessage
       }
     }
   }
@@ -13110,6 +13274,35 @@ query project($id: String!) {
     ...Project
   }
 }
+# Attachments associated with the project.
+query project_attachments(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  project(id: $id) {
+    attachments(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...ProjectAttachmentConnection
+    }
+  }
+}
 # Comments associated with the project overview.
 query project_comments(
   $id: String!
@@ -13156,6 +13349,16 @@ query project_documentContent_aiPromptRules($id: String!) {
     documentContent {
       aiPromptRules {
         ...AiPromptRules
+      }
+    }
+  }
+}
+# The welcome message that the content is associated with.
+query project_documentContent_welcomeMessage($id: String!) {
+  project(id: $id) {
+    documentContent {
+      welcomeMessage {
+        ...WelcomeMessage
       }
     }
   }
@@ -13718,6 +13921,16 @@ query projectMilestone_documentContent_aiPromptRules($id: String!) {
     documentContent {
       aiPromptRules {
         ...AiPromptRules
+      }
+    }
+  }
+}
+# The welcome message that the content is associated with.
+query projectMilestone_documentContent_welcomeMessage($id: String!) {
+  projectMilestone(id: $id) {
+    documentContent {
+      welcomeMessage {
+        ...WelcomeMessage
       }
     }
   }
@@ -15763,6 +15976,30 @@ mutation airbyteIntegrationConnect(
     ...IntegrationPayload
   }
 }
+# Creates a new Asks web form settings.
+mutation createAsksWebSettings(
+  # Optional email intake address settings.
+  $emailIntakeAddress: AsksWebSettingsEmailIntakeAddressInput
+  # The Asks web settings object to create.
+  $input: AsksWebSettingsCreateInput!
+) {
+  asksWebSettingsCreate(emailIntakeAddress: $emailIntakeAddress, input: $input) {
+    ...AsksWebSettingsPayload
+  }
+}
+# Updates Asks web form settings.
+mutation updateAsksWebSettings(
+  # Optional email intake address settings.
+  $emailIntakeAddress: AsksWebSettingsEmailIntakeAddressInput
+  # The identifier of the Asks web settings to update.
+  $id: String!
+  # The fields to update.
+  $input: AsksWebSettingsUpdateInput!
+) {
+  asksWebSettingsUpdate(emailIntakeAddress: $emailIntakeAddress, id: $id, input: $input) {
+    ...AsksWebSettingsPayload
+  }
+}
 # Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
 mutation createAttachment(
   # The attachment object to create.
@@ -16195,10 +16432,12 @@ mutation createInitiativeUpdateReminder(
 mutation createOrganizationFromOnboarding(
   # Organization details for the new organization.
   $input: CreateOrganizationInput!
+  # PostHog session ID for attribution tracking.
+  $sessionId: String
   # Onboarding survey.
   $survey: OnboardingCustomerSurvey
 ) {
-  createOrganizationFromOnboarding(input: $input, survey: $survey) {
+  createOrganizationFromOnboarding(input: $input, sessionId: $sessionId, survey: $survey) {
     ...CreateOrJoinOrganizationResponse
   }
 }
@@ -17002,10 +17241,17 @@ mutation integrationGithubConnect(
   $code: String!
   # Whether the integration should have code access
   $codeAccess: Boolean
+  # The GitHub Enterprise Cloud host (e.g., 'linear-development.ghe.com'). When provided, this creates a GEC integration.
+  $githubHost: String
   # The GitHub data to connect with.
   $installationId: String!
 ) {
-  integrationGithubConnect(code: $code, codeAccess: $codeAccess, installationId: $installationId) {
+  integrationGithubConnect(
+    code: $code
+    codeAccess: $codeAccess
+    githubHost: $githubHost
+    installationId: $installationId
+  ) {
     ...IntegrationPayload
   }
 }
@@ -18009,12 +18255,12 @@ mutation archiveProject(
 }
 # Creates a new project.
 mutation createProject(
-  # Whether to connect a Slack channel to the project.
-  $connectSlackChannel: Boolean
   # The issue object to create.
   $input: ProjectCreateInput!
+  # The full name for the Slack channel to create (including prefix). When provided, a Slack channel will be created and connected to the project.
+  $slackChannelName: String
 ) {
-  projectCreate(connectSlackChannel: $connectSlackChannel, input: $input) {
+  projectCreate(input: $input, slackChannelName: $slackChannelName) {
     ...ProjectPayload
   }
 }
@@ -18619,24 +18865,6 @@ mutation userChangeRole(
     ...UserAdminPayload
   }
 }
-# [DEPRECATED] Makes user a regular user. Can only be called by an admin or owner.
-mutation userDemoteAdmin(
-  # The identifier of the user to make a regular user.
-  $id: String!
-) {
-  userDemoteAdmin(id: $id) {
-    ...UserAdminPayload
-  }
-}
-# [DEPRECATED] Makes user a guest. Can only be called by an admin.
-mutation userDemoteMember(
-  # The identifier of the user to make a guest.
-  $id: String!
-) {
-  userDemoteMember(id: $id) {
-    ...UserAdminPayload
-  }
-}
 # Connects the Discord user to this Linear account via OAuth2.
 mutation userDiscordConnect(
   # The Discord OAuth code.
@@ -18666,24 +18894,6 @@ mutation updateUserFlag(
 ) {
   userFlagUpdate(flag: $flag, operation: $operation) {
     ...UserSettingsFlagPayload
-  }
-}
-# [DEPRECATED] Makes user an admin. Can only be called by an admin or owner.
-mutation userPromoteAdmin(
-  # The identifier of the user to make an admin.
-  $id: String!
-) {
-  userPromoteAdmin(id: $id) {
-    ...UserAdminPayload
-  }
-}
-# [DEPRECATED] Makes user a regular user. Can only be called by an admin.
-mutation userPromoteMember(
-  # The identifier of the user to make a regular user.
-  $id: String!
-) {
-  userPromoteMember(id: $id) {
-    ...UserAdminPayload
   }
 }
 # Revokes a user's sessions. Can only be called by an admin or owner.
