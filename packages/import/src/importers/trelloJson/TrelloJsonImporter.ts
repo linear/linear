@@ -20,6 +20,7 @@ interface TrelloCard {
   }[];
   id: string;
   idList: string;
+  idShort?: number;
 }
 
 interface TrelloList {
@@ -139,9 +140,10 @@ export class TrelloJsonImporter implements Importer {
         .join("\n");
       const cardList = trelloLists.find(list => list.id === card.idList);
 
+      const cardIdInfo = card.idShort !== undefined ? `Trello Card #${card.idShort} | ` : "";
       const description = `${mdDesc}${formattedChecklists && `\n\nChecklists:\n${formattedChecklists}`}${
         formattedAttachments && `\n\nAttachments:\n${formattedAttachments}`
-      }\n\n[View original card in Trello](${url})`;
+      }\n\n${cardIdInfo}[View original card in Trello](${url})`;
       const labels = card.labels?.map(l => l.id);
 
       if (this.discardArchivedCards && card.closed) {
