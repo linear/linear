@@ -18938,10 +18938,12 @@ mutation updateUserSettings(
 }
 # Suspends a user. Can only be called by an admin or owner.
 mutation suspendUser(
+  # [INTERNAL] Whether to bypass SCIM restrictions when suspending. Use with caution — this overrides identity provider management.
+  $forceBypassScimRestrictions: Boolean
   # The identifier of the user to suspend.
   $id: String!
 ) {
-  userSuspend(id: $id) {
+  userSuspend(forceBypassScimRestrictions: $forceBypassScimRestrictions, id: $id) {
     ...UserAdminPayload
   }
 }
@@ -18957,10 +18959,12 @@ mutation userUnlinkFromIdentityProvider(
 }
 # Un-suspends a user. Can only be called by an admin or owner.
 mutation unsuspendUser(
+  # [INTERNAL] Whether to bypass SCIM restrictions when unsuspending. Use with caution — this overrides identity provider management.
+  $forceBypassScimRestrictions: Boolean
   # The identifier of the user to unsuspend.
   $id: String!
 ) {
-  userUnsuspend(id: $id) {
+  userUnsuspend(forceBypassScimRestrictions: $forceBypassScimRestrictions, id: $id) {
     ...UserAdminPayload
   }
 }
