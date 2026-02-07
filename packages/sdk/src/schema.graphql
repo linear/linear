@@ -7,6 +7,78 @@ schema {
 directive @oneOf on INPUT_OBJECT
 
 """
+Activity collection filtering options.
+"""
+input ActivityCollectionFilter {
+  """
+  Compound filters, all of which need to be matched by the activity.
+  """
+  and: [ActivityCollectionFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that needs to be matched by all activities.
+  """
+  every: ActivityFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the collection length.
+  """
+  length: NumberComparator
+  """
+  Compound filters, one of which need to be matched by the activity.
+  """
+  or: [ActivityCollectionFilter!]
+  """
+  Filters that needs to be matched by some activities.
+  """
+  some: ActivityFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+  """
+  Filters that the activity's user must satisfy.
+  """
+  user: UserFilter
+}
+
+"""
+Activity filtering options.
+"""
+input ActivityFilter {
+  """
+  Compound filters, all of which need to be matched by the activity.
+  """
+  and: [ActivityFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Compound filters, one of which need to be matched by the activity.
+  """
+  or: [ActivityFilter!]
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+  """
+  Filters that the activity's user must satisfy.
+  """
+  user: UserFilter
+}
+
+"""
 A bot actor is an actor that is not a user, but an application or integration.
 """
 type ActorBot {
@@ -12660,6 +12732,10 @@ input IssueCollectionFilter {
   """
   accumulatedStateUpdatedAt: NullableDateComparator
   """
+  Filters that the issue's activities must satisfy.
+  """
+  activity: ActivityCollectionFilter
+  """
   Comparator for the issues added to cycle at date.
   """
   addedToCycleAt: NullableDateComparator
@@ -13428,6 +13504,10 @@ input IssueFilter {
   [Internal] Comparator for the issue's accumulatedStateUpdatedAt date.
   """
   accumulatedStateUpdatedAt: NullableDateComparator
+  """
+  Filters that the issue's activities must satisfy.
+  """
+  activity: ActivityCollectionFilter
   """
   Comparator for the issues added to cycle at date.
   """
@@ -21056,6 +21136,10 @@ type Mutation {
   """
   userSuspend(
     """
+    [INTERNAL] Whether to bypass SCIM restrictions when suspending. Use with caution — this overrides identity provider management.
+    """
+    forceBypassScimRestrictions: Boolean
+    """
     The identifier of the user to suspend.
     """
     id: String!
@@ -21073,6 +21157,10 @@ type Mutation {
   Un-suspends a user. Can only be called by an admin or owner.
   """
   userUnsuspend(
+    """
+    [INTERNAL] Whether to bypass SCIM restrictions when unsuspending. Use with caution — this overrides identity provider management.
+    """
+    forceBypassScimRestrictions: Boolean
     """
     The identifier of the user to unsuspend.
     """
@@ -22335,6 +22423,10 @@ input NullableIssueFilter {
   [Internal] Comparator for the issue's accumulatedStateUpdatedAt date.
   """
   accumulatedStateUpdatedAt: NullableDateComparator
+  """
+  Filters that the issue's activities must satisfy.
+  """
+  activity: ActivityCollectionFilter
   """
   Comparator for the issues added to cycle at date.
   """
@@ -32853,6 +32945,10 @@ type Release implements Node {
       been updated after creation.
   """
   updatedAt: DateTime!
+  """
+  Release URL.
+  """
+  url: String!
   """
   The version of the release.
   """
