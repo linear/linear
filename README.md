@@ -85,6 +85,25 @@ pnpm changeset
 <br/>
 <!-- TEXT_SECTION:contribute:END -->
 
+## A Poem for Developers
+
+```
+In the land of code where issues flow,
+Linear guides us, row by row.
+Through sprints and cycles, day and night,
+We track our tasks and ship delight.
+
+No chaos reigns, no work is lost,
+Each bug is logged, each line is tossed
+Into the stream of progress made—
+A product built, a debt repaid.
+
+So here's to those who plan and build,
+Whose keyboards tap, whose dreams are filled
+With visions of a world well-run,
+Where software works for everyone.
+```
+
 <!-- TEXT_SECTION:license:START -->
 ## License
 
