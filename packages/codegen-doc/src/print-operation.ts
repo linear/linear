@@ -7,7 +7,7 @@ import { findObject } from "./object.js";
 import { printGraphqlDebug, printGraphqlDescription, printLines, printList } from "./print.js";
 import { findQuery } from "./query.js";
 import { OperationType, PluginContext } from "./types.js";
-import { getLast, lowerFirst, reduceListType, upperFirst } from "./utils.js";
+import { getLast, lowerFirst, reduceListType, reduceTypeName, upperFirst } from "./utils.js";
 import { Doc } from "./constants.js";
 
 const log = "codegen-doc:print-operation:";
@@ -158,7 +158,11 @@ export function printOperations(
           /** No need to go further if this returns a list */
           reduceListType(field.type) ||
           /** No need to go further if we can get this field from a root query */
-          findQuery(context, field)
+          findQuery(context, field) ||
+          /** Skip connection fields on nested types that aren't directly fetchable via a root query. Connection methods
+           * require re-querying the parent by ID (e.g. issue_comments calls issue(id) { comments }), which isn't
+           * currently possible for types like DocumentContent that are only accessible as nested fields. */
+          (fields.length > 1 && reduceTypeName(field.type)?.endsWith("Connection"))
         ) {
           return undefined;
         } else {

@@ -45,6 +45,44 @@ export type Scalars = {
   UUID: any;
 };
 
+/** Activity collection filtering options. */
+export type ActivityCollectionFilter = {
+  /** Compound filters, all of which need to be matched by the activity. */
+  and?: InputMaybe<Array<ActivityCollectionFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: InputMaybe<DateComparator>;
+  /** Filters that needs to be matched by all activities. */
+  every?: InputMaybe<ActivityFilter>;
+  /** Comparator for the identifier. */
+  id?: InputMaybe<IdComparator>;
+  /** Comparator for the collection length. */
+  length?: InputMaybe<NumberComparator>;
+  /** Compound filters, one of which need to be matched by the activity. */
+  or?: InputMaybe<Array<ActivityCollectionFilter>>;
+  /** Filters that needs to be matched by some activities. */
+  some?: InputMaybe<ActivityFilter>;
+  /** Comparator for the updated at date. */
+  updatedAt?: InputMaybe<DateComparator>;
+  /** Filters that the activity's user must satisfy. */
+  user?: InputMaybe<UserFilter>;
+};
+
+/** Activity filtering options. */
+export type ActivityFilter = {
+  /** Compound filters, all of which need to be matched by the activity. */
+  and?: InputMaybe<Array<ActivityFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: InputMaybe<DateComparator>;
+  /** Comparator for the identifier. */
+  id?: InputMaybe<IdComparator>;
+  /** Compound filters, one of which need to be matched by the activity. */
+  or?: InputMaybe<Array<ActivityFilter>>;
+  /** Comparator for the updated at date. */
+  updatedAt?: InputMaybe<DateComparator>;
+  /** Filters that the activity's user must satisfy. */
+  user?: InputMaybe<UserFilter>;
+};
+
 /** A bot actor is an actor that is not a user, but an application or integration. */
 export type ActorBot = {
   __typename?: "ActorBot";
@@ -7250,6 +7288,8 @@ export type IssueChildWebhookPayload = {
 export type IssueCollectionFilter = {
   /** [Internal] Comparator for the issue's accumulatedStateUpdatedAt date. */
   accumulatedStateUpdatedAt?: InputMaybe<NullableDateComparator>;
+  /** Filters that the issue's activities must satisfy. */
+  activity?: InputMaybe<ActivityCollectionFilter>;
   /** Comparator for the issues added to cycle at date. */
   addedToCycleAt?: InputMaybe<NullableDateComparator>;
   /** Comparator for the period when issue was added to a cycle. */
@@ -7654,6 +7694,8 @@ export type IssueEmojiReactionNotificationWebhookPayload = {
 export type IssueFilter = {
   /** [Internal] Comparator for the issue's accumulatedStateUpdatedAt date. */
   accumulatedStateUpdatedAt?: InputMaybe<NullableDateComparator>;
+  /** Filters that the issue's activities must satisfy. */
+  activity?: InputMaybe<ActivityCollectionFilter>;
   /** Comparator for the issues added to cycle at date. */
   addedToCycleAt?: InputMaybe<NullableDateComparator>;
   /** Comparator for the period when issue was added to a cycle. */
@@ -8487,6 +8529,14 @@ export type IssuePriorityValue = {
   priority: Scalars["Int"];
 };
 
+/** A reference to an issue found during release creation. */
+export type IssueReferenceInput = {
+  /** The commit SHA where this issue reference was found. */
+  commitSha: Scalars["String"];
+  /** The issue identifier (e.g. ENG-123). */
+  identifier: Scalars["String"];
+};
+
 /** A relation between two issues. */
 export type IssueRelation = Node & {
   __typename?: "IssueRelation";
@@ -9184,6 +9234,8 @@ export type IssueToRelease = Node & {
   id: Scalars["ID"];
   /** The issue associated with the release. */
   issue: Issue;
+  /** The pull request that linked this issue to the release. */
+  pullRequest?: Maybe<PullRequest>;
   /** The release associated with the issue. */
   release: Release;
   /**
@@ -11907,6 +11959,7 @@ export type MutationUserSettingsUpdateArgs = {
 };
 
 export type MutationUserSuspendArgs = {
+  forceBypassScimRestrictions?: InputMaybe<Scalars["Boolean"]>;
   id: Scalars["String"];
 };
 
@@ -11915,6 +11968,7 @@ export type MutationUserUnlinkFromIdentityProviderArgs = {
 };
 
 export type MutationUserUnsuspendArgs = {
+  forceBypassScimRestrictions?: InputMaybe<Scalars["Boolean"]>;
   id: Scalars["String"];
 };
 
@@ -12625,6 +12679,8 @@ export type NullableDurationComparator = {
 export type NullableIssueFilter = {
   /** [Internal] Comparator for the issue's accumulatedStateUpdatedAt date. */
   accumulatedStateUpdatedAt?: InputMaybe<NullableDateComparator>;
+  /** Filters that the issue's activities must satisfy. */
+  activity?: InputMaybe<ActivityCollectionFilter>;
   /** Comparator for the issues added to cycle at date. */
   addedToCycleAt?: InputMaybe<NullableDateComparator>;
   /** Comparator for the period when issue was added to a cycle. */
@@ -18240,6 +18296,8 @@ export type Release = Node & {
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
+  /** Release URL. */
+  url: Scalars["String"];
   /** The version of the release. */
   version?: Maybe<Scalars["String"]>;
 };
@@ -18678,14 +18736,18 @@ export type ReleaseSyncInput = {
   description?: InputMaybe<Scalars["String"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars["String"]>;
-  /** Issue identifiers (e.g. ENG-123) to associate with this release. */
+  /** [DEPRECATED] Issue identifiers (e.g. ENG-123) to associate with this release. */
   issueIdentifiers?: InputMaybe<Array<Scalars["String"]>>;
+  /** Issue references (e.g. ENG-123) to associate with this release. */
+  issueReferences?: InputMaybe<Array<IssueReferenceInput>>;
   /** The name of the release. */
   name?: InputMaybe<Scalars["String"]>;
   /** The identifier of the pipeline this release belongs to. */
   pipelineId: Scalars["String"];
   /** Pull request references to look up. Issues linked to found PRs will be associated with this release. */
   pullRequestReferences?: InputMaybe<Array<PullRequestReferenceInput>>;
+  /** Information about the source repository. */
+  repository?: InputMaybe<RepositoryDataInput>;
   /** The current stage of the release. Defaults to the first 'completed' stage. */
   stageId?: InputMaybe<Scalars["String"]>;
   /** The estimated start date of the release. */
@@ -18706,12 +18768,14 @@ export type ReleaseSyncInputBase = {
   description?: InputMaybe<Scalars["String"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars["String"]>;
-  /** Issue identifiers (e.g. ENG-123) to associate with this release. */
-  issueIdentifiers?: InputMaybe<Array<Scalars["String"]>>;
+  /** Issue references (e.g. ENG-123) to associate with this release. */
+  issueReferences?: InputMaybe<Array<IssueReferenceInput>>;
   /** The name of the release. */
   name?: InputMaybe<Scalars["String"]>;
   /** Pull request references to look up. Issues linked to found PRs will be associated with this release. */
   pullRequestReferences?: InputMaybe<Array<PullRequestReferenceInput>>;
+  /** Information about the source repository. */
+  repository?: InputMaybe<RepositoryDataInput>;
   /** The current stage of the release. Defaults to the first 'completed' stage. */
   stageId?: InputMaybe<Scalars["String"]>;
   /** The estimated start date of the release. */
@@ -18756,6 +18820,18 @@ export type ReleaseUpdateInput = {
   targetDate?: InputMaybe<Scalars["TimelessDate"]>;
   /** The version of the release. */
   version?: InputMaybe<Scalars["String"]>;
+};
+
+/** Information about the source repository. */
+export type RepositoryDataInput = {
+  /** The name of the repository. */
+  name: Scalars["String"];
+  /** The owner of the repository (e.g., organization or user name). */
+  owner: Scalars["String"];
+  /** The VCS provider hosting the repository (e.g., 'github', 'gitlab'). */
+  provider: Scalars["String"];
+  /** The base URL of the repository on the hosting provider (e.g., 'https://github.com/linear/linear-app'). */
+  url: Scalars["String"];
 };
 
 export type RepositorySuggestion = {
@@ -56594,6 +56670,7 @@ export type UpdateUserSettingsMutation = { __typename?: "Mutation" } & {
 };
 
 export type SuspendUserMutationVariables = Exact<{
+  forceBypassScimRestrictions?: InputMaybe<Scalars["Boolean"]>;
   id: Scalars["String"];
 }>;
 
@@ -56610,6 +56687,7 @@ export type UserUnlinkFromIdentityProviderMutation = { __typename?: "Mutation" }
 };
 
 export type UnsuspendUserMutationVariables = Exact<{
+  forceBypassScimRestrictions?: InputMaybe<Scalars["Boolean"]>;
   id: Scalars["String"];
 }>;
 
@@ -103968,8 +104046,8 @@ export const UpdateUserSettingsDocument = new TypedDocumentString(`
   success
 }`) as unknown as TypedDocumentString<UpdateUserSettingsMutation, UpdateUserSettingsMutationVariables>;
 export const SuspendUserDocument = new TypedDocumentString(`
-    mutation suspendUser($id: String!) {
-  userSuspend(id: $id) {
+    mutation suspendUser($forceBypassScimRestrictions: Boolean, $id: String!) {
+  userSuspend(forceBypassScimRestrictions: $forceBypassScimRestrictions, id: $id) {
     ...UserAdminPayload
   }
 }
@@ -103991,8 +104069,11 @@ export const UserUnlinkFromIdentityProviderDocument = new TypedDocumentString(`
   UserUnlinkFromIdentityProviderMutationVariables
 >;
 export const UnsuspendUserDocument = new TypedDocumentString(`
-    mutation unsuspendUser($id: String!) {
-  userUnsuspend(id: $id) {
+    mutation unsuspendUser($forceBypassScimRestrictions: Boolean, $id: String!) {
+  userUnsuspend(
+    forceBypassScimRestrictions: $forceBypassScimRestrictions
+    id: $id
+  ) {
     ...UserAdminPayload
   }
 }
