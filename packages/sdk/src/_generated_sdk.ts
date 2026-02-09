@@ -18083,12 +18083,12 @@ export class User extends Request {
     return new User_TeamsQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Suspends a user. Can only be called by an admin or owner. */
-  public suspend() {
-    return new SuspendUserMutation(this._request).fetch(this.id);
+  public suspend(variables?: Omit<L.SuspendUserMutationVariables, "id">) {
+    return new SuspendUserMutation(this._request).fetch(this.id, variables);
   }
   /** Un-suspends a user. Can only be called by an admin or owner. */
-  public unsuspend() {
-    return new UnsuspendUserMutation(this._request).fetch(this.id);
+  public unsuspend(variables?: Omit<L.UnsuspendUserMutationVariables, "id">) {
+    return new UnsuspendUserMutation(this._request).fetch(this.id, variables);
   }
   /** Updates a user. Only available to organization admins and the user themselves. */
   public update(input: L.UserUpdateInput) {
@@ -31779,13 +31779,18 @@ export class SuspendUserMutation extends Request {
    * Call the SuspendUser mutation and return a UserAdminPayload
    *
    * @param id - required id to pass to suspendUser
+   * @param variables - variables without 'id' to pass into the SuspendUserMutation
    * @returns parsed response from SuspendUserMutation
    */
-  public async fetch(id: string): LinearFetch<UserAdminPayload> {
+  public async fetch(
+    id: string,
+    variables?: Omit<L.SuspendUserMutationVariables, "id">
+  ): LinearFetch<UserAdminPayload> {
     const response = await this._request<L.SuspendUserMutation, L.SuspendUserMutationVariables>(
       L.SuspendUserDocument.toString(),
       {
         id,
+        ...variables,
       }
     );
     const data = response.userSuspend;
@@ -31837,13 +31842,18 @@ export class UnsuspendUserMutation extends Request {
    * Call the UnsuspendUser mutation and return a UserAdminPayload
    *
    * @param id - required id to pass to unsuspendUser
+   * @param variables - variables without 'id' to pass into the UnsuspendUserMutation
    * @returns parsed response from UnsuspendUserMutation
    */
-  public async fetch(id: string): LinearFetch<UserAdminPayload> {
+  public async fetch(
+    id: string,
+    variables?: Omit<L.UnsuspendUserMutationVariables, "id">
+  ): LinearFetch<UserAdminPayload> {
     const response = await this._request<L.UnsuspendUserMutation, L.UnsuspendUserMutationVariables>(
       L.UnsuspendUserDocument.toString(),
       {
         id,
+        ...variables,
       }
     );
     const data = response.userUnsuspend;
@@ -43597,10 +43607,14 @@ export class LinearSdk extends Request {
    * Suspends a user. Can only be called by an admin or owner.
    *
    * @param id - required id to pass to suspendUser
+   * @param variables - variables without 'id' to pass into the SuspendUserMutation
    * @returns UserAdminPayload
    */
-  public suspendUser(id: string): LinearFetch<UserAdminPayload> {
-    return new SuspendUserMutation(this._request).fetch(id);
+  public suspendUser(
+    id: string,
+    variables?: Omit<L.SuspendUserMutationVariables, "id">
+  ): LinearFetch<UserAdminPayload> {
+    return new SuspendUserMutation(this._request).fetch(id, variables);
   }
   /**
    * Unlinks a guest user from their identity provider. Can only be called by an admin when SCIM is enabled.
@@ -43615,10 +43629,14 @@ export class LinearSdk extends Request {
    * Un-suspends a user. Can only be called by an admin or owner.
    *
    * @param id - required id to pass to unsuspendUser
+   * @param variables - variables without 'id' to pass into the UnsuspendUserMutation
    * @returns UserAdminPayload
    */
-  public unsuspendUser(id: string): LinearFetch<UserAdminPayload> {
-    return new UnsuspendUserMutation(this._request).fetch(id);
+  public unsuspendUser(
+    id: string,
+    variables?: Omit<L.UnsuspendUserMutationVariables, "id">
+  ): LinearFetch<UserAdminPayload> {
+    return new UnsuspendUserMutation(this._request).fetch(id, variables);
   }
   /**
    * Updates a user. Only available to organization admins and the user themselves.
