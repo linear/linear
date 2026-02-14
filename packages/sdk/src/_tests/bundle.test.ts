@@ -28,6 +28,7 @@ function uuid() {
 async function expectError(shouldError: () => unknown, type: LinearErrorType, message: string) {
   try {
     await shouldError();
+    throw new Error("Expected an error to be thrown");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     expect(error.type).toEqual(type);
@@ -89,7 +90,7 @@ Object.entries(bundles).map(([bundleFormat, bundle]) =>
     it("throw auth error", async () => {
       const client = new ClientConstructor({ apiKey: "fake api key" });
 
-      expectError(
+      await expectError(
         () => client.viewer,
         LinearErrorType.AuthenticationError,
         "Authentication required, not authenticated - You need to authenticate to access this operation."
@@ -107,7 +108,7 @@ Object.entries(bundles).map(([bundleFormat, bundle]) =>
       });
 
       it("query for fake team", async () => {
-        expectError(
+        await expectError(
           () => linearClient.team("not a real team id"),
           LinearErrorType.InvalidInput,
           "Entity not found - Could not find referenced Team"
@@ -119,7 +120,7 @@ Object.entries(bundles).map(([bundleFormat, bundle]) =>
       });
 
       it("query for fake issue", async () => {
-        expectError(
+        await expectError(
           () => linearClient.issue("not a real issue id"),
           LinearErrorType.InvalidInput,
           "Entity not found - Could not find referenced Issue"
