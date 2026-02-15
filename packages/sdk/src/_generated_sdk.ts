@@ -1102,6 +1102,127 @@ export class AsksChannelConnectPayload extends Request {
   }
 }
 /**
+ * A web page for an Asks web form.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AsksWebPageFragment response data
+ */
+export class AsksWebPage extends Request {
+  private _asksWebSettings: L.AsksWebPageFragment["asksWebSettings"];
+  private _creator?: L.AsksWebPageFragment["creator"];
+
+  public constructor(request: LinearRequest, data: L.AsksWebPageFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.description = data.description ?? undefined;
+    this.id = data.id;
+    this.issueCanceledAutoReply = data.issueCanceledAutoReply ?? undefined;
+    this.issueCanceledAutoReplyEnabled = data.issueCanceledAutoReplyEnabled;
+    this.issueCompletedAutoReply = data.issueCompletedAutoReply ?? undefined;
+    this.issueCompletedAutoReplyEnabled = data.issueCompletedAutoReplyEnabled;
+    this.issueCreatedAutoReply = data.issueCreatedAutoReply ?? undefined;
+    this.issueCreatedAutoReplyEnabled = data.issueCreatedAutoReplyEnabled;
+    this.slugId = data.slugId;
+    this.title = data.title;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._asksWebSettings = data.asksWebSettings;
+    this._creator = data.creator ?? undefined;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The description of the page. */
+  public description?: string | null;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The auto-reply message for issue canceled. If not set, the default reply will be used. */
+  public issueCanceledAutoReply?: string | null;
+  /** Whether the auto-reply for issue canceled is enabled. */
+  public issueCanceledAutoReplyEnabled: boolean;
+  /** The auto-reply message for issue completed. If not set, the default reply will be used. */
+  public issueCompletedAutoReply?: string | null;
+  /** Whether the auto-reply for issue completed is enabled. */
+  public issueCompletedAutoReplyEnabled: boolean;
+  /** The auto-reply message for issue created. If not set, the default reply will be used. */
+  public issueCreatedAutoReply?: string | null;
+  /** Whether the auto-reply for issue created is enabled. */
+  public issueCreatedAutoReplyEnabled: boolean;
+  /** The page's unique URL slug. */
+  public slugId: string;
+  /** The title of the page. */
+  public title: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The Asks web settings this page belongs to. */
+  public get asksWebSettings(): LinearFetch<AsksWebSettings> | undefined {
+    return new AsksWebSettingQuery(this._request).fetch(this._asksWebSettings.id);
+  }
+  /** The ID of asks web settings this page belongs to. */
+  public get asksWebSettingsId(): string | undefined {
+    return this._asksWebSettings?.id;
+  }
+  /** The user who created the Asks web page. */
+  public get creator(): LinearFetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+  }
+  /** The ID of user who created the asks web page. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
+  /** The organization that the Asks web page belongs to. */
+  public get organization(): LinearFetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
+  }
+
+  /** Creates a new Asks web page. */
+  public create(input: L.AsksWebPageCreateInput) {
+    return new CreateAsksWebPageMutation(this._request).fetch(input);
+  }
+  /** Deletes an Asks web page. */
+  public delete() {
+    return new DeleteAsksWebPageMutation(this._request).fetch(this.id);
+  }
+  /** Updates an Asks web page. */
+  public update(input: L.AsksWebPageUpdateInput) {
+    return new UpdateAsksWebPageMutation(this._request).fetch(this.id, input);
+  }
+}
+/**
+ * AsksWebPagePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AsksWebPagePayloadFragment response data
+ */
+export class AsksWebPagePayload extends Request {
+  private _asksWebPage: L.AsksWebPagePayloadFragment["asksWebPage"];
+
+  public constructor(request: LinearRequest, data: L.AsksWebPagePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._asksWebPage = data.asksWebPage;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The Asks web page that was created or updated. */
+  public get asksWebPage(): LinearFetch<AsksWebPage> | undefined {
+    return new AsksWebPageQuery(this._request).fetch(this._asksWebPage.id);
+  }
+  /** The ID of asks web page that was created or updated. */
+  public get asksWebPageId(): string | undefined {
+    return this._asksWebPage?.id;
+  }
+}
+/**
  * Settings for an Asks web form.
  *
  * @param request - function to call the graphql client
@@ -19580,6 +19701,35 @@ export class ApplicationInfoQuery extends Request {
 }
 
 /**
+ * A fetchable AsksWebPage Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AsksWebPageQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AsksWebPage query and return a AsksWebPage
+   *
+   * @param id - required id to pass to asksWebPage
+   * @returns parsed response from AsksWebPageQuery
+   */
+  public async fetch(id: string): LinearFetch<AsksWebPage> {
+    const response = await this._request<L.AsksWebPageQuery, L.AsksWebPageQueryVariables>(
+      L.AsksWebPageDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.asksWebPage;
+
+    return new AsksWebPage(this._request, data);
+  }
+}
+
+/**
  * A fetchable AsksWebSetting Query
  *
  * @param request - function to call the graphql client
@@ -23598,6 +23748,95 @@ export class AirbyteIntegrationConnectMutation extends Request {
     const data = response.airbyteIntegrationConnect;
 
     return new IntegrationPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable CreateAsksWebPage Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class CreateAsksWebPageMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CreateAsksWebPage mutation and return a AsksWebPagePayload
+   *
+   * @param input - required input to pass to createAsksWebPage
+   * @returns parsed response from CreateAsksWebPageMutation
+   */
+  public async fetch(input: L.AsksWebPageCreateInput): LinearFetch<AsksWebPagePayload> {
+    const response = await this._request<L.CreateAsksWebPageMutation, L.CreateAsksWebPageMutationVariables>(
+      L.CreateAsksWebPageDocument.toString(),
+      {
+        input,
+      }
+    );
+    const data = response.asksWebPageCreate;
+
+    return new AsksWebPagePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable DeleteAsksWebPage Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class DeleteAsksWebPageMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DeleteAsksWebPage mutation and return a DeletePayload
+   *
+   * @param id - required id to pass to deleteAsksWebPage
+   * @returns parsed response from DeleteAsksWebPageMutation
+   */
+  public async fetch(id: string): LinearFetch<DeletePayload> {
+    const response = await this._request<L.DeleteAsksWebPageMutation, L.DeleteAsksWebPageMutationVariables>(
+      L.DeleteAsksWebPageDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.asksWebPageDelete;
+
+    return new DeletePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UpdateAsksWebPage Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UpdateAsksWebPageMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UpdateAsksWebPage mutation and return a AsksWebPagePayload
+   *
+   * @param id - required id to pass to updateAsksWebPage
+   * @param input - required input to pass to updateAsksWebPage
+   * @returns parsed response from UpdateAsksWebPageMutation
+   */
+  public async fetch(id: string, input: L.AsksWebPageUpdateInput): LinearFetch<AsksWebPagePayload> {
+    const response = await this._request<L.UpdateAsksWebPageMutation, L.UpdateAsksWebPageMutationVariables>(
+      L.UpdateAsksWebPageDocument.toString(),
+      {
+        id,
+        input,
+      }
+    );
+    const data = response.asksWebPageUpdate;
+
+    return new AsksWebPagePayload(this._request, data);
   }
 }
 
@@ -39565,6 +39804,15 @@ export class LinearSdk extends Request {
     return new ApplicationInfoQuery(this._request).fetch(clientId);
   }
   /**
+   * An Asks web page by ID.
+   *
+   * @param id - required id to pass to asksWebPage
+   * @returns AsksWebPage
+   */
+  public asksWebPage(id: string): LinearFetch<AsksWebPage> {
+    return new AsksWebPageQuery(this._request).fetch(id);
+  }
+  /**
    * Asks web form settings by ID.
    *
    * @param id - required id to pass to asksWebSetting
@@ -40774,6 +41022,34 @@ export class LinearSdk extends Request {
    */
   public airbyteIntegrationConnect(input: L.AirbyteConfigurationInput): LinearFetch<IntegrationPayload> {
     return new AirbyteIntegrationConnectMutation(this._request).fetch(input);
+  }
+  /**
+   * Creates a new Asks web page.
+   *
+   * @param input - required input to pass to createAsksWebPage
+   * @returns AsksWebPagePayload
+   */
+  public createAsksWebPage(input: L.AsksWebPageCreateInput): LinearFetch<AsksWebPagePayload> {
+    return new CreateAsksWebPageMutation(this._request).fetch(input);
+  }
+  /**
+   * Deletes an Asks web page.
+   *
+   * @param id - required id to pass to deleteAsksWebPage
+   * @returns DeletePayload
+   */
+  public deleteAsksWebPage(id: string): LinearFetch<DeletePayload> {
+    return new DeleteAsksWebPageMutation(this._request).fetch(id);
+  }
+  /**
+   * Updates an Asks web page.
+   *
+   * @param id - required id to pass to updateAsksWebPage
+   * @param input - required input to pass to updateAsksWebPage
+   * @returns AsksWebPagePayload
+   */
+  public updateAsksWebPage(id: string, input: L.AsksWebPageUpdateInput): LinearFetch<AsksWebPagePayload> {
+    return new UpdateAsksWebPageMutation(this._request).fetch(id, input);
   }
   /**
    * Creates a new Asks web form settings.

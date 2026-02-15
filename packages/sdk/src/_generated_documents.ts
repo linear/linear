@@ -189,7 +189,7 @@ export type AgentActivityCreatePromptInput = {
   /** The agent session this activity belongs to. */
   agentSessionId: Scalars["String"];
   /** The content payload of the prompt agent activity. */
-  content: Scalars["JSONObject"];
+  content: AgentActivityPromptCreateInputContent;
   /** [Internal] Metadata about user-provided contextual information for this agent activity. */
   contextualMetadata?: InputMaybe<Scalars["JSONObject"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
@@ -270,6 +270,16 @@ export type AgentActivityPromptContent = {
   bodyData: Scalars["JSONObject"];
   /** The type of activity. */
   type: AgentActivityType;
+};
+
+/** [Internal] Input for creating prompt-type agent activities (created by users). */
+export type AgentActivityPromptCreateInputContent = {
+  /** A message requesting additional information or action from user in markdown format. */
+  body?: InputMaybe<Scalars["String"]>;
+  /** [Internal] The prompt content as a ProseMirror document. */
+  bodyData?: InputMaybe<Scalars["JSONObject"]>;
+  /** The type of activity. */
+  type?: AgentActivityType;
 };
 
 /** Content for a response activity. */
@@ -380,8 +390,6 @@ export type AgentSession = Node & {
   issue?: Maybe<Issue>;
   /** A dynamically updated list of the agent's execution strategy. */
   plan?: Maybe<Scalars["JSON"]>;
-  /** [Internal] A formatted prompt string containing relevant context for the agent session, including issue details, comments, and guidance. */
-  promptContext?: Maybe<Scalars["String"]>;
   /** [Internal] Pull requests associated with this agent session. */
   pullRequests: AgentSessionToPullRequestConnection;
   /** The comment that this agent session was spawned from, if from a different thread. */
@@ -792,6 +800,98 @@ export type AsksChannelConnectPayload = {
   mapping: SlackChannelNameMapping;
   /** Whether the operation was successful. */
   success: Scalars["Boolean"];
+};
+
+/** A web page for an Asks web form. */
+export type AsksWebPage = Node & {
+  __typename?: "AsksWebPage";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The Asks web settings this page belongs to. */
+  asksWebSettings: AsksWebSettings;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The user who created the Asks web page. */
+  creator?: Maybe<User>;
+  /** The description of the page. */
+  description?: Maybe<Scalars["String"]>;
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The auto-reply message for issue canceled. If not set, the default reply will be used. */
+  issueCanceledAutoReply?: Maybe<Scalars["String"]>;
+  /** Whether the auto-reply for issue canceled is enabled. */
+  issueCanceledAutoReplyEnabled: Scalars["Boolean"];
+  /** The auto-reply message for issue completed. If not set, the default reply will be used. */
+  issueCompletedAutoReply?: Maybe<Scalars["String"]>;
+  /** Whether the auto-reply for issue completed is enabled. */
+  issueCompletedAutoReplyEnabled: Scalars["Boolean"];
+  /** The auto-reply message for issue created. If not set, the default reply will be used. */
+  issueCreatedAutoReply?: Maybe<Scalars["String"]>;
+  /** Whether the auto-reply for issue created is enabled. */
+  issueCreatedAutoReplyEnabled: Scalars["Boolean"];
+  /** The organization that the Asks web page belongs to. */
+  organization: Organization;
+  /** The page's unique URL slug. */
+  slugId: Scalars["String"];
+  /** The title of the page. */
+  title: Scalars["String"];
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+};
+
+export type AsksWebPageCreateInput = {
+  /** The identifier of the Asks web settings this page belongs to. */
+  asksWebSettingsId: Scalars["String"];
+  /** The description of the page. */
+  description?: InputMaybe<Scalars["String"]>;
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
+  id?: InputMaybe<Scalars["String"]>;
+  /** The auto-reply message for issue canceled. If not set, the default reply will be used. */
+  issueCanceledAutoReply?: InputMaybe<Scalars["String"]>;
+  /** Whether the auto-reply for issue canceled is enabled. */
+  issueCanceledAutoReplyEnabled?: InputMaybe<Scalars["Boolean"]>;
+  /** The auto-reply message for issue completed. If not set, the default reply will be used. */
+  issueCompletedAutoReply?: InputMaybe<Scalars["String"]>;
+  /** Whether the auto-reply for issue completed is enabled. */
+  issueCompletedAutoReplyEnabled?: InputMaybe<Scalars["Boolean"]>;
+  /** The auto-reply message for issue created. If not set, the default reply will be used. */
+  issueCreatedAutoReply?: InputMaybe<Scalars["String"]>;
+  /** Whether the auto-reply for issue created is enabled. */
+  issueCreatedAutoReplyEnabled?: InputMaybe<Scalars["Boolean"]>;
+  /** The title of the page. */
+  title: Scalars["String"];
+};
+
+export type AsksWebPagePayload = {
+  __typename?: "AsksWebPagePayload";
+  /** The Asks web page that was created or updated. */
+  asksWebPage: AsksWebPage;
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars["Float"];
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
+};
+
+export type AsksWebPageUpdateInput = {
+  /** The description of the page. */
+  description?: InputMaybe<Scalars["String"]>;
+  /** The auto-reply message for issue canceled. If not set, the default reply will be used. */
+  issueCanceledAutoReply?: InputMaybe<Scalars["String"]>;
+  /** Whether the auto-reply for issue canceled is enabled. */
+  issueCanceledAutoReplyEnabled?: InputMaybe<Scalars["Boolean"]>;
+  /** The auto-reply message for issue completed. If not set, the default reply will be used. */
+  issueCompletedAutoReply?: InputMaybe<Scalars["String"]>;
+  /** Whether the auto-reply for issue completed is enabled. */
+  issueCompletedAutoReplyEnabled?: InputMaybe<Scalars["Boolean"]>;
+  /** The auto-reply message for issue created. If not set, the default reply will be used. */
+  issueCreatedAutoReply?: InputMaybe<Scalars["String"]>;
+  /** Whether the auto-reply for issue created is enabled. */
+  issueCreatedAutoReplyEnabled?: InputMaybe<Scalars["Boolean"]>;
+  /** The title of the page. */
+  title?: InputMaybe<Scalars["String"]>;
 };
 
 /** Settings for an Asks web form. */
@@ -1398,6 +1498,8 @@ export type Comment = Node & {
   issue?: Maybe<Issue>;
   /** The ID of the issue that the comment is associated with. */
   issueId?: Maybe<Scalars["String"]>;
+  /** [Internal] The user on whose behalf the comment was created, e.g. when the Linear assistant creates a comment for a user. */
+  onBehalfOf?: Maybe<User>;
   /** The parent comment under which the current comment is nested. */
   parent?: Maybe<Comment>;
   /** The ID of the parent comment under which the current comment is nested. */
@@ -3760,6 +3862,8 @@ export type DocumentContent = Node & {
   project?: Maybe<Project>;
   /** The project milestone that the content is associated with. */
   projectMilestone?: Maybe<ProjectMilestone>;
+  /** [Internal] The pull request that the content is associated with. */
+  pullRequest?: Maybe<PullRequest>;
   /** The time at which the document content was restored from a previous version. */
   restoredAt?: Maybe<Scalars["DateTime"]>;
   /**
@@ -5541,6 +5645,8 @@ export type Initiative = Node & {
   owner?: Maybe<User>;
   /** Parent initiative associated with the initiative. */
   parentInitiative?: Maybe<Initiative>;
+  /** [Internal] Parent initiatives associated with the initiative. */
+  parentInitiatives: InitiativeConnection;
   /** Projects associated with the initiative. */
   projects: ProjectConnection;
   /** The initiative's unique URL slug. */
@@ -5615,6 +5721,18 @@ export type InitiativeLinksArgs = {
   includeArchived?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+/** An initiative to group projects. */
+export type InitiativeParentInitiativesArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  filter?: InputMaybe<InitiativeFilter>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+  sort?: InputMaybe<Array<InitiativeSortInput>>;
 };
 
 /** An initiative to group projects. */
@@ -9721,6 +9839,12 @@ export type Mutation = {
   agentSessionUpdateExternalUrl: AgentSessionPayload;
   /** Creates an integration api key for Airbyte to connect with Linear. */
   airbyteIntegrationConnect: IntegrationPayload;
+  /** Creates a new Asks web page. */
+  asksWebPageCreate: AsksWebPagePayload;
+  /** Deletes an Asks web page. */
+  asksWebPageDelete: DeletePayload;
+  /** Updates an Asks web page. */
+  asksWebPageUpdate: AsksWebPagePayload;
   /** Creates a new Asks web form settings. */
   asksWebSettingsCreate: AsksWebSettingsPayload;
   /** Updates Asks web form settings. */
@@ -10459,6 +10583,19 @@ export type MutationAgentSessionUpdateExternalUrlArgs = {
 
 export type MutationAirbyteIntegrationConnectArgs = {
   input: AirbyteConfigurationInput;
+};
+
+export type MutationAsksWebPageCreateArgs = {
+  input: AsksWebPageCreateInput;
+};
+
+export type MutationAsksWebPageDeleteArgs = {
+  id: Scalars["String"];
+};
+
+export type MutationAsksWebPageUpdateArgs = {
+  id: Scalars["String"];
+  input: AsksWebPageUpdateInput;
 };
 
 export type MutationAsksWebSettingsCreateArgs = {
@@ -16694,10 +16831,14 @@ export type PullRequest = Node & {
   __typename?: "PullRequest";
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** [Internal] The checks associated with the pull request. */
+  checks: Array<PullRequestCheck>;
   /** [ALPHA] The commits associated with the pull request. */
   commits: Array<PullRequestCommit>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
+  /** [Internal] The user who created the pull request. */
+  creator?: Maybe<User>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /** The merge commit created when the PR was merged. */
@@ -16723,6 +16864,25 @@ export type PullRequest = Node & {
   updatedAt: Scalars["DateTime"];
   /** The URL of the pull request in the version control system. */
   url: Scalars["String"];
+};
+
+/** [ALPHA] A pull request check. */
+export type PullRequestCheck = {
+  __typename?: "PullRequestCheck";
+  /** The date/time at which when the check was completed. */
+  completedAt?: Maybe<Scalars["DateTime"]>;
+  /** Whether the check is required. */
+  isRequired?: Maybe<Scalars["Boolean"]>;
+  /** The name of the check. */
+  name: Scalars["String"];
+  /** The date/time at which when the check was started. */
+  startedAt?: Maybe<Scalars["DateTime"]>;
+  /** The status of the check. */
+  status: Scalars["String"];
+  /** The URL of the check. */
+  url?: Maybe<Scalars["String"]>;
+  /** The name of the workflow that triggered the check. */
+  workflowName?: Maybe<Scalars["String"]>;
 };
 
 /** [ALPHA] A pull request commit. */
@@ -16936,6 +17096,8 @@ export type Query = {
   applicationInfo: Application;
   /** [Internal] All archived teams of the organization. */
   archivedTeams: Array<Team>;
+  /** An Asks web page by ID. */
+  asksWebPage: AsksWebPage;
   /** Asks web form settings by ID. */
   asksWebSetting: AsksWebSettings;
   /**
@@ -17270,6 +17432,10 @@ export type QueryAgentSessionsArgs = {
 
 export type QueryApplicationInfoArgs = {
   clientId: Scalars["String"];
+};
+
+export type QueryAsksWebPageArgs = {
+  id: Scalars["String"];
 };
 
 export type QueryAsksWebSettingArgs = {
@@ -18403,7 +18569,7 @@ export type ReleaseCreateInput = {
   name: Scalars["String"];
   /** The identifier of the pipeline this release belongs to. */
   pipelineId: Scalars["String"];
-  /** The current stage of the release. Defaults to the first 'started' stage. */
+  /** The current stage of the release. Defaults to the first 'completed' stage for continuous pipelines, or the first 'started' stage for scheduled pipelines. */
   stageId?: InputMaybe<Scalars["String"]>;
   /** The estimated start date of the release. */
   startDate?: InputMaybe<Scalars["TimelessDate"]>;
@@ -18722,8 +18888,6 @@ export type ReleaseStageUpdateInput = {
   name?: InputMaybe<Scalars["String"]>;
   /** The position of the stage. */
   position?: InputMaybe<Scalars["Float"]>;
-  /** The type of the stage. */
-  type?: InputMaybe<ReleaseStageType>;
 };
 
 /** The release data to sync. */
@@ -18736,8 +18900,6 @@ export type ReleaseSyncInput = {
   description?: InputMaybe<Scalars["String"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars["String"]>;
-  /** [DEPRECATED] Issue identifiers (e.g. ENG-123) to associate with this release. */
-  issueIdentifiers?: InputMaybe<Array<Scalars["String"]>>;
   /** Issue references (e.g. ENG-123) to associate with this release. */
   issueReferences?: InputMaybe<Array<IssueReferenceInput>>;
   /** The name of the release. */
@@ -21597,6 +21759,7 @@ export enum ViewType {
   Backlog = "backlog",
   Board = "board",
   CompletedCycle = "completedCycle",
+  ContinuousPipelineReleases = "continuousPipelineReleases",
   CreatedReviews = "createdReviews",
   CustomView = "customView",
   CustomViews = "customViews",
@@ -22115,6 +22278,8 @@ export type ZendeskSettingsInput = {
   disableCustomerRequestsAutoCreation?: InputMaybe<Scalars["Boolean"]>;
   /** Whether Linear Agent should be enabled for this integration. */
   enableAiIntake?: InputMaybe<Scalars["Boolean"]>;
+  /** The host mappings from Zendesk brands. */
+  hostMappings?: InputMaybe<Array<Scalars["String"]>>;
   /** Whether an internal message should be added when someone comments on an issue. */
   sendNoteOnComment?: InputMaybe<Scalars["Boolean"]>;
   /** Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled). */
@@ -25206,6 +25371,26 @@ export type PushSubscriptionFragment = { __typename: "PushSubscription" } & Pick
   PushSubscription,
   "updatedAt" | "archivedAt" | "createdAt" | "id"
 >;
+
+export type AsksWebPageFragment = { __typename: "AsksWebPage" } & Pick<
+  AsksWebPage,
+  | "issueCanceledAutoReply"
+  | "issueCompletedAutoReply"
+  | "issueCreatedAutoReply"
+  | "description"
+  | "updatedAt"
+  | "slugId"
+  | "archivedAt"
+  | "createdAt"
+  | "title"
+  | "id"
+  | "issueCanceledAutoReplyEnabled"
+  | "issueCompletedAutoReplyEnabled"
+  | "issueCreatedAutoReplyEnabled"
+> & {
+    asksWebSettings: { __typename?: "AsksWebSettings" } & Pick<AsksWebSettings, "id">;
+    creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+  };
 
 export type WebhookFragment = { __typename: "Webhook" } & Pick<
   Webhook,
@@ -28428,6 +28613,11 @@ export type AsksChannelConnectPayloadFragment = { __typename: "AsksChannelConnec
     > & { teams: Array<{ __typename: "SlackAsksTeamSettings" } & Pick<SlackAsksTeamSettings, "id" | "hasDefaultAsk">> };
   };
 
+export type AsksWebPagePayloadFragment = { __typename: "AsksWebPagePayload" } & Pick<
+  AsksWebPagePayload,
+  "lastSyncId" | "success"
+> & { asksWebPage: { __typename?: "AsksWebPage" } & Pick<AsksWebPage, "id"> };
+
 export type AsksWebSettingsPayloadFragment = { __typename: "AsksWebSettingsPayload" } & Pick<
   AsksWebSettingsPayload,
   "lastSyncId" | "success"
@@ -30552,6 +30742,8 @@ type Node_AgentSessionToPullRequest_Fragment = { __typename: "AgentSessionToPull
 
 type Node_AiPromptRules_Fragment = { __typename: "AiPromptRules" } & Pick<AiPromptRules, "id">;
 
+type Node_AsksWebPage_Fragment = { __typename: "AsksWebPage" } & Pick<AsksWebPage, "id">;
+
 type Node_AsksWebSettings_Fragment = { __typename: "AsksWebSettings" } & Pick<AsksWebSettings, "id">;
 
 type Node_Attachment_Fragment = { __typename: "Attachment" } & Pick<Attachment, "id">;
@@ -30795,6 +30987,7 @@ export type NodeFragment =
   | Node_AgentSession_Fragment
   | Node_AgentSessionToPullRequest_Fragment
   | Node_AiPromptRules_Fragment
+  | Node_AsksWebPage_Fragment
   | Node_AsksWebSettings_Fragment
   | Node_Attachment_Fragment
   | Node_AuditEntry_Fragment
@@ -33936,6 +34129,32 @@ export type ApplicationInfoQuery = { __typename?: "Query" } & {
     Application,
     "name" | "imageUrl" | "description" | "developer" | "id" | "clientId" | "developerUrl"
   >;
+};
+
+export type AsksWebPageQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type AsksWebPageQuery = { __typename?: "Query" } & {
+  asksWebPage: { __typename: "AsksWebPage" } & Pick<
+    AsksWebPage,
+    | "issueCanceledAutoReply"
+    | "issueCompletedAutoReply"
+    | "issueCreatedAutoReply"
+    | "description"
+    | "updatedAt"
+    | "slugId"
+    | "archivedAt"
+    | "createdAt"
+    | "title"
+    | "id"
+    | "issueCanceledAutoReplyEnabled"
+    | "issueCompletedAutoReplyEnabled"
+    | "issueCreatedAutoReplyEnabled"
+  > & {
+      asksWebSettings: { __typename?: "AsksWebSettings" } & Pick<AsksWebSettings, "id">;
+      creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+    };
 };
 
 export type AsksWebSettingQueryVariables = Exact<{
@@ -48976,6 +49195,35 @@ export type AirbyteIntegrationConnectMutation = { __typename?: "Mutation" } & {
   > & { integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">> };
 };
 
+export type CreateAsksWebPageMutationVariables = Exact<{
+  input: AsksWebPageCreateInput;
+}>;
+
+export type CreateAsksWebPageMutation = { __typename?: "Mutation" } & {
+  asksWebPageCreate: { __typename: "AsksWebPagePayload" } & Pick<AsksWebPagePayload, "lastSyncId" | "success"> & {
+      asksWebPage: { __typename?: "AsksWebPage" } & Pick<AsksWebPage, "id">;
+    };
+};
+
+export type DeleteAsksWebPageMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteAsksWebPageMutation = { __typename?: "Mutation" } & {
+  asksWebPageDelete: { __typename: "DeletePayload" } & Pick<DeletePayload, "entityId" | "lastSyncId" | "success">;
+};
+
+export type UpdateAsksWebPageMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: AsksWebPageUpdateInput;
+}>;
+
+export type UpdateAsksWebPageMutation = { __typename?: "Mutation" } & {
+  asksWebPageUpdate: { __typename: "AsksWebPagePayload" } & Pick<AsksWebPagePayload, "lastSyncId" | "success"> & {
+      asksWebPage: { __typename?: "AsksWebPage" } & Pick<AsksWebPage, "id">;
+    };
+};
+
 export type CreateAsksWebSettingsMutationVariables = Exact<{
   emailIntakeAddress?: InputMaybe<AsksWebSettingsEmailIntakeAddressInput>;
   input: AsksWebSettingsCreateInput;
@@ -59520,6 +59768,33 @@ export const UserNotificationSubscriptionFragmentDoc = new TypedDocumentString(
     `,
   { fragmentName: "UserNotificationSubscription" }
 ) as unknown as TypedDocumentString<UserNotificationSubscriptionFragment, unknown>;
+export const AsksWebPageFragmentDoc = new TypedDocumentString(
+  `
+    fragment AsksWebPage on AsksWebPage {
+  __typename
+  asksWebSettings {
+    id
+  }
+  issueCanceledAutoReply
+  issueCompletedAutoReply
+  issueCreatedAutoReply
+  description
+  updatedAt
+  slugId
+  archivedAt
+  createdAt
+  title
+  id
+  creator {
+    id
+  }
+  issueCanceledAutoReplyEnabled
+  issueCompletedAutoReplyEnabled
+  issueCreatedAutoReplyEnabled
+}
+    `,
+  { fragmentName: "AsksWebPage" }
+) as unknown as TypedDocumentString<AsksWebPageFragment, unknown>;
 export const SummaryFragmentDoc = new TypedDocumentString(
   `
     fragment Summary on Summary {
@@ -63712,6 +63987,19 @@ fragment SlackAsksTeamSettings on SlackAsksTeamSettings {
 }`,
   { fragmentName: "AsksChannelConnectPayload" }
 ) as unknown as TypedDocumentString<AsksChannelConnectPayloadFragment, unknown>;
+export const AsksWebPagePayloadFragmentDoc = new TypedDocumentString(
+  `
+    fragment AsksWebPagePayload on AsksWebPagePayload {
+  __typename
+  asksWebPage {
+    id
+  }
+  lastSyncId
+  success
+}
+    `,
+  { fragmentName: "AsksWebPagePayload" }
+) as unknown as TypedDocumentString<AsksWebPagePayloadFragment, unknown>;
 export const AsksWebSettingsPayloadFragmentDoc = new TypedDocumentString(
   `
     fragment AsksWebSettingsPayload on AsksWebSettingsPayload {
@@ -74020,6 +74308,34 @@ export const ApplicationInfoDocument = new TypedDocumentString(`
   clientId
   developerUrl
 }`) as unknown as TypedDocumentString<ApplicationInfoQuery, ApplicationInfoQueryVariables>;
+export const AsksWebPageDocument = new TypedDocumentString(`
+    query asksWebPage($id: String!) {
+  asksWebPage(id: $id) {
+    ...AsksWebPage
+  }
+}
+    fragment AsksWebPage on AsksWebPage {
+  __typename
+  asksWebSettings {
+    id
+  }
+  issueCanceledAutoReply
+  issueCompletedAutoReply
+  issueCreatedAutoReply
+  description
+  updatedAt
+  slugId
+  archivedAt
+  createdAt
+  title
+  id
+  creator {
+    id
+  }
+  issueCanceledAutoReplyEnabled
+  issueCompletedAutoReplyEnabled
+  issueCreatedAutoReplyEnabled
+}`) as unknown as TypedDocumentString<AsksWebPageQuery, AsksWebPageQueryVariables>;
 export const AsksWebSettingDocument = new TypedDocumentString(`
     query asksWebSetting($id: String!) {
   asksWebSetting(id: $id) {
@@ -95487,6 +95803,46 @@ export const AirbyteIntegrationConnectDocument = new TypedDocumentString(`
   }
   success
 }`) as unknown as TypedDocumentString<AirbyteIntegrationConnectMutation, AirbyteIntegrationConnectMutationVariables>;
+export const CreateAsksWebPageDocument = new TypedDocumentString(`
+    mutation createAsksWebPage($input: AsksWebPageCreateInput!) {
+  asksWebPageCreate(input: $input) {
+    ...AsksWebPagePayload
+  }
+}
+    fragment AsksWebPagePayload on AsksWebPagePayload {
+  __typename
+  asksWebPage {
+    id
+  }
+  lastSyncId
+  success
+}`) as unknown as TypedDocumentString<CreateAsksWebPageMutation, CreateAsksWebPageMutationVariables>;
+export const DeleteAsksWebPageDocument = new TypedDocumentString(`
+    mutation deleteAsksWebPage($id: String!) {
+  asksWebPageDelete(id: $id) {
+    ...DeletePayload
+  }
+}
+    fragment DeletePayload on DeletePayload {
+  __typename
+  entityId
+  lastSyncId
+  success
+}`) as unknown as TypedDocumentString<DeleteAsksWebPageMutation, DeleteAsksWebPageMutationVariables>;
+export const UpdateAsksWebPageDocument = new TypedDocumentString(`
+    mutation updateAsksWebPage($id: String!, $input: AsksWebPageUpdateInput!) {
+  asksWebPageUpdate(id: $id, input: $input) {
+    ...AsksWebPagePayload
+  }
+}
+    fragment AsksWebPagePayload on AsksWebPagePayload {
+  __typename
+  asksWebPage {
+    id
+  }
+  lastSyncId
+  success
+}`) as unknown as TypedDocumentString<UpdateAsksWebPageMutation, UpdateAsksWebPageMutationVariables>;
 export const CreateAsksWebSettingsDocument = new TypedDocumentString(`
     mutation createAsksWebSettings($emailIntakeAddress: AsksWebSettingsEmailIntakeAddressInput, $input: AsksWebSettingsCreateInput!) {
   asksWebSettingsCreate(emailIntakeAddress: $emailIntakeAddress, input: $input) {

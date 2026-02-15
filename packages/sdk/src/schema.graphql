@@ -250,7 +250,7 @@ input AgentActivityCreatePromptInput {
   """
   The content payload of the prompt agent activity.
   """
-  content: JSONObject!
+  content: AgentActivityPromptCreateInputContent!
   """
   [Internal] Metadata about user-provided contextual information for this agent activity.
   """
@@ -386,6 +386,24 @@ type AgentActivityPromptContent {
   The type of activity.
   """
   type: AgentActivityType!
+}
+
+"""
+[Internal] Input for creating prompt-type agent activities (created by users).
+"""
+input AgentActivityPromptCreateInputContent {
+  """
+  A message requesting additional information or action from user in markdown format.
+  """
+  body: String
+  """
+  [Internal] The prompt content as a ProseMirror document.
+  """
+  bodyData: JSONObject
+  """
+  The type of activity.
+  """
+  type: AgentActivityType! = prompt
 }
 
 """
@@ -593,10 +611,6 @@ type AgentSession implements Node {
   A dynamically updated list of the agent's execution strategy.
   """
   plan: JSON
-  """
-  [Internal] A formatted prompt string containing relevant context for the agent session, including issue details, comments, and guidance.
-  """
-  promptContext: String
   """
   [Internal] Pull requests associated with this agent session.
   """
@@ -1267,6 +1281,170 @@ type AsksChannelConnectPayload {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+
+"""
+A web page for an Asks web form.
+"""
+type AsksWebPage implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The Asks web settings this page belongs to.
+  """
+  asksWebSettings: AsksWebSettings!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who created the Asks web page.
+  """
+  creator: User
+  """
+  The description of the page.
+  """
+  description: String
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The auto-reply message for issue canceled. If not set, the default reply will be used.
+  """
+  issueCanceledAutoReply: String
+  """
+  Whether the auto-reply for issue canceled is enabled.
+  """
+  issueCanceledAutoReplyEnabled: Boolean!
+  """
+  The auto-reply message for issue completed. If not set, the default reply will be used.
+  """
+  issueCompletedAutoReply: String
+  """
+  Whether the auto-reply for issue completed is enabled.
+  """
+  issueCompletedAutoReplyEnabled: Boolean!
+  """
+  The auto-reply message for issue created. If not set, the default reply will be used.
+  """
+  issueCreatedAutoReply: String
+  """
+  Whether the auto-reply for issue created is enabled.
+  """
+  issueCreatedAutoReplyEnabled: Boolean!
+  """
+  The organization that the Asks web page belongs to.
+  """
+  organization: Organization!
+  """
+  The page's unique URL slug.
+  """
+  slugId: String!
+  """
+  The title of the page.
+  """
+  title: String!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+input AsksWebPageCreateInput {
+  """
+  The identifier of the Asks web settings this page belongs to.
+  """
+  asksWebSettingsId: String!
+  """
+  The description of the page.
+  """
+  description: String
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  The auto-reply message for issue canceled. If not set, the default reply will be used.
+  """
+  issueCanceledAutoReply: String
+  """
+  Whether the auto-reply for issue canceled is enabled.
+  """
+  issueCanceledAutoReplyEnabled: Boolean
+  """
+  The auto-reply message for issue completed. If not set, the default reply will be used.
+  """
+  issueCompletedAutoReply: String
+  """
+  Whether the auto-reply for issue completed is enabled.
+  """
+  issueCompletedAutoReplyEnabled: Boolean
+  """
+  The auto-reply message for issue created. If not set, the default reply will be used.
+  """
+  issueCreatedAutoReply: String
+  """
+  Whether the auto-reply for issue created is enabled.
+  """
+  issueCreatedAutoReplyEnabled: Boolean
+  """
+  The title of the page.
+  """
+  title: String!
+}
+
+type AsksWebPagePayload {
+  """
+  The Asks web page that was created or updated.
+  """
+  asksWebPage: AsksWebPage!
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+input AsksWebPageUpdateInput {
+  """
+  The description of the page.
+  """
+  description: String
+  """
+  The auto-reply message for issue canceled. If not set, the default reply will be used.
+  """
+  issueCanceledAutoReply: String
+  """
+  Whether the auto-reply for issue canceled is enabled.
+  """
+  issueCanceledAutoReplyEnabled: Boolean
+  """
+  The auto-reply message for issue completed. If not set, the default reply will be used.
+  """
+  issueCompletedAutoReply: String
+  """
+  Whether the auto-reply for issue completed is enabled.
+  """
+  issueCompletedAutoReplyEnabled: Boolean
+  """
+  The auto-reply message for issue created. If not set, the default reply will be used.
+  """
+  issueCreatedAutoReply: String
+  """
+  Whether the auto-reply for issue created is enabled.
+  """
+  issueCreatedAutoReplyEnabled: Boolean
+  """
+  The title of the page.
+  """
+  title: String
 }
 
 """
@@ -2405,6 +2583,10 @@ type Comment implements Node {
   The ID of the issue that the comment is associated with.
   """
   issueId: String
+  """
+  [Internal] The user on whose behalf the comment was created, e.g. when the Linear assistant creates a comment for a user.
+  """
+  onBehalfOf: User
   """
   The parent comment under which the current comment is nested.
   """
@@ -6561,6 +6743,10 @@ type DocumentContent implements Node {
   """
   projectMilestone: ProjectMilestone
   """
+  [Internal] The pull request that the content is associated with.
+  """
+  pullRequest: PullRequest
+  """
   The time at which the document content was restored from a previous version.
   """
   restoredAt: DateTime
@@ -9673,6 +9859,43 @@ type Initiative implements Node {
   Parent initiative associated with the initiative.
   """
   parentInitiative: Initiative
+  """
+  [Internal] Parent initiatives associated with the initiative.
+  """
+  parentInitiatives(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned parent initiatives.
+    """
+    filter: InitiativeFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+    """
+    [INTERNAL] Sort returned initiatives.
+    """
+    sort: [InitiativeSortInput!]
+  ): InitiativeConnection!
   """
   Projects associated with the initiative.
   """
@@ -17323,6 +17546,37 @@ type Mutation {
     """
     input: AirbyteConfigurationInput!
   ): IntegrationPayload!
+  """
+  Creates a new Asks web page.
+  """
+  asksWebPageCreate(
+    """
+    The Asks web page object to create.
+    """
+    input: AsksWebPageCreateInput!
+  ): AsksWebPagePayload!
+  """
+  Deletes an Asks web page.
+  """
+  asksWebPageDelete(
+    """
+    The identifier of the Asks web page to delete.
+    """
+    id: String!
+  ): DeletePayload!
+  """
+  Updates an Asks web page.
+  """
+  asksWebPageUpdate(
+    """
+    The identifier of the Asks web page to update.
+    """
+    id: String!
+    """
+    The fields to update.
+    """
+    input: AsksWebPageUpdateInput!
+  ): AsksWebPagePayload!
   """
   Creates a new Asks web form settings.
   """
@@ -29830,6 +30084,10 @@ type PullRequest implements Node {
   """
   archivedAt: DateTime
   """
+  [Internal] The checks associated with the pull request.
+  """
+  checks: [PullRequestCheck!]!
+  """
   [ALPHA] The commits associated with the pull request.
   """
   commits: [PullRequestCommit!]!
@@ -29837,6 +30095,10 @@ type PullRequest implements Node {
   The time at which the entity was created.
   """
   createdAt: DateTime!
+  """
+  [Internal] The user who created the pull request.
+  """
+  creator: User
   """
   The unique identifier of the entity.
   """
@@ -29882,6 +30144,40 @@ type PullRequest implements Node {
   The URL of the pull request in the version control system.
   """
   url: String!
+}
+
+"""
+[ALPHA] A pull request check.
+"""
+type PullRequestCheck {
+  """
+  The date/time at which when the check was completed.
+  """
+  completedAt: DateTime
+  """
+  Whether the check is required.
+  """
+  isRequired: Boolean
+  """
+  The name of the check.
+  """
+  name: String!
+  """
+  The date/time at which when the check was started.
+  """
+  startedAt: DateTime
+  """
+  The status of the check.
+  """
+  status: String!
+  """
+  The URL of the check.
+  """
+  url: String
+  """
+  The name of the workflow that triggered the check.
+  """
+  workflowName: String
 }
 
 """
@@ -30326,6 +30622,15 @@ type Query {
   [Internal] All archived teams of the organization.
   """
   archivedTeams: [Team!]!
+  """
+  An Asks web page by ID.
+  """
+  asksWebPage(
+    """
+    The identifier of the Asks web page.
+    """
+    id: String!
+  ): AsksWebPage!
   """
   Asks web form settings by ID.
   """
@@ -33106,7 +33411,7 @@ input ReleaseCreateInput {
   """
   pipelineId: String!
   """
-  The current stage of the release. Defaults to the first 'started' stage.
+  The current stage of the release. Defaults to the first 'completed' stage for continuous pipelines, or the first 'started' stage for scheduled pipelines.
   """
   stageId: String
   """
@@ -33651,10 +33956,6 @@ input ReleaseStageUpdateInput {
   The position of the stage.
   """
   position: Float
-  """
-  The type of the stage.
-  """
-  type: ReleaseStageType
 }
 
 """
@@ -33677,10 +33978,6 @@ input ReleaseSyncInput {
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
-  """
-  [DEPRECATED] Issue identifiers (e.g. ENG-123) to associate with this release.
-  """
-  issueIdentifiers: [String!]
   """
   Issue references (e.g. ENG-123) to associate with this release.
   """
@@ -38677,6 +38974,7 @@ enum ViewType {
   backlog
   board
   completedCycle
+  continuousPipelineReleases
   createdReviews
   customView
   customViews
@@ -39518,6 +39816,10 @@ input ZendeskSettingsInput {
   Whether Linear Agent should be enabled for this integration.
   """
   enableAiIntake: Boolean
+  """
+  The host mappings from Zendesk brands.
+  """
+  hostMappings: [String!]
   """
   Whether an internal message should be added when someone comments on an issue.
   """
