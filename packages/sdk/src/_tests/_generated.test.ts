@@ -457,6 +457,15 @@ describe("generated", () => {
     });
   });
 
+  /** Test AsksWebPage query */
+  describe("AsksWebPage", () => {
+    /** Test the root model query for AsksWebPage */
+    it("asksWebPage", async () => {
+      const asksWebPage: L.AsksWebPage | undefined | null = await client.asksWebPage("mock-id");
+      expect(asksWebPage instanceof L.AsksWebPage);
+    });
+  });
+
   /** Test AsksWebSetting query */
   describe("AsksWebSetting", () => {
     let _asksWebSetting: L.AsksWebSettings | undefined | null;

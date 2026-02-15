@@ -2861,6 +2861,46 @@ fragment PushSubscription on PushSubscription {
   id
 }
 
+# A web page for an Asks web form.
+fragment AsksWebPage on AsksWebPage {
+  __typename
+  # The Asks web settings this page belongs to.
+  asksWebSettings {
+    id
+  }
+  # The auto-reply message for issue canceled. If not set, the default reply will be used.
+  issueCanceledAutoReply
+  # The auto-reply message for issue completed. If not set, the default reply will be used.
+  issueCompletedAutoReply
+  # The auto-reply message for issue created. If not set, the default reply will be used.
+  issueCreatedAutoReply
+  # The description of the page.
+  description
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The page's unique URL slug.
+  slugId
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The title of the page.
+  title
+  # The unique identifier of the entity.
+  id
+  # The user who created the Asks web page.
+  creator {
+    id
+  }
+  # Whether the auto-reply for issue canceled is enabled.
+  issueCanceledAutoReplyEnabled
+  # Whether the auto-reply for issue completed is enabled.
+  issueCompletedAutoReplyEnabled
+  # Whether the auto-reply for issue created is enabled.
+  issueCreatedAutoReplyEnabled
+}
+
 # A webhook used to send HTTP notifications over data updates.
 fragment Webhook on Webhook {
   __typename
@@ -7416,6 +7456,18 @@ fragment AsksChannelConnectPayload on AsksChannelConnectPayload {
   success
 }
 
+fragment AsksWebPagePayload on AsksWebPagePayload {
+  __typename
+  # The Asks web page that was created or updated.
+  asksWebPage {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
 fragment AsksWebSettingsPayload on AsksWebSettingsPayload {
   __typename
   # The Asks web settings that were created or updated.
@@ -9925,6 +9977,15 @@ query applicationInfo(
 ) {
   applicationInfo(clientId: $clientId) {
     ...Application
+  }
+}
+# An Asks web page by ID.
+query asksWebPage(
+  # The identifier of the Asks web page.
+  $id: String!
+) {
+  asksWebPage(id: $id) {
+    ...AsksWebPage
   }
 }
 # Asks web form settings by ID.
@@ -15974,6 +16035,35 @@ mutation airbyteIntegrationConnect(
 ) {
   airbyteIntegrationConnect(input: $input) {
     ...IntegrationPayload
+  }
+}
+# Creates a new Asks web page.
+mutation createAsksWebPage(
+  # The Asks web page object to create.
+  $input: AsksWebPageCreateInput!
+) {
+  asksWebPageCreate(input: $input) {
+    ...AsksWebPagePayload
+  }
+}
+# Deletes an Asks web page.
+mutation deleteAsksWebPage(
+  # The identifier of the Asks web page to delete.
+  $id: String!
+) {
+  asksWebPageDelete(id: $id) {
+    ...DeletePayload
+  }
+}
+# Updates an Asks web page.
+mutation updateAsksWebPage(
+  # The identifier of the Asks web page to update.
+  $id: String!
+  # The fields to update.
+  $input: AsksWebPageUpdateInput!
+) {
+  asksWebPageUpdate(id: $id, input: $input) {
+    ...AsksWebPagePayload
   }
 }
 # Creates a new Asks web form settings.
