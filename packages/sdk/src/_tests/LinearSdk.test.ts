@@ -59,8 +59,9 @@ describe("LinearSdk", () => {
 
     try {
       await sdk.viewer;
+      expect.unreachable("Expected an error");
     } catch (error: any) {
-      expect(error.message).toEqual(expect.stringContaining("test error"));
+      expect(error.message).toContain("test error");
     }
   });
 });

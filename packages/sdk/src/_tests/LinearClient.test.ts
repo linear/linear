@@ -54,8 +54,9 @@ describe("LinearClient", () => {
 
     try {
       await client.viewer;
+      expect.unreachable("Expected an authentication error");
     } catch (error) {
-      expect(error.message).toEqual(expect.stringContaining("GraphQL Error (Code: 401) - Unauthorized"));
+      expect(error.message).toContain("GraphQL Error (Code: 401) - Unauthorized");
       expect(error.type).toEqual(LinearErrorType.AuthenticationError);
     }
   });
@@ -65,8 +66,9 @@ describe("LinearClient", () => {
 
     try {
       await client.rawRequest("");
+      expect.unreachable("Expected an authentication error");
     } catch (error) {
-      expect(error.message).toEqual(expect.stringContaining("GraphQL Error (Code: 401) - Unauthorized"));
+      expect(error.message).toContain("GraphQL Error (Code: 401) - Unauthorized");
       expect(error.type).toEqual(LinearErrorType.AuthenticationError);
     }
   });
