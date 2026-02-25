@@ -457,28 +457,6 @@ describe("generated", () => {
     });
   });
 
-  /** Test AsksWebSetting query */
-  describe("AsksWebSetting", () => {
-    let _asksWebSetting: L.AsksWebSettings | undefined | null;
-
-    /** Test the root model query for AsksWebSetting */
-    it("asksWebSetting", async () => {
-      const asksWebSetting: L.AsksWebSettings | undefined | null = await client.asksWebSetting("mock-id");
-      _asksWebSetting = asksWebSetting;
-      expect(asksWebSetting instanceof L.AsksWebSettings);
-    });
-
-    /** Test the asksWebSetting model query for AsksWebSetting_IdentityProvider */
-    it("asksWebSetting.identityProvider", async () => {
-      if (_asksWebSetting) {
-        const identityProvider: L.IdentityProvider | undefined | null = _asksWebSetting.identityProvider;
-        expect(identityProvider instanceof L.IdentityProvider);
-      } else {
-        console.warn("codegen-doc:print: No asksWebSetting found - cannot test _asksWebSetting.identityProvider query");
-      }
-    });
-  });
-
   /** Test AttachmentIssue query */
   describe("AttachmentIssue", () => {
     let _attachmentIssue: L.Issue | undefined | null;
@@ -612,6 +590,16 @@ describe("generated", () => {
         expect(relations instanceof L.IssueRelationConnection);
       } else {
         console.warn("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.relations query");
+      }
+    });
+
+    /** Test the attachmentIssue model query for AttachmentIssue_SharedAccess */
+    it("attachmentIssue.sharedAccess", async () => {
+      if (_attachmentIssue) {
+        const sharedAccess: L.IssueSharedAccess | undefined | null = _attachmentIssue.sharedAccess;
+        expect(sharedAccess instanceof L.IssueSharedAccess);
+      } else {
+        console.warn("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.sharedAccess query");
       }
     });
 
@@ -2422,6 +2410,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issue model query for Issue_SharedAccess */
+    it("issue.sharedAccess", async () => {
+      if (_issue) {
+        const sharedAccess: L.IssueSharedAccess | undefined | null = _issue.sharedAccess;
+        expect(sharedAccess instanceof L.IssueSharedAccess);
+      } else {
+        console.warn("codegen-doc:print: No issue found - cannot test _issue.sharedAccess query");
+      }
+    });
+
     /** Test the issue connection query for the IssueStateSpan */
     it("issue.stateHistory", async () => {
       if (_issue) {
@@ -2977,6 +2975,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issue model query for Issue_SharedAccess */
+    it("issue.sharedAccess", async () => {
+      if (_issue) {
+        const sharedAccess: L.IssueSharedAccess | undefined | null = _issue.sharedAccess;
+        expect(sharedAccess instanceof L.IssueSharedAccess);
+      } else {
+        console.warn("codegen-doc:print: No issue found - cannot test _issue.sharedAccess query");
+      }
+    });
+
     /** Test the issue connection query for the IssueStateSpan */
     it("issue.stateHistory", async () => {
       if (_issue) {
@@ -3338,6 +3346,18 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issueVcsBranchSearch model query for IssueVcsBranchSearch_SharedAccess */
+    it("issueVcsBranchSearch.sharedAccess", async () => {
+      if (_issueVcsBranchSearch) {
+        const sharedAccess: L.IssueSharedAccess | undefined | null = _issueVcsBranchSearch.sharedAccess;
+        expect(sharedAccess instanceof L.IssueSharedAccess);
+      } else {
+        console.warn(
+          "codegen-doc:print: No issueVcsBranchSearch found - cannot test _issueVcsBranchSearch.sharedAccess query"
+        );
+      }
+    });
+
     /** Test the issueVcsBranchSearch connection query for the IssueStateSpan */
     it("issueVcsBranchSearch.stateHistory", async () => {
       if (_issueVcsBranchSearch) {
@@ -3504,6 +3524,16 @@ describe("generated", () => {
         expect(relations instanceof L.IssueRelationConnection);
       } else {
         console.warn("codegen-doc:print: No issue found - cannot test _issue.relations query");
+      }
+    });
+
+    /** Test the issue model query for Issue_SharedAccess */
+    it("issue.sharedAccess", async () => {
+      if (_issue) {
+        const sharedAccess: L.IssueSharedAccess | undefined | null = _issue.sharedAccess;
+        expect(sharedAccess instanceof L.IssueSharedAccess);
+      } else {
+        console.warn("codegen-doc:print: No issue found - cannot test _issue.sharedAccess query");
       }
     });
 

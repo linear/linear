@@ -1102,110 +1102,6 @@ export class AsksChannelConnectPayload extends Request {
   }
 }
 /**
- * Settings for an Asks web form.
- *
- * @param request - function to call the graphql client
- * @param data - L.AsksWebSettingsFragment response data
- */
-export class AsksWebSettings extends Request {
-  private _creator?: L.AsksWebSettingsFragment["creator"];
-  private _emailIntakeAddress?: L.AsksWebSettingsFragment["emailIntakeAddress"];
-
-  public constructor(request: LinearRequest, data: L.AsksWebSettingsFragment) {
-    super(request);
-    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? new Date();
-    this.domain = data.domain ?? undefined;
-    this.id = data.id;
-    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
-    this.identityProvider = data.identityProvider ? new IdentityProvider(request, data.identityProvider) : undefined;
-    this._creator = data.creator ?? undefined;
-    this._emailIntakeAddress = data.emailIntakeAddress ?? undefined;
-  }
-
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date | null;
-  /** The time at which the entity was created. */
-  public createdAt: Date;
-  /** The custom domain for the Asks web form. If null, the default Linear-hosted domain will be used. */
-  public domain?: string | null;
-  /** The unique identifier of the entity. */
-  public id: string;
-  /**
-   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-   *     been updated after creation.
-   */
-  public updatedAt: Date;
-  /** The identity provider for SAML authentication on this Asks web form. */
-  public identityProvider?: IdentityProvider | null;
-  /** The user who created the Asks web settings. */
-  public get creator(): LinearFetch<User> | undefined {
-    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
-  }
-  /** The ID of user who created the asks web settings. */
-  public get creatorId(): string | undefined {
-    return this._creator?.id;
-  }
-  /** The email intake address associated with these Asks web settings. */
-  public get emailIntakeAddress(): LinearFetch<EmailIntakeAddress> | undefined {
-    return this._emailIntakeAddress?.id
-      ? new EmailIntakeAddressQuery(this._request).fetch(this._emailIntakeAddress?.id)
-      : undefined;
-  }
-  /** The ID of email intake address associated with these asks web settings. */
-  public get emailIntakeAddressId(): string | undefined {
-    return this._emailIntakeAddress?.id;
-  }
-  /** The organization that the Asks web settings are associated with. */
-  public get organization(): LinearFetch<Organization> {
-    return new OrganizationQuery(this._request).fetch();
-  }
-
-  /** Creates a new Asks web form settings. */
-  public create(
-    input: L.AsksWebSettingsCreateInput,
-    variables?: Omit<L.CreateAsksWebSettingsMutationVariables, "input">
-  ) {
-    return new CreateAsksWebSettingsMutation(this._request).fetch(input, variables);
-  }
-  /** Updates Asks web form settings. */
-  public update(
-    input: L.AsksWebSettingsUpdateInput,
-    variables?: Omit<L.UpdateAsksWebSettingsMutationVariables, "id" | "input">
-  ) {
-    return new UpdateAsksWebSettingsMutation(this._request).fetch(this.id, input, variables);
-  }
-}
-/**
- * AsksWebSettingsPayload model
- *
- * @param request - function to call the graphql client
- * @param data - L.AsksWebSettingsPayloadFragment response data
- */
-export class AsksWebSettingsPayload extends Request {
-  private _asksWebSettings: L.AsksWebSettingsPayloadFragment["asksWebSettings"];
-
-  public constructor(request: LinearRequest, data: L.AsksWebSettingsPayloadFragment) {
-    super(request);
-    this.lastSyncId = data.lastSyncId;
-    this.success = data.success;
-    this._asksWebSettings = data.asksWebSettings;
-  }
-
-  /** The identifier of the last sync operation. */
-  public lastSyncId: number;
-  /** Whether the operation was successful. */
-  public success: boolean;
-  /** The Asks web settings that were created or updated. */
-  public get asksWebSettings(): LinearFetch<AsksWebSettings> | undefined {
-    return new AsksWebSettingQuery(this._request).fetch(this._asksWebSettings.id);
-  }
-  /** The ID of asks web settings that were created or updated. */
-  public get asksWebSettingsId(): string | undefined {
-    return this._asksWebSettings?.id;
-  }
-}
-/**
  * Issue attachment (e.g. support ticket, pull request).
  *
  * @param request - function to call the graphql client
@@ -2674,6 +2570,7 @@ export class Customer extends Request {
     this.slugId = data.slugId;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
+    this.needs = data.needs.map(node => new CustomerNeed(request, node));
     this._integration = data.integration ?? undefined;
     this._owner = data.owner ?? undefined;
     this._status = data.status;
@@ -2713,6 +2610,8 @@ export class Customer extends Request {
   public updatedAt: Date;
   /** URL of the customer in Linear. */
   public url: string;
+  /** Customer needs associated with this customer. */
+  public needs: CustomerNeed[];
   /** The integration that manages the Customer. */
   public get integration(): LinearFetch<Integration> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
@@ -5619,6 +5518,21 @@ export class EntityWebhookPayload {
   public webhookTimestamp: number;
 }
 /**
+ * EventTrackingPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.EventTrackingPayloadFragment response data
+ */
+export class EventTrackingPayload extends Request {
+  public constructor(request: LinearRequest, data: L.EventTrackingPayloadFragment) {
+    super(request);
+    this.success = data.success;
+  }
+
+  /** Whether the operation was successful. */
+  public success: boolean;
+}
+/**
  * Information about an external entity.
  *
  * @param request - function to call the graphql client
@@ -7763,6 +7677,7 @@ export class InitiativeUpdateWebhookPayload {
     this.body = data.body;
     this.bodyData = data.bodyData;
     this.createdAt = data.createdAt;
+    this.diffMarkdown = data.diffMarkdown ?? undefined;
     this.editedAt = data.editedAt;
     this.health = data.health;
     this.id = data.id;
@@ -7784,6 +7699,8 @@ export class InitiativeUpdateWebhookPayload {
   public bodyData: string;
   /** The time at which the entity was created. */
   public createdAt: string;
+  /** The diff between the current update and the previous one, formatted as markdown. */
+  public diffMarkdown?: string | null;
   /** The edited at timestamp of the initiative update. */
   public editedAt: string;
   /** The health of the initiative update. */
@@ -8435,6 +8352,7 @@ export class Issue extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.sharedAccess = new IssueSharedAccess(request, data.sharedAccess);
     this.reactions = data.reactions.map(node => new Reaction(request, node));
     this.syncedWith = data.syncedWith ? data.syncedWith.map(node => new ExternalEntityInfo(request, node)) : undefined;
     this.integrationSourceType = data.integrationSourceType ?? undefined;
@@ -8544,6 +8462,8 @@ export class Issue extends Request {
   public syncedWith?: ExternalEntityInfo[] | null;
   /** The bot that created the issue, if applicable. */
   public botActor?: ActorBot | null;
+  /** Shared access metadata for this issue. */
+  public sharedAccess: IssueSharedAccess;
   /** Integration type that created this issue, if applicable. */
   public integrationSourceType?: L.IntegrationService | null;
   /** The external user who requested creation of the Asks issue on behalf of the creator. */
@@ -10405,6 +10325,7 @@ export class IssueSearchResult extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.sharedAccess = new IssueSharedAccess(request, data.sharedAccess);
     this.reactions = data.reactions.map(node => new Reaction(request, node));
     this.syncedWith = data.syncedWith ? data.syncedWith.map(node => new ExternalEntityInfo(request, node)) : undefined;
     this.integrationSourceType = data.integrationSourceType ?? undefined;
@@ -10516,6 +10437,8 @@ export class IssueSearchResult extends Request {
   public syncedWith?: ExternalEntityInfo[] | null;
   /** The bot that created the issue, if applicable. */
   public botActor?: ActorBot | null;
+  /** Shared access metadata for this issue. */
+  public sharedAccess: IssueSharedAccess;
   /** Integration type that created this issue, if applicable. */
   public integrationSourceType?: L.IntegrationService | null;
   /** The external user who requested creation of the Asks issue on behalf of the creator. */
@@ -10664,6 +10587,30 @@ export class IssueSearchResult extends Request {
   public get teamId(): string | undefined {
     return this._team?.id;
   }
+}
+/**
+ * IssueSharedAccess model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssueSharedAccessFragment response data
+ */
+export class IssueSharedAccess extends Request {
+  public constructor(request: LinearRequest, data: L.IssueSharedAccessFragment) {
+    super(request);
+    this.isShared = data.isShared;
+    this.sharedWithCount = data.sharedWithCount;
+    this.viewerHasOnlySharedAccess = data.viewerHasOnlySharedAccess;
+    this.sharedWithUsers = data.sharedWithUsers.map(node => new User(request, node));
+  }
+
+  /** Whether this issue has been shared with users outside the team. */
+  public isShared: boolean;
+  /** The number of users this issue is shared with. */
+  public sharedWithCount: number;
+  /** Whether the viewer can access this issue only through issue sharing. */
+  public viewerHasOnlySharedAccess: boolean;
+  /** Users this issue is shared with. */
+  public sharedWithUsers: User[];
 }
 /**
  * Payload for issue SLA webhook events.
@@ -11222,6 +11169,41 @@ export class IssueWithDescriptionChildWebhookPayload {
   public url: string;
   /** The ID of the team that the issue belongs to. */
   public team: TeamChildWebhookPayload;
+}
+/**
+ * JiraFetchProjectStatusesPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.JiraFetchProjectStatusesPayloadFragment response data
+ */
+export class JiraFetchProjectStatusesPayload extends Request {
+  private _integration?: L.JiraFetchProjectStatusesPayloadFragment["integration"];
+
+  public constructor(request: LinearRequest, data: L.JiraFetchProjectStatusesPayloadFragment) {
+    super(request);
+    this.issueStatuses = data.issueStatuses;
+    this.lastSyncId = data.lastSyncId;
+    this.projectStatuses = data.projectStatuses;
+    this.success = data.success;
+    this._integration = data.integration ?? undefined;
+  }
+
+  /** The fetched Jira issue statuses (non-Epic). */
+  public issueStatuses: string[];
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** The fetched Jira project statuses (Epic). */
+  public projectStatuses: string[];
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The integration that was created or updated. */
+  public get integration(): LinearFetch<Integration> | undefined {
+    return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
+  }
+  /** The ID of integration that was created or updated. */
+  public get integrationId(): string | undefined {
+    return this._integration?.id;
+  }
 }
 /**
  * A label notification subscription.
@@ -13211,6 +13193,7 @@ export class Project extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this.documentContent = data.documentContent ? new DocumentContent(request, data.documentContent) : undefined;
+    this.syncedWith = data.syncedWith ? data.syncedWith.map(node => new ExternalEntityInfo(request, node)) : undefined;
     this.frequencyResolution = data.frequencyResolution;
     this.health = data.health ?? undefined;
     this.startDateResolution = data.startDateResolution ?? undefined;
@@ -13307,6 +13290,8 @@ export class Project extends Request {
   public updatedAt: Date;
   /** Project URL. */
   public url: string;
+  /** The external services the project is synced with. */
+  public syncedWith?: ExternalEntityInfo[] | null;
   /** The content of the project description. */
   public documentContent?: DocumentContent | null;
   /** The resolution of the reminder frequency. */
@@ -14655,6 +14640,7 @@ export class ProjectSearchResult extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this.documentContent = data.documentContent ? new DocumentContent(request, data.documentContent) : undefined;
+    this.syncedWith = data.syncedWith ? data.syncedWith.map(node => new ExternalEntityInfo(request, node)) : undefined;
     this.frequencyResolution = data.frequencyResolution;
     this.health = data.health ?? undefined;
     this.startDateResolution = data.startDateResolution ?? undefined;
@@ -14753,6 +14739,8 @@ export class ProjectSearchResult extends Request {
   public updatedAt: Date;
   /** Project URL. */
   public url: string;
+  /** The external services the project is synced with. */
+  public syncedWith?: ExternalEntityInfo[] | null;
   /** The content of the project description. */
   public documentContent?: DocumentContent | null;
   /** The resolution of the reminder frequency. */
@@ -15256,6 +15244,7 @@ export class ProjectUpdateWebhookPayload {
     this.body = data.body;
     this.bodyData = data.bodyData;
     this.createdAt = data.createdAt;
+    this.diffMarkdown = data.diffMarkdown ?? undefined;
     this.editedAt = data.editedAt;
     this.health = data.health;
     this.id = data.id;
@@ -15277,6 +15266,8 @@ export class ProjectUpdateWebhookPayload {
   public bodyData: string;
   /** The time at which the entity was created. */
   public createdAt: string;
+  /** The diff between the current update and the previous one, formatted as markdown. */
+  public diffMarkdown?: string | null;
   /** The edited at timestamp of the project update. */
   public editedAt: string;
   /** The health of the project update. */
@@ -15342,6 +15333,7 @@ export class ProjectWebhookPayload {
     this.startDateResolution = data.startDateResolution ?? undefined;
     this.startedAt = data.startedAt ?? undefined;
     this.statusId = data.statusId;
+    this.syncedWith = data.syncedWith ?? undefined;
     this.targetDate = data.targetDate ?? undefined;
     this.targetDateResolution = data.targetDateResolution ?? undefined;
     this.teamIds = data.teamIds;
@@ -15428,6 +15420,8 @@ export class ProjectWebhookPayload {
   public startedAt?: string | null;
   /** The ID of the project status. */
   public statusId: string;
+  /** The external services the project is synced with. */
+  public syncedWith?: L.Scalars["JSONObject"] | null;
   /** The target date of the project. */
   public targetDate?: string | null;
   /** The resolution of the project's target date. */
@@ -18696,6 +18690,24 @@ export class ViewPreferencesPayload extends Request {
   public viewPreferences: ViewPreferences;
 }
 /**
+ * A label group column configuration for the project list view.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ViewPreferencesProjectLabelGroupColumnFragment response data
+ */
+export class ViewPreferencesProjectLabelGroupColumn extends Request {
+  public constructor(request: LinearRequest, data: L.ViewPreferencesProjectLabelGroupColumnFragment) {
+    super(request);
+    this.active = data.active;
+    this.id = data.id;
+  }
+
+  /** Whether the label group column is active. */
+  public active: boolean;
+  /** The identifier of the label group. */
+  public id: string;
+}
+/**
  * ViewPreferencesValues model
  *
  * @param request - function to call the graphql client
@@ -18704,20 +18716,560 @@ export class ViewPreferencesPayload extends Request {
 export class ViewPreferencesValues extends Request {
   public constructor(request: LinearRequest, data: L.ViewPreferencesValuesFragment) {
     super(request);
+    this.closedIssuesOrderedByRecency = data.closedIssuesOrderedByRecency ?? undefined;
+    this.customViewFieldDateCreated = data.customViewFieldDateCreated ?? undefined;
+    this.customViewFieldDateUpdated = data.customViewFieldDateUpdated ?? undefined;
+    this.customViewFieldOwner = data.customViewFieldOwner ?? undefined;
+    this.customViewFieldVisibility = data.customViewFieldVisibility ?? undefined;
+    this.customViewsOrdering = data.customViewsOrdering ?? undefined;
+    this.customerFieldDomains = data.customerFieldDomains ?? undefined;
+    this.customerFieldOwner = data.customerFieldOwner ?? undefined;
+    this.customerFieldRequestCount = data.customerFieldRequestCount ?? undefined;
+    this.customerFieldRevenue = data.customerFieldRevenue ?? undefined;
+    this.customerFieldSize = data.customerFieldSize ?? undefined;
+    this.customerFieldSource = data.customerFieldSource ?? undefined;
+    this.customerFieldStatus = data.customerFieldStatus ?? undefined;
+    this.customerFieldTier = data.customerFieldTier ?? undefined;
+    this.customerPageNeedsFieldIssueIdentifier = data.customerPageNeedsFieldIssueIdentifier ?? undefined;
+    this.customerPageNeedsFieldIssuePriority = data.customerPageNeedsFieldIssuePriority ?? undefined;
+    this.customerPageNeedsFieldIssueStatus = data.customerPageNeedsFieldIssueStatus ?? undefined;
+    this.customerPageNeedsFieldIssueTargetDueDate = data.customerPageNeedsFieldIssueTargetDueDate ?? undefined;
+    this.customerPageNeedsShowCompletedIssuesAndProjects =
+      data.customerPageNeedsShowCompletedIssuesAndProjects ?? undefined;
+    this.customerPageNeedsShowImportantFirst = data.customerPageNeedsShowImportantFirst ?? undefined;
+    this.customerPageNeedsViewGrouping = data.customerPageNeedsViewGrouping ?? undefined;
+    this.customerPageNeedsViewOrdering = data.customerPageNeedsViewOrdering ?? undefined;
+    this.customersViewOrdering = data.customersViewOrdering ?? undefined;
+    this.dashboardFieldDateCreated = data.dashboardFieldDateCreated ?? undefined;
+    this.dashboardFieldDateUpdated = data.dashboardFieldDateUpdated ?? undefined;
+    this.dashboardFieldOwner = data.dashboardFieldOwner ?? undefined;
+    this.dashboardsOrdering = data.dashboardsOrdering ?? undefined;
+    this.embeddedCustomerNeedsShowImportantFirst = data.embeddedCustomerNeedsShowImportantFirst ?? undefined;
+    this.embeddedCustomerNeedsViewOrdering = data.embeddedCustomerNeedsViewOrdering ?? undefined;
+    this.fieldAssignee = data.fieldAssignee ?? undefined;
+    this.fieldCustomerCount = data.fieldCustomerCount ?? undefined;
+    this.fieldCustomerRevenue = data.fieldCustomerRevenue ?? undefined;
+    this.fieldCycle = data.fieldCycle ?? undefined;
+    this.fieldDateArchived = data.fieldDateArchived ?? undefined;
+    this.fieldDateCreated = data.fieldDateCreated ?? undefined;
+    this.fieldDateMyActivity = data.fieldDateMyActivity ?? undefined;
+    this.fieldDateUpdated = data.fieldDateUpdated ?? undefined;
+    this.fieldDueDate = data.fieldDueDate ?? undefined;
+    this.fieldEstimate = data.fieldEstimate ?? undefined;
+    this.fieldId = data.fieldId ?? undefined;
+    this.fieldLabels = data.fieldLabels ?? undefined;
+    this.fieldLinkCount = data.fieldLinkCount ?? undefined;
+    this.fieldMilestone = data.fieldMilestone ?? undefined;
+    this.fieldPreviewLinks = data.fieldPreviewLinks ?? undefined;
+    this.fieldPriority = data.fieldPriority ?? undefined;
+    this.fieldProject = data.fieldProject ?? undefined;
+    this.fieldPullRequests = data.fieldPullRequests ?? undefined;
+    this.fieldRelease = data.fieldRelease ?? undefined;
+    this.fieldSentryIssues = data.fieldSentryIssues ?? undefined;
+    this.fieldSla = data.fieldSla ?? undefined;
+    this.fieldStatus = data.fieldStatus ?? undefined;
+    this.fieldTimeInCurrentStatus = data.fieldTimeInCurrentStatus ?? undefined;
+    this.hiddenColumns = data.hiddenColumns ?? undefined;
+    this.hiddenRows = data.hiddenRows ?? undefined;
+    this.inboxViewOrdering = data.inboxViewOrdering ?? undefined;
+    this.initiativeFieldActivity = data.initiativeFieldActivity ?? undefined;
+    this.initiativeFieldDescription = data.initiativeFieldDescription ?? undefined;
+    this.initiativeFieldHealth = data.initiativeFieldHealth ?? undefined;
+    this.initiativeFieldInitiativeHealth = data.initiativeFieldInitiativeHealth ?? undefined;
+    this.initiativeFieldOwner = data.initiativeFieldOwner ?? undefined;
+    this.initiativeFieldProjects = data.initiativeFieldProjects ?? undefined;
+    this.initiativeFieldTargetDate = data.initiativeFieldTargetDate ?? undefined;
+    this.initiativeFieldTeams = data.initiativeFieldTeams ?? undefined;
+    this.initiativeGrouping = data.initiativeGrouping ?? undefined;
+    this.initiativesViewOrdering = data.initiativesViewOrdering ?? undefined;
     this.issueGrouping = data.issueGrouping ?? undefined;
+    this.issueGroupingLabelGroupId = data.issueGroupingLabelGroupId ?? undefined;
+    this.issueNesting = data.issueNesting ?? undefined;
     this.issueSubGrouping = data.issueSubGrouping ?? undefined;
+    this.issueSubGroupingLabelGroupId = data.issueSubGroupingLabelGroupId ?? undefined;
+    this.layout = data.layout ?? undefined;
+    this.memberFieldJoined = data.memberFieldJoined ?? undefined;
+    this.memberFieldStatus = data.memberFieldStatus ?? undefined;
+    this.memberFieldTeams = data.memberFieldTeams ?? undefined;
+    this.projectCustomerNeedsShowCompletedIssuesLast = data.projectCustomerNeedsShowCompletedIssuesLast ?? undefined;
+    this.projectCustomerNeedsShowImportantFirst = data.projectCustomerNeedsShowImportantFirst ?? undefined;
+    this.projectCustomerNeedsViewGrouping = data.projectCustomerNeedsViewGrouping ?? undefined;
+    this.projectCustomerNeedsViewOrdering = data.projectCustomerNeedsViewOrdering ?? undefined;
+    this.projectFieldActivity = data.projectFieldActivity ?? undefined;
+    this.projectFieldCustomerCount = data.projectFieldCustomerCount ?? undefined;
+    this.projectFieldCustomerRevenue = data.projectFieldCustomerRevenue ?? undefined;
+    this.projectFieldDateCompleted = data.projectFieldDateCompleted ?? undefined;
+    this.projectFieldDateCreated = data.projectFieldDateCreated ?? undefined;
+    this.projectFieldDateUpdated = data.projectFieldDateUpdated ?? undefined;
+    this.projectFieldDescription = data.projectFieldDescription ?? undefined;
+    this.projectFieldDescriptionBoard = data.projectFieldDescriptionBoard ?? undefined;
+    this.projectFieldHealth = data.projectFieldHealth ?? undefined;
+    this.projectFieldHealthTimeline = data.projectFieldHealthTimeline ?? undefined;
+    this.projectFieldInitiatives = data.projectFieldInitiatives ?? undefined;
+    this.projectFieldLabels = data.projectFieldLabels ?? undefined;
+    this.projectFieldLead = data.projectFieldLead ?? undefined;
+    this.projectFieldLeadTimeline = data.projectFieldLeadTimeline ?? undefined;
+    this.projectFieldMembers = data.projectFieldMembers ?? undefined;
+    this.projectFieldMembersBoard = data.projectFieldMembersBoard ?? undefined;
+    this.projectFieldMembersList = data.projectFieldMembersList ?? undefined;
+    this.projectFieldMembersTimeline = data.projectFieldMembersTimeline ?? undefined;
+    this.projectFieldMilestone = data.projectFieldMilestone ?? undefined;
+    this.projectFieldMilestoneTimeline = data.projectFieldMilestoneTimeline ?? undefined;
+    this.projectFieldPredictions = data.projectFieldPredictions ?? undefined;
+    this.projectFieldPredictionsTimeline = data.projectFieldPredictionsTimeline ?? undefined;
+    this.projectFieldPriority = data.projectFieldPriority ?? undefined;
+    this.projectFieldRelations = data.projectFieldRelations ?? undefined;
+    this.projectFieldRelationsTimeline = data.projectFieldRelationsTimeline ?? undefined;
+    this.projectFieldRoadmaps = data.projectFieldRoadmaps ?? undefined;
+    this.projectFieldRoadmapsBoard = data.projectFieldRoadmapsBoard ?? undefined;
+    this.projectFieldRoadmapsList = data.projectFieldRoadmapsList ?? undefined;
+    this.projectFieldRoadmapsTimeline = data.projectFieldRoadmapsTimeline ?? undefined;
+    this.projectFieldRolloutStage = data.projectFieldRolloutStage ?? undefined;
+    this.projectFieldStartDate = data.projectFieldStartDate ?? undefined;
+    this.projectFieldStatus = data.projectFieldStatus ?? undefined;
+    this.projectFieldStatusTimeline = data.projectFieldStatusTimeline ?? undefined;
+    this.projectFieldTargetDate = data.projectFieldTargetDate ?? undefined;
+    this.projectFieldTeams = data.projectFieldTeams ?? undefined;
+    this.projectFieldTeamsBoard = data.projectFieldTeamsBoard ?? undefined;
+    this.projectFieldTeamsList = data.projectFieldTeamsList ?? undefined;
+    this.projectFieldTeamsTimeline = data.projectFieldTeamsTimeline ?? undefined;
+    this.projectGroupOrdering = data.projectGroupOrdering ?? undefined;
+    this.projectGrouping = data.projectGrouping ?? undefined;
+    this.projectGroupingDateResolution = data.projectGroupingDateResolution ?? undefined;
+    this.projectGroupingLabelGroupId = data.projectGroupingLabelGroupId ?? undefined;
+    this.projectLayout = data.projectLayout ?? undefined;
+    this.projectShowEmptyGroups = data.projectShowEmptyGroups ?? undefined;
+    this.projectShowEmptyGroupsBoard = data.projectShowEmptyGroupsBoard ?? undefined;
+    this.projectShowEmptyGroupsList = data.projectShowEmptyGroupsList ?? undefined;
+    this.projectShowEmptyGroupsTimeline = data.projectShowEmptyGroupsTimeline ?? undefined;
+    this.projectShowEmptySubGroups = data.projectShowEmptySubGroups ?? undefined;
+    this.projectShowEmptySubGroupsBoard = data.projectShowEmptySubGroupsBoard ?? undefined;
+    this.projectShowEmptySubGroupsList = data.projectShowEmptySubGroupsList ?? undefined;
+    this.projectShowEmptySubGroupsTimeline = data.projectShowEmptySubGroupsTimeline ?? undefined;
+    this.projectSubGrouping = data.projectSubGrouping ?? undefined;
+    this.projectSubGroupingLabelGroupId = data.projectSubGroupingLabelGroupId ?? undefined;
+    this.projectViewOrdering = data.projectViewOrdering ?? undefined;
+    this.projectZoomLevel = data.projectZoomLevel ?? undefined;
+    this.releasePipelinesViewOrdering = data.releasePipelinesViewOrdering ?? undefined;
+    this.reviewFieldAvatar = data.reviewFieldAvatar ?? undefined;
+    this.reviewFieldChecks = data.reviewFieldChecks ?? undefined;
+    this.reviewFieldIdentifier = data.reviewFieldIdentifier ?? undefined;
+    this.reviewFieldPreviewLinks = data.reviewFieldPreviewLinks ?? undefined;
+    this.reviewFieldRepository = data.reviewFieldRepository ?? undefined;
+    this.reviewGrouping = data.reviewGrouping ?? undefined;
+    this.reviewViewOrdering = data.reviewViewOrdering ?? undefined;
+    this.searchResultType = data.searchResultType ?? undefined;
+    this.searchViewOrdering = data.searchViewOrdering ?? undefined;
+    this.showArchivedItems = data.showArchivedItems ?? undefined;
+    this.showCompletedAgentSessions = data.showCompletedAgentSessions ?? undefined;
     this.showCompletedIssues = data.showCompletedIssues ?? undefined;
+    this.showCompletedProjects = data.showCompletedProjects ?? undefined;
+    this.showCompletedReviews = data.showCompletedReviews ?? undefined;
+    this.showDraftReviews = data.showDraftReviews ?? undefined;
+    this.showEmptyGroups = data.showEmptyGroups ?? undefined;
+    this.showEmptyGroupsBoard = data.showEmptyGroupsBoard ?? undefined;
+    this.showEmptyGroupsList = data.showEmptyGroupsList ?? undefined;
+    this.showEmptySubGroups = data.showEmptySubGroups ?? undefined;
+    this.showEmptySubGroupsBoard = data.showEmptySubGroupsBoard ?? undefined;
+    this.showEmptySubGroupsList = data.showEmptySubGroupsList ?? undefined;
+    this.showNestedInitiatives = data.showNestedInitiatives ?? undefined;
+    this.showParents = data.showParents ?? undefined;
+    this.showReadItems = data.showReadItems ?? undefined;
+    this.showSnoozedItems = data.showSnoozedItems ?? undefined;
+    this.showSubInitiativeProjects = data.showSubInitiativeProjects ?? undefined;
+    this.showSubIssues = data.showSubIssues ?? undefined;
+    this.showSubTeamIssues = data.showSubTeamIssues ?? undefined;
+    this.showSubTeamProjects = data.showSubTeamProjects ?? undefined;
+    this.showSupervisedIssues = data.showSupervisedIssues ?? undefined;
+    this.showTriageIssues = data.showTriageIssues ?? undefined;
+    this.showUnreadItemsFirst = data.showUnreadItemsFirst ?? undefined;
+    this.teamFieldCycle = data.teamFieldCycle ?? undefined;
+    this.teamFieldDateCreated = data.teamFieldDateCreated ?? undefined;
+    this.teamFieldDateUpdated = data.teamFieldDateUpdated ?? undefined;
+    this.teamFieldIdentifier = data.teamFieldIdentifier ?? undefined;
+    this.teamFieldMembers = data.teamFieldMembers ?? undefined;
+    this.teamFieldMembership = data.teamFieldMembership ?? undefined;
+    this.teamFieldOwner = data.teamFieldOwner ?? undefined;
+    this.teamFieldProjects = data.teamFieldProjects ?? undefined;
+    this.teamViewOrdering = data.teamViewOrdering ?? undefined;
+    this.timelineChronologyShowCycleTeamIds = data.timelineChronologyShowCycleTeamIds ?? undefined;
+    this.timelineChronologyShowWeekNumbers = data.timelineChronologyShowWeekNumbers ?? undefined;
+    this.timelineZoomScale = data.timelineZoomScale ?? undefined;
+    this.triageViewOrdering = data.triageViewOrdering ?? undefined;
     this.viewOrdering = data.viewOrdering ?? undefined;
+    this.viewOrderingDirection = data.viewOrderingDirection ?? undefined;
+    this.workspaceMembersViewOrdering = data.workspaceMembersViewOrdering ?? undefined;
+    this.projectLabelGroupColumns = data.projectLabelGroupColumns
+      ? data.projectLabelGroupColumns.map(node => new ViewPreferencesProjectLabelGroupColumn(request, node))
+      : undefined;
   }
 
+  /** Whether issues in closed columns should be ordered by recency. */
+  public closedIssuesOrderedByRecency?: boolean | null;
+  /** Whether to show the custom view creation date field. */
+  public customViewFieldDateCreated?: boolean | null;
+  /** Whether to show the custom view updated date field. */
+  public customViewFieldDateUpdated?: boolean | null;
+  /** Whether to show the custom view owner field. */
+  public customViewFieldOwner?: boolean | null;
+  /** Whether to show the custom view visibility field. */
+  public customViewFieldVisibility?: boolean | null;
+  /** The custom views ordering. */
+  public customViewsOrdering?: string | null;
+  /** Whether to show the customer domains field. */
+  public customerFieldDomains?: boolean | null;
+  /** Whether to show the customer owner field. */
+  public customerFieldOwner?: boolean | null;
+  /** Whether to show the customer request count field. */
+  public customerFieldRequestCount?: boolean | null;
+  /** Whether to show the customer revenue field. */
+  public customerFieldRevenue?: boolean | null;
+  /** Whether to show the customer size field. */
+  public customerFieldSize?: boolean | null;
+  /** Whether to show the customer source field. */
+  public customerFieldSource?: boolean | null;
+  /** Whether to show the customer status field. */
+  public customerFieldStatus?: boolean | null;
+  /** Whether to show the customer tier field. */
+  public customerFieldTier?: boolean | null;
+  /** Whether to show the issue identifier field in the customer page. */
+  public customerPageNeedsFieldIssueIdentifier?: boolean | null;
+  /** Whether to show the issue priority field in the customer page. */
+  public customerPageNeedsFieldIssuePriority?: boolean | null;
+  /** Whether to show the issue status field in the customer page. */
+  public customerPageNeedsFieldIssueStatus?: boolean | null;
+  /** Whether to show the issue due date field in the customer page. */
+  public customerPageNeedsFieldIssueTargetDueDate?: boolean | null;
+  /** Whether to show completed issues and projects in the customer page. */
+  public customerPageNeedsShowCompletedIssuesAndProjects?: string | null;
+  /** Whether to show important customer needs first. */
+  public customerPageNeedsShowImportantFirst?: boolean | null;
+  /** The customer page needs view grouping. */
+  public customerPageNeedsViewGrouping?: string | null;
+  /** The customer page needs view ordering. */
+  public customerPageNeedsViewOrdering?: string | null;
+  /** The customers view ordering. */
+  public customersViewOrdering?: string | null;
+  /** Whether to show the dashboard creation date field. */
+  public dashboardFieldDateCreated?: boolean | null;
+  /** Whether to show the dashboard updated date field. */
+  public dashboardFieldDateUpdated?: boolean | null;
+  /** Whether to show the dashboard owner field. */
+  public dashboardFieldOwner?: boolean | null;
+  /** The dashboards ordering. */
+  public dashboardsOrdering?: string | null;
+  /** Whether to show important embedded customer needs first. */
+  public embeddedCustomerNeedsShowImportantFirst?: boolean | null;
+  /** The embedded customer needs view ordering. */
+  public embeddedCustomerNeedsViewOrdering?: string | null;
+  /** Whether to show the issue assignee field. */
+  public fieldAssignee?: boolean | null;
+  /** Whether to show the customer request count field. */
+  public fieldCustomerCount?: boolean | null;
+  /** Whether to show the customer revenue field. */
+  public fieldCustomerRevenue?: boolean | null;
+  /** Whether to show the cycle field. */
+  public fieldCycle?: boolean | null;
+  /** Whether to show the issue archived date field. */
+  public fieldDateArchived?: boolean | null;
+  /** Whether to show the issue creation date field. */
+  public fieldDateCreated?: boolean | null;
+  /** Whether to show the issue last activity date field. */
+  public fieldDateMyActivity?: boolean | null;
+  /** Whether to show the issue updated date field. */
+  public fieldDateUpdated?: boolean | null;
+  /** Whether to show the due date field. */
+  public fieldDueDate?: boolean | null;
+  /** Whether to show the issue estimate field. */
+  public fieldEstimate?: boolean | null;
+  /** Whether to show the issue identifier field. */
+  public fieldId?: boolean | null;
+  /** Whether to show the labels field. */
+  public fieldLabels?: boolean | null;
+  /** Whether to show the link count field. */
+  public fieldLinkCount?: boolean | null;
+  /** Whether to show the milestone field. */
+  public fieldMilestone?: boolean | null;
+  /** Whether to show preview links. */
+  public fieldPreviewLinks?: boolean | null;
+  /** Whether to show the issue priority field. */
+  public fieldPriority?: boolean | null;
+  /** Whether to show the project field. */
+  public fieldProject?: boolean | null;
+  /** Whether to show the pull requests field. */
+  public fieldPullRequests?: boolean | null;
+  /** Whether to show the release field. */
+  public fieldRelease?: boolean | null;
+  /** Whether to show the Sentry issues field. */
+  public fieldSentryIssues?: boolean | null;
+  /** Whether to show the SLA field. */
+  public fieldSla?: boolean | null;
+  /** Whether to show the issue status field. */
+  public fieldStatus?: boolean | null;
+  /** Whether to show the time in current status field. */
+  public fieldTimeInCurrentStatus?: boolean | null;
+  /** List of column model IDs which should be hidden on a board. */
+  public hiddenColumns?: string[] | null;
+  /** List of row model IDs which should be hidden on a board. */
+  public hiddenRows?: string[] | null;
+  /** The inbox view ordering. */
+  public inboxViewOrdering?: string | null;
+  /** Whether to show the initiative activity field. */
+  public initiativeFieldActivity?: boolean | null;
+  /** Whether to show the initiative description field. */
+  public initiativeFieldDescription?: boolean | null;
+  /** Whether to show the initiative active projects health field. */
+  public initiativeFieldHealth?: boolean | null;
+  /** Whether to show the initiative health field. */
+  public initiativeFieldInitiativeHealth?: boolean | null;
+  /** Whether to show the initiative owner field. */
+  public initiativeFieldOwner?: boolean | null;
+  /** Whether to show the initiative projects field. */
+  public initiativeFieldProjects?: boolean | null;
+  /** Whether to show the initiative target date field. */
+  public initiativeFieldTargetDate?: boolean | null;
+  /** Whether to show the initiative teams field. */
+  public initiativeFieldTeams?: boolean | null;
+  /** The initiative grouping. */
+  public initiativeGrouping?: string | null;
+  /** The initiative ordering. */
+  public initiativesViewOrdering?: string | null;
   /** The issue grouping. */
   public issueGrouping?: string | null;
-  /** The issue sub grouping. */
+  /** The label group ID used for issue grouping. */
+  public issueGroupingLabelGroupId?: string | null;
+  /** How sub-issues should be nested and displayed. */
+  public issueNesting?: string | null;
+  /** The issue sub-grouping. */
   public issueSubGrouping?: string | null;
-  /** Whether to show completed issues. */
+  /** The label group ID used for issue sub-grouping. */
+  public issueSubGroupingLabelGroupId?: string | null;
+  /** The issue layout type. */
+  public layout?: string | null;
+  /** Whether to show the member joined date field. */
+  public memberFieldJoined?: boolean | null;
+  /** Whether to show the member status field. */
+  public memberFieldStatus?: boolean | null;
+  /** Whether to show the member teams field. */
+  public memberFieldTeams?: boolean | null;
+  /** Whether to show completed issues last in project customer needs. */
+  public projectCustomerNeedsShowCompletedIssuesLast?: boolean | null;
+  /** Whether to show important project customer needs first. */
+  public projectCustomerNeedsShowImportantFirst?: boolean | null;
+  /** The project customer needs view grouping. */
+  public projectCustomerNeedsViewGrouping?: string | null;
+  /** The project customer needs view ordering. */
+  public projectCustomerNeedsViewOrdering?: string | null;
+  /** Whether to show the project activity field. */
+  public projectFieldActivity?: boolean | null;
+  /** Whether to show the project customer count field. */
+  public projectFieldCustomerCount?: boolean | null;
+  /** Whether to show the project customer revenue field. */
+  public projectFieldCustomerRevenue?: boolean | null;
+  /** Whether to show the project completion date field. */
+  public projectFieldDateCompleted?: boolean | null;
+  /** Whether to show the project creation date field. */
+  public projectFieldDateCreated?: boolean | null;
+  /** Whether to show the project updated date field. */
+  public projectFieldDateUpdated?: boolean | null;
+  /** Whether to show the project description field. */
+  public projectFieldDescription?: boolean | null;
+  /** Whether to show the project description field on the board. */
+  public projectFieldDescriptionBoard?: boolean | null;
+  /** Whether to show the project health field. */
+  public projectFieldHealth?: boolean | null;
+  /** Whether to show the project health field on the timeline. */
+  public projectFieldHealthTimeline?: boolean | null;
+  /** Whether to show the project initiatives field. */
+  public projectFieldInitiatives?: boolean | null;
+  /** Whether to show the project labels field. */
+  public projectFieldLabels?: boolean | null;
+  /** Whether to show the project lead field. */
+  public projectFieldLead?: boolean | null;
+  /** Whether to show the project lead field on the timeline. */
+  public projectFieldLeadTimeline?: boolean | null;
+  /** Whether to show the project members field. */
+  public projectFieldMembers?: boolean | null;
+  /** Whether to show the project members field on the board. */
+  public projectFieldMembersBoard?: boolean | null;
+  /** Whether to show the project members field on the list. */
+  public projectFieldMembersList?: boolean | null;
+  /** Whether to show the project members field on the timeline. */
+  public projectFieldMembersTimeline?: boolean | null;
+  /** Whether to show the project milestone field. */
+  public projectFieldMilestone?: boolean | null;
+  /** Whether to show the project milestone field on the timeline. */
+  public projectFieldMilestoneTimeline?: boolean | null;
+  /** Whether to show the project predictions field. */
+  public projectFieldPredictions?: boolean | null;
+  /** Whether to show the project predictions field on the timeline. */
+  public projectFieldPredictionsTimeline?: boolean | null;
+  /** Whether to show the project priority field. */
+  public projectFieldPriority?: boolean | null;
+  /** Whether to show the project relations field. */
+  public projectFieldRelations?: boolean | null;
+  /** Whether to show the project relations field on the timeline. */
+  public projectFieldRelationsTimeline?: boolean | null;
+  /** Whether to show the project roadmaps field. */
+  public projectFieldRoadmaps?: boolean | null;
+  /** Whether to show the project roadmaps field on the board. */
+  public projectFieldRoadmapsBoard?: boolean | null;
+  /** Whether to show the project roadmaps field on the list. */
+  public projectFieldRoadmapsList?: boolean | null;
+  /** Whether to show the project roadmaps field on the timeline. */
+  public projectFieldRoadmapsTimeline?: boolean | null;
+  /** Whether to show the project rollout stage field. */
+  public projectFieldRolloutStage?: boolean | null;
+  /** Whether to show the project start date field. */
+  public projectFieldStartDate?: boolean | null;
+  /** Whether to show the project status field. */
+  public projectFieldStatus?: boolean | null;
+  /** Whether to show the project status field on the timeline. */
+  public projectFieldStatusTimeline?: boolean | null;
+  /** Whether to show the project target date field. */
+  public projectFieldTargetDate?: boolean | null;
+  /** Whether to show the project teams field. */
+  public projectFieldTeams?: boolean | null;
+  /** Whether to show the project teams field on the board. */
+  public projectFieldTeamsBoard?: boolean | null;
+  /** Whether to show the project teams field on the list. */
+  public projectFieldTeamsList?: boolean | null;
+  /** Whether to show the project teams field on the timeline. */
+  public projectFieldTeamsTimeline?: boolean | null;
+  /** The ordering of project groups. */
+  public projectGroupOrdering?: string | null;
+  /** The project grouping. */
+  public projectGrouping?: string | null;
+  /** The date resolution when grouping projects by date. */
+  public projectGroupingDateResolution?: string | null;
+  /** The label group ID used for project grouping. */
+  public projectGroupingLabelGroupId?: string | null;
+  /** The project layout type. */
+  public projectLayout?: string | null;
+  /** How to show empty project groups. */
+  public projectShowEmptyGroups?: string | null;
+  /** How to show empty project groups on the board layout. */
+  public projectShowEmptyGroupsBoard?: string | null;
+  /** How to show empty project groups on the list layout. */
+  public projectShowEmptyGroupsList?: string | null;
+  /** How to show empty project groups on the timeline layout. */
+  public projectShowEmptyGroupsTimeline?: string | null;
+  /** How to show empty project sub-groups. */
+  public projectShowEmptySubGroups?: string | null;
+  /** How to show empty project sub-groups on the board layout. */
+  public projectShowEmptySubGroupsBoard?: string | null;
+  /** How to show empty project sub-groups on the list layout. */
+  public projectShowEmptySubGroupsList?: string | null;
+  /** How to show empty project sub-groups on the timeline layout. */
+  public projectShowEmptySubGroupsTimeline?: string | null;
+  /** The project sub-grouping. */
+  public projectSubGrouping?: string | null;
+  /** The label group ID used for project sub-grouping. */
+  public projectSubGroupingLabelGroupId?: string | null;
+  /** The project ordering. */
+  public projectViewOrdering?: string | null;
+  /** The zoom level for the timeline view. */
+  public projectZoomLevel?: string | null;
+  /** The release pipelines view ordering. */
+  public releasePipelinesViewOrdering?: string | null;
+  /** Whether to show the review avatar field. */
+  public reviewFieldAvatar?: boolean | null;
+  /** Whether to show the review checks field. */
+  public reviewFieldChecks?: boolean | null;
+  /** Whether to show the review identifier field. */
+  public reviewFieldIdentifier?: boolean | null;
+  /** Whether to show the review preview links field. */
+  public reviewFieldPreviewLinks?: boolean | null;
+  /** Whether to show the review repository field. */
+  public reviewFieldRepository?: boolean | null;
+  /** The review grouping. */
+  public reviewGrouping?: string | null;
+  /** The review view ordering. */
+  public reviewViewOrdering?: string | null;
+  /** The search result type filter. */
+  public searchResultType?: string | null;
+  /** The search view ordering. */
+  public searchViewOrdering?: string | null;
+  /** Whether to show archived items. */
+  public showArchivedItems?: boolean | null;
+  /** Whether completed agent sessions are shown and for how long. */
+  public showCompletedAgentSessions?: string | null;
+  /** Whether completed issues are shown and for how long. */
   public showCompletedIssues?: string | null;
+  /** Whether completed projects are shown and for how long. */
+  public showCompletedProjects?: string | null;
+  /** Whether completed reviews are shown and for how long. */
+  public showCompletedReviews?: string | null;
+  /** Whether to show draft reviews. */
+  public showDraftReviews?: boolean | null;
+  /** Whether to show empty groups. */
+  public showEmptyGroups?: boolean | null;
+  /** Whether to show empty groups on the board layout. */
+  public showEmptyGroupsBoard?: boolean | null;
+  /** Whether to show empty groups on the list layout. */
+  public showEmptyGroupsList?: boolean | null;
+  /** Whether to show empty sub-groups. */
+  public showEmptySubGroups?: boolean | null;
+  /** Whether to show empty sub-groups on the board layout. */
+  public showEmptySubGroupsBoard?: boolean | null;
+  /** Whether to show empty sub-groups on the list layout. */
+  public showEmptySubGroupsList?: boolean | null;
+  /** Whether to show sub-initiatives nested. */
+  public showNestedInitiatives?: boolean | null;
+  /** Whether to show parent issues for sub-issues. */
+  public showParents?: boolean | null;
+  /** Whether to show read items. */
+  public showReadItems?: boolean | null;
+  /** Whether to show snoozed items. */
+  public showSnoozedItems?: boolean | null;
+  /** Whether to show sub-initiative projects. */
+  public showSubInitiativeProjects?: boolean | null;
+  /** Whether to show sub-issues. */
+  public showSubIssues?: boolean | null;
+  /** Whether to show sub-team issues. */
+  public showSubTeamIssues?: boolean | null;
+  /** Whether to show sub-team projects. */
+  public showSubTeamProjects?: boolean | null;
+  /** Whether to show supervised issues. */
+  public showSupervisedIssues?: boolean | null;
+  /** Whether to show triage issues. */
+  public showTriageIssues?: boolean | null;
+  /** Whether to show unread items first. */
+  public showUnreadItemsFirst?: boolean | null;
+  /** Whether to show the team cycle field. */
+  public teamFieldCycle?: boolean | null;
+  /** Whether to show the team creation date field. */
+  public teamFieldDateCreated?: boolean | null;
+  /** Whether to show the team updated date field. */
+  public teamFieldDateUpdated?: boolean | null;
+  /** Whether to show the team identifier field. */
+  public teamFieldIdentifier?: boolean | null;
+  /** Whether to show the team members field. */
+  public teamFieldMembers?: boolean | null;
+  /** Whether to show the team membership field. */
+  public teamFieldMembership?: boolean | null;
+  /** Whether to show the team owner field. */
+  public teamFieldOwner?: boolean | null;
+  /** Whether to show the team projects field. */
+  public teamFieldProjects?: boolean | null;
+  /** The team view ordering. */
+  public teamViewOrdering?: string | null;
+  /** Selected team IDs to show cycles for in timeline chronology bar. */
+  public timelineChronologyShowCycleTeamIds?: string[] | null;
+  /** Whether to show week numbers in timeline chronology bar. */
+  public timelineChronologyShowWeekNumbers?: boolean | null;
+  /** The zoom scale for the timeline view. */
+  public timelineZoomScale?: number | null;
+  /** The triage view ordering. */
+  public triageViewOrdering?: string | null;
   /** The issue ordering. */
   public viewOrdering?: string | null;
+  /** The direction of the issue ordering. */
+  public viewOrderingDirection?: string | null;
+  /** The workspace members view ordering. */
+  public workspaceMembersViewOrdering?: string | null;
+  /** The project label group columns configuration. */
+  public projectLabelGroupColumns?: ViewPreferencesProjectLabelGroupColumn[] | null;
 }
 /**
  * A webhook used to send HTTP notifications over data updates.
@@ -19576,35 +20128,6 @@ export class ApplicationInfoQuery extends Request {
     const data = response.applicationInfo;
 
     return new Application(this._request, data);
-  }
-}
-
-/**
- * A fetchable AsksWebSetting Query
- *
- * @param request - function to call the graphql client
- */
-export class AsksWebSettingQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the AsksWebSetting query and return a AsksWebSettings
-   *
-   * @param id - required id to pass to asksWebSetting
-   * @returns parsed response from AsksWebSettingQuery
-   */
-  public async fetch(id: string): LinearFetch<AsksWebSettings> {
-    const response = await this._request<L.AsksWebSettingQuery, L.AsksWebSettingQueryVariables>(
-      L.AsksWebSettingDocument.toString(),
-      {
-        id,
-      }
-    );
-    const data = response.asksWebSetting;
-
-    return new AsksWebSettings(this._request, data);
   }
 }
 
@@ -23598,77 +24121,6 @@ export class AirbyteIntegrationConnectMutation extends Request {
     const data = response.airbyteIntegrationConnect;
 
     return new IntegrationPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable CreateAsksWebSettings Mutation
- *
- * @param request - function to call the graphql client
- */
-export class CreateAsksWebSettingsMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the CreateAsksWebSettings mutation and return a AsksWebSettingsPayload
-   *
-   * @param input - required input to pass to createAsksWebSettings
-   * @param variables - variables without 'input' to pass into the CreateAsksWebSettingsMutation
-   * @returns parsed response from CreateAsksWebSettingsMutation
-   */
-  public async fetch(
-    input: L.AsksWebSettingsCreateInput,
-    variables?: Omit<L.CreateAsksWebSettingsMutationVariables, "input">
-  ): LinearFetch<AsksWebSettingsPayload> {
-    const response = await this._request<L.CreateAsksWebSettingsMutation, L.CreateAsksWebSettingsMutationVariables>(
-      L.CreateAsksWebSettingsDocument.toString(),
-      {
-        input,
-        ...variables,
-      }
-    );
-    const data = response.asksWebSettingsCreate;
-
-    return new AsksWebSettingsPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable UpdateAsksWebSettings Mutation
- *
- * @param request - function to call the graphql client
- */
-export class UpdateAsksWebSettingsMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the UpdateAsksWebSettings mutation and return a AsksWebSettingsPayload
-   *
-   * @param id - required id to pass to updateAsksWebSettings
-   * @param input - required input to pass to updateAsksWebSettings
-   * @param variables - variables without 'id', 'input' to pass into the UpdateAsksWebSettingsMutation
-   * @returns parsed response from UpdateAsksWebSettingsMutation
-   */
-  public async fetch(
-    id: string,
-    input: L.AsksWebSettingsUpdateInput,
-    variables?: Omit<L.UpdateAsksWebSettingsMutationVariables, "id" | "input">
-  ): LinearFetch<AsksWebSettingsPayload> {
-    const response = await this._request<L.UpdateAsksWebSettingsMutation, L.UpdateAsksWebSettingsMutationVariables>(
-      L.UpdateAsksWebSettingsDocument.toString(),
-      {
-        id,
-        input,
-        ...variables,
-      }
-    );
-    const data = response.asksWebSettingsUpdate;
-
-    return new AsksWebSettingsPayload(this._request, data);
   }
 }
 
@@ -31435,6 +31887,35 @@ export class TimeScheduleUpsertExternalMutation extends Request {
 }
 
 /**
+ * A fetchable TrackAnonymousEvent Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class TrackAnonymousEventMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the TrackAnonymousEvent mutation and return a EventTrackingPayload
+   *
+   * @param input - required input to pass to trackAnonymousEvent
+   * @returns parsed response from TrackAnonymousEventMutation
+   */
+  public async fetch(input: L.EventTrackingInput): LinearFetch<EventTrackingPayload> {
+    const response = await this._request<L.TrackAnonymousEventMutation, L.TrackAnonymousEventMutationVariables>(
+      L.TrackAnonymousEventDocument.toString(),
+      {
+        input,
+      }
+    );
+    const data = response.trackAnonymousEvent;
+
+    return new EventTrackingPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable CreateTriageResponsibility Mutation
  *
  * @param request - function to call the graphql client
@@ -32245,38 +32726,6 @@ export class AgentSession_ActivitiesQuery extends Request {
 }
 
 /**
- * A fetchable AsksWebSetting_IdentityProvider Query
- *
- * @param request - function to call the graphql client
- * @param id - required id to pass to asksWebSetting
- */
-export class AsksWebSetting_IdentityProviderQuery extends Request {
-  private _id: string;
-
-  public constructor(request: LinearRequest, id: string) {
-    super(request);
-    this._id = id;
-  }
-
-  /**
-   * Call the AsksWebSetting_IdentityProvider query and return a IdentityProvider
-   *
-   * @returns parsed response from AsksWebSetting_IdentityProviderQuery
-   */
-  public async fetch(): LinearFetch<IdentityProvider | undefined> {
-    const response = await this._request<
-      L.AsksWebSetting_IdentityProviderQuery,
-      L.AsksWebSetting_IdentityProviderQueryVariables
-    >(L.AsksWebSetting_IdentityProviderDocument.toString(), {
-      id: this._id,
-    });
-    const data = response.asksWebSetting.identityProvider;
-
-    return data ? new IdentityProvider(this._request, data) : undefined;
-  }
-}
-
-/**
  * A fetchable AttachmentIssue_Attachments Query
  *
  * @param request - function to call the graphql client
@@ -32906,6 +33355,38 @@ export class AttachmentIssue_RelationsQuery extends Request {
         ),
       data
     );
+  }
+}
+
+/**
+ * A fetchable AttachmentIssue_SharedAccess Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to attachmentIssue
+ */
+export class AttachmentIssue_SharedAccessQuery extends Request {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the AttachmentIssue_SharedAccess query and return a IssueSharedAccess
+   *
+   * @returns parsed response from AttachmentIssue_SharedAccessQuery
+   */
+  public async fetch(): LinearFetch<IssueSharedAccess> {
+    const response = await this._request<
+      L.AttachmentIssue_SharedAccessQuery,
+      L.AttachmentIssue_SharedAccessQueryVariables
+    >(L.AttachmentIssue_SharedAccessDocument.toString(), {
+      id: this._id,
+    });
+    const data = response.attachmentIssue.sharedAccess;
+
+    return new IssueSharedAccess(this._request, data);
   }
 }
 
@@ -34895,6 +35376,38 @@ export class Issue_RelationsQuery extends Request {
 }
 
 /**
+ * A fetchable Issue_SharedAccess Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to issue
+ */
+export class Issue_SharedAccessQuery extends Request {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the Issue_SharedAccess query and return a IssueSharedAccess
+   *
+   * @returns parsed response from Issue_SharedAccessQuery
+   */
+  public async fetch(): LinearFetch<IssueSharedAccess> {
+    const response = await this._request<L.Issue_SharedAccessQuery, L.Issue_SharedAccessQueryVariables>(
+      L.Issue_SharedAccessDocument.toString(),
+      {
+        id: this._id,
+      }
+    );
+    const data = response.issue.sharedAccess;
+
+    return new IssueSharedAccess(this._request, data);
+  }
+}
+
+/**
  * A fetchable Issue_StateHistory Query
  *
  * @param request - function to call the graphql client
@@ -35759,6 +36272,38 @@ export class IssueVcsBranchSearch_RelationsQuery extends Request {
     } else {
       return undefined;
     }
+  }
+}
+
+/**
+ * A fetchable IssueVcsBranchSearch_SharedAccess Query
+ *
+ * @param request - function to call the graphql client
+ * @param branchName - required branchName to pass to issueVcsBranchSearch
+ */
+export class IssueVcsBranchSearch_SharedAccessQuery extends Request {
+  private _branchName: string;
+
+  public constructor(request: LinearRequest, branchName: string) {
+    super(request);
+    this._branchName = branchName;
+  }
+
+  /**
+   * Call the IssueVcsBranchSearch_SharedAccess query and return a IssueSharedAccess
+   *
+   * @returns parsed response from IssueVcsBranchSearch_SharedAccessQuery
+   */
+  public async fetch(): LinearFetch<IssueSharedAccess | undefined> {
+    const response = await this._request<
+      L.IssueVcsBranchSearch_SharedAccessQuery,
+      L.IssueVcsBranchSearch_SharedAccessQueryVariables
+    >(L.IssueVcsBranchSearch_SharedAccessDocument.toString(), {
+      branchName: this._branchName,
+    });
+    const data = response.issueVcsBranchSearch?.sharedAccess;
+
+    return data ? new IssueSharedAccess(this._request, data) : undefined;
   }
 }
 
@@ -39565,15 +40110,6 @@ export class LinearSdk extends Request {
     return new ApplicationInfoQuery(this._request).fetch(clientId);
   }
   /**
-   * Asks web form settings by ID.
-   *
-   * @param id - required id to pass to asksWebSetting
-   * @returns AsksWebSettings
-   */
-  public asksWebSetting(id: string): LinearFetch<AsksWebSettings> {
-    return new AsksWebSettingQuery(this._request).fetch(id);
-  }
-  /**
    * One specific issue attachment.
    * [Deprecated] 'url' can no longer be used as the 'id' parameter. Use 'attachmentsForUrl' instead
    *
@@ -40774,34 +41310,6 @@ export class LinearSdk extends Request {
    */
   public airbyteIntegrationConnect(input: L.AirbyteConfigurationInput): LinearFetch<IntegrationPayload> {
     return new AirbyteIntegrationConnectMutation(this._request).fetch(input);
-  }
-  /**
-   * Creates a new Asks web form settings.
-   *
-   * @param input - required input to pass to createAsksWebSettings
-   * @param variables - variables without 'input' to pass into the CreateAsksWebSettingsMutation
-   * @returns AsksWebSettingsPayload
-   */
-  public createAsksWebSettings(
-    input: L.AsksWebSettingsCreateInput,
-    variables?: Omit<L.CreateAsksWebSettingsMutationVariables, "input">
-  ): LinearFetch<AsksWebSettingsPayload> {
-    return new CreateAsksWebSettingsMutation(this._request).fetch(input, variables);
-  }
-  /**
-   * Updates Asks web form settings.
-   *
-   * @param id - required id to pass to updateAsksWebSettings
-   * @param input - required input to pass to updateAsksWebSettings
-   * @param variables - variables without 'id', 'input' to pass into the UpdateAsksWebSettingsMutation
-   * @returns AsksWebSettingsPayload
-   */
-  public updateAsksWebSettings(
-    id: string,
-    input: L.AsksWebSettingsUpdateInput,
-    variables?: Omit<L.UpdateAsksWebSettingsMutationVariables, "id" | "input">
-  ): LinearFetch<AsksWebSettingsPayload> {
-    return new UpdateAsksWebSettingsMutation(this._request).fetch(id, input, variables);
   }
   /**
    * Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
@@ -43487,6 +43995,15 @@ export class LinearSdk extends Request {
     input: L.TimeScheduleUpdateInput
   ): LinearFetch<TimeSchedulePayload> {
     return new TimeScheduleUpsertExternalMutation(this._request).fetch(externalId, input);
+  }
+  /**
+   * Track an anonymous analytics event.
+   *
+   * @param input - required input to pass to trackAnonymousEvent
+   * @returns EventTrackingPayload
+   */
+  public trackAnonymousEvent(input: L.EventTrackingInput): LinearFetch<EventTrackingPayload> {
+    return new TrackAnonymousEventMutation(this._request).fetch(input);
   }
   /**
    * Creates a new triage responsibility.

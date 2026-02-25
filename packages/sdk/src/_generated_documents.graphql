@@ -613,6 +613,10 @@ fragment CustomerTier on CustomerTier {
 # A customer whose needs will be tied to issues or projects.
 fragment Customer on Customer {
   __typename
+  # Customer needs associated with this customer.
+  needs {
+    ...CustomerNeed
+  }
   # The ID of the Slack channel used to interact with the customer.
   slackChannelId
   # The ID of the main source, when a customer has multiple sources. Must be one of externalIds.
@@ -1276,6 +1280,15 @@ fragment InitiativeHistory on InitiativeHistory {
   id
 }
 
+# A label group column configuration for the project list view.
+fragment ViewPreferencesProjectLabelGroupColumn on ViewPreferencesProjectLabelGroupColumn {
+  __typename
+  # The identifier of the label group.
+  id
+  # Whether the label group column is active.
+  active
+}
+
 # A label notification subscription.
 fragment LabelNotificationSubscription on LabelNotificationSubscription {
   __typename
@@ -1684,6 +1697,10 @@ fragment Project on Project {
   targetDate
   # The estimated start date of the project.
   startDate
+  # The external services the project is synced with.
+  syncedWith {
+    ...ExternalEntityInfo
+  }
   # The frequency at which to prompt for updates. When not set, reminders are inherited from workspace.
   updateReminderFrequency
   # The health of the project.
@@ -3742,6 +3759,10 @@ fragment Issue on Issue {
   }
   # Returns the number of Attachment resources which are created by customer support ticketing systems (e.g. Zendesk).
   customerTicketCount
+  # Shared access metadata for this issue.
+  sharedAccess {
+    ...IssueSharedAccess
+  }
   # Suggested branch name for the issue.
   branchName
   # The agent user that is delegated to work on this issue.
@@ -5667,6 +5688,8 @@ fragment ProjectUpdateWebhookPayload on ProjectUpdateWebhookPayload {
   bodyData
   # The body of the project update.
   body
+  # The diff between the current update and the previous one, formatted as markdown.
+  diffMarkdown
   # The edited at timestamp of the project update.
   editedAt
   # The health of the project update.
@@ -5732,6 +5755,8 @@ fragment ProjectWebhookPayload on ProjectWebhookPayload {
   documentContentId
   # The estimated start date of the project.
   startDate
+  # The external services the project is synced with.
+  syncedWith
   # The health of the project.
   health
   # The icon of the project.
@@ -6105,6 +6130,8 @@ fragment InitiativeUpdateWebhookPayload on InitiativeUpdateWebhookPayload {
   bodyData
   # The body of the initiative update.
   body
+  # The diff between the current update and the previous one, formatted as markdown.
+  diffMarkdown
   # The edited at timestamp of the initiative update.
   editedAt
   # The health of the initiative update.
@@ -6883,34 +6910,6 @@ fragment SesDomainIdentity on SesDomainIdentity {
   canSendFromCustomDomain
 }
 
-# Settings for an Asks web form.
-fragment AsksWebSettings on AsksWebSettings {
-  __typename
-  # The custom domain for the Asks web form. If null, the default Linear-hosted domain will be used.
-  domain
-  # The email intake address associated with these Asks web settings.
-  emailIntakeAddress {
-    id
-  }
-  # The identity provider for SAML authentication on this Asks web form.
-  identityProvider {
-    ...IdentityProvider
-  }
-  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-  #     been updated after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The time at which the entity was created.
-  createdAt
-  # The unique identifier of the entity.
-  id
-  # The user who created the Asks web settings.
-  creator {
-    id
-  }
-}
-
 # Team origin for guidance rules.
 fragment TeamOriginWebhookPayload on TeamOriginWebhookPayload {
   __typename
@@ -7416,18 +7415,6 @@ fragment AsksChannelConnectPayload on AsksChannelConnectPayload {
   success
 }
 
-fragment AsksWebSettingsPayload on AsksWebSettingsPayload {
-  __typename
-  # The Asks web settings that were created or updated.
-  asksWebSettings {
-    id
-  }
-  # The identifier of the last sync operation.
-  lastSyncId
-  # Whether the operation was successful.
-  success
-}
-
 fragment AttachmentConnection on AttachmentConnection {
   __typename
   nodes {
@@ -7909,6 +7896,12 @@ fragment EntityExternalLinkPayload on EntityExternalLinkPayload {
   entityExternalLink {
     id
   }
+  # Whether the operation was successful.
+  success
+}
+
+fragment EventTrackingPayload on EventTrackingPayload {
+  __typename
   # Whether the operation was successful.
   success
 }
@@ -8441,6 +8434,10 @@ fragment IssueSearchResult on IssueSearchResult {
   }
   # Returns the number of Attachment resources which are created by customer support ticketing systems (e.g. Zendesk).
   customerTicketCount
+  # Shared access metadata for this issue.
+  sharedAccess {
+    ...IssueSharedAccess
+  }
   # Suggested branch name for the issue.
   branchName
   # The agent user that is delegated to work on this issue.
@@ -8582,6 +8579,20 @@ fragment IssueSearchResult on IssueSearchResult {
   }
 }
 
+fragment IssueSharedAccess on IssueSharedAccess {
+  __typename
+  # The number of users this issue is shared with.
+  sharedWithCount
+  # Users this issue is shared with.
+  sharedWithUsers {
+    ...User
+  }
+  # Whether the viewer can access this issue only through issue sharing.
+  viewerHasOnlySharedAccess
+  # Whether this issue has been shared with users outside the team.
+  isShared
+}
+
 fragment IssueStateSpanConnection on IssueStateSpanConnection {
   __typename
   nodes {
@@ -8661,6 +8672,22 @@ fragment IssueTitleSuggestionFromCustomerRequestPayload on IssueTitleSuggestionF
   lastSyncId
   # The suggested issue title.
   title
+}
+
+fragment JiraFetchProjectStatusesPayload on JiraFetchProjectStatusesPayload {
+  __typename
+  # The fetched Jira issue statuses (non-Epic).
+  issueStatuses
+  # The fetched Jira project statuses (Epic).
+  projectStatuses
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The integration that was created or updated.
+  integration {
+    id
+  }
+  # Whether the operation was successful.
+  success
 }
 
 fragment LogoutResponse on LogoutResponse {
@@ -9049,6 +9076,10 @@ fragment ProjectSearchResult on ProjectSearchResult {
   targetDate
   # The estimated start date of the project.
   startDate
+  # The external services the project is synced with.
+  syncedWith {
+    ...ExternalEntityInfo
+  }
   # The frequency at which to prompt for updates. When not set, reminders are inherited from workspace.
   updateReminderFrequency
   # The health of the project.
@@ -9644,14 +9675,374 @@ fragment ViewPreferencesPayload on ViewPreferencesPayload {
 
 fragment ViewPreferencesValues on ViewPreferencesValues {
   __typename
+  # How sub-issues should be nested and displayed.
+  issueNesting
+  # How to show empty project groups on the board layout.
+  projectShowEmptyGroupsBoard
+  # How to show empty project groups on the list layout.
+  projectShowEmptyGroupsList
+  # How to show empty project groups on the timeline layout.
+  projectShowEmptyGroupsTimeline
+  # How to show empty project groups.
+  projectShowEmptyGroups
+  # How to show empty project sub-groups on the board layout.
+  projectShowEmptySubGroupsBoard
+  # How to show empty project sub-groups on the list layout.
+  projectShowEmptySubGroupsList
+  # How to show empty project sub-groups on the timeline layout.
+  projectShowEmptySubGroupsTimeline
+  # How to show empty project sub-groups.
+  projectShowEmptySubGroups
+  # List of column model IDs which should be hidden on a board.
+  hiddenColumns
+  # List of row model IDs which should be hidden on a board.
+  hiddenRows
+  # Selected team IDs to show cycles for in timeline chronology bar.
+  timelineChronologyShowCycleTeamIds
+  # The custom views ordering.
+  customViewsOrdering
+  # The customer page needs view grouping.
+  customerPageNeedsViewGrouping
+  # The customer page needs view ordering.
+  customerPageNeedsViewOrdering
+  # The customers view ordering.
+  customersViewOrdering
+  # The dashboards ordering.
+  dashboardsOrdering
+  # The date resolution when grouping projects by date.
+  projectGroupingDateResolution
+  # The direction of the issue ordering.
+  viewOrderingDirection
+  # The embedded customer needs view ordering.
+  embeddedCustomerNeedsViewOrdering
+  # The inbox view ordering.
+  inboxViewOrdering
+  # The initiative grouping.
+  initiativeGrouping
+  # The initiative ordering.
+  initiativesViewOrdering
   # The issue grouping.
   issueGrouping
+  # The issue layout type.
+  layout
   # The issue ordering.
   viewOrdering
-  # The issue sub grouping.
+  # The issue sub-grouping.
   issueSubGrouping
-  # Whether to show completed issues.
+  # The label group ID used for issue grouping.
+  issueGroupingLabelGroupId
+  # The label group ID used for issue sub-grouping.
+  issueSubGroupingLabelGroupId
+  # The label group ID used for project grouping.
+  projectGroupingLabelGroupId
+  # The label group ID used for project sub-grouping.
+  projectSubGroupingLabelGroupId
+  # The ordering of project groups.
+  projectGroupOrdering
+  # The project customer needs view grouping.
+  projectCustomerNeedsViewGrouping
+  # The project customer needs view ordering.
+  projectCustomerNeedsViewOrdering
+  # The project grouping.
+  projectGrouping
+  # The project label group columns configuration.
+  projectLabelGroupColumns {
+    ...ViewPreferencesProjectLabelGroupColumn
+  }
+  # The project layout type.
+  projectLayout
+  # The project ordering.
+  projectViewOrdering
+  # The project sub-grouping.
+  projectSubGrouping
+  # The release pipelines view ordering.
+  releasePipelinesViewOrdering
+  # The review grouping.
+  reviewGrouping
+  # The review view ordering.
+  reviewViewOrdering
+  # The search result type filter.
+  searchResultType
+  # The search view ordering.
+  searchViewOrdering
+  # The team view ordering.
+  teamViewOrdering
+  # The triage view ordering.
+  triageViewOrdering
+  # The workspace members view ordering.
+  workspaceMembersViewOrdering
+  # The zoom level for the timeline view.
+  projectZoomLevel
+  # The zoom scale for the timeline view.
+  timelineZoomScale
+  # Whether completed agent sessions are shown and for how long.
+  showCompletedAgentSessions
+  # Whether completed issues are shown and for how long.
   showCompletedIssues
+  # Whether completed projects are shown and for how long.
+  showCompletedProjects
+  # Whether completed reviews are shown and for how long.
+  showCompletedReviews
+  # Whether issues in closed columns should be ordered by recency.
+  closedIssuesOrderedByRecency
+  # Whether to show archived items.
+  showArchivedItems
+  # Whether to show completed issues and projects in the customer page.
+  customerPageNeedsShowCompletedIssuesAndProjects
+  # Whether to show completed issues last in project customer needs.
+  projectCustomerNeedsShowCompletedIssuesLast
+  # Whether to show draft reviews.
+  showDraftReviews
+  # Whether to show empty groups on the board layout.
+  showEmptyGroupsBoard
+  # Whether to show empty groups on the list layout.
+  showEmptyGroupsList
+  # Whether to show empty groups.
+  showEmptyGroups
+  # Whether to show empty sub-groups on the board layout.
+  showEmptySubGroupsBoard
+  # Whether to show empty sub-groups on the list layout.
+  showEmptySubGroupsList
+  # Whether to show empty sub-groups.
+  showEmptySubGroups
+  # Whether to show important customer needs first.
+  customerPageNeedsShowImportantFirst
+  # Whether to show important embedded customer needs first.
+  embeddedCustomerNeedsShowImportantFirst
+  # Whether to show important project customer needs first.
+  projectCustomerNeedsShowImportantFirst
+  # Whether to show parent issues for sub-issues.
+  showParents
+  # Whether to show preview links.
+  fieldPreviewLinks
+  # Whether to show read items.
+  showReadItems
+  # Whether to show snoozed items.
+  showSnoozedItems
+  # Whether to show sub-initiative projects.
+  showSubInitiativeProjects
+  # Whether to show sub-initiatives nested.
+  showNestedInitiatives
+  # Whether to show sub-issues.
+  showSubIssues
+  # Whether to show sub-team issues.
+  showSubTeamIssues
+  # Whether to show sub-team projects.
+  showSubTeamProjects
+  # Whether to show supervised issues.
+  showSupervisedIssues
+  # Whether to show the SLA field.
+  fieldSla
+  # Whether to show the Sentry issues field.
+  fieldSentryIssues
+  # Whether to show the custom view creation date field.
+  customViewFieldDateCreated
+  # Whether to show the custom view owner field.
+  customViewFieldOwner
+  # Whether to show the custom view updated date field.
+  customViewFieldDateUpdated
+  # Whether to show the custom view visibility field.
+  customViewFieldVisibility
+  # Whether to show the customer domains field.
+  customerFieldDomains
+  # Whether to show the customer owner field.
+  customerFieldOwner
+  # Whether to show the customer request count field.
+  customerFieldRequestCount
+  # Whether to show the customer request count field.
+  fieldCustomerCount
+  # Whether to show the customer revenue field.
+  customerFieldRevenue
+  # Whether to show the customer revenue field.
+  fieldCustomerRevenue
+  # Whether to show the customer size field.
+  customerFieldSize
+  # Whether to show the customer source field.
+  customerFieldSource
+  # Whether to show the customer status field.
+  customerFieldStatus
+  # Whether to show the customer tier field.
+  customerFieldTier
+  # Whether to show the cycle field.
+  fieldCycle
+  # Whether to show the dashboard creation date field.
+  dashboardFieldDateCreated
+  # Whether to show the dashboard owner field.
+  dashboardFieldOwner
+  # Whether to show the dashboard updated date field.
+  dashboardFieldDateUpdated
+  # Whether to show the due date field.
+  fieldDueDate
+  # Whether to show the initiative active projects health field.
+  initiativeFieldHealth
+  # Whether to show the initiative activity field.
+  initiativeFieldActivity
+  # Whether to show the initiative description field.
+  initiativeFieldDescription
+  # Whether to show the initiative health field.
+  initiativeFieldInitiativeHealth
+  # Whether to show the initiative owner field.
+  initiativeFieldOwner
+  # Whether to show the initiative projects field.
+  initiativeFieldProjects
+  # Whether to show the initiative target date field.
+  initiativeFieldTargetDate
+  # Whether to show the initiative teams field.
+  initiativeFieldTeams
+  # Whether to show the issue archived date field.
+  fieldDateArchived
+  # Whether to show the issue assignee field.
+  fieldAssignee
+  # Whether to show the issue creation date field.
+  fieldDateCreated
+  # Whether to show the issue due date field in the customer page.
+  customerPageNeedsFieldIssueTargetDueDate
+  # Whether to show the issue estimate field.
+  fieldEstimate
+  # Whether to show the issue identifier field in the customer page.
+  customerPageNeedsFieldIssueIdentifier
+  # Whether to show the issue identifier field.
+  fieldId
+  # Whether to show the issue last activity date field.
+  fieldDateMyActivity
+  # Whether to show the issue priority field in the customer page.
+  customerPageNeedsFieldIssuePriority
+  # Whether to show the issue priority field.
+  fieldPriority
+  # Whether to show the issue status field in the customer page.
+  customerPageNeedsFieldIssueStatus
+  # Whether to show the issue status field.
+  fieldStatus
+  # Whether to show the issue updated date field.
+  fieldDateUpdated
+  # Whether to show the labels field.
+  fieldLabels
+  # Whether to show the link count field.
+  fieldLinkCount
+  # Whether to show the member joined date field.
+  memberFieldJoined
+  # Whether to show the member status field.
+  memberFieldStatus
+  # Whether to show the member teams field.
+  memberFieldTeams
+  # Whether to show the milestone field.
+  fieldMilestone
+  # Whether to show the project activity field.
+  projectFieldActivity
+  # Whether to show the project completion date field.
+  projectFieldDateCompleted
+  # Whether to show the project creation date field.
+  projectFieldDateCreated
+  # Whether to show the project customer count field.
+  projectFieldCustomerCount
+  # Whether to show the project customer revenue field.
+  projectFieldCustomerRevenue
+  # Whether to show the project description field on the board.
+  projectFieldDescriptionBoard
+  # Whether to show the project description field.
+  projectFieldDescription
+  # Whether to show the project field.
+  fieldProject
+  # Whether to show the project health field on the timeline.
+  projectFieldHealthTimeline
+  # Whether to show the project health field.
+  projectFieldHealth
+  # Whether to show the project initiatives field.
+  projectFieldInitiatives
+  # Whether to show the project labels field.
+  projectFieldLabels
+  # Whether to show the project lead field on the timeline.
+  projectFieldLeadTimeline
+  # Whether to show the project lead field.
+  projectFieldLead
+  # Whether to show the project members field on the board.
+  projectFieldMembersBoard
+  # Whether to show the project members field on the list.
+  projectFieldMembersList
+  # Whether to show the project members field on the timeline.
+  projectFieldMembersTimeline
+  # Whether to show the project members field.
+  projectFieldMembers
+  # Whether to show the project milestone field on the timeline.
+  projectFieldMilestoneTimeline
+  # Whether to show the project milestone field.
+  projectFieldMilestone
+  # Whether to show the project predictions field on the timeline.
+  projectFieldPredictionsTimeline
+  # Whether to show the project predictions field.
+  projectFieldPredictions
+  # Whether to show the project priority field.
+  projectFieldPriority
+  # Whether to show the project relations field on the timeline.
+  projectFieldRelationsTimeline
+  # Whether to show the project relations field.
+  projectFieldRelations
+  # Whether to show the project roadmaps field on the board.
+  projectFieldRoadmapsBoard
+  # Whether to show the project roadmaps field on the list.
+  projectFieldRoadmapsList
+  # Whether to show the project roadmaps field on the timeline.
+  projectFieldRoadmapsTimeline
+  # Whether to show the project roadmaps field.
+  projectFieldRoadmaps
+  # Whether to show the project rollout stage field.
+  projectFieldRolloutStage
+  # Whether to show the project start date field.
+  projectFieldStartDate
+  # Whether to show the project status field on the timeline.
+  projectFieldStatusTimeline
+  # Whether to show the project status field.
+  projectFieldStatus
+  # Whether to show the project target date field.
+  projectFieldTargetDate
+  # Whether to show the project teams field on the board.
+  projectFieldTeamsBoard
+  # Whether to show the project teams field on the list.
+  projectFieldTeamsList
+  # Whether to show the project teams field on the timeline.
+  projectFieldTeamsTimeline
+  # Whether to show the project teams field.
+  projectFieldTeams
+  # Whether to show the project updated date field.
+  projectFieldDateUpdated
+  # Whether to show the pull requests field.
+  fieldPullRequests
+  # Whether to show the release field.
+  fieldRelease
+  # Whether to show the review avatar field.
+  reviewFieldAvatar
+  # Whether to show the review checks field.
+  reviewFieldChecks
+  # Whether to show the review identifier field.
+  reviewFieldIdentifier
+  # Whether to show the review preview links field.
+  reviewFieldPreviewLinks
+  # Whether to show the review repository field.
+  reviewFieldRepository
+  # Whether to show the team creation date field.
+  teamFieldDateCreated
+  # Whether to show the team cycle field.
+  teamFieldCycle
+  # Whether to show the team identifier field.
+  teamFieldIdentifier
+  # Whether to show the team members field.
+  teamFieldMembers
+  # Whether to show the team membership field.
+  teamFieldMembership
+  # Whether to show the team owner field.
+  teamFieldOwner
+  # Whether to show the team projects field.
+  teamFieldProjects
+  # Whether to show the team updated date field.
+  teamFieldDateUpdated
+  # Whether to show the time in current status field.
+  fieldTimeInCurrentStatus
+  # Whether to show triage issues.
+  showTriageIssues
+  # Whether to show unread items first.
+  showUnreadItemsFirst
+  # Whether to show week numbers in timeline chronology bar.
+  timelineChronologyShowWeekNumbers
 }
 
 fragment WebhookConnection on WebhookConnection {
@@ -9925,26 +10316,6 @@ query applicationInfo(
 ) {
   applicationInfo(clientId: $clientId) {
     ...Application
-  }
-}
-# Asks web form settings by ID.
-query asksWebSetting(
-  # The identifier of the Asks web settings.
-  $id: String!
-) {
-  asksWebSetting(id: $id) {
-    ...AsksWebSettings
-  }
-}
-# The identity provider for SAML authentication on this Asks web form.
-query asksWebSetting_identityProvider(
-  # The identifier of the Asks web settings.
-  $id: String!
-) {
-  asksWebSetting(id: $id) {
-    identityProvider {
-      ...IdentityProvider
-    }
   }
 }
 # One specific issue attachment.
@@ -10325,6 +10696,17 @@ query attachmentIssue_relations(
       orderBy: $orderBy
     ) {
       ...IssueRelationConnection
+    }
+  }
+}
+# Shared access metadata for this issue.
+query attachmentIssue_sharedAccess(
+  # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
+  $id: String!
+) {
+  attachmentIssue(id: $id) {
+    sharedAccess {
+      ...IssueSharedAccess
     }
   }
 }
@@ -12177,6 +12559,14 @@ query issue_relations(
     }
   }
 }
+# Shared access metadata for this issue.
+query issue_sharedAccess($id: String!) {
+  issue(id: $id) {
+    sharedAccess {
+      ...IssueSharedAccess
+    }
+  }
+}
 # The issue's workflow states over time.
 query issue_stateHistory(
   $id: String!
@@ -12876,6 +13266,17 @@ query issueVcsBranchSearch_relations(
       orderBy: $orderBy
     ) {
       ...IssueRelationConnection
+    }
+  }
+}
+# Shared access metadata for this issue.
+query issueVcsBranchSearch_sharedAccess(
+  # The VCS branch name to search for.
+  $branchName: String!
+) {
+  issueVcsBranchSearch(branchName: $branchName) {
+    sharedAccess {
+      ...IssueSharedAccess
     }
   }
 }
@@ -15976,30 +16377,6 @@ mutation airbyteIntegrationConnect(
     ...IntegrationPayload
   }
 }
-# Creates a new Asks web form settings.
-mutation createAsksWebSettings(
-  # Optional email intake address settings.
-  $emailIntakeAddress: AsksWebSettingsEmailIntakeAddressInput
-  # The Asks web settings object to create.
-  $input: AsksWebSettingsCreateInput!
-) {
-  asksWebSettingsCreate(emailIntakeAddress: $emailIntakeAddress, input: $input) {
-    ...AsksWebSettingsPayload
-  }
-}
-# Updates Asks web form settings.
-mutation updateAsksWebSettings(
-  # Optional email intake address settings.
-  $emailIntakeAddress: AsksWebSettingsEmailIntakeAddressInput
-  # The identifier of the Asks web settings to update.
-  $id: String!
-  # The fields to update.
-  $input: AsksWebSettingsUpdateInput!
-) {
-  asksWebSettingsUpdate(emailIntakeAddress: $emailIntakeAddress, id: $id, input: $input) {
-    ...AsksWebSettingsPayload
-  }
-}
 # Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
 mutation createAttachment(
   # The attachment object to create.
@@ -18823,6 +19200,15 @@ mutation timeScheduleUpsertExternal(
 ) {
   timeScheduleUpsertExternal(externalId: $externalId, input: $input) {
     ...TimeSchedulePayload
+  }
+}
+# Track an anonymous analytics event.
+mutation trackAnonymousEvent(
+  # Event tracking details.
+  $input: EventTrackingInput!
+) {
+  trackAnonymousEvent(input: $input) {
+    ...EventTrackingPayload
   }
 }
 # Creates a new triage responsibility.
