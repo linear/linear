@@ -816,7 +816,7 @@ __metadata:
     "@types/node-fetch": "npm:^2.6.4"
     "@types/react": "npm:18.2.15"
     "@types/react-dom": "npm:^18.2.7"
-    multer: "npm:^2.0.2"
+    multer: "npm:^2.1.0"
     next: "npm:^15.5.10"
     node-fetch: "npm:^3.3.2"
     react: "npm:^18.2.0"
@@ -866,36 +866,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimist@npm:^1.2.6":
-  version: 1.2.8
-  resolution: "minimist@npm:1.2.8"
-  checksum: 10c0/19d3fcdca050087b84c2029841a093691a91259a47def2f18222f41e7645a0b7c44ef4b40e88a1e58a40c84d2ef0ee6047c55594d298146d0eb3f6b737c20ce6
-  languageName: node
-  linkType: hard
-
-"mkdirp@npm:^0.5.6":
-  version: 0.5.6
-  resolution: "mkdirp@npm:0.5.6"
-  dependencies:
-    minimist: "npm:^1.2.6"
-  bin:
-    mkdirp: bin/cmd.js
-  checksum: 10c0/e2e2be789218807b58abced04e7b49851d9e46e88a2f9539242cc8a92c9b5c3a0b9bab360bd3014e02a140fc4fbc58e31176c408b493f8a2a6f4986bd7527b01
-  languageName: node
-  linkType: hard
-
-"multer@npm:^2.0.2":
-  version: 2.0.2
-  resolution: "multer@npm:2.0.2"
+"multer@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "multer@npm:2.1.0"
   dependencies:
     append-field: "npm:^1.0.0"
     busboy: "npm:^1.6.0"
     concat-stream: "npm:^2.0.0"
-    mkdirp: "npm:^0.5.6"
-    object-assign: "npm:^4.1.1"
     type-is: "npm:^1.6.18"
-    xtend: "npm:^4.0.2"
-  checksum: 10c0/d3b99dd0512169bbabf15440e1bbb3ecdc000b761e5a3e4aaca40b5e5e213c6cdcc9b7dffebaa601b7691a84f6876aa87e0173ffcc47139253793cf5657819eb
+  checksum: 10c0/5b374b9a3dbdfe28bbcacbc070cfa8d81a94f74d2fbf979d96802750b7a463ea54c996faee9d25f323a0c67f55e4f82b2b5f034d91e174daf7bcfb7e0f52c165
   languageName: node
   linkType: hard
 
@@ -996,13 +975,6 @@ __metadata:
     fetch-blob: "npm:^3.1.4"
     formdata-polyfill: "npm:^4.0.10"
   checksum: 10c0/f3d5e56190562221398c9f5750198b34cf6113aa304e34ee97c94fd300ec578b25b2c2906edba922050fce983338fde0d5d34fcb0fc3336ade5bd0e429ad7538
-  languageName: node
-  linkType: hard
-
-"object-assign@npm:^4.1.1":
-  version: 4.1.1
-  resolution: "object-assign@npm:4.1.1"
-  checksum: 10c0/1f4df9945120325d041ccf7b86f31e8bcc14e73d29171e37a7903050e96b81323784ec59f93f102ec635bcf6fa8034ba3ea0a8c7e69fa202b87ae3b6cec5a414
   languageName: node
   linkType: hard
 
@@ -1300,12 +1272,5 @@ __metadata:
     tr46: "npm:~0.0.3"
     webidl-conversions: "npm:^3.0.0"
   checksum: 10c0/1588bed84d10b72d5eec1d0faa0722ba1962f1821e7539c535558fb5398d223b0c50d8acab950b8c488b4ba69043fd833cc2697056b167d8ad46fac3995a55d5
-  languageName: node
-  linkType: hard
-
-"xtend@npm:^4.0.2":
-  version: 4.0.2
-  resolution: "xtend@npm:4.0.2"
-  checksum: 10c0/366ae4783eec6100f8a02dff02ac907bf29f9a00b82ac0264b4d8b832ead18306797e283cf19de776538babfdcb2101375ec5646b59f08c52128ac4ab812ed0e
   languageName: node
   linkType: hard
