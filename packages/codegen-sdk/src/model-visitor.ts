@@ -150,13 +150,16 @@ export class ModelVisitor {
         /** Identify list fields */
         const listType = reduceListType(node.type);
         if (listType) {
-          if (Object.keys(this._context.scalars).includes(listType)) {
+          if (
+            Object.keys(this._context.scalars).includes(listType) ||
+            this._context.enums.some(e => e.name.value === listType)
+          ) {
             return {
               __typename: SdkModelFieldType.scalarList,
               node,
               name,
               type,
-              listType: this._context.scalars[listType],
+              listType: this._context.scalars[listType] ?? listType,
               nonNull,
             };
           } else {
