@@ -150,10 +150,7 @@ export class ModelVisitor {
         /** Identify list fields */
         const listType = reduceListType(node.type);
         if (listType) {
-          if (
-            Object.keys(this._context.scalars).includes(listType) ||
-            this._context.enums.some(e => e.name.value === listType)
-          ) {
+          if (Object.keys(this._context.scalars).includes(listType) || findEnum(this._context, node)) {
             return {
               __typename: SdkModelFieldType.scalarList,
               node,
