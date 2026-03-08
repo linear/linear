@@ -50,11 +50,6 @@ interface PlaneRelation {
   direction: string;
 }
 
-/**
- * Import issues from a Plane CSV export.
- *
- * @param filePath  path to csv file
- */
 export class PlaneCsvImporter implements Importer {
   public constructor(filePath: string) {
     this.filePath = filePath;
@@ -78,7 +73,6 @@ export class PlaneCsvImporter implements Importer {
       statuses: {},
     };
 
-    // Dynamic status extraction from data
     const uniqueStates = new Set(data.map(row => row["State Name"]).filter(Boolean));
     for (const state of uniqueStates) {
       importData.statuses![state] = {
@@ -87,7 +81,6 @@ export class PlaneCsvImporter implements Importer {
       };
     }
 
-    // Extract all unique users from "Created By Name", "Assignees", and comment authors
     const allUsers = new Set<string>();
     for (const row of data) {
       if (row["Created By Name"]) {
@@ -115,7 +108,6 @@ export class PlaneCsvImporter implements Importer {
         continue;
       }
 
-      // Skip draft issues
       if (row["Is Draft"]?.toLowerCase() === "true") {
         continue;
       }
@@ -123,24 +115,19 @@ export class PlaneCsvImporter implements Importer {
       const priority = mapPriority(row.Priority);
       const status = row["State Name"] || "Backlog";
 
-      // Parse dates
       const createdAt = parseDate(row["Created At"]);
       const completedAt = parseDate(row["Completed At"]);
       const startedAt = parseDate(row["Start Date"]);
       const dueDate = parseDate(row["Target Date"]);
       const archivedAt = parseDate(row["Archived At"]);
 
-      // Parse labels from JSON array
       const labelNames = parseJsonArray(row.Labels);
 
-      // Get first assignee (Linear supports single assignee)
       const assignees = parseJsonArray(row.Assignees);
       const assigneeId = assignees.length > 0 ? assignees[0] : undefined;
 
-      // Parse estimate
       const estimate = safeParseInt(row.Estimate);
 
-      // Parse comments
       const comments: Comment[] = parseJsonArray<PlaneComment>(row.Comments)
         .filter(c => c.comment)
         .map(c => ({
@@ -149,7 +136,6 @@ export class PlaneCsvImporter implements Importer {
           createdAt: parseDate(c.created_at),
         }));
 
-      // Build description from metadata fields not directly mappable to Linear
       const description = buildDescription(row);
 
       importData.issues.push({
@@ -168,7 +154,6 @@ export class PlaneCsvImporter implements Importer {
         archived: !!archivedAt,
       });
 
-      // Add labels to the labels map
       for (const labelName of labelNames) {
         if (!importData.labels[labelName]) {
           importData.labels[labelName] = {
@@ -181,15 +166,9 @@ export class PlaneCsvImporter implements Importer {
     return importData;
   };
 
-  // -- Private interface
-
   private filePath: string;
 }
 
-/**
- * Safely parse a JSON-encoded array from a CSV cell.
- * Plane's CSVFormatter encodes lists with json.dumps().
- */
 const parseJsonArray = <T = string>(value: string): T[] => {
   if (!value || value.trim() === "") return [];
   try {
@@ -200,9 +179,6 @@ const parseJsonArray = <T = string>(value: string): T[] => {
   }
 };
 
-/**
- * Build a description from Plane metadata fields that have no direct Linear equivalent.
- */
 const buildDescription = (row: PlaneIssueType): string | undefined => {
   const parts: string[] = [];
 
@@ -214,7 +190,6 @@ const buildDescription = (row: PlaneIssueType): string | undefined => {
     parts.push(`**Parent:** ${row.Parent}`);
   }
 
-  // Preserve additional assignees beyond the first (Linear only supports single assignee)
   const assignees = parseJsonArray(row.Assignees);
   if (assignees.length > 1) {
     parts.push(`**Additional assignees:** ${assignees.slice(1).join(", ")}`);
@@ -243,9 +218,6 @@ const buildDescription = (row: PlaneIssueType): string | undefined => {
   return parts.length > 0 ? parts.join("\n\n") : undefined;
 };
 
-/**
- * Map Plane state name to Linear issue status type.
- */
 const mapStateToIssueStatus = (stateName: string): IssueStatus => {
   const lower = stateName.toLowerCase();
   if (lower === "backlog") return "backlog";
@@ -255,10 +227,6 @@ const mapStateToIssueStatus = (stateName: string): IssueStatus => {
   return "unstarted";
 };
 
-/**
- * Map Plane priority to Linear priority.
- * Linear: 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low
- */
 const mapPriority = (input: string): IssuePriority => {
   const priorityMap: { [k: string]: IssuePriority } = {
     urgent: 1,
@@ -270,9 +238,6 @@ const mapPriority = (input: string): IssuePriority => {
   return priorityMap[input?.toLowerCase()] || 0;
 };
 
-/**
- * Parse a date string. Plane exports ISO 8601 dates from Django REST Framework.
- */
 const parseDate = (dateStr: string): Date | undefined => {
   if (!dateStr || dateStr.trim() === "") {
     return undefined;
