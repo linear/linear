@@ -6,6 +6,9 @@ hooks:
     - prettier --write
 config:
   dedupeFragments: true
+  skipDocumentsValidation:
+    ignoreRules:
+      - OverlappingFieldsCanBeMerged
   skipComments:
     - "[Internal]"
     - "[INTERNAL]"

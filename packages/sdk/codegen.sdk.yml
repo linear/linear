@@ -7,6 +7,12 @@ hooks:
 config:
   documentFile: ./_generated_documents
   dedupeFragments: true
+  # graphql-js v15's OverlappingFieldsCanBeMerged rule incorrectly flags field type conflicts between
+  # distinct concrete types in a union (e.g. differing nullability on `args` subfields across
+  # AiConversation*ToolCall types). These can never overlap at runtime. Fixed in graphql-js v16+.
+  skipDocumentsValidation:
+    ignoreRules:
+      - OverlappingFieldsCanBeMerged
   skipComments:
     - "[Internal]"
     - "[INTERNAL]"
