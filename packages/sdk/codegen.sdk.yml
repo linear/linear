@@ -7,6 +7,13 @@ hooks:
 config:
   documentFile: ./_generated_documents
   dedupeFragments: true
+  # Skip OverlappingFieldsCanBeMerged validation: union types like AiConversationToolCall
+  # have members with shared field names (e.g. args.type) that differ in nullability across
+  # concrete types. graphql-js flags these as conflicts even though they're on mutually
+  # exclusive types and can never overlap at runtime.
+  skipDocumentsValidation:
+    ignoreRules:
+      - OverlappingFieldsCanBeMergedRule
   skipComments:
     - "[Internal]"
     - "[INTERNAL]"
