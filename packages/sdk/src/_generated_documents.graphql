@@ -33,6 +33,39 @@ fragment GitAutomationTargetBranch on GitAutomationTargetBranch {
   isRegex
 }
 
+# A base part in an AI conversation.
+fragment AiConversationBasePart on AiConversationBasePart {
+  __typename
+  # The ID of the part.
+  id
+  # The metadata of the part.
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  # The type of the part.
+  type
+
+  ... on AiConversationPromptPart {
+    ...AiConversationPromptPart
+  }
+
+  ... on AiConversationReasoningPart {
+    ...AiConversationReasoningPart
+  }
+
+  ... on AiConversationTextPart {
+    ...AiConversationTextPart
+  }
+
+  ... on AiConversationToolCallPart {
+    ...AiConversationToolCallPart
+  }
+
+  ... on AiConversationWidgetPart {
+    ...AiConversationWidgetPart
+  }
+}
+
 # A basic entity.
 fragment Entity on Entity {
   __typename
@@ -1808,6 +1841,27 @@ fragment Project on Project {
   state
 }
 
+# A prompt part in an AI conversation.
+fragment AiConversationPromptPart on AiConversationPromptPart {
+  __typename
+  # The ID of the part.
+  id
+  # The Markdown body of the prompt part.
+  body
+  # The data of the prompt part.
+  bodyData
+  # The metadata of the part.
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  # The type of the part.
+  type
+  # The user who created the prompt part.
+  user {
+    id
+  }
+}
+
 # A pull request related notification.
 fragment PullRequestNotification on PullRequestNotification {
   __typename
@@ -1893,6 +1947,25 @@ fragment Reaction on Reaction {
   user {
     id
   }
+}
+
+# A reasoning part in an AI conversation.
+fragment AiConversationReasoningPart on AiConversationReasoningPart {
+  __typename
+  # The ID of the part.
+  id
+  # The Markdown body of the reasoning part.
+  body
+  # The data of the reasoning part.
+  bodyData
+  # The metadata of the part.
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  # The title of the reasoning part.
+  title
+  # The type of the part.
+  type
 }
 
 # A record of changes to an issue.
@@ -2372,7 +2445,7 @@ fragment WorkflowState on WorkflowState {
   archivedAt
   # The time at which the entity was created.
   createdAt
-  # The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled".
+  # The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled", "duplicate".
   type
   # The unique identifier of the entity.
   id
@@ -2475,10 +2548,14 @@ fragment Template on Template {
   templateData
   # Template description.
   description
+  # The color of the template icon.
+  color
   # The date when the template was last applied.
   lastAppliedAt
   # The entity type this template is for.
   type
+  # The icon of the template.
+  icon
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
@@ -2510,6 +2587,23 @@ fragment Template on Template {
   }
 }
 
+# A text part in an AI conversation.
+fragment AiConversationTextPart on AiConversationTextPart {
+  __typename
+  # The ID of the part.
+  id
+  # The Markdown body of the text part.
+  body
+  # The data of the text part.
+  bodyData
+  # The metadata of the part.
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  # The type of the part.
+  type
+}
+
 # A time schedule.
 fragment TimeSchedule on TimeSchedule {
   __typename
@@ -2536,6 +2630,82 @@ fragment TimeSchedule on TimeSchedule {
   createdAt
   # The unique identifier of the entity.
   id
+}
+
+# A tool call part in an AI conversation.
+fragment AiConversationToolCallPart on AiConversationToolCallPart {
+  __typename
+  # The ID of the part.
+  id
+  # The metadata of the part.
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  # The tool call part.
+  toolCall {
+    ... on AiConversationCodeIntelligenceToolCall {
+      ...AiConversationCodeIntelligenceToolCall
+    }
+    ... on AiConversationCreateEntityToolCall {
+      ...AiConversationCreateEntityToolCall
+    }
+    ... on AiConversationDeleteEntityToolCall {
+      ...AiConversationDeleteEntityToolCall
+    }
+    ... on AiConversationGetMicrosoftTeamsConversationHistoryToolCall {
+      ...AiConversationGetMicrosoftTeamsConversationHistoryToolCall
+    }
+    ... on AiConversationGetPullRequestDiffToolCall {
+      ...AiConversationGetPullRequestDiffToolCall
+    }
+    ... on AiConversationGetPullRequestFileToolCall {
+      ...AiConversationGetPullRequestFileToolCall
+    }
+    ... on AiConversationGetSlackConversationHistoryToolCall {
+      ...AiConversationGetSlackConversationHistoryToolCall
+    }
+    ... on AiConversationInvokeMcpToolToolCall {
+      ...AiConversationInvokeMcpToolToolCall
+    }
+    ... on AiConversationQueryActivityToolCall {
+      ...AiConversationQueryActivityToolCall
+    }
+    ... on AiConversationQueryUpdatesToolCall {
+      ...AiConversationQueryUpdatesToolCall
+    }
+    ... on AiConversationQueryViewToolCall {
+      ...AiConversationQueryViewToolCall
+    }
+    ... on AiConversationResearchToolCall {
+      ...AiConversationResearchToolCall
+    }
+    ... on AiConversationRetrieveEntitiesToolCall {
+      ...AiConversationRetrieveEntitiesToolCall
+    }
+    ... on AiConversationSearchDocumentationToolCall {
+      ...AiConversationSearchDocumentationToolCall
+    }
+    ... on AiConversationSearchEntitiesToolCall {
+      ...AiConversationSearchEntitiesToolCall
+    }
+    ... on AiConversationSuggestValuesToolCall {
+      ...AiConversationSuggestValuesToolCall
+    }
+    ... on AiConversationTranscribeMediaToolCall {
+      ...AiConversationTranscribeMediaToolCall
+    }
+    ... on AiConversationTranscribeVideoToolCall {
+      ...AiConversationTranscribeVideoToolCall
+    }
+    ... on AiConversationUpdateEntityToolCall {
+      ...AiConversationUpdateEntityToolCall
+    }
+    ... on AiConversationWebSearchToolCall {
+      ...AiConversationWebSearchToolCall
+    }
+  }
+  # The type of the part.
+  type
 }
 
 # A trigger that updates the issue status according to Git automations.
@@ -2979,6 +3149,28 @@ fragment WelcomeMessageNotification on WelcomeMessageNotification {
   }
 }
 
+# A widget part in an AI conversation.
+fragment AiConversationWidgetPart on AiConversationWidgetPart {
+  __typename
+  # The ID of the part.
+  id
+  # The metadata of the part.
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  # The type of the part.
+  type
+  # The widget.
+  widget {
+    ... on AiConversationEntityCardWidget {
+      ...AiConversationEntityCardWidget
+    }
+    ... on AiConversationEntityListWidget {
+      ...AiConversationEntityListWidget
+    }
+  }
+}
+
 # AI prompt rules for a team.
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -3134,6 +3326,8 @@ fragment EmailIntakeAddress on EmailIntakeAddress {
   useUserNamesInReplies
   # Whether the email address is enabled.
   enabled
+  # Whether to reopen completed or canceled issues when a substantive email reply is received.
+  reopenOnReply
 }
 
 # An error that occurred during triage rule execution.
@@ -4074,6 +4268,8 @@ fragment AuthOrganization on AuthOrganization {
   __typename
   # Allowed authentication providers, empty array means all are allowed
   allowedAuthServices
+  # An approximate count of users, updated once per day.
+  approximateUserCount
   # Previously used URL keys for the organization (last 3 are kept and redirected).
   previousUrlKeys
   # The email domain or URL key for the organization.
@@ -5158,6 +5354,17 @@ fragment ProjectLabel on ProjectLabel {
   isGroup
 }
 
+# Metadata about a part in an AI conversation.
+fragment AiConversationPartMetadata on AiConversationPartMetadata {
+  __typename
+  # AI feedback state for this part.
+  feedback
+  # The eval log ID of the part.
+  evalLogId
+  # The turn ID of the part.
+  turnId
+}
+
 # Metadata about a triage rule that made changes to an issue.
 fragment IssueHistoryTriageRuleMetadata on IssueHistoryTriageRuleMetadata {
   __typename
@@ -5167,6 +5374,15 @@ fragment IssueHistoryTriageRuleMetadata on IssueHistoryTriageRuleMetadata {
   }
   # The triage rule that triggered the issue update.
   updatedByTriageRule {
+    ...WorkflowDefinition
+  }
+}
+
+# Metadata about a workflow that made changes to an issue.
+fragment IssueHistoryWorkflowMetadata on IssueHistoryWorkflowMetadata {
+  __typename
+  # The workflow definition that triggered the issue update.
+  workflowDefinition {
     ...WorkflowDefinition
   }
 }
@@ -6201,6 +6417,10 @@ fragment InitiativeWebhookPayload on InitiativeWebhookPayload {
   name
   # The parent initiative associated with the initiative.
   parentInitiative {
+    ...InitiativeChildWebhookPayload
+  }
+  # The parent initiatives associated with the initiative.
+  parentInitiatives {
     ...InitiativeChildWebhookPayload
   }
   # The projects associated with the initiative.
@@ -7397,6 +7617,673 @@ fragment AgentSessionToPullRequestConnection on AgentSessionToPullRequestConnect
   }
 }
 
+fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+
+  ... on AiConversationCodeIntelligenceToolCall {
+    ...AiConversationCodeIntelligenceToolCall
+  }
+
+  ... on AiConversationCreateEntityToolCall {
+    ...AiConversationCreateEntityToolCall
+  }
+
+  ... on AiConversationDeleteEntityToolCall {
+    ...AiConversationDeleteEntityToolCall
+  }
+
+  ... on AiConversationGetMicrosoftTeamsConversationHistoryToolCall {
+    ...AiConversationGetMicrosoftTeamsConversationHistoryToolCall
+  }
+
+  ... on AiConversationGetPullRequestDiffToolCall {
+    ...AiConversationGetPullRequestDiffToolCall
+  }
+
+  ... on AiConversationGetPullRequestFileToolCall {
+    ...AiConversationGetPullRequestFileToolCall
+  }
+
+  ... on AiConversationGetSlackConversationHistoryToolCall {
+    ...AiConversationGetSlackConversationHistoryToolCall
+  }
+
+  ... on AiConversationInvokeMcpToolToolCall {
+    ...AiConversationInvokeMcpToolToolCall
+  }
+
+  ... on AiConversationQueryActivityToolCall {
+    ...AiConversationQueryActivityToolCall
+  }
+
+  ... on AiConversationQueryUpdatesToolCall {
+    ...AiConversationQueryUpdatesToolCall
+  }
+
+  ... on AiConversationQueryViewToolCall {
+    ...AiConversationQueryViewToolCall
+  }
+
+  ... on AiConversationResearchToolCall {
+    ...AiConversationResearchToolCall
+  }
+
+  ... on AiConversationRetrieveEntitiesToolCall {
+    ...AiConversationRetrieveEntitiesToolCall
+  }
+
+  ... on AiConversationSearchDocumentationToolCall {
+    ...AiConversationSearchDocumentationToolCall
+  }
+
+  ... on AiConversationSearchEntitiesToolCall {
+    ...AiConversationSearchEntitiesToolCall
+  }
+
+  ... on AiConversationSuggestValuesToolCall {
+    ...AiConversationSuggestValuesToolCall
+  }
+
+  ... on AiConversationTranscribeMediaToolCall {
+    ...AiConversationTranscribeMediaToolCall
+  }
+
+  ... on AiConversationTranscribeVideoToolCall {
+    ...AiConversationTranscribeVideoToolCall
+  }
+
+  ... on AiConversationUpdateEntityToolCall {
+    ...AiConversationUpdateEntityToolCall
+  }
+
+  ... on AiConversationWebSearchToolCall {
+    ...AiConversationWebSearchToolCall
+  }
+}
+
+fragment AiConversationBaseWidget on AiConversationBaseWidget {
+  __typename
+  # Display information for the widget, including ProseMirror and Markdown representations.
+  displayInfo {
+    ...AiConversationWidgetDisplayInfo
+  }
+  # The arguments of the widget.
+  rawArgs
+  # The name of the widget.
+  name
+
+  ... on AiConversationEntityCardWidget {
+    ...AiConversationEntityCardWidget
+  }
+
+  ... on AiConversationEntityListWidget {
+    ...AiConversationEntityListWidget
+  }
+}
+
+fragment AiConversationCodeIntelligenceToolCall on AiConversationCodeIntelligenceToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationCodeIntelligenceToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationCodeIntelligenceToolCallArgs on AiConversationCodeIntelligenceToolCallArgs {
+  __typename
+  question
+}
+
+fragment AiConversationCreateEntityToolCall on AiConversationCreateEntityToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationCreateEntityToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationCreateEntityToolCallArgs on AiConversationCreateEntityToolCallArgs {
+  __typename
+  count
+  type
+}
+
+fragment AiConversationDeleteEntityToolCall on AiConversationDeleteEntityToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationDeleteEntityToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationDeleteEntityToolCallArgs on AiConversationDeleteEntityToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+
+fragment AiConversationEntityCardWidget on AiConversationEntityCardWidget {
+  __typename
+  # Display information for the widget, including ProseMirror and Markdown representations.
+  displayInfo {
+    ...AiConversationWidgetDisplayInfo
+  }
+  # The arguments of the widget.
+  rawArgs
+  # The arguments to the widget.
+  args {
+    ...AiConversationEntityCardWidgetArgs
+  }
+  # The name of the widget.
+  name
+}
+
+fragment AiConversationEntityCardWidgetArgs on AiConversationEntityCardWidgetArgs {
+  __typename
+  # @deprecated Optional note to display about the entity
+  note
+  # The UUID of the entity to display
+  id
+  # The action performed on the entity (leave empty if just found)
+  action
+}
+
+fragment AiConversationEntityListWidget on AiConversationEntityListWidget {
+  __typename
+  # Display information for the widget, including ProseMirror and Markdown representations.
+  displayInfo {
+    ...AiConversationWidgetDisplayInfo
+  }
+  # The arguments of the widget.
+  rawArgs
+  # The arguments to the widget.
+  args {
+    ...AiConversationEntityListWidgetArgs
+  }
+  # The name of the widget.
+  name
+}
+
+fragment AiConversationEntityListWidgetArgs on AiConversationEntityListWidgetArgs {
+  __typename
+  # The action performed on the entities (leave empty if just found)
+  action
+  # Total number of entities in the list
+  count
+  entities {
+    ...AiConversationEntityListWidgetArgsEntities
+  }
+}
+
+fragment AiConversationEntityListWidgetArgsEntities on AiConversationEntityListWidgetArgsEntities {
+  __typename
+  # @deprecated Optional note to display about the entity
+  note
+  # Entity UUID
+  id
+}
+
+fragment AiConversationGetMicrosoftTeamsConversationHistoryToolCall on AiConversationGetMicrosoftTeamsConversationHistoryToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationGetPullRequestDiffToolCall on AiConversationGetPullRequestDiffToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationGetPullRequestDiffToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationGetPullRequestDiffToolCallArgs on AiConversationGetPullRequestDiffToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+
+fragment AiConversationGetPullRequestFileToolCall on AiConversationGetPullRequestFileToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationGetPullRequestFileToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationGetPullRequestFileToolCallArgs on AiConversationGetPullRequestFileToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  path
+}
+
+fragment AiConversationGetSlackConversationHistoryToolCall on AiConversationGetSlackConversationHistoryToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationInvokeMcpToolToolCall on AiConversationInvokeMcpToolToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationInvokeMcpToolToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationInvokeMcpToolToolCallArgs on AiConversationInvokeMcpToolToolCallArgs {
+  __typename
+  server {
+    ...AiConversationInvokeMcpToolToolCallArgsServer
+  }
+  tool {
+    ...AiConversationInvokeMcpToolToolCallArgsTool
+  }
+}
+
+fragment AiConversationInvokeMcpToolToolCallArgsServer on AiConversationInvokeMcpToolToolCallArgsServer {
+  __typename
+  integrationId
+  name
+  title
+}
+
+fragment AiConversationInvokeMcpToolToolCallArgsTool on AiConversationInvokeMcpToolToolCallArgsTool {
+  __typename
+  name
+  title
+}
+
+fragment AiConversationQueryActivityToolCall on AiConversationQueryActivityToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationQueryActivityToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationQueryActivityToolCallArgs on AiConversationQueryActivityToolCallArgs {
+  __typename
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+
+fragment AiConversationQueryUpdatesToolCall on AiConversationQueryUpdatesToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationQueryUpdatesToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationQueryUpdatesToolCallArgs on AiConversationQueryUpdatesToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  updateType
+}
+
+fragment AiConversationQueryViewToolCall on AiConversationQueryViewToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationQueryViewToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationQueryViewToolCallArgs on AiConversationQueryViewToolCallArgs {
+  __typename
+  filter
+  mode
+  view {
+    ...AiConversationQueryViewToolCallArgsView
+  }
+}
+
+fragment AiConversationQueryViewToolCallArgsView on AiConversationQueryViewToolCallArgsView {
+  __typename
+  group {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  predefinedView
+  type
+}
+
+fragment AiConversationResearchToolCall on AiConversationResearchToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationResearchToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  # The result of the tool call.
+  result {
+    ...AiConversationResearchToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationResearchToolCallArgs on AiConversationResearchToolCallArgs {
+  __typename
+  context
+  query
+  subjects {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+
+fragment AiConversationResearchToolCallResult on AiConversationResearchToolCallResult {
+  __typename
+  progressId
+}
+
+fragment AiConversationRetrieveEntitiesToolCall on AiConversationRetrieveEntitiesToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationRetrieveEntitiesToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationRetrieveEntitiesToolCallArgs on AiConversationRetrieveEntitiesToolCallArgs {
+  __typename
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+
+fragment AiConversationSearchDocumentationToolCall on AiConversationSearchDocumentationToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationSearchEntitiesToolCall on AiConversationSearchEntitiesToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationSearchEntitiesToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  # The result of the tool call.
+  result {
+    ...AiConversationSearchEntitiesToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationSearchEntitiesToolCallArgs on AiConversationSearchEntitiesToolCallArgs {
+  __typename
+  queries
+  type
+}
+
+fragment AiConversationSearchEntitiesToolCallResult on AiConversationSearchEntitiesToolCallResult {
+  __typename
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+
+fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}
+
+fragment AiConversationSuggestValuesToolCall on AiConversationSuggestValuesToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationSuggestValuesToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationSuggestValuesToolCallArgs on AiConversationSuggestValuesToolCallArgs {
+  __typename
+  field
+  query
+}
+
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}
+
+fragment AiConversationTranscribeMediaToolCall on AiConversationTranscribeMediaToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationTranscribeVideoToolCall on AiConversationTranscribeVideoToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationUpdateEntityToolCall on AiConversationUpdateEntityToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationUpdateEntityToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationUpdateEntityToolCallArgs on AiConversationUpdateEntityToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+
+fragment AiConversationWebSearchToolCall on AiConversationWebSearchToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationWebSearchToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationWebSearchToolCallArgs on AiConversationWebSearchToolCallArgs {
+  __typename
+  query
+  url
+}
+
+fragment AiConversationWidgetDisplayInfo on AiConversationWidgetDisplayInfo {
+  __typename
+  # The Markdown representation of the widget content.
+  body
+  # The ProseMirror data representation of the widget content.
+  bodyData
+}
+
 fragment AsksChannelConnectPayload on AsksChannelConnectPayload {
   __typename
   # The identifier of the last sync operation.
@@ -7723,6 +8610,8 @@ fragment DocumentContentHistoryPayload on DocumentContentHistoryPayload {
 
 fragment DocumentContentHistoryType on DocumentContentHistoryType {
   __typename
+  # Metadata associated with the history item.
+  metadata
   # The ID of the author of the change.
   actorIds
   # The UUID of the document content history entry.
@@ -8581,6 +9470,8 @@ fragment IssueSearchResult on IssueSearchResult {
 
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  # Issue update fields the viewer cannot modify due to shared-only access.
+  disallowedIssueFields
   # The number of users this issue is shared with.
   sharedWithCount
   # Users this issue is shared with.
@@ -9761,6 +10652,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   reviewGrouping
   # The review view ordering.
   reviewViewOrdering
+  # The scheduled pipeline releases view ordering.
+  scheduledPipelineReleasesViewOrdering
   # The search result type filter.
   searchResultType
   # The search view ordering.
@@ -9811,6 +10704,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   embeddedCustomerNeedsShowImportantFirst
   # Whether to show important project customer needs first.
   projectCustomerNeedsShowImportantFirst
+  # Whether to show only snoozed items.
+  showOnlySnoozedItems
   # Whether to show parent issues for sub-issues.
   showParents
   # Whether to show preview links.
@@ -9877,6 +10772,10 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldHealth
   # Whether to show the initiative activity field.
   initiativeFieldActivity
+  # Whether to show the initiative completed date field.
+  initiativeFieldDateCompleted
+  # Whether to show the initiative created date field.
+  initiativeFieldDateCreated
   # Whether to show the initiative description field.
   initiativeFieldDescription
   # Whether to show the initiative health field.
@@ -9885,10 +10784,14 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldOwner
   # Whether to show the initiative projects field.
   initiativeFieldProjects
+  # Whether to show the initiative start date field.
+  initiativeFieldStartDate
   # Whether to show the initiative target date field.
   initiativeFieldTargetDate
   # Whether to show the initiative teams field.
   initiativeFieldTeams
+  # Whether to show the initiative updated date field.
+  initiativeFieldDateUpdated
   # Whether to show the issue archived date field.
   fieldDateArchived
   # Whether to show the issue assignee field.
@@ -9917,6 +10820,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldDateUpdated
   # Whether to show the labels field.
   fieldLabels
+  # Whether to show the latest release field for release pipelines.
+  releasePipelineFieldLatestRelease
   # Whether to show the link count field.
   fieldLinkCount
   # Whether to show the member joined date field.
@@ -10007,8 +10912,12 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldDateUpdated
   # Whether to show the pull requests field.
   fieldPullRequests
+  # Whether to show the release date field for scheduled pipeline releases.
+  scheduledPipelineReleaseFieldReleaseDate
   # Whether to show the release field.
   fieldRelease
+  # Whether to show the releases field for release pipelines.
+  releasePipelineFieldReleases
   # Whether to show the review avatar field.
   reviewFieldAvatar
   # Whether to show the review checks field.
@@ -10019,6 +10928,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   reviewFieldPreviewLinks
   # Whether to show the review repository field.
   reviewFieldRepository
+  # Whether to show the stage field for scheduled pipeline releases.
+  scheduledPipelineReleaseFieldStage
   # Whether to show the team creation date field.
   teamFieldDateCreated
   # Whether to show the team cycle field.
@@ -10037,6 +10948,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   teamFieldDateUpdated
   # Whether to show the time in current status field.
   fieldTimeInCurrentStatus
+  # Whether to show the type field for release pipelines.
+  releasePipelineFieldType
   # Whether to show triage issues.
   showTriageIssues
   # Whether to show unread items first.
@@ -12651,11 +13564,13 @@ query issueFigmaFileKeySearch(
 }
 # Suggests filters for an issue view based on a text prompt.
 query issueFilterSuggestion(
-  # The ID of the project if filtering a project view
+  # The ID of the project if filtering a project view.
   $projectId: String
   $prompt: String!
+  # [Internal] The ID of the team if filtering a team view.
+  $teamId: String
 ) {
-  issueFilterSuggestion(projectId: $projectId, prompt: $prompt) {
+  issueFilterSuggestion(projectId: $projectId, prompt: $prompt, teamId: $teamId) {
     ...IssueFilterSuggestionPayload
   }
 }
@@ -14195,8 +15110,12 @@ query project_teams(
   }
 }
 # Suggests filters for a project view based on a text prompt.
-query projectFilterSuggestion($prompt: String!) {
-  projectFilterSuggestion(prompt: $prompt) {
+query projectFilterSuggestion(
+  $prompt: String!
+  # [Internal] The ID of the team if filtering a team view.
+  $teamId: String
+) {
+  projectFilterSuggestion(prompt: $prompt, teamId: $teamId) {
     ...ProjectFilterSuggestionPayload
   }
 }
@@ -16377,7 +17296,9 @@ mutation airbyteIntegrationConnect(
     ...IntegrationPayload
   }
 }
-# Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
+# Creates a new attachment, or updates existing if the same `url` and `issueId` is used. To create an
+# integration-aware attachment, use the integration-specific mutations such as
+# `attachmentLinkZendesk`, `attachmentLinkSlack`, or `attachmentLinkURL` instead.
 mutation createAttachment(
   # The attachment object to create.
   $input: AttachmentCreateInput!
@@ -16395,7 +17316,8 @@ mutation deleteAttachment(
     ...DeletePayload
   }
 }
-# Link an existing Discord message to an issue.
+# Link an existing Discord message to an issue. This creates a rich attachment using the workspace's
+# Discord integration.
 mutation attachmentLinkDiscord(
   # The Discord channel ID for the message to link.
   $channelId: String!
@@ -16427,7 +17349,8 @@ mutation attachmentLinkDiscord(
     ...AttachmentPayload
   }
 }
-# Link an existing Front conversation to an issue.
+# Link an existing Front conversation to an issue. This creates a rich attachment using the
+# workspace's Front integration, enabling features like automated conversation updates.
 mutation attachmentLinkFront(
   # The Front conversation ID to link.
   $conversationId: String!
@@ -16453,7 +17376,8 @@ mutation attachmentLinkFront(
     ...FrontAttachmentPayload
   }
 }
-# Link a GitHub issue to a Linear issue.
+# Link a GitHub issue to a Linear issue. This creates a rich attachment using the workspace's GitHub
+# integration, enabling features like automated status syncing.
 mutation attachmentLinkGitHubIssue(
   # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
@@ -16479,7 +17403,8 @@ mutation attachmentLinkGitHubIssue(
     ...AttachmentPayload
   }
 }
-# Link a GitHub pull request to an issue.
+# Link a GitHub pull request to an issue. This creates a rich attachment using the workspace's GitHub
+# integration, enabling features like automated status syncing.
 mutation attachmentLinkGitHubPR(
   # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
@@ -16508,7 +17433,8 @@ mutation attachmentLinkGitHubPR(
     ...AttachmentPayload
   }
 }
-# Link an existing GitLab MR to an issue.
+# Link an existing GitLab MR to an issue. This creates a rich attachment using the workspace's GitLab
+# integration, enabling features like automated status syncing.
 mutation attachmentLinkGitLabMR(
   # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
@@ -16540,7 +17466,8 @@ mutation attachmentLinkGitLabMR(
     ...AttachmentPayload
   }
 }
-# Link an existing Intercom conversation to an issue.
+# Link an existing Intercom conversation to an issue. This creates a rich attachment using the
+# workspace's Intercom integration, enabling features like automated conversation updates.
 mutation attachmentLinkIntercom(
   # The Intercom conversation ID to link.
   $conversationId: String!
@@ -16569,7 +17496,8 @@ mutation attachmentLinkIntercom(
     ...AttachmentPayload
   }
 }
-# Link an existing Jira issue to an issue.
+# Link an existing Jira issue to an issue. This creates a rich attachment using the workspace's Jira
+# integration, enabling features like automated status syncing.
 mutation attachmentLinkJiraIssue(
   # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
@@ -16598,7 +17526,8 @@ mutation attachmentLinkJiraIssue(
     ...AttachmentPayload
   }
 }
-# Link an existing Salesforce case to an issue.
+# Link an existing Salesforce case to an issue. This creates a rich attachment using the workspace's
+# Salesforce integration.
 mutation attachmentLinkSalesforce(
   # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
@@ -16624,7 +17553,8 @@ mutation attachmentLinkSalesforce(
     ...AttachmentPayload
   }
 }
-# Link an existing Slack message to an issue.
+# Link an existing Slack message to an issue. This creates a rich attachment using the workspace's
+# Slack integration.
 mutation attachmentLinkSlack(
   # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
@@ -16653,7 +17583,9 @@ mutation attachmentLinkSlack(
     ...AttachmentPayload
   }
 }
-# Link any url to an issue.
+# Link any URL to an issue. If the workspace has a matching integration configured and the URL is
+# recognized (e.g., Zendesk, GitHub, Slack), a rich attachment will be created that enables features
+# like automated status updates. Otherwise, a basic attachment is created.
 mutation attachmentLinkURL(
   # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
@@ -16679,7 +17611,9 @@ mutation attachmentLinkURL(
     ...AttachmentPayload
   }
 }
-# Link an existing Zendesk ticket to an issue.
+# Link an existing Zendesk ticket to an issue. This creates a rich attachment using the workspace's
+# Zendesk integration, enabling features like automated ticket reopening when the Linear issue is
+# completed.
 mutation attachmentLinkZendesk(
   # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
@@ -18317,7 +19251,7 @@ mutation issueSubscribe(
 }
 # Unarchives an issue.
 mutation unarchiveIssue(
-  # The identifier of the issue to archive.
+  # The identifier of the issue to unarchive.
   $id: String!
 ) {
   issueUnarchive(id: $id) {
