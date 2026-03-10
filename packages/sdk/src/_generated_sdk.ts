@@ -877,6 +877,1230 @@ export class AgentSessionWebhookPayload {
   public issue?: IssueWithDescriptionChildWebhookPayload | null;
 }
 /**
+ * A base part in an AI conversation.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationBasePartFragment response data
+ */
+export class AiConversationBasePart extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationBasePartFragment) {
+    super(request);
+    this.id = data.id;
+    this.metadata = new AiConversationPartMetadata(request, data.metadata);
+    this.type = data.type;
+  }
+
+  /** The ID of the part. */
+  public id: string;
+  /** The metadata of the part. */
+  public metadata: AiConversationPartMetadata;
+  /** The type of the part. */
+  public type: L.AiConversationPartType;
+}
+/**
+ * AiConversationBaseToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationBaseToolCallFragment response data
+ */
+export class AiConversationBaseToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationBaseToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationBaseWidget model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationBaseWidgetFragment response data
+ */
+export class AiConversationBaseWidget extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationBaseWidgetFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.displayInfo = data.displayInfo ? new AiConversationWidgetDisplayInfo(request, data.displayInfo) : undefined;
+    this.name = data.name;
+  }
+
+  /** The arguments of the widget. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** Display information for the widget, including ProseMirror and Markdown representations. */
+  public displayInfo?: AiConversationWidgetDisplayInfo | null;
+  /** The name of the widget. */
+  public name: L.AiConversationWidgetName;
+}
+/**
+ * AiConversationCodeIntelligenceToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationCodeIntelligenceToolCallFragment response data
+ */
+export class AiConversationCodeIntelligenceToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationCodeIntelligenceToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationCodeIntelligenceToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationCodeIntelligenceToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationCodeIntelligenceToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationCodeIntelligenceToolCallArgsFragment response data
+ */
+export class AiConversationCodeIntelligenceToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationCodeIntelligenceToolCallArgsFragment) {
+    super(request);
+    this.question = data.question;
+  }
+
+  public question: string;
+}
+/**
+ * AiConversationCreateEntityToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationCreateEntityToolCallFragment response data
+ */
+export class AiConversationCreateEntityToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationCreateEntityToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationCreateEntityToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationCreateEntityToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationCreateEntityToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationCreateEntityToolCallArgsFragment response data
+ */
+export class AiConversationCreateEntityToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationCreateEntityToolCallArgsFragment) {
+    super(request);
+    this.count = data.count ?? undefined;
+    this.type = data.type;
+  }
+
+  public count?: number | null;
+  public type: string;
+}
+/**
+ * AiConversationDeleteEntityToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationDeleteEntityToolCallFragment response data
+ */
+export class AiConversationDeleteEntityToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationDeleteEntityToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationDeleteEntityToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationDeleteEntityToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationDeleteEntityToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationDeleteEntityToolCallArgsFragment response data
+ */
+export class AiConversationDeleteEntityToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationDeleteEntityToolCallArgsFragment) {
+    super(request);
+    this.entity = new AiConversationSearchEntitiesToolCallResultEntities(request, data.entity);
+  }
+
+  public entity: AiConversationSearchEntitiesToolCallResultEntities;
+}
+/**
+ * AiConversationEntityCardWidget model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationEntityCardWidgetFragment response data
+ */
+export class AiConversationEntityCardWidget extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationEntityCardWidgetFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.args = data.args ? new AiConversationEntityCardWidgetArgs(request, data.args) : undefined;
+    this.displayInfo = data.displayInfo ? new AiConversationWidgetDisplayInfo(request, data.displayInfo) : undefined;
+    this.name = data.name;
+  }
+
+  /** The arguments of the widget. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The arguments to the widget. */
+  public args?: AiConversationEntityCardWidgetArgs | null;
+  /** Display information for the widget, including ProseMirror and Markdown representations. */
+  public displayInfo?: AiConversationWidgetDisplayInfo | null;
+  /** The name of the widget. */
+  public name: L.AiConversationWidgetName;
+}
+/**
+ * AiConversationEntityCardWidgetArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationEntityCardWidgetArgsFragment response data
+ */
+export class AiConversationEntityCardWidgetArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationEntityCardWidgetArgsFragment) {
+    super(request);
+    this.id = data.id;
+    this.note = data.note ?? undefined;
+    this.action = data.action ?? undefined;
+  }
+
+  /** The UUID of the entity to display */
+  public id: string;
+  /** @deprecated Optional note to display about the entity */
+  public note?: string | null;
+  /** The action performed on the entity (leave empty if just found) */
+  public action?: L.AiConversationEntityCardWidgetArgsAction | null;
+}
+/**
+ * AiConversationEntityListWidget model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationEntityListWidgetFragment response data
+ */
+export class AiConversationEntityListWidget extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationEntityListWidgetFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.args = data.args ? new AiConversationEntityListWidgetArgs(request, data.args) : undefined;
+    this.displayInfo = data.displayInfo ? new AiConversationWidgetDisplayInfo(request, data.displayInfo) : undefined;
+    this.name = data.name;
+  }
+
+  /** The arguments of the widget. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The arguments to the widget. */
+  public args?: AiConversationEntityListWidgetArgs | null;
+  /** Display information for the widget, including ProseMirror and Markdown representations. */
+  public displayInfo?: AiConversationWidgetDisplayInfo | null;
+  /** The name of the widget. */
+  public name: L.AiConversationWidgetName;
+}
+/**
+ * AiConversationEntityListWidgetArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationEntityListWidgetArgsFragment response data
+ */
+export class AiConversationEntityListWidgetArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationEntityListWidgetArgsFragment) {
+    super(request);
+    this.count = data.count ?? undefined;
+    this.entities = data.entities.map(node => new AiConversationEntityListWidgetArgsEntities(request, node));
+    this.action = data.action ?? undefined;
+  }
+
+  /** Total number of entities in the list */
+  public count?: number | null;
+  public entities: AiConversationEntityListWidgetArgsEntities[];
+  /** The action performed on the entities (leave empty if just found) */
+  public action?: L.AiConversationEntityListWidgetArgsAction | null;
+}
+/**
+ * AiConversationEntityListWidgetArgsEntities model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationEntityListWidgetArgsEntitiesFragment response data
+ */
+export class AiConversationEntityListWidgetArgsEntities extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationEntityListWidgetArgsEntitiesFragment) {
+    super(request);
+    this.id = data.id;
+    this.note = data.note ?? undefined;
+  }
+
+  /** Entity UUID */
+  public id: string;
+  /** @deprecated Optional note to display about the entity */
+  public note?: string | null;
+}
+/**
+ * AiConversationGetMicrosoftTeamsConversationHistoryToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationGetMicrosoftTeamsConversationHistoryToolCallFragment response data
+ */
+export class AiConversationGetMicrosoftTeamsConversationHistoryToolCall extends Request {
+  public constructor(
+    request: LinearRequest,
+    data: L.AiConversationGetMicrosoftTeamsConversationHistoryToolCallFragment
+  ) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationGetPullRequestDiffToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationGetPullRequestDiffToolCallFragment response data
+ */
+export class AiConversationGetPullRequestDiffToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationGetPullRequestDiffToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationGetPullRequestDiffToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationGetPullRequestDiffToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationGetPullRequestDiffToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationGetPullRequestDiffToolCallArgsFragment response data
+ */
+export class AiConversationGetPullRequestDiffToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationGetPullRequestDiffToolCallArgsFragment) {
+    super(request);
+    this.entity = new AiConversationSearchEntitiesToolCallResultEntities(request, data.entity);
+  }
+
+  public entity: AiConversationSearchEntitiesToolCallResultEntities;
+}
+/**
+ * AiConversationGetPullRequestFileToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationGetPullRequestFileToolCallFragment response data
+ */
+export class AiConversationGetPullRequestFileToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationGetPullRequestFileToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationGetPullRequestFileToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationGetPullRequestFileToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationGetPullRequestFileToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationGetPullRequestFileToolCallArgsFragment response data
+ */
+export class AiConversationGetPullRequestFileToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationGetPullRequestFileToolCallArgsFragment) {
+    super(request);
+    this.path = data.path;
+    this.entity = new AiConversationSearchEntitiesToolCallResultEntities(request, data.entity);
+  }
+
+  public path: string;
+  public entity: AiConversationSearchEntitiesToolCallResultEntities;
+}
+/**
+ * AiConversationGetSlackConversationHistoryToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationGetSlackConversationHistoryToolCallFragment response data
+ */
+export class AiConversationGetSlackConversationHistoryToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationGetSlackConversationHistoryToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationInvokeMcpToolToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationInvokeMcpToolToolCallFragment response data
+ */
+export class AiConversationInvokeMcpToolToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationInvokeMcpToolToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationInvokeMcpToolToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationInvokeMcpToolToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationInvokeMcpToolToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationInvokeMcpToolToolCallArgsFragment response data
+ */
+export class AiConversationInvokeMcpToolToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationInvokeMcpToolToolCallArgsFragment) {
+    super(request);
+    this.server = new AiConversationInvokeMcpToolToolCallArgsServer(request, data.server);
+    this.tool = new AiConversationInvokeMcpToolToolCallArgsTool(request, data.tool);
+  }
+
+  public server: AiConversationInvokeMcpToolToolCallArgsServer;
+  public tool: AiConversationInvokeMcpToolToolCallArgsTool;
+}
+/**
+ * AiConversationInvokeMcpToolToolCallArgsServer model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationInvokeMcpToolToolCallArgsServerFragment response data
+ */
+export class AiConversationInvokeMcpToolToolCallArgsServer extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationInvokeMcpToolToolCallArgsServerFragment) {
+    super(request);
+    this.integrationId = data.integrationId;
+    this.name = data.name;
+    this.title = data.title ?? undefined;
+  }
+
+  public integrationId: string;
+  public name: string;
+  public title?: string | null;
+}
+/**
+ * AiConversationInvokeMcpToolToolCallArgsTool model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationInvokeMcpToolToolCallArgsToolFragment response data
+ */
+export class AiConversationInvokeMcpToolToolCallArgsTool extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationInvokeMcpToolToolCallArgsToolFragment) {
+    super(request);
+    this.name = data.name;
+    this.title = data.title ?? undefined;
+  }
+
+  public name: string;
+  public title?: string | null;
+}
+/**
+ * Metadata about a part in an AI conversation.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationPartMetadataFragment response data
+ */
+export class AiConversationPartMetadata extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationPartMetadataFragment) {
+    super(request);
+    this.evalLogId = data.evalLogId ?? undefined;
+    this.feedback = data.feedback ?? undefined;
+    this.turnId = data.turnId;
+  }
+
+  /** The eval log ID of the part. */
+  public evalLogId?: string | null;
+  /** AI feedback state for this part. */
+  public feedback?: L.Scalars["JSONObject"] | null;
+  /** The turn ID of the part. */
+  public turnId: string;
+}
+/**
+ * A prompt part in an AI conversation.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationPromptPartFragment response data
+ */
+export class AiConversationPromptPart extends Request {
+  private _user?: L.AiConversationPromptPartFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.AiConversationPromptPartFragment) {
+    super(request);
+    this.body = data.body;
+    this.bodyData = data.bodyData;
+    this.id = data.id;
+    this.metadata = new AiConversationPartMetadata(request, data.metadata);
+    this.type = data.type;
+    this._user = data.user ?? undefined;
+  }
+
+  /** The Markdown body of the prompt part. */
+  public body: string;
+  /** The data of the prompt part. */
+  public bodyData: L.Scalars["JSONObject"];
+  /** The ID of the part. */
+  public id: string;
+  /** The metadata of the part. */
+  public metadata: AiConversationPartMetadata;
+  /** The type of the part. */
+  public type: L.AiConversationPartType;
+  /** The user who created the prompt part. */
+  public get user(): LinearFetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+  /** The ID of user who created the prompt part. */
+  public get userId(): string | undefined {
+    return this._user?.id;
+  }
+}
+/**
+ * AiConversationQueryActivityToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationQueryActivityToolCallFragment response data
+ */
+export class AiConversationQueryActivityToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationQueryActivityToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationQueryActivityToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationQueryActivityToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationQueryActivityToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationQueryActivityToolCallArgsFragment response data
+ */
+export class AiConversationQueryActivityToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationQueryActivityToolCallArgsFragment) {
+    super(request);
+    this.entities = data.entities
+      ? data.entities.map(node => new AiConversationSearchEntitiesToolCallResultEntities(request, node))
+      : undefined;
+  }
+
+  public entities?: AiConversationSearchEntitiesToolCallResultEntities[] | null;
+}
+/**
+ * AiConversationQueryUpdatesToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationQueryUpdatesToolCallFragment response data
+ */
+export class AiConversationQueryUpdatesToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationQueryUpdatesToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationQueryUpdatesToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationQueryUpdatesToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationQueryUpdatesToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationQueryUpdatesToolCallArgsFragment response data
+ */
+export class AiConversationQueryUpdatesToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationQueryUpdatesToolCallArgsFragment) {
+    super(request);
+    this.entity = data.entity
+      ? new AiConversationSearchEntitiesToolCallResultEntities(request, data.entity)
+      : undefined;
+    this.updateType = data.updateType;
+  }
+
+  public entity?: AiConversationSearchEntitiesToolCallResultEntities | null;
+  public updateType: L.AiConversationQueryUpdatesToolCallArgsUpdateType;
+}
+/**
+ * AiConversationQueryViewToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationQueryViewToolCallFragment response data
+ */
+export class AiConversationQueryViewToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationQueryViewToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationQueryViewToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationQueryViewToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationQueryViewToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationQueryViewToolCallArgsFragment response data
+ */
+export class AiConversationQueryViewToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationQueryViewToolCallArgsFragment) {
+    super(request);
+    this.filter = data.filter ?? undefined;
+    this.view = new AiConversationQueryViewToolCallArgsView(request, data.view);
+    this.mode = data.mode;
+  }
+
+  public filter?: string | null;
+  public view: AiConversationQueryViewToolCallArgsView;
+  public mode: L.AiConversationQueryViewToolCallArgsMode;
+}
+/**
+ * AiConversationQueryViewToolCallArgsView model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationQueryViewToolCallArgsViewFragment response data
+ */
+export class AiConversationQueryViewToolCallArgsView extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationQueryViewToolCallArgsViewFragment) {
+    super(request);
+    this.predefinedView = data.predefinedView ?? undefined;
+    this.type = data.type;
+    this.group = data.group ? new AiConversationSearchEntitiesToolCallResultEntities(request, data.group) : undefined;
+  }
+
+  public predefinedView?: string | null;
+  public type: string;
+  public group?: AiConversationSearchEntitiesToolCallResultEntities | null;
+}
+/**
+ * A reasoning part in an AI conversation.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationReasoningPartFragment response data
+ */
+export class AiConversationReasoningPart extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationReasoningPartFragment) {
+    super(request);
+    this.body = data.body;
+    this.bodyData = data.bodyData;
+    this.id = data.id;
+    this.title = data.title ?? undefined;
+    this.metadata = new AiConversationPartMetadata(request, data.metadata);
+    this.type = data.type;
+  }
+
+  /** The Markdown body of the reasoning part. */
+  public body: string;
+  /** The data of the reasoning part. */
+  public bodyData: L.Scalars["JSONObject"];
+  /** The ID of the part. */
+  public id: string;
+  /** The title of the reasoning part. */
+  public title?: string | null;
+  /** The metadata of the part. */
+  public metadata: AiConversationPartMetadata;
+  /** The type of the part. */
+  public type: L.AiConversationPartType;
+}
+/**
+ * AiConversationResearchToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationResearchToolCallFragment response data
+ */
+export class AiConversationResearchToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationResearchToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationResearchToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.result = data.result ? new AiConversationResearchToolCallResult(request, data.result) : undefined;
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationResearchToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The result of the tool call. */
+  public result?: AiConversationResearchToolCallResult | null;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationResearchToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationResearchToolCallArgsFragment response data
+ */
+export class AiConversationResearchToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationResearchToolCallArgsFragment) {
+    super(request);
+    this.context = data.context;
+    this.query = data.query;
+    this.subjects = data.subjects
+      ? data.subjects.map(node => new AiConversationSearchEntitiesToolCallResultEntities(request, node))
+      : undefined;
+  }
+
+  public context: string;
+  public query: string;
+  public subjects?: AiConversationSearchEntitiesToolCallResultEntities[] | null;
+}
+/**
+ * AiConversationResearchToolCallResult model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationResearchToolCallResultFragment response data
+ */
+export class AiConversationResearchToolCallResult extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationResearchToolCallResultFragment) {
+    super(request);
+    this.progressId = data.progressId ?? undefined;
+  }
+
+  public progressId?: string | null;
+}
+/**
+ * AiConversationRetrieveEntitiesToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationRetrieveEntitiesToolCallFragment response data
+ */
+export class AiConversationRetrieveEntitiesToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationRetrieveEntitiesToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationRetrieveEntitiesToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationRetrieveEntitiesToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationRetrieveEntitiesToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationRetrieveEntitiesToolCallArgsFragment response data
+ */
+export class AiConversationRetrieveEntitiesToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationRetrieveEntitiesToolCallArgsFragment) {
+    super(request);
+    this.entities = data.entities.map(node => new AiConversationSearchEntitiesToolCallResultEntities(request, node));
+  }
+
+  public entities: AiConversationSearchEntitiesToolCallResultEntities[];
+}
+/**
+ * AiConversationSearchDocumentationToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSearchDocumentationToolCallFragment response data
+ */
+export class AiConversationSearchDocumentationToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSearchDocumentationToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationSearchEntitiesToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSearchEntitiesToolCallFragment response data
+ */
+export class AiConversationSearchEntitiesToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSearchEntitiesToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationSearchEntitiesToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.result = data.result ? new AiConversationSearchEntitiesToolCallResult(request, data.result) : undefined;
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationSearchEntitiesToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The result of the tool call. */
+  public result?: AiConversationSearchEntitiesToolCallResult | null;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationSearchEntitiesToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSearchEntitiesToolCallArgsFragment response data
+ */
+export class AiConversationSearchEntitiesToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSearchEntitiesToolCallArgsFragment) {
+    super(request);
+    this.queries = data.queries;
+    this.type = data.type ?? undefined;
+  }
+
+  public queries: string[];
+  public type?: string | null;
+}
+/**
+ * AiConversationSearchEntitiesToolCallResult model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSearchEntitiesToolCallResultFragment response data
+ */
+export class AiConversationSearchEntitiesToolCallResult extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSearchEntitiesToolCallResultFragment) {
+    super(request);
+    this.entities = data.entities.map(node => new AiConversationSearchEntitiesToolCallResultEntities(request, node));
+  }
+
+  public entities: AiConversationSearchEntitiesToolCallResultEntities[];
+}
+/**
+ * AiConversationSearchEntitiesToolCallResultEntities model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSearchEntitiesToolCallResultEntitiesFragment response data
+ */
+export class AiConversationSearchEntitiesToolCallResultEntities extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSearchEntitiesToolCallResultEntitiesFragment) {
+    super(request);
+    this.id = data.id;
+    this.type = data.type;
+  }
+
+  public id: string;
+  public type: string;
+}
+/**
+ * AiConversationSuggestValuesToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSuggestValuesToolCallFragment response data
+ */
+export class AiConversationSuggestValuesToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSuggestValuesToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationSuggestValuesToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationSuggestValuesToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationSuggestValuesToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSuggestValuesToolCallArgsFragment response data
+ */
+export class AiConversationSuggestValuesToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSuggestValuesToolCallArgsFragment) {
+    super(request);
+    this.field = data.field;
+    this.query = data.query ?? undefined;
+  }
+
+  public field: string;
+  public query?: string | null;
+}
+/**
+ * A text part in an AI conversation.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationTextPartFragment response data
+ */
+export class AiConversationTextPart extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationTextPartFragment) {
+    super(request);
+    this.body = data.body;
+    this.bodyData = data.bodyData;
+    this.id = data.id;
+    this.metadata = new AiConversationPartMetadata(request, data.metadata);
+    this.type = data.type;
+  }
+
+  /** The Markdown body of the text part. */
+  public body: string;
+  /** The data of the text part. */
+  public bodyData: L.Scalars["JSONObject"];
+  /** The ID of the part. */
+  public id: string;
+  /** The metadata of the part. */
+  public metadata: AiConversationPartMetadata;
+  /** The type of the part. */
+  public type: L.AiConversationPartType;
+}
+/**
+ * A tool call part in an AI conversation.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationToolCallPartFragment response data
+ */
+export class AiConversationToolCallPart extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationToolCallPartFragment) {
+    super(request);
+    this.id = data.id;
+    this.metadata = new AiConversationPartMetadata(request, data.metadata);
+    this.type = data.type;
+    this.toolCall = data.toolCall;
+  }
+
+  /** The ID of the part. */
+  public id: string;
+  /** The metadata of the part. */
+  public metadata: AiConversationPartMetadata;
+  /** The type of the part. */
+  public type: L.AiConversationPartType;
+  /** The tool call part. */
+  public toolCall: L.AiConversationToolCallPartFragment["toolCall"];
+}
+/**
+ * AiConversationToolDisplayInfo model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationToolDisplayInfoFragment response data
+ */
+export class AiConversationToolDisplayInfo extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationToolDisplayInfoFragment) {
+    super(request);
+    this.activeLabel = data.activeLabel;
+    this.detail = data.detail ?? undefined;
+    this.icon = data.icon;
+    this.inactiveLabel = data.inactiveLabel;
+    this.result = data.result ?? undefined;
+  }
+
+  public activeLabel: string;
+  public detail?: string | null;
+  public icon: string;
+  public inactiveLabel: string;
+  public result?: string | null;
+}
+/**
+ * AiConversationTranscribeMediaToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationTranscribeMediaToolCallFragment response data
+ */
+export class AiConversationTranscribeMediaToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationTranscribeMediaToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationTranscribeVideoToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationTranscribeVideoToolCallFragment response data
+ */
+export class AiConversationTranscribeVideoToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationTranscribeVideoToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationUpdateEntityToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationUpdateEntityToolCallFragment response data
+ */
+export class AiConversationUpdateEntityToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationUpdateEntityToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationUpdateEntityToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationUpdateEntityToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationUpdateEntityToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationUpdateEntityToolCallArgsFragment response data
+ */
+export class AiConversationUpdateEntityToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationUpdateEntityToolCallArgsFragment) {
+    super(request);
+    this.entity = new AiConversationSearchEntitiesToolCallResultEntities(request, data.entity);
+  }
+
+  public entity: AiConversationSearchEntitiesToolCallResultEntities;
+}
+/**
+ * AiConversationWebSearchToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationWebSearchToolCallFragment response data
+ */
+export class AiConversationWebSearchToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationWebSearchToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationWebSearchToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationWebSearchToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationWebSearchToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationWebSearchToolCallArgsFragment response data
+ */
+export class AiConversationWebSearchToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationWebSearchToolCallArgsFragment) {
+    super(request);
+    this.query = data.query ?? undefined;
+    this.url = data.url ?? undefined;
+  }
+
+  public query?: string | null;
+  public url?: string | null;
+}
+/**
+ * AiConversationWidgetDisplayInfo model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationWidgetDisplayInfoFragment response data
+ */
+export class AiConversationWidgetDisplayInfo extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationWidgetDisplayInfoFragment) {
+    super(request);
+    this.body = data.body;
+    this.bodyData = data.bodyData;
+  }
+
+  /** The Markdown representation of the widget content. */
+  public body: string;
+  /** The ProseMirror data representation of the widget content. */
+  public bodyData: L.Scalars["JSONObject"];
+}
+/**
+ * A widget part in an AI conversation.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationWidgetPartFragment response data
+ */
+export class AiConversationWidgetPart extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationWidgetPartFragment) {
+    super(request);
+    this.id = data.id;
+    this.metadata = new AiConversationPartMetadata(request, data.metadata);
+    this.type = data.type;
+    this.widget = data.widget;
+  }
+
+  /** The ID of the part. */
+  public id: string;
+  /** The metadata of the part. */
+  public metadata: AiConversationPartMetadata;
+  /** The type of the part. */
+  public type: L.AiConversationPartType;
+  /** The widget. */
+  public widget: L.AiConversationWidgetPartFragment["widget"];
+}
+/**
  * AI prompt rules for a team.
  *
  * @param request - function to call the graphql client
@@ -1195,7 +2419,7 @@ export class Attachment extends Request {
     return this._originalIssue?.id;
   }
 
-  /** Creates a new attachment, or updates existing if the same `url` and `issueId` is used. */
+  /** Creates a new attachment, or updates existing if the same `url` and `issueId` is used. To create an integration-aware attachment, use the integration-specific mutations such as `attachmentLinkZendesk`, `attachmentLinkSlack`, or `attachmentLinkURL` instead. */
   public create(input: L.AttachmentCreateInput) {
     return new CreateAttachmentMutation(this._request).fetch(input);
   }
@@ -1526,6 +2750,7 @@ export class AuthOrganization extends Request {
   public constructor(request: LinearRequest, data: L.AuthOrganizationFragment) {
     super(request);
     this.allowedAuthServices = data.allowedAuthServices;
+    this.approximateUserCount = data.approximateUserCount;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.deletionRequestedAt = parseDate(data.deletionRequestedAt) ?? undefined;
     this.enabled = data.enabled;
@@ -1545,6 +2770,8 @@ export class AuthOrganization extends Request {
 
   /** Allowed authentication providers, empty array means all are allowed */
   public allowedAuthServices: string[];
+  /** An approximate count of users, updated once per day. */
+  public approximateUserCount: number;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The time at which deletion of the organization was requested. */
@@ -4539,6 +5766,7 @@ export class DocumentContentHistoryType extends Request {
     this.contentDataSnapshotAt = parseDate(data.contentDataSnapshotAt) ?? new Date();
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
+    this.metadata = parseJson(data.metadata) ?? undefined;
   }
 
   /** The ID of the author of the change. */
@@ -4549,6 +5777,8 @@ export class DocumentContentHistoryType extends Request {
   public createdAt: Date;
   /** The UUID of the document content history entry. */
   public id: string;
+  /** Metadata associated with the history item. */
+  public metadata?: Record<string, unknown> | null;
 }
 /**
  * A document related notification.
@@ -5068,6 +6298,7 @@ export class EmailIntakeAddress extends Request {
     this.issueCompletedAutoReplyEnabled = data.issueCompletedAutoReplyEnabled;
     this.issueCreatedAutoReply = data.issueCreatedAutoReply ?? undefined;
     this.issueCreatedAutoReplyEnabled = data.issueCreatedAutoReplyEnabled;
+    this.reopenOnReply = data.reopenOnReply;
     this.repliesEnabled = data.repliesEnabled;
     this.senderName = data.senderName ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
@@ -5107,6 +6338,8 @@ export class EmailIntakeAddress extends Request {
   public issueCreatedAutoReply?: string | null;
   /** Whether the auto-reply for issue created is enabled. */
   public issueCreatedAutoReplyEnabled: boolean;
+  /** Whether to reopen completed or canceled issues when a substantive email reply is received. */
+  public reopenOnReply: boolean;
   /** Whether email replies are enabled. */
   public repliesEnabled: boolean;
   /** The name to be used for outgoing emails. */
@@ -7765,6 +8998,9 @@ export class InitiativeWebhookPayload {
     this.parentInitiative = data.parentInitiative
       ? new InitiativeChildWebhookPayload(data.parentInitiative)
       : undefined;
+    this.parentInitiatives = data.parentInitiatives
+      ? data.parentInitiatives.map(node => new InitiativeChildWebhookPayload(node))
+      : undefined;
     this.projects = data.projects ? data.projects.map(node => new ProjectChildWebhookPayload(node)) : undefined;
     this.subInitiatives = data.subInitiatives
       ? data.subInitiatives.map(node => new InitiativeChildWebhookPayload(node))
@@ -7827,6 +9063,8 @@ export class InitiativeWebhookPayload {
   public updatedAt: string;
   /** The URL of the initiative. */
   public url: string;
+  /** The parent initiatives associated with the initiative. */
+  public parentInitiatives?: InitiativeChildWebhookPayload[] | null;
   /** The projects associated with the initiative. */
   public projects?: ProjectChildWebhookPayload[] | null;
   /** The sub-initiatives associated with the initiative. */
@@ -9431,6 +10669,23 @@ export class IssueHistoryTriageRuleMetadata extends Request {
   public updatedByTriageRule?: WorkflowDefinition | null;
 }
 /**
+ * Metadata about a workflow that made changes to an issue.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssueHistoryWorkflowMetadataFragment response data
+ */
+export class IssueHistoryWorkflowMetadata extends Request {
+  public constructor(request: LinearRequest, data: L.IssueHistoryWorkflowMetadataFragment) {
+    super(request);
+    this.workflowDefinition = data.workflowDefinition
+      ? new WorkflowDefinition(request, data.workflowDefinition)
+      : undefined;
+  }
+
+  /** The workflow definition that triggered the issue update. */
+  public workflowDefinition?: WorkflowDefinition | null;
+}
+/**
  * An import job for data from an external service.
  *
  * @param request - function to call the graphql client
@@ -10600,6 +11855,7 @@ export class IssueSharedAccess extends Request {
     this.isShared = data.isShared;
     this.sharedWithCount = data.sharedWithCount;
     this.viewerHasOnlySharedAccess = data.viewerHasOnlySharedAccess;
+    this.disallowedIssueFields = data.disallowedIssueFields;
     this.sharedWithUsers = data.sharedWithUsers.map(node => new User(request, node));
   }
 
@@ -10609,6 +11865,8 @@ export class IssueSharedAccess extends Request {
   public sharedWithCount: number;
   /** Whether the viewer can access this issue only through issue sharing. */
   public viewerHasOnlySharedAccess: boolean;
+  /** Issue update fields the viewer cannot modify due to shared-only access. */
+  public disallowedIssueFields: L.IssueSharedAccessDisallowedField[];
   /** Users this issue is shared with. */
   public sharedWithUsers: User[];
 }
@@ -17447,8 +18705,10 @@ export class Template extends Request {
   public constructor(request: LinearRequest, data: L.TemplateFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.color = data.color ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.description = data.description ?? undefined;
+    this.icon = data.icon ?? undefined;
     this.id = data.id;
     this.lastAppliedAt = parseDate(data.lastAppliedAt) ?? undefined;
     this.name = data.name;
@@ -17464,10 +18724,14 @@ export class Template extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
+  /** The color of the template icon. */
+  public color?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** Template description. */
   public description?: string | null;
+  /** The icon of the template. */
+  public icon?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** The date when the template was last applied. */
@@ -18773,11 +20037,15 @@ export class ViewPreferencesValues extends Request {
     this.hiddenRows = data.hiddenRows ?? undefined;
     this.inboxViewOrdering = data.inboxViewOrdering ?? undefined;
     this.initiativeFieldActivity = data.initiativeFieldActivity ?? undefined;
+    this.initiativeFieldDateCompleted = data.initiativeFieldDateCompleted ?? undefined;
+    this.initiativeFieldDateCreated = data.initiativeFieldDateCreated ?? undefined;
+    this.initiativeFieldDateUpdated = data.initiativeFieldDateUpdated ?? undefined;
     this.initiativeFieldDescription = data.initiativeFieldDescription ?? undefined;
     this.initiativeFieldHealth = data.initiativeFieldHealth ?? undefined;
     this.initiativeFieldInitiativeHealth = data.initiativeFieldInitiativeHealth ?? undefined;
     this.initiativeFieldOwner = data.initiativeFieldOwner ?? undefined;
     this.initiativeFieldProjects = data.initiativeFieldProjects ?? undefined;
+    this.initiativeFieldStartDate = data.initiativeFieldStartDate ?? undefined;
     this.initiativeFieldTargetDate = data.initiativeFieldTargetDate ?? undefined;
     this.initiativeFieldTeams = data.initiativeFieldTeams ?? undefined;
     this.initiativeGrouping = data.initiativeGrouping ?? undefined;
@@ -18850,6 +20118,9 @@ export class ViewPreferencesValues extends Request {
     this.projectSubGroupingLabelGroupId = data.projectSubGroupingLabelGroupId ?? undefined;
     this.projectViewOrdering = data.projectViewOrdering ?? undefined;
     this.projectZoomLevel = data.projectZoomLevel ?? undefined;
+    this.releasePipelineFieldLatestRelease = data.releasePipelineFieldLatestRelease ?? undefined;
+    this.releasePipelineFieldReleases = data.releasePipelineFieldReleases ?? undefined;
+    this.releasePipelineFieldType = data.releasePipelineFieldType ?? undefined;
     this.releasePipelinesViewOrdering = data.releasePipelinesViewOrdering ?? undefined;
     this.reviewFieldAvatar = data.reviewFieldAvatar ?? undefined;
     this.reviewFieldChecks = data.reviewFieldChecks ?? undefined;
@@ -18858,6 +20129,9 @@ export class ViewPreferencesValues extends Request {
     this.reviewFieldRepository = data.reviewFieldRepository ?? undefined;
     this.reviewGrouping = data.reviewGrouping ?? undefined;
     this.reviewViewOrdering = data.reviewViewOrdering ?? undefined;
+    this.scheduledPipelineReleaseFieldReleaseDate = data.scheduledPipelineReleaseFieldReleaseDate ?? undefined;
+    this.scheduledPipelineReleaseFieldStage = data.scheduledPipelineReleaseFieldStage ?? undefined;
+    this.scheduledPipelineReleasesViewOrdering = data.scheduledPipelineReleasesViewOrdering ?? undefined;
     this.searchResultType = data.searchResultType ?? undefined;
     this.searchViewOrdering = data.searchViewOrdering ?? undefined;
     this.showArchivedItems = data.showArchivedItems ?? undefined;
@@ -18873,6 +20147,7 @@ export class ViewPreferencesValues extends Request {
     this.showEmptySubGroupsBoard = data.showEmptySubGroupsBoard ?? undefined;
     this.showEmptySubGroupsList = data.showEmptySubGroupsList ?? undefined;
     this.showNestedInitiatives = data.showNestedInitiatives ?? undefined;
+    this.showOnlySnoozedItems = data.showOnlySnoozedItems ?? undefined;
     this.showParents = data.showParents ?? undefined;
     this.showReadItems = data.showReadItems ?? undefined;
     this.showSnoozedItems = data.showSnoozedItems ?? undefined;
@@ -19016,6 +20291,12 @@ export class ViewPreferencesValues extends Request {
   public inboxViewOrdering?: string | null;
   /** Whether to show the initiative activity field. */
   public initiativeFieldActivity?: boolean | null;
+  /** Whether to show the initiative completed date field. */
+  public initiativeFieldDateCompleted?: boolean | null;
+  /** Whether to show the initiative created date field. */
+  public initiativeFieldDateCreated?: boolean | null;
+  /** Whether to show the initiative updated date field. */
+  public initiativeFieldDateUpdated?: boolean | null;
   /** Whether to show the initiative description field. */
   public initiativeFieldDescription?: boolean | null;
   /** Whether to show the initiative active projects health field. */
@@ -19026,6 +20307,8 @@ export class ViewPreferencesValues extends Request {
   public initiativeFieldOwner?: boolean | null;
   /** Whether to show the initiative projects field. */
   public initiativeFieldProjects?: boolean | null;
+  /** Whether to show the initiative start date field. */
+  public initiativeFieldStartDate?: boolean | null;
   /** Whether to show the initiative target date field. */
   public initiativeFieldTargetDate?: boolean | null;
   /** Whether to show the initiative teams field. */
@@ -19170,6 +20453,12 @@ export class ViewPreferencesValues extends Request {
   public projectViewOrdering?: string | null;
   /** The zoom level for the timeline view. */
   public projectZoomLevel?: string | null;
+  /** Whether to show the latest release field for release pipelines. */
+  public releasePipelineFieldLatestRelease?: boolean | null;
+  /** Whether to show the releases field for release pipelines. */
+  public releasePipelineFieldReleases?: boolean | null;
+  /** Whether to show the type field for release pipelines. */
+  public releasePipelineFieldType?: boolean | null;
   /** The release pipelines view ordering. */
   public releasePipelinesViewOrdering?: string | null;
   /** Whether to show the review avatar field. */
@@ -19186,6 +20475,12 @@ export class ViewPreferencesValues extends Request {
   public reviewGrouping?: string | null;
   /** The review view ordering. */
   public reviewViewOrdering?: string | null;
+  /** Whether to show the release date field for scheduled pipeline releases. */
+  public scheduledPipelineReleaseFieldReleaseDate?: boolean | null;
+  /** Whether to show the stage field for scheduled pipeline releases. */
+  public scheduledPipelineReleaseFieldStage?: boolean | null;
+  /** The scheduled pipeline releases view ordering. */
+  public scheduledPipelineReleasesViewOrdering?: string | null;
   /** The search result type filter. */
   public searchResultType?: string | null;
   /** The search view ordering. */
@@ -19216,6 +20511,8 @@ export class ViewPreferencesValues extends Request {
   public showEmptySubGroupsList?: boolean | null;
   /** Whether to show sub-initiatives nested. */
   public showNestedInitiatives?: boolean | null;
+  /** Whether to show only snoozed items. */
+  public showOnlySnoozedItems?: boolean | null;
   /** Whether to show parent issues for sub-issues. */
   public showParents?: boolean | null;
   /** Whether to show read items. */
@@ -19792,7 +21089,7 @@ export class WorkflowState extends Request {
   public name: string;
   /** The position of the state in the team flow. */
   public position: number;
-  /** The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled". */
+  /** The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled", "duplicate". */
   public type: string;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -22568,13 +23865,18 @@ export class ProjectFilterSuggestionQuery extends Request {
    * Call the ProjectFilterSuggestion query and return a ProjectFilterSuggestionPayload
    *
    * @param prompt - required prompt to pass to projectFilterSuggestion
+   * @param variables - variables without 'prompt' to pass into the ProjectFilterSuggestionQuery
    * @returns parsed response from ProjectFilterSuggestionQuery
    */
-  public async fetch(prompt: string): LinearFetch<ProjectFilterSuggestionPayload> {
+  public async fetch(
+    prompt: string,
+    variables?: Omit<L.ProjectFilterSuggestionQueryVariables, "prompt">
+  ): LinearFetch<ProjectFilterSuggestionPayload> {
     const response = await this._request<L.ProjectFilterSuggestionQuery, L.ProjectFilterSuggestionQueryVariables>(
       L.ProjectFilterSuggestionDocument.toString(),
       {
         prompt,
+        ...variables,
       }
     );
     const data = response.projectFilterSuggestion;
@@ -40836,10 +42138,14 @@ export class LinearSdk extends Request {
    * Suggests filters for a project view based on a text prompt.
    *
    * @param prompt - required prompt to pass to projectFilterSuggestion
+   * @param variables - variables without 'prompt' to pass into the ProjectFilterSuggestionQuery
    * @returns ProjectFilterSuggestionPayload
    */
-  public projectFilterSuggestion(prompt: string): LinearFetch<ProjectFilterSuggestionPayload> {
-    return new ProjectFilterSuggestionQuery(this._request).fetch(prompt);
+  public projectFilterSuggestion(
+    prompt: string,
+    variables?: Omit<L.ProjectFilterSuggestionQueryVariables, "prompt">
+  ): LinearFetch<ProjectFilterSuggestionPayload> {
+    return new ProjectFilterSuggestionQuery(this._request).fetch(prompt, variables);
   }
   /**
    * One specific label.
@@ -41312,7 +42618,7 @@ export class LinearSdk extends Request {
     return new AirbyteIntegrationConnectMutation(this._request).fetch(input);
   }
   /**
-   * Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
+   * Creates a new attachment, or updates existing if the same `url` and `issueId` is used. To create an integration-aware attachment, use the integration-specific mutations such as `attachmentLinkZendesk`, `attachmentLinkSlack`, or `attachmentLinkURL` instead.
    *
    * @param input - required input to pass to createAttachment
    * @returns AttachmentPayload
@@ -41330,7 +42636,7 @@ export class LinearSdk extends Request {
     return new DeleteAttachmentMutation(this._request).fetch(id);
   }
   /**
-   * Link an existing Discord message to an issue.
+   * Link an existing Discord message to an issue. This creates a rich attachment using the workspace's Discord integration.
    *
    * @param channelId - required channelId to pass to attachmentLinkDiscord
    * @param issueId - required issueId to pass to attachmentLinkDiscord
@@ -41349,7 +42655,7 @@ export class LinearSdk extends Request {
     return new AttachmentLinkDiscordMutation(this._request).fetch(channelId, issueId, messageId, url, variables);
   }
   /**
-   * Link an existing Front conversation to an issue.
+   * Link an existing Front conversation to an issue. This creates a rich attachment using the workspace's Front integration, enabling features like automated conversation updates.
    *
    * @param conversationId - required conversationId to pass to attachmentLinkFront
    * @param issueId - required issueId to pass to attachmentLinkFront
@@ -41364,7 +42670,7 @@ export class LinearSdk extends Request {
     return new AttachmentLinkFrontMutation(this._request).fetch(conversationId, issueId, variables);
   }
   /**
-   * Link a GitHub issue to a Linear issue.
+   * Link a GitHub issue to a Linear issue. This creates a rich attachment using the workspace's GitHub integration, enabling features like automated status syncing.
    *
    * @param issueId - required issueId to pass to attachmentLinkGitHubIssue
    * @param url - required url to pass to attachmentLinkGitHubIssue
@@ -41379,7 +42685,7 @@ export class LinearSdk extends Request {
     return new AttachmentLinkGitHubIssueMutation(this._request).fetch(issueId, url, variables);
   }
   /**
-   * Link a GitHub pull request to an issue.
+   * Link a GitHub pull request to an issue. This creates a rich attachment using the workspace's GitHub integration, enabling features like automated status syncing.
    *
    * @param issueId - required issueId to pass to attachmentLinkGitHubPR
    * @param url - required url to pass to attachmentLinkGitHubPR
@@ -41394,7 +42700,7 @@ export class LinearSdk extends Request {
     return new AttachmentLinkGitHubPrMutation(this._request).fetch(issueId, url, variables);
   }
   /**
-   * Link an existing GitLab MR to an issue.
+   * Link an existing GitLab MR to an issue. This creates a rich attachment using the workspace's GitLab integration, enabling features like automated status syncing.
    *
    * @param issueId - required issueId to pass to attachmentLinkGitLabMR
    * @param number - required number to pass to attachmentLinkGitLabMR
@@ -41422,7 +42728,7 @@ export class LinearSdk extends Request {
     );
   }
   /**
-   * Link an existing Intercom conversation to an issue.
+   * Link an existing Intercom conversation to an issue. This creates a rich attachment using the workspace's Intercom integration, enabling features like automated conversation updates.
    *
    * @param conversationId - required conversationId to pass to attachmentLinkIntercom
    * @param issueId - required issueId to pass to attachmentLinkIntercom
@@ -41437,7 +42743,7 @@ export class LinearSdk extends Request {
     return new AttachmentLinkIntercomMutation(this._request).fetch(conversationId, issueId, variables);
   }
   /**
-   * Link an existing Jira issue to an issue.
+   * Link an existing Jira issue to an issue. This creates a rich attachment using the workspace's Jira integration, enabling features like automated status syncing.
    *
    * @param issueId - required issueId to pass to attachmentLinkJiraIssue
    * @param jiraIssueId - required jiraIssueId to pass to attachmentLinkJiraIssue
@@ -41452,7 +42758,7 @@ export class LinearSdk extends Request {
     return new AttachmentLinkJiraIssueMutation(this._request).fetch(issueId, jiraIssueId, variables);
   }
   /**
-   * Link an existing Salesforce case to an issue.
+   * Link an existing Salesforce case to an issue. This creates a rich attachment using the workspace's Salesforce integration.
    *
    * @param issueId - required issueId to pass to attachmentLinkSalesforce
    * @param url - required url to pass to attachmentLinkSalesforce
@@ -41467,7 +42773,7 @@ export class LinearSdk extends Request {
     return new AttachmentLinkSalesforceMutation(this._request).fetch(issueId, url, variables);
   }
   /**
-   * Link an existing Slack message to an issue.
+   * Link an existing Slack message to an issue. This creates a rich attachment using the workspace's Slack integration.
    *
    * @param issueId - required issueId to pass to attachmentLinkSlack
    * @param url - required url to pass to attachmentLinkSlack
@@ -41482,7 +42788,7 @@ export class LinearSdk extends Request {
     return new AttachmentLinkSlackMutation(this._request).fetch(issueId, url, variables);
   }
   /**
-   * Link any url to an issue.
+   * Link any URL to an issue. If the workspace has a matching integration configured and the URL is recognized (e.g., Zendesk, GitHub, Slack), a rich attachment will be created that enables features like automated status updates. Otherwise, a basic attachment is created.
    *
    * @param issueId - required issueId to pass to attachmentLinkURL
    * @param url - required url to pass to attachmentLinkURL
@@ -41497,7 +42803,7 @@ export class LinearSdk extends Request {
     return new AttachmentLinkUrlMutation(this._request).fetch(issueId, url, variables);
   }
   /**
-   * Link an existing Zendesk ticket to an issue.
+   * Link an existing Zendesk ticket to an issue. This creates a rich attachment using the workspace's Zendesk integration, enabling features like automated ticket reopening when the Linear issue is completed.
    *
    * @param issueId - required issueId to pass to attachmentLinkZendesk
    * @param ticketId - required ticketId to pass to attachmentLinkZendesk
@@ -44264,6 +45570,16 @@ export {
   AgentActivityType,
   AgentSessionStatus,
   AgentSessionType,
+  AiConversationEntityCardWidgetArgsAction,
+  AiConversationEntityCardWidgetArgsType,
+  AiConversationEntityListWidgetArgsAction,
+  AiConversationEntityListWidgetArgsEntitiesType,
+  AiConversationPartType,
+  AiConversationQueryUpdatesToolCallArgsUpdateType,
+  AiConversationQueryViewToolCallArgsMode,
+  AiConversationStatus,
+  AiConversationTool,
+  AiConversationWidgetName,
   AuthenticationSessionType,
   ContextViewType,
   CustomerStatusType,
@@ -44285,6 +45601,7 @@ export {
   InitiativeUpdateHealthType,
   IntegrationService,
   IssueRelationType,
+  IssueSharedAccessDisallowedField,
   IssueSuggestionState,
   IssueSuggestionType,
   NotificationCategory,

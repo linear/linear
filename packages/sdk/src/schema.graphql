@@ -1051,6 +1051,1019 @@ type AgentSessionWebhookPayload {
 }
 
 """
+[Internal] A conversation between a user and an LLM.
+"""
+type AiConversation implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  Serialized JSON representing the contexts this conversation is related to.
+  """
+  context: JSONObject!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  [Internal] The log ID of the AI response.
+  """
+  evalLogId: String
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The iteration ID of the conversation in agentic workflow.
+  """
+  iterationId: String
+  """
+  The parts of the conversation.
+  """
+  parts: [AiConversationPart!]
+  """
+  The time at when the user marked the conversation as read. Null, if the user hasn't read the conversation.
+  """
+  readAt: DateTime
+  """
+  The status of the conversation.
+  """
+  status: AiConversationStatus!
+  """
+  A summary of the conversation.
+  """
+  summary: String
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The user who the conversation belongs to.
+  """
+  user: User
+  """
+  [Internal] The workflow definition that created this conversation.
+  """
+  workflowDefinition: WorkflowDefinition
+}
+
+"""
+A base part in an AI conversation.
+"""
+interface AiConversationBasePart {
+  """
+  The ID of the part.
+  """
+  id: String!
+  """
+  The metadata of the part.
+  """
+  metadata: AiConversationPartMetadata!
+  """
+  The type of the part.
+  """
+  type: AiConversationPartType!
+}
+
+interface AiConversationBaseToolCall {
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+interface AiConversationBaseWidget {
+  """
+  Display information for the widget, including ProseMirror and Markdown representations.
+  """
+  displayInfo: AiConversationWidgetDisplayInfo
+  """
+  The name of the widget.
+  """
+  name: AiConversationWidgetName!
+  """
+  The arguments of the widget.
+  """
+  rawArgs: JSON
+}
+
+type AiConversationCodeIntelligenceToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationCodeIntelligenceToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationCodeIntelligenceToolCallArgs {
+  question: String!
+}
+
+type AiConversationCreateEntityToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationCreateEntityToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationCreateEntityToolCallArgs {
+  count: Float
+  type: String!
+}
+
+type AiConversationDeleteEntityToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationDeleteEntityToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationDeleteEntityToolCallArgs {
+  entity: AiConversationSearchEntitiesToolCallResultEntities!
+}
+
+type AiConversationEntityCardWidget implements AiConversationBaseWidget {
+  """
+  The arguments to the widget.
+  """
+  args: AiConversationEntityCardWidgetArgs
+  """
+  Display information for the widget, including ProseMirror and Markdown representations.
+  """
+  displayInfo: AiConversationWidgetDisplayInfo
+  """
+  The name of the widget.
+  """
+  name: AiConversationWidgetName!
+  """
+  The arguments of the widget.
+  """
+  rawArgs: JSON
+}
+
+type AiConversationEntityCardWidgetArgs {
+  """
+  The action performed on the entity (leave empty if just found)
+  """
+  action: AiConversationEntityCardWidgetArgsAction
+  """
+  The UUID of the entity to display
+  """
+  id: String!
+  """
+  @deprecated Optional note to display about the entity
+  """
+  note: String @deprecated(reason: "Optional note to display about the entity")
+  """
+  [Internal] The entity type
+  """
+  type: AiConversationEntityCardWidgetArgsType!
+}
+
+"""
+The action performed on the entity (leave empty if just found)
+"""
+enum AiConversationEntityCardWidgetArgsAction {
+  created
+  updated
+}
+
+"""
+[Internal] The entity type
+"""
+enum AiConversationEntityCardWidgetArgsType {
+  AiPrompt
+  CustomView
+  Customer
+  CustomerNeed
+  Document
+  Initiative
+  InitiativeUpdate
+  Issue
+  Project
+  ProjectUpdate
+  PullRequest
+  Release
+  ReleasePipeline
+  Team
+  Template
+}
+
+type AiConversationEntityListWidget implements AiConversationBaseWidget {
+  """
+  The arguments to the widget.
+  """
+  args: AiConversationEntityListWidgetArgs
+  """
+  Display information for the widget, including ProseMirror and Markdown representations.
+  """
+  displayInfo: AiConversationWidgetDisplayInfo
+  """
+  The name of the widget.
+  """
+  name: AiConversationWidgetName!
+  """
+  The arguments of the widget.
+  """
+  rawArgs: JSON
+}
+
+type AiConversationEntityListWidgetArgs {
+  """
+  The action performed on the entities (leave empty if just found)
+  """
+  action: AiConversationEntityListWidgetArgsAction
+  """
+  Total number of entities in the list
+  """
+  count: Float
+  entities: [AiConversationEntityListWidgetArgsEntities!]!
+}
+
+"""
+The action performed on the entities (leave empty if just found)
+"""
+enum AiConversationEntityListWidgetArgsAction {
+  created
+  updated
+}
+
+type AiConversationEntityListWidgetArgsEntities {
+  """
+  Entity UUID
+  """
+  id: String!
+  """
+  @deprecated Optional note to display about the entity
+  """
+  note: String @deprecated(reason: "Optional note to display about the entity")
+  """
+  [Internal] The entity type
+  """
+  type: AiConversationEntityListWidgetArgsEntitiesType!
+}
+
+"""
+[Internal] The entity type
+"""
+enum AiConversationEntityListWidgetArgsEntitiesType {
+  AiPrompt
+  CustomView
+  Customer
+  CustomerNeed
+  Document
+  Initiative
+  InitiativeUpdate
+  Issue
+  Project
+  ProjectUpdate
+  PullRequest
+  Release
+  ReleasePipeline
+  Team
+  Template
+}
+
+type AiConversationGetMicrosoftTeamsConversationHistoryToolCall implements AiConversationBaseToolCall {
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationGetPullRequestDiffToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationGetPullRequestDiffToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationGetPullRequestDiffToolCallArgs {
+  entity: AiConversationSearchEntitiesToolCallResultEntities!
+}
+
+type AiConversationGetPullRequestFileToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationGetPullRequestFileToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationGetPullRequestFileToolCallArgs {
+  entity: AiConversationSearchEntitiesToolCallResultEntities!
+  path: String!
+}
+
+type AiConversationGetSlackConversationHistoryToolCall implements AiConversationBaseToolCall {
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationInvokeMcpToolToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationInvokeMcpToolToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationInvokeMcpToolToolCallArgs {
+  server: AiConversationInvokeMcpToolToolCallArgsServer!
+  tool: AiConversationInvokeMcpToolToolCallArgsTool!
+}
+
+type AiConversationInvokeMcpToolToolCallArgsServer {
+  integrationId: String!
+  name: String!
+  title: String
+}
+
+type AiConversationInvokeMcpToolToolCallArgsTool {
+  name: String!
+  title: String
+}
+
+"""
+A part in an AI conversation.
+"""
+union AiConversationPart =
+  | AiConversationPromptPart
+  | AiConversationReasoningPart
+  | AiConversationTextPart
+  | AiConversationToolCallPart
+  | AiConversationWidgetPart
+
+"""
+Metadata about a part in an AI conversation.
+"""
+type AiConversationPartMetadata {
+  """
+  The eval log ID of the part.
+  """
+  evalLogId: String
+  """
+  AI feedback state for this part.
+  """
+  feedback: JSONObject
+  """
+  The turn ID of the part.
+  """
+  turnId: String!
+}
+
+"""
+The type of a part in an AI conversation.
+"""
+enum AiConversationPartType {
+  prompt
+  reasoning
+  text
+  toolCall
+  widget
+  widgetPlaceholder
+}
+
+"""
+A prompt part in an AI conversation.
+"""
+type AiConversationPromptPart implements AiConversationBasePart {
+  """
+  The Markdown body of the prompt part.
+  """
+  body: String!
+  """
+  The data of the prompt part.
+  """
+  bodyData: JSONObject!
+  """
+  The ID of the part.
+  """
+  id: String!
+  """
+  The metadata of the part.
+  """
+  metadata: AiConversationPartMetadata!
+  """
+  The type of the part.
+  """
+  type: AiConversationPartType!
+  """
+  The user who created the prompt part.
+  """
+  user: User
+}
+
+type AiConversationQueryActivityToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationQueryActivityToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationQueryActivityToolCallArgs {
+  entities: [AiConversationSearchEntitiesToolCallResultEntities!]
+}
+
+type AiConversationQueryUpdatesToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationQueryUpdatesToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationQueryUpdatesToolCallArgs {
+  entity: AiConversationSearchEntitiesToolCallResultEntities
+  updateType: AiConversationQueryUpdatesToolCallArgsUpdateType!
+}
+
+enum AiConversationQueryUpdatesToolCallArgsUpdateType {
+  InitiativeUpdate
+  ProjectUpdate
+}
+
+type AiConversationQueryViewToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationQueryViewToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationQueryViewToolCallArgs {
+  filter: String
+  mode: AiConversationQueryViewToolCallArgsMode!
+  view: AiConversationQueryViewToolCallArgsView!
+}
+
+enum AiConversationQueryViewToolCallArgsMode {
+  insight
+  list
+}
+
+type AiConversationQueryViewToolCallArgsView {
+  group: AiConversationSearchEntitiesToolCallResultEntities
+  predefinedView: String
+  type: String!
+}
+
+"""
+A reasoning part in an AI conversation.
+"""
+type AiConversationReasoningPart implements AiConversationBasePart {
+  """
+  The Markdown body of the reasoning part.
+  """
+  body: String!
+  """
+  The data of the reasoning part.
+  """
+  bodyData: JSONObject!
+  """
+  The ID of the part.
+  """
+  id: String!
+  """
+  The metadata of the part.
+  """
+  metadata: AiConversationPartMetadata!
+  """
+  The title of the reasoning part.
+  """
+  title: String
+  """
+  The type of the part.
+  """
+  type: AiConversationPartType!
+}
+
+type AiConversationResearchToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationResearchToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+  """
+  The result of the tool call.
+  """
+  result: AiConversationResearchToolCallResult
+}
+
+type AiConversationResearchToolCallArgs {
+  context: String!
+  query: String!
+  subjects: [AiConversationSearchEntitiesToolCallResultEntities!]
+}
+
+type AiConversationResearchToolCallResult {
+  progressId: String
+}
+
+type AiConversationRetrieveEntitiesToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationRetrieveEntitiesToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationRetrieveEntitiesToolCallArgs {
+  entities: [AiConversationSearchEntitiesToolCallResultEntities!]!
+}
+
+type AiConversationSearchDocumentationToolCall implements AiConversationBaseToolCall {
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationSearchEntitiesToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationSearchEntitiesToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+  """
+  The result of the tool call.
+  """
+  result: AiConversationSearchEntitiesToolCallResult
+}
+
+type AiConversationSearchEntitiesToolCallArgs {
+  queries: [String!]!
+  type: String
+}
+
+type AiConversationSearchEntitiesToolCallResult {
+  entities: [AiConversationSearchEntitiesToolCallResultEntities!]!
+}
+
+type AiConversationSearchEntitiesToolCallResultEntities {
+  id: String!
+  type: String!
+}
+
+"""
+The status of an AI conversation.
+"""
+enum AiConversationStatus {
+  active
+  awaitingInput
+  complete
+  error
+  pending
+}
+
+type AiConversationSuggestValuesToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationSuggestValuesToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationSuggestValuesToolCallArgs {
+  field: String!
+  query: String
+}
+
+"""
+A text part in an AI conversation.
+"""
+type AiConversationTextPart implements AiConversationBasePart {
+  """
+  The Markdown body of the text part.
+  """
+  body: String!
+  """
+  The data of the text part.
+  """
+  bodyData: JSONObject!
+  """
+  The ID of the part.
+  """
+  id: String!
+  """
+  The metadata of the part.
+  """
+  metadata: AiConversationPartMetadata!
+  """
+  The type of the part.
+  """
+  type: AiConversationPartType!
+}
+
+"""
+The name of a tool that was called in an AI conversation.
+"""
+enum AiConversationTool {
+  CodeIntelligence
+  CreateEntity
+  DeleteEntity
+  GetMicrosoftTeamsConversationHistory
+  GetPullRequestDiff
+  GetPullRequestFile
+  GetSlackConversationHistory
+  InvokeMcpTool
+  QueryActivity
+  QueryUpdates
+  QueryView
+  Research
+  RetrieveEntities
+  SearchDocumentation
+  SearchEntities
+  SuggestValues
+  TranscribeMedia
+  TranscribeVideo
+  UpdateEntity
+  WebSearch
+}
+
+"""
+The tool call.
+"""
+union AiConversationToolCall =
+  | AiConversationCodeIntelligenceToolCall
+  | AiConversationCreateEntityToolCall
+  | AiConversationDeleteEntityToolCall
+  | AiConversationGetMicrosoftTeamsConversationHistoryToolCall
+  | AiConversationGetPullRequestDiffToolCall
+  | AiConversationGetPullRequestFileToolCall
+  | AiConversationGetSlackConversationHistoryToolCall
+  | AiConversationInvokeMcpToolToolCall
+  | AiConversationQueryActivityToolCall
+  | AiConversationQueryUpdatesToolCall
+  | AiConversationQueryViewToolCall
+  | AiConversationResearchToolCall
+  | AiConversationRetrieveEntitiesToolCall
+  | AiConversationSearchDocumentationToolCall
+  | AiConversationSearchEntitiesToolCall
+  | AiConversationSuggestValuesToolCall
+  | AiConversationTranscribeMediaToolCall
+  | AiConversationTranscribeVideoToolCall
+  | AiConversationUpdateEntityToolCall
+  | AiConversationWebSearchToolCall
+
+"""
+A tool call part in an AI conversation.
+"""
+type AiConversationToolCallPart implements AiConversationBasePart {
+  """
+  The ID of the part.
+  """
+  id: String!
+  """
+  The metadata of the part.
+  """
+  metadata: AiConversationPartMetadata!
+  """
+  The tool call part.
+  """
+  toolCall: AiConversationToolCall!
+  """
+  The type of the part.
+  """
+  type: AiConversationPartType!
+}
+
+type AiConversationToolDisplayInfo {
+  activeLabel: String!
+  detail: String
+  icon: String!
+  inactiveLabel: String!
+  result: String
+}
+
+type AiConversationTranscribeMediaToolCall implements AiConversationBaseToolCall {
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationTranscribeVideoToolCall implements AiConversationBaseToolCall {
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationUpdateEntityToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationUpdateEntityToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationUpdateEntityToolCallArgs {
+  entity: AiConversationSearchEntitiesToolCallResultEntities!
+}
+
+type AiConversationWebSearchToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationWebSearchToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationWebSearchToolCallArgs {
+  query: String
+  url: String
+}
+
+"""
+The widget.
+"""
+union AiConversationWidget = AiConversationEntityCardWidget | AiConversationEntityListWidget
+
+type AiConversationWidgetDisplayInfo {
+  """
+  The Markdown representation of the widget content.
+  """
+  body: String!
+  """
+  The ProseMirror data representation of the widget content.
+  """
+  bodyData: JSONObject!
+}
+
+"""
+The name of a widget in an AI conversation.
+"""
+enum AiConversationWidgetName {
+  EntityCard
+  EntityList
+}
+
+"""
+A widget part in an AI conversation.
+"""
+type AiConversationWidgetPart implements AiConversationBasePart {
+  """
+  The ID of the part.
+  """
+  id: String!
+  """
+  The metadata of the part.
+  """
+  metadata: AiConversationPartMetadata!
+  """
+  The type of the part.
+  """
+  type: AiConversationPartType!
+  """
+  The widget.
+  """
+  widget: AiConversationWidget!
+}
+
+"""
 AI prompt rules for a team.
 """
 type AiPromptRules implements Node {
@@ -1876,6 +2889,10 @@ type AuthOrganization {
   """
   allowedAuthServices: [String!]!
   """
+  An approximate count of users, updated once per day.
+  """
+  approximateUserCount: Float!
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
@@ -2185,6 +3202,10 @@ type CodingAgentSandboxPayload {
   The user who initiated the session.
   """
   creatorId: String
+  """
+  Datadog logs URL for the session or sandbox.
+  """
+  datadogLogsUrl: String
   """
   When the session reached a terminal state.
   """
@@ -2618,7 +3639,7 @@ input CommentCreateInput {
   """
   createAsUser: String
   """
-  Flag to indicate this comment should be created on the issue's synced Slack comment thread. If no synced Slack comment thread exists, the mutation will fail.
+  Flag to indicate this comment should be created on the issue's synced Slack comment thread. If no synced Slack comment thread exists, the mutation will fail. If there are multiple synced Slack threads on the issue, the oldest one will be targeted.
   """
   createOnSyncedSlackThread: Boolean
   """
@@ -6647,6 +7668,10 @@ type DocumentContentHistoryType {
   The UUID of the document content history entry.
   """
   id: String!
+  """
+  Metadata associated with the history item.
+  """
+  metadata: JSON
 }
 
 input DocumentCreateInput {
@@ -7410,6 +8435,10 @@ type EmailIntakeAddress implements Node {
   """
   organization: Organization!
   """
+  Whether to reopen completed or canceled issues when a substantive email reply is received.
+  """
+  reopenOnReply: Boolean!
+  """
   Whether email replies are enabled.
   """
   repliesEnabled: Boolean!
@@ -7481,6 +8510,10 @@ input EmailIntakeAddressCreateInput {
   Whether the issue created auto-reply is enabled.
   """
   issueCreatedAutoReplyEnabled: Boolean
+  """
+  Whether to reopen completed or canceled issues when a substantive email reply is received.
+  """
+  reopenOnReply: Boolean
   """
   Whether email replies are enabled.
   """
@@ -7569,6 +8602,10 @@ input EmailIntakeAddressUpdateInput {
   Whether the issue created auto-reply is enabled.
   """
   issueCreatedAutoReplyEnabled: Boolean
+  """
+  Whether to reopen completed or canceled issues when a substantive email reply is received.
+  """
+  reopenOnReply: Boolean
   """
   Whether email replies are enabled.
   """
@@ -9948,6 +10985,10 @@ input InitiativeCollectionFilter {
   """
   and: [InitiativeCollectionFilter!]
   """
+  Comparator for the initiative completed at date.
+  """
+  completedAt: NullableDateComparator
+  """
   Comparator for the created at date.
   """
   createdAt: DateComparator
@@ -9972,6 +11013,10 @@ input InitiativeCollectionFilter {
   """
   id: IDComparator
   """
+  Filters that the initiative updates must satisfy.
+  """
+  initiativeUpdates: InitiativeUpdatesCollectionFilter
+  """
   Comparator for the collection length.
   """
   length: NumberComparator
@@ -9995,6 +11040,10 @@ input InitiativeCollectionFilter {
   Filters that needs to be matched by some initiatives.
   """
   some: InitiativeFilter
+  """
+  Comparator for the initiative started at date.
+  """
+  startedAt: NullableDateComparator
   """
   Comparator for the initiative status: Planned, Active, Completed
   """
@@ -10108,6 +11157,10 @@ input InitiativeFilter {
   """
   and: [InitiativeFilter!]
   """
+  Comparator for the initiative completed at date.
+  """
+  completedAt: NullableDateComparator
+  """
   Comparator for the created at date.
   """
   createdAt: DateComparator
@@ -10128,6 +11181,10 @@ input InitiativeFilter {
   """
   id: IDComparator
   """
+  Filters that the initiative updates must satisfy.
+  """
+  initiativeUpdates: InitiativeUpdatesCollectionFilter
+  """
   Comparator for the initiative name.
   """
   name: StringComparator
@@ -10143,6 +11200,10 @@ input InitiativeFilter {
   Comparator for the initiative slug ID.
   """
   slugId: StringComparator
+  """
+  Comparator for the initiative started at date.
+  """
+  startedAt: NullableDateComparator
   """
   Comparator for the initiative status: Planned, Active, Completed
   """
@@ -11236,6 +12297,70 @@ input InitiativeUpdatedAtSort {
 }
 
 """
+Collection filtering options for filtering initiatives by initiative updates.
+"""
+input InitiativeUpdatesCollectionFilter {
+  """
+  Compound filters, all of which need to be matched by the initiative update.
+  """
+  and: [InitiativeUpdatesCollectionFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that needs to be matched by all initiative updates.
+  """
+  every: InitiativeUpdatesFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the collection length.
+  """
+  length: NumberComparator
+  """
+  Compound filters, one of which need to be matched by the update.
+  """
+  or: [InitiativeUpdatesCollectionFilter!]
+  """
+  Filters that needs to be matched by some initiative updates.
+  """
+  some: InitiativeUpdatesFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
+"""
+Options for filtering initiatives by initiative updates.
+"""
+input InitiativeUpdatesFilter {
+  """
+  Compound filters, all of which need to be matched by the initiative updates.
+  """
+  and: [InitiativeUpdatesFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Compound filters, one of which need to be matched by the initiative updates.
+  """
+  or: [InitiativeUpdatesFilter!]
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
+"""
 Payload for an initiative webhook.
 """
 type InitiativeWebhookPayload {
@@ -11315,6 +12440,10 @@ type InitiativeWebhookPayload {
   The parent initiative associated with the initiative.
   """
   parentInitiative: InitiativeChildWebhookPayload
+  """
+  The parent initiatives associated with the initiative.
+  """
+  parentInitiatives: [InitiativeChildWebhookPayload!]
   """
   The projects associated with the initiative.
   """
@@ -11518,6 +12647,7 @@ Linear supported integration services.
 """
 enum IntegrationService {
   airbyte
+  asksWeb
   discord
   email
   figma
@@ -11541,6 +12671,7 @@ enum IntegrationService {
   loom
   mcpServer
   mcpServerPersonal
+  microsoftPersonal
   microsoftTeams
   notion
   opsgenie
@@ -13482,6 +14613,10 @@ type IssueDraft implements Node {
   """
   projectMilestoneId: String
   """
+  The IDs of releases associated with the draft.
+  """
+  releaseIds: [String!]!
+  """
   Serialized array of JSONs representing the recurring issue's schedule.
   """
   schedule: JSONObject
@@ -14181,7 +15316,7 @@ type IssueHistory implements Node {
   """
   [INTERNAL] Metadata about the triage rule that made changes to the issue.
   """
-  triageRuleMetadata: IssueHistoryTriageRuleMetadata
+  triageRuleMetadata: IssueHistoryTriageRuleMetadata @deprecated(reason: "Use `workflowMetadata` instead.")
   """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -14191,6 +15326,10 @@ type IssueHistory implements Node {
   Whether the issue's description was updated.
   """
   updatedDescription: Boolean
+  """
+  [INTERNAL] Metadata about the workflow that made changes to the issue.
+  """
+  workflowMetadata: IssueHistoryWorkflowMetadata
 }
 
 type IssueHistoryConnection {
@@ -14249,6 +15388,21 @@ type IssueHistoryTriageRuleMetadata {
   The triage rule that triggered the issue update.
   """
   updatedByTriageRule: WorkflowDefinition
+    @deprecated(reason: "Use `IssueHistoryWorkflowMetadata.workflowDefinition` instead.")
+}
+
+"""
+Metadata about a workflow that made changes to an issue.
+"""
+type IssueHistoryWorkflowMetadata {
+  """
+  The AI conversation associated with the workflow.
+  """
+  aiConversation: AiConversation
+  """
+  The workflow definition that triggered the issue update.
+  """
+  workflowDefinition: WorkflowDefinition
 }
 
 """
@@ -16028,6 +17182,10 @@ type IssueSearchResultEdge {
 
 type IssueSharedAccess {
   """
+  Issue update fields the viewer cannot modify due to shared-only access.
+  """
+  disallowedIssueFields: [IssueSharedAccessDisallowedField!]!
+  """
   Whether this issue has been shared with users outside the team.
   """
   isShared: Boolean!
@@ -16043,6 +17201,16 @@ type IssueSharedAccess {
   Whether the viewer can access this issue only through issue sharing.
   """
   viewerHasOnlySharedAccess: Boolean!
+}
+
+"""
+Issue update fields that are disallowed for users with only shared access.
+"""
+enum IssueSharedAccessDisallowedField {
+  cycleId
+  projectId
+  projectMilestoneId
+  teamId
 }
 
 """
@@ -16506,10 +17674,6 @@ type IssueToRelease implements Node {
   The issue associated with the release.
   """
   issue: Issue!
-  """
-  The pull request that linked this issue to the release.
-  """
-  pullRequest: PullRequest
   """
   The release associated with the issue.
   """
@@ -17482,7 +18646,7 @@ type Mutation {
     input: AirbyteConfigurationInput!
   ): IntegrationPayload!
   """
-  Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
+  Creates a new attachment, or updates existing if the same `url` and `issueId` is used. To create an integration-aware attachment, use the integration-specific mutations such as `attachmentLinkZendesk`, `attachmentLinkSlack`, or `attachmentLinkURL` instead.
   """
   attachmentCreate(
     """
@@ -17500,7 +18664,7 @@ type Mutation {
     id: String!
   ): DeletePayload!
   """
-  Link an existing Discord message to an issue.
+  Link an existing Discord message to an issue. This creates a rich attachment using the workspace's Discord integration.
   """
   attachmentLinkDiscord(
     """
@@ -17537,7 +18701,7 @@ type Mutation {
     url: String!
   ): AttachmentPayload!
   """
-  Link an existing Front conversation to an issue.
+  Link an existing Front conversation to an issue. This creates a rich attachment using the workspace's Front integration, enabling features like automated conversation updates.
   """
   attachmentLinkFront(
     """
@@ -17566,7 +18730,7 @@ type Mutation {
     title: String
   ): FrontAttachmentPayload!
   """
-  Link a GitHub issue to a Linear issue.
+  Link a GitHub issue to a Linear issue. This creates a rich attachment using the workspace's GitHub integration, enabling features like automated status syncing.
   """
   attachmentLinkGitHubIssue(
     """
@@ -17595,7 +18759,7 @@ type Mutation {
     url: String!
   ): AttachmentPayload!
   """
-  Link a GitHub pull request to an issue.
+  Link a GitHub pull request to an issue. This creates a rich attachment using the workspace's GitHub integration, enabling features like automated status syncing.
   """
   attachmentLinkGitHubPR(
     """
@@ -17628,7 +18792,7 @@ type Mutation {
     url: String!
   ): AttachmentPayload!
   """
-  Link an existing GitLab MR to an issue.
+  Link an existing GitLab MR to an issue. This creates a rich attachment using the workspace's GitLab integration, enabling features like automated status syncing.
   """
   attachmentLinkGitLabMR(
     """
@@ -17665,7 +18829,7 @@ type Mutation {
     url: String!
   ): AttachmentPayload!
   """
-  Link an existing Intercom conversation to an issue.
+  Link an existing Intercom conversation to an issue. This creates a rich attachment using the workspace's Intercom integration, enabling features like automated conversation updates.
   """
   attachmentLinkIntercom(
     """
@@ -17698,7 +18862,7 @@ type Mutation {
     title: String
   ): AttachmentPayload!
   """
-  Link an existing Jira issue to an issue.
+  Link an existing Jira issue to an issue. This creates a rich attachment using the workspace's Jira integration, enabling features like automated status syncing.
   """
   attachmentLinkJiraIssue(
     """
@@ -17731,7 +18895,7 @@ type Mutation {
     url: String
   ): AttachmentPayload!
   """
-  Link an existing Salesforce case to an issue.
+  Link an existing Salesforce case to an issue. This creates a rich attachment using the workspace's Salesforce integration.
   """
   attachmentLinkSalesforce(
     """
@@ -17760,7 +18924,7 @@ type Mutation {
     url: String!
   ): AttachmentPayload!
   """
-  Link an existing Slack message to an issue.
+  Link an existing Slack message to an issue. This creates a rich attachment using the workspace's Slack integration.
   """
   attachmentLinkSlack(
     """
@@ -17793,7 +18957,7 @@ type Mutation {
     url: String!
   ): AttachmentPayload!
   """
-  Link any url to an issue.
+  Link any URL to an issue. If the workspace has a matching integration configured and the URL is recognized (e.g., Zendesk, GitHub, Slack), a rich attachment will be created that enables features like automated status updates. Otherwise, a basic attachment is created.
   """
   attachmentLinkURL(
     """
@@ -17822,7 +18986,7 @@ type Mutation {
     url: String!
   ): AttachmentPayload!
   """
-  Link an existing Zendesk ticket to an issue.
+  Link an existing Zendesk ticket to an issue. This creates a rich attachment using the workspace's Zendesk integration, enabling features like automated ticket reopening when the Linear issue is completed.
   """
   attachmentLinkZendesk(
     """
@@ -19058,6 +20222,19 @@ type Mutation {
     serverUrl: String!
   ): IntegrationPayload!
   """
+  [ALPHA] Connects the user's personal Microsoft account to Linear.
+  """
+  integrationMicrosoftPersonalConnect(
+    """
+    The Microsoft OAuth code.
+    """
+    code: String!
+    """
+    The Microsoft OAuth redirect URI.
+    """
+    redirectUri: String!
+  ): IntegrationPayload!
+  """
   [ALPHA] Integrates the organization with Microsoft Teams.
   """
   integrationMicrosoftTeams(
@@ -19916,7 +21093,7 @@ type Mutation {
   """
   issueUnarchive(
     """
-    The identifier of the issue to archive.
+    The identifier of the issue to unarchive.
     """
     id: String!
   ): IssueArchivePayload!
@@ -20699,14 +21876,14 @@ type Mutation {
     input: ReleaseCreateInput!
   ): ReleasePayload!
   """
-  [ALPHA] Deletes a release.
+  [ALPHA] Deletes (trashes) a release.
   """
   releaseDelete(
     """
     The identifier of the release to delete.
     """
     id: String!
-  ): DeletePayload!
+  ): ReleaseArchivePayload!
   """
   [ALPHA] Archives a release pipeline.
   """
@@ -23228,6 +24405,10 @@ Team filtering options.
 """
 input NullableTeamFilter {
   """
+  Filters that the team's ancestors must satisfy.
+  """
+  ancestors: TeamCollectionFilter
+  """
   Compound filters, all of which need to be matched by the team.
   """
   and: [NullableTeamFilter!]
@@ -24065,6 +25246,10 @@ type Organization implements Node {
   The feature release channel the organization belongs to.
   """
   releaseChannel: ReleaseChannel!
+  """
+  [Internal] Whether agent invocation is restricted to full workspace members.
+  """
+  restrictAgentInvocationToMembers: Boolean
   """
   [DEPRECATED] Whether workspace label creation, update, and deletion is restricted to admins.
   """
@@ -30117,6 +31302,10 @@ type PullRequestCommit {
   """
   deletions: Float!
   """
+  Whether this commit has multiple parents.
+  """
+  isMergeCommit: Boolean
+  """
   The full commit message.
   """
   message: String!
@@ -31422,10 +32611,14 @@ type Query {
   """
   issueFilterSuggestion(
     """
-    The ID of the project if filtering a project view
+    The ID of the project if filtering a project view.
     """
     projectId: String
     prompt: String!
+    """
+    [Internal] The ID of the team if filtering a team view.
+    """
+    teamId: String
   ): IssueFilterSuggestionPayload!
   """
   Checks a CSV file validity against a specific import service.
@@ -31828,7 +33021,13 @@ type Query {
   """
   Suggests filters for a project view based on a text prompt.
   """
-  projectFilterSuggestion(prompt: String!): ProjectFilterSuggestionPayload!
+  projectFilterSuggestion(
+    prompt: String!
+    """
+    [Internal] The ID of the team if filtering a team view.
+    """
+    teamId: String
+  ): ProjectFilterSuggestionPayload!
   """
   One specific label.
   """
@@ -32115,6 +33314,19 @@ type Query {
     """
     orderBy: PaginationOrderBy
   ): ReleasePipelineConnection!
+  """
+  [ALPHA] Search releases by term with ranked results.
+  """
+  releaseSearch(
+    """
+    Maximum results. Capped at 50.
+    """
+    first: Int = 20
+    """
+    Search term to match against release name, version, and pipeline name.
+    """
+    term: String!
+  ): [Release!]!
   """
   [ALPHA] One specific release stage.
   """
@@ -33069,6 +34281,10 @@ type Release implements Node {
   """
   createdAt: DateTime!
   """
+  [Internal] The current progress of the release.
+  """
+  currentProgress: JSONObject!
+  """
   The release's description.
   """
   description: String
@@ -33147,6 +34363,10 @@ type Release implements Node {
   """
   pipeline: ReleasePipeline!
   """
+  [Internal] The progress history of the release.
+  """
+  progressHistory: JSONObject!
+  """
   The release's unique URL slug.
   """
   slugId: String!
@@ -33166,6 +34386,10 @@ type Release implements Node {
   The estimated completion date of the release.
   """
   targetDate: TimelessDate
+  """
+  A flag that indicates whether the release is in the trash bin.
+  """
+  trashed: Boolean
   """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -33359,6 +34583,10 @@ input ReleaseDebugSinkInput {
   Pull request debug information.
   """
   pullRequests: [JSONObject!]!
+  """
+  Map of reverted issue identifiers to their source information.
+  """
+  revertedIssues: JSONObject
 }
 
 type ReleaseEdge {
@@ -33430,6 +34658,10 @@ type ReleasePayload {
 [Internal] A release pipeline.
 """
 type ReleasePipeline implements Node {
+  """
+  [ALPHA] The number of non-archived releases in this pipeline.
+  """
+  approximateReleaseCount: Int!
   """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
@@ -33926,6 +35158,10 @@ input ReleaseSyncInput {
   """
   repository: RepositoryDataInput
   """
+  Issue references that were reverted and should be removed from the release.
+  """
+  revertedIssueReferences: [IssueReferenceInput!]
+  """
   The version of the release.
   """
   version: String
@@ -33959,6 +35195,10 @@ input ReleaseSyncInputBase {
   Information about the source repository.
   """
   repository: RepositoryDataInput
+  """
+  Issue references that were reverted and should be removed from the release.
+  """
+  revertedIssueReferences: [IssueReferenceInput!]
   """
   The version of the release.
   """
@@ -34023,6 +35263,10 @@ input ReleaseUpdateInput {
   The estimated completion date of the release.
   """
   targetDate: TimelessDate
+  """
+  Whether the release has been trashed.
+  """
+  trashed: Boolean
   """
   The version of the release.
   """
@@ -34472,6 +35716,9 @@ input RootIssueSort {
   sort: IssueSortInput!
 }
 
+"""
+Which day count to use for SLA calculations.
+"""
 enum SLADayCountType {
   all
   onlyBusinessDays
@@ -36184,6 +37431,10 @@ Team collection filtering options.
 """
 input TeamCollectionFilter {
   """
+  Filters that the team's ancestors must satisfy.
+  """
+  ancestors: TeamCollectionFilter
+  """
   Compound filters, all of which need to be matched by the team.
   """
   and: [TeamCollectionFilter!]
@@ -36386,6 +37637,10 @@ type TeamEdge {
 Team filtering options.
 """
 input TeamFilter {
+  """
+  Filters that the team's ancestors must satisfy.
+  """
+  ancestors: TeamCollectionFilter
   """
   Compound filters, all of which need to be matched by the team.
   """
@@ -36925,6 +38180,10 @@ type Template implements Node {
   """
   archivedAt: DateTime
   """
+  The color of the template icon.
+  """
+  color: String
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
@@ -36940,6 +38199,10 @@ type Template implements Node {
   [Internal] Whether the template has form fields
   """
   hasFormFields: Boolean!
+  """
+  The icon of the template.
+  """
+  icon: String
   """
   The unique identifier of the entity.
   """
@@ -36995,9 +38258,17 @@ type TemplateConnection {
 
 input TemplateCreateInput {
   """
+  The color of the template icon.
+  """
+  color: String
+  """
   The template description.
   """
   description: String
+  """
+  The icon of the template.
+  """
+  icon: String
   """
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
@@ -37049,9 +38320,17 @@ type TemplatePayload {
 
 input TemplateUpdateInput {
   """
+  The color of the template icon.
+  """
+  color: String
+  """
   The template description.
   """
   description: String
+  """
+  The icon of the template.
+  """
+  icon: String
   """
   The template name.
   """
@@ -38197,6 +39476,7 @@ enum UserFlagType {
   slackAgentPromoFromCreateNewIssueShown
   slackBotWelcomeMessageShown
   slackCommentReactionTipShown
+  teamsBotWelcomeMessageShown
   teamsPageIntroductionDismissed
   threadedCommentsNudgeIsSeen
   triageWelcomeDismissed
@@ -38788,6 +40068,10 @@ input ViewPreferencesCreateInput {
   """
   projectLabelId: String
   """
+  The release pipeline these view preferences are associated with.
+  """
+  releasePipelineId: String
+  """
   The team these view preferences are associated with.
   """
   teamId: String
@@ -39079,6 +40363,18 @@ type ViewPreferencesValues {
   """
   initiativeFieldActivity: Boolean
   """
+  Whether to show the initiative completed date field.
+  """
+  initiativeFieldDateCompleted: Boolean
+  """
+  Whether to show the initiative created date field.
+  """
+  initiativeFieldDateCreated: Boolean
+  """
+  Whether to show the initiative updated date field.
+  """
+  initiativeFieldDateUpdated: Boolean
+  """
   Whether to show the initiative description field.
   """
   initiativeFieldDescription: Boolean
@@ -39098,6 +40394,10 @@ type ViewPreferencesValues {
   Whether to show the initiative projects field.
   """
   initiativeFieldProjects: Boolean
+  """
+  Whether to show the initiative start date field.
+  """
+  initiativeFieldStartDate: Boolean
   """
   Whether to show the initiative target date field.
   """
@@ -39391,6 +40691,18 @@ type ViewPreferencesValues {
   """
   projectZoomLevel: String @deprecated(reason: "Use timelineZoomScale instead.")
   """
+  Whether to show the latest release field for release pipelines.
+  """
+  releasePipelineFieldLatestRelease: Boolean
+  """
+  Whether to show the releases field for release pipelines.
+  """
+  releasePipelineFieldReleases: Boolean
+  """
+  Whether to show the type field for release pipelines.
+  """
+  releasePipelineFieldType: Boolean
+  """
   The release pipelines view ordering.
   """
   releasePipelinesViewOrdering: String
@@ -39422,6 +40734,18 @@ type ViewPreferencesValues {
   The review view ordering.
   """
   reviewViewOrdering: String
+  """
+  Whether to show the release date field for scheduled pipeline releases.
+  """
+  scheduledPipelineReleaseFieldReleaseDate: Boolean
+  """
+  Whether to show the stage field for scheduled pipeline releases.
+  """
+  scheduledPipelineReleaseFieldStage: Boolean
+  """
+  The scheduled pipeline releases view ordering.
+  """
+  scheduledPipelineReleasesViewOrdering: String
   """
   The search result type filter.
   """
@@ -39482,6 +40806,10 @@ type ViewPreferencesValues {
   Whether to show sub-initiatives nested.
   """
   showNestedInitiatives: Boolean
+  """
+  Whether to show only snoozed items.
+  """
+  showOnlySnoozedItems: Boolean
   """
   Whether to show parent issues for sub-issues.
   """
@@ -39644,6 +40972,7 @@ enum ViewType {
   roadmapBacklog
   roadmapClosed
   roadmaps
+  scheduledPipelineReleases
   search
   splitSearch
   subIssues
@@ -40187,7 +41516,7 @@ type WorkflowState implements Node {
   """
   team: Team!
   """
-  The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled".
+  The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled", "duplicate".
   """
   type: String!
   """
@@ -40323,7 +41652,7 @@ input WorkflowStateFilter {
   """
   team: TeamFilter
   """
-  Comparator for the workflow state type. Possible values are "triage", "backlog", "unstarted", "started", "completed", "canceled".
+  Comparator for the workflow state type. Possible values are "triage", "backlog", "unstarted", "started", "completed", "canceled", "duplicate".
   """
   type: StringComparator
   """

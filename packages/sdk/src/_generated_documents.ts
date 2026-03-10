@@ -667,6 +667,752 @@ export type AgentSessionWebhookPayload = {
   url?: Maybe<Scalars["String"]>;
 };
 
+/** [Internal] A conversation between a user and an LLM. */
+export type AiConversation = Node & {
+  __typename?: "AiConversation";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** Serialized JSON representing the contexts this conversation is related to. */
+  context: Scalars["JSONObject"];
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** [Internal] The log ID of the AI response. */
+  evalLogId?: Maybe<Scalars["String"]>;
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The iteration ID of the conversation in agentic workflow. */
+  iterationId?: Maybe<Scalars["String"]>;
+  /** The parts of the conversation. */
+  parts?: Maybe<Array<AiConversationPart>>;
+  /** The time at when the user marked the conversation as read. Null, if the user hasn't read the conversation. */
+  readAt?: Maybe<Scalars["DateTime"]>;
+  /** The status of the conversation. */
+  status: AiConversationStatus;
+  /** A summary of the conversation. */
+  summary?: Maybe<Scalars["String"]>;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+  /** The user who the conversation belongs to. */
+  user?: Maybe<User>;
+  /** [Internal] The workflow definition that created this conversation. */
+  workflowDefinition?: Maybe<WorkflowDefinition>;
+};
+
+/** A base part in an AI conversation. */
+export type AiConversationBasePart = {
+  /** The ID of the part. */
+  id: Scalars["String"];
+  /** The metadata of the part. */
+  metadata: AiConversationPartMetadata;
+  /** The type of the part. */
+  type: AiConversationPartType;
+};
+
+export type AiConversationBaseToolCall = {
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationBaseWidget = {
+  /** Display information for the widget, including ProseMirror and Markdown representations. */
+  displayInfo?: Maybe<AiConversationWidgetDisplayInfo>;
+  /** The name of the widget. */
+  name: AiConversationWidgetName;
+  /** The arguments of the widget. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationCodeIntelligenceToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationCodeIntelligenceToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationCodeIntelligenceToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationCodeIntelligenceToolCallArgs = {
+  __typename?: "AiConversationCodeIntelligenceToolCallArgs";
+  question: Scalars["String"];
+};
+
+export type AiConversationCreateEntityToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationCreateEntityToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationCreateEntityToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationCreateEntityToolCallArgs = {
+  __typename?: "AiConversationCreateEntityToolCallArgs";
+  count?: Maybe<Scalars["Float"]>;
+  type: Scalars["String"];
+};
+
+export type AiConversationDeleteEntityToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationDeleteEntityToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationDeleteEntityToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationDeleteEntityToolCallArgs = {
+  __typename?: "AiConversationDeleteEntityToolCallArgs";
+  entity: AiConversationSearchEntitiesToolCallResultEntities;
+};
+
+export type AiConversationEntityCardWidget = AiConversationBaseWidget & {
+  __typename?: "AiConversationEntityCardWidget";
+  /** The arguments to the widget. */
+  args?: Maybe<AiConversationEntityCardWidgetArgs>;
+  /** Display information for the widget, including ProseMirror and Markdown representations. */
+  displayInfo?: Maybe<AiConversationWidgetDisplayInfo>;
+  /** The name of the widget. */
+  name: AiConversationWidgetName;
+  /** The arguments of the widget. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationEntityCardWidgetArgs = {
+  __typename?: "AiConversationEntityCardWidgetArgs";
+  /** The action performed on the entity (leave empty if just found) */
+  action?: Maybe<AiConversationEntityCardWidgetArgsAction>;
+  /** The UUID of the entity to display */
+  id: Scalars["String"];
+  /**
+   * @deprecated Optional note to display about the entity
+   * @deprecated Optional note to display about the entity
+   */
+  note?: Maybe<Scalars["String"]>;
+  /** [Internal] The entity type */
+  type: AiConversationEntityCardWidgetArgsType;
+};
+
+/** The action performed on the entity (leave empty if just found) */
+export enum AiConversationEntityCardWidgetArgsAction {
+  Created = "created",
+  Updated = "updated",
+}
+
+/** [Internal] The entity type */
+export enum AiConversationEntityCardWidgetArgsType {
+  AiPrompt = "AiPrompt",
+  CustomView = "CustomView",
+  Customer = "Customer",
+  CustomerNeed = "CustomerNeed",
+  Document = "Document",
+  Initiative = "Initiative",
+  InitiativeUpdate = "InitiativeUpdate",
+  Issue = "Issue",
+  Project = "Project",
+  ProjectUpdate = "ProjectUpdate",
+  PullRequest = "PullRequest",
+  Release = "Release",
+  ReleasePipeline = "ReleasePipeline",
+  Team = "Team",
+  Template = "Template",
+}
+
+export type AiConversationEntityListWidget = AiConversationBaseWidget & {
+  __typename?: "AiConversationEntityListWidget";
+  /** The arguments to the widget. */
+  args?: Maybe<AiConversationEntityListWidgetArgs>;
+  /** Display information for the widget, including ProseMirror and Markdown representations. */
+  displayInfo?: Maybe<AiConversationWidgetDisplayInfo>;
+  /** The name of the widget. */
+  name: AiConversationWidgetName;
+  /** The arguments of the widget. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationEntityListWidgetArgs = {
+  __typename?: "AiConversationEntityListWidgetArgs";
+  /** The action performed on the entities (leave empty if just found) */
+  action?: Maybe<AiConversationEntityListWidgetArgsAction>;
+  /** Total number of entities in the list */
+  count?: Maybe<Scalars["Float"]>;
+  entities: Array<AiConversationEntityListWidgetArgsEntities>;
+};
+
+/** The action performed on the entities (leave empty if just found) */
+export enum AiConversationEntityListWidgetArgsAction {
+  Created = "created",
+  Updated = "updated",
+}
+
+export type AiConversationEntityListWidgetArgsEntities = {
+  __typename?: "AiConversationEntityListWidgetArgsEntities";
+  /** Entity UUID */
+  id: Scalars["String"];
+  /**
+   * @deprecated Optional note to display about the entity
+   * @deprecated Optional note to display about the entity
+   */
+  note?: Maybe<Scalars["String"]>;
+  /** [Internal] The entity type */
+  type: AiConversationEntityListWidgetArgsEntitiesType;
+};
+
+/** [Internal] The entity type */
+export enum AiConversationEntityListWidgetArgsEntitiesType {
+  AiPrompt = "AiPrompt",
+  CustomView = "CustomView",
+  Customer = "Customer",
+  CustomerNeed = "CustomerNeed",
+  Document = "Document",
+  Initiative = "Initiative",
+  InitiativeUpdate = "InitiativeUpdate",
+  Issue = "Issue",
+  Project = "Project",
+  ProjectUpdate = "ProjectUpdate",
+  PullRequest = "PullRequest",
+  Release = "Release",
+  ReleasePipeline = "ReleasePipeline",
+  Team = "Team",
+  Template = "Template",
+}
+
+export type AiConversationGetMicrosoftTeamsConversationHistoryToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationGetMicrosoftTeamsConversationHistoryToolCall";
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationGetPullRequestDiffToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationGetPullRequestDiffToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationGetPullRequestDiffToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationGetPullRequestDiffToolCallArgs = {
+  __typename?: "AiConversationGetPullRequestDiffToolCallArgs";
+  entity: AiConversationSearchEntitiesToolCallResultEntities;
+};
+
+export type AiConversationGetPullRequestFileToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationGetPullRequestFileToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationGetPullRequestFileToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationGetPullRequestFileToolCallArgs = {
+  __typename?: "AiConversationGetPullRequestFileToolCallArgs";
+  entity: AiConversationSearchEntitiesToolCallResultEntities;
+  path: Scalars["String"];
+};
+
+export type AiConversationGetSlackConversationHistoryToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationGetSlackConversationHistoryToolCall";
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationInvokeMcpToolToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationInvokeMcpToolToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationInvokeMcpToolToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationInvokeMcpToolToolCallArgs = {
+  __typename?: "AiConversationInvokeMcpToolToolCallArgs";
+  server: AiConversationInvokeMcpToolToolCallArgsServer;
+  tool: AiConversationInvokeMcpToolToolCallArgsTool;
+};
+
+export type AiConversationInvokeMcpToolToolCallArgsServer = {
+  __typename?: "AiConversationInvokeMcpToolToolCallArgsServer";
+  integrationId: Scalars["String"];
+  name: Scalars["String"];
+  title?: Maybe<Scalars["String"]>;
+};
+
+export type AiConversationInvokeMcpToolToolCallArgsTool = {
+  __typename?: "AiConversationInvokeMcpToolToolCallArgsTool";
+  name: Scalars["String"];
+  title?: Maybe<Scalars["String"]>;
+};
+
+/** A part in an AI conversation. */
+export type AiConversationPart =
+  | AiConversationPromptPart
+  | AiConversationReasoningPart
+  | AiConversationTextPart
+  | AiConversationToolCallPart
+  | AiConversationWidgetPart;
+
+/** Metadata about a part in an AI conversation. */
+export type AiConversationPartMetadata = {
+  __typename?: "AiConversationPartMetadata";
+  /** The eval log ID of the part. */
+  evalLogId?: Maybe<Scalars["String"]>;
+  /** AI feedback state for this part. */
+  feedback?: Maybe<Scalars["JSONObject"]>;
+  /** The turn ID of the part. */
+  turnId: Scalars["String"];
+};
+
+/** The type of a part in an AI conversation. */
+export enum AiConversationPartType {
+  Prompt = "prompt",
+  Reasoning = "reasoning",
+  Text = "text",
+  ToolCall = "toolCall",
+  Widget = "widget",
+  WidgetPlaceholder = "widgetPlaceholder",
+}
+
+/** A prompt part in an AI conversation. */
+export type AiConversationPromptPart = AiConversationBasePart & {
+  __typename?: "AiConversationPromptPart";
+  /** The Markdown body of the prompt part. */
+  body: Scalars["String"];
+  /** The data of the prompt part. */
+  bodyData: Scalars["JSONObject"];
+  /** The ID of the part. */
+  id: Scalars["String"];
+  /** The metadata of the part. */
+  metadata: AiConversationPartMetadata;
+  /** The type of the part. */
+  type: AiConversationPartType;
+  /** The user who created the prompt part. */
+  user?: Maybe<User>;
+};
+
+export type AiConversationQueryActivityToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationQueryActivityToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationQueryActivityToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationQueryActivityToolCallArgs = {
+  __typename?: "AiConversationQueryActivityToolCallArgs";
+  entities?: Maybe<Array<AiConversationSearchEntitiesToolCallResultEntities>>;
+};
+
+export type AiConversationQueryUpdatesToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationQueryUpdatesToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationQueryUpdatesToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationQueryUpdatesToolCallArgs = {
+  __typename?: "AiConversationQueryUpdatesToolCallArgs";
+  entity?: Maybe<AiConversationSearchEntitiesToolCallResultEntities>;
+  updateType: AiConversationQueryUpdatesToolCallArgsUpdateType;
+};
+
+export enum AiConversationQueryUpdatesToolCallArgsUpdateType {
+  InitiativeUpdate = "InitiativeUpdate",
+  ProjectUpdate = "ProjectUpdate",
+}
+
+export type AiConversationQueryViewToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationQueryViewToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationQueryViewToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationQueryViewToolCallArgs = {
+  __typename?: "AiConversationQueryViewToolCallArgs";
+  filter?: Maybe<Scalars["String"]>;
+  mode: AiConversationQueryViewToolCallArgsMode;
+  view: AiConversationQueryViewToolCallArgsView;
+};
+
+export enum AiConversationQueryViewToolCallArgsMode {
+  Insight = "insight",
+  List = "list",
+}
+
+export type AiConversationQueryViewToolCallArgsView = {
+  __typename?: "AiConversationQueryViewToolCallArgsView";
+  group?: Maybe<AiConversationSearchEntitiesToolCallResultEntities>;
+  predefinedView?: Maybe<Scalars["String"]>;
+  type: Scalars["String"];
+};
+
+/** A reasoning part in an AI conversation. */
+export type AiConversationReasoningPart = AiConversationBasePart & {
+  __typename?: "AiConversationReasoningPart";
+  /** The Markdown body of the reasoning part. */
+  body: Scalars["String"];
+  /** The data of the reasoning part. */
+  bodyData: Scalars["JSONObject"];
+  /** The ID of the part. */
+  id: Scalars["String"];
+  /** The metadata of the part. */
+  metadata: AiConversationPartMetadata;
+  /** The title of the reasoning part. */
+  title?: Maybe<Scalars["String"]>;
+  /** The type of the part. */
+  type: AiConversationPartType;
+};
+
+export type AiConversationResearchToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationResearchToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationResearchToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  result?: Maybe<AiConversationResearchToolCallResult>;
+};
+
+export type AiConversationResearchToolCallArgs = {
+  __typename?: "AiConversationResearchToolCallArgs";
+  context: Scalars["String"];
+  query: Scalars["String"];
+  subjects?: Maybe<Array<AiConversationSearchEntitiesToolCallResultEntities>>;
+};
+
+export type AiConversationResearchToolCallResult = {
+  __typename?: "AiConversationResearchToolCallResult";
+  progressId?: Maybe<Scalars["String"]>;
+};
+
+export type AiConversationRetrieveEntitiesToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationRetrieveEntitiesToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationRetrieveEntitiesToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationRetrieveEntitiesToolCallArgs = {
+  __typename?: "AiConversationRetrieveEntitiesToolCallArgs";
+  entities: Array<AiConversationSearchEntitiesToolCallResultEntities>;
+};
+
+export type AiConversationSearchDocumentationToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationSearchDocumentationToolCall";
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationSearchEntitiesToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationSearchEntitiesToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationSearchEntitiesToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  result?: Maybe<AiConversationSearchEntitiesToolCallResult>;
+};
+
+export type AiConversationSearchEntitiesToolCallArgs = {
+  __typename?: "AiConversationSearchEntitiesToolCallArgs";
+  queries: Array<Scalars["String"]>;
+  type?: Maybe<Scalars["String"]>;
+};
+
+export type AiConversationSearchEntitiesToolCallResult = {
+  __typename?: "AiConversationSearchEntitiesToolCallResult";
+  entities: Array<AiConversationSearchEntitiesToolCallResultEntities>;
+};
+
+export type AiConversationSearchEntitiesToolCallResultEntities = {
+  __typename?: "AiConversationSearchEntitiesToolCallResultEntities";
+  id: Scalars["String"];
+  type: Scalars["String"];
+};
+
+/** The status of an AI conversation. */
+export enum AiConversationStatus {
+  Active = "active",
+  AwaitingInput = "awaitingInput",
+  Complete = "complete",
+  Error = "error",
+  Pending = "pending",
+}
+
+export type AiConversationSuggestValuesToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationSuggestValuesToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationSuggestValuesToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationSuggestValuesToolCallArgs = {
+  __typename?: "AiConversationSuggestValuesToolCallArgs";
+  field: Scalars["String"];
+  query?: Maybe<Scalars["String"]>;
+};
+
+/** A text part in an AI conversation. */
+export type AiConversationTextPart = AiConversationBasePart & {
+  __typename?: "AiConversationTextPart";
+  /** The Markdown body of the text part. */
+  body: Scalars["String"];
+  /** The data of the text part. */
+  bodyData: Scalars["JSONObject"];
+  /** The ID of the part. */
+  id: Scalars["String"];
+  /** The metadata of the part. */
+  metadata: AiConversationPartMetadata;
+  /** The type of the part. */
+  type: AiConversationPartType;
+};
+
+/** The name of a tool that was called in an AI conversation. */
+export enum AiConversationTool {
+  CodeIntelligence = "CodeIntelligence",
+  CreateEntity = "CreateEntity",
+  DeleteEntity = "DeleteEntity",
+  GetMicrosoftTeamsConversationHistory = "GetMicrosoftTeamsConversationHistory",
+  GetPullRequestDiff = "GetPullRequestDiff",
+  GetPullRequestFile = "GetPullRequestFile",
+  GetSlackConversationHistory = "GetSlackConversationHistory",
+  InvokeMcpTool = "InvokeMcpTool",
+  QueryActivity = "QueryActivity",
+  QueryUpdates = "QueryUpdates",
+  QueryView = "QueryView",
+  Research = "Research",
+  RetrieveEntities = "RetrieveEntities",
+  SearchDocumentation = "SearchDocumentation",
+  SearchEntities = "SearchEntities",
+  SuggestValues = "SuggestValues",
+  TranscribeMedia = "TranscribeMedia",
+  TranscribeVideo = "TranscribeVideo",
+  UpdateEntity = "UpdateEntity",
+  WebSearch = "WebSearch",
+}
+
+/** The tool call. */
+export type AiConversationToolCall =
+  | AiConversationCodeIntelligenceToolCall
+  | AiConversationCreateEntityToolCall
+  | AiConversationDeleteEntityToolCall
+  | AiConversationGetMicrosoftTeamsConversationHistoryToolCall
+  | AiConversationGetPullRequestDiffToolCall
+  | AiConversationGetPullRequestFileToolCall
+  | AiConversationGetSlackConversationHistoryToolCall
+  | AiConversationInvokeMcpToolToolCall
+  | AiConversationQueryActivityToolCall
+  | AiConversationQueryUpdatesToolCall
+  | AiConversationQueryViewToolCall
+  | AiConversationResearchToolCall
+  | AiConversationRetrieveEntitiesToolCall
+  | AiConversationSearchDocumentationToolCall
+  | AiConversationSearchEntitiesToolCall
+  | AiConversationSuggestValuesToolCall
+  | AiConversationTranscribeMediaToolCall
+  | AiConversationTranscribeVideoToolCall
+  | AiConversationUpdateEntityToolCall
+  | AiConversationWebSearchToolCall;
+
+/** A tool call part in an AI conversation. */
+export type AiConversationToolCallPart = AiConversationBasePart & {
+  __typename?: "AiConversationToolCallPart";
+  /** The ID of the part. */
+  id: Scalars["String"];
+  /** The metadata of the part. */
+  metadata: AiConversationPartMetadata;
+  /** The tool call part. */
+  toolCall: AiConversationToolCall;
+  /** The type of the part. */
+  type: AiConversationPartType;
+};
+
+export type AiConversationToolDisplayInfo = {
+  __typename?: "AiConversationToolDisplayInfo";
+  activeLabel: Scalars["String"];
+  detail?: Maybe<Scalars["String"]>;
+  icon: Scalars["String"];
+  inactiveLabel: Scalars["String"];
+  result?: Maybe<Scalars["String"]>;
+};
+
+export type AiConversationTranscribeMediaToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationTranscribeMediaToolCall";
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationTranscribeVideoToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationTranscribeVideoToolCall";
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationUpdateEntityToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationUpdateEntityToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationUpdateEntityToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationUpdateEntityToolCallArgs = {
+  __typename?: "AiConversationUpdateEntityToolCallArgs";
+  entity: AiConversationSearchEntitiesToolCallResultEntities;
+};
+
+export type AiConversationWebSearchToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationWebSearchToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationWebSearchToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationWebSearchToolCallArgs = {
+  __typename?: "AiConversationWebSearchToolCallArgs";
+  query?: Maybe<Scalars["String"]>;
+  url?: Maybe<Scalars["String"]>;
+};
+
+/** The widget. */
+export type AiConversationWidget = AiConversationEntityCardWidget | AiConversationEntityListWidget;
+
+export type AiConversationWidgetDisplayInfo = {
+  __typename?: "AiConversationWidgetDisplayInfo";
+  /** The Markdown representation of the widget content. */
+  body: Scalars["String"];
+  /** The ProseMirror data representation of the widget content. */
+  bodyData: Scalars["JSONObject"];
+};
+
+/** The name of a widget in an AI conversation. */
+export enum AiConversationWidgetName {
+  EntityCard = "EntityCard",
+  EntityList = "EntityList",
+}
+
+/** A widget part in an AI conversation. */
+export type AiConversationWidgetPart = AiConversationBasePart & {
+  __typename?: "AiConversationWidgetPart";
+  /** The ID of the part. */
+  id: Scalars["String"];
+  /** The metadata of the part. */
+  metadata: AiConversationPartMetadata;
+  /** The type of the part. */
+  type: AiConversationPartType;
+  /** The widget. */
+  widget: AiConversationWidget;
+};
+
 /** AI prompt rules for a team. */
 export type AiPromptRules = Node & {
   __typename?: "AiPromptRules";
@@ -1143,6 +1889,8 @@ export type AuthOrganization = {
   __typename?: "AuthOrganization";
   /** Allowed authentication providers, empty array means all are allowed */
   allowedAuthServices: Array<Scalars["String"]>;
+  /** An approximate count of users, updated once per day. */
+  approximateUserCount: Scalars["Float"];
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /** The time at which deletion of the organization was requested. */
@@ -1319,6 +2067,8 @@ export type CodingAgentSandboxPayload = {
   createdAt: Scalars["DateTime"];
   /** The user who initiated the session. */
   creatorId?: Maybe<Scalars["String"]>;
+  /** Datadog logs URL for the session or sandbox. */
+  datadogLogsUrl?: Maybe<Scalars["String"]>;
   /** When the session reached a terminal state. */
   endedAt?: Maybe<Scalars["DateTime"]>;
   /** The sandbox identifier. */
@@ -1536,7 +2286,7 @@ export type CommentCreateInput = {
   bodyData?: InputMaybe<Scalars["JSON"]>;
   /** Create comment as a user with the provided name. This option is only available to OAuth applications creating comments in `actor=app` mode. */
   createAsUser?: InputMaybe<Scalars["String"]>;
-  /** Flag to indicate this comment should be created on the issue's synced Slack comment thread. If no synced Slack comment thread exists, the mutation will fail. */
+  /** Flag to indicate this comment should be created on the issue's synced Slack comment thread. If no synced Slack comment thread exists, the mutation will fail. If there are multiple synced Slack threads on the issue, the oldest one will be targeted. */
   createOnSyncedSlackThread?: InputMaybe<Scalars["Boolean"]>;
   /** The date when the comment was created (e.g. if importing from another system). Must be a date in the past. If none is provided, the backend will generate the time as now. */
   createdAt?: InputMaybe<Scalars["DateTime"]>;
@@ -3802,6 +4552,8 @@ export type DocumentContentHistoryType = {
   createdAt: Scalars["DateTime"];
   /** The UUID of the document content history entry. */
   id: Scalars["String"];
+  /** Metadata associated with the history item. */
+  metadata?: Maybe<Scalars["JSON"]>;
 };
 
 export type DocumentCreateInput = {
@@ -4226,6 +4978,8 @@ export type EmailIntakeAddress = Node & {
   issueCreatedAutoReplyEnabled: Scalars["Boolean"];
   /** The organization that the email address is associated with. */
   organization: Organization;
+  /** Whether to reopen completed or canceled issues when a substantive email reply is received. */
+  reopenOnReply: Scalars["Boolean"];
   /** Whether email replies are enabled. */
   repliesEnabled: Scalars["Boolean"];
   /** The name to be used for outgoing emails. */
@@ -4266,6 +5020,8 @@ export type EmailIntakeAddressCreateInput = {
   issueCreatedAutoReply?: InputMaybe<Scalars["String"]>;
   /** Whether the issue created auto-reply is enabled. */
   issueCreatedAutoReplyEnabled?: InputMaybe<Scalars["Boolean"]>;
+  /** Whether to reopen completed or canceled issues when a substantive email reply is received. */
+  reopenOnReply?: InputMaybe<Scalars["Boolean"]>;
   /** Whether email replies are enabled. */
   repliesEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** The name to be used for outgoing emails. */
@@ -4317,6 +5073,8 @@ export type EmailIntakeAddressUpdateInput = {
   issueCreatedAutoReply?: InputMaybe<Scalars["String"]>;
   /** Whether the issue created auto-reply is enabled. */
   issueCreatedAutoReplyEnabled?: InputMaybe<Scalars["Boolean"]>;
+  /** Whether to reopen completed or canceled issues when a substantive email reply is received. */
+  reopenOnReply?: InputMaybe<Scalars["Boolean"]>;
   /** Whether email replies are enabled. */
   repliesEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** The name to be used for outgoing emails. */
@@ -5705,6 +6463,8 @@ export type InitiativeCollectionFilter = {
   ancestors?: InputMaybe<InitiativeCollectionFilter>;
   /** Compound filters, all of which need to be matched by the initiative. */
   and?: InputMaybe<Array<InitiativeCollectionFilter>>;
+  /** Comparator for the initiative completed at date. */
+  completedAt?: InputMaybe<NullableDateComparator>;
   /** Comparator for the created at date. */
   createdAt?: InputMaybe<DateComparator>;
   /** Filters that the initiative creator must satisfy. */
@@ -5717,6 +6477,8 @@ export type InitiativeCollectionFilter = {
   healthWithAge?: InputMaybe<StringComparator>;
   /** Comparator for the identifier. */
   id?: InputMaybe<IdComparator>;
+  /** Filters that the initiative updates must satisfy. */
+  initiativeUpdates?: InputMaybe<InitiativeUpdatesCollectionFilter>;
   /** Comparator for the collection length. */
   length?: InputMaybe<NumberComparator>;
   /** Comparator for the initiative name. */
@@ -5729,6 +6491,8 @@ export type InitiativeCollectionFilter = {
   slugId?: InputMaybe<StringComparator>;
   /** Filters that needs to be matched by some initiatives. */
   some?: InputMaybe<InitiativeFilter>;
+  /** Comparator for the initiative started at date. */
+  startedAt?: InputMaybe<NullableDateComparator>;
   /** Comparator for the initiative status: Planned, Active, Completed */
   status?: InputMaybe<StringComparator>;
   /** Comparator for the initiative target date. */
@@ -5795,6 +6559,8 @@ export type InitiativeFilter = {
   ancestors?: InputMaybe<InitiativeCollectionFilter>;
   /** Compound filters, all of which need to be matched by the initiative. */
   and?: InputMaybe<Array<InitiativeFilter>>;
+  /** Comparator for the initiative completed at date. */
+  completedAt?: InputMaybe<NullableDateComparator>;
   /** Comparator for the created at date. */
   createdAt?: InputMaybe<DateComparator>;
   /** Filters that the initiative creator must satisfy. */
@@ -5805,6 +6571,8 @@ export type InitiativeFilter = {
   healthWithAge?: InputMaybe<StringComparator>;
   /** Comparator for the identifier. */
   id?: InputMaybe<IdComparator>;
+  /** Filters that the initiative updates must satisfy. */
+  initiativeUpdates?: InputMaybe<InitiativeUpdatesCollectionFilter>;
   /** Comparator for the initiative name. */
   name?: InputMaybe<StringComparator>;
   /** Compound filters, one of which need to be matched by the initiative. */
@@ -5813,6 +6581,8 @@ export type InitiativeFilter = {
   owner?: InputMaybe<NullableUserFilter>;
   /** Comparator for the initiative slug ID. */
   slugId?: InputMaybe<StringComparator>;
+  /** Comparator for the initiative started at date. */
+  startedAt?: InputMaybe<NullableDateComparator>;
   /** Comparator for the initiative status: Planned, Active, Completed */
   status?: InputMaybe<StringComparator>;
   /** Comparator for the initiative target date. */
@@ -6461,6 +7231,40 @@ export type InitiativeUpdatedAtSort = {
   order?: InputMaybe<PaginationSortOrder>;
 };
 
+/** Collection filtering options for filtering initiatives by initiative updates. */
+export type InitiativeUpdatesCollectionFilter = {
+  /** Compound filters, all of which need to be matched by the initiative update. */
+  and?: InputMaybe<Array<InitiativeUpdatesCollectionFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: InputMaybe<DateComparator>;
+  /** Filters that needs to be matched by all initiative updates. */
+  every?: InputMaybe<InitiativeUpdatesFilter>;
+  /** Comparator for the identifier. */
+  id?: InputMaybe<IdComparator>;
+  /** Comparator for the collection length. */
+  length?: InputMaybe<NumberComparator>;
+  /** Compound filters, one of which need to be matched by the update. */
+  or?: InputMaybe<Array<InitiativeUpdatesCollectionFilter>>;
+  /** Filters that needs to be matched by some initiative updates. */
+  some?: InputMaybe<InitiativeUpdatesFilter>;
+  /** Comparator for the updated at date. */
+  updatedAt?: InputMaybe<DateComparator>;
+};
+
+/** Options for filtering initiatives by initiative updates. */
+export type InitiativeUpdatesFilter = {
+  /** Compound filters, all of which need to be matched by the initiative updates. */
+  and?: InputMaybe<Array<InitiativeUpdatesFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: InputMaybe<DateComparator>;
+  /** Comparator for the identifier. */
+  id?: InputMaybe<IdComparator>;
+  /** Compound filters, one of which need to be matched by the initiative updates. */
+  or?: InputMaybe<Array<InitiativeUpdatesFilter>>;
+  /** Comparator for the updated at date. */
+  updatedAt?: InputMaybe<DateComparator>;
+};
+
 /** Payload for an initiative webhook. */
 export type InitiativeWebhookPayload = {
   __typename?: "InitiativeWebhookPayload";
@@ -6502,6 +7306,8 @@ export type InitiativeWebhookPayload = {
   ownerId?: Maybe<Scalars["String"]>;
   /** The parent initiative associated with the initiative. */
   parentInitiative?: Maybe<InitiativeChildWebhookPayload>;
+  /** The parent initiatives associated with the initiative. */
+  parentInitiatives?: Maybe<Array<InitiativeChildWebhookPayload>>;
   /** The projects associated with the initiative. */
   projects?: Maybe<Array<ProjectChildWebhookPayload>>;
   /** The unique slug identifier of the initiative. */
@@ -6631,6 +7437,7 @@ export type IntegrationRequestPayload = {
 /** Linear supported integration services. */
 export enum IntegrationService {
   Airbyte = "airbyte",
+  AsksWeb = "asksWeb",
   Discord = "discord",
   Email = "email",
   Figma = "figma",
@@ -6654,6 +7461,7 @@ export enum IntegrationService {
   Loom = "loom",
   McpServer = "mcpServer",
   McpServerPersonal = "mcpServerPersonal",
+  MicrosoftPersonal = "microsoftPersonal",
   MicrosoftTeams = "microsoftTeams",
   Notion = "notion",
   Opsgenie = "opsgenie",
@@ -7658,6 +8466,8 @@ export type IssueDraft = Node & {
   projectId?: Maybe<Scalars["String"]>;
   /** The project milestone associated with the draft. */
   projectMilestoneId?: Maybe<Scalars["String"]>;
+  /** The IDs of releases associated with the draft. */
+  releaseIds: Array<Scalars["String"]>;
   /** Serialized array of JSONs representing the recurring issue's schedule. */
   schedule?: Maybe<Scalars["JSONObject"]>;
   /** The ID of the comment that the draft was created from. */
@@ -8027,7 +8837,10 @@ export type IssueHistory = Node & {
   triageResponsibilityNotifiedUsers?: Maybe<Array<User>>;
   /** The team that triggered the triage responsibility action. */
   triageResponsibilityTeam?: Maybe<Team>;
-  /** [INTERNAL] Metadata about the triage rule that made changes to the issue. */
+  /**
+   * [INTERNAL] Metadata about the triage rule that made changes to the issue.
+   * @deprecated Use `workflowMetadata` instead.
+   */
   triageRuleMetadata?: Maybe<IssueHistoryTriageRuleMetadata>;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -8036,6 +8849,8 @@ export type IssueHistory = Node & {
   updatedAt: Scalars["DateTime"];
   /** Whether the issue's description was updated. */
   updatedDescription?: Maybe<Scalars["Boolean"]>;
+  /** [INTERNAL] Metadata about the workflow that made changes to the issue. */
+  workflowMetadata?: Maybe<IssueHistoryWorkflowMetadata>;
 };
 
 export type IssueHistoryConnection = {
@@ -8074,8 +8889,20 @@ export type IssueHistoryTriageRuleMetadata = {
   __typename?: "IssueHistoryTriageRuleMetadata";
   /** The error that occurred, if any. */
   triageRuleError?: Maybe<IssueHistoryTriageRuleError>;
-  /** The triage rule that triggered the issue update. */
+  /**
+   * The triage rule that triggered the issue update.
+   * @deprecated Use `IssueHistoryWorkflowMetadata.workflowDefinition` instead.
+   */
   updatedByTriageRule?: Maybe<WorkflowDefinition>;
+};
+
+/** Metadata about a workflow that made changes to an issue. */
+export type IssueHistoryWorkflowMetadata = {
+  __typename?: "IssueHistoryWorkflowMetadata";
+  /** The AI conversation associated with the workflow. */
+  aiConversation?: Maybe<AiConversation>;
+  /** The workflow definition that triggered the issue update. */
+  workflowDefinition?: Maybe<WorkflowDefinition>;
 };
 
 /** Comparator for issue identifiers. */
@@ -8994,6 +9821,8 @@ export type IssueSearchResultEdge = {
 
 export type IssueSharedAccess = {
   __typename?: "IssueSharedAccess";
+  /** Issue update fields the viewer cannot modify due to shared-only access. */
+  disallowedIssueFields: Array<IssueSharedAccessDisallowedField>;
   /** Whether this issue has been shared with users outside the team. */
   isShared: Scalars["Boolean"];
   /** The number of users this issue is shared with. */
@@ -9003,6 +9832,14 @@ export type IssueSharedAccess = {
   /** Whether the viewer can access this issue only through issue sharing. */
   viewerHasOnlySharedAccess: Scalars["Boolean"];
 };
+
+/** Issue update fields that are disallowed for users with only shared access. */
+export enum IssueSharedAccessDisallowedField {
+  CycleId = "cycleId",
+  ProjectId = "projectId",
+  ProjectMilestoneId = "projectMilestoneId",
+  TeamId = "teamId",
+}
 
 /** Payload for issue SLA webhook events. */
 export type IssueSlaWebhookPayload = {
@@ -9285,8 +10122,6 @@ export type IssueToRelease = Node & {
   id: Scalars["ID"];
   /** The issue associated with the release. */
   issue: Issue;
-  /** The pull request that linked this issue to the release. */
-  pullRequest?: Maybe<PullRequest>;
   /** The release associated with the issue. */
   release: Release;
   /**
@@ -9793,31 +10628,31 @@ export type Mutation = {
   agentSessionUpdateExternalUrl: AgentSessionPayload;
   /** Creates an integration api key for Airbyte to connect with Linear. */
   airbyteIntegrationConnect: IntegrationPayload;
-  /** Creates a new attachment, or updates existing if the same `url` and `issueId` is used. */
+  /** Creates a new attachment, or updates existing if the same `url` and `issueId` is used. To create an integration-aware attachment, use the integration-specific mutations such as `attachmentLinkZendesk`, `attachmentLinkSlack`, or `attachmentLinkURL` instead. */
   attachmentCreate: AttachmentPayload;
   /** Deletes an issue attachment. */
   attachmentDelete: DeletePayload;
-  /** Link an existing Discord message to an issue. */
+  /** Link an existing Discord message to an issue. This creates a rich attachment using the workspace's Discord integration. */
   attachmentLinkDiscord: AttachmentPayload;
-  /** Link an existing Front conversation to an issue. */
+  /** Link an existing Front conversation to an issue. This creates a rich attachment using the workspace's Front integration, enabling features like automated conversation updates. */
   attachmentLinkFront: FrontAttachmentPayload;
-  /** Link a GitHub issue to a Linear issue. */
+  /** Link a GitHub issue to a Linear issue. This creates a rich attachment using the workspace's GitHub integration, enabling features like automated status syncing. */
   attachmentLinkGitHubIssue: AttachmentPayload;
-  /** Link a GitHub pull request to an issue. */
+  /** Link a GitHub pull request to an issue. This creates a rich attachment using the workspace's GitHub integration, enabling features like automated status syncing. */
   attachmentLinkGitHubPR: AttachmentPayload;
-  /** Link an existing GitLab MR to an issue. */
+  /** Link an existing GitLab MR to an issue. This creates a rich attachment using the workspace's GitLab integration, enabling features like automated status syncing. */
   attachmentLinkGitLabMR: AttachmentPayload;
-  /** Link an existing Intercom conversation to an issue. */
+  /** Link an existing Intercom conversation to an issue. This creates a rich attachment using the workspace's Intercom integration, enabling features like automated conversation updates. */
   attachmentLinkIntercom: AttachmentPayload;
-  /** Link an existing Jira issue to an issue. */
+  /** Link an existing Jira issue to an issue. This creates a rich attachment using the workspace's Jira integration, enabling features like automated status syncing. */
   attachmentLinkJiraIssue: AttachmentPayload;
-  /** Link an existing Salesforce case to an issue. */
+  /** Link an existing Salesforce case to an issue. This creates a rich attachment using the workspace's Salesforce integration. */
   attachmentLinkSalesforce: AttachmentPayload;
-  /** Link an existing Slack message to an issue. */
+  /** Link an existing Slack message to an issue. This creates a rich attachment using the workspace's Slack integration. */
   attachmentLinkSlack: AttachmentPayload;
-  /** Link any url to an issue. */
+  /** Link any URL to an issue. If the workspace has a matching integration configured and the URL is recognized (e.g., Zendesk, GitHub, Slack), a rich attachment will be created that enables features like automated status updates. Otherwise, a basic attachment is created. */
   attachmentLinkURL: AttachmentPayload;
-  /** Link an existing Zendesk ticket to an issue. */
+  /** Link an existing Zendesk ticket to an issue. This creates a rich attachment using the workspace's Zendesk integration, enabling features like automated ticket reopening when the Linear issue is completed. */
   attachmentLinkZendesk: AttachmentPayload;
   /** Begin syncing the thread for an existing Slack message attachment with a comment thread on its issue. */
   attachmentSyncToSlack: AttachmentPayload;
@@ -10051,6 +10886,8 @@ export type Mutation = {
   integrationMcpServerConnect: IntegrationPayload;
   /** [INTERNAL] Connects the user's personal account with an MCP server. */
   integrationMcpServerPersonalConnect: IntegrationPayload;
+  /** [ALPHA] Connects the user's personal Microsoft account to Linear. */
+  integrationMicrosoftPersonalConnect: IntegrationPayload;
   /** [ALPHA] Integrates the organization with Microsoft Teams. */
   integrationMicrosoftTeams: IntegrationPayload;
   /** [INTERNAL] Integrates the organization with Opsgenie. */
@@ -10340,8 +11177,8 @@ export type Mutation = {
   releaseCompleteByAccessKey: ReleasePayload;
   /** [ALPHA] Creates a new release. */
   releaseCreate: ReleasePayload;
-  /** [ALPHA] Deletes a release. */
-  releaseDelete: DeletePayload;
+  /** [ALPHA] Deletes (trashes) a release. */
+  releaseDelete: ReleaseArchivePayload;
   /** [ALPHA] Archives a release pipeline. */
   releasePipelineArchive: ReleasePipelineArchivePayload;
   /** [ALPHA] Creates a new release pipeline. */
@@ -11140,6 +11977,11 @@ export type MutationIntegrationMcpServerConnectArgs = {
 
 export type MutationIntegrationMcpServerPersonalConnectArgs = {
   serverUrl: Scalars["String"];
+};
+
+export type MutationIntegrationMicrosoftPersonalConnectArgs = {
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
 };
 
 export type MutationIntegrationMicrosoftTeamsArgs = {
@@ -13075,6 +13917,8 @@ export type NullableStringComparator = {
 
 /** Team filtering options. */
 export type NullableTeamFilter = {
+  /** Filters that the team's ancestors must satisfy. */
+  ancestors?: InputMaybe<TeamCollectionFilter>;
   /** Compound filters, all of which need to be matched by the team. */
   and?: InputMaybe<Array<NullableTeamFilter>>;
   /** Comparator for the created at date. */
@@ -13495,6 +14339,8 @@ export type Organization = Node & {
   projectUpdatesReminderFrequency: ProjectUpdateReminderFrequency;
   /** The feature release channel the organization belongs to. */
   releaseChannel: ReleaseChannel;
+  /** [Internal] Whether agent invocation is restricted to full workspace members. */
+  restrictAgentInvocationToMembers?: Maybe<Scalars["Boolean"]>;
   /**
    * [DEPRECATED] Whether workspace label creation, update, and deletion is restricted to admins.
    * @deprecated Use `securitySettings.labelManagementRole` instead.
@@ -16841,6 +17687,8 @@ export type PullRequestCommit = {
   committedAt: Scalars["String"];
   /** Number of deletions in this commit. */
   deletions: Scalars["Float"];
+  /** Whether this commit has multiple parents. */
+  isMergeCommit?: Maybe<Scalars["Boolean"]>;
   /** The full commit message. */
   message: Scalars["String"];
   /** The Git commit SHA. */
@@ -17255,6 +18103,8 @@ export type Query = {
   releasePipelineByAccessKey: ReleasePipeline;
   /** [ALPHA] All release pipelines. */
   releasePipelines: ReleasePipelineConnection;
+  /** [ALPHA] Search releases by term with ranked results. */
+  releaseSearch: Array<Release>;
   /** [ALPHA] One specific release stage. */
   releaseStage: ReleaseStage;
   /** [ALPHA] All release stages. */
@@ -17708,6 +18558,7 @@ export type QueryIssueFigmaFileKeySearchArgs = {
 export type QueryIssueFilterSuggestionArgs = {
   projectId?: InputMaybe<Scalars["String"]>;
   prompt: Scalars["String"];
+  teamId?: InputMaybe<Scalars["String"]>;
 };
 
 export type QueryIssueImportCheckCsvArgs = {
@@ -17865,6 +18716,7 @@ export type QueryProjectArgs = {
 
 export type QueryProjectFilterSuggestionArgs = {
   prompt: Scalars["String"];
+  teamId?: InputMaybe<Scalars["String"]>;
 };
 
 export type QueryProjectLabelArgs = {
@@ -17970,6 +18822,11 @@ export type QueryReleasePipelinesArgs = {
   includeArchived?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+export type QueryReleaseSearchArgs = {
+  first?: InputMaybe<Scalars["Int"]>;
+  term: Scalars["String"];
 };
 
 export type QueryReleaseStageArgs = {
@@ -18371,6 +19228,8 @@ export type Release = Node & {
   completedAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
+  /** [Internal] The current progress of the release. */
+  currentProgress: Scalars["JSONObject"];
   /** The release's description. */
   description?: Maybe<Scalars["String"]>;
   /** [Internal] Documents associated with the release. */
@@ -18383,6 +19242,8 @@ export type Release = Node & {
   name: Scalars["String"];
   /** The pipeline this release belongs to. */
   pipeline: ReleasePipeline;
+  /** [Internal] The progress history of the release. */
+  progressHistory: Scalars["JSONObject"];
   /** The release's unique URL slug. */
   slugId: Scalars["String"];
   /** The current stage of the release. */
@@ -18393,6 +19254,8 @@ export type Release = Node & {
   startedAt?: Maybe<Scalars["DateTime"]>;
   /** The estimated completion date of the release. */
   targetDate?: Maybe<Scalars["TimelessDate"]>;
+  /** A flag that indicates whether the release is in the trash bin. */
+  trashed?: Maybe<Scalars["Boolean"]>;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -18529,6 +19392,8 @@ export type ReleaseDebugSinkInput = {
   issues: Scalars["JSONObject"];
   /** Pull request debug information. */
   pullRequests: Array<Scalars["JSONObject"]>;
+  /** Map of reverted issue identifiers to their source information. */
+  revertedIssues?: InputMaybe<Scalars["JSONObject"]>;
 };
 
 export type ReleaseEdge = {
@@ -18573,6 +19438,8 @@ export type ReleasePayload = {
 /** [Internal] A release pipeline. */
 export type ReleasePipeline = Node & {
   __typename?: "ReleasePipeline";
+  /** [ALPHA] The number of non-archived releases in this pipeline. */
+  approximateReleaseCount: Scalars["Int"];
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the entity was created. */
@@ -18858,6 +19725,8 @@ export type ReleaseSyncInput = {
   pullRequestReferences?: InputMaybe<Array<PullRequestReferenceInput>>;
   /** Information about the source repository. */
   repository?: InputMaybe<RepositoryDataInput>;
+  /** Issue references that were reverted and should be removed from the release. */
+  revertedIssueReferences?: InputMaybe<Array<IssueReferenceInput>>;
   /** The version of the release. */
   version?: InputMaybe<Scalars["String"]>;
 };
@@ -18876,6 +19745,8 @@ export type ReleaseSyncInputBase = {
   pullRequestReferences?: InputMaybe<Array<PullRequestReferenceInput>>;
   /** Information about the source repository. */
   repository?: InputMaybe<RepositoryDataInput>;
+  /** Issue references that were reverted and should be removed from the release. */
+  revertedIssueReferences?: InputMaybe<Array<IssueReferenceInput>>;
   /** The version of the release. */
   version?: InputMaybe<Scalars["String"]>;
 };
@@ -18912,6 +19783,8 @@ export type ReleaseUpdateInput = {
   startDate?: InputMaybe<Scalars["TimelessDate"]>;
   /** The estimated completion date of the release. */
   targetDate?: InputMaybe<Scalars["TimelessDate"]>;
+  /** Whether the release has been trashed. */
+  trashed?: InputMaybe<Scalars["Boolean"]>;
   /** The version of the release. */
   version?: InputMaybe<Scalars["String"]>;
 };
@@ -19180,6 +20053,7 @@ export type RootIssueSort = {
   sort: IssueSortInput;
 };
 
+/** Which day count to use for SLA calculations. */
 export enum SLADayCountType {
   All = "all",
   OnlyBusinessDays = "onlyBusinessDays",
@@ -20130,6 +21004,8 @@ export type TeamChildWebhookPayload = {
 
 /** Team collection filtering options. */
 export type TeamCollectionFilter = {
+  /** Filters that the team's ancestors must satisfy. */
+  ancestors?: InputMaybe<TeamCollectionFilter>;
   /** Compound filters, all of which need to be matched by the team. */
   and?: InputMaybe<Array<TeamCollectionFilter>>;
   /** Comparator for the created at date. */
@@ -20241,6 +21117,8 @@ export type TeamEdge = {
 
 /** Team filtering options. */
 export type TeamFilter = {
+  /** Filters that the team's ancestors must satisfy. */
+  ancestors?: InputMaybe<TeamCollectionFilter>;
   /** Compound filters, all of which need to be matched by the team. */
   and?: InputMaybe<Array<TeamFilter>>;
   /** Comparator for the created at date. */
@@ -20550,6 +21428,8 @@ export type Template = Node & {
   __typename?: "Template";
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The color of the template icon. */
+  color?: Maybe<Scalars["String"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /** The user who created the template. */
@@ -20558,6 +21438,8 @@ export type Template = Node & {
   description?: Maybe<Scalars["String"]>;
   /** [Internal] Whether the template has form fields */
   hasFormFields: Scalars["Boolean"];
+  /** The icon of the template. */
+  icon?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /** The original template inherited from. */
@@ -20593,8 +21475,12 @@ export type TemplateConnection = {
 };
 
 export type TemplateCreateInput = {
+  /** The color of the template icon. */
+  color?: InputMaybe<Scalars["String"]>;
   /** The template description. */
   description?: InputMaybe<Scalars["String"]>;
+  /** The icon of the template. */
+  icon?: InputMaybe<Scalars["String"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars["String"]>;
   /** The template name. */
@@ -20627,8 +21513,12 @@ export type TemplatePayload = {
 };
 
 export type TemplateUpdateInput = {
+  /** The color of the template icon. */
+  color?: InputMaybe<Scalars["String"]>;
   /** The template description. */
   description?: InputMaybe<Scalars["String"]>;
+  /** The icon of the template. */
+  icon?: InputMaybe<Scalars["String"]>;
   /** The template name. */
   name?: InputMaybe<Scalars["String"]>;
   /** The position of the template in the templates list. */
@@ -21277,6 +22167,7 @@ export enum UserFlagType {
   SlackAgentPromoFromCreateNewIssueShown = "slackAgentPromoFromCreateNewIssueShown",
   SlackBotWelcomeMessageShown = "slackBotWelcomeMessageShown",
   SlackCommentReactionTipShown = "slackCommentReactionTipShown",
+  TeamsBotWelcomeMessageShown = "teamsBotWelcomeMessageShown",
   TeamsPageIntroductionDismissed = "teamsPageIntroductionDismissed",
   ThreadedCommentsNudgeIsSeen = "threadedCommentsNudgeIsSeen",
   TriageWelcomeDismissed = "triageWelcomeDismissed",
@@ -21637,6 +22528,8 @@ export type ViewPreferencesCreateInput = {
   projectId?: InputMaybe<Scalars["String"]>;
   /** The project label these view preferences are associated with. */
   projectLabelId?: InputMaybe<Scalars["String"]>;
+  /** The release pipeline these view preferences are associated with. */
+  releasePipelineId?: InputMaybe<Scalars["String"]>;
   /** The team these view preferences are associated with. */
   teamId?: InputMaybe<Scalars["String"]>;
   /** The type of view preferences (either user or organization level preferences). */
@@ -21793,6 +22686,12 @@ export type ViewPreferencesValues = {
   inboxViewOrdering?: Maybe<Scalars["String"]>;
   /** Whether to show the initiative activity field. */
   initiativeFieldActivity?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show the initiative completed date field. */
+  initiativeFieldDateCompleted?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show the initiative created date field. */
+  initiativeFieldDateCreated?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show the initiative updated date field. */
+  initiativeFieldDateUpdated?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the initiative description field. */
   initiativeFieldDescription?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the initiative active projects health field. */
@@ -21803,6 +22702,8 @@ export type ViewPreferencesValues = {
   initiativeFieldOwner?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the initiative projects field. */
   initiativeFieldProjects?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show the initiative start date field. */
+  initiativeFieldStartDate?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the initiative target date field. */
   initiativeFieldTargetDate?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the initiative teams field. */
@@ -21952,6 +22853,12 @@ export type ViewPreferencesValues = {
    * @deprecated Use timelineZoomScale instead.
    */
   projectZoomLevel?: Maybe<Scalars["String"]>;
+  /** Whether to show the latest release field for release pipelines. */
+  releasePipelineFieldLatestRelease?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show the releases field for release pipelines. */
+  releasePipelineFieldReleases?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show the type field for release pipelines. */
+  releasePipelineFieldType?: Maybe<Scalars["Boolean"]>;
   /** The release pipelines view ordering. */
   releasePipelinesViewOrdering?: Maybe<Scalars["String"]>;
   /** Whether to show the review avatar field. */
@@ -21968,6 +22875,12 @@ export type ViewPreferencesValues = {
   reviewGrouping?: Maybe<Scalars["String"]>;
   /** The review view ordering. */
   reviewViewOrdering?: Maybe<Scalars["String"]>;
+  /** Whether to show the release date field for scheduled pipeline releases. */
+  scheduledPipelineReleaseFieldReleaseDate?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show the stage field for scheduled pipeline releases. */
+  scheduledPipelineReleaseFieldStage?: Maybe<Scalars["Boolean"]>;
+  /** The scheduled pipeline releases view ordering. */
+  scheduledPipelineReleasesViewOrdering?: Maybe<Scalars["String"]>;
   /** The search result type filter. */
   searchResultType?: Maybe<Scalars["String"]>;
   /** The search view ordering. */
@@ -21998,6 +22911,8 @@ export type ViewPreferencesValues = {
   showEmptySubGroupsList?: Maybe<Scalars["Boolean"]>;
   /** Whether to show sub-initiatives nested. */
   showNestedInitiatives?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show only snoozed items. */
+  showOnlySnoozedItems?: Maybe<Scalars["Boolean"]>;
   /** Whether to show parent issues for sub-issues. */
   showParents?: Maybe<Scalars["Boolean"]>;
   /** Whether to show read items. */
@@ -22106,6 +23021,7 @@ export enum ViewType {
   RoadmapBacklog = "roadmapBacklog",
   RoadmapClosed = "roadmapClosed",
   Roadmaps = "roadmaps",
+  ScheduledPipelineReleases = "scheduledPipelineReleases",
   Search = "search",
   SplitSearch = "splitSearch",
   SubIssues = "subIssues",
@@ -22409,7 +23325,7 @@ export type WorkflowState = Node & {
   position: Scalars["Float"];
   /** The team to which this state belongs to. */
   team: Team;
-  /** The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled". */
+  /** The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled", "duplicate". */
   type: Scalars["String"];
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -22504,7 +23420,7 @@ export type WorkflowStateFilter = {
   position?: InputMaybe<NumberComparator>;
   /** Filters that the workflow states team must satisfy. */
   team?: InputMaybe<TeamFilter>;
-  /** Comparator for the workflow state type. Possible values are "triage", "backlog", "unstarted", "started", "completed", "canceled". */
+  /** Comparator for the workflow state type. Possible values are "triage", "backlog", "unstarted", "started", "completed", "canceled", "duplicate". */
   type?: InputMaybe<StringComparator>;
   /** Comparator for the updated at date. */
   updatedAt?: InputMaybe<DateComparator>;
@@ -22603,6 +23519,442 @@ export type GitAutomationTargetBranchFragment = { __typename: "GitAutomationTarg
   GitAutomationTargetBranch,
   "updatedAt" | "branchPattern" | "archivedAt" | "createdAt" | "id" | "isRegex"
 > & { team: { __typename?: "Team" } & Pick<Team, "id"> };
+
+type AiConversationBasePart_AiConversationPromptPart_Fragment = { __typename: "AiConversationPromptPart" } & Pick<
+  AiConversationPromptPart,
+  "id" | "type" | "body" | "bodyData"
+> & {
+    metadata: { __typename: "AiConversationPartMetadata" } & Pick<
+      AiConversationPartMetadata,
+      "feedback" | "evalLogId" | "turnId"
+    >;
+    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+  };
+
+type AiConversationBasePart_AiConversationReasoningPart_Fragment = { __typename: "AiConversationReasoningPart" } & Pick<
+  AiConversationReasoningPart,
+  "id" | "type" | "body" | "bodyData" | "title"
+> & {
+    metadata: { __typename: "AiConversationPartMetadata" } & Pick<
+      AiConversationPartMetadata,
+      "feedback" | "evalLogId" | "turnId"
+    >;
+  };
+
+type AiConversationBasePart_AiConversationTextPart_Fragment = { __typename: "AiConversationTextPart" } & Pick<
+  AiConversationTextPart,
+  "id" | "type" | "body" | "bodyData"
+> & {
+    metadata: { __typename: "AiConversationPartMetadata" } & Pick<
+      AiConversationPartMetadata,
+      "feedback" | "evalLogId" | "turnId"
+    >;
+  };
+
+type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: "AiConversationToolCallPart" } & Pick<
+  AiConversationToolCallPart,
+  "id" | "type"
+> & {
+    metadata: { __typename: "AiConversationPartMetadata" } & Pick<
+      AiConversationPartMetadata,
+      "feedback" | "evalLogId" | "turnId"
+    >;
+    toolCall:
+      | ({ __typename: "AiConversationCodeIntelligenceToolCall" } & Pick<
+          AiConversationCodeIntelligenceToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationCodeIntelligenceToolCallArgs" } & Pick<
+                AiConversationCodeIntelligenceToolCallArgs,
+                "question"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationCreateEntityToolCall" } & Pick<
+          AiConversationCreateEntityToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationCreateEntityToolCallArgs" } & Pick<
+                AiConversationCreateEntityToolCallArgs,
+                "count" | "type"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationDeleteEntityToolCall" } & Pick<
+          AiConversationDeleteEntityToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationDeleteEntityToolCallArgs" } & {
+                entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                  AiConversationSearchEntitiesToolCallResultEntities,
+                  "id" | "type"
+                >;
+              }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationGetMicrosoftTeamsConversationHistoryToolCall" } & Pick<
+          AiConversationGetMicrosoftTeamsConversationHistoryToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationGetPullRequestDiffToolCall" } & Pick<
+          AiConversationGetPullRequestDiffToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationGetPullRequestDiffToolCallArgs" } & {
+                entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                  AiConversationSearchEntitiesToolCallResultEntities,
+                  "id" | "type"
+                >;
+              }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationGetPullRequestFileToolCall" } & Pick<
+          AiConversationGetPullRequestFileToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationGetPullRequestFileToolCallArgs" } & Pick<
+                AiConversationGetPullRequestFileToolCallArgs,
+                "path"
+              > & {
+                  entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                    AiConversationSearchEntitiesToolCallResultEntities,
+                    "id" | "type"
+                  >;
+                }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationGetSlackConversationHistoryToolCall" } & Pick<
+          AiConversationGetSlackConversationHistoryToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationInvokeMcpToolToolCall" } & Pick<
+          AiConversationInvokeMcpToolToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationInvokeMcpToolToolCallArgs" } & {
+                server: { __typename: "AiConversationInvokeMcpToolToolCallArgsServer" } & Pick<
+                  AiConversationInvokeMcpToolToolCallArgsServer,
+                  "integrationId" | "name" | "title"
+                >;
+                tool: { __typename: "AiConversationInvokeMcpToolToolCallArgsTool" } & Pick<
+                  AiConversationInvokeMcpToolToolCallArgsTool,
+                  "name" | "title"
+                >;
+              }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationQueryActivityToolCall" } & Pick<
+          AiConversationQueryActivityToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationQueryActivityToolCallArgs" } & {
+                entities?: Maybe<
+                  Array<
+                    { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                      AiConversationSearchEntitiesToolCallResultEntities,
+                      "id" | "type"
+                    >
+                  >
+                >;
+              }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationQueryUpdatesToolCall" } & Pick<
+          AiConversationQueryUpdatesToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationQueryUpdatesToolCallArgs" } & Pick<
+                AiConversationQueryUpdatesToolCallArgs,
+                "updateType"
+              > & {
+                  entity?: Maybe<
+                    { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                      AiConversationSearchEntitiesToolCallResultEntities,
+                      "id" | "type"
+                    >
+                  >;
+                }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationQueryViewToolCall" } & Pick<
+          AiConversationQueryViewToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationQueryViewToolCallArgs" } & Pick<
+                AiConversationQueryViewToolCallArgs,
+                "filter" | "mode"
+              > & {
+                  view: { __typename: "AiConversationQueryViewToolCallArgsView" } & Pick<
+                    AiConversationQueryViewToolCallArgsView,
+                    "predefinedView" | "type"
+                  > & {
+                      group?: Maybe<
+                        { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                          AiConversationSearchEntitiesToolCallResultEntities,
+                          "id" | "type"
+                        >
+                      >;
+                    };
+                }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationResearchToolCall" } & Pick<
+          AiConversationResearchToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationResearchToolCallArgs" } & Pick<
+                AiConversationResearchToolCallArgs,
+                "context" | "query"
+              > & {
+                  subjects?: Maybe<
+                    Array<
+                      { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                        AiConversationSearchEntitiesToolCallResultEntities,
+                        "id" | "type"
+                      >
+                    >
+                  >;
+                }
+            >;
+            result?: Maybe<
+              { __typename: "AiConversationResearchToolCallResult" } & Pick<
+                AiConversationResearchToolCallResult,
+                "progressId"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationRetrieveEntitiesToolCall" } & Pick<
+          AiConversationRetrieveEntitiesToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationRetrieveEntitiesToolCallArgs" } & {
+                entities: Array<
+                  { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                    AiConversationSearchEntitiesToolCallResultEntities,
+                    "id" | "type"
+                  >
+                >;
+              }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationSearchDocumentationToolCall" } & Pick<
+          AiConversationSearchDocumentationToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationSearchEntitiesToolCall" } & Pick<
+          AiConversationSearchEntitiesToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationSearchEntitiesToolCallArgs" } & Pick<
+                AiConversationSearchEntitiesToolCallArgs,
+                "queries" | "type"
+              >
+            >;
+            result?: Maybe<
+              { __typename: "AiConversationSearchEntitiesToolCallResult" } & {
+                entities: Array<
+                  { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                    AiConversationSearchEntitiesToolCallResultEntities,
+                    "id" | "type"
+                  >
+                >;
+              }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationSuggestValuesToolCall" } & Pick<
+          AiConversationSuggestValuesToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationSuggestValuesToolCallArgs" } & Pick<
+                AiConversationSuggestValuesToolCallArgs,
+                "field" | "query"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationTranscribeMediaToolCall" } & Pick<
+          AiConversationTranscribeMediaToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationTranscribeVideoToolCall" } & Pick<
+          AiConversationTranscribeVideoToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationUpdateEntityToolCall" } & Pick<
+          AiConversationUpdateEntityToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationUpdateEntityToolCallArgs" } & {
+                entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                  AiConversationSearchEntitiesToolCallResultEntities,
+                  "id" | "type"
+                >;
+              }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationWebSearchToolCall" } & Pick<
+          AiConversationWebSearchToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationWebSearchToolCallArgs" } & Pick<
+                AiConversationWebSearchToolCallArgs,
+                "query" | "url"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          });
+  };
+
+type AiConversationBasePart_AiConversationWidgetPart_Fragment = { __typename: "AiConversationWidgetPart" } & Pick<
+  AiConversationWidgetPart,
+  "id" | "type"
+> & {
+    metadata: { __typename: "AiConversationPartMetadata" } & Pick<
+      AiConversationPartMetadata,
+      "feedback" | "evalLogId" | "turnId"
+    >;
+    widget:
+      | ({ __typename: "AiConversationEntityCardWidget" } & Pick<AiConversationEntityCardWidget, "rawArgs" | "name"> & {
+            displayInfo?: Maybe<
+              { __typename: "AiConversationWidgetDisplayInfo" } & Pick<
+                AiConversationWidgetDisplayInfo,
+                "body" | "bodyData"
+              >
+            >;
+            args?: Maybe<
+              { __typename: "AiConversationEntityCardWidgetArgs" } & Pick<
+                AiConversationEntityCardWidgetArgs,
+                "note" | "id" | "action"
+              >
+            >;
+          })
+      | ({ __typename: "AiConversationEntityListWidget" } & Pick<AiConversationEntityListWidget, "rawArgs" | "name"> & {
+            displayInfo?: Maybe<
+              { __typename: "AiConversationWidgetDisplayInfo" } & Pick<
+                AiConversationWidgetDisplayInfo,
+                "body" | "bodyData"
+              >
+            >;
+            args?: Maybe<
+              { __typename: "AiConversationEntityListWidgetArgs" } & Pick<
+                AiConversationEntityListWidgetArgs,
+                "action" | "count"
+              > & {
+                  entities: Array<
+                    { __typename: "AiConversationEntityListWidgetArgsEntities" } & Pick<
+                      AiConversationEntityListWidgetArgsEntities,
+                      "note" | "id"
+                    >
+                  >;
+                }
+            >;
+          });
+  };
+
+export type AiConversationBasePartFragment =
+  | AiConversationBasePart_AiConversationPromptPart_Fragment
+  | AiConversationBasePart_AiConversationReasoningPart_Fragment
+  | AiConversationBasePart_AiConversationTextPart_Fragment
+  | AiConversationBasePart_AiConversationToolCallPart_Fragment
+  | AiConversationBasePart_AiConversationWidgetPart_Fragment;
 
 type Entity_CustomViewNotificationSubscription_Fragment = { __typename: "CustomViewNotificationSubscription" } & Pick<
   CustomViewNotificationSubscription,
@@ -22927,6 +24279,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "releasePipelinesViewOrdering"
         | "reviewGrouping"
         | "reviewViewOrdering"
+        | "scheduledPipelineReleasesViewOrdering"
         | "searchResultType"
         | "searchViewOrdering"
         | "teamViewOrdering"
@@ -22952,6 +24305,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "customerPageNeedsShowImportantFirst"
         | "embeddedCustomerNeedsShowImportantFirst"
         | "projectCustomerNeedsShowImportantFirst"
+        | "showOnlySnoozedItems"
         | "showParents"
         | "fieldPreviewLinks"
         | "showReadItems"
@@ -22985,12 +24339,16 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "fieldDueDate"
         | "initiativeFieldHealth"
         | "initiativeFieldActivity"
+        | "initiativeFieldDateCompleted"
+        | "initiativeFieldDateCreated"
         | "initiativeFieldDescription"
         | "initiativeFieldInitiativeHealth"
         | "initiativeFieldOwner"
         | "initiativeFieldProjects"
+        | "initiativeFieldStartDate"
         | "initiativeFieldTargetDate"
         | "initiativeFieldTeams"
+        | "initiativeFieldDateUpdated"
         | "fieldDateArchived"
         | "fieldAssignee"
         | "fieldDateCreated"
@@ -23005,6 +24363,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "fieldStatus"
         | "fieldDateUpdated"
         | "fieldLabels"
+        | "releasePipelineFieldLatestRelease"
         | "fieldLinkCount"
         | "memberFieldJoined"
         | "memberFieldStatus"
@@ -23050,12 +24409,15 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "projectFieldTeams"
         | "projectFieldDateUpdated"
         | "fieldPullRequests"
+        | "scheduledPipelineReleaseFieldReleaseDate"
         | "fieldRelease"
+        | "releasePipelineFieldReleases"
         | "reviewFieldAvatar"
         | "reviewFieldChecks"
         | "reviewFieldIdentifier"
         | "reviewFieldPreviewLinks"
         | "reviewFieldRepository"
+        | "scheduledPipelineReleaseFieldStage"
         | "teamFieldDateCreated"
         | "teamFieldCycle"
         | "teamFieldIdentifier"
@@ -23065,6 +24427,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "teamFieldProjects"
         | "teamFieldDateUpdated"
         | "fieldTimeInCurrentStatus"
+        | "releasePipelineFieldType"
         | "showTriageIssues"
         | "showUnreadItemsFirst"
         | "timelineChronologyShowWeekNumbers"
@@ -23127,6 +24490,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "releasePipelinesViewOrdering"
             | "reviewGrouping"
             | "reviewViewOrdering"
+            | "scheduledPipelineReleasesViewOrdering"
             | "searchResultType"
             | "searchViewOrdering"
             | "teamViewOrdering"
@@ -23152,6 +24516,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "customerPageNeedsShowImportantFirst"
             | "embeddedCustomerNeedsShowImportantFirst"
             | "projectCustomerNeedsShowImportantFirst"
+            | "showOnlySnoozedItems"
             | "showParents"
             | "fieldPreviewLinks"
             | "showReadItems"
@@ -23185,12 +24550,16 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "fieldDueDate"
             | "initiativeFieldHealth"
             | "initiativeFieldActivity"
+            | "initiativeFieldDateCompleted"
+            | "initiativeFieldDateCreated"
             | "initiativeFieldDescription"
             | "initiativeFieldInitiativeHealth"
             | "initiativeFieldOwner"
             | "initiativeFieldProjects"
+            | "initiativeFieldStartDate"
             | "initiativeFieldTargetDate"
             | "initiativeFieldTeams"
+            | "initiativeFieldDateUpdated"
             | "fieldDateArchived"
             | "fieldAssignee"
             | "fieldDateCreated"
@@ -23205,6 +24574,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "fieldStatus"
             | "fieldDateUpdated"
             | "fieldLabels"
+            | "releasePipelineFieldLatestRelease"
             | "fieldLinkCount"
             | "memberFieldJoined"
             | "memberFieldStatus"
@@ -23250,12 +24620,15 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "projectFieldTeams"
             | "projectFieldDateUpdated"
             | "fieldPullRequests"
+            | "scheduledPipelineReleaseFieldReleaseDate"
             | "fieldRelease"
+            | "releasePipelineFieldReleases"
             | "reviewFieldAvatar"
             | "reviewFieldChecks"
             | "reviewFieldIdentifier"
             | "reviewFieldPreviewLinks"
             | "reviewFieldRepository"
+            | "scheduledPipelineReleaseFieldStage"
             | "teamFieldDateCreated"
             | "teamFieldCycle"
             | "teamFieldIdentifier"
@@ -23265,6 +24638,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "teamFieldProjects"
             | "teamFieldDateUpdated"
             | "fieldTimeInCurrentStatus"
+            | "releasePipelineFieldType"
             | "showTriageIssues"
             | "showUnreadItemsFirst"
             | "timelineChronologyShowWeekNumbers"
@@ -23328,6 +24702,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "releasePipelinesViewOrdering"
             | "reviewGrouping"
             | "reviewViewOrdering"
+            | "scheduledPipelineReleasesViewOrdering"
             | "searchResultType"
             | "searchViewOrdering"
             | "teamViewOrdering"
@@ -23353,6 +24728,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "customerPageNeedsShowImportantFirst"
             | "embeddedCustomerNeedsShowImportantFirst"
             | "projectCustomerNeedsShowImportantFirst"
+            | "showOnlySnoozedItems"
             | "showParents"
             | "fieldPreviewLinks"
             | "showReadItems"
@@ -23386,12 +24762,16 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "fieldDueDate"
             | "initiativeFieldHealth"
             | "initiativeFieldActivity"
+            | "initiativeFieldDateCompleted"
+            | "initiativeFieldDateCreated"
             | "initiativeFieldDescription"
             | "initiativeFieldInitiativeHealth"
             | "initiativeFieldOwner"
             | "initiativeFieldProjects"
+            | "initiativeFieldStartDate"
             | "initiativeFieldTargetDate"
             | "initiativeFieldTeams"
+            | "initiativeFieldDateUpdated"
             | "fieldDateArchived"
             | "fieldAssignee"
             | "fieldDateCreated"
@@ -23406,6 +24786,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "fieldStatus"
             | "fieldDateUpdated"
             | "fieldLabels"
+            | "releasePipelineFieldLatestRelease"
             | "fieldLinkCount"
             | "memberFieldJoined"
             | "memberFieldStatus"
@@ -23451,12 +24832,15 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "projectFieldTeams"
             | "projectFieldDateUpdated"
             | "fieldPullRequests"
+            | "scheduledPipelineReleaseFieldReleaseDate"
             | "fieldRelease"
+            | "releasePipelineFieldReleases"
             | "reviewFieldAvatar"
             | "reviewFieldChecks"
             | "reviewFieldIdentifier"
             | "reviewFieldPreviewLinks"
             | "reviewFieldRepository"
+            | "scheduledPipelineReleaseFieldStage"
             | "teamFieldDateCreated"
             | "teamFieldCycle"
             | "teamFieldIdentifier"
@@ -23466,6 +24850,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "teamFieldProjects"
             | "teamFieldDateUpdated"
             | "fieldTimeInCurrentStatus"
+            | "releasePipelineFieldType"
             | "showTriageIssues"
             | "showUnreadItemsFirst"
             | "timelineChronologyShowWeekNumbers"
@@ -25547,6 +26932,17 @@ export type ProjectFragment = { __typename: "Project" } & Pick<
     favorite?: Maybe<{ __typename?: "Favorite" } & Pick<Favorite, "id">>;
   };
 
+export type AiConversationPromptPartFragment = { __typename: "AiConversationPromptPart" } & Pick<
+  AiConversationPromptPart,
+  "id" | "body" | "bodyData" | "type"
+> & {
+    metadata: { __typename: "AiConversationPartMetadata" } & Pick<
+      AiConversationPartMetadata,
+      "feedback" | "evalLogId" | "turnId"
+    >;
+    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+  };
+
 export type PullRequestNotificationFragment = { __typename: "PullRequestNotification" } & Pick<
   PullRequestNotification,
   | "type"
@@ -25580,6 +26976,16 @@ export type ReactionFragment = { __typename: "Reaction" } & Pick<
     issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
     projectUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+  };
+
+export type AiConversationReasoningPartFragment = { __typename: "AiConversationReasoningPart" } & Pick<
+  AiConversationReasoningPart,
+  "id" | "body" | "bodyData" | "title" | "type"
+> & {
+    metadata: { __typename: "AiConversationPartMetadata" } & Pick<
+      AiConversationPartMetadata,
+      "feedback" | "evalLogId" | "turnId"
+    >;
   };
 
 export type IssueHistoryFragment = { __typename: "IssueHistory" } & Pick<
@@ -25977,8 +27383,10 @@ export type TemplateFragment = { __typename: "Template" } & Pick<
   Template,
   | "templateData"
   | "description"
+  | "color"
   | "lastAppliedAt"
   | "type"
+  | "icon"
   | "updatedAt"
   | "name"
   | "sortOrder"
@@ -25992,6 +27400,16 @@ export type TemplateFragment = { __typename: "Template" } & Pick<
     lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
 
+export type AiConversationTextPartFragment = { __typename: "AiConversationTextPart" } & Pick<
+  AiConversationTextPart,
+  "id" | "body" | "bodyData" | "type"
+> & {
+    metadata: { __typename: "AiConversationPartMetadata" } & Pick<
+      AiConversationPartMetadata,
+      "feedback" | "evalLogId" | "turnId"
+    >;
+  };
+
 export type TimeScheduleFragment = { __typename: "TimeSchedule" } & Pick<
   TimeSchedule,
   "externalUrl" | "externalId" | "updatedAt" | "name" | "archivedAt" | "createdAt" | "id"
@@ -26002,6 +27420,358 @@ export type TimeScheduleFragment = { __typename: "TimeSchedule" } & Pick<
         { __typename: "TimeScheduleEntry" } & Pick<TimeScheduleEntry, "userId" | "userEmail" | "endsAt" | "startsAt">
       >
     >;
+  };
+
+export type AiConversationToolCallPartFragment = { __typename: "AiConversationToolCallPart" } & Pick<
+  AiConversationToolCallPart,
+  "id" | "type"
+> & {
+    metadata: { __typename: "AiConversationPartMetadata" } & Pick<
+      AiConversationPartMetadata,
+      "feedback" | "evalLogId" | "turnId"
+    >;
+    toolCall:
+      | ({ __typename: "AiConversationCodeIntelligenceToolCall" } & Pick<
+          AiConversationCodeIntelligenceToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationCodeIntelligenceToolCallArgs" } & Pick<
+                AiConversationCodeIntelligenceToolCallArgs,
+                "question"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationCreateEntityToolCall" } & Pick<
+          AiConversationCreateEntityToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationCreateEntityToolCallArgs" } & Pick<
+                AiConversationCreateEntityToolCallArgs,
+                "count" | "type"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationDeleteEntityToolCall" } & Pick<
+          AiConversationDeleteEntityToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationDeleteEntityToolCallArgs" } & {
+                entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                  AiConversationSearchEntitiesToolCallResultEntities,
+                  "id" | "type"
+                >;
+              }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationGetMicrosoftTeamsConversationHistoryToolCall" } & Pick<
+          AiConversationGetMicrosoftTeamsConversationHistoryToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationGetPullRequestDiffToolCall" } & Pick<
+          AiConversationGetPullRequestDiffToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationGetPullRequestDiffToolCallArgs" } & {
+                entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                  AiConversationSearchEntitiesToolCallResultEntities,
+                  "id" | "type"
+                >;
+              }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationGetPullRequestFileToolCall" } & Pick<
+          AiConversationGetPullRequestFileToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationGetPullRequestFileToolCallArgs" } & Pick<
+                AiConversationGetPullRequestFileToolCallArgs,
+                "path"
+              > & {
+                  entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                    AiConversationSearchEntitiesToolCallResultEntities,
+                    "id" | "type"
+                  >;
+                }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationGetSlackConversationHistoryToolCall" } & Pick<
+          AiConversationGetSlackConversationHistoryToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationInvokeMcpToolToolCall" } & Pick<
+          AiConversationInvokeMcpToolToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationInvokeMcpToolToolCallArgs" } & {
+                server: { __typename: "AiConversationInvokeMcpToolToolCallArgsServer" } & Pick<
+                  AiConversationInvokeMcpToolToolCallArgsServer,
+                  "integrationId" | "name" | "title"
+                >;
+                tool: { __typename: "AiConversationInvokeMcpToolToolCallArgsTool" } & Pick<
+                  AiConversationInvokeMcpToolToolCallArgsTool,
+                  "name" | "title"
+                >;
+              }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationQueryActivityToolCall" } & Pick<
+          AiConversationQueryActivityToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationQueryActivityToolCallArgs" } & {
+                entities?: Maybe<
+                  Array<
+                    { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                      AiConversationSearchEntitiesToolCallResultEntities,
+                      "id" | "type"
+                    >
+                  >
+                >;
+              }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationQueryUpdatesToolCall" } & Pick<
+          AiConversationQueryUpdatesToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationQueryUpdatesToolCallArgs" } & Pick<
+                AiConversationQueryUpdatesToolCallArgs,
+                "updateType"
+              > & {
+                  entity?: Maybe<
+                    { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                      AiConversationSearchEntitiesToolCallResultEntities,
+                      "id" | "type"
+                    >
+                  >;
+                }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationQueryViewToolCall" } & Pick<
+          AiConversationQueryViewToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationQueryViewToolCallArgs" } & Pick<
+                AiConversationQueryViewToolCallArgs,
+                "filter" | "mode"
+              > & {
+                  view: { __typename: "AiConversationQueryViewToolCallArgsView" } & Pick<
+                    AiConversationQueryViewToolCallArgsView,
+                    "predefinedView" | "type"
+                  > & {
+                      group?: Maybe<
+                        { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                          AiConversationSearchEntitiesToolCallResultEntities,
+                          "id" | "type"
+                        >
+                      >;
+                    };
+                }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationResearchToolCall" } & Pick<
+          AiConversationResearchToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationResearchToolCallArgs" } & Pick<
+                AiConversationResearchToolCallArgs,
+                "context" | "query"
+              > & {
+                  subjects?: Maybe<
+                    Array<
+                      { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                        AiConversationSearchEntitiesToolCallResultEntities,
+                        "id" | "type"
+                      >
+                    >
+                  >;
+                }
+            >;
+            result?: Maybe<
+              { __typename: "AiConversationResearchToolCallResult" } & Pick<
+                AiConversationResearchToolCallResult,
+                "progressId"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationRetrieveEntitiesToolCall" } & Pick<
+          AiConversationRetrieveEntitiesToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationRetrieveEntitiesToolCallArgs" } & {
+                entities: Array<
+                  { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                    AiConversationSearchEntitiesToolCallResultEntities,
+                    "id" | "type"
+                  >
+                >;
+              }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationSearchDocumentationToolCall" } & Pick<
+          AiConversationSearchDocumentationToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationSearchEntitiesToolCall" } & Pick<
+          AiConversationSearchEntitiesToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationSearchEntitiesToolCallArgs" } & Pick<
+                AiConversationSearchEntitiesToolCallArgs,
+                "queries" | "type"
+              >
+            >;
+            result?: Maybe<
+              { __typename: "AiConversationSearchEntitiesToolCallResult" } & {
+                entities: Array<
+                  { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                    AiConversationSearchEntitiesToolCallResultEntities,
+                    "id" | "type"
+                  >
+                >;
+              }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationSuggestValuesToolCall" } & Pick<
+          AiConversationSuggestValuesToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationSuggestValuesToolCallArgs" } & Pick<
+                AiConversationSuggestValuesToolCallArgs,
+                "field" | "query"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationTranscribeMediaToolCall" } & Pick<
+          AiConversationTranscribeMediaToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationTranscribeVideoToolCall" } & Pick<
+          AiConversationTranscribeVideoToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationUpdateEntityToolCall" } & Pick<
+          AiConversationUpdateEntityToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationUpdateEntityToolCallArgs" } & {
+                entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                  AiConversationSearchEntitiesToolCallResultEntities,
+                  "id" | "type"
+                >;
+              }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationWebSearchToolCall" } & Pick<
+          AiConversationWebSearchToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationWebSearchToolCallArgs" } & Pick<
+                AiConversationWebSearchToolCallArgs,
+                "query" | "url"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          });
   };
 
 export type GitAutomationStateFragment = { __typename: "GitAutomationState" } & Pick<
@@ -26047,6 +27817,7 @@ export type AuthUserFragment = { __typename: "AuthUser" } & Pick<
     organization: { __typename: "AuthOrganization" } & Pick<
       AuthOrganization,
       | "allowedAuthServices"
+      | "approximateUserCount"
       | "previousUrlKeys"
       | "serviceId"
       | "releaseChannel"
@@ -26341,6 +28112,52 @@ export type WelcomeMessageNotificationFragment = { __typename: "WelcomeMessageNo
     user: { __typename?: "User" } & Pick<User, "id">;
   };
 
+export type AiConversationWidgetPartFragment = { __typename: "AiConversationWidgetPart" } & Pick<
+  AiConversationWidgetPart,
+  "id" | "type"
+> & {
+    metadata: { __typename: "AiConversationPartMetadata" } & Pick<
+      AiConversationPartMetadata,
+      "feedback" | "evalLogId" | "turnId"
+    >;
+    widget:
+      | ({ __typename: "AiConversationEntityCardWidget" } & Pick<AiConversationEntityCardWidget, "rawArgs" | "name"> & {
+            displayInfo?: Maybe<
+              { __typename: "AiConversationWidgetDisplayInfo" } & Pick<
+                AiConversationWidgetDisplayInfo,
+                "body" | "bodyData"
+              >
+            >;
+            args?: Maybe<
+              { __typename: "AiConversationEntityCardWidgetArgs" } & Pick<
+                AiConversationEntityCardWidgetArgs,
+                "note" | "id" | "action"
+              >
+            >;
+          })
+      | ({ __typename: "AiConversationEntityListWidget" } & Pick<AiConversationEntityListWidget, "rawArgs" | "name"> & {
+            displayInfo?: Maybe<
+              { __typename: "AiConversationWidgetDisplayInfo" } & Pick<
+                AiConversationWidgetDisplayInfo,
+                "body" | "bodyData"
+              >
+            >;
+            args?: Maybe<
+              { __typename: "AiConversationEntityListWidgetArgs" } & Pick<
+                AiConversationEntityListWidgetArgs,
+                "action" | "count"
+              > & {
+                  entities: Array<
+                    { __typename: "AiConversationEntityListWidgetArgsEntities" } & Pick<
+                      AiConversationEntityListWidgetArgsEntities,
+                      "note" | "id"
+                    >
+                  >;
+                }
+            >;
+          });
+  };
+
 export type AiPromptRulesFragment = { __typename: "AiPromptRules" } & Pick<
   AiPromptRules,
   "updatedAt" | "archivedAt" | "createdAt" | "id"
@@ -26390,6 +28207,7 @@ export type EmailIntakeAddressFragment = { __typename: "EmailIntakeAddress" } & 
   | "issueCreatedAutoReplyEnabled"
   | "useUserNamesInReplies"
   | "enabled"
+  | "reopenOnReply"
 > & {
     sesDomainIdentity?: Maybe<
       { __typename: "SesDomainIdentity" } & Pick<
@@ -26884,7 +28702,7 @@ export type IssueFragment = { __typename: "Issue" } & Pick<
     >;
     sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
       IssueSharedAccess,
-      "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+      "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
     > & {
         sharedWithUsers: Array<
           { __typename: "User" } & Pick<
@@ -27100,6 +28918,7 @@ export type OrganizationFragment = { __typename: "Organization" } & Pick<
 export type AuthOrganizationFragment = { __typename: "AuthOrganization" } & Pick<
   AuthOrganization,
   | "allowedAuthServices"
+  | "approximateUserCount"
   | "previousUrlKeys"
   | "serviceId"
   | "releaseChannel"
@@ -27635,6 +29454,11 @@ export type ProjectLabelFragment = { __typename: "ProjectLabel" } & Pick<
     retiredBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
 
+export type AiConversationPartMetadataFragment = { __typename: "AiConversationPartMetadata" } & Pick<
+  AiConversationPartMetadata,
+  "feedback" | "evalLogId" | "turnId"
+>;
+
 export type IssueHistoryTriageRuleMetadataFragment = { __typename: "IssueHistoryTriageRuleMetadata" } & {
   triageRuleError?: Maybe<
     { __typename: "IssueHistoryTriageRuleError" } & Pick<
@@ -27668,6 +29492,41 @@ export type IssueHistoryTriageRuleMetadataFragment = { __typename: "IssueHistory
       }
   >;
   updatedByTriageRule?: Maybe<
+    { __typename: "WorkflowDefinition" } & Pick<
+      WorkflowDefinition,
+      | "activities"
+      | "conditions"
+      | "lastExecutedAt"
+      | "description"
+      | "updatedAt"
+      | "groupName"
+      | "name"
+      | "triggerType"
+      | "sortOrder"
+      | "archivedAt"
+      | "createdAt"
+      | "trigger"
+      | "type"
+      | "userContextViewType"
+      | "contextViewType"
+      | "id"
+      | "enabled"
+    > & {
+        customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+        cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+        initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+        label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+        project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+        user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+        team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+        creator: { __typename?: "User" } & Pick<User, "id">;
+        lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+      }
+  >;
+};
+
+export type IssueHistoryWorkflowMetadataFragment = { __typename: "IssueHistoryWorkflowMetadata" } & {
+  workflowDefinition?: Maybe<
     { __typename: "WorkflowDefinition" } & Pick<
       WorkflowDefinition,
       | "activities"
@@ -28583,6 +30442,11 @@ export type InitiativeWebhookPayloadFragment = { __typename: "InitiativeWebhookP
     parentInitiative?: Maybe<
       { __typename: "InitiativeChildWebhookPayload" } & Pick<InitiativeChildWebhookPayload, "id" | "url" | "name">
     >;
+    parentInitiatives?: Maybe<
+      Array<
+        { __typename: "InitiativeChildWebhookPayload" } & Pick<InitiativeChildWebhookPayload, "id" | "url" | "name">
+      >
+    >;
     projects?: Maybe<
       Array<{ __typename: "ProjectChildWebhookPayload" } & Pick<ProjectChildWebhookPayload, "id" | "url" | "name">>
     >;
@@ -29423,6 +31287,7 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "releasePipelinesViewOrdering"
       | "reviewGrouping"
       | "reviewViewOrdering"
+      | "scheduledPipelineReleasesViewOrdering"
       | "searchResultType"
       | "searchViewOrdering"
       | "teamViewOrdering"
@@ -29448,6 +31313,7 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "customerPageNeedsShowImportantFirst"
       | "embeddedCustomerNeedsShowImportantFirst"
       | "projectCustomerNeedsShowImportantFirst"
+      | "showOnlySnoozedItems"
       | "showParents"
       | "fieldPreviewLinks"
       | "showReadItems"
@@ -29481,12 +31347,16 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "fieldDueDate"
       | "initiativeFieldHealth"
       | "initiativeFieldActivity"
+      | "initiativeFieldDateCompleted"
+      | "initiativeFieldDateCreated"
       | "initiativeFieldDescription"
       | "initiativeFieldInitiativeHealth"
       | "initiativeFieldOwner"
       | "initiativeFieldProjects"
+      | "initiativeFieldStartDate"
       | "initiativeFieldTargetDate"
       | "initiativeFieldTeams"
+      | "initiativeFieldDateUpdated"
       | "fieldDateArchived"
       | "fieldAssignee"
       | "fieldDateCreated"
@@ -29501,6 +31371,7 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "fieldStatus"
       | "fieldDateUpdated"
       | "fieldLabels"
+      | "releasePipelineFieldLatestRelease"
       | "fieldLinkCount"
       | "memberFieldJoined"
       | "memberFieldStatus"
@@ -29546,12 +31417,15 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "projectFieldTeams"
       | "projectFieldDateUpdated"
       | "fieldPullRequests"
+      | "scheduledPipelineReleaseFieldReleaseDate"
       | "fieldRelease"
+      | "releasePipelineFieldReleases"
       | "reviewFieldAvatar"
       | "reviewFieldChecks"
       | "reviewFieldIdentifier"
       | "reviewFieldPreviewLinks"
       | "reviewFieldRepository"
+      | "scheduledPipelineReleaseFieldStage"
       | "teamFieldDateCreated"
       | "teamFieldCycle"
       | "teamFieldIdentifier"
@@ -29561,6 +31435,7 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "teamFieldProjects"
       | "teamFieldDateUpdated"
       | "fieldTimeInCurrentStatus"
+      | "releasePipelineFieldType"
       | "showTriageIssues"
       | "showUnreadItemsFirst"
       | "timelineChronologyShowWeekNumbers"
@@ -29701,6 +31576,989 @@ export type AgentSessionToPullRequestConnectionFragment = { __typename: "AgentSe
   >;
 };
 
+type AiConversationBaseToolCall_AiConversationCodeIntelligenceToolCall_Fragment = {
+  __typename: "AiConversationCodeIntelligenceToolCall";
+} & Pick<AiConversationCodeIntelligenceToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationCodeIntelligenceToolCallArgs" } & Pick<
+        AiConversationCodeIntelligenceToolCallArgs,
+        "question"
+      >
+    >;
+  };
+
+type AiConversationBaseToolCall_AiConversationCreateEntityToolCall_Fragment = {
+  __typename: "AiConversationCreateEntityToolCall";
+} & Pick<AiConversationCreateEntityToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationCreateEntityToolCallArgs" } & Pick<
+        AiConversationCreateEntityToolCallArgs,
+        "count" | "type"
+      >
+    >;
+  };
+
+type AiConversationBaseToolCall_AiConversationDeleteEntityToolCall_Fragment = {
+  __typename: "AiConversationDeleteEntityToolCall";
+} & Pick<AiConversationDeleteEntityToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationDeleteEntityToolCallArgs" } & {
+        entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+          AiConversationSearchEntitiesToolCallResultEntities,
+          "id" | "type"
+        >;
+      }
+    >;
+  };
+
+type AiConversationBaseToolCall_AiConversationGetMicrosoftTeamsConversationHistoryToolCall_Fragment = {
+  __typename: "AiConversationGetMicrosoftTeamsConversationHistoryToolCall";
+} & Pick<AiConversationGetMicrosoftTeamsConversationHistoryToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+type AiConversationBaseToolCall_AiConversationGetPullRequestDiffToolCall_Fragment = {
+  __typename: "AiConversationGetPullRequestDiffToolCall";
+} & Pick<AiConversationGetPullRequestDiffToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationGetPullRequestDiffToolCallArgs" } & {
+        entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+          AiConversationSearchEntitiesToolCallResultEntities,
+          "id" | "type"
+        >;
+      }
+    >;
+  };
+
+type AiConversationBaseToolCall_AiConversationGetPullRequestFileToolCall_Fragment = {
+  __typename: "AiConversationGetPullRequestFileToolCall";
+} & Pick<AiConversationGetPullRequestFileToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationGetPullRequestFileToolCallArgs" } & Pick<
+        AiConversationGetPullRequestFileToolCallArgs,
+        "path"
+      > & {
+          entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+            AiConversationSearchEntitiesToolCallResultEntities,
+            "id" | "type"
+          >;
+        }
+    >;
+  };
+
+type AiConversationBaseToolCall_AiConversationGetSlackConversationHistoryToolCall_Fragment = {
+  __typename: "AiConversationGetSlackConversationHistoryToolCall";
+} & Pick<AiConversationGetSlackConversationHistoryToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+type AiConversationBaseToolCall_AiConversationInvokeMcpToolToolCall_Fragment = {
+  __typename: "AiConversationInvokeMcpToolToolCall";
+} & Pick<AiConversationInvokeMcpToolToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationInvokeMcpToolToolCallArgs" } & {
+        server: { __typename: "AiConversationInvokeMcpToolToolCallArgsServer" } & Pick<
+          AiConversationInvokeMcpToolToolCallArgsServer,
+          "integrationId" | "name" | "title"
+        >;
+        tool: { __typename: "AiConversationInvokeMcpToolToolCallArgsTool" } & Pick<
+          AiConversationInvokeMcpToolToolCallArgsTool,
+          "name" | "title"
+        >;
+      }
+    >;
+  };
+
+type AiConversationBaseToolCall_AiConversationQueryActivityToolCall_Fragment = {
+  __typename: "AiConversationQueryActivityToolCall";
+} & Pick<AiConversationQueryActivityToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationQueryActivityToolCallArgs" } & {
+        entities?: Maybe<
+          Array<
+            { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+              AiConversationSearchEntitiesToolCallResultEntities,
+              "id" | "type"
+            >
+          >
+        >;
+      }
+    >;
+  };
+
+type AiConversationBaseToolCall_AiConversationQueryUpdatesToolCall_Fragment = {
+  __typename: "AiConversationQueryUpdatesToolCall";
+} & Pick<AiConversationQueryUpdatesToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationQueryUpdatesToolCallArgs" } & Pick<
+        AiConversationQueryUpdatesToolCallArgs,
+        "updateType"
+      > & {
+          entity?: Maybe<
+            { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+              AiConversationSearchEntitiesToolCallResultEntities,
+              "id" | "type"
+            >
+          >;
+        }
+    >;
+  };
+
+type AiConversationBaseToolCall_AiConversationQueryViewToolCall_Fragment = {
+  __typename: "AiConversationQueryViewToolCall";
+} & Pick<AiConversationQueryViewToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationQueryViewToolCallArgs" } & Pick<
+        AiConversationQueryViewToolCallArgs,
+        "filter" | "mode"
+      > & {
+          view: { __typename: "AiConversationQueryViewToolCallArgsView" } & Pick<
+            AiConversationQueryViewToolCallArgsView,
+            "predefinedView" | "type"
+          > & {
+              group?: Maybe<
+                { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                  AiConversationSearchEntitiesToolCallResultEntities,
+                  "id" | "type"
+                >
+              >;
+            };
+        }
+    >;
+  };
+
+type AiConversationBaseToolCall_AiConversationResearchToolCall_Fragment = {
+  __typename: "AiConversationResearchToolCall";
+} & Pick<AiConversationResearchToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationResearchToolCallArgs" } & Pick<
+        AiConversationResearchToolCallArgs,
+        "context" | "query"
+      > & {
+          subjects?: Maybe<
+            Array<
+              { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                AiConversationSearchEntitiesToolCallResultEntities,
+                "id" | "type"
+              >
+            >
+          >;
+        }
+    >;
+    result?: Maybe<
+      { __typename: "AiConversationResearchToolCallResult" } & Pick<AiConversationResearchToolCallResult, "progressId">
+    >;
+  };
+
+type AiConversationBaseToolCall_AiConversationRetrieveEntitiesToolCall_Fragment = {
+  __typename: "AiConversationRetrieveEntitiesToolCall";
+} & Pick<AiConversationRetrieveEntitiesToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationRetrieveEntitiesToolCallArgs" } & {
+        entities: Array<
+          { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+            AiConversationSearchEntitiesToolCallResultEntities,
+            "id" | "type"
+          >
+        >;
+      }
+    >;
+  };
+
+type AiConversationBaseToolCall_AiConversationSearchDocumentationToolCall_Fragment = {
+  __typename: "AiConversationSearchDocumentationToolCall";
+} & Pick<AiConversationSearchDocumentationToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+type AiConversationBaseToolCall_AiConversationSearchEntitiesToolCall_Fragment = {
+  __typename: "AiConversationSearchEntitiesToolCall";
+} & Pick<AiConversationSearchEntitiesToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationSearchEntitiesToolCallArgs" } & Pick<
+        AiConversationSearchEntitiesToolCallArgs,
+        "queries" | "type"
+      >
+    >;
+    result?: Maybe<
+      { __typename: "AiConversationSearchEntitiesToolCallResult" } & {
+        entities: Array<
+          { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+            AiConversationSearchEntitiesToolCallResultEntities,
+            "id" | "type"
+          >
+        >;
+      }
+    >;
+  };
+
+type AiConversationBaseToolCall_AiConversationSuggestValuesToolCall_Fragment = {
+  __typename: "AiConversationSuggestValuesToolCall";
+} & Pick<AiConversationSuggestValuesToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationSuggestValuesToolCallArgs" } & Pick<
+        AiConversationSuggestValuesToolCallArgs,
+        "field" | "query"
+      >
+    >;
+  };
+
+type AiConversationBaseToolCall_AiConversationTranscribeMediaToolCall_Fragment = {
+  __typename: "AiConversationTranscribeMediaToolCall";
+} & Pick<AiConversationTranscribeMediaToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+type AiConversationBaseToolCall_AiConversationTranscribeVideoToolCall_Fragment = {
+  __typename: "AiConversationTranscribeVideoToolCall";
+} & Pick<AiConversationTranscribeVideoToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+type AiConversationBaseToolCall_AiConversationUpdateEntityToolCall_Fragment = {
+  __typename: "AiConversationUpdateEntityToolCall";
+} & Pick<AiConversationUpdateEntityToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationUpdateEntityToolCallArgs" } & {
+        entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+          AiConversationSearchEntitiesToolCallResultEntities,
+          "id" | "type"
+        >;
+      }
+    >;
+  };
+
+type AiConversationBaseToolCall_AiConversationWebSearchToolCall_Fragment = {
+  __typename: "AiConversationWebSearchToolCall";
+} & Pick<AiConversationWebSearchToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationWebSearchToolCallArgs" } & Pick<AiConversationWebSearchToolCallArgs, "query" | "url">
+    >;
+  };
+
+export type AiConversationBaseToolCallFragment =
+  | AiConversationBaseToolCall_AiConversationCodeIntelligenceToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationCreateEntityToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationDeleteEntityToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationGetMicrosoftTeamsConversationHistoryToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationGetPullRequestDiffToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationGetPullRequestFileToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationGetSlackConversationHistoryToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationInvokeMcpToolToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationQueryActivityToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationQueryUpdatesToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationQueryViewToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationResearchToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationRetrieveEntitiesToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationSearchDocumentationToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationSearchEntitiesToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationSuggestValuesToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationTranscribeMediaToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationTranscribeVideoToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationUpdateEntityToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationWebSearchToolCall_Fragment;
+
+type AiConversationBaseWidget_AiConversationEntityCardWidget_Fragment = {
+  __typename: "AiConversationEntityCardWidget";
+} & Pick<AiConversationEntityCardWidget, "rawArgs" | "name"> & {
+    displayInfo?: Maybe<
+      { __typename: "AiConversationWidgetDisplayInfo" } & Pick<AiConversationWidgetDisplayInfo, "body" | "bodyData">
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationEntityCardWidgetArgs" } & Pick<
+        AiConversationEntityCardWidgetArgs,
+        "note" | "id" | "action"
+      >
+    >;
+  };
+
+type AiConversationBaseWidget_AiConversationEntityListWidget_Fragment = {
+  __typename: "AiConversationEntityListWidget";
+} & Pick<AiConversationEntityListWidget, "rawArgs" | "name"> & {
+    displayInfo?: Maybe<
+      { __typename: "AiConversationWidgetDisplayInfo" } & Pick<AiConversationWidgetDisplayInfo, "body" | "bodyData">
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationEntityListWidgetArgs" } & Pick<
+        AiConversationEntityListWidgetArgs,
+        "action" | "count"
+      > & {
+          entities: Array<
+            { __typename: "AiConversationEntityListWidgetArgsEntities" } & Pick<
+              AiConversationEntityListWidgetArgsEntities,
+              "note" | "id"
+            >
+          >;
+        }
+    >;
+  };
+
+export type AiConversationBaseWidgetFragment =
+  | AiConversationBaseWidget_AiConversationEntityCardWidget_Fragment
+  | AiConversationBaseWidget_AiConversationEntityListWidget_Fragment;
+
+export type AiConversationCodeIntelligenceToolCallFragment = {
+  __typename: "AiConversationCodeIntelligenceToolCall";
+} & Pick<AiConversationCodeIntelligenceToolCall, "rawArgs" | "name" | "rawResult"> & {
+    args?: Maybe<
+      { __typename: "AiConversationCodeIntelligenceToolCallArgs" } & Pick<
+        AiConversationCodeIntelligenceToolCallArgs,
+        "question"
+      >
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationCodeIntelligenceToolCallArgsFragment = {
+  __typename: "AiConversationCodeIntelligenceToolCallArgs";
+} & Pick<AiConversationCodeIntelligenceToolCallArgs, "question">;
+
+export type AiConversationCreateEntityToolCallFragment = { __typename: "AiConversationCreateEntityToolCall" } & Pick<
+  AiConversationCreateEntityToolCall,
+  "rawArgs" | "name" | "rawResult"
+> & {
+    args?: Maybe<
+      { __typename: "AiConversationCreateEntityToolCallArgs" } & Pick<
+        AiConversationCreateEntityToolCallArgs,
+        "count" | "type"
+      >
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationCreateEntityToolCallArgsFragment = {
+  __typename: "AiConversationCreateEntityToolCallArgs";
+} & Pick<AiConversationCreateEntityToolCallArgs, "count" | "type">;
+
+export type AiConversationDeleteEntityToolCallFragment = { __typename: "AiConversationDeleteEntityToolCall" } & Pick<
+  AiConversationDeleteEntityToolCall,
+  "rawArgs" | "name" | "rawResult"
+> & {
+    args?: Maybe<
+      { __typename: "AiConversationDeleteEntityToolCallArgs" } & {
+        entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+          AiConversationSearchEntitiesToolCallResultEntities,
+          "id" | "type"
+        >;
+      }
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationDeleteEntityToolCallArgsFragment = {
+  __typename: "AiConversationDeleteEntityToolCallArgs";
+} & {
+  entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+    AiConversationSearchEntitiesToolCallResultEntities,
+    "id" | "type"
+  >;
+};
+
+export type AiConversationEntityCardWidgetFragment = { __typename: "AiConversationEntityCardWidget" } & Pick<
+  AiConversationEntityCardWidget,
+  "rawArgs" | "name"
+> & {
+    displayInfo?: Maybe<
+      { __typename: "AiConversationWidgetDisplayInfo" } & Pick<AiConversationWidgetDisplayInfo, "body" | "bodyData">
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationEntityCardWidgetArgs" } & Pick<
+        AiConversationEntityCardWidgetArgs,
+        "note" | "id" | "action"
+      >
+    >;
+  };
+
+export type AiConversationEntityCardWidgetArgsFragment = { __typename: "AiConversationEntityCardWidgetArgs" } & Pick<
+  AiConversationEntityCardWidgetArgs,
+  "note" | "id" | "action"
+>;
+
+export type AiConversationEntityListWidgetFragment = { __typename: "AiConversationEntityListWidget" } & Pick<
+  AiConversationEntityListWidget,
+  "rawArgs" | "name"
+> & {
+    displayInfo?: Maybe<
+      { __typename: "AiConversationWidgetDisplayInfo" } & Pick<AiConversationWidgetDisplayInfo, "body" | "bodyData">
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationEntityListWidgetArgs" } & Pick<
+        AiConversationEntityListWidgetArgs,
+        "action" | "count"
+      > & {
+          entities: Array<
+            { __typename: "AiConversationEntityListWidgetArgsEntities" } & Pick<
+              AiConversationEntityListWidgetArgsEntities,
+              "note" | "id"
+            >
+          >;
+        }
+    >;
+  };
+
+export type AiConversationEntityListWidgetArgsFragment = { __typename: "AiConversationEntityListWidgetArgs" } & Pick<
+  AiConversationEntityListWidgetArgs,
+  "action" | "count"
+> & {
+    entities: Array<
+      { __typename: "AiConversationEntityListWidgetArgsEntities" } & Pick<
+        AiConversationEntityListWidgetArgsEntities,
+        "note" | "id"
+      >
+    >;
+  };
+
+export type AiConversationEntityListWidgetArgsEntitiesFragment = {
+  __typename: "AiConversationEntityListWidgetArgsEntities";
+} & Pick<AiConversationEntityListWidgetArgsEntities, "note" | "id">;
+
+export type AiConversationGetMicrosoftTeamsConversationHistoryToolCallFragment = {
+  __typename: "AiConversationGetMicrosoftTeamsConversationHistoryToolCall";
+} & Pick<AiConversationGetMicrosoftTeamsConversationHistoryToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationGetPullRequestDiffToolCallFragment = {
+  __typename: "AiConversationGetPullRequestDiffToolCall";
+} & Pick<AiConversationGetPullRequestDiffToolCall, "rawArgs" | "name" | "rawResult"> & {
+    args?: Maybe<
+      { __typename: "AiConversationGetPullRequestDiffToolCallArgs" } & {
+        entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+          AiConversationSearchEntitiesToolCallResultEntities,
+          "id" | "type"
+        >;
+      }
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationGetPullRequestDiffToolCallArgsFragment = {
+  __typename: "AiConversationGetPullRequestDiffToolCallArgs";
+} & {
+  entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+    AiConversationSearchEntitiesToolCallResultEntities,
+    "id" | "type"
+  >;
+};
+
+export type AiConversationGetPullRequestFileToolCallFragment = {
+  __typename: "AiConversationGetPullRequestFileToolCall";
+} & Pick<AiConversationGetPullRequestFileToolCall, "rawArgs" | "name" | "rawResult"> & {
+    args?: Maybe<
+      { __typename: "AiConversationGetPullRequestFileToolCallArgs" } & Pick<
+        AiConversationGetPullRequestFileToolCallArgs,
+        "path"
+      > & {
+          entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+            AiConversationSearchEntitiesToolCallResultEntities,
+            "id" | "type"
+          >;
+        }
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationGetPullRequestFileToolCallArgsFragment = {
+  __typename: "AiConversationGetPullRequestFileToolCallArgs";
+} & Pick<AiConversationGetPullRequestFileToolCallArgs, "path"> & {
+    entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+      AiConversationSearchEntitiesToolCallResultEntities,
+      "id" | "type"
+    >;
+  };
+
+export type AiConversationGetSlackConversationHistoryToolCallFragment = {
+  __typename: "AiConversationGetSlackConversationHistoryToolCall";
+} & Pick<AiConversationGetSlackConversationHistoryToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationInvokeMcpToolToolCallFragment = { __typename: "AiConversationInvokeMcpToolToolCall" } & Pick<
+  AiConversationInvokeMcpToolToolCall,
+  "rawArgs" | "name" | "rawResult"
+> & {
+    args?: Maybe<
+      { __typename: "AiConversationInvokeMcpToolToolCallArgs" } & {
+        server: { __typename: "AiConversationInvokeMcpToolToolCallArgsServer" } & Pick<
+          AiConversationInvokeMcpToolToolCallArgsServer,
+          "integrationId" | "name" | "title"
+        >;
+        tool: { __typename: "AiConversationInvokeMcpToolToolCallArgsTool" } & Pick<
+          AiConversationInvokeMcpToolToolCallArgsTool,
+          "name" | "title"
+        >;
+      }
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationInvokeMcpToolToolCallArgsFragment = {
+  __typename: "AiConversationInvokeMcpToolToolCallArgs";
+} & {
+  server: { __typename: "AiConversationInvokeMcpToolToolCallArgsServer" } & Pick<
+    AiConversationInvokeMcpToolToolCallArgsServer,
+    "integrationId" | "name" | "title"
+  >;
+  tool: { __typename: "AiConversationInvokeMcpToolToolCallArgsTool" } & Pick<
+    AiConversationInvokeMcpToolToolCallArgsTool,
+    "name" | "title"
+  >;
+};
+
+export type AiConversationInvokeMcpToolToolCallArgsServerFragment = {
+  __typename: "AiConversationInvokeMcpToolToolCallArgsServer";
+} & Pick<AiConversationInvokeMcpToolToolCallArgsServer, "integrationId" | "name" | "title">;
+
+export type AiConversationInvokeMcpToolToolCallArgsToolFragment = {
+  __typename: "AiConversationInvokeMcpToolToolCallArgsTool";
+} & Pick<AiConversationInvokeMcpToolToolCallArgsTool, "name" | "title">;
+
+export type AiConversationQueryActivityToolCallFragment = { __typename: "AiConversationQueryActivityToolCall" } & Pick<
+  AiConversationQueryActivityToolCall,
+  "rawArgs" | "name" | "rawResult"
+> & {
+    args?: Maybe<
+      { __typename: "AiConversationQueryActivityToolCallArgs" } & {
+        entities?: Maybe<
+          Array<
+            { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+              AiConversationSearchEntitiesToolCallResultEntities,
+              "id" | "type"
+            >
+          >
+        >;
+      }
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationQueryActivityToolCallArgsFragment = {
+  __typename: "AiConversationQueryActivityToolCallArgs";
+} & {
+  entities?: Maybe<
+    Array<
+      { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+        AiConversationSearchEntitiesToolCallResultEntities,
+        "id" | "type"
+      >
+    >
+  >;
+};
+
+export type AiConversationQueryUpdatesToolCallFragment = { __typename: "AiConversationQueryUpdatesToolCall" } & Pick<
+  AiConversationQueryUpdatesToolCall,
+  "rawArgs" | "name" | "rawResult"
+> & {
+    args?: Maybe<
+      { __typename: "AiConversationQueryUpdatesToolCallArgs" } & Pick<
+        AiConversationQueryUpdatesToolCallArgs,
+        "updateType"
+      > & {
+          entity?: Maybe<
+            { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+              AiConversationSearchEntitiesToolCallResultEntities,
+              "id" | "type"
+            >
+          >;
+        }
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationQueryUpdatesToolCallArgsFragment = {
+  __typename: "AiConversationQueryUpdatesToolCallArgs";
+} & Pick<AiConversationQueryUpdatesToolCallArgs, "updateType"> & {
+    entity?: Maybe<
+      { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+        AiConversationSearchEntitiesToolCallResultEntities,
+        "id" | "type"
+      >
+    >;
+  };
+
+export type AiConversationQueryViewToolCallFragment = { __typename: "AiConversationQueryViewToolCall" } & Pick<
+  AiConversationQueryViewToolCall,
+  "rawArgs" | "name" | "rawResult"
+> & {
+    args?: Maybe<
+      { __typename: "AiConversationQueryViewToolCallArgs" } & Pick<
+        AiConversationQueryViewToolCallArgs,
+        "filter" | "mode"
+      > & {
+          view: { __typename: "AiConversationQueryViewToolCallArgsView" } & Pick<
+            AiConversationQueryViewToolCallArgsView,
+            "predefinedView" | "type"
+          > & {
+              group?: Maybe<
+                { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                  AiConversationSearchEntitiesToolCallResultEntities,
+                  "id" | "type"
+                >
+              >;
+            };
+        }
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationQueryViewToolCallArgsFragment = { __typename: "AiConversationQueryViewToolCallArgs" } & Pick<
+  AiConversationQueryViewToolCallArgs,
+  "filter" | "mode"
+> & {
+    view: { __typename: "AiConversationQueryViewToolCallArgsView" } & Pick<
+      AiConversationQueryViewToolCallArgsView,
+      "predefinedView" | "type"
+    > & {
+        group?: Maybe<
+          { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+            AiConversationSearchEntitiesToolCallResultEntities,
+            "id" | "type"
+          >
+        >;
+      };
+  };
+
+export type AiConversationQueryViewToolCallArgsViewFragment = {
+  __typename: "AiConversationQueryViewToolCallArgsView";
+} & Pick<AiConversationQueryViewToolCallArgsView, "predefinedView" | "type"> & {
+    group?: Maybe<
+      { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+        AiConversationSearchEntitiesToolCallResultEntities,
+        "id" | "type"
+      >
+    >;
+  };
+
+export type AiConversationResearchToolCallFragment = { __typename: "AiConversationResearchToolCall" } & Pick<
+  AiConversationResearchToolCall,
+  "rawArgs" | "name" | "rawResult"
+> & {
+    args?: Maybe<
+      { __typename: "AiConversationResearchToolCallArgs" } & Pick<
+        AiConversationResearchToolCallArgs,
+        "context" | "query"
+      > & {
+          subjects?: Maybe<
+            Array<
+              { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                AiConversationSearchEntitiesToolCallResultEntities,
+                "id" | "type"
+              >
+            >
+          >;
+        }
+    >;
+    result?: Maybe<
+      { __typename: "AiConversationResearchToolCallResult" } & Pick<AiConversationResearchToolCallResult, "progressId">
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationResearchToolCallArgsFragment = { __typename: "AiConversationResearchToolCallArgs" } & Pick<
+  AiConversationResearchToolCallArgs,
+  "context" | "query"
+> & {
+    subjects?: Maybe<
+      Array<
+        { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+          AiConversationSearchEntitiesToolCallResultEntities,
+          "id" | "type"
+        >
+      >
+    >;
+  };
+
+export type AiConversationResearchToolCallResultFragment = {
+  __typename: "AiConversationResearchToolCallResult";
+} & Pick<AiConversationResearchToolCallResult, "progressId">;
+
+export type AiConversationRetrieveEntitiesToolCallFragment = {
+  __typename: "AiConversationRetrieveEntitiesToolCall";
+} & Pick<AiConversationRetrieveEntitiesToolCall, "rawArgs" | "name" | "rawResult"> & {
+    args?: Maybe<
+      { __typename: "AiConversationRetrieveEntitiesToolCallArgs" } & {
+        entities: Array<
+          { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+            AiConversationSearchEntitiesToolCallResultEntities,
+            "id" | "type"
+          >
+        >;
+      }
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationRetrieveEntitiesToolCallArgsFragment = {
+  __typename: "AiConversationRetrieveEntitiesToolCallArgs";
+} & {
+  entities: Array<
+    { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+      AiConversationSearchEntitiesToolCallResultEntities,
+      "id" | "type"
+    >
+  >;
+};
+
+export type AiConversationSearchDocumentationToolCallFragment = {
+  __typename: "AiConversationSearchDocumentationToolCall";
+} & Pick<AiConversationSearchDocumentationToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationSearchEntitiesToolCallFragment = {
+  __typename: "AiConversationSearchEntitiesToolCall";
+} & Pick<AiConversationSearchEntitiesToolCall, "rawArgs" | "name" | "rawResult"> & {
+    args?: Maybe<
+      { __typename: "AiConversationSearchEntitiesToolCallArgs" } & Pick<
+        AiConversationSearchEntitiesToolCallArgs,
+        "queries" | "type"
+      >
+    >;
+    result?: Maybe<
+      { __typename: "AiConversationSearchEntitiesToolCallResult" } & {
+        entities: Array<
+          { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+            AiConversationSearchEntitiesToolCallResultEntities,
+            "id" | "type"
+          >
+        >;
+      }
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationSearchEntitiesToolCallArgsFragment = {
+  __typename: "AiConversationSearchEntitiesToolCallArgs";
+} & Pick<AiConversationSearchEntitiesToolCallArgs, "queries" | "type">;
+
+export type AiConversationSearchEntitiesToolCallResultFragment = {
+  __typename: "AiConversationSearchEntitiesToolCallResult";
+} & {
+  entities: Array<
+    { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+      AiConversationSearchEntitiesToolCallResultEntities,
+      "id" | "type"
+    >
+  >;
+};
+
+export type AiConversationSearchEntitiesToolCallResultEntitiesFragment = {
+  __typename: "AiConversationSearchEntitiesToolCallResultEntities";
+} & Pick<AiConversationSearchEntitiesToolCallResultEntities, "id" | "type">;
+
+export type AiConversationSuggestValuesToolCallFragment = { __typename: "AiConversationSuggestValuesToolCall" } & Pick<
+  AiConversationSuggestValuesToolCall,
+  "rawArgs" | "name" | "rawResult"
+> & {
+    args?: Maybe<
+      { __typename: "AiConversationSuggestValuesToolCallArgs" } & Pick<
+        AiConversationSuggestValuesToolCallArgs,
+        "field" | "query"
+      >
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationSuggestValuesToolCallArgsFragment = {
+  __typename: "AiConversationSuggestValuesToolCallArgs";
+} & Pick<AiConversationSuggestValuesToolCallArgs, "field" | "query">;
+
+export type AiConversationToolDisplayInfoFragment = { __typename: "AiConversationToolDisplayInfo" } & Pick<
+  AiConversationToolDisplayInfo,
+  "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+>;
+
+export type AiConversationTranscribeMediaToolCallFragment = {
+  __typename: "AiConversationTranscribeMediaToolCall";
+} & Pick<AiConversationTranscribeMediaToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationTranscribeVideoToolCallFragment = {
+  __typename: "AiConversationTranscribeVideoToolCall";
+} & Pick<AiConversationTranscribeVideoToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationUpdateEntityToolCallFragment = { __typename: "AiConversationUpdateEntityToolCall" } & Pick<
+  AiConversationUpdateEntityToolCall,
+  "rawArgs" | "name" | "rawResult"
+> & {
+    args?: Maybe<
+      { __typename: "AiConversationUpdateEntityToolCallArgs" } & {
+        entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+          AiConversationSearchEntitiesToolCallResultEntities,
+          "id" | "type"
+        >;
+      }
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationUpdateEntityToolCallArgsFragment = {
+  __typename: "AiConversationUpdateEntityToolCallArgs";
+} & {
+  entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+    AiConversationSearchEntitiesToolCallResultEntities,
+    "id" | "type"
+  >;
+};
+
+export type AiConversationWebSearchToolCallFragment = { __typename: "AiConversationWebSearchToolCall" } & Pick<
+  AiConversationWebSearchToolCall,
+  "rawArgs" | "name" | "rawResult"
+> & {
+    args?: Maybe<
+      { __typename: "AiConversationWebSearchToolCallArgs" } & Pick<AiConversationWebSearchToolCallArgs, "query" | "url">
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationWebSearchToolCallArgsFragment = { __typename: "AiConversationWebSearchToolCallArgs" } & Pick<
+  AiConversationWebSearchToolCallArgs,
+  "query" | "url"
+>;
+
+export type AiConversationWidgetDisplayInfoFragment = { __typename: "AiConversationWidgetDisplayInfo" } & Pick<
+  AiConversationWidgetDisplayInfo,
+  "body" | "bodyData"
+>;
+
 export type AsksChannelConnectPayloadFragment = { __typename: "AsksChannelConnectPayload" } & Pick<
   AsksChannelConnectPayload,
   "lastSyncId" | "addBot" | "success"
@@ -29799,6 +32657,7 @@ export type AuthResolverResponseFragment = { __typename: "AuthResolverResponse" 
           organization: { __typename: "AuthOrganization" } & Pick<
             AuthOrganization,
             | "allowedAuthServices"
+            | "approximateUserCount"
             | "previousUrlKeys"
             | "serviceId"
             | "releaseChannel"
@@ -29825,6 +32684,7 @@ export type AuthResolverResponseFragment = { __typename: "AuthResolverResponse" 
           organization: { __typename: "AuthOrganization" } & Pick<
             AuthOrganization,
             | "allowedAuthServices"
+            | "approximateUserCount"
             | "previousUrlKeys"
             | "serviceId"
             | "releaseChannel"
@@ -29848,6 +32708,7 @@ export type AuthResolverResponseFragment = { __typename: "AuthResolverResponse" 
         { __typename: "AuthOrganization" } & Pick<
           AuthOrganization,
           | "allowedAuthServices"
+          | "approximateUserCount"
           | "previousUrlKeys"
           | "serviceId"
           | "releaseChannel"
@@ -29871,6 +32732,7 @@ export type AuthResolverResponseFragment = { __typename: "AuthResolverResponse" 
         { __typename: "AuthOrganization" } & Pick<
           AuthOrganization,
           | "allowedAuthServices"
+          | "approximateUserCount"
           | "previousUrlKeys"
           | "serviceId"
           | "releaseChannel"
@@ -30019,6 +32881,7 @@ export type CreateOrJoinOrganizationResponseFragment = { __typename: "CreateOrJo
   organization: { __typename: "AuthOrganization" } & Pick<
     AuthOrganization,
     | "allowedAuthServices"
+    | "approximateUserCount"
     | "previousUrlKeys"
     | "serviceId"
     | "releaseChannel"
@@ -30042,6 +32905,7 @@ export type CreateOrJoinOrganizationResponseFragment = { __typename: "CreateOrJo
       organization: { __typename: "AuthOrganization" } & Pick<
         AuthOrganization,
         | "allowedAuthServices"
+        | "approximateUserCount"
         | "previousUrlKeys"
         | "serviceId"
         | "releaseChannel"
@@ -30126,6 +32990,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "releasePipelinesViewOrdering"
             | "reviewGrouping"
             | "reviewViewOrdering"
+            | "scheduledPipelineReleasesViewOrdering"
             | "searchResultType"
             | "searchViewOrdering"
             | "teamViewOrdering"
@@ -30151,6 +33016,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "customerPageNeedsShowImportantFirst"
             | "embeddedCustomerNeedsShowImportantFirst"
             | "projectCustomerNeedsShowImportantFirst"
+            | "showOnlySnoozedItems"
             | "showParents"
             | "fieldPreviewLinks"
             | "showReadItems"
@@ -30184,12 +33050,16 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "fieldDueDate"
             | "initiativeFieldHealth"
             | "initiativeFieldActivity"
+            | "initiativeFieldDateCompleted"
+            | "initiativeFieldDateCreated"
             | "initiativeFieldDescription"
             | "initiativeFieldInitiativeHealth"
             | "initiativeFieldOwner"
             | "initiativeFieldProjects"
+            | "initiativeFieldStartDate"
             | "initiativeFieldTargetDate"
             | "initiativeFieldTeams"
+            | "initiativeFieldDateUpdated"
             | "fieldDateArchived"
             | "fieldAssignee"
             | "fieldDateCreated"
@@ -30204,6 +33074,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "fieldStatus"
             | "fieldDateUpdated"
             | "fieldLabels"
+            | "releasePipelineFieldLatestRelease"
             | "fieldLinkCount"
             | "memberFieldJoined"
             | "memberFieldStatus"
@@ -30249,12 +33120,15 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "projectFieldTeams"
             | "projectFieldDateUpdated"
             | "fieldPullRequests"
+            | "scheduledPipelineReleaseFieldReleaseDate"
             | "fieldRelease"
+            | "releasePipelineFieldReleases"
             | "reviewFieldAvatar"
             | "reviewFieldChecks"
             | "reviewFieldIdentifier"
             | "reviewFieldPreviewLinks"
             | "reviewFieldRepository"
+            | "scheduledPipelineReleaseFieldStage"
             | "teamFieldDateCreated"
             | "teamFieldCycle"
             | "teamFieldIdentifier"
@@ -30264,6 +33138,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "teamFieldProjects"
             | "teamFieldDateUpdated"
             | "fieldTimeInCurrentStatus"
+            | "releasePipelineFieldType"
             | "showTriageIssues"
             | "showUnreadItemsFirst"
             | "timelineChronologyShowWeekNumbers"
@@ -30326,6 +33201,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "releasePipelinesViewOrdering"
                 | "reviewGrouping"
                 | "reviewViewOrdering"
+                | "scheduledPipelineReleasesViewOrdering"
                 | "searchResultType"
                 | "searchViewOrdering"
                 | "teamViewOrdering"
@@ -30351,6 +33227,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "customerPageNeedsShowImportantFirst"
                 | "embeddedCustomerNeedsShowImportantFirst"
                 | "projectCustomerNeedsShowImportantFirst"
+                | "showOnlySnoozedItems"
                 | "showParents"
                 | "fieldPreviewLinks"
                 | "showReadItems"
@@ -30384,12 +33261,16 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "fieldDueDate"
                 | "initiativeFieldHealth"
                 | "initiativeFieldActivity"
+                | "initiativeFieldDateCompleted"
+                | "initiativeFieldDateCreated"
                 | "initiativeFieldDescription"
                 | "initiativeFieldInitiativeHealth"
                 | "initiativeFieldOwner"
                 | "initiativeFieldProjects"
+                | "initiativeFieldStartDate"
                 | "initiativeFieldTargetDate"
                 | "initiativeFieldTeams"
+                | "initiativeFieldDateUpdated"
                 | "fieldDateArchived"
                 | "fieldAssignee"
                 | "fieldDateCreated"
@@ -30404,6 +33285,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "fieldStatus"
                 | "fieldDateUpdated"
                 | "fieldLabels"
+                | "releasePipelineFieldLatestRelease"
                 | "fieldLinkCount"
                 | "memberFieldJoined"
                 | "memberFieldStatus"
@@ -30449,12 +33331,15 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "projectFieldTeams"
                 | "projectFieldDateUpdated"
                 | "fieldPullRequests"
+                | "scheduledPipelineReleaseFieldReleaseDate"
                 | "fieldRelease"
+                | "releasePipelineFieldReleases"
                 | "reviewFieldAvatar"
                 | "reviewFieldChecks"
                 | "reviewFieldIdentifier"
                 | "reviewFieldPreviewLinks"
                 | "reviewFieldRepository"
+                | "scheduledPipelineReleaseFieldStage"
                 | "teamFieldDateCreated"
                 | "teamFieldCycle"
                 | "teamFieldIdentifier"
@@ -30464,6 +33349,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "teamFieldProjects"
                 | "teamFieldDateUpdated"
                 | "fieldTimeInCurrentStatus"
+                | "releasePipelineFieldType"
                 | "showTriageIssues"
                 | "showUnreadItemsFirst"
                 | "timelineChronologyShowWeekNumbers"
@@ -30527,6 +33413,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "releasePipelinesViewOrdering"
                 | "reviewGrouping"
                 | "reviewViewOrdering"
+                | "scheduledPipelineReleasesViewOrdering"
                 | "searchResultType"
                 | "searchViewOrdering"
                 | "teamViewOrdering"
@@ -30552,6 +33439,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "customerPageNeedsShowImportantFirst"
                 | "embeddedCustomerNeedsShowImportantFirst"
                 | "projectCustomerNeedsShowImportantFirst"
+                | "showOnlySnoozedItems"
                 | "showParents"
                 | "fieldPreviewLinks"
                 | "showReadItems"
@@ -30585,12 +33473,16 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "fieldDueDate"
                 | "initiativeFieldHealth"
                 | "initiativeFieldActivity"
+                | "initiativeFieldDateCompleted"
+                | "initiativeFieldDateCreated"
                 | "initiativeFieldDescription"
                 | "initiativeFieldInitiativeHealth"
                 | "initiativeFieldOwner"
                 | "initiativeFieldProjects"
+                | "initiativeFieldStartDate"
                 | "initiativeFieldTargetDate"
                 | "initiativeFieldTeams"
+                | "initiativeFieldDateUpdated"
                 | "fieldDateArchived"
                 | "fieldAssignee"
                 | "fieldDateCreated"
@@ -30605,6 +33497,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "fieldStatus"
                 | "fieldDateUpdated"
                 | "fieldLabels"
+                | "releasePipelineFieldLatestRelease"
                 | "fieldLinkCount"
                 | "memberFieldJoined"
                 | "memberFieldStatus"
@@ -30650,12 +33543,15 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "projectFieldTeams"
                 | "projectFieldDateUpdated"
                 | "fieldPullRequests"
+                | "scheduledPipelineReleaseFieldReleaseDate"
                 | "fieldRelease"
+                | "releasePipelineFieldReleases"
                 | "reviewFieldAvatar"
                 | "reviewFieldChecks"
                 | "reviewFieldIdentifier"
                 | "reviewFieldPreviewLinks"
                 | "reviewFieldRepository"
+                | "scheduledPipelineReleaseFieldStage"
                 | "teamFieldDateCreated"
                 | "teamFieldCycle"
                 | "teamFieldIdentifier"
@@ -30665,6 +33561,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "teamFieldProjects"
                 | "teamFieldDateUpdated"
                 | "fieldTimeInCurrentStatus"
+                | "releasePipelineFieldType"
                 | "showTriageIssues"
                 | "showUnreadItemsFirst"
                 | "timelineChronologyShowWeekNumbers"
@@ -30976,14 +33873,14 @@ export type DocumentContentHistoryPayloadFragment = { __typename: "DocumentConte
     history: Array<
       { __typename: "DocumentContentHistoryType" } & Pick<
         DocumentContentHistoryType,
-        "actorIds" | "id" | "createdAt" | "contentDataSnapshotAt"
+        "metadata" | "actorIds" | "id" | "createdAt" | "contentDataSnapshotAt"
       >
     >;
   };
 
 export type DocumentContentHistoryTypeFragment = { __typename: "DocumentContentHistoryType" } & Pick<
   DocumentContentHistoryType,
-  "actorIds" | "id" | "createdAt" | "contentDataSnapshotAt"
+  "metadata" | "actorIds" | "id" | "createdAt" | "contentDataSnapshotAt"
 >;
 
 export type DocumentPayloadFragment = { __typename: "DocumentPayload" } & Pick<
@@ -31603,7 +34500,7 @@ export type IssueBatchPayloadFragment = { __typename: "IssueBatchPayload" } & Pi
           >;
           sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
             IssueSharedAccess,
-            "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+            "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
           > & {
               sharedWithUsers: Array<
                 { __typename: "User" } & Pick<
@@ -31747,7 +34644,7 @@ export type IssueConnectionFragment = { __typename: "IssueConnection" } & {
         >;
         sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
           IssueSharedAccess,
-          "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+          "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
         > & {
             sharedWithUsers: Array<
               { __typename: "User" } & Pick<
@@ -32286,7 +35183,7 @@ export type IssueSearchPayloadFragment = { __typename: "IssueSearchPayload" } & 
           >;
           sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
             IssueSharedAccess,
-            "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+            "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
           > & {
               sharedWithUsers: Array<
                 { __typename: "User" } & Pick<
@@ -32433,7 +35330,7 @@ export type IssueSearchResultFragment = { __typename: "IssueSearchResult" } & Pi
     >;
     sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
       IssueSharedAccess,
-      "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+      "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
     > & {
         sharedWithUsers: Array<
           { __typename: "User" } & Pick<
@@ -32517,7 +35414,7 @@ export type IssueSearchResultFragment = { __typename: "IssueSearchResult" } & Pi
 
 export type IssueSharedAccessFragment = { __typename: "IssueSharedAccess" } & Pick<
   IssueSharedAccess,
-  "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+  "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
 > & {
     sharedWithUsers: Array<
       { __typename: "User" } & Pick<
@@ -32660,6 +35557,8 @@ type Node_AgentSessionToPullRequest_Fragment = { __typename: "AgentSessionToPull
   AgentSessionToPullRequest,
   "id"
 >;
+
+type Node_AiConversation_Fragment = { __typename: "AiConversation" } & Pick<AiConversation, "id">;
 
 type Node_AiPromptRules_Fragment = { __typename: "AiPromptRules" } & Pick<AiPromptRules, "id">;
 
@@ -32903,6 +35802,7 @@ export type NodeFragment =
   | Node_AgentActivity_Fragment
   | Node_AgentSession_Fragment
   | Node_AgentSessionToPullRequest_Fragment
+  | Node_AiConversation_Fragment
   | Node_AiPromptRules_Fragment
   | Node_Attachment_Fragment
   | Node_AuditEntry_Fragment
@@ -35505,8 +38405,10 @@ export type TemplateConnectionFragment = { __typename: "TemplateConnection" } & 
       Template,
       | "templateData"
       | "description"
+      | "color"
       | "lastAppliedAt"
       | "type"
+      | "icon"
       | "updatedAt"
       | "name"
       | "sortOrder"
@@ -35751,6 +38653,7 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "releasePipelinesViewOrdering"
           | "reviewGrouping"
           | "reviewViewOrdering"
+          | "scheduledPipelineReleasesViewOrdering"
           | "searchResultType"
           | "searchViewOrdering"
           | "teamViewOrdering"
@@ -35776,6 +38679,7 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "customerPageNeedsShowImportantFirst"
           | "embeddedCustomerNeedsShowImportantFirst"
           | "projectCustomerNeedsShowImportantFirst"
+          | "showOnlySnoozedItems"
           | "showParents"
           | "fieldPreviewLinks"
           | "showReadItems"
@@ -35809,12 +38713,16 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "fieldDueDate"
           | "initiativeFieldHealth"
           | "initiativeFieldActivity"
+          | "initiativeFieldDateCompleted"
+          | "initiativeFieldDateCreated"
           | "initiativeFieldDescription"
           | "initiativeFieldInitiativeHealth"
           | "initiativeFieldOwner"
           | "initiativeFieldProjects"
+          | "initiativeFieldStartDate"
           | "initiativeFieldTargetDate"
           | "initiativeFieldTeams"
+          | "initiativeFieldDateUpdated"
           | "fieldDateArchived"
           | "fieldAssignee"
           | "fieldDateCreated"
@@ -35829,6 +38737,7 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "fieldStatus"
           | "fieldDateUpdated"
           | "fieldLabels"
+          | "releasePipelineFieldLatestRelease"
           | "fieldLinkCount"
           | "memberFieldJoined"
           | "memberFieldStatus"
@@ -35874,12 +38783,15 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "projectFieldTeams"
           | "projectFieldDateUpdated"
           | "fieldPullRequests"
+          | "scheduledPipelineReleaseFieldReleaseDate"
           | "fieldRelease"
+          | "releasePipelineFieldReleases"
           | "reviewFieldAvatar"
           | "reviewFieldChecks"
           | "reviewFieldIdentifier"
           | "reviewFieldPreviewLinks"
           | "reviewFieldRepository"
+          | "scheduledPipelineReleaseFieldStage"
           | "teamFieldDateCreated"
           | "teamFieldCycle"
           | "teamFieldIdentifier"
@@ -35889,6 +38801,7 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "teamFieldProjects"
           | "teamFieldDateUpdated"
           | "fieldTimeInCurrentStatus"
+          | "releasePipelineFieldType"
           | "showTriageIssues"
           | "showUnreadItemsFirst"
           | "timelineChronologyShowWeekNumbers"
@@ -35948,6 +38861,7 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "releasePipelinesViewOrdering"
   | "reviewGrouping"
   | "reviewViewOrdering"
+  | "scheduledPipelineReleasesViewOrdering"
   | "searchResultType"
   | "searchViewOrdering"
   | "teamViewOrdering"
@@ -35973,6 +38887,7 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "customerPageNeedsShowImportantFirst"
   | "embeddedCustomerNeedsShowImportantFirst"
   | "projectCustomerNeedsShowImportantFirst"
+  | "showOnlySnoozedItems"
   | "showParents"
   | "fieldPreviewLinks"
   | "showReadItems"
@@ -36006,12 +38921,16 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "fieldDueDate"
   | "initiativeFieldHealth"
   | "initiativeFieldActivity"
+  | "initiativeFieldDateCompleted"
+  | "initiativeFieldDateCreated"
   | "initiativeFieldDescription"
   | "initiativeFieldInitiativeHealth"
   | "initiativeFieldOwner"
   | "initiativeFieldProjects"
+  | "initiativeFieldStartDate"
   | "initiativeFieldTargetDate"
   | "initiativeFieldTeams"
+  | "initiativeFieldDateUpdated"
   | "fieldDateArchived"
   | "fieldAssignee"
   | "fieldDateCreated"
@@ -36026,6 +38945,7 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "fieldStatus"
   | "fieldDateUpdated"
   | "fieldLabels"
+  | "releasePipelineFieldLatestRelease"
   | "fieldLinkCount"
   | "memberFieldJoined"
   | "memberFieldStatus"
@@ -36071,12 +38991,15 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "projectFieldTeams"
   | "projectFieldDateUpdated"
   | "fieldPullRequests"
+  | "scheduledPipelineReleaseFieldReleaseDate"
   | "fieldRelease"
+  | "releasePipelineFieldReleases"
   | "reviewFieldAvatar"
   | "reviewFieldChecks"
   | "reviewFieldIdentifier"
   | "reviewFieldPreviewLinks"
   | "reviewFieldRepository"
+  | "scheduledPipelineReleaseFieldStage"
   | "teamFieldDateCreated"
   | "teamFieldCycle"
   | "teamFieldIdentifier"
@@ -36086,6 +39009,7 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "teamFieldProjects"
   | "teamFieldDateUpdated"
   | "fieldTimeInCurrentStatus"
+  | "releasePipelineFieldType"
   | "showTriageIssues"
   | "showUnreadItemsFirst"
   | "timelineChronologyShowWeekNumbers"
@@ -36573,7 +39497,7 @@ export type AttachmentIssueQuery = { __typename?: "Query" } & {
       >;
       sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
         IssueSharedAccess,
-        "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+        "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
       > & {
           sharedWithUsers: Array<
             { __typename: "User" } & Pick<
@@ -36785,7 +39709,7 @@ export type AttachmentIssue_ChildrenQuery = { __typename?: "Query" } & {
             >;
             sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
               IssueSharedAccess,
-              "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+              "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
             > & {
                 sharedWithUsers: Array<
                   { __typename: "User" } & Pick<
@@ -37593,7 +40517,7 @@ export type AttachmentIssue_SharedAccessQuery = { __typename?: "Query" } & {
   attachmentIssue: { __typename?: "Issue" } & {
     sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
       IssueSharedAccess,
-      "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+      "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
     > & {
         sharedWithUsers: Array<
           { __typename: "User" } & Pick<
@@ -37886,6 +40810,7 @@ export type AvailableUsersQuery = { __typename?: "Query" } & {
             organization: { __typename: "AuthOrganization" } & Pick<
               AuthOrganization,
               | "allowedAuthServices"
+              | "approximateUserCount"
               | "previousUrlKeys"
               | "serviceId"
               | "releaseChannel"
@@ -37912,6 +40837,7 @@ export type AvailableUsersQuery = { __typename?: "Query" } & {
             organization: { __typename: "AuthOrganization" } & Pick<
               AuthOrganization,
               | "allowedAuthServices"
+              | "approximateUserCount"
               | "previousUrlKeys"
               | "serviceId"
               | "releaseChannel"
@@ -37935,6 +40861,7 @@ export type AvailableUsersQuery = { __typename?: "Query" } & {
           { __typename: "AuthOrganization" } & Pick<
             AuthOrganization,
             | "allowedAuthServices"
+            | "approximateUserCount"
             | "previousUrlKeys"
             | "serviceId"
             | "releaseChannel"
@@ -37958,6 +40885,7 @@ export type AvailableUsersQuery = { __typename?: "Query" } & {
           { __typename: "AuthOrganization" } & Pick<
             AuthOrganization,
             | "allowedAuthServices"
+            | "approximateUserCount"
             | "previousUrlKeys"
             | "serviceId"
             | "releaseChannel"
@@ -38301,7 +41229,7 @@ export type Comment_CreatedIssuesQuery = { __typename?: "Query" } & {
             >;
             sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
               IssueSharedAccess,
-              "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+              "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
             > & {
                 sharedWithUsers: Array<
                   { __typename: "User" } & Pick<
@@ -38682,6 +41610,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "releasePipelinesViewOrdering"
           | "reviewGrouping"
           | "reviewViewOrdering"
+          | "scheduledPipelineReleasesViewOrdering"
           | "searchResultType"
           | "searchViewOrdering"
           | "teamViewOrdering"
@@ -38707,6 +41636,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "customerPageNeedsShowImportantFirst"
           | "embeddedCustomerNeedsShowImportantFirst"
           | "projectCustomerNeedsShowImportantFirst"
+          | "showOnlySnoozedItems"
           | "showParents"
           | "fieldPreviewLinks"
           | "showReadItems"
@@ -38740,12 +41670,16 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "fieldDueDate"
           | "initiativeFieldHealth"
           | "initiativeFieldActivity"
+          | "initiativeFieldDateCompleted"
+          | "initiativeFieldDateCreated"
           | "initiativeFieldDescription"
           | "initiativeFieldInitiativeHealth"
           | "initiativeFieldOwner"
           | "initiativeFieldProjects"
+          | "initiativeFieldStartDate"
           | "initiativeFieldTargetDate"
           | "initiativeFieldTeams"
+          | "initiativeFieldDateUpdated"
           | "fieldDateArchived"
           | "fieldAssignee"
           | "fieldDateCreated"
@@ -38760,6 +41694,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "fieldStatus"
           | "fieldDateUpdated"
           | "fieldLabels"
+          | "releasePipelineFieldLatestRelease"
           | "fieldLinkCount"
           | "memberFieldJoined"
           | "memberFieldStatus"
@@ -38805,12 +41740,15 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "projectFieldTeams"
           | "projectFieldDateUpdated"
           | "fieldPullRequests"
+          | "scheduledPipelineReleaseFieldReleaseDate"
           | "fieldRelease"
+          | "releasePipelineFieldReleases"
           | "reviewFieldAvatar"
           | "reviewFieldChecks"
           | "reviewFieldIdentifier"
           | "reviewFieldPreviewLinks"
           | "reviewFieldRepository"
+          | "scheduledPipelineReleaseFieldStage"
           | "teamFieldDateCreated"
           | "teamFieldCycle"
           | "teamFieldIdentifier"
@@ -38820,6 +41758,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "teamFieldProjects"
           | "teamFieldDateUpdated"
           | "fieldTimeInCurrentStatus"
+          | "releasePipelineFieldType"
           | "showTriageIssues"
           | "showUnreadItemsFirst"
           | "timelineChronologyShowWeekNumbers"
@@ -38882,6 +41821,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "releasePipelinesViewOrdering"
               | "reviewGrouping"
               | "reviewViewOrdering"
+              | "scheduledPipelineReleasesViewOrdering"
               | "searchResultType"
               | "searchViewOrdering"
               | "teamViewOrdering"
@@ -38907,6 +41847,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "customerPageNeedsShowImportantFirst"
               | "embeddedCustomerNeedsShowImportantFirst"
               | "projectCustomerNeedsShowImportantFirst"
+              | "showOnlySnoozedItems"
               | "showParents"
               | "fieldPreviewLinks"
               | "showReadItems"
@@ -38940,12 +41881,16 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "fieldDueDate"
               | "initiativeFieldHealth"
               | "initiativeFieldActivity"
+              | "initiativeFieldDateCompleted"
+              | "initiativeFieldDateCreated"
               | "initiativeFieldDescription"
               | "initiativeFieldInitiativeHealth"
               | "initiativeFieldOwner"
               | "initiativeFieldProjects"
+              | "initiativeFieldStartDate"
               | "initiativeFieldTargetDate"
               | "initiativeFieldTeams"
+              | "initiativeFieldDateUpdated"
               | "fieldDateArchived"
               | "fieldAssignee"
               | "fieldDateCreated"
@@ -38960,6 +41905,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "fieldStatus"
               | "fieldDateUpdated"
               | "fieldLabels"
+              | "releasePipelineFieldLatestRelease"
               | "fieldLinkCount"
               | "memberFieldJoined"
               | "memberFieldStatus"
@@ -39005,12 +41951,15 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "projectFieldTeams"
               | "projectFieldDateUpdated"
               | "fieldPullRequests"
+              | "scheduledPipelineReleaseFieldReleaseDate"
               | "fieldRelease"
+              | "releasePipelineFieldReleases"
               | "reviewFieldAvatar"
               | "reviewFieldChecks"
               | "reviewFieldIdentifier"
               | "reviewFieldPreviewLinks"
               | "reviewFieldRepository"
+              | "scheduledPipelineReleaseFieldStage"
               | "teamFieldDateCreated"
               | "teamFieldCycle"
               | "teamFieldIdentifier"
@@ -39020,6 +41969,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "teamFieldProjects"
               | "teamFieldDateUpdated"
               | "fieldTimeInCurrentStatus"
+              | "releasePipelineFieldType"
               | "showTriageIssues"
               | "showUnreadItemsFirst"
               | "timelineChronologyShowWeekNumbers"
@@ -39083,6 +42033,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "releasePipelinesViewOrdering"
               | "reviewGrouping"
               | "reviewViewOrdering"
+              | "scheduledPipelineReleasesViewOrdering"
               | "searchResultType"
               | "searchViewOrdering"
               | "teamViewOrdering"
@@ -39108,6 +42059,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "customerPageNeedsShowImportantFirst"
               | "embeddedCustomerNeedsShowImportantFirst"
               | "projectCustomerNeedsShowImportantFirst"
+              | "showOnlySnoozedItems"
               | "showParents"
               | "fieldPreviewLinks"
               | "showReadItems"
@@ -39141,12 +42093,16 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "fieldDueDate"
               | "initiativeFieldHealth"
               | "initiativeFieldActivity"
+              | "initiativeFieldDateCompleted"
+              | "initiativeFieldDateCreated"
               | "initiativeFieldDescription"
               | "initiativeFieldInitiativeHealth"
               | "initiativeFieldOwner"
               | "initiativeFieldProjects"
+              | "initiativeFieldStartDate"
               | "initiativeFieldTargetDate"
               | "initiativeFieldTeams"
+              | "initiativeFieldDateUpdated"
               | "fieldDateArchived"
               | "fieldAssignee"
               | "fieldDateCreated"
@@ -39161,6 +42117,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "fieldStatus"
               | "fieldDateUpdated"
               | "fieldLabels"
+              | "releasePipelineFieldLatestRelease"
               | "fieldLinkCount"
               | "memberFieldJoined"
               | "memberFieldStatus"
@@ -39206,12 +42163,15 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "projectFieldTeams"
               | "projectFieldDateUpdated"
               | "fieldPullRequests"
+              | "scheduledPipelineReleaseFieldReleaseDate"
               | "fieldRelease"
+              | "releasePipelineFieldReleases"
               | "reviewFieldAvatar"
               | "reviewFieldChecks"
               | "reviewFieldIdentifier"
               | "reviewFieldPreviewLinks"
               | "reviewFieldRepository"
+              | "scheduledPipelineReleaseFieldStage"
               | "teamFieldDateCreated"
               | "teamFieldCycle"
               | "teamFieldIdentifier"
@@ -39221,6 +42181,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "teamFieldProjects"
               | "teamFieldDateUpdated"
               | "fieldTimeInCurrentStatus"
+              | "releasePipelineFieldType"
               | "showTriageIssues"
               | "showUnreadItemsFirst"
               | "timelineChronologyShowWeekNumbers"
@@ -39397,7 +42358,7 @@ export type CustomView_IssuesQuery = { __typename?: "Query" } & {
             >;
             sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
               IssueSharedAccess,
-              "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+              "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
             > & {
                 sharedWithUsers: Array<
                   { __typename: "User" } & Pick<
@@ -39544,6 +42505,7 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "releasePipelinesViewOrdering"
             | "reviewGrouping"
             | "reviewViewOrdering"
+            | "scheduledPipelineReleasesViewOrdering"
             | "searchResultType"
             | "searchViewOrdering"
             | "teamViewOrdering"
@@ -39569,6 +42531,7 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "customerPageNeedsShowImportantFirst"
             | "embeddedCustomerNeedsShowImportantFirst"
             | "projectCustomerNeedsShowImportantFirst"
+            | "showOnlySnoozedItems"
             | "showParents"
             | "fieldPreviewLinks"
             | "showReadItems"
@@ -39602,12 +42565,16 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "fieldDueDate"
             | "initiativeFieldHealth"
             | "initiativeFieldActivity"
+            | "initiativeFieldDateCompleted"
+            | "initiativeFieldDateCreated"
             | "initiativeFieldDescription"
             | "initiativeFieldInitiativeHealth"
             | "initiativeFieldOwner"
             | "initiativeFieldProjects"
+            | "initiativeFieldStartDate"
             | "initiativeFieldTargetDate"
             | "initiativeFieldTeams"
+            | "initiativeFieldDateUpdated"
             | "fieldDateArchived"
             | "fieldAssignee"
             | "fieldDateCreated"
@@ -39622,6 +42589,7 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "fieldStatus"
             | "fieldDateUpdated"
             | "fieldLabels"
+            | "releasePipelineFieldLatestRelease"
             | "fieldLinkCount"
             | "memberFieldJoined"
             | "memberFieldStatus"
@@ -39667,12 +42635,15 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "projectFieldTeams"
             | "projectFieldDateUpdated"
             | "fieldPullRequests"
+            | "scheduledPipelineReleaseFieldReleaseDate"
             | "fieldRelease"
+            | "releasePipelineFieldReleases"
             | "reviewFieldAvatar"
             | "reviewFieldChecks"
             | "reviewFieldIdentifier"
             | "reviewFieldPreviewLinks"
             | "reviewFieldRepository"
+            | "scheduledPipelineReleaseFieldStage"
             | "teamFieldDateCreated"
             | "teamFieldCycle"
             | "teamFieldIdentifier"
@@ -39682,6 +42653,7 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "teamFieldProjects"
             | "teamFieldDateUpdated"
             | "fieldTimeInCurrentStatus"
+            | "releasePipelineFieldType"
             | "showTriageIssues"
             | "showUnreadItemsFirst"
             | "timelineChronologyShowWeekNumbers"
@@ -39751,6 +42723,7 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "releasePipelinesViewOrdering"
           | "reviewGrouping"
           | "reviewViewOrdering"
+          | "scheduledPipelineReleasesViewOrdering"
           | "searchResultType"
           | "searchViewOrdering"
           | "teamViewOrdering"
@@ -39776,6 +42749,7 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "customerPageNeedsShowImportantFirst"
           | "embeddedCustomerNeedsShowImportantFirst"
           | "projectCustomerNeedsShowImportantFirst"
+          | "showOnlySnoozedItems"
           | "showParents"
           | "fieldPreviewLinks"
           | "showReadItems"
@@ -39809,12 +42783,16 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "fieldDueDate"
           | "initiativeFieldHealth"
           | "initiativeFieldActivity"
+          | "initiativeFieldDateCompleted"
+          | "initiativeFieldDateCreated"
           | "initiativeFieldDescription"
           | "initiativeFieldInitiativeHealth"
           | "initiativeFieldOwner"
           | "initiativeFieldProjects"
+          | "initiativeFieldStartDate"
           | "initiativeFieldTargetDate"
           | "initiativeFieldTeams"
+          | "initiativeFieldDateUpdated"
           | "fieldDateArchived"
           | "fieldAssignee"
           | "fieldDateCreated"
@@ -39829,6 +42807,7 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "fieldStatus"
           | "fieldDateUpdated"
           | "fieldLabels"
+          | "releasePipelineFieldLatestRelease"
           | "fieldLinkCount"
           | "memberFieldJoined"
           | "memberFieldStatus"
@@ -39874,12 +42853,15 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "projectFieldTeams"
           | "projectFieldDateUpdated"
           | "fieldPullRequests"
+          | "scheduledPipelineReleaseFieldReleaseDate"
           | "fieldRelease"
+          | "releasePipelineFieldReleases"
           | "reviewFieldAvatar"
           | "reviewFieldChecks"
           | "reviewFieldIdentifier"
           | "reviewFieldPreviewLinks"
           | "reviewFieldRepository"
+          | "scheduledPipelineReleaseFieldStage"
           | "teamFieldDateCreated"
           | "teamFieldCycle"
           | "teamFieldIdentifier"
@@ -39889,6 +42871,7 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "teamFieldProjects"
           | "teamFieldDateUpdated"
           | "fieldTimeInCurrentStatus"
+          | "releasePipelineFieldType"
           | "showTriageIssues"
           | "showUnreadItemsFirst"
           | "timelineChronologyShowWeekNumbers"
@@ -40087,6 +43070,7 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "releasePipelinesViewOrdering"
             | "reviewGrouping"
             | "reviewViewOrdering"
+            | "scheduledPipelineReleasesViewOrdering"
             | "searchResultType"
             | "searchViewOrdering"
             | "teamViewOrdering"
@@ -40112,6 +43096,7 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "customerPageNeedsShowImportantFirst"
             | "embeddedCustomerNeedsShowImportantFirst"
             | "projectCustomerNeedsShowImportantFirst"
+            | "showOnlySnoozedItems"
             | "showParents"
             | "fieldPreviewLinks"
             | "showReadItems"
@@ -40145,12 +43130,16 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "fieldDueDate"
             | "initiativeFieldHealth"
             | "initiativeFieldActivity"
+            | "initiativeFieldDateCompleted"
+            | "initiativeFieldDateCreated"
             | "initiativeFieldDescription"
             | "initiativeFieldInitiativeHealth"
             | "initiativeFieldOwner"
             | "initiativeFieldProjects"
+            | "initiativeFieldStartDate"
             | "initiativeFieldTargetDate"
             | "initiativeFieldTeams"
+            | "initiativeFieldDateUpdated"
             | "fieldDateArchived"
             | "fieldAssignee"
             | "fieldDateCreated"
@@ -40165,6 +43154,7 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "fieldStatus"
             | "fieldDateUpdated"
             | "fieldLabels"
+            | "releasePipelineFieldLatestRelease"
             | "fieldLinkCount"
             | "memberFieldJoined"
             | "memberFieldStatus"
@@ -40210,12 +43200,15 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "projectFieldTeams"
             | "projectFieldDateUpdated"
             | "fieldPullRequests"
+            | "scheduledPipelineReleaseFieldReleaseDate"
             | "fieldRelease"
+            | "releasePipelineFieldReleases"
             | "reviewFieldAvatar"
             | "reviewFieldChecks"
             | "reviewFieldIdentifier"
             | "reviewFieldPreviewLinks"
             | "reviewFieldRepository"
+            | "scheduledPipelineReleaseFieldStage"
             | "teamFieldDateCreated"
             | "teamFieldCycle"
             | "teamFieldIdentifier"
@@ -40225,6 +43218,7 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "teamFieldProjects"
             | "teamFieldDateUpdated"
             | "fieldTimeInCurrentStatus"
+            | "releasePipelineFieldType"
             | "showTriageIssues"
             | "showUnreadItemsFirst"
             | "timelineChronologyShowWeekNumbers"
@@ -40294,6 +43288,7 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "releasePipelinesViewOrdering"
           | "reviewGrouping"
           | "reviewViewOrdering"
+          | "scheduledPipelineReleasesViewOrdering"
           | "searchResultType"
           | "searchViewOrdering"
           | "teamViewOrdering"
@@ -40319,6 +43314,7 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "customerPageNeedsShowImportantFirst"
           | "embeddedCustomerNeedsShowImportantFirst"
           | "projectCustomerNeedsShowImportantFirst"
+          | "showOnlySnoozedItems"
           | "showParents"
           | "fieldPreviewLinks"
           | "showReadItems"
@@ -40352,12 +43348,16 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "fieldDueDate"
           | "initiativeFieldHealth"
           | "initiativeFieldActivity"
+          | "initiativeFieldDateCompleted"
+          | "initiativeFieldDateCreated"
           | "initiativeFieldDescription"
           | "initiativeFieldInitiativeHealth"
           | "initiativeFieldOwner"
           | "initiativeFieldProjects"
+          | "initiativeFieldStartDate"
           | "initiativeFieldTargetDate"
           | "initiativeFieldTeams"
+          | "initiativeFieldDateUpdated"
           | "fieldDateArchived"
           | "fieldAssignee"
           | "fieldDateCreated"
@@ -40372,6 +43372,7 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "fieldStatus"
           | "fieldDateUpdated"
           | "fieldLabels"
+          | "releasePipelineFieldLatestRelease"
           | "fieldLinkCount"
           | "memberFieldJoined"
           | "memberFieldStatus"
@@ -40417,12 +43418,15 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "projectFieldTeams"
           | "projectFieldDateUpdated"
           | "fieldPullRequests"
+          | "scheduledPipelineReleaseFieldReleaseDate"
           | "fieldRelease"
+          | "releasePipelineFieldReleases"
           | "reviewFieldAvatar"
           | "reviewFieldChecks"
           | "reviewFieldIdentifier"
           | "reviewFieldPreviewLinks"
           | "reviewFieldRepository"
+          | "scheduledPipelineReleaseFieldStage"
           | "teamFieldDateCreated"
           | "teamFieldCycle"
           | "teamFieldIdentifier"
@@ -40432,6 +43436,7 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "teamFieldProjects"
           | "teamFieldDateUpdated"
           | "fieldTimeInCurrentStatus"
+          | "releasePipelineFieldType"
           | "showTriageIssues"
           | "showUnreadItemsFirst"
           | "timelineChronologyShowWeekNumbers"
@@ -40500,6 +43505,7 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "releasePipelinesViewOrdering"
         | "reviewGrouping"
         | "reviewViewOrdering"
+        | "scheduledPipelineReleasesViewOrdering"
         | "searchResultType"
         | "searchViewOrdering"
         | "teamViewOrdering"
@@ -40525,6 +43531,7 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "customerPageNeedsShowImportantFirst"
         | "embeddedCustomerNeedsShowImportantFirst"
         | "projectCustomerNeedsShowImportantFirst"
+        | "showOnlySnoozedItems"
         | "showParents"
         | "fieldPreviewLinks"
         | "showReadItems"
@@ -40558,12 +43565,16 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "fieldDueDate"
         | "initiativeFieldHealth"
         | "initiativeFieldActivity"
+        | "initiativeFieldDateCompleted"
+        | "initiativeFieldDateCreated"
         | "initiativeFieldDescription"
         | "initiativeFieldInitiativeHealth"
         | "initiativeFieldOwner"
         | "initiativeFieldProjects"
+        | "initiativeFieldStartDate"
         | "initiativeFieldTargetDate"
         | "initiativeFieldTeams"
+        | "initiativeFieldDateUpdated"
         | "fieldDateArchived"
         | "fieldAssignee"
         | "fieldDateCreated"
@@ -40578,6 +43589,7 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "fieldStatus"
         | "fieldDateUpdated"
         | "fieldLabels"
+        | "releasePipelineFieldLatestRelease"
         | "fieldLinkCount"
         | "memberFieldJoined"
         | "memberFieldStatus"
@@ -40623,12 +43635,15 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "projectFieldTeams"
         | "projectFieldDateUpdated"
         | "fieldPullRequests"
+        | "scheduledPipelineReleaseFieldReleaseDate"
         | "fieldRelease"
+        | "releasePipelineFieldReleases"
         | "reviewFieldAvatar"
         | "reviewFieldChecks"
         | "reviewFieldIdentifier"
         | "reviewFieldPreviewLinks"
         | "reviewFieldRepository"
+        | "scheduledPipelineReleaseFieldStage"
         | "teamFieldDateCreated"
         | "teamFieldCycle"
         | "teamFieldIdentifier"
@@ -40638,6 +43653,7 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "teamFieldProjects"
         | "teamFieldDateUpdated"
         | "fieldTimeInCurrentStatus"
+        | "releasePipelineFieldType"
         | "showTriageIssues"
         | "showUnreadItemsFirst"
         | "timelineChronologyShowWeekNumbers"
@@ -40743,6 +43759,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "releasePipelinesViewOrdering"
               | "reviewGrouping"
               | "reviewViewOrdering"
+              | "scheduledPipelineReleasesViewOrdering"
               | "searchResultType"
               | "searchViewOrdering"
               | "teamViewOrdering"
@@ -40768,6 +43785,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "customerPageNeedsShowImportantFirst"
               | "embeddedCustomerNeedsShowImportantFirst"
               | "projectCustomerNeedsShowImportantFirst"
+              | "showOnlySnoozedItems"
               | "showParents"
               | "fieldPreviewLinks"
               | "showReadItems"
@@ -40801,12 +43819,16 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "fieldDueDate"
               | "initiativeFieldHealth"
               | "initiativeFieldActivity"
+              | "initiativeFieldDateCompleted"
+              | "initiativeFieldDateCreated"
               | "initiativeFieldDescription"
               | "initiativeFieldInitiativeHealth"
               | "initiativeFieldOwner"
               | "initiativeFieldProjects"
+              | "initiativeFieldStartDate"
               | "initiativeFieldTargetDate"
               | "initiativeFieldTeams"
+              | "initiativeFieldDateUpdated"
               | "fieldDateArchived"
               | "fieldAssignee"
               | "fieldDateCreated"
@@ -40821,6 +43843,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "fieldStatus"
               | "fieldDateUpdated"
               | "fieldLabels"
+              | "releasePipelineFieldLatestRelease"
               | "fieldLinkCount"
               | "memberFieldJoined"
               | "memberFieldStatus"
@@ -40866,12 +43889,15 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "projectFieldTeams"
               | "projectFieldDateUpdated"
               | "fieldPullRequests"
+              | "scheduledPipelineReleaseFieldReleaseDate"
               | "fieldRelease"
+              | "releasePipelineFieldReleases"
               | "reviewFieldAvatar"
               | "reviewFieldChecks"
               | "reviewFieldIdentifier"
               | "reviewFieldPreviewLinks"
               | "reviewFieldRepository"
+              | "scheduledPipelineReleaseFieldStage"
               | "teamFieldDateCreated"
               | "teamFieldCycle"
               | "teamFieldIdentifier"
@@ -40881,6 +43907,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "teamFieldProjects"
               | "teamFieldDateUpdated"
               | "fieldTimeInCurrentStatus"
+              | "releasePipelineFieldType"
               | "showTriageIssues"
               | "showUnreadItemsFirst"
               | "timelineChronologyShowWeekNumbers"
@@ -40943,6 +43970,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "releasePipelinesViewOrdering"
                   | "reviewGrouping"
                   | "reviewViewOrdering"
+                  | "scheduledPipelineReleasesViewOrdering"
                   | "searchResultType"
                   | "searchViewOrdering"
                   | "teamViewOrdering"
@@ -40968,6 +43996,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "customerPageNeedsShowImportantFirst"
                   | "embeddedCustomerNeedsShowImportantFirst"
                   | "projectCustomerNeedsShowImportantFirst"
+                  | "showOnlySnoozedItems"
                   | "showParents"
                   | "fieldPreviewLinks"
                   | "showReadItems"
@@ -41001,12 +44030,16 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "fieldDueDate"
                   | "initiativeFieldHealth"
                   | "initiativeFieldActivity"
+                  | "initiativeFieldDateCompleted"
+                  | "initiativeFieldDateCreated"
                   | "initiativeFieldDescription"
                   | "initiativeFieldInitiativeHealth"
                   | "initiativeFieldOwner"
                   | "initiativeFieldProjects"
+                  | "initiativeFieldStartDate"
                   | "initiativeFieldTargetDate"
                   | "initiativeFieldTeams"
+                  | "initiativeFieldDateUpdated"
                   | "fieldDateArchived"
                   | "fieldAssignee"
                   | "fieldDateCreated"
@@ -41021,6 +44054,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "fieldStatus"
                   | "fieldDateUpdated"
                   | "fieldLabels"
+                  | "releasePipelineFieldLatestRelease"
                   | "fieldLinkCount"
                   | "memberFieldJoined"
                   | "memberFieldStatus"
@@ -41066,12 +44100,15 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "projectFieldTeams"
                   | "projectFieldDateUpdated"
                   | "fieldPullRequests"
+                  | "scheduledPipelineReleaseFieldReleaseDate"
                   | "fieldRelease"
+                  | "releasePipelineFieldReleases"
                   | "reviewFieldAvatar"
                   | "reviewFieldChecks"
                   | "reviewFieldIdentifier"
                   | "reviewFieldPreviewLinks"
                   | "reviewFieldRepository"
+                  | "scheduledPipelineReleaseFieldStage"
                   | "teamFieldDateCreated"
                   | "teamFieldCycle"
                   | "teamFieldIdentifier"
@@ -41081,6 +44118,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "teamFieldProjects"
                   | "teamFieldDateUpdated"
                   | "fieldTimeInCurrentStatus"
+                  | "releasePipelineFieldType"
                   | "showTriageIssues"
                   | "showUnreadItemsFirst"
                   | "timelineChronologyShowWeekNumbers"
@@ -41144,6 +44182,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "releasePipelinesViewOrdering"
                   | "reviewGrouping"
                   | "reviewViewOrdering"
+                  | "scheduledPipelineReleasesViewOrdering"
                   | "searchResultType"
                   | "searchViewOrdering"
                   | "teamViewOrdering"
@@ -41169,6 +44208,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "customerPageNeedsShowImportantFirst"
                   | "embeddedCustomerNeedsShowImportantFirst"
                   | "projectCustomerNeedsShowImportantFirst"
+                  | "showOnlySnoozedItems"
                   | "showParents"
                   | "fieldPreviewLinks"
                   | "showReadItems"
@@ -41202,12 +44242,16 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "fieldDueDate"
                   | "initiativeFieldHealth"
                   | "initiativeFieldActivity"
+                  | "initiativeFieldDateCompleted"
+                  | "initiativeFieldDateCreated"
                   | "initiativeFieldDescription"
                   | "initiativeFieldInitiativeHealth"
                   | "initiativeFieldOwner"
                   | "initiativeFieldProjects"
+                  | "initiativeFieldStartDate"
                   | "initiativeFieldTargetDate"
                   | "initiativeFieldTeams"
+                  | "initiativeFieldDateUpdated"
                   | "fieldDateArchived"
                   | "fieldAssignee"
                   | "fieldDateCreated"
@@ -41222,6 +44266,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "fieldStatus"
                   | "fieldDateUpdated"
                   | "fieldLabels"
+                  | "releasePipelineFieldLatestRelease"
                   | "fieldLinkCount"
                   | "memberFieldJoined"
                   | "memberFieldStatus"
@@ -41267,12 +44312,15 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "projectFieldTeams"
                   | "projectFieldDateUpdated"
                   | "fieldPullRequests"
+                  | "scheduledPipelineReleaseFieldReleaseDate"
                   | "fieldRelease"
+                  | "releasePipelineFieldReleases"
                   | "reviewFieldAvatar"
                   | "reviewFieldChecks"
                   | "reviewFieldIdentifier"
                   | "reviewFieldPreviewLinks"
                   | "reviewFieldRepository"
+                  | "scheduledPipelineReleaseFieldStage"
                   | "teamFieldDateCreated"
                   | "teamFieldCycle"
                   | "teamFieldIdentifier"
@@ -41282,6 +44330,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "teamFieldProjects"
                   | "teamFieldDateUpdated"
                   | "fieldTimeInCurrentStatus"
+                  | "releasePipelineFieldType"
                   | "showTriageIssues"
                   | "showUnreadItemsFirst"
                   | "timelineChronologyShowWeekNumbers"
@@ -41744,7 +44793,7 @@ export type Cycle_IssuesQuery = { __typename?: "Query" } & {
             >;
             sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
               IssueSharedAccess,
-              "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+              "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
             > & {
                 sharedWithUsers: Array<
                   { __typename: "User" } & Pick<
@@ -41907,7 +44956,7 @@ export type Cycle_UncompletedIssuesUponCloseQuery = { __typename?: "Query" } & {
             >;
             sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
               IssueSharedAccess,
-              "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+              "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
             > & {
                 sharedWithUsers: Array<
                   { __typename: "User" } & Pick<
@@ -42219,7 +45268,7 @@ export type DocumentContentHistoryQuery = { __typename?: "Query" } & {
       history: Array<
         { __typename: "DocumentContentHistoryType" } & Pick<
           DocumentContentHistoryType,
-          "actorIds" | "id" | "createdAt" | "contentDataSnapshotAt"
+          "metadata" | "actorIds" | "id" | "createdAt" | "contentDataSnapshotAt"
         >
       >;
     };
@@ -42295,6 +45344,7 @@ export type EmailIntakeAddressQuery = { __typename?: "Query" } & {
     | "issueCreatedAutoReplyEnabled"
     | "useUserNamesInReplies"
     | "enabled"
+    | "reopenOnReply"
   > & {
       sesDomainIdentity?: Maybe<
         { __typename: "SesDomainIdentity" } & Pick<
@@ -43623,7 +46673,7 @@ export type IssueQuery = { __typename?: "Query" } & {
       >;
       sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
         IssueSharedAccess,
-        "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+        "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
       > & {
           sharedWithUsers: Array<
             { __typename: "User" } & Pick<
@@ -43835,7 +46885,7 @@ export type Issue_ChildrenQuery = { __typename?: "Query" } & {
             >;
             sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
               IssueSharedAccess,
-              "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+              "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
             > & {
                 sharedWithUsers: Array<
                   { __typename: "User" } & Pick<
@@ -44643,7 +47693,7 @@ export type Issue_SharedAccessQuery = { __typename?: "Query" } & {
   issue: { __typename?: "Issue" } & {
     sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
       IssueSharedAccess,
-      "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+      "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
     > & {
         sharedWithUsers: Array<
           { __typename: "User" } & Pick<
@@ -44838,7 +47888,7 @@ export type IssueFigmaFileKeySearchQuery = { __typename?: "Query" } & {
           >;
           sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
             IssueSharedAccess,
-            "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+            "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
           > & {
               sharedWithUsers: Array<
                 { __typename: "User" } & Pick<
@@ -44933,6 +47983,7 @@ export type IssueFigmaFileKeySearchQuery = { __typename?: "Query" } & {
 export type IssueFilterSuggestionQueryVariables = Exact<{
   projectId?: InputMaybe<Scalars["String"]>;
   prompt: Scalars["String"];
+  teamId?: InputMaybe<Scalars["String"]>;
 }>;
 
 export type IssueFilterSuggestionQuery = { __typename?: "Query" } & {
@@ -45106,7 +48157,7 @@ export type IssueLabel_IssuesQuery = { __typename?: "Query" } & {
             >;
             sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
               IssueSharedAccess,
-              "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+              "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
             > & {
                 sharedWithUsers: Array<
                   { __typename: "User" } & Pick<
@@ -45363,7 +48414,7 @@ export type IssueSearchQuery = { __typename?: "Query" } & {
           >;
           sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
             IssueSharedAccess,
-            "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+            "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
           > & {
               sharedWithUsers: Array<
                 { __typename: "User" } & Pick<
@@ -45527,7 +48578,7 @@ export type IssueVcsBranchSearchQuery = { __typename?: "Query" } & {
         >;
         sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
           IssueSharedAccess,
-          "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+          "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
         > & {
             sharedWithUsers: Array<
               { __typename: "User" } & Pick<
@@ -45751,7 +48802,7 @@ export type IssueVcsBranchSearch_ChildrenQuery = { __typename?: "Query" } & {
               >;
               sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
                 IssueSharedAccess,
-                "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+                "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
               > & {
                   sharedWithUsers: Array<
                     { __typename: "User" } & Pick<
@@ -46585,7 +49636,7 @@ export type IssueVcsBranchSearch_SharedAccessQuery = { __typename?: "Query" } & 
     { __typename?: "Issue" } & {
       sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
         IssueSharedAccess,
-        "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+        "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
       > & {
           sharedWithUsers: Array<
             { __typename: "User" } & Pick<
@@ -46786,7 +49837,7 @@ export type IssuesQuery = { __typename?: "Query" } & {
           >;
           sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
             IssueSharedAccess,
-            "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+            "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
           > & {
               sharedWithUsers: Array<
                 { __typename: "User" } & Pick<
@@ -48366,8 +51417,10 @@ export type Organization_TemplatesQuery = { __typename?: "Query" } & {
           Template,
           | "templateData"
           | "description"
+          | "color"
           | "lastAppliedAt"
           | "type"
+          | "icon"
           | "updatedAt"
           | "name"
           | "sortOrder"
@@ -49174,7 +52227,7 @@ export type Project_IssuesQuery = { __typename?: "Query" } & {
             >;
             sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
               IssueSharedAccess,
-              "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+              "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
             > & {
                 sharedWithUsers: Array<
                   { __typename: "User" } & Pick<
@@ -49664,6 +52717,7 @@ export type Project_TeamsQuery = { __typename?: "Query" } & {
 
 export type ProjectFilterSuggestionQueryVariables = Exact<{
   prompt: Scalars["String"];
+  teamId?: InputMaybe<Scalars["String"]>;
 }>;
 
 export type ProjectFilterSuggestionQuery = { __typename?: "Query" } & {
@@ -50066,7 +53120,7 @@ export type ProjectMilestone_IssuesQuery = { __typename?: "Query" } & {
             >;
             sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
               IssueSharedAccess,
-              "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+              "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
             > & {
                 sharedWithUsers: Array<
                   { __typename: "User" } & Pick<
@@ -51044,7 +54098,7 @@ export type SearchIssuesQuery = { __typename?: "Query" } & {
             >;
             sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
               IssueSharedAccess,
-              "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+              "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
             > & {
                 sharedWithUsers: Array<
                   { __typename: "User" } & Pick<
@@ -51574,7 +54628,7 @@ export type Team_IssuesQuery = { __typename?: "Query" } & {
             >;
             sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
               IssueSharedAccess,
-              "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+              "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
             > & {
                 sharedWithUsers: Array<
                   { __typename: "User" } & Pick<
@@ -51972,8 +55026,10 @@ export type Team_TemplatesQuery = { __typename?: "Query" } & {
           Template,
           | "templateData"
           | "description"
+          | "color"
           | "lastAppliedAt"
           | "type"
+          | "icon"
           | "updatedAt"
           | "name"
           | "sortOrder"
@@ -52169,8 +55225,10 @@ export type TemplateQuery = { __typename?: "Query" } & {
     Template,
     | "templateData"
     | "description"
+    | "color"
     | "lastAppliedAt"
     | "type"
+    | "icon"
     | "updatedAt"
     | "name"
     | "sortOrder"
@@ -52193,8 +55251,10 @@ export type TemplatesQuery = { __typename?: "Query" } & {
       Template,
       | "templateData"
       | "description"
+      | "color"
       | "lastAppliedAt"
       | "type"
+      | "icon"
       | "updatedAt"
       | "name"
       | "sortOrder"
@@ -52220,8 +55280,10 @@ export type TemplatesForIntegrationQuery = { __typename?: "Query" } & {
       Template,
       | "templateData"
       | "description"
+      | "color"
       | "lastAppliedAt"
       | "type"
+      | "icon"
       | "updatedAt"
       | "name"
       | "sortOrder"
@@ -52462,7 +55524,7 @@ export type User_AssignedIssuesQuery = { __typename?: "Query" } & {
             >;
             sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
               IssueSharedAccess,
-              "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+              "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
             > & {
                 sharedWithUsers: Array<
                   { __typename: "User" } & Pick<
@@ -52625,7 +55687,7 @@ export type User_CreatedIssuesQuery = { __typename?: "Query" } & {
             >;
             sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
               IssueSharedAccess,
-              "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+              "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
             > & {
                 sharedWithUsers: Array<
                   { __typename: "User" } & Pick<
@@ -52788,7 +55850,7 @@ export type User_DelegatedIssuesQuery = { __typename?: "Query" } & {
             >;
             sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
               IssueSharedAccess,
-              "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+              "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
             > & {
                 sharedWithUsers: Array<
                   { __typename: "User" } & Pick<
@@ -54070,7 +57132,7 @@ export type Viewer_AssignedIssuesQuery = { __typename?: "Query" } & {
             >;
             sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
               IssueSharedAccess,
-              "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+              "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
             > & {
                 sharedWithUsers: Array<
                   { __typename: "User" } & Pick<
@@ -54232,7 +57294,7 @@ export type Viewer_CreatedIssuesQuery = { __typename?: "Query" } & {
             >;
             sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
               IssueSharedAccess,
-              "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+              "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
             > & {
                 sharedWithUsers: Array<
                   { __typename: "User" } & Pick<
@@ -54394,7 +57456,7 @@ export type Viewer_DelegatedIssuesQuery = { __typename?: "Query" } & {
             >;
             sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
               IssueSharedAccess,
-              "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+              "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
             > & {
                 sharedWithUsers: Array<
                   { __typename: "User" } & Pick<
@@ -54785,7 +57847,7 @@ export type WorkflowState_IssuesQuery = { __typename?: "Query" } & {
             >;
             sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
               IssueSharedAccess,
-              "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+              "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
             > & {
                 sharedWithUsers: Array<
                   { __typename: "User" } & Pick<
@@ -55276,6 +58338,7 @@ export type CreateOrganizationFromOnboardingMutation = { __typename?: "Mutation"
     organization: { __typename: "AuthOrganization" } & Pick<
       AuthOrganization,
       | "allowedAuthServices"
+      | "approximateUserCount"
       | "previousUrlKeys"
       | "serviceId"
       | "releaseChannel"
@@ -55299,6 +58362,7 @@ export type CreateOrganizationFromOnboardingMutation = { __typename?: "Mutation"
         organization: { __typename: "AuthOrganization" } & Pick<
           AuthOrganization,
           | "allowedAuthServices"
+          | "approximateUserCount"
           | "previousUrlKeys"
           | "serviceId"
           | "releaseChannel"
@@ -55730,6 +58794,7 @@ export type EmailTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
             organization: { __typename: "AuthOrganization" } & Pick<
               AuthOrganization,
               | "allowedAuthServices"
+              | "approximateUserCount"
               | "previousUrlKeys"
               | "serviceId"
               | "releaseChannel"
@@ -55756,6 +58821,7 @@ export type EmailTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
             organization: { __typename: "AuthOrganization" } & Pick<
               AuthOrganization,
               | "allowedAuthServices"
+              | "approximateUserCount"
               | "previousUrlKeys"
               | "serviceId"
               | "releaseChannel"
@@ -55779,6 +58845,7 @@ export type EmailTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
           { __typename: "AuthOrganization" } & Pick<
             AuthOrganization,
             | "allowedAuthServices"
+            | "approximateUserCount"
             | "previousUrlKeys"
             | "serviceId"
             | "releaseChannel"
@@ -55802,6 +58869,7 @@ export type EmailTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
           { __typename: "AuthOrganization" } & Pick<
             AuthOrganization,
             | "allowedAuthServices"
+            | "approximateUserCount"
             | "previousUrlKeys"
             | "serviceId"
             | "releaseChannel"
@@ -56065,6 +59133,7 @@ export type GoogleUserAccountAuthMutation = { __typename?: "Mutation" } & {
             organization: { __typename: "AuthOrganization" } & Pick<
               AuthOrganization,
               | "allowedAuthServices"
+              | "approximateUserCount"
               | "previousUrlKeys"
               | "serviceId"
               | "releaseChannel"
@@ -56091,6 +59160,7 @@ export type GoogleUserAccountAuthMutation = { __typename?: "Mutation" } & {
             organization: { __typename: "AuthOrganization" } & Pick<
               AuthOrganization,
               | "allowedAuthServices"
+              | "approximateUserCount"
               | "previousUrlKeys"
               | "serviceId"
               | "releaseChannel"
@@ -56114,6 +59184,7 @@ export type GoogleUserAccountAuthMutation = { __typename?: "Mutation" } & {
           { __typename: "AuthOrganization" } & Pick<
             AuthOrganization,
             | "allowedAuthServices"
+            | "approximateUserCount"
             | "previousUrlKeys"
             | "serviceId"
             | "releaseChannel"
@@ -56137,6 +59208,7 @@ export type GoogleUserAccountAuthMutation = { __typename?: "Mutation" } & {
           { __typename: "AuthOrganization" } & Pick<
             AuthOrganization,
             | "allowedAuthServices"
+            | "approximateUserCount"
             | "previousUrlKeys"
             | "serviceId"
             | "releaseChannel"
@@ -56906,7 +59978,7 @@ export type CreateIssueBatchMutation = { __typename?: "Mutation" } & {
             >;
             sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
               IssueSharedAccess,
-              "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+              "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
             > & {
                 sharedWithUsers: Array<
                   { __typename: "User" } & Pick<
@@ -57057,7 +60129,7 @@ export type UpdateIssueBatchMutation = { __typename?: "Mutation" } & {
             >;
             sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
               IssueSharedAccess,
-              "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
+              "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
             > & {
                 sharedWithUsers: Array<
                   { __typename: "User" } & Pick<
@@ -57607,6 +60679,7 @@ export type JoinOrganizationFromOnboardingMutation = { __typename?: "Mutation" }
     organization: { __typename: "AuthOrganization" } & Pick<
       AuthOrganization,
       | "allowedAuthServices"
+      | "approximateUserCount"
       | "previousUrlKeys"
       | "serviceId"
       | "releaseChannel"
@@ -57630,6 +60703,7 @@ export type JoinOrganizationFromOnboardingMutation = { __typename?: "Mutation" }
         organization: { __typename: "AuthOrganization" } & Pick<
           AuthOrganization,
           | "allowedAuthServices"
+          | "approximateUserCount"
           | "previousUrlKeys"
           | "serviceId"
           | "releaseChannel"
@@ -57659,6 +60733,7 @@ export type LeaveOrganizationMutation = { __typename?: "Mutation" } & {
     organization: { __typename: "AuthOrganization" } & Pick<
       AuthOrganization,
       | "allowedAuthServices"
+      | "approximateUserCount"
       | "previousUrlKeys"
       | "serviceId"
       | "releaseChannel"
@@ -57682,6 +60757,7 @@ export type LeaveOrganizationMutation = { __typename?: "Mutation" } & {
         organization: { __typename: "AuthOrganization" } & Pick<
           AuthOrganization,
           | "allowedAuthServices"
+          | "approximateUserCount"
           | "previousUrlKeys"
           | "serviceId"
           | "releaseChannel"
@@ -62346,6 +65422,7 @@ export type SamlTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
             organization: { __typename: "AuthOrganization" } & Pick<
               AuthOrganization,
               | "allowedAuthServices"
+              | "approximateUserCount"
               | "previousUrlKeys"
               | "serviceId"
               | "releaseChannel"
@@ -62372,6 +65449,7 @@ export type SamlTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
             organization: { __typename: "AuthOrganization" } & Pick<
               AuthOrganization,
               | "allowedAuthServices"
+              | "approximateUserCount"
               | "previousUrlKeys"
               | "serviceId"
               | "releaseChannel"
@@ -62395,6 +65473,7 @@ export type SamlTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
           { __typename: "AuthOrganization" } & Pick<
             AuthOrganization,
             | "allowedAuthServices"
+            | "approximateUserCount"
             | "previousUrlKeys"
             | "serviceId"
             | "releaseChannel"
@@ -62418,6 +65497,7 @@ export type SamlTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
           { __typename: "AuthOrganization" } & Pick<
             AuthOrganization,
             | "allowedAuthServices"
+            | "approximateUserCount"
             | "previousUrlKeys"
             | "serviceId"
             | "releaseChannel"
@@ -62825,6 +65905,7 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "releasePipelinesViewOrdering"
             | "reviewGrouping"
             | "reviewViewOrdering"
+            | "scheduledPipelineReleasesViewOrdering"
             | "searchResultType"
             | "searchViewOrdering"
             | "teamViewOrdering"
@@ -62850,6 +65931,7 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "customerPageNeedsShowImportantFirst"
             | "embeddedCustomerNeedsShowImportantFirst"
             | "projectCustomerNeedsShowImportantFirst"
+            | "showOnlySnoozedItems"
             | "showParents"
             | "fieldPreviewLinks"
             | "showReadItems"
@@ -62883,12 +65965,16 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "fieldDueDate"
             | "initiativeFieldHealth"
             | "initiativeFieldActivity"
+            | "initiativeFieldDateCompleted"
+            | "initiativeFieldDateCreated"
             | "initiativeFieldDescription"
             | "initiativeFieldInitiativeHealth"
             | "initiativeFieldOwner"
             | "initiativeFieldProjects"
+            | "initiativeFieldStartDate"
             | "initiativeFieldTargetDate"
             | "initiativeFieldTeams"
+            | "initiativeFieldDateUpdated"
             | "fieldDateArchived"
             | "fieldAssignee"
             | "fieldDateCreated"
@@ -62903,6 +65989,7 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "fieldStatus"
             | "fieldDateUpdated"
             | "fieldLabels"
+            | "releasePipelineFieldLatestRelease"
             | "fieldLinkCount"
             | "memberFieldJoined"
             | "memberFieldStatus"
@@ -62948,12 +66035,15 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "projectFieldTeams"
             | "projectFieldDateUpdated"
             | "fieldPullRequests"
+            | "scheduledPipelineReleaseFieldReleaseDate"
             | "fieldRelease"
+            | "releasePipelineFieldReleases"
             | "reviewFieldAvatar"
             | "reviewFieldChecks"
             | "reviewFieldIdentifier"
             | "reviewFieldPreviewLinks"
             | "reviewFieldRepository"
+            | "scheduledPipelineReleaseFieldStage"
             | "teamFieldDateCreated"
             | "teamFieldCycle"
             | "teamFieldIdentifier"
@@ -62963,6 +66053,7 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "teamFieldProjects"
             | "teamFieldDateUpdated"
             | "fieldTimeInCurrentStatus"
+            | "releasePipelineFieldType"
             | "showTriageIssues"
             | "showUnreadItemsFirst"
             | "timelineChronologyShowWeekNumbers"
@@ -63045,6 +66136,7 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "releasePipelinesViewOrdering"
             | "reviewGrouping"
             | "reviewViewOrdering"
+            | "scheduledPipelineReleasesViewOrdering"
             | "searchResultType"
             | "searchViewOrdering"
             | "teamViewOrdering"
@@ -63070,6 +66162,7 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "customerPageNeedsShowImportantFirst"
             | "embeddedCustomerNeedsShowImportantFirst"
             | "projectCustomerNeedsShowImportantFirst"
+            | "showOnlySnoozedItems"
             | "showParents"
             | "fieldPreviewLinks"
             | "showReadItems"
@@ -63103,12 +66196,16 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "fieldDueDate"
             | "initiativeFieldHealth"
             | "initiativeFieldActivity"
+            | "initiativeFieldDateCompleted"
+            | "initiativeFieldDateCreated"
             | "initiativeFieldDescription"
             | "initiativeFieldInitiativeHealth"
             | "initiativeFieldOwner"
             | "initiativeFieldProjects"
+            | "initiativeFieldStartDate"
             | "initiativeFieldTargetDate"
             | "initiativeFieldTeams"
+            | "initiativeFieldDateUpdated"
             | "fieldDateArchived"
             | "fieldAssignee"
             | "fieldDateCreated"
@@ -63123,6 +66220,7 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "fieldStatus"
             | "fieldDateUpdated"
             | "fieldLabels"
+            | "releasePipelineFieldLatestRelease"
             | "fieldLinkCount"
             | "memberFieldJoined"
             | "memberFieldStatus"
@@ -63168,12 +66266,15 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "projectFieldTeams"
             | "projectFieldDateUpdated"
             | "fieldPullRequests"
+            | "scheduledPipelineReleaseFieldReleaseDate"
             | "fieldRelease"
+            | "releasePipelineFieldReleases"
             | "reviewFieldAvatar"
             | "reviewFieldChecks"
             | "reviewFieldIdentifier"
             | "reviewFieldPreviewLinks"
             | "reviewFieldRepository"
+            | "scheduledPipelineReleaseFieldStage"
             | "teamFieldDateCreated"
             | "teamFieldCycle"
             | "teamFieldIdentifier"
@@ -63183,6 +66284,7 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "teamFieldProjects"
             | "teamFieldDateUpdated"
             | "fieldTimeInCurrentStatus"
+            | "releasePipelineFieldType"
             | "showTriageIssues"
             | "showUnreadItemsFirst"
             | "timelineChronologyShowWeekNumbers"
@@ -63290,6 +66392,2221 @@ export class TypedDocumentString<TResult, TVariables>
     return this.value;
   }
 }
+export const AiConversationPartMetadataFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationPartMetadata on AiConversationPartMetadata {
+  __typename
+  feedback
+  evalLogId
+  turnId
+}
+    `,
+  { fragmentName: "AiConversationPartMetadata" }
+) as unknown as TypedDocumentString<AiConversationPartMetadataFragment, unknown>;
+export const AiConversationPromptPartFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationPromptPart on AiConversationPromptPart {
+  __typename
+  id
+  body
+  bodyData
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  type
+  user {
+    id
+  }
+}
+    fragment AiConversationPartMetadata on AiConversationPartMetadata {
+  __typename
+  feedback
+  evalLogId
+  turnId
+}`,
+  { fragmentName: "AiConversationPromptPart" }
+) as unknown as TypedDocumentString<AiConversationPromptPartFragment, unknown>;
+export const AiConversationReasoningPartFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationReasoningPart on AiConversationReasoningPart {
+  __typename
+  id
+  body
+  bodyData
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  title
+  type
+}
+    fragment AiConversationPartMetadata on AiConversationPartMetadata {
+  __typename
+  feedback
+  evalLogId
+  turnId
+}`,
+  { fragmentName: "AiConversationReasoningPart" }
+) as unknown as TypedDocumentString<AiConversationReasoningPartFragment, unknown>;
+export const AiConversationTextPartFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationTextPart on AiConversationTextPart {
+  __typename
+  id
+  body
+  bodyData
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  type
+}
+    fragment AiConversationPartMetadata on AiConversationPartMetadata {
+  __typename
+  feedback
+  evalLogId
+  turnId
+}`,
+  { fragmentName: "AiConversationTextPart" }
+) as unknown as TypedDocumentString<AiConversationTextPartFragment, unknown>;
+export const AiConversationCodeIntelligenceToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationCodeIntelligenceToolCallArgs on AiConversationCodeIntelligenceToolCallArgs {
+  __typename
+  question
+}
+    `,
+  { fragmentName: "AiConversationCodeIntelligenceToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationCodeIntelligenceToolCallArgsFragment, unknown>;
+export const AiConversationToolDisplayInfoFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}
+    `,
+  { fragmentName: "AiConversationToolDisplayInfo" }
+) as unknown as TypedDocumentString<AiConversationToolDisplayInfoFragment, unknown>;
+export const AiConversationCodeIntelligenceToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationCodeIntelligenceToolCall on AiConversationCodeIntelligenceToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationCodeIntelligenceToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationCodeIntelligenceToolCallArgs on AiConversationCodeIntelligenceToolCallArgs {
+  __typename
+  question
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationCodeIntelligenceToolCall" }
+) as unknown as TypedDocumentString<AiConversationCodeIntelligenceToolCallFragment, unknown>;
+export const AiConversationCreateEntityToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationCreateEntityToolCallArgs on AiConversationCreateEntityToolCallArgs {
+  __typename
+  count
+  type
+}
+    `,
+  { fragmentName: "AiConversationCreateEntityToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationCreateEntityToolCallArgsFragment, unknown>;
+export const AiConversationCreateEntityToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationCreateEntityToolCall on AiConversationCreateEntityToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationCreateEntityToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationCreateEntityToolCallArgs on AiConversationCreateEntityToolCallArgs {
+  __typename
+  count
+  type
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationCreateEntityToolCall" }
+) as unknown as TypedDocumentString<AiConversationCreateEntityToolCallFragment, unknown>;
+export const AiConversationSearchEntitiesToolCallResultEntitiesFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}
+    `,
+  { fragmentName: "AiConversationSearchEntitiesToolCallResultEntities" }
+) as unknown as TypedDocumentString<AiConversationSearchEntitiesToolCallResultEntitiesFragment, unknown>;
+export const AiConversationDeleteEntityToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationDeleteEntityToolCallArgs on AiConversationDeleteEntityToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+    fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}`,
+  { fragmentName: "AiConversationDeleteEntityToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationDeleteEntityToolCallArgsFragment, unknown>;
+export const AiConversationDeleteEntityToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationDeleteEntityToolCall on AiConversationDeleteEntityToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationDeleteEntityToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationDeleteEntityToolCallArgs on AiConversationDeleteEntityToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationDeleteEntityToolCall" }
+) as unknown as TypedDocumentString<AiConversationDeleteEntityToolCallFragment, unknown>;
+export const AiConversationGetMicrosoftTeamsConversationHistoryToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationGetMicrosoftTeamsConversationHistoryToolCall on AiConversationGetMicrosoftTeamsConversationHistoryToolCall {
+  __typename
+  rawArgs
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationGetMicrosoftTeamsConversationHistoryToolCall" }
+) as unknown as TypedDocumentString<AiConversationGetMicrosoftTeamsConversationHistoryToolCallFragment, unknown>;
+export const AiConversationGetPullRequestDiffToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationGetPullRequestDiffToolCallArgs on AiConversationGetPullRequestDiffToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+    fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}`,
+  { fragmentName: "AiConversationGetPullRequestDiffToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationGetPullRequestDiffToolCallArgsFragment, unknown>;
+export const AiConversationGetPullRequestDiffToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationGetPullRequestDiffToolCall on AiConversationGetPullRequestDiffToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationGetPullRequestDiffToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationGetPullRequestDiffToolCallArgs on AiConversationGetPullRequestDiffToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationGetPullRequestDiffToolCall" }
+) as unknown as TypedDocumentString<AiConversationGetPullRequestDiffToolCallFragment, unknown>;
+export const AiConversationGetPullRequestFileToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationGetPullRequestFileToolCallArgs on AiConversationGetPullRequestFileToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  path
+}
+    fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}`,
+  { fragmentName: "AiConversationGetPullRequestFileToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationGetPullRequestFileToolCallArgsFragment, unknown>;
+export const AiConversationGetPullRequestFileToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationGetPullRequestFileToolCall on AiConversationGetPullRequestFileToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationGetPullRequestFileToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationGetPullRequestFileToolCallArgs on AiConversationGetPullRequestFileToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  path
+}
+fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationGetPullRequestFileToolCall" }
+) as unknown as TypedDocumentString<AiConversationGetPullRequestFileToolCallFragment, unknown>;
+export const AiConversationGetSlackConversationHistoryToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationGetSlackConversationHistoryToolCall on AiConversationGetSlackConversationHistoryToolCall {
+  __typename
+  rawArgs
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationGetSlackConversationHistoryToolCall" }
+) as unknown as TypedDocumentString<AiConversationGetSlackConversationHistoryToolCallFragment, unknown>;
+export const AiConversationInvokeMcpToolToolCallArgsServerFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationInvokeMcpToolToolCallArgsServer on AiConversationInvokeMcpToolToolCallArgsServer {
+  __typename
+  integrationId
+  name
+  title
+}
+    `,
+  { fragmentName: "AiConversationInvokeMcpToolToolCallArgsServer" }
+) as unknown as TypedDocumentString<AiConversationInvokeMcpToolToolCallArgsServerFragment, unknown>;
+export const AiConversationInvokeMcpToolToolCallArgsToolFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationInvokeMcpToolToolCallArgsTool on AiConversationInvokeMcpToolToolCallArgsTool {
+  __typename
+  name
+  title
+}
+    `,
+  { fragmentName: "AiConversationInvokeMcpToolToolCallArgsTool" }
+) as unknown as TypedDocumentString<AiConversationInvokeMcpToolToolCallArgsToolFragment, unknown>;
+export const AiConversationInvokeMcpToolToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationInvokeMcpToolToolCallArgs on AiConversationInvokeMcpToolToolCallArgs {
+  __typename
+  server {
+    ...AiConversationInvokeMcpToolToolCallArgsServer
+  }
+  tool {
+    ...AiConversationInvokeMcpToolToolCallArgsTool
+  }
+}
+    fragment AiConversationInvokeMcpToolToolCallArgsServer on AiConversationInvokeMcpToolToolCallArgsServer {
+  __typename
+  integrationId
+  name
+  title
+}
+fragment AiConversationInvokeMcpToolToolCallArgsTool on AiConversationInvokeMcpToolToolCallArgsTool {
+  __typename
+  name
+  title
+}`,
+  { fragmentName: "AiConversationInvokeMcpToolToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationInvokeMcpToolToolCallArgsFragment, unknown>;
+export const AiConversationInvokeMcpToolToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationInvokeMcpToolToolCall on AiConversationInvokeMcpToolToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationInvokeMcpToolToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationInvokeMcpToolToolCallArgs on AiConversationInvokeMcpToolToolCallArgs {
+  __typename
+  server {
+    ...AiConversationInvokeMcpToolToolCallArgsServer
+  }
+  tool {
+    ...AiConversationInvokeMcpToolToolCallArgsTool
+  }
+}
+fragment AiConversationInvokeMcpToolToolCallArgsServer on AiConversationInvokeMcpToolToolCallArgsServer {
+  __typename
+  integrationId
+  name
+  title
+}
+fragment AiConversationInvokeMcpToolToolCallArgsTool on AiConversationInvokeMcpToolToolCallArgsTool {
+  __typename
+  name
+  title
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationInvokeMcpToolToolCall" }
+) as unknown as TypedDocumentString<AiConversationInvokeMcpToolToolCallFragment, unknown>;
+export const AiConversationQueryActivityToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationQueryActivityToolCallArgs on AiConversationQueryActivityToolCallArgs {
+  __typename
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+    fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}`,
+  { fragmentName: "AiConversationQueryActivityToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationQueryActivityToolCallArgsFragment, unknown>;
+export const AiConversationQueryActivityToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationQueryActivityToolCall on AiConversationQueryActivityToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationQueryActivityToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationQueryActivityToolCallArgs on AiConversationQueryActivityToolCallArgs {
+  __typename
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationQueryActivityToolCall" }
+) as unknown as TypedDocumentString<AiConversationQueryActivityToolCallFragment, unknown>;
+export const AiConversationQueryUpdatesToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationQueryUpdatesToolCallArgs on AiConversationQueryUpdatesToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  updateType
+}
+    fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}`,
+  { fragmentName: "AiConversationQueryUpdatesToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationQueryUpdatesToolCallArgsFragment, unknown>;
+export const AiConversationQueryUpdatesToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationQueryUpdatesToolCall on AiConversationQueryUpdatesToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationQueryUpdatesToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationQueryUpdatesToolCallArgs on AiConversationQueryUpdatesToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  updateType
+}
+fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationQueryUpdatesToolCall" }
+) as unknown as TypedDocumentString<AiConversationQueryUpdatesToolCallFragment, unknown>;
+export const AiConversationQueryViewToolCallArgsViewFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationQueryViewToolCallArgsView on AiConversationQueryViewToolCallArgsView {
+  __typename
+  group {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  predefinedView
+  type
+}
+    fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}`,
+  { fragmentName: "AiConversationQueryViewToolCallArgsView" }
+) as unknown as TypedDocumentString<AiConversationQueryViewToolCallArgsViewFragment, unknown>;
+export const AiConversationQueryViewToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationQueryViewToolCallArgs on AiConversationQueryViewToolCallArgs {
+  __typename
+  filter
+  mode
+  view {
+    ...AiConversationQueryViewToolCallArgsView
+  }
+}
+    fragment AiConversationQueryViewToolCallArgsView on AiConversationQueryViewToolCallArgsView {
+  __typename
+  group {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  predefinedView
+  type
+}
+fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}`,
+  { fragmentName: "AiConversationQueryViewToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationQueryViewToolCallArgsFragment, unknown>;
+export const AiConversationQueryViewToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationQueryViewToolCall on AiConversationQueryViewToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationQueryViewToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationQueryViewToolCallArgs on AiConversationQueryViewToolCallArgs {
+  __typename
+  filter
+  mode
+  view {
+    ...AiConversationQueryViewToolCallArgsView
+  }
+}
+fragment AiConversationQueryViewToolCallArgsView on AiConversationQueryViewToolCallArgsView {
+  __typename
+  group {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  predefinedView
+  type
+}
+fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationQueryViewToolCall" }
+) as unknown as TypedDocumentString<AiConversationQueryViewToolCallFragment, unknown>;
+export const AiConversationResearchToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationResearchToolCallArgs on AiConversationResearchToolCallArgs {
+  __typename
+  context
+  query
+  subjects {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+    fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}`,
+  { fragmentName: "AiConversationResearchToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationResearchToolCallArgsFragment, unknown>;
+export const AiConversationResearchToolCallResultFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationResearchToolCallResult on AiConversationResearchToolCallResult {
+  __typename
+  progressId
+}
+    `,
+  { fragmentName: "AiConversationResearchToolCallResult" }
+) as unknown as TypedDocumentString<AiConversationResearchToolCallResultFragment, unknown>;
+export const AiConversationResearchToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationResearchToolCall on AiConversationResearchToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationResearchToolCallArgs
+  }
+  name
+  rawResult
+  result {
+    ...AiConversationResearchToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationResearchToolCallArgs on AiConversationResearchToolCallArgs {
+  __typename
+  context
+  query
+  subjects {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationResearchToolCallResult on AiConversationResearchToolCallResult {
+  __typename
+  progressId
+}
+fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationResearchToolCall" }
+) as unknown as TypedDocumentString<AiConversationResearchToolCallFragment, unknown>;
+export const AiConversationRetrieveEntitiesToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationRetrieveEntitiesToolCallArgs on AiConversationRetrieveEntitiesToolCallArgs {
+  __typename
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+    fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}`,
+  { fragmentName: "AiConversationRetrieveEntitiesToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationRetrieveEntitiesToolCallArgsFragment, unknown>;
+export const AiConversationRetrieveEntitiesToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationRetrieveEntitiesToolCall on AiConversationRetrieveEntitiesToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationRetrieveEntitiesToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationRetrieveEntitiesToolCallArgs on AiConversationRetrieveEntitiesToolCallArgs {
+  __typename
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationRetrieveEntitiesToolCall" }
+) as unknown as TypedDocumentString<AiConversationRetrieveEntitiesToolCallFragment, unknown>;
+export const AiConversationSearchDocumentationToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationSearchDocumentationToolCall on AiConversationSearchDocumentationToolCall {
+  __typename
+  rawArgs
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationSearchDocumentationToolCall" }
+) as unknown as TypedDocumentString<AiConversationSearchDocumentationToolCallFragment, unknown>;
+export const AiConversationSearchEntitiesToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationSearchEntitiesToolCallArgs on AiConversationSearchEntitiesToolCallArgs {
+  __typename
+  queries
+  type
+}
+    `,
+  { fragmentName: "AiConversationSearchEntitiesToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationSearchEntitiesToolCallArgsFragment, unknown>;
+export const AiConversationSearchEntitiesToolCallResultFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationSearchEntitiesToolCallResult on AiConversationSearchEntitiesToolCallResult {
+  __typename
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+    fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}`,
+  { fragmentName: "AiConversationSearchEntitiesToolCallResult" }
+) as unknown as TypedDocumentString<AiConversationSearchEntitiesToolCallResultFragment, unknown>;
+export const AiConversationSearchEntitiesToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationSearchEntitiesToolCall on AiConversationSearchEntitiesToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationSearchEntitiesToolCallArgs
+  }
+  name
+  rawResult
+  result {
+    ...AiConversationSearchEntitiesToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationSearchEntitiesToolCallArgs on AiConversationSearchEntitiesToolCallArgs {
+  __typename
+  queries
+  type
+}
+fragment AiConversationSearchEntitiesToolCallResult on AiConversationSearchEntitiesToolCallResult {
+  __typename
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationSearchEntitiesToolCall" }
+) as unknown as TypedDocumentString<AiConversationSearchEntitiesToolCallFragment, unknown>;
+export const AiConversationSuggestValuesToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationSuggestValuesToolCallArgs on AiConversationSuggestValuesToolCallArgs {
+  __typename
+  field
+  query
+}
+    `,
+  { fragmentName: "AiConversationSuggestValuesToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationSuggestValuesToolCallArgsFragment, unknown>;
+export const AiConversationSuggestValuesToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationSuggestValuesToolCall on AiConversationSuggestValuesToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationSuggestValuesToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationSuggestValuesToolCallArgs on AiConversationSuggestValuesToolCallArgs {
+  __typename
+  field
+  query
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationSuggestValuesToolCall" }
+) as unknown as TypedDocumentString<AiConversationSuggestValuesToolCallFragment, unknown>;
+export const AiConversationTranscribeMediaToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationTranscribeMediaToolCall on AiConversationTranscribeMediaToolCall {
+  __typename
+  rawArgs
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationTranscribeMediaToolCall" }
+) as unknown as TypedDocumentString<AiConversationTranscribeMediaToolCallFragment, unknown>;
+export const AiConversationTranscribeVideoToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationTranscribeVideoToolCall on AiConversationTranscribeVideoToolCall {
+  __typename
+  rawArgs
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationTranscribeVideoToolCall" }
+) as unknown as TypedDocumentString<AiConversationTranscribeVideoToolCallFragment, unknown>;
+export const AiConversationUpdateEntityToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationUpdateEntityToolCallArgs on AiConversationUpdateEntityToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+    fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}`,
+  { fragmentName: "AiConversationUpdateEntityToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationUpdateEntityToolCallArgsFragment, unknown>;
+export const AiConversationUpdateEntityToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationUpdateEntityToolCall on AiConversationUpdateEntityToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationUpdateEntityToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}
+fragment AiConversationUpdateEntityToolCallArgs on AiConversationUpdateEntityToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}`,
+  { fragmentName: "AiConversationUpdateEntityToolCall" }
+) as unknown as TypedDocumentString<AiConversationUpdateEntityToolCallFragment, unknown>;
+export const AiConversationWebSearchToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationWebSearchToolCallArgs on AiConversationWebSearchToolCallArgs {
+  __typename
+  query
+  url
+}
+    `,
+  { fragmentName: "AiConversationWebSearchToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationWebSearchToolCallArgsFragment, unknown>;
+export const AiConversationWebSearchToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationWebSearchToolCall on AiConversationWebSearchToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationWebSearchToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}
+fragment AiConversationWebSearchToolCallArgs on AiConversationWebSearchToolCallArgs {
+  __typename
+  query
+  url
+}`,
+  { fragmentName: "AiConversationWebSearchToolCall" }
+) as unknown as TypedDocumentString<AiConversationWebSearchToolCallFragment, unknown>;
+export const AiConversationToolCallPartFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationToolCallPart on AiConversationToolCallPart {
+  __typename
+  id
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  toolCall {
+    ... on AiConversationCodeIntelligenceToolCall {
+      ...AiConversationCodeIntelligenceToolCall
+    }
+    ... on AiConversationCreateEntityToolCall {
+      ...AiConversationCreateEntityToolCall
+    }
+    ... on AiConversationDeleteEntityToolCall {
+      ...AiConversationDeleteEntityToolCall
+    }
+    ... on AiConversationGetMicrosoftTeamsConversationHistoryToolCall {
+      ...AiConversationGetMicrosoftTeamsConversationHistoryToolCall
+    }
+    ... on AiConversationGetPullRequestDiffToolCall {
+      ...AiConversationGetPullRequestDiffToolCall
+    }
+    ... on AiConversationGetPullRequestFileToolCall {
+      ...AiConversationGetPullRequestFileToolCall
+    }
+    ... on AiConversationGetSlackConversationHistoryToolCall {
+      ...AiConversationGetSlackConversationHistoryToolCall
+    }
+    ... on AiConversationInvokeMcpToolToolCall {
+      ...AiConversationInvokeMcpToolToolCall
+    }
+    ... on AiConversationQueryActivityToolCall {
+      ...AiConversationQueryActivityToolCall
+    }
+    ... on AiConversationQueryUpdatesToolCall {
+      ...AiConversationQueryUpdatesToolCall
+    }
+    ... on AiConversationQueryViewToolCall {
+      ...AiConversationQueryViewToolCall
+    }
+    ... on AiConversationResearchToolCall {
+      ...AiConversationResearchToolCall
+    }
+    ... on AiConversationRetrieveEntitiesToolCall {
+      ...AiConversationRetrieveEntitiesToolCall
+    }
+    ... on AiConversationSearchDocumentationToolCall {
+      ...AiConversationSearchDocumentationToolCall
+    }
+    ... on AiConversationSearchEntitiesToolCall {
+      ...AiConversationSearchEntitiesToolCall
+    }
+    ... on AiConversationSuggestValuesToolCall {
+      ...AiConversationSuggestValuesToolCall
+    }
+    ... on AiConversationTranscribeMediaToolCall {
+      ...AiConversationTranscribeMediaToolCall
+    }
+    ... on AiConversationTranscribeVideoToolCall {
+      ...AiConversationTranscribeVideoToolCall
+    }
+    ... on AiConversationUpdateEntityToolCall {
+      ...AiConversationUpdateEntityToolCall
+    }
+    ... on AiConversationWebSearchToolCall {
+      ...AiConversationWebSearchToolCall
+    }
+  }
+  type
+}
+    fragment AiConversationPartMetadata on AiConversationPartMetadata {
+  __typename
+  feedback
+  evalLogId
+  turnId
+}
+fragment AiConversationCodeIntelligenceToolCall on AiConversationCodeIntelligenceToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationCodeIntelligenceToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationCodeIntelligenceToolCallArgs on AiConversationCodeIntelligenceToolCallArgs {
+  __typename
+  question
+}
+fragment AiConversationCreateEntityToolCall on AiConversationCreateEntityToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationCreateEntityToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationCreateEntityToolCallArgs on AiConversationCreateEntityToolCallArgs {
+  __typename
+  count
+  type
+}
+fragment AiConversationDeleteEntityToolCall on AiConversationDeleteEntityToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationDeleteEntityToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationDeleteEntityToolCallArgs on AiConversationDeleteEntityToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationGetMicrosoftTeamsConversationHistoryToolCall on AiConversationGetMicrosoftTeamsConversationHistoryToolCall {
+  __typename
+  rawArgs
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationGetPullRequestDiffToolCall on AiConversationGetPullRequestDiffToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationGetPullRequestDiffToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationGetPullRequestDiffToolCallArgs on AiConversationGetPullRequestDiffToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationGetPullRequestFileToolCall on AiConversationGetPullRequestFileToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationGetPullRequestFileToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationGetPullRequestFileToolCallArgs on AiConversationGetPullRequestFileToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  path
+}
+fragment AiConversationGetSlackConversationHistoryToolCall on AiConversationGetSlackConversationHistoryToolCall {
+  __typename
+  rawArgs
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationInvokeMcpToolToolCall on AiConversationInvokeMcpToolToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationInvokeMcpToolToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationInvokeMcpToolToolCallArgs on AiConversationInvokeMcpToolToolCallArgs {
+  __typename
+  server {
+    ...AiConversationInvokeMcpToolToolCallArgsServer
+  }
+  tool {
+    ...AiConversationInvokeMcpToolToolCallArgsTool
+  }
+}
+fragment AiConversationInvokeMcpToolToolCallArgsServer on AiConversationInvokeMcpToolToolCallArgsServer {
+  __typename
+  integrationId
+  name
+  title
+}
+fragment AiConversationInvokeMcpToolToolCallArgsTool on AiConversationInvokeMcpToolToolCallArgsTool {
+  __typename
+  name
+  title
+}
+fragment AiConversationQueryActivityToolCall on AiConversationQueryActivityToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationQueryActivityToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationQueryActivityToolCallArgs on AiConversationQueryActivityToolCallArgs {
+  __typename
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationQueryUpdatesToolCall on AiConversationQueryUpdatesToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationQueryUpdatesToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationQueryUpdatesToolCallArgs on AiConversationQueryUpdatesToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  updateType
+}
+fragment AiConversationQueryViewToolCall on AiConversationQueryViewToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationQueryViewToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationQueryViewToolCallArgs on AiConversationQueryViewToolCallArgs {
+  __typename
+  filter
+  mode
+  view {
+    ...AiConversationQueryViewToolCallArgsView
+  }
+}
+fragment AiConversationQueryViewToolCallArgsView on AiConversationQueryViewToolCallArgsView {
+  __typename
+  group {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  predefinedView
+  type
+}
+fragment AiConversationResearchToolCall on AiConversationResearchToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationResearchToolCallArgs
+  }
+  name
+  rawResult
+  result {
+    ...AiConversationResearchToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationResearchToolCallArgs on AiConversationResearchToolCallArgs {
+  __typename
+  context
+  query
+  subjects {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationResearchToolCallResult on AiConversationResearchToolCallResult {
+  __typename
+  progressId
+}
+fragment AiConversationRetrieveEntitiesToolCall on AiConversationRetrieveEntitiesToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationRetrieveEntitiesToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationRetrieveEntitiesToolCallArgs on AiConversationRetrieveEntitiesToolCallArgs {
+  __typename
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationSearchDocumentationToolCall on AiConversationSearchDocumentationToolCall {
+  __typename
+  rawArgs
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationSearchEntitiesToolCall on AiConversationSearchEntitiesToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationSearchEntitiesToolCallArgs
+  }
+  name
+  rawResult
+  result {
+    ...AiConversationSearchEntitiesToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationSearchEntitiesToolCallArgs on AiConversationSearchEntitiesToolCallArgs {
+  __typename
+  queries
+  type
+}
+fragment AiConversationSearchEntitiesToolCallResult on AiConversationSearchEntitiesToolCallResult {
+  __typename
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}
+fragment AiConversationSuggestValuesToolCall on AiConversationSuggestValuesToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationSuggestValuesToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationSuggestValuesToolCallArgs on AiConversationSuggestValuesToolCallArgs {
+  __typename
+  field
+  query
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}
+fragment AiConversationTranscribeMediaToolCall on AiConversationTranscribeMediaToolCall {
+  __typename
+  rawArgs
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationTranscribeVideoToolCall on AiConversationTranscribeVideoToolCall {
+  __typename
+  rawArgs
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationUpdateEntityToolCall on AiConversationUpdateEntityToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationUpdateEntityToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationUpdateEntityToolCallArgs on AiConversationUpdateEntityToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationWebSearchToolCall on AiConversationWebSearchToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationWebSearchToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationWebSearchToolCallArgs on AiConversationWebSearchToolCallArgs {
+  __typename
+  query
+  url
+}`,
+  { fragmentName: "AiConversationToolCallPart" }
+) as unknown as TypedDocumentString<AiConversationToolCallPartFragment, unknown>;
+export const AiConversationWidgetDisplayInfoFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationWidgetDisplayInfo on AiConversationWidgetDisplayInfo {
+  __typename
+  body
+  bodyData
+}
+    `,
+  { fragmentName: "AiConversationWidgetDisplayInfo" }
+) as unknown as TypedDocumentString<AiConversationWidgetDisplayInfoFragment, unknown>;
+export const AiConversationEntityCardWidgetArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationEntityCardWidgetArgs on AiConversationEntityCardWidgetArgs {
+  __typename
+  note
+  id
+  action
+}
+    `,
+  { fragmentName: "AiConversationEntityCardWidgetArgs" }
+) as unknown as TypedDocumentString<AiConversationEntityCardWidgetArgsFragment, unknown>;
+export const AiConversationEntityCardWidgetFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationEntityCardWidget on AiConversationEntityCardWidget {
+  __typename
+  displayInfo {
+    ...AiConversationWidgetDisplayInfo
+  }
+  rawArgs
+  args {
+    ...AiConversationEntityCardWidgetArgs
+  }
+  name
+}
+    fragment AiConversationEntityCardWidgetArgs on AiConversationEntityCardWidgetArgs {
+  __typename
+  note
+  id
+  action
+}
+fragment AiConversationWidgetDisplayInfo on AiConversationWidgetDisplayInfo {
+  __typename
+  body
+  bodyData
+}`,
+  { fragmentName: "AiConversationEntityCardWidget" }
+) as unknown as TypedDocumentString<AiConversationEntityCardWidgetFragment, unknown>;
+export const AiConversationEntityListWidgetArgsEntitiesFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationEntityListWidgetArgsEntities on AiConversationEntityListWidgetArgsEntities {
+  __typename
+  note
+  id
+}
+    `,
+  { fragmentName: "AiConversationEntityListWidgetArgsEntities" }
+) as unknown as TypedDocumentString<AiConversationEntityListWidgetArgsEntitiesFragment, unknown>;
+export const AiConversationEntityListWidgetArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationEntityListWidgetArgs on AiConversationEntityListWidgetArgs {
+  __typename
+  action
+  count
+  entities {
+    ...AiConversationEntityListWidgetArgsEntities
+  }
+}
+    fragment AiConversationEntityListWidgetArgsEntities on AiConversationEntityListWidgetArgsEntities {
+  __typename
+  note
+  id
+}`,
+  { fragmentName: "AiConversationEntityListWidgetArgs" }
+) as unknown as TypedDocumentString<AiConversationEntityListWidgetArgsFragment, unknown>;
+export const AiConversationEntityListWidgetFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationEntityListWidget on AiConversationEntityListWidget {
+  __typename
+  displayInfo {
+    ...AiConversationWidgetDisplayInfo
+  }
+  rawArgs
+  args {
+    ...AiConversationEntityListWidgetArgs
+  }
+  name
+}
+    fragment AiConversationEntityListWidgetArgs on AiConversationEntityListWidgetArgs {
+  __typename
+  action
+  count
+  entities {
+    ...AiConversationEntityListWidgetArgsEntities
+  }
+}
+fragment AiConversationEntityListWidgetArgsEntities on AiConversationEntityListWidgetArgsEntities {
+  __typename
+  note
+  id
+}
+fragment AiConversationWidgetDisplayInfo on AiConversationWidgetDisplayInfo {
+  __typename
+  body
+  bodyData
+}`,
+  { fragmentName: "AiConversationEntityListWidget" }
+) as unknown as TypedDocumentString<AiConversationEntityListWidgetFragment, unknown>;
+export const AiConversationWidgetPartFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationWidgetPart on AiConversationWidgetPart {
+  __typename
+  id
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  type
+  widget {
+    ... on AiConversationEntityCardWidget {
+      ...AiConversationEntityCardWidget
+    }
+    ... on AiConversationEntityListWidget {
+      ...AiConversationEntityListWidget
+    }
+  }
+}
+    fragment AiConversationPartMetadata on AiConversationPartMetadata {
+  __typename
+  feedback
+  evalLogId
+  turnId
+}
+fragment AiConversationEntityCardWidget on AiConversationEntityCardWidget {
+  __typename
+  displayInfo {
+    ...AiConversationWidgetDisplayInfo
+  }
+  rawArgs
+  args {
+    ...AiConversationEntityCardWidgetArgs
+  }
+  name
+}
+fragment AiConversationEntityCardWidgetArgs on AiConversationEntityCardWidgetArgs {
+  __typename
+  note
+  id
+  action
+}
+fragment AiConversationEntityListWidget on AiConversationEntityListWidget {
+  __typename
+  displayInfo {
+    ...AiConversationWidgetDisplayInfo
+  }
+  rawArgs
+  args {
+    ...AiConversationEntityListWidgetArgs
+  }
+  name
+}
+fragment AiConversationEntityListWidgetArgs on AiConversationEntityListWidgetArgs {
+  __typename
+  action
+  count
+  entities {
+    ...AiConversationEntityListWidgetArgsEntities
+  }
+}
+fragment AiConversationEntityListWidgetArgsEntities on AiConversationEntityListWidgetArgsEntities {
+  __typename
+  note
+  id
+}
+fragment AiConversationWidgetDisplayInfo on AiConversationWidgetDisplayInfo {
+  __typename
+  body
+  bodyData
+}`,
+  { fragmentName: "AiConversationWidgetPart" }
+) as unknown as TypedDocumentString<AiConversationWidgetPartFragment, unknown>;
+export const AiConversationBasePartFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationBasePart on AiConversationBasePart {
+  __typename
+  id
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  type
+  ... on AiConversationPromptPart {
+    ...AiConversationPromptPart
+  }
+  ... on AiConversationReasoningPart {
+    ...AiConversationReasoningPart
+  }
+  ... on AiConversationTextPart {
+    ...AiConversationTextPart
+  }
+  ... on AiConversationToolCallPart {
+    ...AiConversationToolCallPart
+  }
+  ... on AiConversationWidgetPart {
+    ...AiConversationWidgetPart
+  }
+}
+    fragment AiConversationPromptPart on AiConversationPromptPart {
+  __typename
+  id
+  body
+  bodyData
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  type
+  user {
+    id
+  }
+}
+fragment AiConversationReasoningPart on AiConversationReasoningPart {
+  __typename
+  id
+  body
+  bodyData
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  title
+  type
+}
+fragment AiConversationTextPart on AiConversationTextPart {
+  __typename
+  id
+  body
+  bodyData
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  type
+}
+fragment AiConversationToolCallPart on AiConversationToolCallPart {
+  __typename
+  id
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  toolCall {
+    ... on AiConversationCodeIntelligenceToolCall {
+      ...AiConversationCodeIntelligenceToolCall
+    }
+    ... on AiConversationCreateEntityToolCall {
+      ...AiConversationCreateEntityToolCall
+    }
+    ... on AiConversationDeleteEntityToolCall {
+      ...AiConversationDeleteEntityToolCall
+    }
+    ... on AiConversationGetMicrosoftTeamsConversationHistoryToolCall {
+      ...AiConversationGetMicrosoftTeamsConversationHistoryToolCall
+    }
+    ... on AiConversationGetPullRequestDiffToolCall {
+      ...AiConversationGetPullRequestDiffToolCall
+    }
+    ... on AiConversationGetPullRequestFileToolCall {
+      ...AiConversationGetPullRequestFileToolCall
+    }
+    ... on AiConversationGetSlackConversationHistoryToolCall {
+      ...AiConversationGetSlackConversationHistoryToolCall
+    }
+    ... on AiConversationInvokeMcpToolToolCall {
+      ...AiConversationInvokeMcpToolToolCall
+    }
+    ... on AiConversationQueryActivityToolCall {
+      ...AiConversationQueryActivityToolCall
+    }
+    ... on AiConversationQueryUpdatesToolCall {
+      ...AiConversationQueryUpdatesToolCall
+    }
+    ... on AiConversationQueryViewToolCall {
+      ...AiConversationQueryViewToolCall
+    }
+    ... on AiConversationResearchToolCall {
+      ...AiConversationResearchToolCall
+    }
+    ... on AiConversationRetrieveEntitiesToolCall {
+      ...AiConversationRetrieveEntitiesToolCall
+    }
+    ... on AiConversationSearchDocumentationToolCall {
+      ...AiConversationSearchDocumentationToolCall
+    }
+    ... on AiConversationSearchEntitiesToolCall {
+      ...AiConversationSearchEntitiesToolCall
+    }
+    ... on AiConversationSuggestValuesToolCall {
+      ...AiConversationSuggestValuesToolCall
+    }
+    ... on AiConversationTranscribeMediaToolCall {
+      ...AiConversationTranscribeMediaToolCall
+    }
+    ... on AiConversationTranscribeVideoToolCall {
+      ...AiConversationTranscribeVideoToolCall
+    }
+    ... on AiConversationUpdateEntityToolCall {
+      ...AiConversationUpdateEntityToolCall
+    }
+    ... on AiConversationWebSearchToolCall {
+      ...AiConversationWebSearchToolCall
+    }
+  }
+  type
+}
+fragment AiConversationWidgetPart on AiConversationWidgetPart {
+  __typename
+  id
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  type
+  widget {
+    ... on AiConversationEntityCardWidget {
+      ...AiConversationEntityCardWidget
+    }
+    ... on AiConversationEntityListWidget {
+      ...AiConversationEntityListWidget
+    }
+  }
+}
+fragment AiConversationPartMetadata on AiConversationPartMetadata {
+  __typename
+  feedback
+  evalLogId
+  turnId
+}
+fragment AiConversationCodeIntelligenceToolCall on AiConversationCodeIntelligenceToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationCodeIntelligenceToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationCodeIntelligenceToolCallArgs on AiConversationCodeIntelligenceToolCallArgs {
+  __typename
+  question
+}
+fragment AiConversationCreateEntityToolCall on AiConversationCreateEntityToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationCreateEntityToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationCreateEntityToolCallArgs on AiConversationCreateEntityToolCallArgs {
+  __typename
+  count
+  type
+}
+fragment AiConversationDeleteEntityToolCall on AiConversationDeleteEntityToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationDeleteEntityToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationDeleteEntityToolCallArgs on AiConversationDeleteEntityToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationEntityCardWidget on AiConversationEntityCardWidget {
+  __typename
+  displayInfo {
+    ...AiConversationWidgetDisplayInfo
+  }
+  rawArgs
+  args {
+    ...AiConversationEntityCardWidgetArgs
+  }
+  name
+}
+fragment AiConversationEntityCardWidgetArgs on AiConversationEntityCardWidgetArgs {
+  __typename
+  note
+  id
+  action
+}
+fragment AiConversationEntityListWidget on AiConversationEntityListWidget {
+  __typename
+  displayInfo {
+    ...AiConversationWidgetDisplayInfo
+  }
+  rawArgs
+  args {
+    ...AiConversationEntityListWidgetArgs
+  }
+  name
+}
+fragment AiConversationEntityListWidgetArgs on AiConversationEntityListWidgetArgs {
+  __typename
+  action
+  count
+  entities {
+    ...AiConversationEntityListWidgetArgsEntities
+  }
+}
+fragment AiConversationEntityListWidgetArgsEntities on AiConversationEntityListWidgetArgsEntities {
+  __typename
+  note
+  id
+}
+fragment AiConversationGetMicrosoftTeamsConversationHistoryToolCall on AiConversationGetMicrosoftTeamsConversationHistoryToolCall {
+  __typename
+  rawArgs
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationGetPullRequestDiffToolCall on AiConversationGetPullRequestDiffToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationGetPullRequestDiffToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationGetPullRequestDiffToolCallArgs on AiConversationGetPullRequestDiffToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationGetPullRequestFileToolCall on AiConversationGetPullRequestFileToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationGetPullRequestFileToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationGetPullRequestFileToolCallArgs on AiConversationGetPullRequestFileToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  path
+}
+fragment AiConversationGetSlackConversationHistoryToolCall on AiConversationGetSlackConversationHistoryToolCall {
+  __typename
+  rawArgs
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationInvokeMcpToolToolCall on AiConversationInvokeMcpToolToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationInvokeMcpToolToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationInvokeMcpToolToolCallArgs on AiConversationInvokeMcpToolToolCallArgs {
+  __typename
+  server {
+    ...AiConversationInvokeMcpToolToolCallArgsServer
+  }
+  tool {
+    ...AiConversationInvokeMcpToolToolCallArgsTool
+  }
+}
+fragment AiConversationInvokeMcpToolToolCallArgsServer on AiConversationInvokeMcpToolToolCallArgsServer {
+  __typename
+  integrationId
+  name
+  title
+}
+fragment AiConversationInvokeMcpToolToolCallArgsTool on AiConversationInvokeMcpToolToolCallArgsTool {
+  __typename
+  name
+  title
+}
+fragment AiConversationQueryActivityToolCall on AiConversationQueryActivityToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationQueryActivityToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationQueryActivityToolCallArgs on AiConversationQueryActivityToolCallArgs {
+  __typename
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationQueryUpdatesToolCall on AiConversationQueryUpdatesToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationQueryUpdatesToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationQueryUpdatesToolCallArgs on AiConversationQueryUpdatesToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  updateType
+}
+fragment AiConversationQueryViewToolCall on AiConversationQueryViewToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationQueryViewToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationQueryViewToolCallArgs on AiConversationQueryViewToolCallArgs {
+  __typename
+  filter
+  mode
+  view {
+    ...AiConversationQueryViewToolCallArgsView
+  }
+}
+fragment AiConversationQueryViewToolCallArgsView on AiConversationQueryViewToolCallArgsView {
+  __typename
+  group {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  predefinedView
+  type
+}
+fragment AiConversationResearchToolCall on AiConversationResearchToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationResearchToolCallArgs
+  }
+  name
+  rawResult
+  result {
+    ...AiConversationResearchToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationResearchToolCallArgs on AiConversationResearchToolCallArgs {
+  __typename
+  context
+  query
+  subjects {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationResearchToolCallResult on AiConversationResearchToolCallResult {
+  __typename
+  progressId
+}
+fragment AiConversationRetrieveEntitiesToolCall on AiConversationRetrieveEntitiesToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationRetrieveEntitiesToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationRetrieveEntitiesToolCallArgs on AiConversationRetrieveEntitiesToolCallArgs {
+  __typename
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationSearchDocumentationToolCall on AiConversationSearchDocumentationToolCall {
+  __typename
+  rawArgs
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationSearchEntitiesToolCall on AiConversationSearchEntitiesToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationSearchEntitiesToolCallArgs
+  }
+  name
+  rawResult
+  result {
+    ...AiConversationSearchEntitiesToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationSearchEntitiesToolCallArgs on AiConversationSearchEntitiesToolCallArgs {
+  __typename
+  queries
+  type
+}
+fragment AiConversationSearchEntitiesToolCallResult on AiConversationSearchEntitiesToolCallResult {
+  __typename
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}
+fragment AiConversationSuggestValuesToolCall on AiConversationSuggestValuesToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationSuggestValuesToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationSuggestValuesToolCallArgs on AiConversationSuggestValuesToolCallArgs {
+  __typename
+  field
+  query
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}
+fragment AiConversationTranscribeMediaToolCall on AiConversationTranscribeMediaToolCall {
+  __typename
+  rawArgs
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationTranscribeVideoToolCall on AiConversationTranscribeVideoToolCall {
+  __typename
+  rawArgs
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationUpdateEntityToolCall on AiConversationUpdateEntityToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationUpdateEntityToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationUpdateEntityToolCallArgs on AiConversationUpdateEntityToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationWebSearchToolCall on AiConversationWebSearchToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationWebSearchToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationWebSearchToolCallArgs on AiConversationWebSearchToolCallArgs {
+  __typename
+  query
+  url
+}
+fragment AiConversationWidgetDisplayInfo on AiConversationWidgetDisplayInfo {
+  __typename
+  body
+  bodyData
+}`,
+  { fragmentName: "AiConversationBasePart" }
+) as unknown as TypedDocumentString<AiConversationBasePartFragment, unknown>;
 export const EntityFragmentDoc = new TypedDocumentString(
   `
     fragment Entity on Entity {
@@ -66055,6 +71372,7 @@ export const EmailIntakeAddressFragmentDoc = new TypedDocumentString(
   issueCreatedAutoReplyEnabled
   useUserNamesInReplies
   enabled
+  reopenOnReply
 }
     fragment SesDomainIdentityDnsRecord on SesDomainIdentityDnsRecord {
   __typename
@@ -66948,6 +72266,63 @@ fragment WorkflowDefinition on WorkflowDefinition {
 }`,
   { fragmentName: "IssueHistoryTriageRuleMetadata" }
 ) as unknown as TypedDocumentString<IssueHistoryTriageRuleMetadataFragment, unknown>;
+export const IssueHistoryWorkflowMetadataFragmentDoc = new TypedDocumentString(
+  `
+    fragment IssueHistoryWorkflowMetadata on IssueHistoryWorkflowMetadata {
+  __typename
+  workflowDefinition {
+    ...WorkflowDefinition
+  }
+}
+    fragment WorkflowDefinition on WorkflowDefinition {
+  __typename
+  activities
+  conditions
+  customView {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  project {
+    id
+  }
+  user {
+    id
+  }
+  lastExecutedAt
+  description
+  updatedAt
+  groupName
+  name
+  triggerType
+  sortOrder
+  team {
+    id
+  }
+  archivedAt
+  createdAt
+  trigger
+  type
+  userContextViewType
+  contextViewType
+  id
+  creator {
+    id
+  }
+  lastUpdatedBy {
+    id
+  }
+  enabled
+}`,
+  { fragmentName: "IssueHistoryWorkflowMetadata" }
+) as unknown as TypedDocumentString<IssueHistoryWorkflowMetadataFragment, unknown>;
 export const OauthClientActorWebhookPayloadFragmentDoc = new TypedDocumentString(
   `
     fragment OauthClientActorWebhookPayload on OauthClientActorWebhookPayload {
@@ -68123,6 +73498,9 @@ export const InitiativeWebhookPayloadFragmentDoc = new TypedDocumentString(
   }
   name
   parentInitiative {
+    ...InitiativeChildWebhookPayload
+  }
+  parentInitiatives {
     ...InitiativeChildWebhookPayload
   }
   projects {
@@ -70040,6 +75418,509 @@ fragment PageInfo on PageInfo {
 }`,
   { fragmentName: "AgentSessionToPullRequestConnection" }
 ) as unknown as TypedDocumentString<AgentSessionToPullRequestConnectionFragment, unknown>;
+export const AiConversationBaseToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
+  __typename
+  rawArgs
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+  ... on AiConversationCodeIntelligenceToolCall {
+    ...AiConversationCodeIntelligenceToolCall
+  }
+  ... on AiConversationCreateEntityToolCall {
+    ...AiConversationCreateEntityToolCall
+  }
+  ... on AiConversationDeleteEntityToolCall {
+    ...AiConversationDeleteEntityToolCall
+  }
+  ... on AiConversationGetMicrosoftTeamsConversationHistoryToolCall {
+    ...AiConversationGetMicrosoftTeamsConversationHistoryToolCall
+  }
+  ... on AiConversationGetPullRequestDiffToolCall {
+    ...AiConversationGetPullRequestDiffToolCall
+  }
+  ... on AiConversationGetPullRequestFileToolCall {
+    ...AiConversationGetPullRequestFileToolCall
+  }
+  ... on AiConversationGetSlackConversationHistoryToolCall {
+    ...AiConversationGetSlackConversationHistoryToolCall
+  }
+  ... on AiConversationInvokeMcpToolToolCall {
+    ...AiConversationInvokeMcpToolToolCall
+  }
+  ... on AiConversationQueryActivityToolCall {
+    ...AiConversationQueryActivityToolCall
+  }
+  ... on AiConversationQueryUpdatesToolCall {
+    ...AiConversationQueryUpdatesToolCall
+  }
+  ... on AiConversationQueryViewToolCall {
+    ...AiConversationQueryViewToolCall
+  }
+  ... on AiConversationResearchToolCall {
+    ...AiConversationResearchToolCall
+  }
+  ... on AiConversationRetrieveEntitiesToolCall {
+    ...AiConversationRetrieveEntitiesToolCall
+  }
+  ... on AiConversationSearchDocumentationToolCall {
+    ...AiConversationSearchDocumentationToolCall
+  }
+  ... on AiConversationSearchEntitiesToolCall {
+    ...AiConversationSearchEntitiesToolCall
+  }
+  ... on AiConversationSuggestValuesToolCall {
+    ...AiConversationSuggestValuesToolCall
+  }
+  ... on AiConversationTranscribeMediaToolCall {
+    ...AiConversationTranscribeMediaToolCall
+  }
+  ... on AiConversationTranscribeVideoToolCall {
+    ...AiConversationTranscribeVideoToolCall
+  }
+  ... on AiConversationUpdateEntityToolCall {
+    ...AiConversationUpdateEntityToolCall
+  }
+  ... on AiConversationWebSearchToolCall {
+    ...AiConversationWebSearchToolCall
+  }
+}
+    fragment AiConversationCodeIntelligenceToolCall on AiConversationCodeIntelligenceToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationCodeIntelligenceToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationCodeIntelligenceToolCallArgs on AiConversationCodeIntelligenceToolCallArgs {
+  __typename
+  question
+}
+fragment AiConversationCreateEntityToolCall on AiConversationCreateEntityToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationCreateEntityToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationCreateEntityToolCallArgs on AiConversationCreateEntityToolCallArgs {
+  __typename
+  count
+  type
+}
+fragment AiConversationDeleteEntityToolCall on AiConversationDeleteEntityToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationDeleteEntityToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationDeleteEntityToolCallArgs on AiConversationDeleteEntityToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationGetMicrosoftTeamsConversationHistoryToolCall on AiConversationGetMicrosoftTeamsConversationHistoryToolCall {
+  __typename
+  rawArgs
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationGetPullRequestDiffToolCall on AiConversationGetPullRequestDiffToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationGetPullRequestDiffToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationGetPullRequestDiffToolCallArgs on AiConversationGetPullRequestDiffToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationGetPullRequestFileToolCall on AiConversationGetPullRequestFileToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationGetPullRequestFileToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationGetPullRequestFileToolCallArgs on AiConversationGetPullRequestFileToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  path
+}
+fragment AiConversationGetSlackConversationHistoryToolCall on AiConversationGetSlackConversationHistoryToolCall {
+  __typename
+  rawArgs
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationInvokeMcpToolToolCall on AiConversationInvokeMcpToolToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationInvokeMcpToolToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationInvokeMcpToolToolCallArgs on AiConversationInvokeMcpToolToolCallArgs {
+  __typename
+  server {
+    ...AiConversationInvokeMcpToolToolCallArgsServer
+  }
+  tool {
+    ...AiConversationInvokeMcpToolToolCallArgsTool
+  }
+}
+fragment AiConversationInvokeMcpToolToolCallArgsServer on AiConversationInvokeMcpToolToolCallArgsServer {
+  __typename
+  integrationId
+  name
+  title
+}
+fragment AiConversationInvokeMcpToolToolCallArgsTool on AiConversationInvokeMcpToolToolCallArgsTool {
+  __typename
+  name
+  title
+}
+fragment AiConversationQueryActivityToolCall on AiConversationQueryActivityToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationQueryActivityToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationQueryActivityToolCallArgs on AiConversationQueryActivityToolCallArgs {
+  __typename
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationQueryUpdatesToolCall on AiConversationQueryUpdatesToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationQueryUpdatesToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationQueryUpdatesToolCallArgs on AiConversationQueryUpdatesToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  updateType
+}
+fragment AiConversationQueryViewToolCall on AiConversationQueryViewToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationQueryViewToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationQueryViewToolCallArgs on AiConversationQueryViewToolCallArgs {
+  __typename
+  filter
+  mode
+  view {
+    ...AiConversationQueryViewToolCallArgsView
+  }
+}
+fragment AiConversationQueryViewToolCallArgsView on AiConversationQueryViewToolCallArgsView {
+  __typename
+  group {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  predefinedView
+  type
+}
+fragment AiConversationResearchToolCall on AiConversationResearchToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationResearchToolCallArgs
+  }
+  name
+  rawResult
+  result {
+    ...AiConversationResearchToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationResearchToolCallArgs on AiConversationResearchToolCallArgs {
+  __typename
+  context
+  query
+  subjects {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationResearchToolCallResult on AiConversationResearchToolCallResult {
+  __typename
+  progressId
+}
+fragment AiConversationRetrieveEntitiesToolCall on AiConversationRetrieveEntitiesToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationRetrieveEntitiesToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationRetrieveEntitiesToolCallArgs on AiConversationRetrieveEntitiesToolCallArgs {
+  __typename
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationSearchDocumentationToolCall on AiConversationSearchDocumentationToolCall {
+  __typename
+  rawArgs
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationSearchEntitiesToolCall on AiConversationSearchEntitiesToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationSearchEntitiesToolCallArgs
+  }
+  name
+  rawResult
+  result {
+    ...AiConversationSearchEntitiesToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationSearchEntitiesToolCallArgs on AiConversationSearchEntitiesToolCallArgs {
+  __typename
+  queries
+  type
+}
+fragment AiConversationSearchEntitiesToolCallResult on AiConversationSearchEntitiesToolCallResult {
+  __typename
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}
+fragment AiConversationSuggestValuesToolCall on AiConversationSuggestValuesToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationSuggestValuesToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationSuggestValuesToolCallArgs on AiConversationSuggestValuesToolCallArgs {
+  __typename
+  field
+  query
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}
+fragment AiConversationTranscribeMediaToolCall on AiConversationTranscribeMediaToolCall {
+  __typename
+  rawArgs
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationTranscribeVideoToolCall on AiConversationTranscribeVideoToolCall {
+  __typename
+  rawArgs
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationUpdateEntityToolCall on AiConversationUpdateEntityToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationUpdateEntityToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationUpdateEntityToolCallArgs on AiConversationUpdateEntityToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationWebSearchToolCall on AiConversationWebSearchToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationWebSearchToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationWebSearchToolCallArgs on AiConversationWebSearchToolCallArgs {
+  __typename
+  query
+  url
+}`,
+  { fragmentName: "AiConversationBaseToolCall" }
+) as unknown as TypedDocumentString<AiConversationBaseToolCallFragment, unknown>;
+export const AiConversationBaseWidgetFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationBaseWidget on AiConversationBaseWidget {
+  __typename
+  displayInfo {
+    ...AiConversationWidgetDisplayInfo
+  }
+  rawArgs
+  name
+  ... on AiConversationEntityCardWidget {
+    ...AiConversationEntityCardWidget
+  }
+  ... on AiConversationEntityListWidget {
+    ...AiConversationEntityListWidget
+  }
+}
+    fragment AiConversationEntityCardWidget on AiConversationEntityCardWidget {
+  __typename
+  displayInfo {
+    ...AiConversationWidgetDisplayInfo
+  }
+  rawArgs
+  args {
+    ...AiConversationEntityCardWidgetArgs
+  }
+  name
+}
+fragment AiConversationEntityCardWidgetArgs on AiConversationEntityCardWidgetArgs {
+  __typename
+  note
+  id
+  action
+}
+fragment AiConversationEntityListWidget on AiConversationEntityListWidget {
+  __typename
+  displayInfo {
+    ...AiConversationWidgetDisplayInfo
+  }
+  rawArgs
+  args {
+    ...AiConversationEntityListWidgetArgs
+  }
+  name
+}
+fragment AiConversationEntityListWidgetArgs on AiConversationEntityListWidgetArgs {
+  __typename
+  action
+  count
+  entities {
+    ...AiConversationEntityListWidgetArgsEntities
+  }
+}
+fragment AiConversationEntityListWidgetArgsEntities on AiConversationEntityListWidgetArgsEntities {
+  __typename
+  note
+  id
+}
+fragment AiConversationWidgetDisplayInfo on AiConversationWidgetDisplayInfo {
+  __typename
+  body
+  bodyData
+}`,
+  { fragmentName: "AiConversationBaseWidget" }
+) as unknown as TypedDocumentString<AiConversationBaseWidgetFragment, unknown>;
 export const SlackAsksTeamSettingsFragmentDoc = new TypedDocumentString(
   `
     fragment SlackAsksTeamSettings on SlackAsksTeamSettings {
@@ -70291,6 +76172,7 @@ export const AuthOrganizationFragmentDoc = new TypedDocumentString(
     fragment AuthOrganization on AuthOrganization {
   __typename
   allowedAuthServices
+  approximateUserCount
   previousUrlKeys
   serviceId
   releaseChannel
@@ -70330,6 +76212,7 @@ export const AuthUserFragmentDoc = new TypedDocumentString(
     fragment AuthOrganization on AuthOrganization {
   __typename
   allowedAuthServices
+  approximateUserCount
   previousUrlKeys
   serviceId
   releaseChannel
@@ -70389,6 +76272,7 @@ export const AuthResolverResponseFragmentDoc = new TypedDocumentString(
 fragment AuthOrganization on AuthOrganization {
   __typename
   allowedAuthServices
+  approximateUserCount
   previousUrlKeys
   serviceId
   releaseChannel
@@ -71093,6 +76977,7 @@ export const CreateOrJoinOrganizationResponseFragmentDoc = new TypedDocumentStri
 fragment AuthOrganization on AuthOrganization {
   __typename
   allowedAuthServices
+  approximateUserCount
   previousUrlKeys
   serviceId
   releaseChannel
@@ -71169,6 +77054,7 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   releasePipelinesViewOrdering
   reviewGrouping
   reviewViewOrdering
+  scheduledPipelineReleasesViewOrdering
   searchResultType
   searchViewOrdering
   teamViewOrdering
@@ -71194,6 +77080,7 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   customerPageNeedsShowImportantFirst
   embeddedCustomerNeedsShowImportantFirst
   projectCustomerNeedsShowImportantFirst
+  showOnlySnoozedItems
   showParents
   fieldPreviewLinks
   showReadItems
@@ -71227,12 +77114,16 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   fieldDueDate
   initiativeFieldHealth
   initiativeFieldActivity
+  initiativeFieldDateCompleted
+  initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldOwner
   initiativeFieldProjects
+  initiativeFieldStartDate
   initiativeFieldTargetDate
   initiativeFieldTeams
+  initiativeFieldDateUpdated
   fieldDateArchived
   fieldAssignee
   fieldDateCreated
@@ -71247,6 +77138,7 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   fieldStatus
   fieldDateUpdated
   fieldLabels
+  releasePipelineFieldLatestRelease
   fieldLinkCount
   memberFieldJoined
   memberFieldStatus
@@ -71292,12 +77184,15 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   projectFieldTeams
   projectFieldDateUpdated
   fieldPullRequests
+  scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
   reviewFieldIdentifier
   reviewFieldPreviewLinks
   reviewFieldRepository
+  scheduledPipelineReleaseFieldStage
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -71307,6 +77202,7 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   teamFieldProjects
   teamFieldDateUpdated
   fieldTimeInCurrentStatus
+  releasePipelineFieldType
   showTriageIssues
   showUnreadItemsFirst
   timelineChronologyShowWeekNumbers
@@ -71383,6 +77279,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelinesViewOrdering
   reviewGrouping
   reviewViewOrdering
+  scheduledPipelineReleasesViewOrdering
   searchResultType
   searchViewOrdering
   teamViewOrdering
@@ -71408,6 +77305,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   customerPageNeedsShowImportantFirst
   embeddedCustomerNeedsShowImportantFirst
   projectCustomerNeedsShowImportantFirst
+  showOnlySnoozedItems
   showParents
   fieldPreviewLinks
   showReadItems
@@ -71441,12 +77339,16 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldDueDate
   initiativeFieldHealth
   initiativeFieldActivity
+  initiativeFieldDateCompleted
+  initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldOwner
   initiativeFieldProjects
+  initiativeFieldStartDate
   initiativeFieldTargetDate
   initiativeFieldTeams
+  initiativeFieldDateUpdated
   fieldDateArchived
   fieldAssignee
   fieldDateCreated
@@ -71461,6 +77363,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldStatus
   fieldDateUpdated
   fieldLabels
+  releasePipelineFieldLatestRelease
   fieldLinkCount
   memberFieldJoined
   memberFieldStatus
@@ -71506,12 +77409,15 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   fieldPullRequests
+  scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
   reviewFieldIdentifier
   reviewFieldPreviewLinks
   reviewFieldRepository
+  scheduledPipelineReleaseFieldStage
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -71521,6 +77427,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   teamFieldProjects
   teamFieldDateUpdated
   fieldTimeInCurrentStatus
+  releasePipelineFieldType
   showTriageIssues
   showUnreadItemsFirst
   timelineChronologyShowWeekNumbers
@@ -71632,6 +77539,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelinesViewOrdering
   reviewGrouping
   reviewViewOrdering
+  scheduledPipelineReleasesViewOrdering
   searchResultType
   searchViewOrdering
   teamViewOrdering
@@ -71657,6 +77565,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   customerPageNeedsShowImportantFirst
   embeddedCustomerNeedsShowImportantFirst
   projectCustomerNeedsShowImportantFirst
+  showOnlySnoozedItems
   showParents
   fieldPreviewLinks
   showReadItems
@@ -71690,12 +77599,16 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldDueDate
   initiativeFieldHealth
   initiativeFieldActivity
+  initiativeFieldDateCompleted
+  initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldOwner
   initiativeFieldProjects
+  initiativeFieldStartDate
   initiativeFieldTargetDate
   initiativeFieldTeams
+  initiativeFieldDateUpdated
   fieldDateArchived
   fieldAssignee
   fieldDateCreated
@@ -71710,6 +77623,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldStatus
   fieldDateUpdated
   fieldLabels
+  releasePipelineFieldLatestRelease
   fieldLinkCount
   memberFieldJoined
   memberFieldStatus
@@ -71755,12 +77669,15 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   fieldPullRequests
+  scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
   reviewFieldIdentifier
   reviewFieldPreviewLinks
   reviewFieldRepository
+  scheduledPipelineReleaseFieldStage
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -71770,6 +77687,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   teamFieldProjects
   teamFieldDateUpdated
   fieldTimeInCurrentStatus
+  releasePipelineFieldType
   showTriageIssues
   showUnreadItemsFirst
   timelineChronologyShowWeekNumbers
@@ -71897,6 +77815,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelinesViewOrdering
   reviewGrouping
   reviewViewOrdering
+  scheduledPipelineReleasesViewOrdering
   searchResultType
   searchViewOrdering
   teamViewOrdering
@@ -71922,6 +77841,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   customerPageNeedsShowImportantFirst
   embeddedCustomerNeedsShowImportantFirst
   projectCustomerNeedsShowImportantFirst
+  showOnlySnoozedItems
   showParents
   fieldPreviewLinks
   showReadItems
@@ -71955,12 +77875,16 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldDueDate
   initiativeFieldHealth
   initiativeFieldActivity
+  initiativeFieldDateCompleted
+  initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldOwner
   initiativeFieldProjects
+  initiativeFieldStartDate
   initiativeFieldTargetDate
   initiativeFieldTeams
+  initiativeFieldDateUpdated
   fieldDateArchived
   fieldAssignee
   fieldDateCreated
@@ -71975,6 +77899,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldStatus
   fieldDateUpdated
   fieldLabels
+  releasePipelineFieldLatestRelease
   fieldLinkCount
   memberFieldJoined
   memberFieldStatus
@@ -72020,12 +77945,15 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   fieldPullRequests
+  scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
   reviewFieldIdentifier
   reviewFieldPreviewLinks
   reviewFieldRepository
+  scheduledPipelineReleaseFieldStage
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -72035,6 +77963,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   teamFieldProjects
   teamFieldDateUpdated
   fieldTimeInCurrentStatus
+  releasePipelineFieldType
   showTriageIssues
   showUnreadItemsFirst
   timelineChronologyShowWeekNumbers
@@ -72825,6 +78754,7 @@ export const DocumentContentHistoryTypeFragmentDoc = new TypedDocumentString(
   `
     fragment DocumentContentHistoryType on DocumentContentHistoryType {
   __typename
+  metadata
   actorIds
   id
   createdAt
@@ -72844,6 +78774,7 @@ export const DocumentContentHistoryPayloadFragmentDoc = new TypedDocumentString(
 }
     fragment DocumentContentHistoryType on DocumentContentHistoryType {
   __typename
+  metadata
   actorIds
   id
   createdAt
@@ -74595,6 +80526,7 @@ export const IssueSharedAccessFragmentDoc = new TypedDocumentString(
   `
     fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -74854,6 +80786,7 @@ fragment ExternalEntitySlackMetadata on ExternalEntitySlackMetadata {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -75086,6 +81019,7 @@ fragment ExternalEntitySlackMetadata on ExternalEntitySlackMetadata {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -75319,6 +81253,7 @@ fragment ExternalEntitySlackMetadata on ExternalEntitySlackMetadata {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -76292,6 +82227,7 @@ fragment ExternalEntitySlackMetadata on ExternalEntitySlackMetadata {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -76537,6 +82473,7 @@ fragment IssueSearchResult on IssueSearchResult {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -80546,8 +86483,10 @@ export const TemplateFragmentDoc = new TypedDocumentString(
   __typename
   templateData
   description
+  color
   lastAppliedAt
   type
+  icon
   updatedAt
   name
   inheritedFrom {
@@ -80585,8 +86524,10 @@ export const TemplateConnectionFragmentDoc = new TypedDocumentString(
   __typename
   templateData
   description
+  color
   lastAppliedAt
   type
+  icon
   updatedAt
   name
   inheritedFrom {
@@ -81059,6 +87000,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelinesViewOrdering
   reviewGrouping
   reviewViewOrdering
+  scheduledPipelineReleasesViewOrdering
   searchResultType
   searchViewOrdering
   teamViewOrdering
@@ -81084,6 +87026,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   customerPageNeedsShowImportantFirst
   embeddedCustomerNeedsShowImportantFirst
   projectCustomerNeedsShowImportantFirst
+  showOnlySnoozedItems
   showParents
   fieldPreviewLinks
   showReadItems
@@ -81117,12 +87060,16 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldDueDate
   initiativeFieldHealth
   initiativeFieldActivity
+  initiativeFieldDateCompleted
+  initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldOwner
   initiativeFieldProjects
+  initiativeFieldStartDate
   initiativeFieldTargetDate
   initiativeFieldTeams
+  initiativeFieldDateUpdated
   fieldDateArchived
   fieldAssignee
   fieldDateCreated
@@ -81137,6 +87084,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldStatus
   fieldDateUpdated
   fieldLabels
+  releasePipelineFieldLatestRelease
   fieldLinkCount
   memberFieldJoined
   memberFieldStatus
@@ -81182,12 +87130,15 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   fieldPullRequests
+  scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
   reviewFieldIdentifier
   reviewFieldPreviewLinks
   reviewFieldRepository
+  scheduledPipelineReleaseFieldStage
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -81197,6 +87148,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   teamFieldProjects
   teamFieldDateUpdated
   fieldTimeInCurrentStatus
+  releasePipelineFieldType
   showTriageIssues
   showUnreadItemsFirst
   timelineChronologyShowWeekNumbers
@@ -82168,6 +88120,7 @@ fragment ExternalEntitySlackMetadata on ExternalEntitySlackMetadata {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -82489,6 +88442,7 @@ fragment IssueConnection on IssueConnection {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -83480,6 +89434,7 @@ export const AttachmentIssue_SharedAccessDocument = new TypedDocumentString(`
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -83812,6 +89767,7 @@ export const AvailableUsersDocument = new TypedDocumentString(`
 fragment AuthOrganization on AuthOrganization {
   __typename
   allowedAuthServices
+  approximateUserCount
   previousUrlKeys
   serviceId
   releaseChannel
@@ -84534,6 +90490,7 @@ fragment IssueConnection on IssueConnection {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -85012,6 +90969,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelinesViewOrdering
   reviewGrouping
   reviewViewOrdering
+  scheduledPipelineReleasesViewOrdering
   searchResultType
   searchViewOrdering
   teamViewOrdering
@@ -85037,6 +90995,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   customerPageNeedsShowImportantFirst
   embeddedCustomerNeedsShowImportantFirst
   projectCustomerNeedsShowImportantFirst
+  showOnlySnoozedItems
   showParents
   fieldPreviewLinks
   showReadItems
@@ -85070,12 +91029,16 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldDueDate
   initiativeFieldHealth
   initiativeFieldActivity
+  initiativeFieldDateCompleted
+  initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldOwner
   initiativeFieldProjects
+  initiativeFieldStartDate
   initiativeFieldTargetDate
   initiativeFieldTeams
+  initiativeFieldDateUpdated
   fieldDateArchived
   fieldAssignee
   fieldDateCreated
@@ -85090,6 +91053,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldStatus
   fieldDateUpdated
   fieldLabels
+  releasePipelineFieldLatestRelease
   fieldLinkCount
   memberFieldJoined
   memberFieldStatus
@@ -85135,12 +91099,15 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   fieldPullRequests
+  scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
   reviewFieldIdentifier
   reviewFieldPreviewLinks
   reviewFieldRepository
+  scheduledPipelineReleaseFieldStage
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -85150,6 +91117,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   teamFieldProjects
   teamFieldDateUpdated
   fieldTimeInCurrentStatus
+  releasePipelineFieldType
   showTriageIssues
   showUnreadItemsFirst
   timelineChronologyShowWeekNumbers
@@ -85525,6 +91493,7 @@ fragment IssueConnection on IssueConnection {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -85610,6 +91579,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelinesViewOrdering
   reviewGrouping
   reviewViewOrdering
+  scheduledPipelineReleasesViewOrdering
   searchResultType
   searchViewOrdering
   teamViewOrdering
@@ -85635,6 +91605,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   customerPageNeedsShowImportantFirst
   embeddedCustomerNeedsShowImportantFirst
   projectCustomerNeedsShowImportantFirst
+  showOnlySnoozedItems
   showParents
   fieldPreviewLinks
   showReadItems
@@ -85668,12 +91639,16 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldDueDate
   initiativeFieldHealth
   initiativeFieldActivity
+  initiativeFieldDateCompleted
+  initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldOwner
   initiativeFieldProjects
+  initiativeFieldStartDate
   initiativeFieldTargetDate
   initiativeFieldTeams
+  initiativeFieldDateUpdated
   fieldDateArchived
   fieldAssignee
   fieldDateCreated
@@ -85688,6 +91663,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldStatus
   fieldDateUpdated
   fieldLabels
+  releasePipelineFieldLatestRelease
   fieldLinkCount
   memberFieldJoined
   memberFieldStatus
@@ -85733,12 +91709,15 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   fieldPullRequests
+  scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
   reviewFieldIdentifier
   reviewFieldPreviewLinks
   reviewFieldRepository
+  scheduledPipelineReleaseFieldStage
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -85748,6 +91727,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   teamFieldProjects
   teamFieldDateUpdated
   fieldTimeInCurrentStatus
+  releasePipelineFieldType
   showTriageIssues
   showUnreadItemsFirst
   timelineChronologyShowWeekNumbers
@@ -85816,6 +91796,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelinesViewOrdering
   reviewGrouping
   reviewViewOrdering
+  scheduledPipelineReleasesViewOrdering
   searchResultType
   searchViewOrdering
   teamViewOrdering
@@ -85841,6 +91822,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   customerPageNeedsShowImportantFirst
   embeddedCustomerNeedsShowImportantFirst
   projectCustomerNeedsShowImportantFirst
+  showOnlySnoozedItems
   showParents
   fieldPreviewLinks
   showReadItems
@@ -85874,12 +91856,16 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldDueDate
   initiativeFieldHealth
   initiativeFieldActivity
+  initiativeFieldDateCompleted
+  initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldOwner
   initiativeFieldProjects
+  initiativeFieldStartDate
   initiativeFieldTargetDate
   initiativeFieldTeams
+  initiativeFieldDateUpdated
   fieldDateArchived
   fieldAssignee
   fieldDateCreated
@@ -85894,6 +91880,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldStatus
   fieldDateUpdated
   fieldLabels
+  releasePipelineFieldLatestRelease
   fieldLinkCount
   memberFieldJoined
   memberFieldStatus
@@ -85939,12 +91926,15 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   fieldPullRequests
+  scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
   reviewFieldIdentifier
   reviewFieldPreviewLinks
   reviewFieldRepository
+  scheduledPipelineReleaseFieldStage
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -85954,6 +91944,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   teamFieldProjects
   teamFieldDateUpdated
   fieldTimeInCurrentStatus
+  releasePipelineFieldType
   showTriageIssues
   showUnreadItemsFirst
   timelineChronologyShowWeekNumbers
@@ -86231,6 +92222,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelinesViewOrdering
   reviewGrouping
   reviewViewOrdering
+  scheduledPipelineReleasesViewOrdering
   searchResultType
   searchViewOrdering
   teamViewOrdering
@@ -86256,6 +92248,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   customerPageNeedsShowImportantFirst
   embeddedCustomerNeedsShowImportantFirst
   projectCustomerNeedsShowImportantFirst
+  showOnlySnoozedItems
   showParents
   fieldPreviewLinks
   showReadItems
@@ -86289,12 +92282,16 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldDueDate
   initiativeFieldHealth
   initiativeFieldActivity
+  initiativeFieldDateCompleted
+  initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldOwner
   initiativeFieldProjects
+  initiativeFieldStartDate
   initiativeFieldTargetDate
   initiativeFieldTeams
+  initiativeFieldDateUpdated
   fieldDateArchived
   fieldAssignee
   fieldDateCreated
@@ -86309,6 +92306,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldStatus
   fieldDateUpdated
   fieldLabels
+  releasePipelineFieldLatestRelease
   fieldLinkCount
   memberFieldJoined
   memberFieldStatus
@@ -86354,12 +92352,15 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   fieldPullRequests
+  scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
   reviewFieldIdentifier
   reviewFieldPreviewLinks
   reviewFieldRepository
+  scheduledPipelineReleaseFieldStage
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -86369,6 +92370,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   teamFieldProjects
   teamFieldDateUpdated
   fieldTimeInCurrentStatus
+  releasePipelineFieldType
   showTriageIssues
   showUnreadItemsFirst
   timelineChronologyShowWeekNumbers
@@ -86437,6 +92439,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelinesViewOrdering
   reviewGrouping
   reviewViewOrdering
+  scheduledPipelineReleasesViewOrdering
   searchResultType
   searchViewOrdering
   teamViewOrdering
@@ -86462,6 +92465,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   customerPageNeedsShowImportantFirst
   embeddedCustomerNeedsShowImportantFirst
   projectCustomerNeedsShowImportantFirst
+  showOnlySnoozedItems
   showParents
   fieldPreviewLinks
   showReadItems
@@ -86495,12 +92499,16 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldDueDate
   initiativeFieldHealth
   initiativeFieldActivity
+  initiativeFieldDateCompleted
+  initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldOwner
   initiativeFieldProjects
+  initiativeFieldStartDate
   initiativeFieldTargetDate
   initiativeFieldTeams
+  initiativeFieldDateUpdated
   fieldDateArchived
   fieldAssignee
   fieldDateCreated
@@ -86515,6 +92523,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldStatus
   fieldDateUpdated
   fieldLabels
+  releasePipelineFieldLatestRelease
   fieldLinkCount
   memberFieldJoined
   memberFieldStatus
@@ -86560,12 +92569,15 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   fieldPullRequests
+  scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
   reviewFieldIdentifier
   reviewFieldPreviewLinks
   reviewFieldRepository
+  scheduledPipelineReleaseFieldStage
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -86575,6 +92587,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   teamFieldProjects
   teamFieldDateUpdated
   fieldTimeInCurrentStatus
+  releasePipelineFieldType
   showTriageIssues
   showUnreadItemsFirst
   timelineChronologyShowWeekNumbers
@@ -86641,6 +92654,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelinesViewOrdering
   reviewGrouping
   reviewViewOrdering
+  scheduledPipelineReleasesViewOrdering
   searchResultType
   searchViewOrdering
   teamViewOrdering
@@ -86666,6 +92680,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   customerPageNeedsShowImportantFirst
   embeddedCustomerNeedsShowImportantFirst
   projectCustomerNeedsShowImportantFirst
+  showOnlySnoozedItems
   showParents
   fieldPreviewLinks
   showReadItems
@@ -86699,12 +92714,16 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldDueDate
   initiativeFieldHealth
   initiativeFieldActivity
+  initiativeFieldDateCompleted
+  initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldOwner
   initiativeFieldProjects
+  initiativeFieldStartDate
   initiativeFieldTargetDate
   initiativeFieldTeams
+  initiativeFieldDateUpdated
   fieldDateArchived
   fieldAssignee
   fieldDateCreated
@@ -86719,6 +92738,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldStatus
   fieldDateUpdated
   fieldLabels
+  releasePipelineFieldLatestRelease
   fieldLinkCount
   memberFieldJoined
   memberFieldStatus
@@ -86764,12 +92784,15 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   fieldPullRequests
+  scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
   reviewFieldIdentifier
   reviewFieldPreviewLinks
   reviewFieldRepository
+  scheduledPipelineReleaseFieldStage
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -86779,6 +92802,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   teamFieldProjects
   teamFieldDateUpdated
   fieldTimeInCurrentStatus
+  releasePipelineFieldType
   showTriageIssues
   showUnreadItemsFirst
   timelineChronologyShowWeekNumbers
@@ -86930,6 +92954,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelinesViewOrdering
   reviewGrouping
   reviewViewOrdering
+  scheduledPipelineReleasesViewOrdering
   searchResultType
   searchViewOrdering
   teamViewOrdering
@@ -86955,6 +92980,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   customerPageNeedsShowImportantFirst
   embeddedCustomerNeedsShowImportantFirst
   projectCustomerNeedsShowImportantFirst
+  showOnlySnoozedItems
   showParents
   fieldPreviewLinks
   showReadItems
@@ -86988,12 +93014,16 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldDueDate
   initiativeFieldHealth
   initiativeFieldActivity
+  initiativeFieldDateCompleted
+  initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldOwner
   initiativeFieldProjects
+  initiativeFieldStartDate
   initiativeFieldTargetDate
   initiativeFieldTeams
+  initiativeFieldDateUpdated
   fieldDateArchived
   fieldAssignee
   fieldDateCreated
@@ -87008,6 +93038,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldStatus
   fieldDateUpdated
   fieldLabels
+  releasePipelineFieldLatestRelease
   fieldLinkCount
   memberFieldJoined
   memberFieldStatus
@@ -87053,12 +93084,15 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   fieldPullRequests
+  scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
   reviewFieldIdentifier
   reviewFieldPreviewLinks
   reviewFieldRepository
+  scheduledPipelineReleaseFieldStage
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -87068,6 +93102,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   teamFieldProjects
   teamFieldDateUpdated
   fieldTimeInCurrentStatus
+  releasePipelineFieldType
   showTriageIssues
   showUnreadItemsFirst
   timelineChronologyShowWeekNumbers
@@ -87833,6 +93868,7 @@ fragment IssueConnection on IssueConnection {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -88085,6 +94121,7 @@ fragment IssueConnection on IssueConnection {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -88447,6 +94484,7 @@ export const DocumentContentHistoryDocument = new TypedDocumentString(`
 }
 fragment DocumentContentHistoryType on DocumentContentHistoryType {
   __typename
+  metadata
   actorIds
   id
   createdAt
@@ -88562,6 +94600,7 @@ fragment EmailIntakeAddress on EmailIntakeAddress {
   issueCreatedAutoReplyEnabled
   useUserNamesInReplies
   enabled
+  reopenOnReply
 }
 fragment SesDomainIdentity on SesDomainIdentity {
   __typename
@@ -90805,6 +96844,7 @@ fragment ExternalEntitySlackMetadata on ExternalEntitySlackMetadata {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -91126,6 +97166,7 @@ fragment IssueConnection on IssueConnection {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -92111,6 +98152,7 @@ export const Issue_SharedAccessDocument = new TypedDocumentString(`
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -92456,6 +98498,7 @@ fragment IssueConnection on IssueConnection {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -92471,8 +98514,8 @@ fragment PageInfo on PageInfo {
   hasNextPage
 }`) as unknown as TypedDocumentString<IssueFigmaFileKeySearchQuery, IssueFigmaFileKeySearchQueryVariables>;
 export const IssueFilterSuggestionDocument = new TypedDocumentString(`
-    query issueFilterSuggestion($projectId: String, $prompt: String!) {
-  issueFilterSuggestion(projectId: $projectId, prompt: $prompt) {
+    query issueFilterSuggestion($projectId: String, $prompt: String!, $teamId: String) {
+  issueFilterSuggestion(projectId: $projectId, prompt: $prompt, teamId: $teamId) {
     ...IssueFilterSuggestionPayload
   }
 }
@@ -92850,6 +98893,7 @@ fragment IssueConnection on IssueConnection {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -93254,6 +99298,7 @@ fragment IssueConnection on IssueConnection {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -93501,6 +99546,7 @@ fragment ExternalEntitySlackMetadata on ExternalEntitySlackMetadata {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -93825,6 +99871,7 @@ fragment IssueConnection on IssueConnection {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -94825,6 +100872,7 @@ export const IssueVcsBranchSearch_SharedAccessDocument = new TypedDocumentString
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -95180,6 +101228,7 @@ fragment IssueConnection on IssueConnection {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -96689,8 +102738,10 @@ export const Organization_TemplatesDocument = new TypedDocumentString(`
   __typename
   templateData
   description
+  color
   lastAppliedAt
   type
+  icon
   updatedAt
   name
   inheritedFrom {
@@ -98057,6 +104108,7 @@ fragment IssueConnection on IssueConnection {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -98648,8 +104700,8 @@ fragment TeamConnection on TeamConnection {
   }
 }`) as unknown as TypedDocumentString<Project_TeamsQuery, Project_TeamsQueryVariables>;
 export const ProjectFilterSuggestionDocument = new TypedDocumentString(`
-    query projectFilterSuggestion($prompt: String!) {
-  projectFilterSuggestion(prompt: $prompt) {
+    query projectFilterSuggestion($prompt: String!, $teamId: String) {
+  projectFilterSuggestion(prompt: $prompt, teamId: $teamId) {
     ...ProjectFilterSuggestionPayload
   }
 }
@@ -99415,6 +105467,7 @@ fragment IssueConnection on IssueConnection {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -100967,6 +107020,7 @@ fragment IssueSearchResult on IssueSearchResult {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -101754,6 +107808,7 @@ fragment IssueConnection on IssueConnection {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -102210,8 +108265,10 @@ export const Team_TemplatesDocument = new TypedDocumentString(`
   __typename
   templateData
   description
+  color
   lastAppliedAt
   type
+  icon
   updatedAt
   name
   inheritedFrom {
@@ -102499,8 +108556,10 @@ export const TemplateDocument = new TypedDocumentString(`
   __typename
   templateData
   description
+  color
   lastAppliedAt
   type
+  icon
   updatedAt
   name
   inheritedFrom {
@@ -102530,8 +108589,10 @@ export const TemplatesDocument = new TypedDocumentString(`
   __typename
   templateData
   description
+  color
   lastAppliedAt
   type
+  icon
   updatedAt
   name
   inheritedFrom {
@@ -102561,8 +108622,10 @@ export const TemplatesForIntegrationDocument = new TypedDocumentString(`
   __typename
   templateData
   description
+  color
   lastAppliedAt
   type
+  icon
   updatedAt
   name
   inheritedFrom {
@@ -103040,6 +109103,7 @@ fragment IssueConnection on IssueConnection {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -103292,6 +109356,7 @@ fragment IssueConnection on IssueConnection {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -103544,6 +109609,7 @@ fragment IssueConnection on IssueConnection {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -105109,6 +111175,7 @@ fragment IssueConnection on IssueConnection {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -105361,6 +111428,7 @@ fragment IssueConnection on IssueConnection {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -105613,6 +111681,7 @@ fragment IssueConnection on IssueConnection {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -106205,6 +112274,7 @@ fragment IssueConnection on IssueConnection {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -106781,6 +112851,7 @@ export const CreateOrganizationFromOnboardingDocument = new TypedDocumentString(
 fragment AuthOrganization on AuthOrganization {
   __typename
   allowedAuthServices
+  approximateUserCount
   previousUrlKeys
   serviceId
   releaseChannel
@@ -107373,6 +113444,7 @@ export const EmailTokenUserAccountAuthDocument = new TypedDocumentString(`
 fragment AuthOrganization on AuthOrganization {
   __typename
   allowedAuthServices
+  approximateUserCount
   previousUrlKeys
   serviceId
   releaseChannel
@@ -107774,6 +113846,7 @@ export const GoogleUserAccountAuthDocument = new TypedDocumentString(`
 fragment AuthOrganization on AuthOrganization {
   __typename
   allowedAuthServices
+  approximateUserCount
   previousUrlKeys
   serviceId
   releaseChannel
@@ -109000,6 +115073,7 @@ fragment IssueBatchPayload on IssueBatchPayload {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -109234,6 +115308,7 @@ fragment IssueBatchPayload on IssueBatchPayload {
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
+  disallowedIssueFields
   sharedWithCount
   sharedWithUsers {
     ...User
@@ -109796,6 +115871,7 @@ export const JoinOrganizationFromOnboardingDocument = new TypedDocumentString(`
 fragment AuthOrganization on AuthOrganization {
   __typename
   allowedAuthServices
+  approximateUserCount
   previousUrlKeys
   serviceId
   releaseChannel
@@ -109848,6 +115924,7 @@ export const LeaveOrganizationDocument = new TypedDocumentString(`
 fragment AuthOrganization on AuthOrganization {
   __typename
   allowedAuthServices
+  approximateUserCount
   previousUrlKeys
   serviceId
   releaseChannel
@@ -114576,6 +120653,7 @@ export const SamlTokenUserAccountAuthDocument = new TypedDocumentString(`
 fragment AuthOrganization on AuthOrganization {
   __typename
   allowedAuthServices
+  approximateUserCount
   previousUrlKeys
   serviceId
   releaseChannel
@@ -115114,6 +121192,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelinesViewOrdering
   reviewGrouping
   reviewViewOrdering
+  scheduledPipelineReleasesViewOrdering
   searchResultType
   searchViewOrdering
   teamViewOrdering
@@ -115139,6 +121218,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   customerPageNeedsShowImportantFirst
   embeddedCustomerNeedsShowImportantFirst
   projectCustomerNeedsShowImportantFirst
+  showOnlySnoozedItems
   showParents
   fieldPreviewLinks
   showReadItems
@@ -115172,12 +121252,16 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldDueDate
   initiativeFieldHealth
   initiativeFieldActivity
+  initiativeFieldDateCompleted
+  initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldOwner
   initiativeFieldProjects
+  initiativeFieldStartDate
   initiativeFieldTargetDate
   initiativeFieldTeams
+  initiativeFieldDateUpdated
   fieldDateArchived
   fieldAssignee
   fieldDateCreated
@@ -115192,6 +121276,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldStatus
   fieldDateUpdated
   fieldLabels
+  releasePipelineFieldLatestRelease
   fieldLinkCount
   memberFieldJoined
   memberFieldStatus
@@ -115237,12 +121322,15 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   fieldPullRequests
+  scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
   reviewFieldIdentifier
   reviewFieldPreviewLinks
   reviewFieldRepository
+  scheduledPipelineReleaseFieldStage
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -115252,6 +121340,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   teamFieldProjects
   teamFieldDateUpdated
   fieldTimeInCurrentStatus
+  releasePipelineFieldType
   showTriageIssues
   showUnreadItemsFirst
   timelineChronologyShowWeekNumbers
@@ -115345,6 +121434,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelinesViewOrdering
   reviewGrouping
   reviewViewOrdering
+  scheduledPipelineReleasesViewOrdering
   searchResultType
   searchViewOrdering
   teamViewOrdering
@@ -115370,6 +121460,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   customerPageNeedsShowImportantFirst
   embeddedCustomerNeedsShowImportantFirst
   projectCustomerNeedsShowImportantFirst
+  showOnlySnoozedItems
   showParents
   fieldPreviewLinks
   showReadItems
@@ -115403,12 +121494,16 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldDueDate
   initiativeFieldHealth
   initiativeFieldActivity
+  initiativeFieldDateCompleted
+  initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldOwner
   initiativeFieldProjects
+  initiativeFieldStartDate
   initiativeFieldTargetDate
   initiativeFieldTeams
+  initiativeFieldDateUpdated
   fieldDateArchived
   fieldAssignee
   fieldDateCreated
@@ -115423,6 +121518,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldStatus
   fieldDateUpdated
   fieldLabels
+  releasePipelineFieldLatestRelease
   fieldLinkCount
   memberFieldJoined
   memberFieldStatus
@@ -115468,12 +121564,15 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   fieldPullRequests
+  scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
   reviewFieldIdentifier
   reviewFieldPreviewLinks
   reviewFieldRepository
+  scheduledPipelineReleaseFieldStage
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -115483,6 +121582,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   teamFieldProjects
   teamFieldDateUpdated
   fieldTimeInCurrentStatus
+  releasePipelineFieldType
   showTriageIssues
   showUnreadItemsFirst
   timelineChronologyShowWeekNumbers
