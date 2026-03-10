@@ -1,5 +1,11 @@
 # Change Log
 
+## 4.0.2
+
+### Patch Changes
+
+- 73b4c31: Fix enum list fields being incorrectly treated as object lists in SDK codegen
+
 ## 4.0.1
 
 ### Patch Changes
