@@ -1386,17 +1386,26 @@ export class AiConversationInvokeMcpToolToolCallArgsTool extends Request {
 export class AiConversationPartMetadata extends Request {
   public constructor(request: LinearRequest, data: L.AiConversationPartMetadataFragment) {
     super(request);
+    this.endedAt = data.endedAt ?? undefined;
     this.evalLogId = data.evalLogId ?? undefined;
     this.feedback = data.feedback ?? undefined;
+    this.startedAt = data.startedAt ?? undefined;
     this.turnId = data.turnId;
+    this.phase = data.phase ?? undefined;
   }
 
+  /** The ended timestamp of the part. */
+  public endedAt?: string | null;
   /** The eval log ID of the part. */
   public evalLogId?: string | null;
   /** AI feedback state for this part. */
   public feedback?: L.Scalars["JSONObject"] | null;
+  /** The started timestamp of the part. */
+  public startedAt?: string | null;
   /** The turn ID of the part. */
   public turnId: string;
+  /** The phase during which the part was generated. */
+  public phase?: L.AiConversationPartPhase | null;
 }
 /**
  * A prompt part in an AI conversation.
@@ -1676,6 +1685,46 @@ export class AiConversationResearchToolCallResult extends Request {
   }
 
   public progressId?: string | null;
+}
+/**
+ * AiConversationRestoreEntityToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationRestoreEntityToolCallFragment response data
+ */
+export class AiConversationRestoreEntityToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationRestoreEntityToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationRestoreEntityToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationRestoreEntityToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationRestoreEntityToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationRestoreEntityToolCallArgsFragment response data
+ */
+export class AiConversationRestoreEntityToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationRestoreEntityToolCallArgsFragment) {
+    super(request);
+    this.entity = new AiConversationSearchEntitiesToolCallResultEntities(request, data.entity);
+  }
+
+  public entity: AiConversationSearchEntitiesToolCallResultEntities;
 }
 /**
  * AiConversationRetrieveEntitiesToolCall model
@@ -2751,6 +2800,7 @@ export class AuthOrganization extends Request {
     super(request);
     this.allowedAuthServices = data.allowedAuthServices;
     this.approximateUserCount = data.approximateUserCount;
+    this.authSettings = data.authSettings;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.deletionRequestedAt = parseDate(data.deletionRequestedAt) ?? undefined;
     this.enabled = data.enabled;
@@ -2772,6 +2822,8 @@ export class AuthOrganization extends Request {
   public allowedAuthServices: string[];
   /** An approximate count of users, updated once per day. */
   public approximateUserCount: number;
+  /** Authentication settings for the organization. */
+  public authSettings: L.Scalars["JSONObject"];
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The time at which deletion of the organization was requested. */
@@ -2980,7 +3032,7 @@ export class BaseWebhookPayload {
   public webhookTimestamp: number;
 }
 /**
- * A comment associated with an issue.
+ * A comment associated with an entity.
  *
  * @param request - function to call the graphql client
  * @param data - L.CommentFragment response data
@@ -4057,8 +4109,11 @@ export class CustomerNeed extends Request {
     return new UnarchiveCustomerNeedMutation(this._request).fetch(this.id);
   }
   /** Updates a customer need */
-  public update(input: L.CustomerNeedUpdateInput) {
-    return new UpdateCustomerNeedMutation(this._request).fetch(this.id, input);
+  public update(
+    input: L.CustomerNeedUpdateInput,
+    variables?: Omit<L.UpdateCustomerNeedMutationVariables, "id" | "input">
+  ) {
+    return new UpdateCustomerNeedMutation(this._request).fetch(this.id, input, variables);
   }
 }
 /**
@@ -13520,6 +13575,7 @@ export class Organization extends Request {
     this.allowedAuthServices = data.allowedAuthServices;
     this.allowedFileUploadContentTypes = data.allowedFileUploadContentTypes ?? undefined;
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.authSettings = data.authSettings;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.createdIssueCount = data.createdIssueCount;
     this.customerCount = data.customerCount;
@@ -13581,6 +13637,8 @@ export class Organization extends Request {
   public allowedFileUploadContentTypes?: string[] | null;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
+  /** Authentication settings for the organization. */
+  public authSettings: L.Scalars["JSONObject"];
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** Aproximate number of issues in the organization, including archived ones. */
@@ -20033,6 +20091,9 @@ export class ViewPreferencesValues extends Request {
     this.fieldSla = data.fieldSla ?? undefined;
     this.fieldStatus = data.fieldStatus ?? undefined;
     this.fieldTimeInCurrentStatus = data.fieldTimeInCurrentStatus ?? undefined;
+    this.focusViewGrouping = data.focusViewGrouping ?? undefined;
+    this.focusViewOrdering = data.focusViewOrdering ?? undefined;
+    this.focusViewOrderingDirection = data.focusViewOrderingDirection ?? undefined;
     this.hiddenColumns = data.hiddenColumns ?? undefined;
     this.hiddenRows = data.hiddenRows ?? undefined;
     this.inboxViewOrdering = data.inboxViewOrdering ?? undefined;
@@ -20283,6 +20344,12 @@ export class ViewPreferencesValues extends Request {
   public fieldStatus?: boolean | null;
   /** Whether to show the time in current status field. */
   public fieldTimeInCurrentStatus?: boolean | null;
+  /** The focus view grouping. */
+  public focusViewGrouping?: string | null;
+  /** The focus view ordering. */
+  public focusViewOrdering?: string | null;
+  /** The focus view ordering direction. */
+  public focusViewOrderingDirection?: string | null;
   /** List of column model IDs which should be hidden on a board. */
   public hiddenColumns?: string[] | null;
   /** List of row model IDs which should be hidden on a board. */
@@ -20923,6 +20990,7 @@ export class WorkflowDefinition extends Request {
     this.id = data.id;
     this.lastExecutedAt = parseDate(data.lastExecutedAt) ?? undefined;
     this.name = data.name;
+    this.slugId = data.slugId;
     this.sortOrder = data.sortOrder;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.contextViewType = data.contextViewType ?? undefined;
@@ -20960,6 +21028,8 @@ export class WorkflowDefinition extends Request {
   public lastExecutedAt?: Date | null;
   /** The name of the workflow. */
   public name: string;
+  /** The workflow definition's unique URL slug. */
+  public slugId: string;
   /** The sort order of the workflow definition within its siblings. */
   public sortOrder: string;
   /**
@@ -26625,14 +26695,20 @@ export class UpdateCustomerNeedMutation extends Request {
    *
    * @param id - required id to pass to updateCustomerNeed
    * @param input - required input to pass to updateCustomerNeed
+   * @param variables - variables without 'id', 'input' to pass into the UpdateCustomerNeedMutation
    * @returns parsed response from UpdateCustomerNeedMutation
    */
-  public async fetch(id: string, input: L.CustomerNeedUpdateInput): LinearFetch<CustomerNeedUpdatePayload> {
+  public async fetch(
+    id: string,
+    input: L.CustomerNeedUpdateInput,
+    variables?: Omit<L.UpdateCustomerNeedMutationVariables, "id" | "input">
+  ): LinearFetch<CustomerNeedUpdatePayload> {
     const response = await this._request<L.UpdateCustomerNeedMutation, L.UpdateCustomerNeedMutationVariables>(
       L.UpdateCustomerNeedDocument.toString(),
       {
         id,
         input,
+        ...variables,
       }
     );
     const data = response.customerNeedUpdate;
@@ -43062,10 +43138,15 @@ export class LinearSdk extends Request {
    *
    * @param id - required id to pass to updateCustomerNeed
    * @param input - required input to pass to updateCustomerNeed
+   * @param variables - variables without 'id', 'input' to pass into the UpdateCustomerNeedMutation
    * @returns CustomerNeedUpdatePayload
    */
-  public updateCustomerNeed(id: string, input: L.CustomerNeedUpdateInput): LinearFetch<CustomerNeedUpdatePayload> {
-    return new UpdateCustomerNeedMutation(this._request).fetch(id, input);
+  public updateCustomerNeed(
+    id: string,
+    input: L.CustomerNeedUpdateInput,
+    variables?: Omit<L.UpdateCustomerNeedMutationVariables, "id" | "input">
+  ): LinearFetch<CustomerNeedUpdatePayload> {
+    return new UpdateCustomerNeedMutation(this._request).fetch(id, input, variables);
   }
   /**
    * Creates a new customer status.
@@ -45574,6 +45655,7 @@ export {
   AiConversationEntityCardWidgetArgsType,
   AiConversationEntityListWidgetArgsAction,
   AiConversationEntityListWidgetArgsEntitiesType,
+  AiConversationPartPhase,
   AiConversationPartType,
   AiConversationQueryUpdatesToolCallArgsUpdateType,
   AiConversationQueryViewToolCallArgsMode,
