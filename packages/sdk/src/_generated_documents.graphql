@@ -96,7 +96,7 @@ fragment ActorBot on ActorBot {
   id
 }
 
-# A comment associated with an issue.
+# A comment associated with an entity.
 fragment Comment on Comment {
   __typename
   # Agent session associated with this comment.
@@ -2679,6 +2679,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     ... on AiConversationResearchToolCall {
       ...AiConversationResearchToolCall
     }
+    ... on AiConversationRestoreEntityToolCall {
+      ...AiConversationRestoreEntityToolCall
+    }
     ... on AiConversationRetrieveEntitiesToolCall {
       ...AiConversationRetrieveEntitiesToolCall
     }
@@ -4156,6 +4159,8 @@ fragment Organization on Organization {
   allowedFileUploadContentTypes
   # Aproximate number of issues in the organization, including archived ones.
   createdIssueCount
+  # Authentication settings for the organization.
+  authSettings
   # Configuration settings for the Customers feature.
   customersConfiguration
   # Default schedule for how often feed summaries are generated.
@@ -4270,6 +4275,8 @@ fragment AuthOrganization on AuthOrganization {
   allowedAuthServices
   # An approximate count of users, updated once per day.
   approximateUserCount
+  # Authentication settings for the organization.
+  authSettings
   # Previously used URL keys for the organization (last 3 are kept and redirected).
   previousUrlKeys
   # The email domain or URL key for the organization.
@@ -5359,8 +5366,14 @@ fragment AiConversationPartMetadata on AiConversationPartMetadata {
   __typename
   # AI feedback state for this part.
   feedback
+  # The ended timestamp of the part.
+  endedAt
   # The eval log ID of the part.
   evalLogId
+  # The phase during which the part was generated.
+  phase
+  # The started timestamp of the part.
+  startedAt
   # The turn ID of the part.
   turnId
 }
@@ -7677,6 +7690,10 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
     ...AiConversationResearchToolCall
   }
 
+  ... on AiConversationRestoreEntityToolCall {
+    ...AiConversationRestoreEntityToolCall
+  }
+
   ... on AiConversationRetrieveEntitiesToolCall {
     ...AiConversationRetrieveEntitiesToolCall
   }
@@ -8092,6 +8109,30 @@ fragment AiConversationResearchToolCallArgs on AiConversationResearchToolCallArg
 fragment AiConversationResearchToolCallResult on AiConversationResearchToolCallResult {
   __typename
   progressId
+}
+
+fragment AiConversationRestoreEntityToolCall on AiConversationRestoreEntityToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationRestoreEntityToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationRestoreEntityToolCallArgs on AiConversationRestoreEntityToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
 }
 
 fragment AiConversationRetrieveEntitiesToolCall on AiConversationRetrieveEntitiesToolCall {
@@ -10606,6 +10647,12 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   viewOrderingDirection
   # The embedded customer needs view ordering.
   embeddedCustomerNeedsViewOrdering
+  # The focus view grouping.
+  focusViewGrouping
+  # The focus view ordering direction.
+  focusViewOrderingDirection
+  # The focus view ordering.
+  focusViewOrdering
   # The inbox view ordering.
   inboxViewOrdering
   # The initiative grouping.
@@ -11061,6 +11108,8 @@ fragment WorkflowDefinition on WorkflowDefinition {
   lastUpdatedBy {
     id
   }
+  # The workflow definition's unique URL slug.
+  slugId
   enabled
 }
 
@@ -17870,12 +17919,14 @@ mutation unarchiveCustomerNeed(
 }
 # Updates a customer need
 mutation updateCustomerNeed(
+  # Whether to remove any existing attachment associated with the customer need.
+  $clearAttachment: Boolean
   # The identifier of the customer need to update.
   $id: String!
   # The properties of the customer need to update.
   $input: CustomerNeedUpdateInput!
 ) {
-  customerNeedUpdate(id: $id, input: $input) {
+  customerNeedUpdate(clearAttachment: $clearAttachment, id: $id, input: $input) {
     ...CustomerNeedUpdatePayload
   }
 }
