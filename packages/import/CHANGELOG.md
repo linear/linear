@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.0.13
+
+### Patch Changes
+
+- Updated dependencies [ab3ddaa]
+  - @linear/sdk@78.0.0
+
 ## 3.0.12
 
 ### Patch Changes
