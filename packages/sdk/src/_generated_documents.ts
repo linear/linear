@@ -998,13 +998,25 @@ export type AiConversationPart =
 /** Metadata about a part in an AI conversation. */
 export type AiConversationPartMetadata = {
   __typename?: "AiConversationPartMetadata";
+  /** The ended timestamp of the part. */
+  endedAt?: Maybe<Scalars["String"]>;
   /** The eval log ID of the part. */
   evalLogId?: Maybe<Scalars["String"]>;
   /** AI feedback state for this part. */
   feedback?: Maybe<Scalars["JSONObject"]>;
+  /** The phase during which the part was generated. */
+  phase?: Maybe<AiConversationPartPhase>;
+  /** The started timestamp of the part. */
+  startedAt?: Maybe<Scalars["String"]>;
   /** The turn ID of the part. */
   turnId: Scalars["String"];
 };
+
+/** The phase during which a conversation part was generated. */
+export enum AiConversationPartPhase {
+  Answer = "answer",
+  Commentary = "commentary",
+}
 
 /** The type of a part in an AI conversation. */
 export enum AiConversationPartType {
@@ -1151,6 +1163,24 @@ export type AiConversationResearchToolCallResult = {
   progressId?: Maybe<Scalars["String"]>;
 };
 
+export type AiConversationRestoreEntityToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationRestoreEntityToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationRestoreEntityToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationRestoreEntityToolCallArgs = {
+  __typename?: "AiConversationRestoreEntityToolCallArgs";
+  entity: AiConversationSearchEntitiesToolCallResultEntities;
+};
+
 export type AiConversationRetrieveEntitiesToolCall = AiConversationBaseToolCall & {
   __typename?: "AiConversationRetrieveEntitiesToolCall";
   /** The arguments to the tool call. */
@@ -1269,6 +1299,7 @@ export enum AiConversationTool {
   QueryUpdates = "QueryUpdates",
   QueryView = "QueryView",
   Research = "Research",
+  RestoreEntity = "RestoreEntity",
   RetrieveEntities = "RetrieveEntities",
   SearchDocumentation = "SearchDocumentation",
   SearchEntities = "SearchEntities",
@@ -1293,6 +1324,7 @@ export type AiConversationToolCall =
   | AiConversationQueryUpdatesToolCall
   | AiConversationQueryViewToolCall
   | AiConversationResearchToolCall
+  | AiConversationRestoreEntityToolCall
   | AiConversationRetrieveEntitiesToolCall
   | AiConversationSearchDocumentationToolCall
   | AiConversationSearchEntitiesToolCall
@@ -1361,7 +1393,8 @@ export type AiConversationUpdateEntityToolCall = AiConversationBaseToolCall & {
 
 export type AiConversationUpdateEntityToolCallArgs = {
   __typename?: "AiConversationUpdateEntityToolCallArgs";
-  entity: AiConversationSearchEntitiesToolCallResultEntities;
+  entities?: Maybe<Array<AiConversationSearchEntitiesToolCallResultEntities>>;
+  entity?: Maybe<AiConversationSearchEntitiesToolCallResultEntities>;
 };
 
 export type AiConversationWebSearchToolCall = AiConversationBaseToolCall & {
@@ -1887,10 +1920,15 @@ export type AuthIdentityProvider = {
 /** An organization. Organizations are root-level objects that contain users and teams. */
 export type AuthOrganization = {
   __typename?: "AuthOrganization";
-  /** Allowed authentication providers, empty array means all are allowed */
+  /**
+   * Allowed authentication providers, empty array means all are allowed
+   * @deprecated Use authSettings.allowedAuthServices instead.
+   */
   allowedAuthServices: Array<Scalars["String"]>;
   /** An approximate count of users, updated once per day. */
   approximateUserCount: Scalars["Float"];
+  /** Authentication settings for the organization. */
+  authSettings: Scalars["JSONObject"];
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /** The time at which deletion of the organization was requested. */
@@ -2083,11 +2121,13 @@ export type CodingAgentSandboxPayload = {
   sandboxUrl?: Maybe<Scalars["String"]>;
   /** When the sandbox first became active. */
   startedAt?: Maybe<Scalars["DateTime"]>;
+  /** Temporal URL to view all workflows for this sandbox. */
+  temporalWorkflowUrl?: Maybe<Scalars["String"]>;
   /** Claude Agent SDK conversation ID. */
   workerConversationId?: Maybe<Scalars["String"]>;
 };
 
-/** A comment associated with an issue. */
+/** A comment associated with an entity. */
 export type Comment = Node & {
   __typename?: "Comment";
   /** Agent session associated with this comment. */
@@ -2122,6 +2162,10 @@ export type Comment = Node & {
   hideInLinear: Scalars["Boolean"];
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** [Internal] The initiative that the comment is associated with. */
+  initiative?: Maybe<Initiative>;
+  /** [Internal] The ID of the initiative that the comment is associated with. */
+  initiativeId?: Maybe<Scalars["String"]>;
   /** The initiative update that the comment is associated with. */
   initiativeUpdate?: Maybe<InitiativeUpdate>;
   /** The ID of the initiative update that the comment is associated with. */
@@ -2140,6 +2184,10 @@ export type Comment = Node & {
   parentId?: Maybe<Scalars["String"]>;
   /** The post that the comment is associated with. */
   post?: Maybe<Post>;
+  /** [Internal] The project that the comment is associated with. */
+  project?: Maybe<Project>;
+  /** [Internal] The ID of the project that the comment is associated with. */
+  projectId?: Maybe<Scalars["String"]>;
   /** The project update that the comment is associated with. */
   projectUpdate?: Maybe<ProjectUpdate>;
   /** The ID of the project update that the comment is associated with. */
@@ -2175,7 +2223,7 @@ export type Comment = Node & {
   user?: Maybe<User>;
 };
 
-/** A comment associated with an issue. */
+/** A comment associated with an entity. */
 export type CommentAgentSessionsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -2185,7 +2233,7 @@ export type CommentAgentSessionsArgs = {
   orderBy?: InputMaybe<PaginationOrderBy>;
 };
 
-/** A comment associated with an issue. */
+/** A comment associated with an entity. */
 export type CommentChildrenArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -2196,7 +2244,7 @@ export type CommentChildrenArgs = {
   orderBy?: InputMaybe<PaginationOrderBy>;
 };
 
-/** A comment associated with an issue. */
+/** A comment associated with an entity. */
 export type CommentCreatedIssuesArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -2207,7 +2255,7 @@ export type CommentCreatedIssuesArgs = {
   orderBy?: InputMaybe<PaginationOrderBy>;
 };
 
-/** A comment associated with an issue. */
+/** A comment associated with an entity. */
 export type CommentSpawnedAgentSessionsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -2226,10 +2274,14 @@ export type CommentChildWebhookPayload = {
   documentContentId?: Maybe<Scalars["String"]>;
   /** The ID of the comment. */
   id: Scalars["String"];
+  /** [Internal] The ID of the initiative this comment belongs to. */
+  initiativeId?: Maybe<Scalars["String"]>;
   /** The ID of the initiative update this comment belongs to. */
   initiativeUpdateId?: Maybe<Scalars["String"]>;
   /** The ID of the issue this comment belongs to. */
   issueId?: Maybe<Scalars["String"]>;
+  /** [Internal] The ID of the project this comment belongs to. */
+  projectId?: Maybe<Scalars["String"]>;
   /** The ID of the project update this comment belongs to. */
   projectUpdateId?: Maybe<Scalars["String"]>;
   /** The ID of the user who created this comment. */
@@ -2250,6 +2302,8 @@ export type CommentCollectionFilter = {
   every?: InputMaybe<CommentFilter>;
   /** Comparator for the identifier. */
   id?: InputMaybe<IdComparator>;
+  /** [Internal] Filters that the comment's initiative must satisfy. */
+  initiative?: InputMaybe<NullableInitiativeFilter>;
   /** Filters that the comment's issue must satisfy. */
   issue?: InputMaybe<NullableIssueFilter>;
   /** Comparator for the collection length. */
@@ -2260,6 +2314,8 @@ export type CommentCollectionFilter = {
   or?: InputMaybe<Array<CommentCollectionFilter>>;
   /** Filters that the comment parent must satisfy. */
   parent?: InputMaybe<NullableCommentFilter>;
+  /** [Internal] Filters that the comment's project must satisfy. */
+  project?: InputMaybe<NullableProjectFilter>;
   /** Filters that the comment's project update must satisfy. */
   projectUpdate?: InputMaybe<NullableProjectUpdateFilter>;
   /** Filters that the comment's reactions must satisfy. */
@@ -2298,6 +2354,8 @@ export type CommentCreateInput = {
   documentContentId?: InputMaybe<Scalars["String"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars["String"]>;
+  /** [Internal] The initiative to associate the comment with. */
+  initiativeId?: InputMaybe<Scalars["String"]>;
   /** The initiative update to associate the comment with. */
   initiativeUpdateId?: InputMaybe<Scalars["String"]>;
   /** The issue to associate the comment with. Can be a UUID or issue identifier (e.g., 'LIN-123'). */
@@ -2306,6 +2364,8 @@ export type CommentCreateInput = {
   parentId?: InputMaybe<Scalars["String"]>;
   /** The post to associate the comment with. */
   postId?: InputMaybe<Scalars["String"]>;
+  /** [Internal] The project to associate the comment with. */
+  projectId?: InputMaybe<Scalars["String"]>;
   /** The project update to associate the comment with. */
   projectUpdateId?: InputMaybe<Scalars["String"]>;
   /** The text that this comment references. Only defined for inline comments. */
@@ -2333,6 +2393,8 @@ export type CommentFilter = {
   documentContent?: InputMaybe<NullableDocumentContentFilter>;
   /** Comparator for the identifier. */
   id?: InputMaybe<IdComparator>;
+  /** [Internal] Filters that the comment's initiative must satisfy. */
+  initiative?: InputMaybe<NullableInitiativeFilter>;
   /** Filters that the comment's issue must satisfy. */
   issue?: InputMaybe<NullableIssueFilter>;
   /** Filters that the comment's customer needs must satisfy. */
@@ -2341,6 +2403,8 @@ export type CommentFilter = {
   or?: InputMaybe<Array<CommentFilter>>;
   /** Filters that the comment parent must satisfy. */
   parent?: InputMaybe<NullableCommentFilter>;
+  /** [Internal] Filters that the comment's project must satisfy. */
+  project?: InputMaybe<NullableProjectFilter>;
   /** Filters that the comment's project update must satisfy. */
   projectUpdate?: InputMaybe<NullableProjectUpdateFilter>;
   /** Filters that the comment's reactions must satisfy. */
@@ -2401,6 +2465,8 @@ export type CommentWebhookPayload = {
   externalUserId?: Maybe<Scalars["String"]>;
   /** The ID of the entity. */
   id: Scalars["String"];
+  /** [Internal] The ID of the initiative this comment belongs to. */
+  initiativeId?: Maybe<Scalars["String"]>;
   /** The initiative update this comment belongs to. */
   initiativeUpdate?: Maybe<InitiativeUpdateChildWebhookPayload>;
   /** The ID of the initiative update this comment belongs to. */
@@ -2415,6 +2481,8 @@ export type CommentWebhookPayload = {
   parentId?: Maybe<Scalars["String"]>;
   /** The ID of the post this comment belongs to. */
   postId?: Maybe<Scalars["String"]>;
+  /** [Internal] The ID of the project this comment belongs to. */
+  projectId?: Maybe<Scalars["String"]>;
   /** The project update this comment belongs to. */
   projectUpdate?: Maybe<ProjectUpdateChildWebhookPayload>;
   /** The ID of the project update this comment belongs to. */
@@ -4422,6 +4490,8 @@ export type Document = Node & {
   slugId: Scalars["String"];
   /** The order of the item in the resources list. */
   sortOrder: Scalars["Float"];
+  /** [Internal] A one-sentence AI-generated summary of the document content. */
+  summary?: Maybe<Scalars["String"]>;
   /** [Internal] The team that the document is associated with. */
   team?: Maybe<Team>;
   /** The document title. */
@@ -4760,6 +4830,8 @@ export type DocumentSearchResult = Node & {
   slugId: Scalars["String"];
   /** The order of the item in the resources list. */
   sortOrder: Scalars["Float"];
+  /** [Internal] A one-sentence AI-generated summary of the document content. */
+  summary?: Maybe<Scalars["String"]>;
   /** [Internal] The team that the document is associated with. */
   team?: Maybe<Team>;
   /** The document title. */
@@ -5115,6 +5187,8 @@ export type EmailUserAccountAuthChallengeInput = {
   isDesktop?: InputMaybe<Scalars["Boolean"]>;
   /** Whether to only return the login code. This is used by mobile apps to skip showing the login link. */
   loginCodeOnly?: InputMaybe<Scalars["Boolean"]>;
+  /** PostHog session ID for attribution tracking. */
+  sessionId?: InputMaybe<Scalars["String"]>;
 };
 
 export type EmailUserAccountAuthChallengeResponse = {
@@ -6170,6 +6244,8 @@ export type GoogleUserAccountAuthInput = {
   inviteLink?: InputMaybe<Scalars["String"]>;
   /** The URI to redirect the user to. */
   redirectUri?: InputMaybe<Scalars["String"]>;
+  /** PostHog session ID for attribution tracking. */
+  sessionId?: InputMaybe<Scalars["String"]>;
   /** The timezone of the user's browser. */
   timezone: Scalars["String"];
 };
@@ -11102,6 +11178,8 @@ export type Mutation = {
   projectArchive: ProjectArchivePayload;
   /** Creates a new project. */
   projectCreate: ProjectPayload;
+  /** [Internal] Creates a Slack channel for an existing project. */
+  projectCreateSlackChannel: ProjectPayload;
   /** Deletes (trashes) a project. */
   projectDelete: ProjectArchivePayload;
   /** Disables external sync on a project. */
@@ -11288,7 +11366,7 @@ export type Mutation = {
   triageResponsibilityDelete: DeletePayload;
   /** Updates an existing triage responsibility. */
   triageResponsibilityUpdate: TriageResponsibilityPayload;
-  /** [Internal] Updates existing Slack integration scopes. */
+  /** [Internal] Updates existing Slack and Asks integration scopes. */
   updateIntegrationSlackScopes: IntegrationPayload;
   /** Changes the role of a user. */
   userChangeRole: UserAdminPayload;
@@ -11595,6 +11673,7 @@ export type MutationCustomerNeedUnarchiveArgs = {
 };
 
 export type MutationCustomerNeedUpdateArgs = {
+  clearAttachment?: InputMaybe<Scalars["Boolean"]>;
   id: Scalars["String"];
   input: CustomerNeedUpdateInput;
 };
@@ -12464,6 +12543,12 @@ export type MutationProjectArchiveArgs = {
 export type MutationProjectCreateArgs = {
   input: ProjectCreateInput;
   slackChannelName?: InputMaybe<Scalars["String"]>;
+};
+
+export type MutationProjectCreateSlackChannelArgs = {
+  id: Scalars["String"];
+  integrationId?: InputMaybe<Scalars["String"]>;
+  slackChannelName: Scalars["String"];
 };
 
 export type MutationProjectDeleteArgs = {
@@ -13421,6 +13506,8 @@ export type NullableCommentFilter = {
   documentContent?: InputMaybe<NullableDocumentContentFilter>;
   /** Comparator for the identifier. */
   id?: InputMaybe<IdComparator>;
+  /** [Internal] Filters that the comment's initiative must satisfy. */
+  initiative?: InputMaybe<NullableInitiativeFilter>;
   /** Filters that the comment's issue must satisfy. */
   issue?: InputMaybe<NullableIssueFilter>;
   /** Filters that the comment's customer needs must satisfy. */
@@ -13431,6 +13518,8 @@ export type NullableCommentFilter = {
   or?: InputMaybe<Array<NullableCommentFilter>>;
   /** Filters that the comment parent must satisfy. */
   parent?: InputMaybe<NullableCommentFilter>;
+  /** [Internal] Filters that the comment's project must satisfy. */
+  project?: InputMaybe<NullableProjectFilter>;
   /** Filters that the comment's project update must satisfy. */
   projectUpdate?: InputMaybe<NullableProjectUpdateFilter>;
   /** Filters that the comment's reactions must satisfy. */
@@ -13585,6 +13674,50 @@ export type NullableDurationComparator = {
   nin?: InputMaybe<Array<Scalars["Duration"]>>;
   /** Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values. */
   null?: InputMaybe<Scalars["Boolean"]>;
+};
+
+/** Initiative filtering options. */
+export type NullableInitiativeFilter = {
+  /** Comparator for the initiative activity type. */
+  activityType?: InputMaybe<StringComparator>;
+  /** Filters that the initiative must be an ancestor of. */
+  ancestors?: InputMaybe<InitiativeCollectionFilter>;
+  /** Compound filters, all of which need to be matched by the initiative. */
+  and?: InputMaybe<Array<NullableInitiativeFilter>>;
+  /** Comparator for the initiative completed at date. */
+  completedAt?: InputMaybe<NullableDateComparator>;
+  /** Comparator for the created at date. */
+  createdAt?: InputMaybe<DateComparator>;
+  /** Filters that the initiative creator must satisfy. */
+  creator?: InputMaybe<NullableUserFilter>;
+  /** Comparator for the initiative health: onTrack, atRisk, offTrack */
+  health?: InputMaybe<StringComparator>;
+  /** Comparator for the initiative health (with age): onTrack, atRisk, offTrack, outdated, noUpdate */
+  healthWithAge?: InputMaybe<StringComparator>;
+  /** Comparator for the identifier. */
+  id?: InputMaybe<IdComparator>;
+  /** Filters that the initiative updates must satisfy. */
+  initiativeUpdates?: InputMaybe<InitiativeUpdatesCollectionFilter>;
+  /** Comparator for the initiative name. */
+  name?: InputMaybe<StringComparator>;
+  /** Filter based on the existence of the relation. */
+  null?: InputMaybe<Scalars["Boolean"]>;
+  /** Compound filters, one of which need to be matched by the initiative. */
+  or?: InputMaybe<Array<NullableInitiativeFilter>>;
+  /** Filters that the initiative owner must satisfy. */
+  owner?: InputMaybe<NullableUserFilter>;
+  /** Comparator for the initiative slug ID. */
+  slugId?: InputMaybe<StringComparator>;
+  /** Comparator for the initiative started at date. */
+  startedAt?: InputMaybe<NullableDateComparator>;
+  /** Comparator for the initiative status: Planned, Active, Completed */
+  status?: InputMaybe<StringComparator>;
+  /** Comparator for the initiative target date. */
+  targetDate?: InputMaybe<NullableDateComparator>;
+  /** Filters that the initiative teams must satisfy. */
+  teams?: InputMaybe<TeamCollectionFilter>;
+  /** Comparator for the updated at date. */
+  updatedAt?: InputMaybe<DateComparator>;
 };
 
 /** Issue filtering options. */
@@ -14254,12 +14387,17 @@ export type Organization = Node & {
    * @deprecated Use aiProviderConfiguration instead.
    */
   allowedAiProviders: Array<Scalars["String"]>;
-  /** Allowed authentication providers, empty array means all are allowed. */
+  /**
+   * Allowed authentication providers, empty array means all are allowed.
+   * @deprecated Use authSettings.allowedAuthServices instead.
+   */
   allowedAuthServices: Array<Scalars["String"]>;
   /** Allowed file upload content types */
   allowedFileUploadContentTypes?: Maybe<Array<Scalars["String"]>>;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** Authentication settings for the organization. */
+  authSettings: Scalars["JSONObject"];
   /** [INTERNAL] Whether code intelligence is enabled for the organization. */
   codeIntelligenceEnabled: Scalars["Boolean"];
   /** [INTERNAL] GitHub repository in owner/repo format for code intelligence. */
@@ -14294,7 +14432,10 @@ export type Organization = Node & {
   gitLinkbackMessagesEnabled: Scalars["Boolean"];
   /** Whether the Git integration linkback messages should be sent to public repositories. */
   gitPublicLinkbackMessagesEnabled: Scalars["Boolean"];
-  /** Whether to hide other organizations for new users signing up with email domains claimed by this organization. */
+  /**
+   * Whether to hide other organizations for new users signing up with email domains claimed by this organization.
+   * @deprecated Use authSettings.hideNonPrimaryOrganizations instead.
+   */
   hideNonPrimaryOrganizations: Scalars["Boolean"];
   /** Whether HIPAA compliance is enabled for organization. */
   hipaaComplianceEnabled: Scalars["Boolean"];
@@ -14468,6 +14609,15 @@ export type OrganizationAcceptedOrExpiredInviteDetailsPayload = {
   __typename?: "OrganizationAcceptedOrExpiredInviteDetailsPayload";
   /** The status of the invite. */
   status: OrganizationInviteStatus;
+};
+
+export type OrganizationAuthSettingsInput = {
+  /** Allowed authentication providers, empty array means all are allowed. */
+  allowedAuthServices?: InputMaybe<Array<Scalars["String"]>>;
+  /** Whether to disable admin/owner auth service bypass. */
+  disableAuthServiceBypass?: InputMaybe<Scalars["Boolean"]>;
+  /** Whether to hide non-primary organizations during signup for users with matching email domains. */
+  hideNonPrimaryOrganizations?: InputMaybe<Scalars["Boolean"]>;
 };
 
 export type OrganizationCancelDeletePayload = {
@@ -14787,6 +14937,8 @@ export type OrganizationUpdateInput = {
   allowedAuthServices?: InputMaybe<Array<Scalars["String"]>>;
   /** Allowed file upload content types. */
   allowedFileUploadContentTypes?: InputMaybe<Array<Scalars["String"]>>;
+  /** The authentication settings for the organization. */
+  authSettings?: InputMaybe<OrganizationAuthSettingsInput>;
   /** [INTERNAL] Whether code intelligence is enabled for the organization. */
   codeIntelligenceEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** [INTERNAL] GitHub repository in owner/repo format for code intelligence. */
@@ -19456,6 +19608,8 @@ export type ReleasePipeline = Node & {
   slugId: Scalars["String"];
   /** [ALPHA] Stages associated with this pipeline. */
   stages: ReleaseStageConnection;
+  /** [ALPHA] Teams associated with this pipeline. */
+  teams: TeamConnection;
   /** The type of the pipeline. */
   type: ReleasePipelineType;
   /**
@@ -19463,6 +19617,8 @@ export type ReleasePipeline = Node & {
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
+  /** [Internal] Release pipeline URL. */
+  url: Scalars["String"];
 };
 
 /** [Internal] A release pipeline. */
@@ -19477,6 +19633,16 @@ export type ReleasePipelineReleasesArgs = {
 
 /** [Internal] A release pipeline. */
 export type ReleasePipelineStagesArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+/** [Internal] A release pipeline. */
+export type ReleasePipelineTeamsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
   first?: InputMaybe<Scalars["Int"]>;
@@ -19512,6 +19678,8 @@ export type ReleasePipelineCreateInput = {
   name: Scalars["String"];
   /** The pipeline's unique slug identifier. If not provided, it will be auto-generated. */
   slugId?: InputMaybe<Scalars["String"]>;
+  /** The identifiers of the teams this pipeline is associated with. */
+  teamIds?: InputMaybe<Array<Scalars["String"]>>;
   /** The type of the pipeline. */
   type?: InputMaybe<ReleasePipelineType>;
 };
@@ -19562,6 +19730,8 @@ export type ReleasePipelineUpdateInput = {
   name?: InputMaybe<Scalars["String"]>;
   /** The pipeline's unique slug identifier. */
   slugId?: InputMaybe<Scalars["String"]>;
+  /** The identifiers of the teams this pipeline is associated with. */
+  teamIds?: InputMaybe<Array<Scalars["String"]>>;
   /** The type of the pipeline. */
   type?: InputMaybe<ReleasePipelineType>;
 };
@@ -20407,14 +20577,6 @@ export type SlackSettingsInput = {
 
 /** Comparator for issue source type. */
 export type SourceMetadataComparator = {
-  /** Equals constraint. */
-  eq?: InputMaybe<Scalars["String"]>;
-  /** In-array constraint. */
-  in?: InputMaybe<Array<Scalars["String"]>>;
-  /** Not-equals constraint. */
-  neq?: InputMaybe<Scalars["String"]>;
-  /** Not-in-array constraint. */
-  nin?: InputMaybe<Array<Scalars["String"]>>;
   /** Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values. */
   null?: InputMaybe<Scalars["Boolean"]>;
   /** [INTERNAL] Comparator for the salesforce metadata. */
@@ -22171,6 +22333,8 @@ export enum UserFlagType {
   TeamsPageIntroductionDismissed = "teamsPageIntroductionDismissed",
   ThreadedCommentsNudgeIsSeen = "threadedCommentsNudgeIsSeen",
   TriageWelcomeDismissed = "triageWelcomeDismissed",
+  TryCodexDismissed = "tryCodexDismissed",
+  TryCursorDismissed = "tryCursorDismissed",
   TryCyclesDismissed = "tryCyclesDismissed",
   TryGithubDismissed = "tryGithubDismissed",
   TryInvitePeopleDismissed = "tryInvitePeopleDismissed",
@@ -22678,6 +22842,12 @@ export type ViewPreferencesValues = {
   fieldStatus?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the time in current status field. */
   fieldTimeInCurrentStatus?: Maybe<Scalars["Boolean"]>;
+  /** The focus view grouping. */
+  focusViewGrouping?: Maybe<Scalars["String"]>;
+  /** The focus view ordering. */
+  focusViewOrdering?: Maybe<Scalars["String"]>;
+  /** The focus view ordering direction. */
+  focusViewOrderingDirection?: Maybe<Scalars["String"]>;
   /** List of column model IDs which should be hidden on a board. */
   hiddenColumns?: Maybe<Array<Scalars["String"]>>;
   /** List of row model IDs which should be hidden on a board. */
@@ -22989,6 +23159,7 @@ export enum ViewType {
   FeedCreated = "feedCreated",
   FeedFollowing = "feedFollowing",
   FeedPopular = "feedPopular",
+  Focus = "focus",
   Inbox = "inbox",
   Initiative = "initiative",
   InitiativeOverview = "initiativeOverview",
@@ -23281,6 +23452,8 @@ export type WorkflowDefinition = Node & {
   name: Scalars["String"];
   /** The contextual project view associated with the workflow. */
   project?: Maybe<Project>;
+  /** The workflow definition's unique URL slug. */
+  slugId: Scalars["String"];
   /** The sort order of the workflow definition within its siblings. */
   sortOrder: Scalars["String"];
   /** The team associated with the workflow. If not set, the workflow is associated with the entire organization. */
@@ -23526,7 +23699,7 @@ type AiConversationBasePart_AiConversationPromptPart_Fragment = { __typename: "A
 > & {
     metadata: { __typename: "AiConversationPartMetadata" } & Pick<
       AiConversationPartMetadata,
-      "feedback" | "evalLogId" | "turnId"
+      "feedback" | "endedAt" | "evalLogId" | "phase" | "startedAt" | "turnId"
     >;
     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
@@ -23537,7 +23710,7 @@ type AiConversationBasePart_AiConversationReasoningPart_Fragment = { __typename:
 > & {
     metadata: { __typename: "AiConversationPartMetadata" } & Pick<
       AiConversationPartMetadata,
-      "feedback" | "evalLogId" | "turnId"
+      "feedback" | "endedAt" | "evalLogId" | "phase" | "startedAt" | "turnId"
     >;
   };
 
@@ -23547,7 +23720,7 @@ type AiConversationBasePart_AiConversationTextPart_Fragment = { __typename: "AiC
 > & {
     metadata: { __typename: "AiConversationPartMetadata" } & Pick<
       AiConversationPartMetadata,
-      "feedback" | "evalLogId" | "turnId"
+      "feedback" | "endedAt" | "evalLogId" | "phase" | "startedAt" | "turnId"
     >;
   };
 
@@ -23557,7 +23730,7 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
 > & {
     metadata: { __typename: "AiConversationPartMetadata" } & Pick<
       AiConversationPartMetadata,
-      "feedback" | "evalLogId" | "turnId"
+      "feedback" | "endedAt" | "evalLogId" | "phase" | "startedAt" | "turnId"
     >;
     toolCall:
       | ({ __typename: "AiConversationCodeIntelligenceToolCall" } & Pick<
@@ -23783,6 +23956,23 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
               "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
             >;
           })
+      | ({ __typename: "AiConversationRestoreEntityToolCall" } & Pick<
+          AiConversationRestoreEntityToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationRestoreEntityToolCallArgs" } & {
+                entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                  AiConversationSearchEntitiesToolCallResultEntities,
+                  "id" | "type"
+                >;
+              }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
       | ({ __typename: "AiConversationRetrieveEntitiesToolCall" } & Pick<
           AiConversationRetrieveEntitiesToolCall,
           "rawArgs" | "name" | "rawResult"
@@ -23875,9 +24065,19 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
         > & {
             args?: Maybe<
               { __typename: "AiConversationUpdateEntityToolCallArgs" } & {
-                entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
-                  AiConversationSearchEntitiesToolCallResultEntities,
-                  "id" | "type"
+                entities?: Maybe<
+                  Array<
+                    { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                      AiConversationSearchEntitiesToolCallResultEntities,
+                      "id" | "type"
+                    >
+                  >
+                >;
+                entity?: Maybe<
+                  { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                    AiConversationSearchEntitiesToolCallResultEntities,
+                    "id" | "type"
+                  >
                 >;
               }
             >;
@@ -23909,7 +24109,7 @@ type AiConversationBasePart_AiConversationWidgetPart_Fragment = { __typename: "A
 > & {
     metadata: { __typename: "AiConversationPartMetadata" } & Pick<
       AiConversationPartMetadata,
-      "feedback" | "evalLogId" | "turnId"
+      "feedback" | "endedAt" | "evalLogId" | "phase" | "startedAt" | "turnId"
     >;
     widget:
       | ({ __typename: "AiConversationEntityCardWidget" } & Pick<AiConversationEntityCardWidget, "rawArgs" | "name"> & {
@@ -24258,6 +24458,9 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "projectGroupingDateResolution"
         | "viewOrderingDirection"
         | "embeddedCustomerNeedsViewOrdering"
+        | "focusViewGrouping"
+        | "focusViewOrderingDirection"
+        | "focusViewOrdering"
         | "inboxViewOrdering"
         | "initiativeGrouping"
         | "initiativesViewOrdering"
@@ -24469,6 +24672,9 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "projectGroupingDateResolution"
             | "viewOrderingDirection"
             | "embeddedCustomerNeedsViewOrdering"
+            | "focusViewGrouping"
+            | "focusViewOrderingDirection"
+            | "focusViewOrdering"
             | "inboxViewOrdering"
             | "initiativeGrouping"
             | "initiativesViewOrdering"
@@ -24681,6 +24887,9 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "projectGroupingDateResolution"
             | "viewOrderingDirection"
             | "embeddedCustomerNeedsViewOrdering"
+            | "focusViewGrouping"
+            | "focusViewOrderingDirection"
+            | "focusViewOrdering"
             | "inboxViewOrdering"
             | "initiativeGrouping"
             | "initiativesViewOrdering"
@@ -26938,7 +27147,7 @@ export type AiConversationPromptPartFragment = { __typename: "AiConversationProm
 > & {
     metadata: { __typename: "AiConversationPartMetadata" } & Pick<
       AiConversationPartMetadata,
-      "feedback" | "evalLogId" | "turnId"
+      "feedback" | "endedAt" | "evalLogId" | "phase" | "startedAt" | "turnId"
     >;
     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
@@ -26984,7 +27193,7 @@ export type AiConversationReasoningPartFragment = { __typename: "AiConversationR
 > & {
     metadata: { __typename: "AiConversationPartMetadata" } & Pick<
       AiConversationPartMetadata,
-      "feedback" | "evalLogId" | "turnId"
+      "feedback" | "endedAt" | "evalLogId" | "phase" | "startedAt" | "turnId"
     >;
   };
 
@@ -27406,7 +27615,7 @@ export type AiConversationTextPartFragment = { __typename: "AiConversationTextPa
 > & {
     metadata: { __typename: "AiConversationPartMetadata" } & Pick<
       AiConversationPartMetadata,
-      "feedback" | "evalLogId" | "turnId"
+      "feedback" | "endedAt" | "evalLogId" | "phase" | "startedAt" | "turnId"
     >;
   };
 
@@ -27428,7 +27637,7 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
 > & {
     metadata: { __typename: "AiConversationPartMetadata" } & Pick<
       AiConversationPartMetadata,
-      "feedback" | "evalLogId" | "turnId"
+      "feedback" | "endedAt" | "evalLogId" | "phase" | "startedAt" | "turnId"
     >;
     toolCall:
       | ({ __typename: "AiConversationCodeIntelligenceToolCall" } & Pick<
@@ -27654,6 +27863,23 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
               "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
             >;
           })
+      | ({ __typename: "AiConversationRestoreEntityToolCall" } & Pick<
+          AiConversationRestoreEntityToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationRestoreEntityToolCallArgs" } & {
+                entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                  AiConversationSearchEntitiesToolCallResultEntities,
+                  "id" | "type"
+                >;
+              }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
       | ({ __typename: "AiConversationRetrieveEntitiesToolCall" } & Pick<
           AiConversationRetrieveEntitiesToolCall,
           "rawArgs" | "name" | "rawResult"
@@ -27746,9 +27972,19 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
         > & {
             args?: Maybe<
               { __typename: "AiConversationUpdateEntityToolCallArgs" } & {
-                entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
-                  AiConversationSearchEntitiesToolCallResultEntities,
-                  "id" | "type"
+                entities?: Maybe<
+                  Array<
+                    { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                      AiConversationSearchEntitiesToolCallResultEntities,
+                      "id" | "type"
+                    >
+                  >
+                >;
+                entity?: Maybe<
+                  { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                    AiConversationSearchEntitiesToolCallResultEntities,
+                    "id" | "type"
+                  >
                 >;
               }
             >;
@@ -27818,6 +28054,7 @@ export type AuthUserFragment = { __typename: "AuthUser" } & Pick<
       AuthOrganization,
       | "allowedAuthServices"
       | "approximateUserCount"
+      | "authSettings"
       | "previousUrlKeys"
       | "serviceId"
       | "releaseChannel"
@@ -28118,7 +28355,7 @@ export type AiConversationWidgetPartFragment = { __typename: "AiConversationWidg
 > & {
     metadata: { __typename: "AiConversationPartMetadata" } & Pick<
       AiConversationPartMetadata,
-      "feedback" | "evalLogId" | "turnId"
+      "feedback" | "endedAt" | "evalLogId" | "phase" | "startedAt" | "turnId"
     >;
     widget:
       | ({ __typename: "AiConversationEntityCardWidget" } & Pick<AiConversationEntityCardWidget, "rawArgs" | "name"> & {
@@ -28826,6 +29063,7 @@ export type OrganizationFragment = { __typename: "Organization" } & Pick<
   | "allowedAuthServices"
   | "allowedFileUploadContentTypes"
   | "createdIssueCount"
+  | "authSettings"
   | "customersConfiguration"
   | "defaultFeedSummarySchedule"
   | "gitBranchFormat"
@@ -28919,6 +29157,7 @@ export type AuthOrganizationFragment = { __typename: "AuthOrganization" } & Pick
   AuthOrganization,
   | "allowedAuthServices"
   | "approximateUserCount"
+  | "authSettings"
   | "previousUrlKeys"
   | "serviceId"
   | "releaseChannel"
@@ -29456,7 +29695,7 @@ export type ProjectLabelFragment = { __typename: "ProjectLabel" } & Pick<
 
 export type AiConversationPartMetadataFragment = { __typename: "AiConversationPartMetadata" } & Pick<
   AiConversationPartMetadata,
-  "feedback" | "evalLogId" | "turnId"
+  "feedback" | "endedAt" | "evalLogId" | "phase" | "startedAt" | "turnId"
 >;
 
 export type IssueHistoryTriageRuleMetadataFragment = { __typename: "IssueHistoryTriageRuleMetadata" } & {
@@ -29510,6 +29749,7 @@ export type IssueHistoryTriageRuleMetadataFragment = { __typename: "IssueHistory
       | "userContextViewType"
       | "contextViewType"
       | "id"
+      | "slugId"
       | "enabled"
     > & {
         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
@@ -29545,6 +29785,7 @@ export type IssueHistoryWorkflowMetadataFragment = { __typename: "IssueHistoryWo
       | "userContextViewType"
       | "contextViewType"
       | "id"
+      | "slugId"
       | "enabled"
     > & {
         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
@@ -31266,6 +31507,9 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "projectGroupingDateResolution"
       | "viewOrderingDirection"
       | "embeddedCustomerNeedsViewOrdering"
+      | "focusViewGrouping"
+      | "focusViewOrderingDirection"
+      | "focusViewOrdering"
       | "inboxViewOrdering"
       | "initiativeGrouping"
       | "initiativesViewOrdering"
@@ -31796,6 +32040,23 @@ type AiConversationBaseToolCall_AiConversationResearchToolCall_Fragment = {
     >;
   };
 
+type AiConversationBaseToolCall_AiConversationRestoreEntityToolCall_Fragment = {
+  __typename: "AiConversationRestoreEntityToolCall";
+} & Pick<AiConversationRestoreEntityToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationRestoreEntityToolCallArgs" } & {
+        entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+          AiConversationSearchEntitiesToolCallResultEntities,
+          "id" | "type"
+        >;
+      }
+    >;
+  };
+
 type AiConversationBaseToolCall_AiConversationRetrieveEntitiesToolCall_Fragment = {
   __typename: "AiConversationRetrieveEntitiesToolCall";
 } & Pick<AiConversationRetrieveEntitiesToolCall, "rawArgs" | "name" | "rawResult"> & {
@@ -31891,9 +32152,19 @@ type AiConversationBaseToolCall_AiConversationUpdateEntityToolCall_Fragment = {
     >;
     args?: Maybe<
       { __typename: "AiConversationUpdateEntityToolCallArgs" } & {
-        entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
-          AiConversationSearchEntitiesToolCallResultEntities,
-          "id" | "type"
+        entities?: Maybe<
+          Array<
+            { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+              AiConversationSearchEntitiesToolCallResultEntities,
+              "id" | "type"
+            >
+          >
+        >;
+        entity?: Maybe<
+          { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+            AiConversationSearchEntitiesToolCallResultEntities,
+            "id" | "type"
+          >
         >;
       }
     >;
@@ -31924,6 +32195,7 @@ export type AiConversationBaseToolCallFragment =
   | AiConversationBaseToolCall_AiConversationQueryUpdatesToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationQueryViewToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationResearchToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationRestoreEntityToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationRetrieveEntitiesToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationSearchDocumentationToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationSearchEntitiesToolCall_Fragment
@@ -32383,6 +32655,33 @@ export type AiConversationResearchToolCallResultFragment = {
   __typename: "AiConversationResearchToolCallResult";
 } & Pick<AiConversationResearchToolCallResult, "progressId">;
 
+export type AiConversationRestoreEntityToolCallFragment = { __typename: "AiConversationRestoreEntityToolCall" } & Pick<
+  AiConversationRestoreEntityToolCall,
+  "rawArgs" | "name" | "rawResult"
+> & {
+    args?: Maybe<
+      { __typename: "AiConversationRestoreEntityToolCallArgs" } & {
+        entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+          AiConversationSearchEntitiesToolCallResultEntities,
+          "id" | "type"
+        >;
+      }
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationRestoreEntityToolCallArgsFragment = {
+  __typename: "AiConversationRestoreEntityToolCallArgs";
+} & {
+  entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+    AiConversationSearchEntitiesToolCallResultEntities,
+    "id" | "type"
+  >;
+};
+
 export type AiConversationRetrieveEntitiesToolCallFragment = {
   __typename: "AiConversationRetrieveEntitiesToolCall";
 } & Pick<AiConversationRetrieveEntitiesToolCall, "rawArgs" | "name" | "rawResult"> & {
@@ -32515,9 +32814,19 @@ export type AiConversationUpdateEntityToolCallFragment = { __typename: "AiConver
 > & {
     args?: Maybe<
       { __typename: "AiConversationUpdateEntityToolCallArgs" } & {
-        entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
-          AiConversationSearchEntitiesToolCallResultEntities,
-          "id" | "type"
+        entities?: Maybe<
+          Array<
+            { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+              AiConversationSearchEntitiesToolCallResultEntities,
+              "id" | "type"
+            >
+          >
+        >;
+        entity?: Maybe<
+          { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+            AiConversationSearchEntitiesToolCallResultEntities,
+            "id" | "type"
+          >
         >;
       }
     >;
@@ -32530,9 +32839,19 @@ export type AiConversationUpdateEntityToolCallFragment = { __typename: "AiConver
 export type AiConversationUpdateEntityToolCallArgsFragment = {
   __typename: "AiConversationUpdateEntityToolCallArgs";
 } & {
-  entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
-    AiConversationSearchEntitiesToolCallResultEntities,
-    "id" | "type"
+  entities?: Maybe<
+    Array<
+      { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+        AiConversationSearchEntitiesToolCallResultEntities,
+        "id" | "type"
+      >
+    >
+  >;
+  entity?: Maybe<
+    { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+      AiConversationSearchEntitiesToolCallResultEntities,
+      "id" | "type"
+    >
   >;
 };
 
@@ -32658,6 +32977,7 @@ export type AuthResolverResponseFragment = { __typename: "AuthResolverResponse" 
             AuthOrganization,
             | "allowedAuthServices"
             | "approximateUserCount"
+            | "authSettings"
             | "previousUrlKeys"
             | "serviceId"
             | "releaseChannel"
@@ -32685,6 +33005,7 @@ export type AuthResolverResponseFragment = { __typename: "AuthResolverResponse" 
             AuthOrganization,
             | "allowedAuthServices"
             | "approximateUserCount"
+            | "authSettings"
             | "previousUrlKeys"
             | "serviceId"
             | "releaseChannel"
@@ -32709,6 +33030,7 @@ export type AuthResolverResponseFragment = { __typename: "AuthResolverResponse" 
           AuthOrganization,
           | "allowedAuthServices"
           | "approximateUserCount"
+          | "authSettings"
           | "previousUrlKeys"
           | "serviceId"
           | "releaseChannel"
@@ -32733,6 +33055,7 @@ export type AuthResolverResponseFragment = { __typename: "AuthResolverResponse" 
           AuthOrganization,
           | "allowedAuthServices"
           | "approximateUserCount"
+          | "authSettings"
           | "previousUrlKeys"
           | "serviceId"
           | "releaseChannel"
@@ -32882,6 +33205,7 @@ export type CreateOrJoinOrganizationResponseFragment = { __typename: "CreateOrJo
     AuthOrganization,
     | "allowedAuthServices"
     | "approximateUserCount"
+    | "authSettings"
     | "previousUrlKeys"
     | "serviceId"
     | "releaseChannel"
@@ -32906,6 +33230,7 @@ export type CreateOrJoinOrganizationResponseFragment = { __typename: "CreateOrJo
         AuthOrganization,
         | "allowedAuthServices"
         | "approximateUserCount"
+        | "authSettings"
         | "previousUrlKeys"
         | "serviceId"
         | "releaseChannel"
@@ -32969,6 +33294,9 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "projectGroupingDateResolution"
             | "viewOrderingDirection"
             | "embeddedCustomerNeedsViewOrdering"
+            | "focusViewGrouping"
+            | "focusViewOrderingDirection"
+            | "focusViewOrdering"
             | "inboxViewOrdering"
             | "initiativeGrouping"
             | "initiativesViewOrdering"
@@ -33180,6 +33508,9 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "projectGroupingDateResolution"
                 | "viewOrderingDirection"
                 | "embeddedCustomerNeedsViewOrdering"
+                | "focusViewGrouping"
+                | "focusViewOrderingDirection"
+                | "focusViewOrdering"
                 | "inboxViewOrdering"
                 | "initiativeGrouping"
                 | "initiativesViewOrdering"
@@ -33392,6 +33723,9 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "projectGroupingDateResolution"
                 | "viewOrderingDirection"
                 | "embeddedCustomerNeedsViewOrdering"
+                | "focusViewGrouping"
+                | "focusViewOrderingDirection"
+                | "focusViewOrdering"
                 | "inboxViewOrdering"
                 | "initiativeGrouping"
                 | "initiativesViewOrdering"
@@ -38632,6 +38966,9 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "projectGroupingDateResolution"
           | "viewOrderingDirection"
           | "embeddedCustomerNeedsViewOrdering"
+          | "focusViewGrouping"
+          | "focusViewOrderingDirection"
+          | "focusViewOrdering"
           | "inboxViewOrdering"
           | "initiativeGrouping"
           | "initiativesViewOrdering"
@@ -38840,6 +39177,9 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "projectGroupingDateResolution"
   | "viewOrderingDirection"
   | "embeddedCustomerNeedsViewOrdering"
+  | "focusViewGrouping"
+  | "focusViewOrderingDirection"
+  | "focusViewOrdering"
   | "inboxViewOrdering"
   | "initiativeGrouping"
   | "initiativesViewOrdering"
@@ -39077,6 +39417,7 @@ export type WorkflowDefinitionFragment = { __typename: "WorkflowDefinition" } & 
   | "userContextViewType"
   | "contextViewType"
   | "id"
+  | "slugId"
   | "enabled"
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
@@ -40811,6 +41152,7 @@ export type AvailableUsersQuery = { __typename?: "Query" } & {
               AuthOrganization,
               | "allowedAuthServices"
               | "approximateUserCount"
+              | "authSettings"
               | "previousUrlKeys"
               | "serviceId"
               | "releaseChannel"
@@ -40838,6 +41180,7 @@ export type AvailableUsersQuery = { __typename?: "Query" } & {
               AuthOrganization,
               | "allowedAuthServices"
               | "approximateUserCount"
+              | "authSettings"
               | "previousUrlKeys"
               | "serviceId"
               | "releaseChannel"
@@ -40862,6 +41205,7 @@ export type AvailableUsersQuery = { __typename?: "Query" } & {
             AuthOrganization,
             | "allowedAuthServices"
             | "approximateUserCount"
+            | "authSettings"
             | "previousUrlKeys"
             | "serviceId"
             | "releaseChannel"
@@ -40886,6 +41230,7 @@ export type AvailableUsersQuery = { __typename?: "Query" } & {
             AuthOrganization,
             | "allowedAuthServices"
             | "approximateUserCount"
+            | "authSettings"
             | "previousUrlKeys"
             | "serviceId"
             | "releaseChannel"
@@ -41589,6 +41934,9 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "projectGroupingDateResolution"
           | "viewOrderingDirection"
           | "embeddedCustomerNeedsViewOrdering"
+          | "focusViewGrouping"
+          | "focusViewOrderingDirection"
+          | "focusViewOrdering"
           | "inboxViewOrdering"
           | "initiativeGrouping"
           | "initiativesViewOrdering"
@@ -41800,6 +42148,9 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "projectGroupingDateResolution"
               | "viewOrderingDirection"
               | "embeddedCustomerNeedsViewOrdering"
+              | "focusViewGrouping"
+              | "focusViewOrderingDirection"
+              | "focusViewOrdering"
               | "inboxViewOrdering"
               | "initiativeGrouping"
               | "initiativesViewOrdering"
@@ -42012,6 +42363,9 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "projectGroupingDateResolution"
               | "viewOrderingDirection"
               | "embeddedCustomerNeedsViewOrdering"
+              | "focusViewGrouping"
+              | "focusViewOrderingDirection"
+              | "focusViewOrdering"
               | "inboxViewOrdering"
               | "initiativeGrouping"
               | "initiativesViewOrdering"
@@ -42484,6 +42838,9 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "projectGroupingDateResolution"
             | "viewOrderingDirection"
             | "embeddedCustomerNeedsViewOrdering"
+            | "focusViewGrouping"
+            | "focusViewOrderingDirection"
+            | "focusViewOrdering"
             | "inboxViewOrdering"
             | "initiativeGrouping"
             | "initiativesViewOrdering"
@@ -42702,6 +43059,9 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "projectGroupingDateResolution"
           | "viewOrderingDirection"
           | "embeddedCustomerNeedsViewOrdering"
+          | "focusViewGrouping"
+          | "focusViewOrderingDirection"
+          | "focusViewOrdering"
           | "inboxViewOrdering"
           | "initiativeGrouping"
           | "initiativesViewOrdering"
@@ -43049,6 +43409,9 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "projectGroupingDateResolution"
             | "viewOrderingDirection"
             | "embeddedCustomerNeedsViewOrdering"
+            | "focusViewGrouping"
+            | "focusViewOrderingDirection"
+            | "focusViewOrdering"
             | "inboxViewOrdering"
             | "initiativeGrouping"
             | "initiativesViewOrdering"
@@ -43267,6 +43630,9 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "projectGroupingDateResolution"
           | "viewOrderingDirection"
           | "embeddedCustomerNeedsViewOrdering"
+          | "focusViewGrouping"
+          | "focusViewOrderingDirection"
+          | "focusViewOrdering"
           | "inboxViewOrdering"
           | "initiativeGrouping"
           | "initiativesViewOrdering"
@@ -43484,6 +43850,9 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "projectGroupingDateResolution"
         | "viewOrderingDirection"
         | "embeddedCustomerNeedsViewOrdering"
+        | "focusViewGrouping"
+        | "focusViewOrderingDirection"
+        | "focusViewOrdering"
         | "inboxViewOrdering"
         | "initiativeGrouping"
         | "initiativesViewOrdering"
@@ -43738,6 +44107,9 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "projectGroupingDateResolution"
               | "viewOrderingDirection"
               | "embeddedCustomerNeedsViewOrdering"
+              | "focusViewGrouping"
+              | "focusViewOrderingDirection"
+              | "focusViewOrdering"
               | "inboxViewOrdering"
               | "initiativeGrouping"
               | "initiativesViewOrdering"
@@ -43949,6 +44321,9 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "projectGroupingDateResolution"
                   | "viewOrderingDirection"
                   | "embeddedCustomerNeedsViewOrdering"
+                  | "focusViewGrouping"
+                  | "focusViewOrderingDirection"
+                  | "focusViewOrdering"
                   | "inboxViewOrdering"
                   | "initiativeGrouping"
                   | "initiativesViewOrdering"
@@ -44161,6 +44536,9 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "projectGroupingDateResolution"
                   | "viewOrderingDirection"
                   | "embeddedCustomerNeedsViewOrdering"
+                  | "focusViewGrouping"
+                  | "focusViewOrderingDirection"
+                  | "focusViewOrdering"
                   | "inboxViewOrdering"
                   | "initiativeGrouping"
                   | "initiativesViewOrdering"
@@ -51082,6 +51460,7 @@ export type OrganizationQuery = { __typename?: "Query" } & {
     | "allowedAuthServices"
     | "allowedFileUploadContentTypes"
     | "createdIssueCount"
+    | "authSettings"
     | "customersConfiguration"
     | "defaultFeedSummarySchedule"
     | "gitBranchFormat"
@@ -58339,6 +58718,7 @@ export type CreateOrganizationFromOnboardingMutation = { __typename?: "Mutation"
       AuthOrganization,
       | "allowedAuthServices"
       | "approximateUserCount"
+      | "authSettings"
       | "previousUrlKeys"
       | "serviceId"
       | "releaseChannel"
@@ -58363,6 +58743,7 @@ export type CreateOrganizationFromOnboardingMutation = { __typename?: "Mutation"
           AuthOrganization,
           | "allowedAuthServices"
           | "approximateUserCount"
+          | "authSettings"
           | "previousUrlKeys"
           | "serviceId"
           | "releaseChannel"
@@ -58506,6 +58887,7 @@ export type UnarchiveCustomerNeedMutation = { __typename?: "Mutation" } & {
 };
 
 export type UpdateCustomerNeedMutationVariables = Exact<{
+  clearAttachment?: InputMaybe<Scalars["Boolean"]>;
   id: Scalars["String"];
   input: CustomerNeedUpdateInput;
 }>;
@@ -58795,6 +59177,7 @@ export type EmailTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
               AuthOrganization,
               | "allowedAuthServices"
               | "approximateUserCount"
+              | "authSettings"
               | "previousUrlKeys"
               | "serviceId"
               | "releaseChannel"
@@ -58822,6 +59205,7 @@ export type EmailTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
               AuthOrganization,
               | "allowedAuthServices"
               | "approximateUserCount"
+              | "authSettings"
               | "previousUrlKeys"
               | "serviceId"
               | "releaseChannel"
@@ -58846,6 +59230,7 @@ export type EmailTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
             AuthOrganization,
             | "allowedAuthServices"
             | "approximateUserCount"
+            | "authSettings"
             | "previousUrlKeys"
             | "serviceId"
             | "releaseChannel"
@@ -58870,6 +59255,7 @@ export type EmailTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
             AuthOrganization,
             | "allowedAuthServices"
             | "approximateUserCount"
+            | "authSettings"
             | "previousUrlKeys"
             | "serviceId"
             | "releaseChannel"
@@ -59134,6 +59520,7 @@ export type GoogleUserAccountAuthMutation = { __typename?: "Mutation" } & {
               AuthOrganization,
               | "allowedAuthServices"
               | "approximateUserCount"
+              | "authSettings"
               | "previousUrlKeys"
               | "serviceId"
               | "releaseChannel"
@@ -59161,6 +59548,7 @@ export type GoogleUserAccountAuthMutation = { __typename?: "Mutation" } & {
               AuthOrganization,
               | "allowedAuthServices"
               | "approximateUserCount"
+              | "authSettings"
               | "previousUrlKeys"
               | "serviceId"
               | "releaseChannel"
@@ -59185,6 +59573,7 @@ export type GoogleUserAccountAuthMutation = { __typename?: "Mutation" } & {
             AuthOrganization,
             | "allowedAuthServices"
             | "approximateUserCount"
+            | "authSettings"
             | "previousUrlKeys"
             | "serviceId"
             | "releaseChannel"
@@ -59209,6 +59598,7 @@ export type GoogleUserAccountAuthMutation = { __typename?: "Mutation" } & {
             AuthOrganization,
             | "allowedAuthServices"
             | "approximateUserCount"
+            | "authSettings"
             | "previousUrlKeys"
             | "serviceId"
             | "releaseChannel"
@@ -60680,6 +61070,7 @@ export type JoinOrganizationFromOnboardingMutation = { __typename?: "Mutation" }
       AuthOrganization,
       | "allowedAuthServices"
       | "approximateUserCount"
+      | "authSettings"
       | "previousUrlKeys"
       | "serviceId"
       | "releaseChannel"
@@ -60704,6 +61095,7 @@ export type JoinOrganizationFromOnboardingMutation = { __typename?: "Mutation" }
           AuthOrganization,
           | "allowedAuthServices"
           | "approximateUserCount"
+          | "authSettings"
           | "previousUrlKeys"
           | "serviceId"
           | "releaseChannel"
@@ -60734,6 +61126,7 @@ export type LeaveOrganizationMutation = { __typename?: "Mutation" } & {
       AuthOrganization,
       | "allowedAuthServices"
       | "approximateUserCount"
+      | "authSettings"
       | "previousUrlKeys"
       | "serviceId"
       | "releaseChannel"
@@ -60758,6 +61151,7 @@ export type LeaveOrganizationMutation = { __typename?: "Mutation" } & {
           AuthOrganization,
           | "allowedAuthServices"
           | "approximateUserCount"
+          | "authSettings"
           | "previousUrlKeys"
           | "serviceId"
           | "releaseChannel"
@@ -65423,6 +65817,7 @@ export type SamlTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
               AuthOrganization,
               | "allowedAuthServices"
               | "approximateUserCount"
+              | "authSettings"
               | "previousUrlKeys"
               | "serviceId"
               | "releaseChannel"
@@ -65450,6 +65845,7 @@ export type SamlTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
               AuthOrganization,
               | "allowedAuthServices"
               | "approximateUserCount"
+              | "authSettings"
               | "previousUrlKeys"
               | "serviceId"
               | "releaseChannel"
@@ -65474,6 +65870,7 @@ export type SamlTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
             AuthOrganization,
             | "allowedAuthServices"
             | "approximateUserCount"
+            | "authSettings"
             | "previousUrlKeys"
             | "serviceId"
             | "releaseChannel"
@@ -65498,6 +65895,7 @@ export type SamlTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
             AuthOrganization,
             | "allowedAuthServices"
             | "approximateUserCount"
+            | "authSettings"
             | "previousUrlKeys"
             | "serviceId"
             | "releaseChannel"
@@ -65884,6 +66282,9 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "projectGroupingDateResolution"
             | "viewOrderingDirection"
             | "embeddedCustomerNeedsViewOrdering"
+            | "focusViewGrouping"
+            | "focusViewOrderingDirection"
+            | "focusViewOrdering"
             | "inboxViewOrdering"
             | "initiativeGrouping"
             | "initiativesViewOrdering"
@@ -66115,6 +66516,9 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "projectGroupingDateResolution"
             | "viewOrderingDirection"
             | "embeddedCustomerNeedsViewOrdering"
+            | "focusViewGrouping"
+            | "focusViewOrderingDirection"
+            | "focusViewOrdering"
             | "inboxViewOrdering"
             | "initiativeGrouping"
             | "initiativesViewOrdering"
@@ -66397,7 +66801,10 @@ export const AiConversationPartMetadataFragmentDoc = new TypedDocumentString(
     fragment AiConversationPartMetadata on AiConversationPartMetadata {
   __typename
   feedback
+  endedAt
   evalLogId
+  phase
+  startedAt
   turnId
 }
     `,
@@ -66421,7 +66828,10 @@ export const AiConversationPromptPartFragmentDoc = new TypedDocumentString(
     fragment AiConversationPartMetadata on AiConversationPartMetadata {
   __typename
   feedback
+  endedAt
   evalLogId
+  phase
+  startedAt
   turnId
 }`,
   { fragmentName: "AiConversationPromptPart" }
@@ -66442,7 +66852,10 @@ export const AiConversationReasoningPartFragmentDoc = new TypedDocumentString(
     fragment AiConversationPartMetadata on AiConversationPartMetadata {
   __typename
   feedback
+  endedAt
   evalLogId
+  phase
+  startedAt
   turnId
 }`,
   { fragmentName: "AiConversationReasoningPart" }
@@ -66462,7 +66875,10 @@ export const AiConversationTextPartFragmentDoc = new TypedDocumentString(
     fragment AiConversationPartMetadata on AiConversationPartMetadata {
   __typename
   feedback
+  endedAt
   evalLogId
+  phase
+  startedAt
   turnId
 }`,
   { fragmentName: "AiConversationTextPart" }
@@ -67108,6 +67524,56 @@ fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
 }`,
   { fragmentName: "AiConversationResearchToolCall" }
 ) as unknown as TypedDocumentString<AiConversationResearchToolCallFragment, unknown>;
+export const AiConversationRestoreEntityToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationRestoreEntityToolCallArgs on AiConversationRestoreEntityToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+    fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}`,
+  { fragmentName: "AiConversationRestoreEntityToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationRestoreEntityToolCallArgsFragment, unknown>;
+export const AiConversationRestoreEntityToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationRestoreEntityToolCall on AiConversationRestoreEntityToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationRestoreEntityToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationRestoreEntityToolCallArgs on AiConversationRestoreEntityToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationRestoreEntityToolCall" }
+) as unknown as TypedDocumentString<AiConversationRestoreEntityToolCallFragment, unknown>;
 export const AiConversationRetrieveEntitiesToolCallArgsFragmentDoc = new TypedDocumentString(
   `
     fragment AiConversationRetrieveEntitiesToolCallArgs on AiConversationRetrieveEntitiesToolCallArgs {
@@ -67332,6 +67798,9 @@ export const AiConversationUpdateEntityToolCallArgsFragmentDoc = new TypedDocume
   `
     fragment AiConversationUpdateEntityToolCallArgs on AiConversationUpdateEntityToolCallArgs {
   __typename
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
   entity {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
@@ -67372,6 +67841,9 @@ fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
 }
 fragment AiConversationUpdateEntityToolCallArgs on AiConversationUpdateEntityToolCallArgs {
   __typename
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
   entity {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
@@ -67462,6 +67934,9 @@ export const AiConversationToolCallPartFragmentDoc = new TypedDocumentString(
     ... on AiConversationResearchToolCall {
       ...AiConversationResearchToolCall
     }
+    ... on AiConversationRestoreEntityToolCall {
+      ...AiConversationRestoreEntityToolCall
+    }
     ... on AiConversationRetrieveEntitiesToolCall {
       ...AiConversationRetrieveEntitiesToolCall
     }
@@ -67492,7 +67967,10 @@ export const AiConversationToolCallPartFragmentDoc = new TypedDocumentString(
     fragment AiConversationPartMetadata on AiConversationPartMetadata {
   __typename
   feedback
+  endedAt
   evalLogId
+  phase
+  startedAt
   turnId
 }
 fragment AiConversationCodeIntelligenceToolCall on AiConversationCodeIntelligenceToolCall {
@@ -67725,6 +68203,24 @@ fragment AiConversationResearchToolCallResult on AiConversationResearchToolCallR
   __typename
   progressId
 }
+fragment AiConversationRestoreEntityToolCall on AiConversationRestoreEntityToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationRestoreEntityToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationRestoreEntityToolCallArgs on AiConversationRestoreEntityToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
 fragment AiConversationRetrieveEntitiesToolCall on AiConversationRetrieveEntitiesToolCall {
   __typename
   rawArgs
@@ -67840,6 +68336,9 @@ fragment AiConversationUpdateEntityToolCall on AiConversationUpdateEntityToolCal
 }
 fragment AiConversationUpdateEntityToolCallArgs on AiConversationUpdateEntityToolCallArgs {
   __typename
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
   entity {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
@@ -67991,7 +68490,10 @@ export const AiConversationWidgetPartFragmentDoc = new TypedDocumentString(
     fragment AiConversationPartMetadata on AiConversationPartMetadata {
   __typename
   feedback
+  endedAt
   evalLogId
+  phase
+  startedAt
   turnId
 }
 fragment AiConversationEntityCardWidget on AiConversationEntityCardWidget {
@@ -68144,6 +68646,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     ... on AiConversationResearchToolCall {
       ...AiConversationResearchToolCall
     }
+    ... on AiConversationRestoreEntityToolCall {
+      ...AiConversationRestoreEntityToolCall
+    }
     ... on AiConversationRetrieveEntitiesToolCall {
       ...AiConversationRetrieveEntitiesToolCall
     }
@@ -68190,7 +68695,10 @@ fragment AiConversationWidgetPart on AiConversationWidgetPart {
 fragment AiConversationPartMetadata on AiConversationPartMetadata {
   __typename
   feedback
+  endedAt
   evalLogId
+  phase
+  startedAt
   turnId
 }
 fragment AiConversationCodeIntelligenceToolCall on AiConversationCodeIntelligenceToolCall {
@@ -68464,6 +68972,24 @@ fragment AiConversationResearchToolCallResult on AiConversationResearchToolCallR
   __typename
   progressId
 }
+fragment AiConversationRestoreEntityToolCall on AiConversationRestoreEntityToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationRestoreEntityToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationRestoreEntityToolCallArgs on AiConversationRestoreEntityToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
 fragment AiConversationRetrieveEntitiesToolCall on AiConversationRetrieveEntitiesToolCall {
   __typename
   rawArgs
@@ -68579,6 +69105,9 @@ fragment AiConversationUpdateEntityToolCall on AiConversationUpdateEntityToolCal
 }
 fragment AiConversationUpdateEntityToolCallArgs on AiConversationUpdateEntityToolCallArgs {
   __typename
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
   entity {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
@@ -71524,6 +72053,7 @@ export const OrganizationFragmentDoc = new TypedDocumentString(
   allowedAuthServices
   allowedFileUploadContentTypes
   createdIssueCount
+  authSettings
   customersConfiguration
   defaultFeedSummarySchedule
   gitBranchFormat
@@ -72159,6 +72689,7 @@ export const WorkflowDefinitionFragmentDoc = new TypedDocumentString(
   lastUpdatedBy {
     id
   }
+  slugId
   enabled
 }
     `,
@@ -72262,6 +72793,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   lastUpdatedBy {
     id
   }
+  slugId
   enabled
 }`,
   { fragmentName: "IssueHistoryTriageRuleMetadata" }
@@ -72319,6 +72851,7 @@ export const IssueHistoryWorkflowMetadataFragmentDoc = new TypedDocumentString(
   lastUpdatedBy {
     id
   }
+  slugId
   enabled
 }`,
   { fragmentName: "IssueHistoryWorkflowMetadata" }
@@ -75464,6 +75997,9 @@ export const AiConversationBaseToolCallFragmentDoc = new TypedDocumentString(
   ... on AiConversationResearchToolCall {
     ...AiConversationResearchToolCall
   }
+  ... on AiConversationRestoreEntityToolCall {
+    ...AiConversationRestoreEntityToolCall
+  }
   ... on AiConversationRetrieveEntitiesToolCall {
     ...AiConversationRetrieveEntitiesToolCall
   }
@@ -75719,6 +76255,24 @@ fragment AiConversationResearchToolCallResult on AiConversationResearchToolCallR
   __typename
   progressId
 }
+fragment AiConversationRestoreEntityToolCall on AiConversationRestoreEntityToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationRestoreEntityToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationRestoreEntityToolCallArgs on AiConversationRestoreEntityToolCallArgs {
+  __typename
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
 fragment AiConversationRetrieveEntitiesToolCall on AiConversationRetrieveEntitiesToolCall {
   __typename
   rawArgs
@@ -75834,6 +76388,9 @@ fragment AiConversationUpdateEntityToolCall on AiConversationUpdateEntityToolCal
 }
 fragment AiConversationUpdateEntityToolCallArgs on AiConversationUpdateEntityToolCallArgs {
   __typename
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
   entity {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
@@ -76173,6 +76730,7 @@ export const AuthOrganizationFragmentDoc = new TypedDocumentString(
   __typename
   allowedAuthServices
   approximateUserCount
+  authSettings
   previousUrlKeys
   serviceId
   releaseChannel
@@ -76213,6 +76771,7 @@ export const AuthUserFragmentDoc = new TypedDocumentString(
   __typename
   allowedAuthServices
   approximateUserCount
+  authSettings
   previousUrlKeys
   serviceId
   releaseChannel
@@ -76273,6 +76832,7 @@ fragment AuthOrganization on AuthOrganization {
   __typename
   allowedAuthServices
   approximateUserCount
+  authSettings
   previousUrlKeys
   serviceId
   releaseChannel
@@ -76978,6 +77538,7 @@ fragment AuthOrganization on AuthOrganization {
   __typename
   allowedAuthServices
   approximateUserCount
+  authSettings
   previousUrlKeys
   serviceId
   releaseChannel
@@ -77030,6 +77591,9 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   projectGroupingDateResolution
   viewOrderingDirection
   embeddedCustomerNeedsViewOrdering
+  focusViewGrouping
+  focusViewOrderingDirection
+  focusViewOrdering
   inboxViewOrdering
   initiativeGrouping
   initiativesViewOrdering
@@ -77255,6 +77819,9 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectGroupingDateResolution
   viewOrderingDirection
   embeddedCustomerNeedsViewOrdering
+  focusViewGrouping
+  focusViewOrderingDirection
+  focusViewOrdering
   inboxViewOrdering
   initiativeGrouping
   initiativesViewOrdering
@@ -77515,6 +78082,9 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectGroupingDateResolution
   viewOrderingDirection
   embeddedCustomerNeedsViewOrdering
+  focusViewGrouping
+  focusViewOrderingDirection
+  focusViewOrdering
   inboxViewOrdering
   initiativeGrouping
   initiativesViewOrdering
@@ -77791,6 +78361,9 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectGroupingDateResolution
   viewOrderingDirection
   embeddedCustomerNeedsViewOrdering
+  focusViewGrouping
+  focusViewOrderingDirection
+  focusViewOrdering
   inboxViewOrdering
   initiativeGrouping
   initiativesViewOrdering
@@ -86976,6 +87549,9 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectGroupingDateResolution
   viewOrderingDirection
   embeddedCustomerNeedsViewOrdering
+  focusViewGrouping
+  focusViewOrderingDirection
+  focusViewOrdering
   inboxViewOrdering
   initiativeGrouping
   initiativesViewOrdering
@@ -89768,6 +90344,7 @@ fragment AuthOrganization on AuthOrganization {
   __typename
   allowedAuthServices
   approximateUserCount
+  authSettings
   previousUrlKeys
   serviceId
   releaseChannel
@@ -90945,6 +91522,9 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectGroupingDateResolution
   viewOrderingDirection
   embeddedCustomerNeedsViewOrdering
+  focusViewGrouping
+  focusViewOrderingDirection
+  focusViewOrdering
   inboxViewOrdering
   initiativeGrouping
   initiativesViewOrdering
@@ -91555,6 +92135,9 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectGroupingDateResolution
   viewOrderingDirection
   embeddedCustomerNeedsViewOrdering
+  focusViewGrouping
+  focusViewOrderingDirection
+  focusViewOrdering
   inboxViewOrdering
   initiativeGrouping
   initiativesViewOrdering
@@ -91772,6 +92355,9 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectGroupingDateResolution
   viewOrderingDirection
   embeddedCustomerNeedsViewOrdering
+  focusViewGrouping
+  focusViewOrderingDirection
+  focusViewOrdering
   inboxViewOrdering
   initiativeGrouping
   initiativesViewOrdering
@@ -92198,6 +92784,9 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectGroupingDateResolution
   viewOrderingDirection
   embeddedCustomerNeedsViewOrdering
+  focusViewGrouping
+  focusViewOrderingDirection
+  focusViewOrdering
   inboxViewOrdering
   initiativeGrouping
   initiativesViewOrdering
@@ -92415,6 +93004,9 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectGroupingDateResolution
   viewOrderingDirection
   embeddedCustomerNeedsViewOrdering
+  focusViewGrouping
+  focusViewOrderingDirection
+  focusViewOrdering
   inboxViewOrdering
   initiativeGrouping
   initiativesViewOrdering
@@ -92630,6 +93222,9 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectGroupingDateResolution
   viewOrderingDirection
   embeddedCustomerNeedsViewOrdering
+  focusViewGrouping
+  focusViewOrderingDirection
+  focusViewOrdering
   inboxViewOrdering
   initiativeGrouping
   initiativesViewOrdering
@@ -92930,6 +93525,9 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectGroupingDateResolution
   viewOrderingDirection
   embeddedCustomerNeedsViewOrdering
+  focusViewGrouping
+  focusViewOrderingDirection
+  focusViewOrdering
   inboxViewOrdering
   initiativeGrouping
   initiativesViewOrdering
@@ -102322,6 +102920,7 @@ fragment Organization on Organization {
   allowedAuthServices
   allowedFileUploadContentTypes
   createdIssueCount
+  authSettings
   customersConfiguration
   defaultFeedSummarySchedule
   gitBranchFormat
@@ -112852,6 +113451,7 @@ fragment AuthOrganization on AuthOrganization {
   __typename
   allowedAuthServices
   approximateUserCount
+  authSettings
   previousUrlKeys
   serviceId
   releaseChannel
@@ -113049,8 +113649,8 @@ export const UnarchiveCustomerNeedDocument = new TypedDocumentString(`
   success
 }`) as unknown as TypedDocumentString<UnarchiveCustomerNeedMutation, UnarchiveCustomerNeedMutationVariables>;
 export const UpdateCustomerNeedDocument = new TypedDocumentString(`
-    mutation updateCustomerNeed($id: String!, $input: CustomerNeedUpdateInput!) {
-  customerNeedUpdate(id: $id, input: $input) {
+    mutation updateCustomerNeed($clearAttachment: Boolean, $id: String!, $input: CustomerNeedUpdateInput!) {
+  customerNeedUpdate(clearAttachment: $clearAttachment, id: $id, input: $input) {
     ...CustomerNeedUpdatePayload
   }
 }
@@ -113445,6 +114045,7 @@ fragment AuthOrganization on AuthOrganization {
   __typename
   allowedAuthServices
   approximateUserCount
+  authSettings
   previousUrlKeys
   serviceId
   releaseChannel
@@ -113847,6 +114448,7 @@ fragment AuthOrganization on AuthOrganization {
   __typename
   allowedAuthServices
   approximateUserCount
+  authSettings
   previousUrlKeys
   serviceId
   releaseChannel
@@ -115872,6 +116474,7 @@ fragment AuthOrganization on AuthOrganization {
   __typename
   allowedAuthServices
   approximateUserCount
+  authSettings
   previousUrlKeys
   serviceId
   releaseChannel
@@ -115925,6 +116528,7 @@ fragment AuthOrganization on AuthOrganization {
   __typename
   allowedAuthServices
   approximateUserCount
+  authSettings
   previousUrlKeys
   serviceId
   releaseChannel
@@ -120654,6 +121258,7 @@ fragment AuthOrganization on AuthOrganization {
   __typename
   allowedAuthServices
   approximateUserCount
+  authSettings
   previousUrlKeys
   serviceId
   releaseChannel
@@ -121168,6 +121773,9 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectGroupingDateResolution
   viewOrderingDirection
   embeddedCustomerNeedsViewOrdering
+  focusViewGrouping
+  focusViewOrderingDirection
+  focusViewOrdering
   inboxViewOrdering
   initiativeGrouping
   initiativesViewOrdering
@@ -121410,6 +122018,9 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectGroupingDateResolution
   viewOrderingDirection
   embeddedCustomerNeedsViewOrdering
+  focusViewGrouping
+  focusViewOrderingDirection
+  focusViewOrdering
   inboxViewOrdering
   initiativeGrouping
   initiativesViewOrdering
