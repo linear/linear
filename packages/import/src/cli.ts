@@ -4,6 +4,7 @@ import inquirer from "inquirer";
 import inquirerFilePath from "inquirer-file-path";
 import { importIssues } from "./importIssues.ts";
 import { asanaCsvImport } from "./importers/asanaCsv/index.ts";
+import { clickupCsvImport } from "./importers/clickupCsv/index.ts";
 import { githubImport } from "./importers/github/index.ts";
 import { gitlabCsvImporter } from "./importers/gitlabCsv/index.ts";
 import { jiraCsvImport } from "./importers/jiraCsv/index.ts";
@@ -45,6 +46,10 @@ inquirer.registerPrompt("filePath", inquirerFilePath);
             value: "asanaCsv",
           },
           {
+            name: "ClickUp (CSV export)",
+            value: "clickupCsv",
+          },
+          {
             name: "Pivotal (CSV export)",
             value: "pivotalCsv",
           },
@@ -78,6 +83,9 @@ inquirer.registerPrompt("filePath", inquirerFilePath);
         break;
       case "asanaCsv":
         importer = await asanaCsvImport();
+        break;
+      case "clickupCsv":
+        importer = await clickupCsvImport();
         break;
       case "pivotalCsv":
         importer = await pivotalCsvImport();
