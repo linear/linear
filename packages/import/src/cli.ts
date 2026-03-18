@@ -11,6 +11,7 @@ import { linearCsvImporter } from "./importers/linearCsv/index.ts";
 import { pivotalCsvImport } from "./importers/pivotalCsv/index.ts";
 import { shortcutCsvImport } from "./importers/shortcutCsv/index.ts";
 import { trelloJsonImport } from "./importers/trelloJson/index.ts";
+import { planeCsvImport } from "./importers/planeCsv/index.ts";
 import type { ImportAnswers } from "./types.ts";
 
 inquirer.registerPrompt("filePath", inquirerFilePath);
@@ -60,6 +61,10 @@ inquirer.registerPrompt("filePath", inquirerFilePath);
             name: "Linear (CSV export)",
             value: "linearCsv",
           },
+          {
+            name: "Plane (CSV export)",
+            value: "planeCsv",
+          },
         ],
       },
     ]);
@@ -90,6 +95,9 @@ inquirer.registerPrompt("filePath", inquirerFilePath);
         break;
       case "linearCsv":
         importer = await linearCsvImporter();
+        break;
+      case "planeCsv":
+        importer = await planeCsvImport();
         break;
       default:
         console.log(chalk.red(`Invalid importer`));

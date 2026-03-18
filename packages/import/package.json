@@ -24,7 +24,8 @@
     "cli:local": "NODE_TLS_REJECT_UNAUTHORIZED=0 ts-node src/cli --apiUrl https://local.linear.dev:8090/graphql",
     "dev:import": "NODE_ENV=development pnpm run build:import",
     "build:import": "tsdown --clean --format cjs src/cli.ts",
-    "build:types": "tsc --noEmit"
+    "build:types": "tsc --noEmit",
+    "test": "vitest"
   },
   "dependencies": {
     "@linear/sdk": "workspace:*",
@@ -43,8 +44,9 @@
     "@types/cli-progress": "^3.11.5",
     "@types/inquirer": "^7.3.3",
     "@types/node-fetch": "^2.5.7",
-    "tsdown": "catalog:",
     "ts-node": "catalog:",
+    "tsdown": "catalog:",
+    "vitest": "4.0.15",
     "typescript": "catalog:"
   },
   "publishConfig": {
