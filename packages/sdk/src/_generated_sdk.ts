@@ -20187,7 +20187,9 @@ export class ViewPreferencesValues extends Request {
     this.projectZoomLevel = data.projectZoomLevel ?? undefined;
     this.releasePipelineFieldLatestRelease = data.releasePipelineFieldLatestRelease ?? undefined;
     this.releasePipelineFieldReleases = data.releasePipelineFieldReleases ?? undefined;
+    this.releasePipelineFieldTeams = data.releasePipelineFieldTeams ?? undefined;
     this.releasePipelineFieldType = data.releasePipelineFieldType ?? undefined;
+    this.releasePipelineGrouping = data.releasePipelineGrouping ?? undefined;
     this.releasePipelinesViewOrdering = data.releasePipelinesViewOrdering ?? undefined;
     this.reviewFieldAvatar = data.reviewFieldAvatar ?? undefined;
     this.reviewFieldChecks = data.reviewFieldChecks ?? undefined;
@@ -20196,8 +20198,11 @@ export class ViewPreferencesValues extends Request {
     this.reviewFieldRepository = data.reviewFieldRepository ?? undefined;
     this.reviewGrouping = data.reviewGrouping ?? undefined;
     this.reviewViewOrdering = data.reviewViewOrdering ?? undefined;
+    this.scheduledPipelineReleaseFieldCompletion = data.scheduledPipelineReleaseFieldCompletion ?? undefined;
+    this.scheduledPipelineReleaseFieldDescription = data.scheduledPipelineReleaseFieldDescription ?? undefined;
     this.scheduledPipelineReleaseFieldReleaseDate = data.scheduledPipelineReleaseFieldReleaseDate ?? undefined;
-    this.scheduledPipelineReleaseFieldStage = data.scheduledPipelineReleaseFieldStage ?? undefined;
+    this.scheduledPipelineReleaseFieldVersion = data.scheduledPipelineReleaseFieldVersion ?? undefined;
+    this.scheduledPipelineReleasesViewGrouping = data.scheduledPipelineReleasesViewGrouping ?? undefined;
     this.scheduledPipelineReleasesViewOrdering = data.scheduledPipelineReleasesViewOrdering ?? undefined;
     this.searchResultType = data.searchResultType ?? undefined;
     this.searchViewOrdering = data.searchViewOrdering ?? undefined;
@@ -20530,8 +20535,12 @@ export class ViewPreferencesValues extends Request {
   public releasePipelineFieldLatestRelease?: boolean | null;
   /** Whether to show the releases field for release pipelines. */
   public releasePipelineFieldReleases?: boolean | null;
+  /** Whether to show the teams field for release pipelines. */
+  public releasePipelineFieldTeams?: boolean | null;
   /** Whether to show the type field for release pipelines. */
   public releasePipelineFieldType?: boolean | null;
+  /** The release pipeline grouping. */
+  public releasePipelineGrouping?: string | null;
   /** The release pipelines view ordering. */
   public releasePipelinesViewOrdering?: string | null;
   /** Whether to show the review avatar field. */
@@ -20548,10 +20557,16 @@ export class ViewPreferencesValues extends Request {
   public reviewGrouping?: string | null;
   /** The review view ordering. */
   public reviewViewOrdering?: string | null;
+  /** Whether to show the completion field for scheduled pipeline releases. */
+  public scheduledPipelineReleaseFieldCompletion?: boolean | null;
+  /** Whether to show the description field for scheduled pipeline releases. */
+  public scheduledPipelineReleaseFieldDescription?: boolean | null;
   /** Whether to show the release date field for scheduled pipeline releases. */
   public scheduledPipelineReleaseFieldReleaseDate?: boolean | null;
-  /** Whether to show the stage field for scheduled pipeline releases. */
-  public scheduledPipelineReleaseFieldStage?: boolean | null;
+  /** Whether to show the version field for scheduled pipeline releases. */
+  public scheduledPipelineReleaseFieldVersion?: boolean | null;
+  /** The scheduled pipeline releases view grouping. */
+  public scheduledPipelineReleasesViewGrouping?: string | null;
   /** The scheduled pipeline releases view ordering. */
   public scheduledPipelineReleasesViewOrdering?: string | null;
   /** The search result type filter. */
@@ -45661,6 +45676,7 @@ export {
   AiConversationEntityCardWidgetArgsType,
   AiConversationEntityListWidgetArgsAction,
   AiConversationEntityListWidgetArgsEntitiesType,
+  AiConversationInitialSource,
   AiConversationPartPhase,
   AiConversationPartType,
   AiConversationQueryUpdatesToolCallArgsUpdateType,
@@ -45690,6 +45706,7 @@ export {
   IntegrationService,
   IssueRelationType,
   IssueSharedAccessDisallowedField,
+  IssueSharingPolicy,
   IssueSuggestionState,
   IssueSuggestionType,
   NotificationCategory,
@@ -45708,6 +45725,7 @@ export {
   ProjectTab,
   ProjectUpdateHealthType,
   ProjectUpdateReminderFrequency,
+  PullRequestCheckPresentation,
   PullRequestMergeMethod,
   PullRequestReviewTool,
   PullRequestStatus,
