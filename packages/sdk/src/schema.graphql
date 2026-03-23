@@ -1075,6 +1075,10 @@ type AiConversation implements Node {
   """
   id: ID!
   """
+  The initial source of the conversation.
+  """
+  initialSource: AiConversationInitialSource!
+  """
   The iteration ID of the conversation in agentic workflow.
   """
   iterationId: String
@@ -1452,6 +1456,18 @@ type AiConversationGetSlackConversationHistoryToolCall implements AiConversation
   The result of the tool call.
   """
   rawResult: JSON
+}
+
+"""
+The initial source of an AI conversation.
+"""
+enum AiConversationInitialSource {
+  comment
+  directChat
+  microsoftTeams
+  pullRequestComment
+  slack
+  workflow
 }
 
 type AiConversationInvokeMcpToolToolCall implements AiConversationBaseToolCall {
@@ -7877,6 +7893,10 @@ input DocumentFilter {
   """
   creator: UserFilter
   """
+  Filters that the document's cycle must satisfy.
+  """
+  cycle: CycleFilter
+  """
   Comparator for the identifier.
   """
   id: IDComparator
@@ -7896,6 +7916,10 @@ input DocumentFilter {
   Filters that the document's project must satisfy.
   """
   project: ProjectFilter
+  """
+  Filters that the document's release must satisfy.
+  """
+  release: ReleaseFilter
   """
   Comparator for the document slug ID.
   """
@@ -17341,6 +17365,15 @@ enum IssueSharedAccessDisallowedField {
 }
 
 """
+Policy controlling whether and by whom issues in a team can be shared with non-team-members.
+"""
+enum IssueSharingPolicy {
+  adminsOnly
+  allMembers
+  disabled
+}
+
+"""
 Payload for issue SLA webhook events.
 """
 type IssueSlaWebhookPayload {
@@ -18408,6 +18441,10 @@ input JiraLinearMappingInput {
   The Jira id for this project.
   """
   jiraProjectId: String!
+  """
+  Whether this mapping uses legacy unidirectional sync behavior where no changes sync from Linear to Jira.
+  """
+  legacyUnidirectional: Boolean
   """
   The Linear team id to map to the given project.
   """
@@ -25217,6 +25254,10 @@ An organization. Organizations are root-level objects that contain user accounts
 """
 type Organization implements Node {
   """
+  [INTERNAL] Whether the organization has enabled agent automation.
+  """
+  agentAutomationEnabled: Boolean!
+  """
   [INTERNAL] Whether the organization has enabled the AI add-on (which at this point only includes triage suggestions).
   """
   aiAddonEnabled: Boolean!
@@ -25418,6 +25459,10 @@ type Organization implements Node {
   [Internal] Whether the organization has enabled Linear Agent.
   """
   linearAgentEnabled: Boolean!
+  """
+  [Internal] Settings for Linear Agent features.
+  """
+  linearAgentSettings: JSONObject!
   """
   The organization's logo URL.
   """
@@ -26082,6 +26127,28 @@ input OrganizationIpRestrictionInput {
   type: String!
 }
 
+input OrganizationLinearAgentMcpServerAllowlistEntryInput {
+  """
+  [Internal] The MCP server URL that Linear Agent is allowed to use.
+  """
+  url: String!
+}
+
+input OrganizationLinearAgentSettingsInput {
+  """
+  [Internal] The MCP server allowlist for Linear Agent. When unset, all MCP servers are allowed.
+  """
+  mcpServersAllowlist: [OrganizationLinearAgentMcpServerAllowlistEntryInput!]
+  """
+  [Internal] Whether the organization has enabled MCP servers for Linear Agent.
+  """
+  mcpServersEnabled: Boolean
+  """
+  [Internal] Whether the organization has enabled web search for Linear Agent.
+  """
+  webSearchEnabled: Boolean
+}
+
 type OrganizationMeta {
   """
   Allowed authentication providers, empty array means all are allowed.
@@ -26172,6 +26239,10 @@ type OrganizationStartTrialPayload {
 }
 
 input OrganizationUpdateInput {
+  """
+  [INTERNAL] Whether the organization has enabled agent automation.
+  """
+  agentAutomationEnabled: Boolean
   """
   [INTERNAL] Whether the organization has enabled the AI add-on.
   """
@@ -26280,6 +26351,10 @@ input OrganizationUpdateInput {
   [Internal] Whether the organization has enabled Linear Agent.
   """
   linearAgentEnabled: Boolean
+  """
+  [Internal] Settings for Linear Agent features.
+  """
+  linearAgentSettings: OrganizationLinearAgentSettingsInput
   """
   The logo of the organization.
   """
@@ -31442,6 +31517,10 @@ type PullRequest implements Node {
   """
   archivedAt: DateTime
   """
+  The base SHA of the pull request.
+  """
+  baseSha: String
+  """
   [Internal] The checks associated with the pull request.
   """
   checks: [PullRequestCheck!]!
@@ -31457,6 +31536,10 @@ type PullRequest implements Node {
   [Internal] The user who created the pull request.
   """
   creator: User
+  """
+  The head SHA of the pull request.
+  """
+  headSha: String
   """
   The unique identifier of the entity.
   """
@@ -31521,6 +31604,10 @@ type PullRequestCheck {
   """
   name: String!
   """
+  How the check should be opened in the client.
+  """
+  presentation: PullRequestCheckPresentation
+  """
   The date/time at which when the check was started.
   """
   startedAt: DateTime
@@ -31536,6 +31623,16 @@ type PullRequestCheck {
   The name of the workflow that triggered the check.
   """
   workflowName: String
+}
+
+"""
+[ALPHA] How a pull request check should be opened in the client.
+"""
+enum PullRequestCheckPresentation {
+  externalOnly
+  jobLogs
+  markdown
+  runLogs
 }
 
 """
@@ -33563,6 +33660,10 @@ type Query {
     """
     before: String
     """
+    Filter returned release pipelines.
+    """
+    filter: ReleasePipelineFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -33608,6 +33709,10 @@ type Query {
     A cursor to be used with last for backward pagination.
     """
     before: String
+    """
+    Filter returned release stages.
+    """
+    filter: ReleaseStageFilter
     """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
@@ -34590,6 +34695,48 @@ type Release implements Node {
   The unique identifier of the entity.
   """
   id: ID!
+  """
+  [ALPHA] Number of issues associated with the release.
+  """
+  issueCount(
+    """
+    Include archived issues in the count.
+    """
+    includeArchived: Boolean = false
+  ): Int!
+  """
+  [ALPHA] Issues associated with the release.
+  """
+  issues(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned issues.
+    """
+    filter: IssueFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): IssueConnection!
   """
   [Internal] Links associated with the release.
   """
@@ -37870,6 +38017,10 @@ input TeamCreateInput {
   """
   issueEstimationType: String
   """
+  The policy controlling whether and by whom issues in the team can be shared with non-team-members.
+  """
+  issueSharingPolicy: IssueSharingPolicy
+  """
   The key of the team. If not given, the key will be generated based on the name of the team.
   """
   key: String
@@ -38361,6 +38512,10 @@ input TeamUpdateInput {
   The issue estimation type to use. Must be one of "notUsed", "exponential", "fibonacci", "linear", "tShirt".
   """
   issueEstimationType: String
+  """
+  The policy controlling whether and by whom issues in the team can be shared with non-team-members.
+  """
+  issueSharingPolicy: IssueSharingPolicy
   """
   Whether new users should join this team by default. Mutation restricted to workspace admins or owners!
   """
@@ -39727,6 +39882,7 @@ input UserFilter {
 The types of flags that the user can have.
 """
 enum UserFlagType {
+  agentExamplesDismissed
   all
   analyticsWelcomeDismissed
   canPlaySnake
@@ -41003,9 +41159,17 @@ type ViewPreferencesValues {
   """
   releasePipelineFieldReleases: Boolean
   """
+  Whether to show the teams field for release pipelines.
+  """
+  releasePipelineFieldTeams: Boolean
+  """
   Whether to show the type field for release pipelines.
   """
   releasePipelineFieldType: Boolean
+  """
+  The release pipeline grouping.
+  """
+  releasePipelineGrouping: String
   """
   The release pipelines view ordering.
   """
@@ -41039,13 +41203,25 @@ type ViewPreferencesValues {
   """
   reviewViewOrdering: String
   """
+  Whether to show the completion field for scheduled pipeline releases.
+  """
+  scheduledPipelineReleaseFieldCompletion: Boolean
+  """
+  Whether to show the description field for scheduled pipeline releases.
+  """
+  scheduledPipelineReleaseFieldDescription: Boolean
+  """
   Whether to show the release date field for scheduled pipeline releases.
   """
   scheduledPipelineReleaseFieldReleaseDate: Boolean
   """
-  Whether to show the stage field for scheduled pipeline releases.
+  Whether to show the version field for scheduled pipeline releases.
   """
-  scheduledPipelineReleaseFieldStage: Boolean
+  scheduledPipelineReleaseFieldVersion: Boolean
+  """
+  The scheduled pipeline releases view grouping.
+  """
+  scheduledPipelineReleasesViewGrouping: String
   """
   The scheduled pipeline releases view ordering.
   """
@@ -42036,9 +42212,10 @@ enum WorkflowTriggerType {
 }
 
 enum WorkflowType {
-  custom
+  automation
   sla
   triage
+  triageAutomation
   viewSubscription
 }
 
