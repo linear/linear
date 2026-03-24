@@ -5797,6 +5797,48 @@ export class DocumentContentChildWebhookPayload {
   public project?: ProjectChildWebhookPayload | null;
 }
 /**
+ * A draft revision of document content, pending user review.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.DocumentContentDraftFragment response data
+ */
+export class DocumentContentDraft extends Request {
+  private _user: L.DocumentContentDraftFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.DocumentContentDraftFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.contentState = data.contentState;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.documentContentId = data.documentContentId;
+    this.id = data.id;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.userId = data.userId;
+    this.documentContent = new DocumentContent(request, data.documentContent);
+    this._user = data.user;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The draft content state as a base64 encoded Yjs state update. */
+  public contentState: string;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  public documentContentId: string;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  public userId: string;
+  public documentContent: DocumentContent;
+  public get user(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._user.id);
+  }
+}
+/**
  * DocumentContentHistoryPayload model
  *
  * @param request - function to call the graphql client
@@ -17869,6 +17911,577 @@ export class SsoUrlFromEmailResponse extends Request {
   public samlSsoUrl: string;
   /** Whether the operation was successful. */
   public success: boolean;
+}
+/**
+ * Subscription model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.SubscriptionFragment response data
+ */
+export class Subscription extends Request {
+  private _agentActivityCreated: L.SubscriptionFragment["agentActivityCreated"];
+  private _agentActivityUpdated: L.SubscriptionFragment["agentActivityUpdated"];
+  private _agentSessionCreated: L.SubscriptionFragment["agentSessionCreated"];
+  private _agentSessionUpdated: L.SubscriptionFragment["agentSessionUpdated"];
+  private _commentArchived: L.SubscriptionFragment["commentArchived"];
+  private _commentCreated: L.SubscriptionFragment["commentCreated"];
+  private _commentDeleted: L.SubscriptionFragment["commentDeleted"];
+  private _commentUnarchived: L.SubscriptionFragment["commentUnarchived"];
+  private _commentUpdated: L.SubscriptionFragment["commentUpdated"];
+  private _cycleArchived: L.SubscriptionFragment["cycleArchived"];
+  private _cycleCreated: L.SubscriptionFragment["cycleCreated"];
+  private _cycleUpdated: L.SubscriptionFragment["cycleUpdated"];
+  private _documentArchived: L.SubscriptionFragment["documentArchived"];
+  private _documentCreated: L.SubscriptionFragment["documentCreated"];
+  private _documentUnarchived: L.SubscriptionFragment["documentUnarchived"];
+  private _documentUpdated: L.SubscriptionFragment["documentUpdated"];
+  private _favoriteCreated: L.SubscriptionFragment["favoriteCreated"];
+  private _favoriteDeleted: L.SubscriptionFragment["favoriteDeleted"];
+  private _favoriteUpdated: L.SubscriptionFragment["favoriteUpdated"];
+  private _initiativeCreated: L.SubscriptionFragment["initiativeCreated"];
+  private _initiativeDeleted: L.SubscriptionFragment["initiativeDeleted"];
+  private _initiativeUpdated: L.SubscriptionFragment["initiativeUpdated"];
+  private _issueArchived: L.SubscriptionFragment["issueArchived"];
+  private _issueCreated: L.SubscriptionFragment["issueCreated"];
+  private _issueLabelCreated: L.SubscriptionFragment["issueLabelCreated"];
+  private _issueLabelDeleted: L.SubscriptionFragment["issueLabelDeleted"];
+  private _issueLabelUpdated: L.SubscriptionFragment["issueLabelUpdated"];
+  private _issueRelationCreated: L.SubscriptionFragment["issueRelationCreated"];
+  private _issueRelationDeleted: L.SubscriptionFragment["issueRelationDeleted"];
+  private _issueRelationUpdated: L.SubscriptionFragment["issueRelationUpdated"];
+  private _issueUnarchived: L.SubscriptionFragment["issueUnarchived"];
+  private _issueUpdated: L.SubscriptionFragment["issueUpdated"];
+  private _projectArchived: L.SubscriptionFragment["projectArchived"];
+  private _projectCreated: L.SubscriptionFragment["projectCreated"];
+  private _projectUnarchived: L.SubscriptionFragment["projectUnarchived"];
+  private _projectUpdateCreated: L.SubscriptionFragment["projectUpdateCreated"];
+  private _projectUpdateDeleted: L.SubscriptionFragment["projectUpdateDeleted"];
+  private _projectUpdateUpdated: L.SubscriptionFragment["projectUpdateUpdated"];
+  private _projectUpdated: L.SubscriptionFragment["projectUpdated"];
+  private _roadmapCreated: L.SubscriptionFragment["roadmapCreated"];
+  private _roadmapDeleted: L.SubscriptionFragment["roadmapDeleted"];
+  private _roadmapUpdated: L.SubscriptionFragment["roadmapUpdated"];
+  private _teamCreated: L.SubscriptionFragment["teamCreated"];
+  private _teamDeleted: L.SubscriptionFragment["teamDeleted"];
+  private _teamMembershipCreated: L.SubscriptionFragment["teamMembershipCreated"];
+  private _teamMembershipDeleted: L.SubscriptionFragment["teamMembershipDeleted"];
+  private _teamMembershipUpdated: L.SubscriptionFragment["teamMembershipUpdated"];
+  private _teamUpdated: L.SubscriptionFragment["teamUpdated"];
+  private _userCreated: L.SubscriptionFragment["userCreated"];
+  private _userUpdated: L.SubscriptionFragment["userUpdated"];
+  private _workflowStateArchived: L.SubscriptionFragment["workflowStateArchived"];
+  private _workflowStateCreated: L.SubscriptionFragment["workflowStateCreated"];
+  private _workflowStateUpdated: L.SubscriptionFragment["workflowStateUpdated"];
+
+  public constructor(request: LinearRequest, data: L.SubscriptionFragment) {
+    super(request);
+    this.documentContentDraftCreated = new DocumentContentDraft(request, data.documentContentDraftCreated);
+    this.documentContentDraftDeleted = new DocumentContentDraft(request, data.documentContentDraftDeleted);
+    this.documentContentDraftUpdated = new DocumentContentDraft(request, data.documentContentDraftUpdated);
+    this.draftCreated = new Draft(request, data.draftCreated);
+    this.draftDeleted = new Draft(request, data.draftDeleted);
+    this.draftUpdated = new Draft(request, data.draftUpdated);
+    this.issueHistoryCreated = new IssueHistory(request, data.issueHistoryCreated);
+    this.issueHistoryUpdated = new IssueHistory(request, data.issueHistoryUpdated);
+    this._agentActivityCreated = data.agentActivityCreated;
+    this._agentActivityUpdated = data.agentActivityUpdated;
+    this._agentSessionCreated = data.agentSessionCreated;
+    this._agentSessionUpdated = data.agentSessionUpdated;
+    this._commentArchived = data.commentArchived;
+    this._commentCreated = data.commentCreated;
+    this._commentDeleted = data.commentDeleted;
+    this._commentUnarchived = data.commentUnarchived;
+    this._commentUpdated = data.commentUpdated;
+    this._cycleArchived = data.cycleArchived;
+    this._cycleCreated = data.cycleCreated;
+    this._cycleUpdated = data.cycleUpdated;
+    this._documentArchived = data.documentArchived;
+    this._documentCreated = data.documentCreated;
+    this._documentUnarchived = data.documentUnarchived;
+    this._documentUpdated = data.documentUpdated;
+    this._favoriteCreated = data.favoriteCreated;
+    this._favoriteDeleted = data.favoriteDeleted;
+    this._favoriteUpdated = data.favoriteUpdated;
+    this._initiativeCreated = data.initiativeCreated;
+    this._initiativeDeleted = data.initiativeDeleted;
+    this._initiativeUpdated = data.initiativeUpdated;
+    this._issueArchived = data.issueArchived;
+    this._issueCreated = data.issueCreated;
+    this._issueLabelCreated = data.issueLabelCreated;
+    this._issueLabelDeleted = data.issueLabelDeleted;
+    this._issueLabelUpdated = data.issueLabelUpdated;
+    this._issueRelationCreated = data.issueRelationCreated;
+    this._issueRelationDeleted = data.issueRelationDeleted;
+    this._issueRelationUpdated = data.issueRelationUpdated;
+    this._issueUnarchived = data.issueUnarchived;
+    this._issueUpdated = data.issueUpdated;
+    this._projectArchived = data.projectArchived;
+    this._projectCreated = data.projectCreated;
+    this._projectUnarchived = data.projectUnarchived;
+    this._projectUpdateCreated = data.projectUpdateCreated;
+    this._projectUpdateDeleted = data.projectUpdateDeleted;
+    this._projectUpdateUpdated = data.projectUpdateUpdated;
+    this._projectUpdated = data.projectUpdated;
+    this._roadmapCreated = data.roadmapCreated;
+    this._roadmapDeleted = data.roadmapDeleted;
+    this._roadmapUpdated = data.roadmapUpdated;
+    this._teamCreated = data.teamCreated;
+    this._teamDeleted = data.teamDeleted;
+    this._teamMembershipCreated = data.teamMembershipCreated;
+    this._teamMembershipDeleted = data.teamMembershipDeleted;
+    this._teamMembershipUpdated = data.teamMembershipUpdated;
+    this._teamUpdated = data.teamUpdated;
+    this._userCreated = data.userCreated;
+    this._userUpdated = data.userUpdated;
+    this._workflowStateArchived = data.workflowStateArchived;
+    this._workflowStateCreated = data.workflowStateCreated;
+    this._workflowStateUpdated = data.workflowStateUpdated;
+  }
+
+  /** Triggered when a document content draft is created */
+  public documentContentDraftCreated: DocumentContentDraft;
+  /** Triggered when a document content draft is deleted */
+  public documentContentDraftDeleted: DocumentContentDraft;
+  /** Triggered when a document content draft is updated */
+  public documentContentDraftUpdated: DocumentContentDraft;
+  /** Triggered when a draft is created */
+  public draftCreated: Draft;
+  /** Triggered when a draft is deleted */
+  public draftDeleted: Draft;
+  /** Triggered when a draft is updated */
+  public draftUpdated: Draft;
+  /** Triggered when an issue history is created */
+  public issueHistoryCreated: IssueHistory;
+  /** Triggered when an issue history is updated */
+  public issueHistoryUpdated: IssueHistory;
+  /** Triggered when an agent activity is created */
+  public get agentActivityCreated(): LinearFetch<AgentActivity> | undefined {
+    return new AgentActivityQuery(this._request).fetch(this._agentActivityCreated.id);
+  }
+  /** The ID of triggered when an agent activity is created */
+  public get agentActivityCreatedId(): string | undefined {
+    return this._agentActivityCreated?.id;
+  }
+  /** Triggered when an agent activity is updated */
+  public get agentActivityUpdated(): LinearFetch<AgentActivity> | undefined {
+    return new AgentActivityQuery(this._request).fetch(this._agentActivityUpdated.id);
+  }
+  /** The ID of triggered when an agent activity is updated */
+  public get agentActivityUpdatedId(): string | undefined {
+    return this._agentActivityUpdated?.id;
+  }
+  /** Triggered when an agent session is created */
+  public get agentSessionCreated(): LinearFetch<AgentSession> | undefined {
+    return new AgentSessionQuery(this._request).fetch(this._agentSessionCreated.id);
+  }
+  /** The ID of triggered when an agent session is created */
+  public get agentSessionCreatedId(): string | undefined {
+    return this._agentSessionCreated?.id;
+  }
+  /** Triggered when an agent session is updated */
+  public get agentSessionUpdated(): LinearFetch<AgentSession> | undefined {
+    return new AgentSessionQuery(this._request).fetch(this._agentSessionUpdated.id);
+  }
+  /** The ID of triggered when an agent session is updated */
+  public get agentSessionUpdatedId(): string | undefined {
+    return this._agentSessionUpdated?.id;
+  }
+  /** Triggered when a comment is archived */
+  public get commentArchived(): LinearFetch<Comment> | undefined {
+    return new CommentQuery(this._request).fetch({ id: this._commentArchived.id });
+  }
+  /** The ID of triggered when a comment is archived */
+  public get commentArchivedId(): string | undefined {
+    return this._commentArchived?.id;
+  }
+  /** Triggered when a comment is created */
+  public get commentCreated(): LinearFetch<Comment> | undefined {
+    return new CommentQuery(this._request).fetch({ id: this._commentCreated.id });
+  }
+  /** The ID of triggered when a comment is created */
+  public get commentCreatedId(): string | undefined {
+    return this._commentCreated?.id;
+  }
+  /** Triggered when a comment is deleted */
+  public get commentDeleted(): LinearFetch<Comment> | undefined {
+    return new CommentQuery(this._request).fetch({ id: this._commentDeleted.id });
+  }
+  /** The ID of triggered when a comment is deleted */
+  public get commentDeletedId(): string | undefined {
+    return this._commentDeleted?.id;
+  }
+  /** Triggered when a a comment is unarchived */
+  public get commentUnarchived(): LinearFetch<Comment> | undefined {
+    return new CommentQuery(this._request).fetch({ id: this._commentUnarchived.id });
+  }
+  /** The ID of triggered when a a comment is unarchived */
+  public get commentUnarchivedId(): string | undefined {
+    return this._commentUnarchived?.id;
+  }
+  /** Triggered when a comment is updated */
+  public get commentUpdated(): LinearFetch<Comment> | undefined {
+    return new CommentQuery(this._request).fetch({ id: this._commentUpdated.id });
+  }
+  /** The ID of triggered when a comment is updated */
+  public get commentUpdatedId(): string | undefined {
+    return this._commentUpdated?.id;
+  }
+  /** Triggered when a cycle is archived */
+  public get cycleArchived(): LinearFetch<Cycle> | undefined {
+    return new CycleQuery(this._request).fetch(this._cycleArchived.id);
+  }
+  /** The ID of triggered when a cycle is archived */
+  public get cycleArchivedId(): string | undefined {
+    return this._cycleArchived?.id;
+  }
+  /** Triggered when a cycle is created */
+  public get cycleCreated(): LinearFetch<Cycle> | undefined {
+    return new CycleQuery(this._request).fetch(this._cycleCreated.id);
+  }
+  /** The ID of triggered when a cycle is created */
+  public get cycleCreatedId(): string | undefined {
+    return this._cycleCreated?.id;
+  }
+  /** Triggered when a cycle is updated */
+  public get cycleUpdated(): LinearFetch<Cycle> | undefined {
+    return new CycleQuery(this._request).fetch(this._cycleUpdated.id);
+  }
+  /** The ID of triggered when a cycle is updated */
+  public get cycleUpdatedId(): string | undefined {
+    return this._cycleUpdated?.id;
+  }
+  /** Triggered when a document is archived */
+  public get documentArchived(): LinearFetch<Document> | undefined {
+    return new DocumentQuery(this._request).fetch(this._documentArchived.id);
+  }
+  /** The ID of triggered when a document is archived */
+  public get documentArchivedId(): string | undefined {
+    return this._documentArchived?.id;
+  }
+  /** Triggered when a document is created */
+  public get documentCreated(): LinearFetch<Document> | undefined {
+    return new DocumentQuery(this._request).fetch(this._documentCreated.id);
+  }
+  /** The ID of triggered when a document is created */
+  public get documentCreatedId(): string | undefined {
+    return this._documentCreated?.id;
+  }
+  /** Triggered when a a document is unarchived */
+  public get documentUnarchived(): LinearFetch<Document> | undefined {
+    return new DocumentQuery(this._request).fetch(this._documentUnarchived.id);
+  }
+  /** The ID of triggered when a a document is unarchived */
+  public get documentUnarchivedId(): string | undefined {
+    return this._documentUnarchived?.id;
+  }
+  /** Triggered when a document is updated */
+  public get documentUpdated(): LinearFetch<Document> | undefined {
+    return new DocumentQuery(this._request).fetch(this._documentUpdated.id);
+  }
+  /** The ID of triggered when a document is updated */
+  public get documentUpdatedId(): string | undefined {
+    return this._documentUpdated?.id;
+  }
+  /** Triggered when a favorite is created */
+  public get favoriteCreated(): LinearFetch<Favorite> | undefined {
+    return new FavoriteQuery(this._request).fetch(this._favoriteCreated.id);
+  }
+  /** The ID of triggered when a favorite is created */
+  public get favoriteCreatedId(): string | undefined {
+    return this._favoriteCreated?.id;
+  }
+  /** Triggered when a favorite is deleted */
+  public get favoriteDeleted(): LinearFetch<Favorite> | undefined {
+    return new FavoriteQuery(this._request).fetch(this._favoriteDeleted.id);
+  }
+  /** The ID of triggered when a favorite is deleted */
+  public get favoriteDeletedId(): string | undefined {
+    return this._favoriteDeleted?.id;
+  }
+  /** Triggered when a favorite is updated */
+  public get favoriteUpdated(): LinearFetch<Favorite> | undefined {
+    return new FavoriteQuery(this._request).fetch(this._favoriteUpdated.id);
+  }
+  /** The ID of triggered when a favorite is updated */
+  public get favoriteUpdatedId(): string | undefined {
+    return this._favoriteUpdated?.id;
+  }
+  /** Triggered when an initiative is created */
+  public get initiativeCreated(): LinearFetch<Initiative> | undefined {
+    return new InitiativeQuery(this._request).fetch(this._initiativeCreated.id);
+  }
+  /** The ID of triggered when an initiative is created */
+  public get initiativeCreatedId(): string | undefined {
+    return this._initiativeCreated?.id;
+  }
+  /** Triggered when an initiative is deleted */
+  public get initiativeDeleted(): LinearFetch<Initiative> | undefined {
+    return new InitiativeQuery(this._request).fetch(this._initiativeDeleted.id);
+  }
+  /** The ID of triggered when an initiative is deleted */
+  public get initiativeDeletedId(): string | undefined {
+    return this._initiativeDeleted?.id;
+  }
+  /** Triggered when an initiative is updated */
+  public get initiativeUpdated(): LinearFetch<Initiative> | undefined {
+    return new InitiativeQuery(this._request).fetch(this._initiativeUpdated.id);
+  }
+  /** The ID of triggered when an initiative is updated */
+  public get initiativeUpdatedId(): string | undefined {
+    return this._initiativeUpdated?.id;
+  }
+  /** Triggered when an issue is archived */
+  public get issueArchived(): LinearFetch<Issue> | undefined {
+    return new IssueQuery(this._request).fetch(this._issueArchived.id);
+  }
+  /** The ID of triggered when an issue is archived */
+  public get issueArchivedId(): string | undefined {
+    return this._issueArchived?.id;
+  }
+  /** Triggered when an issue is created */
+  public get issueCreated(): LinearFetch<Issue> | undefined {
+    return new IssueQuery(this._request).fetch(this._issueCreated.id);
+  }
+  /** The ID of triggered when an issue is created */
+  public get issueCreatedId(): string | undefined {
+    return this._issueCreated?.id;
+  }
+  /** Triggered when an issue label is created */
+  public get issueLabelCreated(): LinearFetch<IssueLabel> | undefined {
+    return new IssueLabelQuery(this._request).fetch(this._issueLabelCreated.id);
+  }
+  /** The ID of triggered when an issue label is created */
+  public get issueLabelCreatedId(): string | undefined {
+    return this._issueLabelCreated?.id;
+  }
+  /** Triggered when an issue label is deleted */
+  public get issueLabelDeleted(): LinearFetch<IssueLabel> | undefined {
+    return new IssueLabelQuery(this._request).fetch(this._issueLabelDeleted.id);
+  }
+  /** The ID of triggered when an issue label is deleted */
+  public get issueLabelDeletedId(): string | undefined {
+    return this._issueLabelDeleted?.id;
+  }
+  /** Triggered when an issue label is updated */
+  public get issueLabelUpdated(): LinearFetch<IssueLabel> | undefined {
+    return new IssueLabelQuery(this._request).fetch(this._issueLabelUpdated.id);
+  }
+  /** The ID of triggered when an issue label is updated */
+  public get issueLabelUpdatedId(): string | undefined {
+    return this._issueLabelUpdated?.id;
+  }
+  /** Triggered when an issue relation is created */
+  public get issueRelationCreated(): LinearFetch<IssueRelation> | undefined {
+    return new IssueRelationQuery(this._request).fetch(this._issueRelationCreated.id);
+  }
+  /** The ID of triggered when an issue relation is created */
+  public get issueRelationCreatedId(): string | undefined {
+    return this._issueRelationCreated?.id;
+  }
+  /** Triggered when an issue relation is deleted */
+  public get issueRelationDeleted(): LinearFetch<IssueRelation> | undefined {
+    return new IssueRelationQuery(this._request).fetch(this._issueRelationDeleted.id);
+  }
+  /** The ID of triggered when an issue relation is deleted */
+  public get issueRelationDeletedId(): string | undefined {
+    return this._issueRelationDeleted?.id;
+  }
+  /** Triggered when an issue relation is updated */
+  public get issueRelationUpdated(): LinearFetch<IssueRelation> | undefined {
+    return new IssueRelationQuery(this._request).fetch(this._issueRelationUpdated.id);
+  }
+  /** The ID of triggered when an issue relation is updated */
+  public get issueRelationUpdatedId(): string | undefined {
+    return this._issueRelationUpdated?.id;
+  }
+  /** Triggered when a an issue is unarchived */
+  public get issueUnarchived(): LinearFetch<Issue> | undefined {
+    return new IssueQuery(this._request).fetch(this._issueUnarchived.id);
+  }
+  /** The ID of triggered when a an issue is unarchived */
+  public get issueUnarchivedId(): string | undefined {
+    return this._issueUnarchived?.id;
+  }
+  /** Triggered when an issue is updated */
+  public get issueUpdated(): LinearFetch<Issue> | undefined {
+    return new IssueQuery(this._request).fetch(this._issueUpdated.id);
+  }
+  /** The ID of triggered when an issue is updated */
+  public get issueUpdatedId(): string | undefined {
+    return this._issueUpdated?.id;
+  }
+  /** Triggered when an organization is updated */
+  public get organizationUpdated(): LinearFetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
+  }
+  /** Triggered when a project is archived */
+  public get projectArchived(): LinearFetch<Project> | undefined {
+    return new ProjectQuery(this._request).fetch(this._projectArchived.id);
+  }
+  /** The ID of triggered when a project is archived */
+  public get projectArchivedId(): string | undefined {
+    return this._projectArchived?.id;
+  }
+  /** Triggered when a project is created */
+  public get projectCreated(): LinearFetch<Project> | undefined {
+    return new ProjectQuery(this._request).fetch(this._projectCreated.id);
+  }
+  /** The ID of triggered when a project is created */
+  public get projectCreatedId(): string | undefined {
+    return this._projectCreated?.id;
+  }
+  /** Triggered when a a project is unarchived */
+  public get projectUnarchived(): LinearFetch<Project> | undefined {
+    return new ProjectQuery(this._request).fetch(this._projectUnarchived.id);
+  }
+  /** The ID of triggered when a a project is unarchived */
+  public get projectUnarchivedId(): string | undefined {
+    return this._projectUnarchived?.id;
+  }
+  /** Triggered when a project update is created */
+  public get projectUpdateCreated(): LinearFetch<ProjectUpdate> | undefined {
+    return new ProjectUpdateQuery(this._request).fetch(this._projectUpdateCreated.id);
+  }
+  /** The ID of triggered when a project update is created */
+  public get projectUpdateCreatedId(): string | undefined {
+    return this._projectUpdateCreated?.id;
+  }
+  /** Triggered when a project update is deleted */
+  public get projectUpdateDeleted(): LinearFetch<ProjectUpdate> | undefined {
+    return new ProjectUpdateQuery(this._request).fetch(this._projectUpdateDeleted.id);
+  }
+  /** The ID of triggered when a project update is deleted */
+  public get projectUpdateDeletedId(): string | undefined {
+    return this._projectUpdateDeleted?.id;
+  }
+  /** Triggered when a project update is updated */
+  public get projectUpdateUpdated(): LinearFetch<ProjectUpdate> | undefined {
+    return new ProjectUpdateQuery(this._request).fetch(this._projectUpdateUpdated.id);
+  }
+  /** The ID of triggered when a project update is updated */
+  public get projectUpdateUpdatedId(): string | undefined {
+    return this._projectUpdateUpdated?.id;
+  }
+  /** Triggered when a project is updated */
+  public get projectUpdated(): LinearFetch<Project> | undefined {
+    return new ProjectQuery(this._request).fetch(this._projectUpdated.id);
+  }
+  /** The ID of triggered when a project is updated */
+  public get projectUpdatedId(): string | undefined {
+    return this._projectUpdated?.id;
+  }
+  /** Triggered when a roadmap is created */
+  public get roadmapCreated(): LinearFetch<Roadmap> | undefined {
+    return new RoadmapQuery(this._request).fetch(this._roadmapCreated.id);
+  }
+  /** The ID of triggered when a roadmap is created */
+  public get roadmapCreatedId(): string | undefined {
+    return this._roadmapCreated?.id;
+  }
+  /** Triggered when a roadmap is deleted */
+  public get roadmapDeleted(): LinearFetch<Roadmap> | undefined {
+    return new RoadmapQuery(this._request).fetch(this._roadmapDeleted.id);
+  }
+  /** The ID of triggered when a roadmap is deleted */
+  public get roadmapDeletedId(): string | undefined {
+    return this._roadmapDeleted?.id;
+  }
+  /** Triggered when a roadmap is updated */
+  public get roadmapUpdated(): LinearFetch<Roadmap> | undefined {
+    return new RoadmapQuery(this._request).fetch(this._roadmapUpdated.id);
+  }
+  /** The ID of triggered when a roadmap is updated */
+  public get roadmapUpdatedId(): string | undefined {
+    return this._roadmapUpdated?.id;
+  }
+  /** Triggered when a team is created */
+  public get teamCreated(): LinearFetch<Team> | undefined {
+    return new TeamQuery(this._request).fetch(this._teamCreated.id);
+  }
+  /** The ID of triggered when a team is created */
+  public get teamCreatedId(): string | undefined {
+    return this._teamCreated?.id;
+  }
+  /** Triggered when a team is deleted */
+  public get teamDeleted(): LinearFetch<Team> | undefined {
+    return new TeamQuery(this._request).fetch(this._teamDeleted.id);
+  }
+  /** The ID of triggered when a team is deleted */
+  public get teamDeletedId(): string | undefined {
+    return this._teamDeleted?.id;
+  }
+  /** Triggered when a team membership is created */
+  public get teamMembershipCreated(): LinearFetch<TeamMembership> | undefined {
+    return new TeamMembershipQuery(this._request).fetch(this._teamMembershipCreated.id);
+  }
+  /** The ID of triggered when a team membership is created */
+  public get teamMembershipCreatedId(): string | undefined {
+    return this._teamMembershipCreated?.id;
+  }
+  /** Triggered when a team membership is deleted */
+  public get teamMembershipDeleted(): LinearFetch<TeamMembership> | undefined {
+    return new TeamMembershipQuery(this._request).fetch(this._teamMembershipDeleted.id);
+  }
+  /** The ID of triggered when a team membership is deleted */
+  public get teamMembershipDeletedId(): string | undefined {
+    return this._teamMembershipDeleted?.id;
+  }
+  /** Triggered when a team membership is updated */
+  public get teamMembershipUpdated(): LinearFetch<TeamMembership> | undefined {
+    return new TeamMembershipQuery(this._request).fetch(this._teamMembershipUpdated.id);
+  }
+  /** The ID of triggered when a team membership is updated */
+  public get teamMembershipUpdatedId(): string | undefined {
+    return this._teamMembershipUpdated?.id;
+  }
+  /** Triggered when a team is updated */
+  public get teamUpdated(): LinearFetch<Team> | undefined {
+    return new TeamQuery(this._request).fetch(this._teamUpdated.id);
+  }
+  /** The ID of triggered when a team is updated */
+  public get teamUpdatedId(): string | undefined {
+    return this._teamUpdated?.id;
+  }
+  /** Triggered when an user is created */
+  public get userCreated(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._userCreated.id);
+  }
+  /** The ID of triggered when an user is created */
+  public get userCreatedId(): string | undefined {
+    return this._userCreated?.id;
+  }
+  /** Triggered when an user is updated */
+  public get userUpdated(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._userUpdated.id);
+  }
+  /** The ID of triggered when an user is updated */
+  public get userUpdatedId(): string | undefined {
+    return this._userUpdated?.id;
+  }
+  /** Triggered when a workflow state is archived */
+  public get workflowStateArchived(): LinearFetch<WorkflowState> | undefined {
+    return new WorkflowStateQuery(this._request).fetch(this._workflowStateArchived.id);
+  }
+  /** The ID of triggered when a workflow state is archived */
+  public get workflowStateArchivedId(): string | undefined {
+    return this._workflowStateArchived?.id;
+  }
+  /** Triggered when a workflow state is created */
+  public get workflowStateCreated(): LinearFetch<WorkflowState> | undefined {
+    return new WorkflowStateQuery(this._request).fetch(this._workflowStateCreated.id);
+  }
+  /** The ID of triggered when a workflow state is created */
+  public get workflowStateCreatedId(): string | undefined {
+    return this._workflowStateCreated?.id;
+  }
+  /** Triggered when a workflow state is updated */
+  public get workflowStateUpdated(): LinearFetch<WorkflowState> | undefined {
+    return new WorkflowStateQuery(this._request).fetch(this._workflowStateUpdated.id);
+  }
+  /** The ID of triggered when a workflow state is updated */
+  public get workflowStateUpdatedId(): string | undefined {
+    return this._workflowStateUpdated?.id;
+  }
 }
 /**
  * SuccessPayload model
@@ -45694,6 +46307,8 @@ export {
   AiConversationStatus,
   AiConversationTool,
   AiConversationWidgetName,
+  AiPromptProgressStatus,
+  AiPromptType,
   AuthenticationSessionType,
   ContextViewType,
   CustomerStatusType,

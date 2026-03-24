@@ -914,6 +914,30 @@ fragment Document on Document {
   }
 }
 
+# A draft revision of document content, pending user review.
+fragment DocumentContentDraft on DocumentContentDraft {
+  __typename
+  # The draft content state as a base64 encoded Yjs state update.
+  contentState
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  documentContent {
+    ...DocumentContent
+  }
+  documentContentId
+  user {
+    id
+  }
+  userId
+}
+
 # A facet. Facets are joins between entities. A facet can tie a custom view to a project, or a a
 # project to a roadmap for example.
 fragment Facet on Facet {
@@ -10354,6 +10378,274 @@ fragment SsoUrlFromEmailResponse on SsoUrlFromEmailResponse {
   samlSsoUrl
   # Whether the operation was successful.
   success
+}
+
+fragment Subscription on Subscription {
+  __typename
+  # Triggered when a a comment is unarchived
+  commentUnarchived {
+    id
+  }
+  # Triggered when a a document is unarchived
+  documentUnarchived {
+    id
+  }
+  # Triggered when a a notification is unarchived
+  notificationUnarchived {
+    ...Notification
+  }
+  # Triggered when a a project is unarchived
+  projectUnarchived {
+    id
+  }
+  # Triggered when a an issue is unarchived
+  issueUnarchived {
+    id
+  }
+  # Triggered when a comment is archived
+  commentArchived {
+    id
+  }
+  # Triggered when a comment is created
+  commentCreated {
+    id
+  }
+  # Triggered when a comment is deleted
+  commentDeleted {
+    id
+  }
+  # Triggered when a comment is updated
+  commentUpdated {
+    id
+  }
+  # Triggered when a cycle is archived
+  cycleArchived {
+    id
+  }
+  # Triggered when a cycle is created
+  cycleCreated {
+    id
+  }
+  # Triggered when a cycle is updated
+  cycleUpdated {
+    id
+  }
+  # Triggered when a document content draft is created
+  documentContentDraftCreated {
+    ...DocumentContentDraft
+  }
+  # Triggered when a document content draft is deleted
+  documentContentDraftDeleted {
+    ...DocumentContentDraft
+  }
+  # Triggered when a document content draft is updated
+  documentContentDraftUpdated {
+    ...DocumentContentDraft
+  }
+  # Triggered when a document is archived
+  documentArchived {
+    id
+  }
+  # Triggered when a document is created
+  documentCreated {
+    id
+  }
+  # Triggered when a document is updated
+  documentUpdated {
+    id
+  }
+  # Triggered when a draft is created
+  draftCreated {
+    ...Draft
+  }
+  # Triggered when a draft is deleted
+  draftDeleted {
+    ...Draft
+  }
+  # Triggered when a draft is updated
+  draftUpdated {
+    ...Draft
+  }
+  # Triggered when a favorite is created
+  favoriteCreated {
+    id
+  }
+  # Triggered when a favorite is deleted
+  favoriteDeleted {
+    id
+  }
+  # Triggered when a favorite is updated
+  favoriteUpdated {
+    id
+  }
+  # Triggered when a notification is archived
+  notificationArchived {
+    ...Notification
+  }
+  # Triggered when a notification is created
+  notificationCreated {
+    ...Notification
+  }
+  # Triggered when a notification is deleted
+  notificationDeleted {
+    ...Notification
+  }
+  # Triggered when a notification is updated
+  notificationUpdated {
+    ...Notification
+  }
+  # Triggered when a project is archived
+  projectArchived {
+    id
+  }
+  # Triggered when a project is created
+  projectCreated {
+    id
+  }
+  # Triggered when a project is updated
+  projectUpdated {
+    id
+  }
+  # Triggered when a project update is created
+  projectUpdateCreated {
+    id
+  }
+  # Triggered when a project update is deleted
+  projectUpdateDeleted {
+    id
+  }
+  # Triggered when a project update is updated
+  projectUpdateUpdated {
+    id
+  }
+  # Triggered when a roadmap is created
+  roadmapCreated {
+    id
+  }
+  # Triggered when a roadmap is deleted
+  roadmapDeleted {
+    id
+  }
+  # Triggered when a roadmap is updated
+  roadmapUpdated {
+    id
+  }
+  # Triggered when a team is created
+  teamCreated {
+    id
+  }
+  # Triggered when a team is deleted
+  teamDeleted {
+    id
+  }
+  # Triggered when a team is updated
+  teamUpdated {
+    id
+  }
+  # Triggered when a team membership is created
+  teamMembershipCreated {
+    id
+  }
+  # Triggered when a team membership is deleted
+  teamMembershipDeleted {
+    id
+  }
+  # Triggered when a team membership is updated
+  teamMembershipUpdated {
+    id
+  }
+  # Triggered when a workflow state is archived
+  workflowStateArchived {
+    id
+  }
+  # Triggered when a workflow state is created
+  workflowStateCreated {
+    id
+  }
+  # Triggered when a workflow state is updated
+  workflowStateUpdated {
+    id
+  }
+  # Triggered when an agent activity is created
+  agentActivityCreated {
+    id
+  }
+  # Triggered when an agent activity is updated
+  agentActivityUpdated {
+    id
+  }
+  # Triggered when an agent session is created
+  agentSessionCreated {
+    id
+  }
+  # Triggered when an agent session is updated
+  agentSessionUpdated {
+    id
+  }
+  # Triggered when an initiative is created
+  initiativeCreated {
+    id
+  }
+  # Triggered when an initiative is deleted
+  initiativeDeleted {
+    id
+  }
+  # Triggered when an initiative is updated
+  initiativeUpdated {
+    id
+  }
+  # Triggered when an issue history is created
+  issueHistoryCreated {
+    ...IssueHistory
+  }
+  # Triggered when an issue history is updated
+  issueHistoryUpdated {
+    ...IssueHistory
+  }
+  # Triggered when an issue is archived
+  issueArchived {
+    id
+  }
+  # Triggered when an issue is created
+  issueCreated {
+    id
+  }
+  # Triggered when an issue is updated
+  issueUpdated {
+    id
+  }
+  # Triggered when an issue label is created
+  issueLabelCreated {
+    id
+  }
+  # Triggered when an issue label is deleted
+  issueLabelDeleted {
+    id
+  }
+  # Triggered when an issue label is updated
+  issueLabelUpdated {
+    id
+  }
+  # Triggered when an issue relation is created
+  issueRelationCreated {
+    id
+  }
+  # Triggered when an issue relation is deleted
+  issueRelationDeleted {
+    id
+  }
+  # Triggered when an issue relation is updated
+  issueRelationUpdated {
+    id
+  }
+  # Triggered when an user is created
+  userCreated {
+    id
+  }
+  # Triggered when an user is updated
+  userUpdated {
+    id
+  }
 }
 
 fragment SuccessPayload on SuccessPayload {
