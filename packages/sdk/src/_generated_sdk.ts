@@ -6245,11 +6245,11 @@ export class Draft extends Request {
   public get customerNeedId(): string | undefined {
     return this._customerNeed?.id;
   }
-  /** The initiative for which this is a draft initiative update. */
+  /** The initiative for which this is a draft comment or initiative update. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
-  /** The ID of initiative for which this is a draft initiative update. */
+  /** The ID of initiative for which this is a draft comment or initiative update. */
   public get initiativeId(): string | undefined {
     return this._initiative?.id;
   }
@@ -6279,11 +6279,11 @@ export class Draft extends Request {
   public get parentCommentId(): string | undefined {
     return this._parentComment?.id;
   }
-  /** The project for which this is a draft project update. */
+  /** The project for which this is a draft comment or project update. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
-  /** The ID of project for which this is a draft project update. */
+  /** The ID of project for which this is a draft comment or project update. */
   public get projectId(): string | undefined {
     return this._project?.id;
   }
@@ -17993,6 +17993,7 @@ export class Team extends Request {
   private _markedAsDuplicateWorkflowState?: L.TeamFragment["markedAsDuplicateWorkflowState"];
   private _mergeWorkflowState?: L.TeamFragment["mergeWorkflowState"];
   private _mergeableWorkflowState?: L.TeamFragment["mergeableWorkflowState"];
+  private _parent?: L.TeamFragment["parent"];
   private _reviewWorkflowState?: L.TeamFragment["reviewWorkflowState"];
   private _startWorkflowState?: L.TeamFragment["startWorkflowState"];
   private _triageIssueState?: L.TeamFragment["triageIssueState"];
@@ -18062,6 +18063,7 @@ export class Team extends Request {
     this._markedAsDuplicateWorkflowState = data.markedAsDuplicateWorkflowState ?? undefined;
     this._mergeWorkflowState = data.mergeWorkflowState ?? undefined;
     this._mergeableWorkflowState = data.mergeableWorkflowState ?? undefined;
+    this._parent = data.parent ?? undefined;
     this._reviewWorkflowState = data.reviewWorkflowState ?? undefined;
     this._startWorkflowState = data.startWorkflowState ?? undefined;
     this._triageIssueState = data.triageIssueState ?? undefined;
@@ -18268,6 +18270,14 @@ export class Team extends Request {
   /** The organization that the team is associated with. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
+  }
+  /** The team's parent team. */
+  public get parent(): LinearFetch<Team> | undefined {
+    return this._parent?.id ? new TeamQuery(this._request).fetch(this._parent?.id) : undefined;
+  }
+  /** The ID of team's parent team. */
+  public get parentId(): string | undefined {
+    return this._parent?.id;
   }
   /** The workflow state into which issues are moved when a review has been requested for the PR. */
   public get reviewWorkflowState(): LinearFetch<WorkflowState> | undefined {
@@ -20187,7 +20197,9 @@ export class ViewPreferencesValues extends Request {
     this.projectZoomLevel = data.projectZoomLevel ?? undefined;
     this.releasePipelineFieldLatestRelease = data.releasePipelineFieldLatestRelease ?? undefined;
     this.releasePipelineFieldReleases = data.releasePipelineFieldReleases ?? undefined;
+    this.releasePipelineFieldTeams = data.releasePipelineFieldTeams ?? undefined;
     this.releasePipelineFieldType = data.releasePipelineFieldType ?? undefined;
+    this.releasePipelineGrouping = data.releasePipelineGrouping ?? undefined;
     this.releasePipelinesViewOrdering = data.releasePipelinesViewOrdering ?? undefined;
     this.reviewFieldAvatar = data.reviewFieldAvatar ?? undefined;
     this.reviewFieldChecks = data.reviewFieldChecks ?? undefined;
@@ -20196,8 +20208,11 @@ export class ViewPreferencesValues extends Request {
     this.reviewFieldRepository = data.reviewFieldRepository ?? undefined;
     this.reviewGrouping = data.reviewGrouping ?? undefined;
     this.reviewViewOrdering = data.reviewViewOrdering ?? undefined;
+    this.scheduledPipelineReleaseFieldCompletion = data.scheduledPipelineReleaseFieldCompletion ?? undefined;
+    this.scheduledPipelineReleaseFieldDescription = data.scheduledPipelineReleaseFieldDescription ?? undefined;
     this.scheduledPipelineReleaseFieldReleaseDate = data.scheduledPipelineReleaseFieldReleaseDate ?? undefined;
-    this.scheduledPipelineReleaseFieldStage = data.scheduledPipelineReleaseFieldStage ?? undefined;
+    this.scheduledPipelineReleaseFieldVersion = data.scheduledPipelineReleaseFieldVersion ?? undefined;
+    this.scheduledPipelineReleasesViewGrouping = data.scheduledPipelineReleasesViewGrouping ?? undefined;
     this.scheduledPipelineReleasesViewOrdering = data.scheduledPipelineReleasesViewOrdering ?? undefined;
     this.searchResultType = data.searchResultType ?? undefined;
     this.searchViewOrdering = data.searchViewOrdering ?? undefined;
@@ -20530,8 +20545,12 @@ export class ViewPreferencesValues extends Request {
   public releasePipelineFieldLatestRelease?: boolean | null;
   /** Whether to show the releases field for release pipelines. */
   public releasePipelineFieldReleases?: boolean | null;
+  /** Whether to show the teams field for release pipelines. */
+  public releasePipelineFieldTeams?: boolean | null;
   /** Whether to show the type field for release pipelines. */
   public releasePipelineFieldType?: boolean | null;
+  /** The release pipeline grouping. */
+  public releasePipelineGrouping?: string | null;
   /** The release pipelines view ordering. */
   public releasePipelinesViewOrdering?: string | null;
   /** Whether to show the review avatar field. */
@@ -20548,10 +20567,16 @@ export class ViewPreferencesValues extends Request {
   public reviewGrouping?: string | null;
   /** The review view ordering. */
   public reviewViewOrdering?: string | null;
+  /** Whether to show the completion field for scheduled pipeline releases. */
+  public scheduledPipelineReleaseFieldCompletion?: boolean | null;
+  /** Whether to show the description field for scheduled pipeline releases. */
+  public scheduledPipelineReleaseFieldDescription?: boolean | null;
   /** Whether to show the release date field for scheduled pipeline releases. */
   public scheduledPipelineReleaseFieldReleaseDate?: boolean | null;
-  /** Whether to show the stage field for scheduled pipeline releases. */
-  public scheduledPipelineReleaseFieldStage?: boolean | null;
+  /** Whether to show the version field for scheduled pipeline releases. */
+  public scheduledPipelineReleaseFieldVersion?: boolean | null;
+  /** The scheduled pipeline releases view grouping. */
+  public scheduledPipelineReleasesViewGrouping?: string | null;
   /** The scheduled pipeline releases view ordering. */
   public scheduledPipelineReleasesViewOrdering?: string | null;
   /** The search result type filter. */
@@ -45661,6 +45686,7 @@ export {
   AiConversationEntityCardWidgetArgsType,
   AiConversationEntityListWidgetArgsAction,
   AiConversationEntityListWidgetArgsEntitiesType,
+  AiConversationInitialSource,
   AiConversationPartPhase,
   AiConversationPartType,
   AiConversationQueryUpdatesToolCallArgsUpdateType,
@@ -45690,6 +45716,7 @@ export {
   IntegrationService,
   IssueRelationType,
   IssueSharedAccessDisallowedField,
+  IssueSharingPolicy,
   IssueSuggestionState,
   IssueSuggestionType,
   NotificationCategory,
@@ -45708,6 +45735,7 @@ export {
   ProjectTab,
   ProjectUpdateHealthType,
   ProjectUpdateReminderFrequency,
+  PullRequestCheckPresentation,
   PullRequestMergeMethod,
   PullRequestReviewTool,
   PullRequestStatus,

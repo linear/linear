@@ -966,7 +966,7 @@ fragment Draft on Draft {
   customerNeed {
     id
   }
-  # The initiative for which this is a draft initiative update.
+  # The initiative for which this is a draft comment or initiative update.
   initiative {
     id
   }
@@ -981,7 +981,7 @@ fragment Draft on Draft {
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
-  # The project for which this is a draft project update.
+  # The project for which this is a draft comment or project update.
   project {
     id
   }
@@ -4386,6 +4386,10 @@ fragment Team on Team {
   description
   # The team's name.
   name
+  # The team's parent team.
+  parent {
+    id
+  }
   # The team's unique key. The key is used in URLs.
   key
   # The time at which the entity was archived. Null if the entity has not been archived.
@@ -10696,12 +10700,16 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectViewOrdering
   # The project sub-grouping.
   projectSubGrouping
+  # The release pipeline grouping.
+  releasePipelineGrouping
   # The release pipelines view ordering.
   releasePipelinesViewOrdering
   # The review grouping.
   reviewGrouping
   # The review view ordering.
   reviewViewOrdering
+  # The scheduled pipeline releases view grouping.
+  scheduledPipelineReleasesViewGrouping
   # The scheduled pipeline releases view ordering.
   scheduledPipelineReleasesViewOrdering
   # The search result type filter.
@@ -10780,6 +10788,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldSla
   # Whether to show the Sentry issues field.
   fieldSentryIssues
+  # Whether to show the completion field for scheduled pipeline releases.
+  scheduledPipelineReleaseFieldCompletion
   # Whether to show the custom view creation date field.
   customViewFieldDateCreated
   # Whether to show the custom view owner field.
@@ -10816,6 +10826,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   dashboardFieldOwner
   # Whether to show the dashboard updated date field.
   dashboardFieldDateUpdated
+  # Whether to show the description field for scheduled pipeline releases.
+  scheduledPipelineReleaseFieldDescription
   # Whether to show the due date field.
   fieldDueDate
   # Whether to show the initiative active projects health field.
@@ -10978,8 +10990,6 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   reviewFieldPreviewLinks
   # Whether to show the review repository field.
   reviewFieldRepository
-  # Whether to show the stage field for scheduled pipeline releases.
-  scheduledPipelineReleaseFieldStage
   # Whether to show the team creation date field.
   teamFieldDateCreated
   # Whether to show the team cycle field.
@@ -10996,10 +11006,14 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   teamFieldProjects
   # Whether to show the team updated date field.
   teamFieldDateUpdated
+  # Whether to show the teams field for release pipelines.
+  releasePipelineFieldTeams
   # Whether to show the time in current status field.
   fieldTimeInCurrentStatus
   # Whether to show the type field for release pipelines.
   releasePipelineFieldType
+  # Whether to show the version field for scheduled pipeline releases.
+  scheduledPipelineReleaseFieldVersion
   # Whether to show triage issues.
   showTriageIssues
   # Whether to show unread items first.
