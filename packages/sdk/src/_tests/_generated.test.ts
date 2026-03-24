@@ -257,6 +257,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the team.parent query for L.Team */
+    it("team.parent", async () => {
+      if (_team) {
+        const team_parent: L.Team | undefined | null = await _team.parent;
+        expect(team_parent instanceof L.Team);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.parent query");
+      }
+    });
+
     /** Test the team.reviewWorkflowState query for L.WorkflowState */
     it("team.reviewWorkflowState", async () => {
       if (_team) {
@@ -5226,6 +5236,16 @@ describe("generated", () => {
         expect(team_organization instanceof L.Organization);
       } else {
         console.warn("codegen-doc:print: No Team found - cannot test team.organization query");
+      }
+    });
+
+    /** Test the team.parent query for L.Team */
+    it("team.parent", async () => {
+      if (_team) {
+        const team_parent: L.Team | undefined | null = await _team.parent;
+        expect(team_parent instanceof L.Team);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.parent query");
       }
     });
 
