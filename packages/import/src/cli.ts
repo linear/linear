@@ -26,28 +26,47 @@ const VALID_SERVICES = [
   "linearCsv",
 ] as const;
 
+const SERVICE_LABELS: Record<(typeof VALID_SERVICES)[number], string> = {
+  github: "GitHub",
+  gitlabCsv: "GitLab (CSV export)",
+  jiraCsv: "Jira (CSV export)",
+  asanaCsv: "Asana (CSV export)",
+  pivotalCsv: "Pivotal (CSV export)",
+  shortcutCsv: "Shortcut (CSV export)",
+  trelloJson: "Trello (JSON export)",
+  linearCsv: "Linear (CSV export)",
+};
+
 /** Parse a named CLI flag value: --flag value */
 const getFlag = (name: string): string | undefined => {
   const idx = process.argv.indexOf(`--${name}`);
   return idx > -1 && idx + 1 < process.argv.length ? process.argv[idx + 1] : undefined;
 };
 
+/** Check if a boolean CLI flag is present */
+const hasFlag = (name: string): boolean => process.argv.includes(`--${name}`);
+
 (async () => {
   try {
-    // Support non-interactive mode via CLI flags / env vars
-    const flagApiKey = getFlag("api-key") || process.env.LINEAR_API_KEY;
+    // API key from environment variable only (not CLI flag for security)
+    const flagApiKey = process.env.LINEAR_API_KEY;
     const flagImporter = getFlag("importer");
     const flagTeam = getFlag("team");
+    const flagProject = getFlag("project");
+    const flagIncludeComments = hasFlag("include-comments");
+    const flagSelfAssign = hasFlag("self-assign");
+
+    // Validate --importer early regardless of mode
+    if (flagImporter && !VALID_SERVICES.includes(flagImporter as (typeof VALID_SERVICES)[number])) {
+      console.error(chalk.red(`Invalid importer "${flagImporter}". Valid options: ${VALID_SERVICES.join(", ")}`));
+      process.exit(1);
+    }
 
     let linearApiKey: string;
     let service: string;
 
     if (flagApiKey && flagImporter) {
-      // Non-interactive mode: use provided flags
-      if (!VALID_SERVICES.includes(flagImporter as (typeof VALID_SERVICES)[number])) {
-        console.log(chalk.red(`Invalid importer "${flagImporter}". Valid options: ${VALID_SERVICES.join(", ")}`));
-        return;
-      }
+      // Non-interactive mode: use provided flags/env
       linearApiKey = flagApiKey;
       service = flagImporter;
     } else {
@@ -64,40 +83,7 @@ const getFlag = (name: string): string | undefined => {
           type: "list",
           name: "service",
           message: "Which service would you like to import from?",
-          choices: [
-            {
-              name: "GitHub",
-              value: "github",
-            },
-            {
-              name: "GitLab (CSV export)",
-              value: "gitlabCsv",
-            },
-            {
-              name: "Jira (CSV export)",
-              value: "jiraCsv",
-            },
-            {
-              name: "Asana (CSV export)",
-              value: "asanaCsv",
-            },
-            {
-              name: "Pivotal (CSV export)",
-              value: "pivotalCsv",
-            },
-            {
-              name: "Shortcut (CSV export)",
-              value: "shortcutCsv",
-            },
-            {
-              name: "Trello (JSON export)",
-              value: "trelloJson",
-            },
-            {
-              name: "Linear (CSV export)",
-              value: "linearCsv",
-            },
-          ],
+          choices: VALID_SERVICES.map(value => ({ name: SERVICE_LABELS[value], value })),
           when: () => !flagImporter,
           default: flagImporter,
         },
@@ -135,13 +121,17 @@ const getFlag = (name: string): string | undefined => {
         importer = await linearCsvImporter();
         break;
       default:
-        console.log(chalk.red(`Invalid importer`));
-        return;
+        console.error(chalk.red(`Invalid importer`));
+        process.exit(1);
     }
 
     if (importer) {
       const apiUrl = getFlag("apiUrl");
-      await importIssues(linearApiKey, importer, apiUrl, flagTeam);
+      await importIssues(linearApiKey, importer, apiUrl, flagTeam, {
+        project: flagProject,
+        includeComments: flagIncludeComments,
+        selfAssign: flagSelfAssign,
+      });
     }
   } catch (error) {
     const userFriendlyMessage = error.errors?.[0]?.message;
@@ -150,7 +140,8 @@ const getFlag = (name: string): string | undefined => {
       console.error(error);
     }
     if (userFriendlyMessage) {
-      console.log(chalk.red(userFriendlyMessage));
+      console.error(chalk.red(userFriendlyMessage));
     }
+    process.exit(1);
   }
 })();

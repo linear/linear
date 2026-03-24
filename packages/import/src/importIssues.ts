@@ -35,6 +35,12 @@ const defaultStateColors: Record<IssueStatus, string> = {
   [IssueStatus.Completed]: "#5e6ad2",
 };
 
+interface NonInteractiveFlags {
+  project?: string;
+  includeComments?: boolean;
+  selfAssign?: boolean;
+}
+
 /**
  * Import issues into Linear via the API.
  */
@@ -42,7 +48,8 @@ export const importIssues = async (
   apiKey: string,
   importer: Importer,
   apiUrl?: string,
-  targetTeamIdFlag?: string
+  targetTeamIdFlag?: string,
+  flags?: NonInteractiveFlags
 ): Promise<void> => {
   const client = new LinearClient({ apiKey, apiUrl });
   const importData = await importer.import();
@@ -68,7 +75,25 @@ export const importIssues = async (
     if (matchedTeam) {
       resolvedTeamIdFlag = matchedTeam.id;
     } else {
-      throw new Error(`Team "${targetTeamIdFlag}" not found. Available teams: ${allTeams.map(t => t.key).join(", ")}`);
+      console.error(chalk.red(`Team "${targetTeamIdFlag}" not found. Available teams: ${allTeams.map(t => t.key).join(", ")}`));
+      process.exit(1);
+    }
+  }
+
+  // Resolve --project flag to a project ID if provided
+  let resolvedProjectIdFlag: string | undefined;
+  if (flags?.project && resolvedTeamIdFlag) {
+    const team = await client.team(resolvedTeamIdFlag);
+    const teamProjects = await team?.projects();
+    const projects = teamProjects?.nodes ?? [];
+    const matchedProject = projects.find(
+      p => p.id === flags.project || p.name.toLowerCase() === flags.project!.toLowerCase()
+    );
+    if (matchedProject) {
+      resolvedProjectIdFlag = matchedProject.id;
+    } else {
+      console.error(chalk.red(`Project "${flags.project}" not found. Available projects: ${projects.map(p => p.name).join(", ")}`));
+      process.exit(1);
     }
   }
 
@@ -78,8 +103,11 @@ export const importIssues = async (
     importAnswers = {
       newTeam: false,
       targetTeamId: resolvedTeamIdFlag,
-      selfAssign: true,
-      includeComments: !!importData.issues.find(issue => issue.comments && issue.comments.length > 0),
+      targetProjectId: resolvedProjectIdFlag ? true : undefined,
+      selfAssign: flags?.selfAssign ?? false,
+      includeComments: flags?.includeComments
+        ? true
+        : !!importData.issues.find(issue => issue.comments && issue.comments.length > 0),
     };
   } else {
     // Prompt the user to either get or create a team
@@ -228,7 +256,7 @@ export const importIssues = async (
   spinner.stop();
   spinner = ora("Updating labels").start();
 
-  const projectId = importAnswers.targetProjectId;
+  const projectId = resolvedProjectIdFlag || importAnswers.targetProjectId;
   const labelMapping = await handleLabels(client, importData, teamId, [...allTeamLabels, ...allWorkspaceLabels]);
 
   const existingStateMap = {} as { [name: string]: string };
