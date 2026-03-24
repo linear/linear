@@ -1,6 +1,7 @@
 schema {
   query: Query
   mutation: Mutation
+  subscription: Subscription
 }
 
 "Indicates exactly one field must be supplied and this field must not be `null`."
@@ -2127,6 +2128,156 @@ type AiConversationWidgetPart implements AiConversationBasePart {
 }
 
 """
+[Internal] A prompt workflow progress.
+"""
+type AiPromptProgress implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  [Internal] The log ID for the prompt workflow, if available.
+  """
+  logId: String
+  """
+  [Internal] The metadata for the prompt workflow.
+  """
+  metadata: JSONObject!
+  """
+  [Internal] The status of the prompt workflow.
+  """
+  status: AiPromptProgressStatus!
+  """
+  [Internal] The type of AI prompt workflow.
+  """
+  type: AiPromptType!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type AiPromptProgressConnection {
+  edges: [AiPromptProgressEdge!]!
+  nodes: [AiPromptProgress!]!
+  pageInfo: PageInfo!
+}
+
+type AiPromptProgressEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: AiPromptProgress!
+}
+
+"""
+[Internal] AI prompt progress filtering options.
+"""
+input AiPromptProgressFilter {
+  """
+  [Internal] Compound filters, all of which need to be matched by the AI prompt progress.
+  """
+  and: [AiPromptProgressFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  [Internal] Compound filters, one of which need to be matched by the AI prompt progress.
+  """
+  or: [AiPromptProgressFilter!]
+  """
+  [Internal] Comparator for the AI prompt workflow status.
+  """
+  status: AiPromptProgressStatusComparator
+  """
+  [Internal] Comparator for the AI prompt workflow type.
+  """
+  type: AiPromptTypeComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
+"""
+[Internal] The status of a prompt workflow.
+"""
+enum AiPromptProgressStatus {
+  canceled
+  created
+  failed
+  finished
+  inProgress
+}
+
+"""
+[Internal] Comparator for the AI prompt workflow status.
+"""
+input AiPromptProgressStatusComparator {
+  """
+  Equals constraint.
+  """
+  eq: AiPromptProgressStatus
+  """
+  In-array constraint.
+  """
+  in: [AiPromptProgressStatus!]
+  """
+  Not-equals constraint.
+  """
+  neq: AiPromptProgressStatus
+  """
+  Not-in-array constraint.
+  """
+  nin: [AiPromptProgressStatus!]
+  """
+  Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.
+  """
+  null: Boolean
+}
+
+"""
+[Internal] Filter for AI prompt progress subscription events.
+"""
+input AiPromptProgressSubscriptionFilter {
+  """
+  [Internal] Filter by comment ID.
+  """
+  commentId: IDComparator
+  """
+  [Internal] Filter by issue ID.
+  """
+  issueId: IDComparator
+  """
+  [Internal] Filter by pull request comment ID.
+  """
+  pullRequestCommentId: IDComparator
+  """
+  [Internal] Filter by prompt workflow status.
+  """
+  status: AiPromptProgressStatusComparator
+  """
+  [Internal] Filter by prompt workflow type.
+  """
+  type: AiPromptTypeComparator
+}
+
+"""
 AI prompt rules for a team.
 """
 type AiPromptRules implements Node {
@@ -2151,6 +2302,51 @@ type AiPromptRules implements Node {
   The user who last updated the AI prompt rules.
   """
   updatedBy: User
+}
+
+"""
+The type of AI prompt workflow.
+"""
+enum AiPromptType {
+  agentGuidance
+  aiConversation
+  codeIntelligence
+  gongIssueIntake
+  initiativeUpdates
+  intercomIssueIntake
+  internalResearch
+  microsoftTeamsIssueIntake
+  productIntelligence
+  projectUpdates
+  slackIssueIntake
+  triageAgent
+  zendeskIssueIntake
+}
+
+"""
+[Internal] Comparator for the AI prompt workflow type.
+"""
+input AiPromptTypeComparator {
+  """
+  Equals constraint.
+  """
+  eq: AiPromptType
+  """
+  In-array constraint.
+  """
+  in: [AiPromptType!]
+  """
+  Not-equals constraint.
+  """
+  neq: AiPromptType
+  """
+  Not-in-array constraint.
+  """
+  nin: [AiPromptType!]
+  """
+  Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.
+  """
+  null: Boolean
 }
 
 input AirbyteConfigurationInput {
@@ -3348,6 +3544,39 @@ type Comment implements Node {
     """
     orderBy: PaginationOrderBy
   ): AgentSessionConnection!
+  """
+  [Internal] AI prompt progresses associated with this comment.
+  """
+  aiPromptProgresses(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned AI prompt progresses.
+    """
+    filter: AiPromptProgressFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): AiPromptProgressConnection!
   """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
@@ -7767,6 +7996,37 @@ type DocumentContentChildWebhookPayload {
   project: ProjectChildWebhookPayload
 }
 
+"""
+A draft revision of document content, pending user review.
+"""
+type DocumentContentDraft implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The draft content state as a base64 encoded Yjs state update.
+  """
+  contentState: String!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  documentContent: DocumentContent!
+  documentContentId: String!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  user: User!
+  userId: String!
+}
+
 type DocumentContentHistoryPayload {
   """
   The document content history entries.
@@ -10300,6 +10560,10 @@ input GitHubRepoInput {
   Whether the repository is archived.
   """
   archived: Boolean
+  """
+  The external identifier (GitHub node ID) for the repository.
+  """
+  externalId: String
   """
   The full name of the repository.
   """
@@ -17614,6 +17878,28 @@ type IssueStatusChangedNotificationWebhookPayload {
   The ID of the user who received the notification.
   """
   userId: String!
+}
+
+"""
+Filter for issue subscription events.
+"""
+input IssueSubscriptionFilter {
+  """
+  Filter by assignee ID.
+  """
+  assigneeId: IDComparator
+  """
+  Filter by project ID.
+  """
+  projectId: IDComparator
+  """
+  Filter by workflow state ID.
+  """
+  stateId: IDComparator
+  """
+  Filter by team ID.
+  """
+  teamId: IDComparator
 }
 
 type IssueSuggestion implements Node {
@@ -35138,6 +35424,10 @@ type ReleasePipeline implements Node {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
+    """
+    [ALPHA] Sort returned releases.
+    """
+    sort: [ReleaseSortInput!]
   ): ReleaseConnection!
   """
   The pipeline's unique slug identifier.
@@ -35352,6 +35642,16 @@ input ReleasePipelineUpdateInput {
 }
 
 """
+Release sorting options.
+"""
+input ReleaseSortInput {
+  """
+  Sort by release stage
+  """
+  stage: ReleaseStageSort
+}
+
+"""
 [Internal] A release stage.
 """
 type ReleaseStage implements Node {
@@ -35537,6 +35837,20 @@ type ReleaseStagePayload {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+
+"""
+Release stage sorting options.
+"""
+input ReleaseStageSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
 }
 
 """
@@ -37074,6 +37388,301 @@ input SubTypeComparator {
   Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.
   """
   null: Boolean
+}
+
+type Subscription {
+  """
+  Triggered when an agent activity is created
+  """
+  agentActivityCreated: AgentActivity!
+  """
+  Triggered when an agent activity is updated
+  """
+  agentActivityUpdated: AgentActivity!
+  """
+  Triggered when an agent session is created
+  """
+  agentSessionCreated: AgentSession!
+  """
+  Triggered when an agent session is updated
+  """
+  agentSessionUpdated: AgentSession!
+  """
+  Triggered when an ai conversation is updated
+  """
+  aiConversationUpdated: AiConversation!
+  """
+  Triggered when an ai prompt progress is created
+  """
+  aiPromptProgressCreated(filter: AiPromptProgressSubscriptionFilter): AiPromptProgress!
+  """
+  Triggered when an ai prompt progress is updated
+  """
+  aiPromptProgressUpdated(filter: AiPromptProgressSubscriptionFilter): AiPromptProgress!
+  """
+  Triggered when a comment is archived
+  """
+  commentArchived: Comment!
+  """
+  Triggered when a comment is created
+  """
+  commentCreated: Comment!
+  """
+  Triggered when a comment is deleted
+  """
+  commentDeleted: Comment!
+  """
+  Triggered when a a comment is unarchived
+  """
+  commentUnarchived: Comment!
+  """
+  Triggered when a comment is updated
+  """
+  commentUpdated: Comment!
+  """
+  Triggered when a cycle is archived
+  """
+  cycleArchived: Cycle!
+  """
+  Triggered when a cycle is created
+  """
+  cycleCreated: Cycle!
+  """
+  Triggered when a cycle is updated
+  """
+  cycleUpdated: Cycle!
+  """
+  Triggered when a document is archived
+  """
+  documentArchived: Document!
+  """
+  Triggered when a document content draft is created
+  """
+  documentContentDraftCreated: DocumentContentDraft!
+  """
+  Triggered when a document content draft is deleted
+  """
+  documentContentDraftDeleted: DocumentContentDraft!
+  """
+  Triggered when a document content draft is updated
+  """
+  documentContentDraftUpdated: DocumentContentDraft!
+  """
+  Triggered when a document is created
+  """
+  documentCreated: Document!
+  """
+  Triggered when a a document is unarchived
+  """
+  documentUnarchived: Document!
+  """
+  Triggered when a document is updated
+  """
+  documentUpdated: Document!
+  """
+  Triggered when a draft is created
+  """
+  draftCreated: Draft!
+  """
+  Triggered when a draft is deleted
+  """
+  draftDeleted: Draft!
+  """
+  Triggered when a draft is updated
+  """
+  draftUpdated: Draft!
+  """
+  Triggered when a favorite is created
+  """
+  favoriteCreated: Favorite!
+  """
+  Triggered when a favorite is deleted
+  """
+  favoriteDeleted: Favorite!
+  """
+  Triggered when a favorite is updated
+  """
+  favoriteUpdated: Favorite!
+  """
+  Triggered when an initiative is created
+  """
+  initiativeCreated: Initiative!
+  """
+  Triggered when an initiative is deleted
+  """
+  initiativeDeleted: Initiative!
+  """
+  Triggered when an initiative is updated
+  """
+  initiativeUpdated: Initiative!
+  """
+  Triggered when an issue is archived
+  """
+  issueArchived: Issue!
+  """
+  Triggered when an issue is created
+  """
+  issueCreated(filter: IssueSubscriptionFilter): Issue!
+  """
+  Triggered when an issue draft is created
+  """
+  issueDraftCreated: IssueDraft!
+  """
+  Triggered when an issue draft is deleted
+  """
+  issueDraftDeleted: IssueDraft!
+  """
+  Triggered when an issue draft is updated
+  """
+  issueDraftUpdated: IssueDraft!
+  """
+  Triggered when an issue history is created
+  """
+  issueHistoryCreated: IssueHistory!
+  """
+  Triggered when an issue history is updated
+  """
+  issueHistoryUpdated: IssueHistory!
+  """
+  Triggered when an issue label is created
+  """
+  issueLabelCreated: IssueLabel!
+  """
+  Triggered when an issue label is deleted
+  """
+  issueLabelDeleted: IssueLabel!
+  """
+  Triggered when an issue label is updated
+  """
+  issueLabelUpdated: IssueLabel!
+  """
+  Triggered when an issue relation is created
+  """
+  issueRelationCreated: IssueRelation!
+  """
+  Triggered when an issue relation is deleted
+  """
+  issueRelationDeleted: IssueRelation!
+  """
+  Triggered when an issue relation is updated
+  """
+  issueRelationUpdated: IssueRelation!
+  """
+  Triggered when a an issue is unarchived
+  """
+  issueUnarchived: Issue!
+  """
+  Triggered when an issue is updated
+  """
+  issueUpdated(filter: IssueSubscriptionFilter): Issue!
+  """
+  Triggered when a notification is archived
+  """
+  notificationArchived: Notification!
+  """
+  Triggered when a notification is created
+  """
+  notificationCreated: Notification!
+  """
+  Triggered when a notification is deleted
+  """
+  notificationDeleted: Notification!
+  """
+  Triggered when a a notification is unarchived
+  """
+  notificationUnarchived: Notification!
+  """
+  Triggered when a notification is updated
+  """
+  notificationUpdated: Notification!
+  """
+  Triggered when an organization is updated
+  """
+  organizationUpdated: Organization!
+  """
+  Triggered when a project is archived
+  """
+  projectArchived: Project!
+  """
+  Triggered when a project is created
+  """
+  projectCreated: Project!
+  """
+  Triggered when a a project is unarchived
+  """
+  projectUnarchived: Project!
+  """
+  Triggered when a project update is created
+  """
+  projectUpdateCreated: ProjectUpdate!
+  """
+  Triggered when a project update is deleted
+  """
+  projectUpdateDeleted: ProjectUpdate!
+  """
+  Triggered when a project update is updated
+  """
+  projectUpdateUpdated: ProjectUpdate!
+  """
+  Triggered when a project is updated
+  """
+  projectUpdated: Project!
+  """
+  Triggered when a roadmap is created
+  """
+  roadmapCreated: Roadmap!
+  """
+  Triggered when a roadmap is deleted
+  """
+  roadmapDeleted: Roadmap!
+  """
+  Triggered when a roadmap is updated
+  """
+  roadmapUpdated: Roadmap!
+  """
+  Triggered when a team is created
+  """
+  teamCreated: Team!
+  """
+  Triggered when a team is deleted
+  """
+  teamDeleted: Team!
+  """
+  Triggered when a team membership is created
+  """
+  teamMembershipCreated: TeamMembership!
+  """
+  Triggered when a team membership is deleted
+  """
+  teamMembershipDeleted: TeamMembership!
+  """
+  Triggered when a team membership is updated
+  """
+  teamMembershipUpdated: TeamMembership!
+  """
+  Triggered when a team is updated
+  """
+  teamUpdated: Team!
+  """
+  Triggered when an user is created
+  """
+  userCreated: User!
+  """
+  Triggered when an user is updated
+  """
+  userUpdated: User!
+  """
+  Triggered when a workflow state is archived
+  """
+  workflowStateArchived: WorkflowState!
+  """
+  Triggered when a workflow state is created
+  """
+  workflowStateCreated: WorkflowState!
+  """
+  Triggered when a workflow state is updated
+  """
+  workflowStateUpdated: WorkflowState!
 }
 
 type SuccessPayload {

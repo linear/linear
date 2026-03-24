@@ -1458,6 +1458,99 @@ export type AiConversationWidgetPart = AiConversationBasePart & {
   widget: AiConversationWidget;
 };
 
+/** [Internal] A prompt workflow progress. */
+export type AiPromptProgress = Node & {
+  __typename?: "AiPromptProgress";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** [Internal] The log ID for the prompt workflow, if available. */
+  logId?: Maybe<Scalars["String"]>;
+  /** [Internal] The metadata for the prompt workflow. */
+  metadata: Scalars["JSONObject"];
+  /** [Internal] The status of the prompt workflow. */
+  status: AiPromptProgressStatus;
+  /** [Internal] The type of AI prompt workflow. */
+  type: AiPromptType;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+};
+
+export type AiPromptProgressConnection = {
+  __typename?: "AiPromptProgressConnection";
+  edges: Array<AiPromptProgressEdge>;
+  nodes: Array<AiPromptProgress>;
+  pageInfo: PageInfo;
+};
+
+export type AiPromptProgressEdge = {
+  __typename?: "AiPromptProgressEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: AiPromptProgress;
+};
+
+/** [Internal] AI prompt progress filtering options. */
+export type AiPromptProgressFilter = {
+  /** [Internal] Compound filters, all of which need to be matched by the AI prompt progress. */
+  and?: InputMaybe<Array<AiPromptProgressFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: InputMaybe<DateComparator>;
+  /** Comparator for the identifier. */
+  id?: InputMaybe<IdComparator>;
+  /** [Internal] Compound filters, one of which need to be matched by the AI prompt progress. */
+  or?: InputMaybe<Array<AiPromptProgressFilter>>;
+  /** [Internal] Comparator for the AI prompt workflow status. */
+  status?: InputMaybe<AiPromptProgressStatusComparator>;
+  /** [Internal] Comparator for the AI prompt workflow type. */
+  type?: InputMaybe<AiPromptTypeComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: InputMaybe<DateComparator>;
+};
+
+/** [Internal] The status of a prompt workflow. */
+export enum AiPromptProgressStatus {
+  Canceled = "canceled",
+  Created = "created",
+  Failed = "failed",
+  Finished = "finished",
+  InProgress = "inProgress",
+}
+
+/** [Internal] Comparator for the AI prompt workflow status. */
+export type AiPromptProgressStatusComparator = {
+  /** Equals constraint. */
+  eq?: InputMaybe<AiPromptProgressStatus>;
+  /** In-array constraint. */
+  in?: InputMaybe<Array<AiPromptProgressStatus>>;
+  /** Not-equals constraint. */
+  neq?: InputMaybe<AiPromptProgressStatus>;
+  /** Not-in-array constraint. */
+  nin?: InputMaybe<Array<AiPromptProgressStatus>>;
+  /** Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values. */
+  null?: InputMaybe<Scalars["Boolean"]>;
+};
+
+/** [Internal] Filter for AI prompt progress subscription events. */
+export type AiPromptProgressSubscriptionFilter = {
+  /** [Internal] Filter by comment ID. */
+  commentId?: InputMaybe<IdComparator>;
+  /** [Internal] Filter by issue ID. */
+  issueId?: InputMaybe<IdComparator>;
+  /** [Internal] Filter by pull request comment ID. */
+  pullRequestCommentId?: InputMaybe<IdComparator>;
+  /** [Internal] Filter by prompt workflow status. */
+  status?: InputMaybe<AiPromptProgressStatusComparator>;
+  /** [Internal] Filter by prompt workflow type. */
+  type?: InputMaybe<AiPromptTypeComparator>;
+};
+
 /** AI prompt rules for a team. */
 export type AiPromptRules = Node & {
   __typename?: "AiPromptRules";
@@ -1474,6 +1567,37 @@ export type AiPromptRules = Node & {
   updatedAt: Scalars["DateTime"];
   /** The user who last updated the AI prompt rules. */
   updatedBy?: Maybe<User>;
+};
+
+/** The type of AI prompt workflow. */
+export enum AiPromptType {
+  AgentGuidance = "agentGuidance",
+  AiConversation = "aiConversation",
+  CodeIntelligence = "codeIntelligence",
+  GongIssueIntake = "gongIssueIntake",
+  InitiativeUpdates = "initiativeUpdates",
+  IntercomIssueIntake = "intercomIssueIntake",
+  InternalResearch = "internalResearch",
+  MicrosoftTeamsIssueIntake = "microsoftTeamsIssueIntake",
+  ProductIntelligence = "productIntelligence",
+  ProjectUpdates = "projectUpdates",
+  SlackIssueIntake = "slackIssueIntake",
+  TriageAgent = "triageAgent",
+  ZendeskIssueIntake = "zendeskIssueIntake",
+}
+
+/** [Internal] Comparator for the AI prompt workflow type. */
+export type AiPromptTypeComparator = {
+  /** Equals constraint. */
+  eq?: InputMaybe<AiPromptType>;
+  /** In-array constraint. */
+  in?: InputMaybe<Array<AiPromptType>>;
+  /** Not-equals constraint. */
+  neq?: InputMaybe<AiPromptType>;
+  /** Not-in-array constraint. */
+  nin?: InputMaybe<Array<AiPromptType>>;
+  /** Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values. */
+  null?: InputMaybe<Scalars["Boolean"]>;
 };
 
 export type AirbyteConfigurationInput = {
@@ -2146,6 +2270,8 @@ export type Comment = Node & {
   agentSession?: Maybe<AgentSession>;
   /** [Internal] Agent sessions associated with this comment. */
   agentSessions: AgentSessionConnection;
+  /** [Internal] AI prompt progresses associated with this comment. */
+  aiPromptProgresses: AiPromptProgressConnection;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The comment content in markdown format. */
@@ -2239,6 +2365,17 @@ export type Comment = Node & {
 export type CommentAgentSessionsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+/** A comment associated with an entity. */
+export type CommentAiPromptProgressesArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  filter?: InputMaybe<AiPromptProgressFilter>;
   first?: InputMaybe<Scalars["Int"]>;
   includeArchived?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
@@ -4614,6 +4751,28 @@ export type DocumentContentChildWebhookPayload = {
   project?: Maybe<ProjectChildWebhookPayload>;
 };
 
+/** A draft revision of document content, pending user review. */
+export type DocumentContentDraft = Node & {
+  __typename?: "DocumentContentDraft";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The draft content state as a base64 encoded Yjs state update. */
+  contentState: Scalars["String"];
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  documentContent: DocumentContent;
+  documentContentId: Scalars["String"];
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+  user: User;
+  userId: Scalars["String"];
+};
+
 export type DocumentContentHistoryPayload = {
   __typename?: "DocumentContentHistoryPayload";
   /** The document content history entries. */
@@ -6117,6 +6276,8 @@ export type GitHubPersonalSettingsInput = {
 export type GitHubRepoInput = {
   /** Whether the repository is archived. */
   archived?: InputMaybe<Scalars["Boolean"]>;
+  /** The external identifier (GitHub node ID) for the repository. */
+  externalId?: InputMaybe<Scalars["String"]>;
   /** The full name of the repository. */
   fullName: Scalars["String"];
   /** The GitHub repo id. */
@@ -10071,6 +10232,18 @@ export type IssueStatusChangedNotificationWebhookPayload = {
   updatedAt: Scalars["String"];
   /** The ID of the user who received the notification. */
   userId: Scalars["String"];
+};
+
+/** Filter for issue subscription events. */
+export type IssueSubscriptionFilter = {
+  /** Filter by assignee ID. */
+  assigneeId?: InputMaybe<IdComparator>;
+  /** Filter by project ID. */
+  projectId?: InputMaybe<IdComparator>;
+  /** Filter by workflow state ID. */
+  stateId?: InputMaybe<IdComparator>;
+  /** Filter by team ID. */
+  teamId?: InputMaybe<IdComparator>;
 };
 
 export type IssueSuggestion = Node & {
@@ -19720,6 +19893,7 @@ export type ReleasePipelineReleasesArgs = {
   includeArchived?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<PaginationOrderBy>;
+  sort?: InputMaybe<Array<ReleaseSortInput>>;
 };
 
 /** [Internal] A release pipeline. */
@@ -19825,6 +19999,12 @@ export type ReleasePipelineUpdateInput = {
   teamIds?: InputMaybe<Array<Scalars["String"]>>;
   /** The type of the pipeline. */
   type?: InputMaybe<ReleasePipelineType>;
+};
+
+/** Release sorting options. */
+export type ReleaseSortInput = {
+  /** Sort by release stage */
+  stage?: InputMaybe<ReleaseStageSort>;
 };
 
 /** [Internal] A release stage. */
@@ -19935,6 +20115,14 @@ export type ReleaseStagePayload = {
   releaseStage: ReleaseStage;
   /** Whether the operation was successful. */
   success: Scalars["Boolean"];
+};
+
+/** Release stage sorting options. */
+export type ReleaseStageSort = {
+  /** Whether nulls should be sorted first or last */
+  nulls?: InputMaybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: InputMaybe<PaginationSortOrder>;
 };
 
 /** A type of release stage. */
@@ -20822,6 +21010,172 @@ export type SubTypeComparator = {
   nin?: InputMaybe<Array<Scalars["String"]>>;
   /** Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values. */
   null?: InputMaybe<Scalars["Boolean"]>;
+};
+
+export type Subscription = {
+  __typename?: "Subscription";
+  /** Triggered when an agent activity is created */
+  agentActivityCreated: AgentActivity;
+  /** Triggered when an agent activity is updated */
+  agentActivityUpdated: AgentActivity;
+  /** Triggered when an agent session is created */
+  agentSessionCreated: AgentSession;
+  /** Triggered when an agent session is updated */
+  agentSessionUpdated: AgentSession;
+  /** Triggered when an ai conversation is updated */
+  aiConversationUpdated: AiConversation;
+  /** Triggered when an ai prompt progress is created */
+  aiPromptProgressCreated: AiPromptProgress;
+  /** Triggered when an ai prompt progress is updated */
+  aiPromptProgressUpdated: AiPromptProgress;
+  /** Triggered when a comment is archived */
+  commentArchived: Comment;
+  /** Triggered when a comment is created */
+  commentCreated: Comment;
+  /** Triggered when a comment is deleted */
+  commentDeleted: Comment;
+  /** Triggered when a a comment is unarchived */
+  commentUnarchived: Comment;
+  /** Triggered when a comment is updated */
+  commentUpdated: Comment;
+  /** Triggered when a cycle is archived */
+  cycleArchived: Cycle;
+  /** Triggered when a cycle is created */
+  cycleCreated: Cycle;
+  /** Triggered when a cycle is updated */
+  cycleUpdated: Cycle;
+  /** Triggered when a document is archived */
+  documentArchived: Document;
+  /** Triggered when a document content draft is created */
+  documentContentDraftCreated: DocumentContentDraft;
+  /** Triggered when a document content draft is deleted */
+  documentContentDraftDeleted: DocumentContentDraft;
+  /** Triggered when a document content draft is updated */
+  documentContentDraftUpdated: DocumentContentDraft;
+  /** Triggered when a document is created */
+  documentCreated: Document;
+  /** Triggered when a a document is unarchived */
+  documentUnarchived: Document;
+  /** Triggered when a document is updated */
+  documentUpdated: Document;
+  /** Triggered when a draft is created */
+  draftCreated: Draft;
+  /** Triggered when a draft is deleted */
+  draftDeleted: Draft;
+  /** Triggered when a draft is updated */
+  draftUpdated: Draft;
+  /** Triggered when a favorite is created */
+  favoriteCreated: Favorite;
+  /** Triggered when a favorite is deleted */
+  favoriteDeleted: Favorite;
+  /** Triggered when a favorite is updated */
+  favoriteUpdated: Favorite;
+  /** Triggered when an initiative is created */
+  initiativeCreated: Initiative;
+  /** Triggered when an initiative is deleted */
+  initiativeDeleted: Initiative;
+  /** Triggered when an initiative is updated */
+  initiativeUpdated: Initiative;
+  /** Triggered when an issue is archived */
+  issueArchived: Issue;
+  /** Triggered when an issue is created */
+  issueCreated: Issue;
+  /** Triggered when an issue draft is created */
+  issueDraftCreated: IssueDraft;
+  /** Triggered when an issue draft is deleted */
+  issueDraftDeleted: IssueDraft;
+  /** Triggered when an issue draft is updated */
+  issueDraftUpdated: IssueDraft;
+  /** Triggered when an issue history is created */
+  issueHistoryCreated: IssueHistory;
+  /** Triggered when an issue history is updated */
+  issueHistoryUpdated: IssueHistory;
+  /** Triggered when an issue label is created */
+  issueLabelCreated: IssueLabel;
+  /** Triggered when an issue label is deleted */
+  issueLabelDeleted: IssueLabel;
+  /** Triggered when an issue label is updated */
+  issueLabelUpdated: IssueLabel;
+  /** Triggered when an issue relation is created */
+  issueRelationCreated: IssueRelation;
+  /** Triggered when an issue relation is deleted */
+  issueRelationDeleted: IssueRelation;
+  /** Triggered when an issue relation is updated */
+  issueRelationUpdated: IssueRelation;
+  /** Triggered when a an issue is unarchived */
+  issueUnarchived: Issue;
+  /** Triggered when an issue is updated */
+  issueUpdated: Issue;
+  /** Triggered when a notification is archived */
+  notificationArchived: Notification;
+  /** Triggered when a notification is created */
+  notificationCreated: Notification;
+  /** Triggered when a notification is deleted */
+  notificationDeleted: Notification;
+  /** Triggered when a a notification is unarchived */
+  notificationUnarchived: Notification;
+  /** Triggered when a notification is updated */
+  notificationUpdated: Notification;
+  /** Triggered when an organization is updated */
+  organizationUpdated: Organization;
+  /** Triggered when a project is archived */
+  projectArchived: Project;
+  /** Triggered when a project is created */
+  projectCreated: Project;
+  /** Triggered when a a project is unarchived */
+  projectUnarchived: Project;
+  /** Triggered when a project update is created */
+  projectUpdateCreated: ProjectUpdate;
+  /** Triggered when a project update is deleted */
+  projectUpdateDeleted: ProjectUpdate;
+  /** Triggered when a project update is updated */
+  projectUpdateUpdated: ProjectUpdate;
+  /** Triggered when a project is updated */
+  projectUpdated: Project;
+  /** Triggered when a roadmap is created */
+  roadmapCreated: Roadmap;
+  /** Triggered when a roadmap is deleted */
+  roadmapDeleted: Roadmap;
+  /** Triggered when a roadmap is updated */
+  roadmapUpdated: Roadmap;
+  /** Triggered when a team is created */
+  teamCreated: Team;
+  /** Triggered when a team is deleted */
+  teamDeleted: Team;
+  /** Triggered when a team membership is created */
+  teamMembershipCreated: TeamMembership;
+  /** Triggered when a team membership is deleted */
+  teamMembershipDeleted: TeamMembership;
+  /** Triggered when a team membership is updated */
+  teamMembershipUpdated: TeamMembership;
+  /** Triggered when a team is updated */
+  teamUpdated: Team;
+  /** Triggered when an user is created */
+  userCreated: User;
+  /** Triggered when an user is updated */
+  userUpdated: User;
+  /** Triggered when a workflow state is archived */
+  workflowStateArchived: WorkflowState;
+  /** Triggered when a workflow state is created */
+  workflowStateCreated: WorkflowState;
+  /** Triggered when a workflow state is updated */
+  workflowStateUpdated: WorkflowState;
+};
+
+export type SubscriptionAiPromptProgressCreatedArgs = {
+  filter?: InputMaybe<AiPromptProgressSubscriptionFilter>;
+};
+
+export type SubscriptionAiPromptProgressUpdatedArgs = {
+  filter?: InputMaybe<AiPromptProgressSubscriptionFilter>;
+};
+
+export type SubscriptionIssueCreatedArgs = {
+  filter?: InputMaybe<IssueSubscriptionFilter>;
+};
+
+export type SubscriptionIssueUpdatedArgs = {
+  filter?: InputMaybe<IssueSubscriptionFilter>;
 };
 
 export type SuccessPayload = {
@@ -25465,6 +25819,34 @@ export type DocumentFragment = { __typename: "Document" } & Pick<
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+  };
+
+export type DocumentContentDraftFragment = { __typename: "DocumentContentDraft" } & Pick<
+  DocumentContentDraft,
+  "contentState" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "documentContentId" | "userId"
+> & {
+    documentContent: { __typename: "DocumentContent" } & Pick<
+      DocumentContent,
+      "content" | "contentState" | "updatedAt" | "restoredAt" | "archivedAt" | "createdAt" | "id"
+    > & {
+        aiPromptRules?: Maybe<
+          { __typename: "AiPromptRules" } & Pick<AiPromptRules, "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
+              updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            }
+        >;
+        document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
+        initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+        issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+        projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
+        project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+        welcomeMessage?: Maybe<
+          { __typename: "WelcomeMessage" } & Pick<
+            WelcomeMessage,
+            "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+          > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+        >;
+      };
+    user: { __typename?: "User" } & Pick<User, "id">;
   };
 
 export type FacetFragment = { __typename: "Facet" } & Pick<
@@ -36037,6 +36419,8 @@ type Node_AgentSessionToPullRequest_Fragment = { __typename: "AgentSessionToPull
 
 type Node_AiConversation_Fragment = { __typename: "AiConversation" } & Pick<AiConversation, "id">;
 
+type Node_AiPromptProgress_Fragment = { __typename: "AiPromptProgress" } & Pick<AiPromptProgress, "id">;
+
 type Node_AiPromptRules_Fragment = { __typename: "AiPromptRules" } & Pick<AiPromptRules, "id">;
 
 type Node_Attachment_Fragment = { __typename: "Attachment" } & Pick<Attachment, "id">;
@@ -36084,6 +36468,8 @@ type Node_Dashboard_Fragment = { __typename: "Dashboard" } & Pick<Dashboard, "id
 type Node_Document_Fragment = { __typename: "Document" } & Pick<Document, "id">;
 
 type Node_DocumentContent_Fragment = { __typename: "DocumentContent" } & Pick<DocumentContent, "id">;
+
+type Node_DocumentContentDraft_Fragment = { __typename: "DocumentContentDraft" } & Pick<DocumentContentDraft, "id">;
 
 type Node_DocumentNotification_Fragment = { __typename: "DocumentNotification" } & Pick<DocumentNotification, "id">;
 
@@ -36280,6 +36666,7 @@ export type NodeFragment =
   | Node_AgentSession_Fragment
   | Node_AgentSessionToPullRequest_Fragment
   | Node_AiConversation_Fragment
+  | Node_AiPromptProgress_Fragment
   | Node_AiPromptRules_Fragment
   | Node_Attachment_Fragment
   | Node_AuditEntry_Fragment
@@ -36298,6 +36685,7 @@ export type NodeFragment =
   | Node_Dashboard_Fragment
   | Node_Document_Fragment
   | Node_DocumentContent_Fragment
+  | Node_DocumentContentDraft_Fragment
   | Node_DocumentNotification_Fragment
   | Node_DocumentSearchResult_Fragment
   | Node_Draft_Fragment
@@ -38772,6 +39160,2748 @@ export type SsoUrlFromEmailResponseFragment = { __typename: "SsoUrlFromEmailResp
   SsoUrlFromEmailResponse,
   "samlSsoUrl" | "success"
 >;
+
+export type SubscriptionFragment = { __typename: "Subscription" } & {
+  commentUnarchived: { __typename?: "Comment" } & Pick<Comment, "id">;
+  documentUnarchived: { __typename?: "Document" } & Pick<Document, "id">;
+  notificationUnarchived:
+    | ({ __typename: "CustomerNeedNotification" } & Pick<
+        CustomerNeedNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "customerNeedId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          customerNeed: { __typename?: "CustomerNeed" } & Pick<CustomerNeed, "id">;
+          relatedIssue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+          relatedProject?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+        })
+    | ({ __typename: "CustomerNotification" } & Pick<
+        CustomerNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "customerId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+        })
+    | ({ __typename: "DocumentNotification" } & Pick<
+        DocumentNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "reactionEmoji"
+        | "commentId"
+        | "documentId"
+        | "parentCommentId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+        })
+    | ({ __typename: "InitiativeNotification" } & Pick<
+        InitiativeNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "reactionEmoji"
+        | "commentId"
+        | "initiativeId"
+        | "initiativeUpdateId"
+        | "parentCommentId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+          document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
+          initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+          initiativeUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
+          parentComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+        })
+    | ({ __typename: "IssueNotification" } & Pick<
+        IssueNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "reactionEmoji"
+        | "commentId"
+        | "issueId"
+        | "parentCommentId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+          issue: { __typename?: "Issue" } & Pick<Issue, "id">;
+          parentComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+          subscriptions?: Maybe<
+            Array<
+              | ({ __typename: "CustomViewNotificationSubscription" } & Pick<
+                  CustomViewNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "CustomerNotificationSubscription" } & Pick<
+                  CustomerNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "CycleNotificationSubscription" } & Pick<
+                  CycleNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "InitiativeNotificationSubscription" } & Pick<
+                  InitiativeNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "LabelNotificationSubscription" } & Pick<
+                  LabelNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "ProjectNotificationSubscription" } & Pick<
+                  ProjectNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project: { __typename?: "Project" } & Pick<Project, "id">;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "TeamNotificationSubscription" } & Pick<
+                  TeamNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team: { __typename?: "Team" } & Pick<Team, "id">;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "UserNotificationSubscription" } & Pick<
+                  UserNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user: { __typename?: "User" } & Pick<User, "id">;
+                  })
+            >
+          >;
+          team: { __typename?: "Team" } & Pick<Team, "id">;
+        })
+    | ({ __typename: "OauthClientApprovalNotification" } & Pick<
+        OauthClientApprovalNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "oauthClientApprovalId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          oauthClientApproval: { __typename: "OauthClientApproval" } & Pick<
+            OauthClientApproval,
+            | "newlyRequestedScopes"
+            | "updatedAt"
+            | "requesterId"
+            | "responderId"
+            | "requestReason"
+            | "denyReason"
+            | "scopes"
+            | "status"
+            | "archivedAt"
+            | "createdAt"
+            | "id"
+            | "oauthClientId"
+          >;
+        })
+    | ({ __typename: "PostNotification" } & Pick<
+        PostNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "reactionEmoji"
+        | "commentId"
+        | "parentCommentId"
+        | "postId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+        })
+    | ({ __typename: "ProjectNotification" } & Pick<
+        ProjectNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "reactionEmoji"
+        | "commentId"
+        | "parentCommentId"
+        | "projectId"
+        | "projectMilestoneId"
+        | "projectUpdateId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+          document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
+          parentComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+          project: { __typename?: "Project" } & Pick<Project, "id">;
+          projectUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
+        })
+    | ({ __typename: "PullRequestNotification" } & Pick<
+        PullRequestNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "pullRequestCommentId"
+        | "pullRequestId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+        })
+    | ({ __typename: "WelcomeMessageNotification" } & Pick<
+        WelcomeMessageNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "welcomeMessageId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+        });
+  projectUnarchived: { __typename?: "Project" } & Pick<Project, "id">;
+  issueUnarchived: { __typename?: "Issue" } & Pick<Issue, "id">;
+  commentArchived: { __typename?: "Comment" } & Pick<Comment, "id">;
+  commentCreated: { __typename?: "Comment" } & Pick<Comment, "id">;
+  commentDeleted: { __typename?: "Comment" } & Pick<Comment, "id">;
+  commentUpdated: { __typename?: "Comment" } & Pick<Comment, "id">;
+  cycleArchived: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+  cycleCreated: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+  cycleUpdated: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+  documentContentDraftCreated: { __typename: "DocumentContentDraft" } & Pick<
+    DocumentContentDraft,
+    "contentState" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "documentContentId" | "userId"
+  > & {
+      documentContent: { __typename: "DocumentContent" } & Pick<
+        DocumentContent,
+        "content" | "contentState" | "updatedAt" | "restoredAt" | "archivedAt" | "createdAt" | "id"
+      > & {
+          aiPromptRules?: Maybe<
+            { __typename: "AiPromptRules" } & Pick<AiPromptRules, "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
+                updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+              }
+          >;
+          document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
+          initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+          issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+          projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
+          project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+          welcomeMessage?: Maybe<
+            { __typename: "WelcomeMessage" } & Pick<
+              WelcomeMessage,
+              "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+            > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+          >;
+        };
+      user: { __typename?: "User" } & Pick<User, "id">;
+    };
+  documentContentDraftDeleted: { __typename: "DocumentContentDraft" } & Pick<
+    DocumentContentDraft,
+    "contentState" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "documentContentId" | "userId"
+  > & {
+      documentContent: { __typename: "DocumentContent" } & Pick<
+        DocumentContent,
+        "content" | "contentState" | "updatedAt" | "restoredAt" | "archivedAt" | "createdAt" | "id"
+      > & {
+          aiPromptRules?: Maybe<
+            { __typename: "AiPromptRules" } & Pick<AiPromptRules, "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
+                updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+              }
+          >;
+          document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
+          initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+          issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+          projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
+          project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+          welcomeMessage?: Maybe<
+            { __typename: "WelcomeMessage" } & Pick<
+              WelcomeMessage,
+              "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+            > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+          >;
+        };
+      user: { __typename?: "User" } & Pick<User, "id">;
+    };
+  documentContentDraftUpdated: { __typename: "DocumentContentDraft" } & Pick<
+    DocumentContentDraft,
+    "contentState" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "documentContentId" | "userId"
+  > & {
+      documentContent: { __typename: "DocumentContent" } & Pick<
+        DocumentContent,
+        "content" | "contentState" | "updatedAt" | "restoredAt" | "archivedAt" | "createdAt" | "id"
+      > & {
+          aiPromptRules?: Maybe<
+            { __typename: "AiPromptRules" } & Pick<AiPromptRules, "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
+                updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+              }
+          >;
+          document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
+          initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+          issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+          projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
+          project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+          welcomeMessage?: Maybe<
+            { __typename: "WelcomeMessage" } & Pick<
+              WelcomeMessage,
+              "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+            > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+          >;
+        };
+      user: { __typename?: "User" } & Pick<User, "id">;
+    };
+  documentArchived: { __typename?: "Document" } & Pick<Document, "id">;
+  documentCreated: { __typename?: "Document" } & Pick<Document, "id">;
+  documentUpdated: { __typename?: "Document" } & Pick<Document, "id">;
+  draftCreated: { __typename: "Draft" } & Pick<
+    Draft,
+    "data" | "updatedAt" | "bodyData" | "archivedAt" | "createdAt" | "id" | "isAutogenerated"
+  > & {
+      parentComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+      customerNeed?: Maybe<{ __typename?: "CustomerNeed" } & Pick<CustomerNeed, "id">>;
+      initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+      initiativeUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
+      issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+      project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+      projectUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
+      team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+      user: { __typename?: "User" } & Pick<User, "id">;
+    };
+  draftDeleted: { __typename: "Draft" } & Pick<
+    Draft,
+    "data" | "updatedAt" | "bodyData" | "archivedAt" | "createdAt" | "id" | "isAutogenerated"
+  > & {
+      parentComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+      customerNeed?: Maybe<{ __typename?: "CustomerNeed" } & Pick<CustomerNeed, "id">>;
+      initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+      initiativeUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
+      issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+      project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+      projectUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
+      team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+      user: { __typename?: "User" } & Pick<User, "id">;
+    };
+  draftUpdated: { __typename: "Draft" } & Pick<
+    Draft,
+    "data" | "updatedAt" | "bodyData" | "archivedAt" | "createdAt" | "id" | "isAutogenerated"
+  > & {
+      parentComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+      customerNeed?: Maybe<{ __typename?: "CustomerNeed" } & Pick<CustomerNeed, "id">>;
+      initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+      initiativeUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
+      issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+      project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+      projectUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
+      team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+      user: { __typename?: "User" } & Pick<User, "id">;
+    };
+  favoriteCreated: { __typename?: "Favorite" } & Pick<Favorite, "id">;
+  favoriteDeleted: { __typename?: "Favorite" } & Pick<Favorite, "id">;
+  favoriteUpdated: { __typename?: "Favorite" } & Pick<Favorite, "id">;
+  notificationArchived:
+    | ({ __typename: "CustomerNeedNotification" } & Pick<
+        CustomerNeedNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "customerNeedId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          customerNeed: { __typename?: "CustomerNeed" } & Pick<CustomerNeed, "id">;
+          relatedIssue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+          relatedProject?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+        })
+    | ({ __typename: "CustomerNotification" } & Pick<
+        CustomerNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "customerId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+        })
+    | ({ __typename: "DocumentNotification" } & Pick<
+        DocumentNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "reactionEmoji"
+        | "commentId"
+        | "documentId"
+        | "parentCommentId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+        })
+    | ({ __typename: "InitiativeNotification" } & Pick<
+        InitiativeNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "reactionEmoji"
+        | "commentId"
+        | "initiativeId"
+        | "initiativeUpdateId"
+        | "parentCommentId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+          document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
+          initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+          initiativeUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
+          parentComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+        })
+    | ({ __typename: "IssueNotification" } & Pick<
+        IssueNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "reactionEmoji"
+        | "commentId"
+        | "issueId"
+        | "parentCommentId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+          issue: { __typename?: "Issue" } & Pick<Issue, "id">;
+          parentComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+          subscriptions?: Maybe<
+            Array<
+              | ({ __typename: "CustomViewNotificationSubscription" } & Pick<
+                  CustomViewNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "CustomerNotificationSubscription" } & Pick<
+                  CustomerNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "CycleNotificationSubscription" } & Pick<
+                  CycleNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "InitiativeNotificationSubscription" } & Pick<
+                  InitiativeNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "LabelNotificationSubscription" } & Pick<
+                  LabelNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "ProjectNotificationSubscription" } & Pick<
+                  ProjectNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project: { __typename?: "Project" } & Pick<Project, "id">;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "TeamNotificationSubscription" } & Pick<
+                  TeamNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team: { __typename?: "Team" } & Pick<Team, "id">;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "UserNotificationSubscription" } & Pick<
+                  UserNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user: { __typename?: "User" } & Pick<User, "id">;
+                  })
+            >
+          >;
+          team: { __typename?: "Team" } & Pick<Team, "id">;
+        })
+    | ({ __typename: "OauthClientApprovalNotification" } & Pick<
+        OauthClientApprovalNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "oauthClientApprovalId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          oauthClientApproval: { __typename: "OauthClientApproval" } & Pick<
+            OauthClientApproval,
+            | "newlyRequestedScopes"
+            | "updatedAt"
+            | "requesterId"
+            | "responderId"
+            | "requestReason"
+            | "denyReason"
+            | "scopes"
+            | "status"
+            | "archivedAt"
+            | "createdAt"
+            | "id"
+            | "oauthClientId"
+          >;
+        })
+    | ({ __typename: "PostNotification" } & Pick<
+        PostNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "reactionEmoji"
+        | "commentId"
+        | "parentCommentId"
+        | "postId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+        })
+    | ({ __typename: "ProjectNotification" } & Pick<
+        ProjectNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "reactionEmoji"
+        | "commentId"
+        | "parentCommentId"
+        | "projectId"
+        | "projectMilestoneId"
+        | "projectUpdateId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+          document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
+          parentComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+          project: { __typename?: "Project" } & Pick<Project, "id">;
+          projectUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
+        })
+    | ({ __typename: "PullRequestNotification" } & Pick<
+        PullRequestNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "pullRequestCommentId"
+        | "pullRequestId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+        })
+    | ({ __typename: "WelcomeMessageNotification" } & Pick<
+        WelcomeMessageNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "welcomeMessageId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+        });
+  notificationCreated:
+    | ({ __typename: "CustomerNeedNotification" } & Pick<
+        CustomerNeedNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "customerNeedId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          customerNeed: { __typename?: "CustomerNeed" } & Pick<CustomerNeed, "id">;
+          relatedIssue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+          relatedProject?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+        })
+    | ({ __typename: "CustomerNotification" } & Pick<
+        CustomerNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "customerId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+        })
+    | ({ __typename: "DocumentNotification" } & Pick<
+        DocumentNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "reactionEmoji"
+        | "commentId"
+        | "documentId"
+        | "parentCommentId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+        })
+    | ({ __typename: "InitiativeNotification" } & Pick<
+        InitiativeNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "reactionEmoji"
+        | "commentId"
+        | "initiativeId"
+        | "initiativeUpdateId"
+        | "parentCommentId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+          document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
+          initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+          initiativeUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
+          parentComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+        })
+    | ({ __typename: "IssueNotification" } & Pick<
+        IssueNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "reactionEmoji"
+        | "commentId"
+        | "issueId"
+        | "parentCommentId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+          issue: { __typename?: "Issue" } & Pick<Issue, "id">;
+          parentComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+          subscriptions?: Maybe<
+            Array<
+              | ({ __typename: "CustomViewNotificationSubscription" } & Pick<
+                  CustomViewNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "CustomerNotificationSubscription" } & Pick<
+                  CustomerNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "CycleNotificationSubscription" } & Pick<
+                  CycleNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "InitiativeNotificationSubscription" } & Pick<
+                  InitiativeNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "LabelNotificationSubscription" } & Pick<
+                  LabelNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "ProjectNotificationSubscription" } & Pick<
+                  ProjectNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project: { __typename?: "Project" } & Pick<Project, "id">;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "TeamNotificationSubscription" } & Pick<
+                  TeamNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team: { __typename?: "Team" } & Pick<Team, "id">;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "UserNotificationSubscription" } & Pick<
+                  UserNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user: { __typename?: "User" } & Pick<User, "id">;
+                  })
+            >
+          >;
+          team: { __typename?: "Team" } & Pick<Team, "id">;
+        })
+    | ({ __typename: "OauthClientApprovalNotification" } & Pick<
+        OauthClientApprovalNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "oauthClientApprovalId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          oauthClientApproval: { __typename: "OauthClientApproval" } & Pick<
+            OauthClientApproval,
+            | "newlyRequestedScopes"
+            | "updatedAt"
+            | "requesterId"
+            | "responderId"
+            | "requestReason"
+            | "denyReason"
+            | "scopes"
+            | "status"
+            | "archivedAt"
+            | "createdAt"
+            | "id"
+            | "oauthClientId"
+          >;
+        })
+    | ({ __typename: "PostNotification" } & Pick<
+        PostNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "reactionEmoji"
+        | "commentId"
+        | "parentCommentId"
+        | "postId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+        })
+    | ({ __typename: "ProjectNotification" } & Pick<
+        ProjectNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "reactionEmoji"
+        | "commentId"
+        | "parentCommentId"
+        | "projectId"
+        | "projectMilestoneId"
+        | "projectUpdateId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+          document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
+          parentComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+          project: { __typename?: "Project" } & Pick<Project, "id">;
+          projectUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
+        })
+    | ({ __typename: "PullRequestNotification" } & Pick<
+        PullRequestNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "pullRequestCommentId"
+        | "pullRequestId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+        })
+    | ({ __typename: "WelcomeMessageNotification" } & Pick<
+        WelcomeMessageNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "welcomeMessageId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+        });
+  notificationDeleted:
+    | ({ __typename: "CustomerNeedNotification" } & Pick<
+        CustomerNeedNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "customerNeedId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          customerNeed: { __typename?: "CustomerNeed" } & Pick<CustomerNeed, "id">;
+          relatedIssue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+          relatedProject?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+        })
+    | ({ __typename: "CustomerNotification" } & Pick<
+        CustomerNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "customerId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+        })
+    | ({ __typename: "DocumentNotification" } & Pick<
+        DocumentNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "reactionEmoji"
+        | "commentId"
+        | "documentId"
+        | "parentCommentId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+        })
+    | ({ __typename: "InitiativeNotification" } & Pick<
+        InitiativeNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "reactionEmoji"
+        | "commentId"
+        | "initiativeId"
+        | "initiativeUpdateId"
+        | "parentCommentId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+          document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
+          initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+          initiativeUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
+          parentComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+        })
+    | ({ __typename: "IssueNotification" } & Pick<
+        IssueNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "reactionEmoji"
+        | "commentId"
+        | "issueId"
+        | "parentCommentId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+          issue: { __typename?: "Issue" } & Pick<Issue, "id">;
+          parentComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+          subscriptions?: Maybe<
+            Array<
+              | ({ __typename: "CustomViewNotificationSubscription" } & Pick<
+                  CustomViewNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "CustomerNotificationSubscription" } & Pick<
+                  CustomerNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "CycleNotificationSubscription" } & Pick<
+                  CycleNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "InitiativeNotificationSubscription" } & Pick<
+                  InitiativeNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "LabelNotificationSubscription" } & Pick<
+                  LabelNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "ProjectNotificationSubscription" } & Pick<
+                  ProjectNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project: { __typename?: "Project" } & Pick<Project, "id">;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "TeamNotificationSubscription" } & Pick<
+                  TeamNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team: { __typename?: "Team" } & Pick<Team, "id">;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "UserNotificationSubscription" } & Pick<
+                  UserNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user: { __typename?: "User" } & Pick<User, "id">;
+                  })
+            >
+          >;
+          team: { __typename?: "Team" } & Pick<Team, "id">;
+        })
+    | ({ __typename: "OauthClientApprovalNotification" } & Pick<
+        OauthClientApprovalNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "oauthClientApprovalId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          oauthClientApproval: { __typename: "OauthClientApproval" } & Pick<
+            OauthClientApproval,
+            | "newlyRequestedScopes"
+            | "updatedAt"
+            | "requesterId"
+            | "responderId"
+            | "requestReason"
+            | "denyReason"
+            | "scopes"
+            | "status"
+            | "archivedAt"
+            | "createdAt"
+            | "id"
+            | "oauthClientId"
+          >;
+        })
+    | ({ __typename: "PostNotification" } & Pick<
+        PostNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "reactionEmoji"
+        | "commentId"
+        | "parentCommentId"
+        | "postId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+        })
+    | ({ __typename: "ProjectNotification" } & Pick<
+        ProjectNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "reactionEmoji"
+        | "commentId"
+        | "parentCommentId"
+        | "projectId"
+        | "projectMilestoneId"
+        | "projectUpdateId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+          document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
+          parentComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+          project: { __typename?: "Project" } & Pick<Project, "id">;
+          projectUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
+        })
+    | ({ __typename: "PullRequestNotification" } & Pick<
+        PullRequestNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "pullRequestCommentId"
+        | "pullRequestId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+        })
+    | ({ __typename: "WelcomeMessageNotification" } & Pick<
+        WelcomeMessageNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "welcomeMessageId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+        });
+  notificationUpdated:
+    | ({ __typename: "CustomerNeedNotification" } & Pick<
+        CustomerNeedNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "customerNeedId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          customerNeed: { __typename?: "CustomerNeed" } & Pick<CustomerNeed, "id">;
+          relatedIssue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+          relatedProject?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+        })
+    | ({ __typename: "CustomerNotification" } & Pick<
+        CustomerNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "customerId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+        })
+    | ({ __typename: "DocumentNotification" } & Pick<
+        DocumentNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "reactionEmoji"
+        | "commentId"
+        | "documentId"
+        | "parentCommentId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+        })
+    | ({ __typename: "InitiativeNotification" } & Pick<
+        InitiativeNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "reactionEmoji"
+        | "commentId"
+        | "initiativeId"
+        | "initiativeUpdateId"
+        | "parentCommentId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+          document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
+          initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+          initiativeUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
+          parentComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+        })
+    | ({ __typename: "IssueNotification" } & Pick<
+        IssueNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "reactionEmoji"
+        | "commentId"
+        | "issueId"
+        | "parentCommentId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+          issue: { __typename?: "Issue" } & Pick<Issue, "id">;
+          parentComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+          subscriptions?: Maybe<
+            Array<
+              | ({ __typename: "CustomViewNotificationSubscription" } & Pick<
+                  CustomViewNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "CustomerNotificationSubscription" } & Pick<
+                  CustomerNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "CycleNotificationSubscription" } & Pick<
+                  CycleNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "InitiativeNotificationSubscription" } & Pick<
+                  InitiativeNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "LabelNotificationSubscription" } & Pick<
+                  LabelNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "ProjectNotificationSubscription" } & Pick<
+                  ProjectNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project: { __typename?: "Project" } & Pick<Project, "id">;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "TeamNotificationSubscription" } & Pick<
+                  TeamNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team: { __typename?: "Team" } & Pick<Team, "id">;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  })
+              | ({ __typename: "UserNotificationSubscription" } & Pick<
+                  UserNotificationSubscription,
+                  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+                > & {
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                    subscriber: { __typename?: "User" } & Pick<User, "id">;
+                    user: { __typename?: "User" } & Pick<User, "id">;
+                  })
+            >
+          >;
+          team: { __typename?: "Team" } & Pick<Team, "id">;
+        })
+    | ({ __typename: "OauthClientApprovalNotification" } & Pick<
+        OauthClientApprovalNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "oauthClientApprovalId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          oauthClientApproval: { __typename: "OauthClientApproval" } & Pick<
+            OauthClientApproval,
+            | "newlyRequestedScopes"
+            | "updatedAt"
+            | "requesterId"
+            | "responderId"
+            | "requestReason"
+            | "denyReason"
+            | "scopes"
+            | "status"
+            | "archivedAt"
+            | "createdAt"
+            | "id"
+            | "oauthClientId"
+          >;
+        })
+    | ({ __typename: "PostNotification" } & Pick<
+        PostNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "reactionEmoji"
+        | "commentId"
+        | "parentCommentId"
+        | "postId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+        })
+    | ({ __typename: "ProjectNotification" } & Pick<
+        ProjectNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "reactionEmoji"
+        | "commentId"
+        | "parentCommentId"
+        | "projectId"
+        | "projectMilestoneId"
+        | "projectUpdateId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+          document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
+          parentComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+          project: { __typename?: "Project" } & Pick<Project, "id">;
+          projectUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
+        })
+    | ({ __typename: "PullRequestNotification" } & Pick<
+        PullRequestNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "pullRequestCommentId"
+        | "pullRequestId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+        })
+    | ({ __typename: "WelcomeMessageNotification" } & Pick<
+        WelcomeMessageNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "emailedAt"
+        | "readAt"
+        | "unsnoozedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "welcomeMessageId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+        });
+  projectArchived: { __typename?: "Project" } & Pick<Project, "id">;
+  projectCreated: { __typename?: "Project" } & Pick<Project, "id">;
+  projectUpdated: { __typename?: "Project" } & Pick<Project, "id">;
+  projectUpdateCreated: { __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">;
+  projectUpdateDeleted: { __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">;
+  projectUpdateUpdated: { __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">;
+  roadmapCreated: { __typename?: "Roadmap" } & Pick<Roadmap, "id">;
+  roadmapDeleted: { __typename?: "Roadmap" } & Pick<Roadmap, "id">;
+  roadmapUpdated: { __typename?: "Roadmap" } & Pick<Roadmap, "id">;
+  teamCreated: { __typename?: "Team" } & Pick<Team, "id">;
+  teamDeleted: { __typename?: "Team" } & Pick<Team, "id">;
+  teamUpdated: { __typename?: "Team" } & Pick<Team, "id">;
+  teamMembershipCreated: { __typename?: "TeamMembership" } & Pick<TeamMembership, "id">;
+  teamMembershipDeleted: { __typename?: "TeamMembership" } & Pick<TeamMembership, "id">;
+  teamMembershipUpdated: { __typename?: "TeamMembership" } & Pick<TeamMembership, "id">;
+  workflowStateArchived: { __typename?: "WorkflowState" } & Pick<WorkflowState, "id">;
+  workflowStateCreated: { __typename?: "WorkflowState" } & Pick<WorkflowState, "id">;
+  workflowStateUpdated: { __typename?: "WorkflowState" } & Pick<WorkflowState, "id">;
+  agentActivityCreated: { __typename?: "AgentActivity" } & Pick<AgentActivity, "id">;
+  agentActivityUpdated: { __typename?: "AgentActivity" } & Pick<AgentActivity, "id">;
+  agentSessionCreated: { __typename?: "AgentSession" } & Pick<AgentSession, "id">;
+  agentSessionUpdated: { __typename?: "AgentSession" } & Pick<AgentSession, "id">;
+  initiativeCreated: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+  initiativeDeleted: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+  initiativeUpdated: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+  issueHistoryCreated: { __typename: "IssueHistory" } & Pick<
+    IssueHistory,
+    | "triageResponsibilityAutoAssigned"
+    | "addedLabelIds"
+    | "removedLabelIds"
+    | "toSlaBreachesAt"
+    | "fromSlaBreachesAt"
+    | "attachmentId"
+    | "customerNeedId"
+    | "toCycleId"
+    | "toParentId"
+    | "toConvertedProjectId"
+    | "toProjectId"
+    | "toStateId"
+    | "fromCycleId"
+    | "fromParentId"
+    | "fromProjectId"
+    | "fromStateId"
+    | "fromTeamId"
+    | "toTeamId"
+    | "fromAssigneeId"
+    | "toAssigneeId"
+    | "actorId"
+    | "updatedAt"
+    | "archivedAt"
+    | "createdAt"
+    | "toSlaStartedAt"
+    | "fromSlaStartedAt"
+    | "toSlaType"
+    | "fromSlaType"
+    | "id"
+    | "fromDueDate"
+    | "toDueDate"
+    | "fromEstimate"
+    | "toEstimate"
+    | "fromPriority"
+    | "toPriority"
+    | "fromTitle"
+    | "toTitle"
+    | "fromSlaBreached"
+    | "toSlaBreached"
+    | "archived"
+    | "autoArchived"
+    | "autoClosed"
+    | "trashed"
+    | "updatedDescription"
+  > & {
+      relationChanges?: Maybe<
+        Array<{ __typename: "IssueRelationHistoryPayload" } & Pick<IssueRelationHistoryPayload, "identifier" | "type">>
+      >;
+      actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+      descriptionUpdatedBy?: Maybe<
+        Array<
+          { __typename: "User" } & Pick<
+            User,
+            | "statusUntilAt"
+            | "description"
+            | "avatarUrl"
+            | "createdIssueCount"
+            | "disableReason"
+            | "avatarBackgroundColor"
+            | "statusEmoji"
+            | "initials"
+            | "statusLabel"
+            | "updatedAt"
+            | "lastSeen"
+            | "timezone"
+            | "archivedAt"
+            | "createdAt"
+            | "id"
+            | "gitHubUserId"
+            | "displayName"
+            | "email"
+            | "name"
+            | "url"
+            | "active"
+            | "guest"
+            | "app"
+            | "admin"
+            | "owner"
+            | "isAssignable"
+            | "isMentionable"
+            | "isMe"
+            | "supportsAgentSessions"
+            | "canAccessAnyPublicTeam"
+            | "calendarHash"
+            | "inviteHash"
+          >
+        >
+      >;
+      actors?: Maybe<
+        Array<
+          { __typename: "User" } & Pick<
+            User,
+            | "statusUntilAt"
+            | "description"
+            | "avatarUrl"
+            | "createdIssueCount"
+            | "disableReason"
+            | "avatarBackgroundColor"
+            | "statusEmoji"
+            | "initials"
+            | "statusLabel"
+            | "updatedAt"
+            | "lastSeen"
+            | "timezone"
+            | "archivedAt"
+            | "createdAt"
+            | "id"
+            | "gitHubUserId"
+            | "displayName"
+            | "email"
+            | "name"
+            | "url"
+            | "active"
+            | "guest"
+            | "app"
+            | "admin"
+            | "owner"
+            | "isAssignable"
+            | "isMentionable"
+            | "isMe"
+            | "supportsAgentSessions"
+            | "canAccessAnyPublicTeam"
+            | "calendarHash"
+            | "inviteHash"
+          >
+        >
+      >;
+      fromDelegate?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+      toDelegate?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+      botActor?: Maybe<
+        { __typename: "ActorBot" } & Pick<
+          ActorBot,
+          "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+        >
+      >;
+      fromCycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+      toCycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+      issueImport?: Maybe<
+        { __typename: "IssueImport" } & Pick<
+          IssueImport,
+          | "progress"
+          | "errorMetadata"
+          | "csvFileUrl"
+          | "serviceMetadata"
+          | "teamName"
+          | "mapping"
+          | "displayName"
+          | "creatorId"
+          | "updatedAt"
+          | "service"
+          | "status"
+          | "archivedAt"
+          | "createdAt"
+          | "id"
+          | "error"
+        >
+      >;
+      issue: { __typename?: "Issue" } & Pick<Issue, "id">;
+      addedLabels?: Maybe<
+        Array<
+          { __typename: "IssueLabel" } & Pick<
+            IssueLabel,
+            | "lastAppliedAt"
+            | "color"
+            | "description"
+            | "name"
+            | "updatedAt"
+            | "archivedAt"
+            | "createdAt"
+            | "id"
+            | "isGroup"
+          > & {
+              inheritedFrom?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+              parent?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+              team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+              creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+              retiredBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            }
+        >
+      >;
+      removedLabels?: Maybe<
+        Array<
+          { __typename: "IssueLabel" } & Pick<
+            IssueLabel,
+            | "lastAppliedAt"
+            | "color"
+            | "description"
+            | "name"
+            | "updatedAt"
+            | "archivedAt"
+            | "createdAt"
+            | "id"
+            | "isGroup"
+          > & {
+              inheritedFrom?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+              parent?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+              team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+              creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+              retiredBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            }
+        >
+      >;
+      attachment?: Maybe<{ __typename?: "Attachment" } & Pick<Attachment, "id">>;
+      toConvertedProject?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+      fromParent?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+      toParent?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+      fromProjectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
+      toProjectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
+      fromProject?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+      toProject?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+      fromState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
+      toState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
+      fromTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+      toTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+      triageResponsibilityTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+      toAssignee?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+      fromAssignee?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+      triageResponsibilityNotifiedUsers?: Maybe<
+        Array<
+          { __typename: "User" } & Pick<
+            User,
+            | "statusUntilAt"
+            | "description"
+            | "avatarUrl"
+            | "createdIssueCount"
+            | "disableReason"
+            | "avatarBackgroundColor"
+            | "statusEmoji"
+            | "initials"
+            | "statusLabel"
+            | "updatedAt"
+            | "lastSeen"
+            | "timezone"
+            | "archivedAt"
+            | "createdAt"
+            | "id"
+            | "gitHubUserId"
+            | "displayName"
+            | "email"
+            | "name"
+            | "url"
+            | "active"
+            | "guest"
+            | "app"
+            | "admin"
+            | "owner"
+            | "isAssignable"
+            | "isMentionable"
+            | "isMe"
+            | "supportsAgentSessions"
+            | "canAccessAnyPublicTeam"
+            | "calendarHash"
+            | "inviteHash"
+          >
+        >
+      >;
+    };
+  issueHistoryUpdated: { __typename: "IssueHistory" } & Pick<
+    IssueHistory,
+    | "triageResponsibilityAutoAssigned"
+    | "addedLabelIds"
+    | "removedLabelIds"
+    | "toSlaBreachesAt"
+    | "fromSlaBreachesAt"
+    | "attachmentId"
+    | "customerNeedId"
+    | "toCycleId"
+    | "toParentId"
+    | "toConvertedProjectId"
+    | "toProjectId"
+    | "toStateId"
+    | "fromCycleId"
+    | "fromParentId"
+    | "fromProjectId"
+    | "fromStateId"
+    | "fromTeamId"
+    | "toTeamId"
+    | "fromAssigneeId"
+    | "toAssigneeId"
+    | "actorId"
+    | "updatedAt"
+    | "archivedAt"
+    | "createdAt"
+    | "toSlaStartedAt"
+    | "fromSlaStartedAt"
+    | "toSlaType"
+    | "fromSlaType"
+    | "id"
+    | "fromDueDate"
+    | "toDueDate"
+    | "fromEstimate"
+    | "toEstimate"
+    | "fromPriority"
+    | "toPriority"
+    | "fromTitle"
+    | "toTitle"
+    | "fromSlaBreached"
+    | "toSlaBreached"
+    | "archived"
+    | "autoArchived"
+    | "autoClosed"
+    | "trashed"
+    | "updatedDescription"
+  > & {
+      relationChanges?: Maybe<
+        Array<{ __typename: "IssueRelationHistoryPayload" } & Pick<IssueRelationHistoryPayload, "identifier" | "type">>
+      >;
+      actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+      descriptionUpdatedBy?: Maybe<
+        Array<
+          { __typename: "User" } & Pick<
+            User,
+            | "statusUntilAt"
+            | "description"
+            | "avatarUrl"
+            | "createdIssueCount"
+            | "disableReason"
+            | "avatarBackgroundColor"
+            | "statusEmoji"
+            | "initials"
+            | "statusLabel"
+            | "updatedAt"
+            | "lastSeen"
+            | "timezone"
+            | "archivedAt"
+            | "createdAt"
+            | "id"
+            | "gitHubUserId"
+            | "displayName"
+            | "email"
+            | "name"
+            | "url"
+            | "active"
+            | "guest"
+            | "app"
+            | "admin"
+            | "owner"
+            | "isAssignable"
+            | "isMentionable"
+            | "isMe"
+            | "supportsAgentSessions"
+            | "canAccessAnyPublicTeam"
+            | "calendarHash"
+            | "inviteHash"
+          >
+        >
+      >;
+      actors?: Maybe<
+        Array<
+          { __typename: "User" } & Pick<
+            User,
+            | "statusUntilAt"
+            | "description"
+            | "avatarUrl"
+            | "createdIssueCount"
+            | "disableReason"
+            | "avatarBackgroundColor"
+            | "statusEmoji"
+            | "initials"
+            | "statusLabel"
+            | "updatedAt"
+            | "lastSeen"
+            | "timezone"
+            | "archivedAt"
+            | "createdAt"
+            | "id"
+            | "gitHubUserId"
+            | "displayName"
+            | "email"
+            | "name"
+            | "url"
+            | "active"
+            | "guest"
+            | "app"
+            | "admin"
+            | "owner"
+            | "isAssignable"
+            | "isMentionable"
+            | "isMe"
+            | "supportsAgentSessions"
+            | "canAccessAnyPublicTeam"
+            | "calendarHash"
+            | "inviteHash"
+          >
+        >
+      >;
+      fromDelegate?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+      toDelegate?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+      botActor?: Maybe<
+        { __typename: "ActorBot" } & Pick<
+          ActorBot,
+          "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+        >
+      >;
+      fromCycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+      toCycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+      issueImport?: Maybe<
+        { __typename: "IssueImport" } & Pick<
+          IssueImport,
+          | "progress"
+          | "errorMetadata"
+          | "csvFileUrl"
+          | "serviceMetadata"
+          | "teamName"
+          | "mapping"
+          | "displayName"
+          | "creatorId"
+          | "updatedAt"
+          | "service"
+          | "status"
+          | "archivedAt"
+          | "createdAt"
+          | "id"
+          | "error"
+        >
+      >;
+      issue: { __typename?: "Issue" } & Pick<Issue, "id">;
+      addedLabels?: Maybe<
+        Array<
+          { __typename: "IssueLabel" } & Pick<
+            IssueLabel,
+            | "lastAppliedAt"
+            | "color"
+            | "description"
+            | "name"
+            | "updatedAt"
+            | "archivedAt"
+            | "createdAt"
+            | "id"
+            | "isGroup"
+          > & {
+              inheritedFrom?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+              parent?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+              team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+              creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+              retiredBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            }
+        >
+      >;
+      removedLabels?: Maybe<
+        Array<
+          { __typename: "IssueLabel" } & Pick<
+            IssueLabel,
+            | "lastAppliedAt"
+            | "color"
+            | "description"
+            | "name"
+            | "updatedAt"
+            | "archivedAt"
+            | "createdAt"
+            | "id"
+            | "isGroup"
+          > & {
+              inheritedFrom?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+              parent?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+              team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+              creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+              retiredBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            }
+        >
+      >;
+      attachment?: Maybe<{ __typename?: "Attachment" } & Pick<Attachment, "id">>;
+      toConvertedProject?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+      fromParent?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+      toParent?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+      fromProjectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
+      toProjectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
+      fromProject?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+      toProject?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+      fromState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
+      toState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
+      fromTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+      toTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+      triageResponsibilityTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+      toAssignee?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+      fromAssignee?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+      triageResponsibilityNotifiedUsers?: Maybe<
+        Array<
+          { __typename: "User" } & Pick<
+            User,
+            | "statusUntilAt"
+            | "description"
+            | "avatarUrl"
+            | "createdIssueCount"
+            | "disableReason"
+            | "avatarBackgroundColor"
+            | "statusEmoji"
+            | "initials"
+            | "statusLabel"
+            | "updatedAt"
+            | "lastSeen"
+            | "timezone"
+            | "archivedAt"
+            | "createdAt"
+            | "id"
+            | "gitHubUserId"
+            | "displayName"
+            | "email"
+            | "name"
+            | "url"
+            | "active"
+            | "guest"
+            | "app"
+            | "admin"
+            | "owner"
+            | "isAssignable"
+            | "isMentionable"
+            | "isMe"
+            | "supportsAgentSessions"
+            | "canAccessAnyPublicTeam"
+            | "calendarHash"
+            | "inviteHash"
+          >
+        >
+      >;
+    };
+  issueArchived: { __typename?: "Issue" } & Pick<Issue, "id">;
+  issueCreated: { __typename?: "Issue" } & Pick<Issue, "id">;
+  issueUpdated: { __typename?: "Issue" } & Pick<Issue, "id">;
+  issueLabelCreated: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+  issueLabelDeleted: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+  issueLabelUpdated: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+  issueRelationCreated: { __typename?: "IssueRelation" } & Pick<IssueRelation, "id">;
+  issueRelationDeleted: { __typename?: "IssueRelation" } & Pick<IssueRelation, "id">;
+  issueRelationUpdated: { __typename?: "IssueRelation" } & Pick<IssueRelation, "id">;
+  userCreated: { __typename?: "User" } & Pick<User, "id">;
+  userUpdated: { __typename?: "User" } & Pick<User, "id">;
+};
 
 export type SuccessPayloadFragment = { __typename: "SuccessPayload" } & Pick<SuccessPayload, "lastSyncId" | "success">;
 
@@ -86986,6 +90116,1064 @@ export const SsoUrlFromEmailResponseFragmentDoc = new TypedDocumentString(
     `,
   { fragmentName: "SsoUrlFromEmailResponse" }
 ) as unknown as TypedDocumentString<SsoUrlFromEmailResponseFragment, unknown>;
+export const DocumentContentDraftFragmentDoc = new TypedDocumentString(
+  `
+    fragment DocumentContentDraft on DocumentContentDraft {
+  __typename
+  contentState
+  updatedAt
+  archivedAt
+  createdAt
+  id
+  documentContent {
+    ...DocumentContent
+  }
+  documentContentId
+  user {
+    id
+  }
+  userId
+}
+    fragment DocumentContent on DocumentContent {
+  __typename
+  aiPromptRules {
+    ...AiPromptRules
+  }
+  content
+  contentState
+  document {
+    id
+  }
+  initiative {
+    id
+  }
+  issue {
+    id
+  }
+  updatedAt
+  projectMilestone {
+    id
+  }
+  project {
+    id
+  }
+  restoredAt
+  archivedAt
+  createdAt
+  id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
+}
+fragment AiPromptRules on AiPromptRules {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  id
+  updatedBy {
+    id
+  }
+}`,
+  { fragmentName: "DocumentContentDraft" }
+) as unknown as TypedDocumentString<DocumentContentDraftFragment, unknown>;
+export const SubscriptionFragmentDoc = new TypedDocumentString(
+  `
+    fragment Subscription on Subscription {
+  __typename
+  commentUnarchived {
+    id
+  }
+  documentUnarchived {
+    id
+  }
+  notificationUnarchived {
+    ...Notification
+  }
+  projectUnarchived {
+    id
+  }
+  issueUnarchived {
+    id
+  }
+  commentArchived {
+    id
+  }
+  commentCreated {
+    id
+  }
+  commentDeleted {
+    id
+  }
+  commentUpdated {
+    id
+  }
+  cycleArchived {
+    id
+  }
+  cycleCreated {
+    id
+  }
+  cycleUpdated {
+    id
+  }
+  documentContentDraftCreated {
+    ...DocumentContentDraft
+  }
+  documentContentDraftDeleted {
+    ...DocumentContentDraft
+  }
+  documentContentDraftUpdated {
+    ...DocumentContentDraft
+  }
+  documentArchived {
+    id
+  }
+  documentCreated {
+    id
+  }
+  documentUpdated {
+    id
+  }
+  draftCreated {
+    ...Draft
+  }
+  draftDeleted {
+    ...Draft
+  }
+  draftUpdated {
+    ...Draft
+  }
+  favoriteCreated {
+    id
+  }
+  favoriteDeleted {
+    id
+  }
+  favoriteUpdated {
+    id
+  }
+  notificationArchived {
+    ...Notification
+  }
+  notificationCreated {
+    ...Notification
+  }
+  notificationDeleted {
+    ...Notification
+  }
+  notificationUpdated {
+    ...Notification
+  }
+  projectArchived {
+    id
+  }
+  projectCreated {
+    id
+  }
+  projectUpdated {
+    id
+  }
+  projectUpdateCreated {
+    id
+  }
+  projectUpdateDeleted {
+    id
+  }
+  projectUpdateUpdated {
+    id
+  }
+  roadmapCreated {
+    id
+  }
+  roadmapDeleted {
+    id
+  }
+  roadmapUpdated {
+    id
+  }
+  teamCreated {
+    id
+  }
+  teamDeleted {
+    id
+  }
+  teamUpdated {
+    id
+  }
+  teamMembershipCreated {
+    id
+  }
+  teamMembershipDeleted {
+    id
+  }
+  teamMembershipUpdated {
+    id
+  }
+  workflowStateArchived {
+    id
+  }
+  workflowStateCreated {
+    id
+  }
+  workflowStateUpdated {
+    id
+  }
+  agentActivityCreated {
+    id
+  }
+  agentActivityUpdated {
+    id
+  }
+  agentSessionCreated {
+    id
+  }
+  agentSessionUpdated {
+    id
+  }
+  initiativeCreated {
+    id
+  }
+  initiativeDeleted {
+    id
+  }
+  initiativeUpdated {
+    id
+  }
+  issueHistoryCreated {
+    ...IssueHistory
+  }
+  issueHistoryUpdated {
+    ...IssueHistory
+  }
+  issueArchived {
+    id
+  }
+  issueCreated {
+    id
+  }
+  issueUpdated {
+    id
+  }
+  issueLabelCreated {
+    id
+  }
+  issueLabelDeleted {
+    id
+  }
+  issueLabelUpdated {
+    id
+  }
+  issueRelationCreated {
+    id
+  }
+  issueRelationDeleted {
+    id
+  }
+  issueRelationUpdated {
+    id
+  }
+  userCreated {
+    id
+  }
+  userUpdated {
+    id
+  }
+}
+    fragment ActorBot on ActorBot {
+  __typename
+  avatarUrl
+  name
+  userDisplayName
+  subType
+  type
+  id
+}
+fragment CustomerNeedNotification on CustomerNeedNotification {
+  __typename
+  type
+  customerNeedId
+  botActor {
+    ...ActorBot
+  }
+  category
+  customerNeed {
+    id
+  }
+  externalUserActor {
+    id
+  }
+  relatedIssue {
+    id
+  }
+  updatedAt
+  relatedProject {
+    id
+  }
+  emailedAt
+  readAt
+  unsnoozedAt
+  archivedAt
+  createdAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+  user {
+    id
+  }
+}
+fragment CustomerNotification on CustomerNotification {
+  __typename
+  type
+  customerId
+  botActor {
+    ...ActorBot
+  }
+  category
+  customer {
+    id
+  }
+  externalUserActor {
+    id
+  }
+  updatedAt
+  emailedAt
+  readAt
+  unsnoozedAt
+  archivedAt
+  createdAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+  user {
+    id
+  }
+}
+fragment DocumentContent on DocumentContent {
+  __typename
+  aiPromptRules {
+    ...AiPromptRules
+  }
+  content
+  contentState
+  document {
+    id
+  }
+  initiative {
+    id
+  }
+  issue {
+    id
+  }
+  updatedAt
+  projectMilestone {
+    id
+  }
+  project {
+    id
+  }
+  restoredAt
+  archivedAt
+  createdAt
+  id
+  welcomeMessage {
+    ...WelcomeMessage
+  }
+}
+fragment DocumentNotification on DocumentNotification {
+  __typename
+  reactionEmoji
+  type
+  commentId
+  documentId
+  parentCommentId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  emailedAt
+  readAt
+  unsnoozedAt
+  archivedAt
+  createdAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+  user {
+    id
+  }
+}
+fragment DocumentContentDraft on DocumentContentDraft {
+  __typename
+  contentState
+  updatedAt
+  archivedAt
+  createdAt
+  id
+  documentContent {
+    ...DocumentContent
+  }
+  documentContentId
+  user {
+    id
+  }
+  userId
+}
+fragment Draft on Draft {
+  __typename
+  data
+  parentComment {
+    id
+  }
+  customerNeed {
+    id
+  }
+  initiative {
+    id
+  }
+  initiativeUpdate {
+    id
+  }
+  issue {
+    id
+  }
+  updatedAt
+  project {
+    id
+  }
+  projectUpdate {
+    id
+  }
+  team {
+    id
+  }
+  bodyData
+  archivedAt
+  createdAt
+  id
+  user {
+    id
+  }
+  isAutogenerated
+}
+fragment Notification on Notification {
+  __typename
+  type
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  emailedAt
+  readAt
+  unsnoozedAt
+  archivedAt
+  createdAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+  user {
+    id
+  }
+  ... on CustomerNeedNotification {
+    ...CustomerNeedNotification
+  }
+  ... on CustomerNotification {
+    ...CustomerNotification
+  }
+  ... on DocumentNotification {
+    ...DocumentNotification
+  }
+  ... on InitiativeNotification {
+    ...InitiativeNotification
+  }
+  ... on IssueNotification {
+    ...IssueNotification
+  }
+  ... on OauthClientApprovalNotification {
+    ...OauthClientApprovalNotification
+  }
+  ... on PostNotification {
+    ...PostNotification
+  }
+  ... on ProjectNotification {
+    ...ProjectNotification
+  }
+  ... on PullRequestNotification {
+    ...PullRequestNotification
+  }
+  ... on WelcomeMessageNotification {
+    ...WelcomeMessageNotification
+  }
+}
+fragment PostNotification on PostNotification {
+  __typename
+  reactionEmoji
+  type
+  commentId
+  parentCommentId
+  postId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  emailedAt
+  readAt
+  unsnoozedAt
+  archivedAt
+  createdAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+  user {
+    id
+  }
+}
+fragment ProjectNotification on ProjectNotification {
+  __typename
+  reactionEmoji
+  type
+  commentId
+  parentCommentId
+  projectId
+  projectMilestoneId
+  projectUpdateId
+  botActor {
+    ...ActorBot
+  }
+  category
+  comment {
+    id
+  }
+  document {
+    id
+  }
+  externalUserActor {
+    id
+  }
+  updatedAt
+  parentComment {
+    id
+  }
+  project {
+    id
+  }
+  projectUpdate {
+    id
+  }
+  emailedAt
+  readAt
+  unsnoozedAt
+  archivedAt
+  createdAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+  user {
+    id
+  }
+}
+fragment PullRequestNotification on PullRequestNotification {
+  __typename
+  type
+  pullRequestCommentId
+  pullRequestId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  emailedAt
+  readAt
+  unsnoozedAt
+  archivedAt
+  createdAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+  user {
+    id
+  }
+}
+fragment IssueHistory on IssueHistory {
+  __typename
+  triageResponsibilityAutoAssigned
+  relationChanges {
+    ...IssueRelationHistoryPayload
+  }
+  addedLabelIds
+  removedLabelIds
+  toSlaBreachesAt
+  fromSlaBreachesAt
+  actor {
+    id
+  }
+  descriptionUpdatedBy {
+    ...User
+  }
+  actors {
+    ...User
+  }
+  fromDelegate {
+    id
+  }
+  toDelegate {
+    id
+  }
+  botActor {
+    ...ActorBot
+  }
+  fromCycle {
+    id
+  }
+  toCycle {
+    id
+  }
+  attachmentId
+  customerNeedId
+  toCycleId
+  toParentId
+  toConvertedProjectId
+  toProjectId
+  toStateId
+  fromCycleId
+  fromParentId
+  fromProjectId
+  fromStateId
+  fromTeamId
+  toTeamId
+  fromAssigneeId
+  toAssigneeId
+  actorId
+  issueImport {
+    ...IssueImport
+  }
+  issue {
+    id
+  }
+  addedLabels {
+    ...IssueLabel
+  }
+  removedLabels {
+    ...IssueLabel
+  }
+  updatedAt
+  attachment {
+    id
+  }
+  toConvertedProject {
+    id
+  }
+  fromParent {
+    id
+  }
+  toParent {
+    id
+  }
+  fromProjectMilestone {
+    id
+  }
+  toProjectMilestone {
+    id
+  }
+  fromProject {
+    id
+  }
+  toProject {
+    id
+  }
+  fromState {
+    id
+  }
+  toState {
+    id
+  }
+  fromTeam {
+    id
+  }
+  toTeam {
+    id
+  }
+  triageResponsibilityTeam {
+    id
+  }
+  archivedAt
+  createdAt
+  toSlaStartedAt
+  fromSlaStartedAt
+  toSlaType
+  fromSlaType
+  id
+  toAssignee {
+    id
+  }
+  fromAssignee {
+    id
+  }
+  triageResponsibilityNotifiedUsers {
+    ...User
+  }
+  fromDueDate
+  toDueDate
+  fromEstimate
+  toEstimate
+  fromPriority
+  toPriority
+  fromTitle
+  toTitle
+  fromSlaBreached
+  toSlaBreached
+  archived
+  autoArchived
+  autoClosed
+  trashed
+  updatedDescription
+}
+fragment User on User {
+  __typename
+  statusUntilAt
+  description
+  avatarUrl
+  createdIssueCount
+  disableReason
+  avatarBackgroundColor
+  statusEmoji
+  initials
+  statusLabel
+  updatedAt
+  lastSeen
+  timezone
+  archivedAt
+  createdAt
+  id
+  gitHubUserId
+  displayName
+  email
+  name
+  url
+  active
+  guest
+  app
+  admin
+  owner
+  isAssignable
+  isMentionable
+  isMe
+  supportsAgentSessions
+  canAccessAnyPublicTeam
+  calendarHash
+  inviteHash
+}
+fragment WelcomeMessage on WelcomeMessage {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  title
+  id
+  updatedBy {
+    id
+  }
+  enabled
+}
+fragment WelcomeMessageNotification on WelcomeMessageNotification {
+  __typename
+  type
+  welcomeMessageId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  emailedAt
+  readAt
+  unsnoozedAt
+  archivedAt
+  createdAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+  user {
+    id
+  }
+}
+fragment AiPromptRules on AiPromptRules {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  id
+  updatedBy {
+    id
+  }
+}
+fragment IssueImport on IssueImport {
+  __typename
+  progress
+  errorMetadata
+  csvFileUrl
+  serviceMetadata
+  teamName
+  mapping
+  displayName
+  creatorId
+  updatedAt
+  service
+  status
+  archivedAt
+  createdAt
+  id
+  error
+}
+fragment InitiativeNotification on InitiativeNotification {
+  __typename
+  reactionEmoji
+  type
+  commentId
+  initiativeId
+  initiativeUpdateId
+  parentCommentId
+  botActor {
+    ...ActorBot
+  }
+  category
+  comment {
+    id
+  }
+  document {
+    id
+  }
+  externalUserActor {
+    id
+  }
+  initiative {
+    id
+  }
+  initiativeUpdate {
+    id
+  }
+  updatedAt
+  parentComment {
+    id
+  }
+  emailedAt
+  readAt
+  unsnoozedAt
+  archivedAt
+  createdAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+  user {
+    id
+  }
+}
+fragment IssueNotification on IssueNotification {
+  __typename
+  reactionEmoji
+  type
+  commentId
+  issueId
+  parentCommentId
+  botActor {
+    ...ActorBot
+  }
+  category
+  comment {
+    id
+  }
+  externalUserActor {
+    id
+  }
+  issue {
+    id
+  }
+  updatedAt
+  parentComment {
+    id
+  }
+  subscriptions {
+    ...NotificationSubscription
+  }
+  team {
+    id
+  }
+  emailedAt
+  readAt
+  unsnoozedAt
+  archivedAt
+  createdAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+  user {
+    id
+  }
+}
+fragment OauthClientApprovalNotification on OauthClientApprovalNotification {
+  __typename
+  type
+  oauthClientApprovalId
+  oauthClientApproval {
+    ...OauthClientApproval
+  }
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  emailedAt
+  readAt
+  unsnoozedAt
+  archivedAt
+  createdAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+  user {
+    id
+  }
+}
+fragment IssueRelationHistoryPayload on IssueRelationHistoryPayload {
+  __typename
+  identifier
+  type
+}
+fragment IssueLabel on IssueLabel {
+  __typename
+  lastAppliedAt
+  color
+  description
+  name
+  updatedAt
+  inheritedFrom {
+    id
+  }
+  parent {
+    id
+  }
+  team {
+    id
+  }
+  archivedAt
+  createdAt
+  id
+  creator {
+    id
+  }
+  retiredBy {
+    id
+  }
+  isGroup
+}
+fragment NotificationSubscription on NotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  project {
+    id
+  }
+  customer {
+    id
+  }
+  updatedAt
+  team {
+    id
+  }
+  archivedAt
+  createdAt
+  userContextViewType
+  contextViewType
+  id
+  subscriber {
+    id
+  }
+  user {
+    id
+  }
+  active
+}
+fragment OauthClientApproval on OauthClientApproval {
+  __typename
+  newlyRequestedScopes
+  updatedAt
+  requesterId
+  responderId
+  requestReason
+  denyReason
+  scopes
+  status
+  archivedAt
+  createdAt
+  id
+  oauthClientId
+}`,
+  { fragmentName: "Subscription" }
+) as unknown as TypedDocumentString<SubscriptionFragment, unknown>;
 export const SuccessPayloadFragmentDoc = new TypedDocumentString(
   `
     fragment SuccessPayload on SuccessPayload {
