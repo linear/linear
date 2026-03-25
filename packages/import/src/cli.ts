@@ -15,58 +15,83 @@ import type { ImportAnswers } from "./types.ts";
 
 inquirer.registerPrompt("filePath", inquirerFilePath);
 
+const VALID_SERVICES = [
+  "github",
+  "gitlabCsv",
+  "jiraCsv",
+  "asanaCsv",
+  "pivotalCsv",
+  "shortcutCsv",
+  "trelloJson",
+  "linearCsv",
+] as const;
+
+const SERVICE_LABELS: Record<(typeof VALID_SERVICES)[number], string> = {
+  github: "GitHub",
+  gitlabCsv: "GitLab (CSV export)",
+  jiraCsv: "Jira (CSV export)",
+  asanaCsv: "Asana (CSV export)",
+  pivotalCsv: "Pivotal (CSV export)",
+  shortcutCsv: "Shortcut (CSV export)",
+  trelloJson: "Trello (JSON export)",
+  linearCsv: "Linear (CSV export)",
+};
+
+const getFlag = (name: string): string | undefined => {
+  const idx = process.argv.indexOf(`--${name}`);
+  if (idx === -1 || idx + 1 >= process.argv.length) {return undefined;}
+  const value = process.argv[idx + 1];
+  return value.startsWith("--") ? undefined : value;
+};
+
+const hasFlag = (name: string): boolean => process.argv.includes(`--${name}`);
+
 (async () => {
   try {
-    const importAnswers = await inquirer.prompt<ImportAnswers>([
-      {
-        type: "input",
-        name: "linearApiKey",
-        message: "Input your Linear API key (https://linear.app/settings/account/security)",
-      },
-      {
-        type: "list",
-        name: "service",
-        message: "Which service would you like to import from?",
-        choices: [
-          {
-            name: "GitHub",
-            value: "github",
-          },
-          {
-            name: "GitLab (CSV export)",
-            value: "gitlabCsv",
-          },
-          {
-            name: "Jira (CSV export)",
-            value: "jiraCsv",
-          },
-          {
-            name: "Asana (CSV export)",
-            value: "asanaCsv",
-          },
-          {
-            name: "Pivotal (CSV export)",
-            value: "pivotalCsv",
-          },
-          {
-            name: "Shortcut (CSV export)",
-            value: "shortcutCsv",
-          },
-          {
-            name: "Trello (JSON export)",
-            value: "trelloJson",
-          },
-          {
-            name: "Linear (CSV export)",
-            value: "linearCsv",
-          },
-        ],
-      },
-    ]);
+    const envApiKey = process.env.LINEAR_API_KEY;
+    const flagImporter = getFlag("importer");
+    const flagTeam = getFlag("team");
+    const flagProject = getFlag("project");
+    const flagIncludeComments = hasFlag("include-comments");
+    const flagSelfAssign = hasFlag("self-assign");
+
+    if (flagImporter && !VALID_SERVICES.includes(flagImporter as (typeof VALID_SERVICES)[number])) {
+      console.error(chalk.red(`Invalid importer "${flagImporter}". Valid options: ${VALID_SERVICES.join(", ")}`));
+      process.exit(1);
+    }
+
+    let linearApiKey: string;
+    let service: string;
+
+    if (envApiKey && flagImporter) {
+      linearApiKey = envApiKey;
+      service = flagImporter;
+    } else {
+      const importAnswers = await inquirer.prompt<ImportAnswers>([
+        {
+          type: "input",
+          name: "linearApiKey",
+          message: "Input your Linear API key (https://linear.app/settings/account/security)",
+          when: () => !envApiKey,
+          default: envApiKey,
+        },
+        {
+          type: "list",
+          name: "service",
+          message: "Which service would you like to import from?",
+          choices: VALID_SERVICES.map(value => ({ name: SERVICE_LABELS[value], value })),
+          when: () => !flagImporter,
+          default: flagImporter,
+        },
+      ]);
+
+      linearApiKey = envApiKey || importAnswers.linearApiKey;
+      service = flagImporter || importAnswers.service;
+    }
 
     // TODO: Validate Linear API
     let importer;
-    switch (importAnswers.service) {
+    switch (service) {
       case "github":
         importer = await githubImport();
         break;
@@ -92,14 +117,17 @@ inquirer.registerPrompt("filePath", inquirerFilePath);
         importer = await linearCsvImporter();
         break;
       default:
-        console.log(chalk.red(`Invalid importer`));
-        return;
+        console.error(chalk.red(`Invalid importer`));
+        process.exit(1);
     }
 
     if (importer) {
-      const apiUrlIndex = process.argv.indexOf("--apiUrl");
-      const apiUrl = apiUrlIndex > -1 ? process.argv[apiUrlIndex + 1] : undefined;
-      await importIssues(importAnswers.linearApiKey, importer, apiUrl);
+      const apiUrl = getFlag("apiUrl");
+      await importIssues(linearApiKey, importer, apiUrl, flagTeam, {
+        project: flagProject,
+        includeComments: flagIncludeComments,
+        selfAssign: flagSelfAssign,
+      });
     }
   } catch (error) {
     const userFriendlyMessage = error.errors?.[0]?.message;
@@ -108,7 +136,8 @@ inquirer.registerPrompt("filePath", inquirerFilePath);
       console.error(error);
     }
     if (userFriendlyMessage) {
-      console.log(chalk.red(userFriendlyMessage));
+      console.error(chalk.red(userFriendlyMessage));
     }
+    process.exit(1);
   }
 })();

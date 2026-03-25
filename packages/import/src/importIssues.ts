@@ -18,7 +18,7 @@ interface ImportAnswers {
   includeProject?: string;
   selfAssign?: boolean;
   targetAssignee?: string;
-  targetProjectId?: boolean;
+  targetProjectId?: string;
   targetTeamId?: string;
   teamName?: string;
 }
@@ -35,10 +35,22 @@ const defaultStateColors: Record<IssueStatus, string> = {
   [IssueStatus.Completed]: "#5e6ad2",
 };
 
+interface NonInteractiveFlags {
+  project?: string;
+  includeComments?: boolean;
+  selfAssign?: boolean;
+}
+
 /**
  * Import issues into Linear via the API.
  */
-export const importIssues = async (apiKey: string, importer: Importer, apiUrl?: string): Promise<void> => {
+export const importIssues = async (
+  apiKey: string,
+  importer: Importer,
+  apiUrl?: string,
+  targetTeamIdFlag?: string,
+  flags?: NonInteractiveFlags
+): Promise<void> => {
   const client = new LinearClient({ apiKey, apiUrl });
   const importData = await importer.import();
 
@@ -54,111 +66,157 @@ export const importIssues = async (apiKey: string, importer: Importer, apiUrl?: 
   spinner.stop();
   const viewer = viewerQuery?.id;
 
-  // Prompt the user to either get or create a team
-  const importAnswers = await inquirer.prompt<ImportAnswers>([
-    {
-      type: "confirm",
-      name: "newTeam",
-      message: "Do you want to create a new team for imported issues?",
-      default: true,
-    },
-    {
-      type: "input",
-      name: "teamName",
-      message: "Name of the team:",
-      default: importer.defaultTeamName || importer.name,
-      when: (answers: ImportAnswers) => {
-        return answers.newTeam;
-      },
-    },
-    {
-      type: "list",
-      name: "targetTeamId",
-      message: "Import into team:",
-      choices: async () => {
-        return allTeams.map(team => ({
-          name: `[${team.key}] ${team.displayName}`,
-          value: team.id,
-        }));
-      },
-      when: (answers: ImportAnswers) => {
-        return !answers.newTeam;
-      },
-    },
-    {
-      type: "confirm",
-      name: "includeProject",
-      message: "Do you want to import to a specific project?",
-      when: async (answers: ImportAnswers) => {
-        // if no team is selected then don't show projects screen
-        if (!answers.targetTeamId) {
-          return false;
-        }
+  let resolvedTeamIdFlag: string | undefined;
+  if (targetTeamIdFlag) {
+    const matchedTeam = allTeams.find(
+      team => team.id === targetTeamIdFlag || team.key.toLowerCase() === targetTeamIdFlag.toLowerCase()
+    );
+    if (matchedTeam) {
+      resolvedTeamIdFlag = matchedTeam.id;
+    } else {
+      console.error(
+        chalk.red(`Team "${targetTeamIdFlag}" not found. Available teams: ${allTeams.map(t => t.key).join(", ")}`)
+      );
+      process.exit(1);
+    }
+  }
 
-        const team = await client.team(answers.targetTeamId);
-        const teamProjects = await team?.projects();
+  let resolvedProjectIdFlag: string | undefined;
+  if (flags?.project && !resolvedTeamIdFlag) {
+    console.error(chalk.red("--project requires --team to be specified."));
+    process.exit(1);
+  }
+  if (flags?.project && resolvedTeamIdFlag) {
+    const team = await client.team(resolvedTeamIdFlag);
+    const teamProjects = await team?.projects();
+    const projects = teamProjects?.nodes ?? [];
+    const matchedProject = projects.find(
+      p => p.id === flags.project || p.name.toLowerCase() === flags.project!.toLowerCase()
+    );
+    if (matchedProject) {
+      resolvedProjectIdFlag = matchedProject.id;
+    } else {
+      console.error(
+        chalk.red(`Project "${flags.project}" not found. Available projects: ${projects.map(p => p.name).join(", ")}`)
+      );
+      process.exit(1);
+    }
+  }
 
-        const projects = teamProjects?.nodes ?? [];
-        return projects.length > 0;
+  let importAnswers: ImportAnswers;
+  if (resolvedTeamIdFlag) {
+    importAnswers = {
+      newTeam: false,
+      targetTeamId: resolvedTeamIdFlag,
+      selfAssign: flags?.selfAssign ?? false,
+      includeComments: flags?.includeComments ?? false,
+    };
+  } else {
+    importAnswers = await inquirer.prompt<ImportAnswers>([
+      {
+        type: "confirm",
+        name: "newTeam",
+        message: "Do you want to create a new team for imported issues?",
+        default: true,
       },
-    },
-    {
-      type: "list",
-      name: "targetProjectId",
-      message: "Import into project:",
-      choices: async (answers: ImportAnswers) => {
-        // if no team is selected then don't show projects screen
-        if (!answers.targetTeamId) {
-          return false;
-        }
+      {
+        type: "input",
+        name: "teamName",
+        message: "Name of the team:",
+        default: importer.defaultTeamName || importer.name,
+        when: (answers: ImportAnswers) => {
+          return answers.newTeam;
+        },
+      },
+      {
+        type: "list",
+        name: "targetTeamId",
+        message: "Import into team:",
+        choices: async () => {
+          return allTeams.map(team => ({
+            name: `[${team.key}] ${team.displayName}`,
+            value: team.id,
+          }));
+        },
+        when: (answers: ImportAnswers) => {
+          return !answers.newTeam;
+        },
+      },
+      {
+        type: "confirm",
+        name: "includeProject",
+        message: "Do you want to import to a specific project?",
+        when: async (answers: ImportAnswers) => {
+          // if no team is selected then don't show projects screen
+          if (!answers.targetTeamId) {
+            return false;
+          }
 
-        const team = await client.team(answers.targetTeamId);
-        const teamProjects = await team?.projects();
+          const team = await client.team(answers.targetTeamId);
+          const teamProjects = await team?.projects();
 
-        const projects = teamProjects?.nodes ?? [];
-        return projects.map(project => ({
-          name: project.name,
-          value: project.id,
-        }));
+          const projects = teamProjects?.nodes ?? [];
+          return projects.length > 0;
+        },
       },
-      when: (answers: ImportAnswers) => {
-        return answers.includeProject;
-      },
-    },
-    {
-      type: "confirm",
-      name: "includeComments",
-      message: "Do you want to include comments in the issue description?",
-      when: () => {
-        return !!importData.issues.find(issue => issue.comments && issue.comments.length > 0);
-      },
-    },
-    {
-      type: "confirm",
-      name: "selfAssign",
-      message: "Do you want to assign these issues to yourself?",
-      default: true,
-    },
-    {
-      type: "list",
-      name: "targetAssignee",
-      message: "Assign to user:",
-      choices: () => {
-        const map = allUsers.map(user => ({
-          name: user.name,
-          value: user.id,
-        }));
+      {
+        type: "list",
+        name: "targetProjectId",
+        message: "Import into project:",
+        choices: async (answers: ImportAnswers) => {
+          // if no team is selected then don't show projects screen
+          if (!answers.targetTeamId) {
+            return false;
+          }
 
-        map.unshift({ name: "[Unassigned]", value: "" });
-        map.unshift({ name: "[Provided assignee]", value: "{{assignee}}" });
+          const team = await client.team(answers.targetTeamId);
+          const teamProjects = await team?.projects();
 
-        return map;
+          const projects = teamProjects?.nodes ?? [];
+          return projects.map(project => ({
+            name: project.name,
+            value: project.id,
+          }));
+        },
+        when: (answers: ImportAnswers) => {
+          return answers.includeProject;
+        },
       },
-      when: (answers: ImportAnswers) => {
-        return !answers.selfAssign;
+      {
+        type: "confirm",
+        name: "includeComments",
+        message: "Do you want to include comments in the issue description?",
+        when: () => {
+          return !!importData.issues.find(issue => issue.comments && issue.comments.length > 0);
+        },
       },
-    },
-  ]);
+      {
+        type: "confirm",
+        name: "selfAssign",
+        message: "Do you want to assign these issues to yourself?",
+        default: true,
+      },
+      {
+        type: "list",
+        name: "targetAssignee",
+        message: "Assign to user:",
+        choices: () => {
+          const map = allUsers.map(user => ({
+            name: user.name,
+            value: user.id,
+          }));
+
+          map.unshift({ name: "[Unassigned]", value: "" });
+          map.unshift({ name: "[Provided assignee]", value: "{{assignee}}" });
+
+          return map;
+        },
+        when: (answers: ImportAnswers) => {
+          return !answers.selfAssign;
+        },
+      },
+    ]);
+  }
 
   let teamKey: string | undefined;
   let teamId: Id | undefined;
@@ -199,7 +257,7 @@ export const importIssues = async (apiKey: string, importer: Importer, apiUrl?: 
   spinner.stop();
   spinner = ora("Updating labels").start();
 
-  const projectId = importAnswers.targetProjectId;
+  const projectId = resolvedProjectIdFlag || importAnswers.targetProjectId;
   const labelMapping = await handleLabels(client, importData, teamId, [...allTeamLabels, ...allWorkspaceLabels]);
 
   const existingStateMap = {} as { [name: string]: string };
@@ -284,7 +342,7 @@ export const importIssues = async (apiKey: string, importer: Importer, apiUrl?: 
     try {
       const createdIssue = await createIssueWithRetries(client, {
         teamId,
-        projectId: projectId as unknown as string,
+        projectId,
         title: issue.title,
         description,
         priority: issue.priority,
