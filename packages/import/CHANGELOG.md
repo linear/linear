@@ -1,5 +1,16 @@
 # Change Log
 
+## 3.1.0
+
+### Minor Changes
+
+- 21bfb47: Add non-interactive mode to the import CLI with `--api-key`, `--importer`, and `--team` flags for CI/automation use cases
+
+### Patch Changes
+
+- Updated dependencies [2d465ad]
+  - @linear/sdk@80.0.0
+
 ## 3.0.14
 
 ### Patch Changes
