@@ -37,26 +37,24 @@ const SERVICE_LABELS: Record<(typeof VALID_SERVICES)[number], string> = {
   linearCsv: "Linear (CSV export)",
 };
 
-/** Parse a named CLI flag value: --flag value */
 const getFlag = (name: string): string | undefined => {
   const idx = process.argv.indexOf(`--${name}`);
-  return idx > -1 && idx + 1 < process.argv.length ? process.argv[idx + 1] : undefined;
+  if (idx === -1 || idx + 1 >= process.argv.length) {return undefined;}
+  const value = process.argv[idx + 1];
+  return value.startsWith("--") ? undefined : value;
 };
 
-/** Check if a boolean CLI flag is present */
 const hasFlag = (name: string): boolean => process.argv.includes(`--${name}`);
 
 (async () => {
   try {
-    // API key from environment variable only (not CLI flag for security)
-    const flagApiKey = process.env.LINEAR_API_KEY;
+    const envApiKey = process.env.LINEAR_API_KEY;
     const flagImporter = getFlag("importer");
     const flagTeam = getFlag("team");
     const flagProject = getFlag("project");
     const flagIncludeComments = hasFlag("include-comments");
     const flagSelfAssign = hasFlag("self-assign");
 
-    // Validate --importer early regardless of mode
     if (flagImporter && !VALID_SERVICES.includes(flagImporter as (typeof VALID_SERVICES)[number])) {
       console.error(chalk.red(`Invalid importer "${flagImporter}". Valid options: ${VALID_SERVICES.join(", ")}`));
       process.exit(1);
@@ -65,19 +63,17 @@ const hasFlag = (name: string): boolean => process.argv.includes(`--${name}`);
     let linearApiKey: string;
     let service: string;
 
-    if (flagApiKey && flagImporter) {
-      // Non-interactive mode: use provided flags/env
-      linearApiKey = flagApiKey;
+    if (envApiKey && flagImporter) {
+      linearApiKey = envApiKey;
       service = flagImporter;
     } else {
-      // Interactive mode: prompt as before
       const importAnswers = await inquirer.prompt<ImportAnswers>([
         {
           type: "input",
           name: "linearApiKey",
           message: "Input your Linear API key (https://linear.app/settings/account/security)",
-          when: () => !flagApiKey,
-          default: flagApiKey,
+          when: () => !envApiKey,
+          default: envApiKey,
         },
         {
           type: "list",
@@ -89,7 +85,7 @@ const hasFlag = (name: string): boolean => process.argv.includes(`--${name}`);
         },
       ]);
 
-      linearApiKey = flagApiKey || importAnswers.linearApiKey;
+      linearApiKey = envApiKey || importAnswers.linearApiKey;
       service = flagImporter || importAnswers.service;
     }
 

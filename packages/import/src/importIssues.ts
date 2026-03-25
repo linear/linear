@@ -18,7 +18,7 @@ interface ImportAnswers {
   includeProject?: string;
   selfAssign?: boolean;
   targetAssignee?: string;
-  targetProjectId?: boolean;
+  targetProjectId?: string;
   targetTeamId?: string;
   teamName?: string;
 }
@@ -66,7 +66,6 @@ export const importIssues = async (
   spinner.stop();
   const viewer = viewerQuery?.id;
 
-  // When --team flag is provided, resolve it to a team ID (supports team key or ID)
   let resolvedTeamIdFlag: string | undefined;
   if (targetTeamIdFlag) {
     const matchedTeam = allTeams.find(
@@ -75,13 +74,18 @@ export const importIssues = async (
     if (matchedTeam) {
       resolvedTeamIdFlag = matchedTeam.id;
     } else {
-      console.error(chalk.red(`Team "${targetTeamIdFlag}" not found. Available teams: ${allTeams.map(t => t.key).join(", ")}`));
+      console.error(
+        chalk.red(`Team "${targetTeamIdFlag}" not found. Available teams: ${allTeams.map(t => t.key).join(", ")}`)
+      );
       process.exit(1);
     }
   }
 
-  // Resolve --project flag to a project ID if provided
   let resolvedProjectIdFlag: string | undefined;
+  if (flags?.project && !resolvedTeamIdFlag) {
+    console.error(chalk.red("--project requires --team to be specified."));
+    process.exit(1);
+  }
   if (flags?.project && resolvedTeamIdFlag) {
     const team = await client.team(resolvedTeamIdFlag);
     const teamProjects = await team?.projects();
@@ -92,25 +96,22 @@ export const importIssues = async (
     if (matchedProject) {
       resolvedProjectIdFlag = matchedProject.id;
     } else {
-      console.error(chalk.red(`Project "${flags.project}" not found. Available projects: ${projects.map(p => p.name).join(", ")}`));
+      console.error(
+        chalk.red(`Project "${flags.project}" not found. Available projects: ${projects.map(p => p.name).join(", ")}`)
+      );
       process.exit(1);
     }
   }
 
-  // In non-interactive mode (--team provided), skip all prompts
   let importAnswers: ImportAnswers;
   if (resolvedTeamIdFlag) {
     importAnswers = {
       newTeam: false,
       targetTeamId: resolvedTeamIdFlag,
-      targetProjectId: resolvedProjectIdFlag ? true : undefined,
       selfAssign: flags?.selfAssign ?? false,
-      includeComments: flags?.includeComments
-        ? true
-        : !!importData.issues.find(issue => issue.comments && issue.comments.length > 0),
+      includeComments: flags?.includeComments ?? false,
     };
   } else {
-    // Prompt the user to either get or create a team
     importAnswers = await inquirer.prompt<ImportAnswers>([
       {
         type: "confirm",
@@ -341,7 +342,7 @@ export const importIssues = async (
     try {
       const createdIssue = await createIssueWithRetries(client, {
         teamId,
-        projectId: projectId as unknown as string,
+        projectId,
         title: issue.title,
         description,
         priority: issue.priority,
