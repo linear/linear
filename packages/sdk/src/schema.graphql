@@ -34064,6 +34064,10 @@ type Query {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
+    """
+    [ALPHA] Sort returned releases.
+    """
+    sort: [ReleaseSortInput!]
   ): ReleaseConnection!
   """
   One specific roadmap.

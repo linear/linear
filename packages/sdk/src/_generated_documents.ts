@@ -19246,6 +19246,7 @@ export type QueryReleasesArgs = {
   includeArchived?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<PaginationOrderBy>;
+  sort?: InputMaybe<Array<ReleaseSortInput>>;
 };
 
 export type QueryRoadmapArgs = {
