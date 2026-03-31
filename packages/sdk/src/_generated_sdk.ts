@@ -9670,6 +9670,7 @@ export class Issue extends Request {
     this.estimate = data.estimate ?? undefined;
     this.id = data.id;
     this.identifier = data.identifier;
+    this.inheritsSharedAccess = data.inheritsSharedAccess;
     this.labelIds = data.labelIds;
     this.number = data.number;
     this.previousIdentifiers = data.previousIdentifiers;
@@ -9750,13 +9751,15 @@ export class Issue extends Request {
   public id: string;
   /** Issue's human readable identifier (e.g. ENG-123). */
   public identifier: string;
+  /** Whether this issue inherits shared access from its parent issue. */
+  public inheritsSharedAccess: boolean;
   /** Id of the labels associated with this issue. */
   public labelIds: string[];
   /** The issue's unique number. */
   public number: number;
   /** Previous identifiers of the issue if it has been moved between teams. */
   public previousIdentifiers: string[];
-  /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
   public priority: number;
   /** Label for the priority. */
   public priorityLabel: string;
@@ -11659,6 +11662,7 @@ export class IssueSearchResult extends Request {
     this.estimate = data.estimate ?? undefined;
     this.id = data.id;
     this.identifier = data.identifier;
+    this.inheritsSharedAccess = data.inheritsSharedAccess;
     this.labelIds = data.labelIds;
     this.metadata = data.metadata;
     this.number = data.number;
@@ -11740,6 +11744,8 @@ export class IssueSearchResult extends Request {
   public id: string;
   /** Issue's human readable identifier (e.g. ENG-123). */
   public identifier: string;
+  /** Whether this issue inherits shared access from its parent issue. */
+  public inheritsSharedAccess: boolean;
   /** Id of the labels associated with this issue. */
   public labelIds: string[];
   /** Metadata related to search result. */
@@ -11748,7 +11754,7 @@ export class IssueSearchResult extends Request {
   public number: number;
   /** Previous identifiers of the issue if it has been moved between teams. */
   public previousIdentifiers: string[];
-  /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
   public priority: number;
   /** Label for the priority. */
   public priorityLabel: string;
@@ -12425,7 +12431,7 @@ export class IssueWebhookPayload {
   public parentId?: string | null;
   /** Previous identifiers of the issue if it has been moved between teams. */
   public previousIdentifiers: string[];
-  /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
   public priority: number;
   /** The label of the issue's priority. */
   public priorityLabel: string;
@@ -14607,7 +14613,7 @@ export class Project extends Request {
   public labelIds: string[];
   /** The project's name. */
   public name: string;
-  /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
   public priority: number;
   /** The priority of the project as a label. */
   public priorityLabel: string;
@@ -16056,7 +16062,7 @@ export class ProjectSearchResult extends Request {
   public metadata: L.Scalars["JSONObject"];
   /** The project's name. */
   public name: string;
-  /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
   public priority: number;
   /** The priority of the project as a label. */
   public priorityLabel: string;
@@ -16764,7 +16770,7 @@ export class ProjectWebhookPayload {
   public memberIds: string[];
   /** The project's name. */
   public name: string;
-  /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
   public priority: number;
   /** The sort order for the project within the organization, when ordered by priority. */
   public prioritySortOrder: number;
@@ -17254,6 +17260,31 @@ export class ReleasePipelineArchivePayload extends Request {
   public success: boolean;
 }
 /**
+ * Certain properties of a release pipeline.
+ *
+ * @param data - L.ReleasePipelineChildWebhookPayloadFragment response data
+ */
+export class ReleasePipelineChildWebhookPayload {
+  public constructor(data: L.ReleasePipelineChildWebhookPayloadFragment) {
+    this.id = data.id;
+    this.name = data.name;
+    this.slugId = data.slugId;
+    this.type = data.type;
+    this.url = data.url;
+  }
+
+  /** The ID of the release pipeline. */
+  public id: string;
+  /** The name of the release pipeline. */
+  public name: string;
+  /** The pipeline's unique slug identifier. */
+  public slugId: string;
+  /** The type of the release pipeline. */
+  public type: string;
+  /** The URL of the release pipeline. */
+  public url: string;
+}
+/**
  * ReleasePipelinePayload model
  *
  * @param request - function to call the graphql client
@@ -17290,6 +17321,31 @@ export class ReleaseStageArchivePayload extends Request {
   public success: boolean;
 }
 /**
+ * Certain properties of a release stage.
+ *
+ * @param data - L.ReleaseStageChildWebhookPayloadFragment response data
+ */
+export class ReleaseStageChildWebhookPayload {
+  public constructor(data: L.ReleaseStageChildWebhookPayloadFragment) {
+    this.color = data.color;
+    this.id = data.id;
+    this.name = data.name;
+    this.position = data.position;
+    this.type = data.type;
+  }
+
+  /** The UI color of the stage as a HEX string. */
+  public color: string;
+  /** The ID of the release stage. */
+  public id: string;
+  /** The name of the stage. */
+  public name: string;
+  /** The position of the stage. */
+  public position: number;
+  /** The type of the stage. */
+  public type: string;
+}
+/**
  * ReleaseStagePayload model
  *
  * @param request - function to call the graphql client
@@ -17306,6 +17362,79 @@ export class ReleaseStagePayload extends Request {
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
+}
+/**
+ * Payload for a release webhook.
+ *
+ * @param data - L.ReleaseWebhookPayloadFragment response data
+ */
+export class ReleaseWebhookPayload {
+  public constructor(data: L.ReleaseWebhookPayloadFragment) {
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.canceledAt = data.canceledAt ?? undefined;
+    this.commitSha = data.commitSha ?? undefined;
+    this.completedAt = data.completedAt ?? undefined;
+    this.createdAt = data.createdAt;
+    this.description = data.description ?? undefined;
+    this.id = data.id;
+    this.name = data.name;
+    this.pipelineId = data.pipelineId;
+    this.slugId = data.slugId;
+    this.stageId = data.stageId;
+    this.startDate = data.startDate ?? undefined;
+    this.startedAt = data.startedAt ?? undefined;
+    this.targetDate = data.targetDate ?? undefined;
+    this.trashed = data.trashed ?? undefined;
+    this.updatedAt = data.updatedAt;
+    this.url = data.url;
+    this.version = data.version ?? undefined;
+    this.pipeline = data.pipeline ? new ReleasePipelineChildWebhookPayload(data.pipeline) : undefined;
+    this.stage = data.stage ? new ReleaseStageChildWebhookPayload(data.stage) : undefined;
+    this.issues = data.issues ? data.issues.map(node => new IssueChildWebhookPayload(node)) : undefined;
+  }
+
+  /** The time at which the entity was archived. */
+  public archivedAt?: string | null;
+  /** The time at which the release was canceled. */
+  public canceledAt?: string | null;
+  /** The commit SHA associated with this release. */
+  public commitSha?: string | null;
+  /** The time at which the release was completed. */
+  public completedAt?: string | null;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The release's description. */
+  public description?: string | null;
+  /** The ID of the entity. */
+  public id: string;
+  /** The name of the release. */
+  public name: string;
+  /** The ID of the pipeline this release belongs to. */
+  public pipelineId: string;
+  /** The release's unique URL slug. */
+  public slugId: string;
+  /** The ID of the current stage of the release. */
+  public stageId: string;
+  /** The estimated start date of the release. */
+  public startDate?: string | null;
+  /** The time at which the release was started. */
+  public startedAt?: string | null;
+  /** The estimated completion date of the release. */
+  public targetDate?: string | null;
+  /** Whether the release is in the trash bin. */
+  public trashed?: boolean | null;
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+  /** The URL of the release. */
+  public url: string;
+  /** The version of the release. */
+  public version?: string | null;
+  /** The issues associated with the release. */
+  public issues?: IssueChildWebhookPayload[] | null;
+  /** The pipeline this release belongs to. */
+  public pipeline?: ReleasePipelineChildWebhookPayload | null;
+  /** The current stage of the release. */
+  public stage?: ReleaseStageChildWebhookPayload | null;
 }
 /**
  * RepositorySuggestion model
@@ -17975,9 +18104,11 @@ export class Subscription extends Request {
 
   public constructor(request: LinearRequest, data: L.SubscriptionFragment) {
     super(request);
+    this.documentContentCreated = new DocumentContent(request, data.documentContentCreated);
     this.documentContentDraftCreated = new DocumentContentDraft(request, data.documentContentDraftCreated);
     this.documentContentDraftDeleted = new DocumentContentDraft(request, data.documentContentDraftDeleted);
     this.documentContentDraftUpdated = new DocumentContentDraft(request, data.documentContentDraftUpdated);
+    this.documentContentUpdated = new DocumentContent(request, data.documentContentUpdated);
     this.draftCreated = new Draft(request, data.draftCreated);
     this.draftDeleted = new Draft(request, data.draftDeleted);
     this.draftUpdated = new Draft(request, data.draftUpdated);
@@ -18038,12 +18169,16 @@ export class Subscription extends Request {
     this._workflowStateUpdated = data.workflowStateUpdated;
   }
 
+  /** Triggered when a document content is created */
+  public documentContentCreated: DocumentContent;
   /** Triggered when a document content draft is created */
   public documentContentDraftCreated: DocumentContentDraft;
   /** Triggered when a document content draft is deleted */
   public documentContentDraftDeleted: DocumentContentDraft;
   /** Triggered when a document content draft is updated */
   public documentContentDraftUpdated: DocumentContentDraft;
+  /** Triggered when a document content is updated */
+  public documentContentUpdated: DocumentContent;
   /** Triggered when a draft is created */
   public draftCreated: Draft;
   /** Triggered when a draft is deleted */
@@ -29731,6 +29866,68 @@ export class IntegrationLoomMutation extends Request {
       {}
     );
     const data = response.integrationLoom;
+
+    return new IntegrationPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IntegrationMicrosoftPersonalConnect Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationMicrosoftPersonalConnectMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationMicrosoftPersonalConnect mutation and return a IntegrationPayload
+   *
+   * @param code - required code to pass to integrationMicrosoftPersonalConnect
+   * @param redirectUri - required redirectUri to pass to integrationMicrosoftPersonalConnect
+   * @returns parsed response from IntegrationMicrosoftPersonalConnectMutation
+   */
+  public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+    const response = await this._request<
+      L.IntegrationMicrosoftPersonalConnectMutation,
+      L.IntegrationMicrosoftPersonalConnectMutationVariables
+    >(L.IntegrationMicrosoftPersonalConnectDocument.toString(), {
+      code,
+      redirectUri,
+    });
+    const data = response.integrationMicrosoftPersonalConnect;
+
+    return new IntegrationPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IntegrationMicrosoftTeams Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationMicrosoftTeamsMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationMicrosoftTeams mutation and return a IntegrationPayload
+   *
+   * @param code - required code to pass to integrationMicrosoftTeams
+   * @param redirectUri - required redirectUri to pass to integrationMicrosoftTeams
+   * @returns parsed response from IntegrationMicrosoftTeamsMutation
+   */
+  public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+    const response = await this._request<
+      L.IntegrationMicrosoftTeamsMutation,
+      L.IntegrationMicrosoftTeamsMutationVariables
+    >(L.IntegrationMicrosoftTeamsDocument.toString(), {
+      code,
+      redirectUri,
+    });
+    const data = response.integrationMicrosoftTeams;
 
     return new IntegrationPayload(this._request, data);
   }
@@ -44584,6 +44781,26 @@ export class LinearSdk extends Request {
    */
   public get integrationLoom(): LinearFetch<IntegrationPayload> {
     return new IntegrationLoomMutation(this._request).fetch();
+  }
+  /**
+   * Connects the user's personal Microsoft account to Linear.
+   *
+   * @param code - required code to pass to integrationMicrosoftPersonalConnect
+   * @param redirectUri - required redirectUri to pass to integrationMicrosoftPersonalConnect
+   * @returns IntegrationPayload
+   */
+  public integrationMicrosoftPersonalConnect(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+    return new IntegrationMicrosoftPersonalConnectMutation(this._request).fetch(code, redirectUri);
+  }
+  /**
+   * Integrates the organization with Microsoft Teams.
+   *
+   * @param code - required code to pass to integrationMicrosoftTeams
+   * @param redirectUri - required redirectUri to pass to integrationMicrosoftTeams
+   * @returns IntegrationPayload
+   */
+  public integrationMicrosoftTeams(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+    return new IntegrationMicrosoftTeamsMutation(this._request).fetch(code, redirectUri);
   }
   /**
    * Requests a currently unavailable integration.

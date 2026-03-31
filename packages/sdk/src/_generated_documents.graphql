@@ -1791,7 +1791,7 @@ fragment Project on Project {
   scope
   # The priority of the project as a label.
   priorityLabel
-  # The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  # The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   priority
   # The project lead.
   lead {
@@ -4047,7 +4047,7 @@ fragment Issue on Issue {
   parent {
     id
   }
-  # The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  # The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   priority
   # The project that the issue is associated with.
   project {
@@ -4123,6 +4123,8 @@ fragment Issue on Issue {
   state {
     id
   }
+  # Whether this issue inherits shared access from its parent issue.
+  inheritsSharedAccess
 }
 
 # An oauth client approval related notification.
@@ -4794,6 +4796,36 @@ fragment ProjectChildWebhookPayload on ProjectChildWebhookPayload {
   url
   # The name of the project.
   name
+}
+
+# Certain properties of a release pipeline.
+fragment ReleasePipelineChildWebhookPayload on ReleasePipelineChildWebhookPayload {
+  __typename
+  # The ID of the release pipeline.
+  id
+  # The URL of the release pipeline.
+  url
+  # The name of the release pipeline.
+  name
+  # The pipeline's unique slug identifier.
+  slugId
+  # The type of the release pipeline.
+  type
+}
+
+# Certain properties of a release stage.
+fragment ReleaseStageChildWebhookPayload on ReleaseStageChildWebhookPayload {
+  __typename
+  # The ID of the release stage.
+  id
+  # The UI color of the stage as a HEX string.
+  color
+  # The name of the stage.
+  name
+  # The position of the stage.
+  position
+  # The type of the stage.
+  type
 }
 
 # Certain properties of a team.
@@ -6032,7 +6064,7 @@ fragment ProjectWebhookPayload on ProjectWebhookPayload {
   completedIssueCountHistory
   # The number of in progress estimation points after each week.
   inProgressScopeHistory
-  # The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  # The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   priority
   # The project lead.
   lead {
@@ -6123,6 +6155,59 @@ fragment ReactionWebhookPayload on ReactionWebhookPayload {
   user {
     ...UserChildWebhookPayload
   }
+}
+
+# Payload for a release webhook.
+fragment ReleaseWebhookPayload on ReleaseWebhookPayload {
+  __typename
+  # The ID of the current stage of the release.
+  stageId
+  # The ID of the entity.
+  id
+  # The ID of the pipeline this release belongs to.
+  pipelineId
+  # The URL of the release.
+  url
+  # The commit SHA associated with this release.
+  commitSha
+  # The current stage of the release.
+  stage {
+    ...ReleaseStageChildWebhookPayload
+  }
+  # The estimated completion date of the release.
+  targetDate
+  # The estimated start date of the release.
+  startDate
+  # The issues associated with the release.
+  issues {
+    ...IssueChildWebhookPayload
+  }
+  # The name of the release.
+  name
+  # The pipeline this release belongs to.
+  pipeline {
+    ...ReleasePipelineChildWebhookPayload
+  }
+  # The release's description.
+  description
+  # The release's unique URL slug.
+  slugId
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The time at which the release was canceled.
+  canceledAt
+  # The time at which the release was completed.
+  completedAt
+  # The time at which the release was started.
+  startedAt
+  # The version of the release.
+  version
+  # Whether the release is in the trash bin.
+  trashed
 }
 
 # Payload for a terminal issue status change notification.
@@ -6881,7 +6966,7 @@ fragment IssueWebhookPayload on IssueWebhookPayload {
   sortOrder
   # The order of the item in the sub-issue list. Only set if the issue has a parent.
   subIssueSortOrder
-  # The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  # The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   priority
   # The project milestone that the issue belongs to.
   projectMilestone {
@@ -9462,7 +9547,7 @@ fragment IssueSearchResult on IssueSearchResult {
   parent {
     id
   }
-  # The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  # The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   priority
   # The project that the issue is associated with.
   project {
@@ -9538,6 +9623,8 @@ fragment IssueSearchResult on IssueSearchResult {
   state {
     id
   }
+  # Whether this issue inherits shared access from its parent issue.
+  inheritsSharedAccess
 }
 
 fragment IssueSharedAccess on IssueSharedAccess {
@@ -10076,7 +10163,7 @@ fragment ProjectSearchResult on ProjectSearchResult {
   scope
   # The priority of the project as a label.
   priorityLabel
-  # The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  # The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   priority
   # The project lead.
   lead {
@@ -10441,6 +10528,14 @@ fragment Subscription on Subscription {
   # Triggered when a document content draft is updated
   documentContentDraftUpdated {
     ...DocumentContentDraft
+  }
+  # Triggered when a document content is created
+  documentContentCreated {
+    ...DocumentContent
+  }
+  # Triggered when a document content is updated
+  documentContentUpdated {
+    ...DocumentContent
   }
   # Triggered when a document is archived
   documentArchived {
@@ -19028,6 +19123,28 @@ mutation integrationJiraPersonal(
 # Enables Loom integration for the organization.
 mutation integrationLoom {
   integrationLoom {
+    ...IntegrationPayload
+  }
+}
+# Connects the user's personal Microsoft account to Linear.
+mutation integrationMicrosoftPersonalConnect(
+  # The Microsoft OAuth code.
+  $code: String!
+  # The Microsoft OAuth redirect URI.
+  $redirectUri: String!
+) {
+  integrationMicrosoftPersonalConnect(code: $code, redirectUri: $redirectUri) {
+    ...IntegrationPayload
+  }
+}
+# Integrates the organization with Microsoft Teams.
+mutation integrationMicrosoftTeams(
+  # The Microsoft OAuth code.
+  $code: String!
+  # The Microsoft OAuth redirect URI.
+  $redirectUri: String!
+) {
+  integrationMicrosoftTeams(code: $code, redirectUri: $redirectUri) {
     ...IntegrationPayload
   }
 }

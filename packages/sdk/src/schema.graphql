@@ -7609,6 +7609,7 @@ union DataWebhookPayload =
   | ProjectUpdateWebhookPayload
   | ProjectWebhookPayload
   | ReactionWebhookPayload
+  | ReleaseWebhookPayload
   | UserWebhookPayload
 
 """
@@ -10736,6 +10737,10 @@ input GongSettingsInput {
   Configuration for recording import.
   """
   importConfig: GongRecordingImportConfigInput
+  """
+  Whether to tag matching internal Gong call participants as user mentions in created issues.
+  """
+  tagParticipantsInIssues: Boolean
 }
 
 input GoogleSheetsExportSettings {
@@ -13884,6 +13889,10 @@ type Issue implements Node {
     orderBy: PaginationOrderBy
   ): IssueSuggestionConnection!
   """
+  Whether this issue inherits shared access from its parent issue.
+  """
+  inheritsSharedAccess: Boolean!
+  """
   Integration type that created this issue, if applicable.
   """
   integrationSourceType: IntegrationService
@@ -14003,7 +14012,7 @@ type Issue implements Node {
   """
   previousIdentifiers: [String!]!
   """
-  The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   """
   priority: Float!
   """
@@ -14559,7 +14568,7 @@ input IssueCollectionFilter {
   """
   parent: NullableIssueFilter
   """
-  Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   """
   priority: NullableNumberComparator
   """
@@ -14866,7 +14875,7 @@ input IssueCreateInput {
   """
   preserveSortOrderOnCreate: Boolean
   """
-  The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   """
   priority: Int
   """
@@ -15328,7 +15337,7 @@ input IssueFilter {
   """
   parent: NullableIssueFilter
   """
-  Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   """
   priority: NullableNumberComparator
   """
@@ -17226,6 +17235,10 @@ type IssueSearchResult implements Node {
     orderBy: PaginationOrderBy
   ): IssueSuggestionConnection!
   """
+  Whether this issue inherits shared access from its parent issue.
+  """
+  inheritsSharedAccess: Boolean!
+  """
   Integration type that created this issue, if applicable.
   """
   integrationSourceType: IntegrationService
@@ -17349,7 +17362,7 @@ type IssueSearchResult implements Node {
   """
   previousIdentifiers: [String!]!
   """
-  The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   """
   priority: Float!
   """
@@ -17760,6 +17773,10 @@ input IssueSortInput {
   """
   project: ProjectSort
   """
+  [ALPHA] Sort by most recent release date
+  """
+  release: ReleaseSort
+  """
   Sort by the root issue
   """
   rootIssue: RootIssueSort
@@ -17888,6 +17905,10 @@ input IssueSubscriptionFilter {
   Filter by assignee ID.
   """
   assigneeId: IDComparator
+  """
+  Filter by parent issue ID.
+  """
+  parentId: IDComparator
   """
   Filter by project ID.
   """
@@ -18290,7 +18311,7 @@ input IssueUpdateInput {
   """
   parentId: String
   """
-  The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   """
   priority: Int
   """
@@ -18496,7 +18517,7 @@ type IssueWebhookPayload {
   """
   previousIdentifiers: [String!]!
   """
-  The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   """
   priority: Float!
   """
@@ -20669,6 +20690,10 @@ type Mutation {
     The ID of the team to connect the MCP server to.
     """
     teamId: String
+    """
+    The ID of the workflow definition to connect the MCP server to.
+    """
+    workflowDefinitionId: String
   ): IntegrationPayload!
   """
   [INTERNAL] Connects the user's personal account with an MCP server.
@@ -20680,7 +20705,7 @@ type Mutation {
     serverUrl: String!
   ): IntegrationPayload!
   """
-  [ALPHA] Connects the user's personal Microsoft account to Linear.
+  Connects the user's personal Microsoft account to Linear.
   """
   integrationMicrosoftPersonalConnect(
     """
@@ -20693,7 +20718,7 @@ type Mutation {
     redirectUri: String!
   ): IntegrationPayload!
   """
-  [ALPHA] Integrates the organization with Microsoft Teams.
+  Integrates the organization with Microsoft Teams.
   """
   integrationMicrosoftTeams(
     """
@@ -24510,7 +24535,7 @@ input NullableIssueFilter {
   """
   parent: NullableIssueFilter
   """
-  Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   """
   priority: NullableNumberComparator
   """
@@ -27817,7 +27842,7 @@ type Project implements Node {
     orderBy: PaginationOrderBy
   ): CustomerNeedConnection!
   """
-  The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   """
   priority: Int!
   """
@@ -28390,7 +28415,7 @@ input ProjectCreateInput {
   """
   name: String!
   """
-  The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   """
   priority: Int
   """
@@ -30457,7 +30482,7 @@ type ProjectSearchResult implements Node {
     orderBy: PaginationOrderBy
   ): CustomerNeedConnection!
   """
-  The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   """
   priority: Int!
   """
@@ -31336,7 +31361,7 @@ input ProjectUpdateInput {
   """
   name: String
   """
-  The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   """
   priority: Int
   """
@@ -31737,7 +31762,7 @@ type ProjectWebhookPayload {
   """
   name: String!
   """
-  The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   """
   priority: Float!
   """
@@ -32829,6 +32854,10 @@ type Query {
   A collection of document content history entries.
   """
   documentContentHistory(id: String!): DocumentContentHistoryPayload!
+  """
+  [Internal] Fetches document content history entries by their IDs, including content data.
+  """
+  documentContentHistoryEntries(entryIds: [String!]!): DocumentContentHistoryPayload!
   """
   All documents in the workspace.
   """
@@ -34064,6 +34093,10 @@ type Query {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
+    """
+    [ALPHA] Sort returned releases.
+    """
+    sort: [ReleaseSortInput!]
   ): ReleaseConnection!
   """
   One specific roadmap.
@@ -35524,6 +35557,32 @@ type ReleasePipelineArchivePayload implements ArchivePayload {
   success: Boolean!
 }
 
+"""
+Certain properties of a release pipeline.
+"""
+type ReleasePipelineChildWebhookPayload {
+  """
+  The ID of the release pipeline.
+  """
+  id: String!
+  """
+  The name of the release pipeline.
+  """
+  name: String!
+  """
+  The pipeline's unique slug identifier.
+  """
+  slugId: String!
+  """
+  The type of the release pipeline.
+  """
+  type: String!
+  """
+  The URL of the release pipeline.
+  """
+  url: String!
+}
+
 type ReleasePipelineConnection {
   edges: [ReleasePipelineEdge!]!
   nodes: [ReleasePipeline!]!
@@ -35642,6 +35701,20 @@ input ReleasePipelineUpdateInput {
 }
 
 """
+[Internal] Issue release sorting options.
+"""
+input ReleaseSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
+}
+
+"""
 Release sorting options.
 """
 input ReleaseSortInput {
@@ -35743,6 +35816,32 @@ type ReleaseStageArchivePayload implements ArchivePayload {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+
+"""
+Certain properties of a release stage.
+"""
+type ReleaseStageChildWebhookPayload {
+  """
+  The UI color of the stage as a HEX string.
+  """
+  color: String!
+  """
+  The ID of the release stage.
+  """
+  id: String!
+  """
+  The name of the stage.
+  """
+  name: String!
+  """
+  The position of the stage.
+  """
+  position: Float!
+  """
+  The type of the stage.
+  """
+  type: String!
 }
 
 type ReleaseStageConnection {
@@ -36050,6 +36149,96 @@ input ReleaseUpdateInput {
   Whether the release has been trashed.
   """
   trashed: Boolean
+  """
+  The version of the release.
+  """
+  version: String
+}
+
+"""
+Payload for a release webhook.
+"""
+type ReleaseWebhookPayload {
+  """
+  The time at which the entity was archived.
+  """
+  archivedAt: String
+  """
+  The time at which the release was canceled.
+  """
+  canceledAt: String
+  """
+  The commit SHA associated with this release.
+  """
+  commitSha: String
+  """
+  The time at which the release was completed.
+  """
+  completedAt: String
+  """
+  The time at which the entity was created.
+  """
+  createdAt: String!
+  """
+  The release's description.
+  """
+  description: String
+  """
+  The ID of the entity.
+  """
+  id: String!
+  """
+  The issues associated with the release.
+  """
+  issues: [IssueChildWebhookPayload!]
+  """
+  The name of the release.
+  """
+  name: String!
+  """
+  The pipeline this release belongs to.
+  """
+  pipeline: ReleasePipelineChildWebhookPayload
+  """
+  The ID of the pipeline this release belongs to.
+  """
+  pipelineId: String!
+  """
+  The release's unique URL slug.
+  """
+  slugId: String!
+  """
+  The current stage of the release.
+  """
+  stage: ReleaseStageChildWebhookPayload
+  """
+  The ID of the current stage of the release.
+  """
+  stageId: String!
+  """
+  The estimated start date of the release.
+  """
+  startDate: String
+  """
+  The time at which the release was started.
+  """
+  startedAt: String
+  """
+  The estimated completion date of the release.
+  """
+  targetDate: String
+  """
+  Whether the release is in the trash bin.
+  """
+  trashed: Boolean
+  """
+  The time at which the entity was updated.
+  """
+  updatedAt: String!
+  """
+  The URL of the release.
+  """
+  url: String!
   """
   The version of the release.
   """
@@ -37456,6 +37645,10 @@ type Subscription {
   """
   documentArchived: Document!
   """
+  Triggered when a document content is created
+  """
+  documentContentCreated: DocumentContent!
+  """
   Triggered when a document content draft is created
   """
   documentContentDraftCreated: DocumentContentDraft!
@@ -37467,6 +37660,10 @@ type Subscription {
   Triggered when a document content draft is updated
   """
   documentContentDraftUpdated: DocumentContentDraft!
+  """
+  Triggered when a document content is updated
+  """
+  documentContentUpdated: DocumentContent!
   """
   Triggered when a document is created
   """
@@ -42834,6 +43031,7 @@ enum WorkflowTrigger {
 enum WorkflowTriggerType {
   issue
   project
+  release
 }
 
 enum WorkflowType {
