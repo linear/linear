@@ -89,7 +89,11 @@ const hasFlag = (name: string): boolean => process.argv.includes(`--${name}`);
       service = flagImporter || importAnswers.service;
     }
 
-    // TODO: Validate Linear API
+    if (!linearApiKey) {
+      console.error(chalk.red("No Linear API key provided. Create one here: https://linear.app/settings/account/security"));
+      process.exit(1);
+    }
+
     let importer;
     switch (service) {
       case "github":
