@@ -36,7 +36,7 @@ jobs:
             if $old == null then
               "\u2022 (new) \($name)@\($new)"
             else
-              ([$old, $new] | map(split(".") | map(tonumber))) as [[$om, $omi, $op], [$nm, $nmi, $np]] |
+              ([$old, $new] | map(split("-") | .[0] | split(".") | map(tonumber))) as [[$om, $omi, $op], [$nm, $nmi, $np]] |
               (if $nm > $om then "major" elif $nmi > $omi then "minor" else "patch" end) as $bump |
               "\u2022 (\($bump)) \($name)@\($old) \u2192 \($new)"
             end

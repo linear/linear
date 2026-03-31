@@ -68,6 +68,7 @@ jobs:
         run: |
           VERSIONS='{}'
           for dir in packages/*/; do
+            [ "$(jq -r '.private // false' "$dir/package.json")" = "true" ] && continue
             NAME=$(jq -r '.name' "$dir/package.json")
             VER=$(npm view "$NAME" version 2>/dev/null || echo "")
             [ -n "$VER" ] && VERSIONS=$(echo "$VERSIONS" | jq --arg n "$NAME" --arg v "$VER" '. + {($n): $v}')
