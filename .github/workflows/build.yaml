@@ -146,7 +146,8 @@ jobs:
       - name: Run smoke test
         run: |
           linear-import --version
-          yes '' | linear-import
+          OUTPUT=$(yes '' | linear-import 2>&1 || true)
+          echo "$OUTPUT" | grep -q "No Linear API key"
 
   notify-slack:
     runs-on: ubuntu-latest
