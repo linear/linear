@@ -10,6 +10,10 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    outputs:
+      published: ${{ steps.changesets.outputs.published }}
+      publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}
+      prePublishVersions: ${{ steps.npm-versions.outputs.versions }}
     permissions:
       actions: read
       contents: write
@@ -59,7 +63,19 @@ jobs:
       - name: Check for no generated changes
         run: git update-index --refresh && git diff-index HEAD
 
+      - name: Capture current npm versions
+        id: npm-versions
+        run: |
+          VERSIONS='{}'
+          for dir in packages/*/; do
+            NAME=$(jq -r '.name' "$dir/package.json")
+            VER=$(npm view "$NAME" version 2>/dev/null || echo "")
+            [ -n "$VER" ] && VERSIONS=$(echo "$VERSIONS" | jq --arg n "$NAME" --arg v "$VER" '. + {($n): $v}')
+          done
+          echo "versions=$(echo "$VERSIONS" | jq -c .)" >> "$GITHUB_OUTPUT"
+
       - name: Create Release Pull Request or Publish to npm
+        id: changesets
         uses: changesets/action@master
         with:
           commit: "chore(release): version packages"
@@ -67,6 +83,17 @@ jobs:
           publish: pnpm ci:publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  notify-npm-publish:
+    needs: [release]
+    if: needs.release.outputs.published == 'true'
+    uses: ./.github/workflows/notify-npm-publish.yaml
+    with:
+      publishedPackages: ${{ needs.release.outputs.publishedPackages }}
+      prePublishVersions: ${{ needs.release.outputs.prePublishVersions }}
+      actor: ${{ github.actor }}
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
   notify-slack:
     runs-on: ubuntu-latest

@@ -1,0 +1,53 @@
+name: Notify npm publish
+
+on:
+  workflow_call:
+    inputs:
+      publishedPackages:
+        required: true
+        type: string
+      prePublishVersions:
+        required: true
+        type: string
+      actor:
+        required: true
+        type: string
+    secrets:
+      SLACK_WEBHOOK_URL:
+        required: true
+
+jobs:
+  notify:
+    name: Notify Slack
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Notify Slack of published packages
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          PUBLISHED_PACKAGES: ${{ inputs.publishedPackages }}
+          PRE_PUBLISH_VERSIONS: ${{ inputs.prePublishVersions }}
+        run: |
+          PACKAGE_COUNT=$(echo "$PUBLISHED_PACKAGES" | jq 'length')
+          PACKAGE_LIST=$(echo "$PUBLISHED_PACKAGES" | jq -r --argjson prev "$PRE_PUBLISH_VERSIONS" '
+            .[] |
+            .name as $name | .version as $new |
+            ($prev[$name] // null) as $old |
+            if $old == null then
+              "\u2022 (new) \($name)@\($new)"
+            else
+              ([$old, $new] | map(split(".") | map(tonumber))) as [[$om, $omi, $op], [$nm, $nmi, $np]] |
+              (if $nm > $om then "major" elif $nmi > $omi then "minor" else "patch" end) as $bump |
+              "\u2022 (\($bump)) \($name)@\($old) \u2192 \($new)"
+            end
+          ')
+
+          PAYLOAD=$(jq -n \
+            --arg text ":package: *${PACKAGE_COUNT} package(s) published to npm* by <${{ github.server_url }}/${{ inputs.actor }}|@${{ inputs.actor }}>
+
+          ${PACKAGE_LIST}
+
+          <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View run>" \
+            '{text: $text}')
+
+          curl -fsS -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
