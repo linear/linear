@@ -4533,6 +4533,7 @@ export type DataWebhookPayload =
   | ProjectUpdateWebhookPayload
   | ProjectWebhookPayload
   | ReactionWebhookPayload
+  | ReleaseWebhookPayload
   | UserWebhookPayload;
 
 /** Comparator for dates. */
@@ -6382,6 +6383,8 @@ export type GongRecordingImportConfigInput = {
 export type GongSettingsInput = {
   /** Configuration for recording import. */
   importConfig?: InputMaybe<GongRecordingImportConfigInput>;
+  /** Whether to tag matching internal Gong call participants as user mentions in created issues. */
+  tagParticipantsInIssues?: InputMaybe<Scalars["Boolean"]>;
 };
 
 export type GoogleSheetsExportSettings = {
@@ -8063,6 +8066,8 @@ export type Issue = Node & {
   identifier: Scalars["String"];
   /** [Internal] Incoming product intelligence relation suggestions for the issue. */
   incomingSuggestions: IssueSuggestionConnection;
+  /** Whether this issue inherits shared access from its parent issue. */
+  inheritsSharedAccess: Scalars["Boolean"];
   /** Integration type that created this issue, if applicable. */
   integrationSourceType?: Maybe<IntegrationService>;
   /** Inverse relations associated with this issue. */
@@ -8081,7 +8086,7 @@ export type Issue = Node & {
   parent?: Maybe<Issue>;
   /** Previous identifiers of the issue if it has been moved between teams. */
   previousIdentifiers: Array<Scalars["String"]>;
-  /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
   priority: Scalars["Float"];
   /** Label for the priority. */
   priorityLabel: Scalars["String"];
@@ -8478,7 +8483,7 @@ export type IssueCollectionFilter = {
   or?: InputMaybe<Array<IssueCollectionFilter>>;
   /** Filters that the issue parent must satisfy. */
   parent?: InputMaybe<NullableIssueFilter>;
-  /** Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  /** Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
   priority?: InputMaybe<NullableNumberComparator>;
   /** Filters that the issues project must satisfy. */
   project?: InputMaybe<NullableProjectFilter>;
@@ -8636,7 +8641,7 @@ export type IssueCreateInput = {
   parentId?: InputMaybe<Scalars["String"]>;
   /** Whether the passed sort order should be preserved. */
   preserveSortOrderOnCreate?: InputMaybe<Scalars["Boolean"]>;
-  /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
   priority?: InputMaybe<Scalars["Int"]>;
   /** The position of the issue related to other issues, when ordered by priority. */
   prioritySortOrder?: InputMaybe<Scalars["Float"]>;
@@ -8882,7 +8887,7 @@ export type IssueFilter = {
   or?: InputMaybe<Array<IssueFilter>>;
   /** Filters that the issue parent must satisfy. */
   parent?: InputMaybe<NullableIssueFilter>;
-  /** Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  /** Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
   priority?: InputMaybe<NullableNumberComparator>;
   /** Filters that the issues project must satisfy. */
   project?: InputMaybe<NullableProjectFilter>;
@@ -9829,6 +9834,8 @@ export type IssueSearchResult = Node & {
   identifier: Scalars["String"];
   /** [Internal] Incoming product intelligence relation suggestions for the issue. */
   incomingSuggestions: IssueSuggestionConnection;
+  /** Whether this issue inherits shared access from its parent issue. */
+  inheritsSharedAccess: Scalars["Boolean"];
   /** Integration type that created this issue, if applicable. */
   integrationSourceType?: Maybe<IntegrationService>;
   /** Inverse relations associated with this issue. */
@@ -9849,7 +9856,7 @@ export type IssueSearchResult = Node & {
   parent?: Maybe<Issue>;
   /** Previous identifiers of the issue if it has been moved between teams. */
   previousIdentifiers: Array<Scalars["String"]>;
-  /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
   priority: Scalars["Float"];
   /** Label for the priority. */
   priorityLabel: Scalars["String"];
@@ -10164,6 +10171,8 @@ export type IssueSortInput = {
   priority?: InputMaybe<PrioritySort>;
   /** Sort by Project name */
   project?: InputMaybe<ProjectSort>;
+  /** [ALPHA] Sort by most recent release date */
+  release?: InputMaybe<ReleaseSort>;
   /** Sort by the root issue */
   rootIssue?: InputMaybe<RootIssueSort>;
   /** Sort by SLA status */
@@ -10238,6 +10247,8 @@ export type IssueStatusChangedNotificationWebhookPayload = {
 export type IssueSubscriptionFilter = {
   /** Filter by assignee ID. */
   assigneeId?: InputMaybe<IdComparator>;
+  /** Filter by parent issue ID. */
+  parentId?: InputMaybe<IdComparator>;
   /** Filter by project ID. */
   projectId?: InputMaybe<IdComparator>;
   /** Filter by workflow state ID. */
@@ -10492,7 +10503,7 @@ export type IssueUpdateInput = {
   lastAppliedTemplateId?: InputMaybe<Scalars["String"]>;
   /** The identifier of the parent issue. Can be a UUID or issue identifier (e.g., 'LIN-123'). */
   parentId?: InputMaybe<Scalars["String"]>;
-  /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
   priority?: InputMaybe<Scalars["Int"]>;
   /** The position of the issue related to other issues, when ordered by priority. */
   prioritySortOrder?: InputMaybe<Scalars["Float"]>;
@@ -10597,7 +10608,7 @@ export type IssueWebhookPayload = {
   parentId?: Maybe<Scalars["String"]>;
   /** Previous identifiers of the issue if it has been moved between teams. */
   previousIdentifiers: Array<Scalars["String"]>;
-  /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
   priority: Scalars["Float"];
   /** The label of the issue's priority. */
   priorityLabel: Scalars["String"];
@@ -11162,9 +11173,9 @@ export type Mutation = {
   integrationMcpServerConnect: IntegrationPayload;
   /** [INTERNAL] Connects the user's personal account with an MCP server. */
   integrationMcpServerPersonalConnect: IntegrationPayload;
-  /** [ALPHA] Connects the user's personal Microsoft account to Linear. */
+  /** Connects the user's personal Microsoft account to Linear. */
   integrationMicrosoftPersonalConnect: IntegrationPayload;
-  /** [ALPHA] Integrates the organization with Microsoft Teams. */
+  /** Integrates the organization with Microsoft Teams. */
   integrationMicrosoftTeams: IntegrationPayload;
   /** [INTERNAL] Integrates the organization with Opsgenie. */
   integrationOpsgenieConnect: IntegrationPayload;
@@ -12252,6 +12263,7 @@ export type MutationIntegrationLaunchDarklyPersonalConnectArgs = {
 export type MutationIntegrationMcpServerConnectArgs = {
   serverUrl: Scalars["String"];
   teamId?: InputMaybe<Scalars["String"]>;
+  workflowDefinitionId?: InputMaybe<Scalars["String"]>;
 };
 
 export type MutationIntegrationMcpServerPersonalConnectArgs = {
@@ -14012,7 +14024,7 @@ export type NullableIssueFilter = {
   or?: InputMaybe<Array<NullableIssueFilter>>;
   /** Filters that the issue parent must satisfy. */
   parent?: InputMaybe<NullableIssueFilter>;
-  /** Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  /** Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
   priority?: InputMaybe<NullableNumberComparator>;
   /** Filters that the issues project must satisfy. */
   project?: InputMaybe<NullableProjectFilter>;
@@ -15709,7 +15721,7 @@ export type Project = Node & {
   name: Scalars["String"];
   /** Customer needs associated with the project. */
   needs: CustomerNeedConnection;
-  /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
   priority: Scalars["Int"];
   /** The priority of the project as a label. */
   priorityLabel: Scalars["String"];
@@ -16147,7 +16159,7 @@ export type ProjectCreateInput = {
   memberIds?: InputMaybe<Array<Scalars["String"]>>;
   /** The name of the project. */
   name: Scalars["String"];
-  /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
   priority?: InputMaybe<Scalars["Int"]>;
   /** The sort order for the project within shared views, when ordered by priority. */
   prioritySortOrder?: InputMaybe<Scalars["Float"]>;
@@ -17129,7 +17141,7 @@ export type ProjectSearchResult = Node & {
   name: Scalars["String"];
   /** Customer needs associated with the project. */
   needs: CustomerNeedConnection;
-  /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
   priority: Scalars["Int"];
   /** The priority of the project as a label. */
   priorityLabel: Scalars["String"];
@@ -17738,7 +17750,7 @@ export type ProjectUpdateInput = {
   memberIds?: InputMaybe<Array<Scalars["String"]>>;
   /** The name of the project. */
   name?: InputMaybe<Scalars["String"]>;
-  /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
   priority?: InputMaybe<Scalars["Int"]>;
   /** The sort order for the project within shared views, when ordered by priority. */
   prioritySortOrder?: InputMaybe<Scalars["Float"]>;
@@ -17955,7 +17967,7 @@ export type ProjectWebhookPayload = {
   milestones?: Maybe<Array<ProjectMilestoneChildWebhookPayload>>;
   /** The project's name. */
   name: Scalars["String"];
-  /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
   priority: Scalars["Float"];
   /** The sort order for the project within the organization, when ordered by priority. */
   prioritySortOrder: Scalars["Float"];
@@ -18345,6 +18357,8 @@ export type Query = {
   document: Document;
   /** A collection of document content history entries. */
   documentContentHistory: DocumentContentHistoryPayload;
+  /** [Internal] Fetches document content history entries by their IDs, including content data. */
+  documentContentHistoryEntries: DocumentContentHistoryPayload;
   /** All documents in the workspace. */
   documents: DocumentConnection;
   /** One specific email intake address. */
@@ -18778,6 +18792,10 @@ export type QueryDocumentArgs = {
 
 export type QueryDocumentContentHistoryArgs = {
   id: Scalars["String"];
+};
+
+export type QueryDocumentContentHistoryEntriesArgs = {
+  entryIds: Array<Scalars["String"]>;
 };
 
 export type QueryDocumentsArgs = {
@@ -19246,6 +19264,7 @@ export type QueryReleasesArgs = {
   includeArchived?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<PaginationOrderBy>;
+  sort?: InputMaybe<Array<ReleaseSortInput>>;
 };
 
 export type QueryRoadmapArgs = {
@@ -19927,6 +19946,21 @@ export type ReleasePipelineArchivePayload = ArchivePayload & {
   success: Scalars["Boolean"];
 };
 
+/** Certain properties of a release pipeline. */
+export type ReleasePipelineChildWebhookPayload = {
+  __typename?: "ReleasePipelineChildWebhookPayload";
+  /** The ID of the release pipeline. */
+  id: Scalars["String"];
+  /** The name of the release pipeline. */
+  name: Scalars["String"];
+  /** The pipeline's unique slug identifier. */
+  slugId: Scalars["String"];
+  /** The type of the release pipeline. */
+  type: Scalars["String"];
+  /** The URL of the release pipeline. */
+  url: Scalars["String"];
+};
+
 export type ReleasePipelineConnection = {
   __typename?: "ReleasePipelineConnection";
   edges: Array<ReleasePipelineEdge>;
@@ -20001,6 +20035,14 @@ export type ReleasePipelineUpdateInput = {
   type?: InputMaybe<ReleasePipelineType>;
 };
 
+/** [Internal] Issue release sorting options. */
+export type ReleaseSort = {
+  /** Whether nulls should be sorted first or last */
+  nulls?: InputMaybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: InputMaybe<PaginationSortOrder>;
+};
+
 /** Release sorting options. */
 export type ReleaseSortInput = {
   /** Sort by release stage */
@@ -20056,6 +20098,21 @@ export type ReleaseStageArchivePayload = ArchivePayload & {
   lastSyncId: Scalars["Float"];
   /** Whether the operation was successful. */
   success: Scalars["Boolean"];
+};
+
+/** Certain properties of a release stage. */
+export type ReleaseStageChildWebhookPayload = {
+  __typename?: "ReleaseStageChildWebhookPayload";
+  /** The UI color of the stage as a HEX string. */
+  color: Scalars["String"];
+  /** The ID of the release stage. */
+  id: Scalars["String"];
+  /** The name of the stage. */
+  name: Scalars["String"];
+  /** The position of the stage. */
+  position: Scalars["Float"];
+  /** The type of the stage. */
+  type: Scalars["String"];
 };
 
 export type ReleaseStageConnection = {
@@ -20236,6 +20293,53 @@ export type ReleaseUpdateInput = {
   trashed?: InputMaybe<Scalars["Boolean"]>;
   /** The version of the release. */
   version?: InputMaybe<Scalars["String"]>;
+};
+
+/** Payload for a release webhook. */
+export type ReleaseWebhookPayload = {
+  __typename?: "ReleaseWebhookPayload";
+  /** The time at which the entity was archived. */
+  archivedAt?: Maybe<Scalars["String"]>;
+  /** The time at which the release was canceled. */
+  canceledAt?: Maybe<Scalars["String"]>;
+  /** The commit SHA associated with this release. */
+  commitSha?: Maybe<Scalars["String"]>;
+  /** The time at which the release was completed. */
+  completedAt?: Maybe<Scalars["String"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["String"];
+  /** The release's description. */
+  description?: Maybe<Scalars["String"]>;
+  /** The ID of the entity. */
+  id: Scalars["String"];
+  /** The issues associated with the release. */
+  issues?: Maybe<Array<IssueChildWebhookPayload>>;
+  /** The name of the release. */
+  name: Scalars["String"];
+  /** The pipeline this release belongs to. */
+  pipeline?: Maybe<ReleasePipelineChildWebhookPayload>;
+  /** The ID of the pipeline this release belongs to. */
+  pipelineId: Scalars["String"];
+  /** The release's unique URL slug. */
+  slugId: Scalars["String"];
+  /** The current stage of the release. */
+  stage?: Maybe<ReleaseStageChildWebhookPayload>;
+  /** The ID of the current stage of the release. */
+  stageId: Scalars["String"];
+  /** The estimated start date of the release. */
+  startDate?: Maybe<Scalars["String"]>;
+  /** The time at which the release was started. */
+  startedAt?: Maybe<Scalars["String"]>;
+  /** The estimated completion date of the release. */
+  targetDate?: Maybe<Scalars["String"]>;
+  /** Whether the release is in the trash bin. */
+  trashed?: Maybe<Scalars["Boolean"]>;
+  /** The time at which the entity was updated. */
+  updatedAt: Scalars["String"];
+  /** The URL of the release. */
+  url: Scalars["String"];
+  /** The version of the release. */
+  version?: Maybe<Scalars["String"]>;
 };
 
 /** Information about the source repository. */
@@ -21046,12 +21150,16 @@ export type Subscription = {
   cycleUpdated: Cycle;
   /** Triggered when a document is archived */
   documentArchived: Document;
+  /** Triggered when a document content is created */
+  documentContentCreated: DocumentContent;
   /** Triggered when a document content draft is created */
   documentContentDraftCreated: DocumentContentDraft;
   /** Triggered when a document content draft is deleted */
   documentContentDraftDeleted: DocumentContentDraft;
   /** Triggered when a document content draft is updated */
   documentContentDraftUpdated: DocumentContentDraft;
+  /** Triggered when a document content is updated */
+  documentContentUpdated: DocumentContent;
   /** Triggered when a document is created */
   documentCreated: Document;
   /** Triggered when a a document is unarchived */
@@ -24101,6 +24209,7 @@ export enum WorkflowTrigger {
 export enum WorkflowTriggerType {
   Issue = "issue",
   Project = "project",
+  Release = "release",
 }
 
 export enum WorkflowType {
@@ -29430,6 +29539,7 @@ export type IssueFragment = { __typename: "Issue" } & Pick<
   | "snoozedUntilAt"
   | "slaType"
   | "id"
+  | "inheritsSharedAccess"
 > & {
     reactions: Array<
       { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -29895,6 +30005,16 @@ export type ProjectUpdateChildWebhookPayloadFragment = { __typename: "ProjectUpd
 export type ProjectChildWebhookPayloadFragment = { __typename: "ProjectChildWebhookPayload" } & Pick<
   ProjectChildWebhookPayload,
   "id" | "url" | "name"
+>;
+
+export type ReleasePipelineChildWebhookPayloadFragment = { __typename: "ReleasePipelineChildWebhookPayload" } & Pick<
+  ReleasePipelineChildWebhookPayload,
+  "id" | "url" | "name" | "slugId" | "type"
+>;
+
+export type ReleaseStageChildWebhookPayloadFragment = { __typename: "ReleaseStageChildWebhookPayload" } & Pick<
+  ReleaseStageChildWebhookPayload,
+  "id" | "color" | "name" | "position" | "type"
 >;
 
 export type TeamChildWebhookPayloadFragment = { __typename: "TeamChildWebhookPayload" } & Pick<
@@ -30903,6 +31023,49 @@ export type ReactionWebhookPayloadFragment = { __typename: "ReactionWebhookPaylo
       { __typename: "UserChildWebhookPayload" } & Pick<
         UserChildWebhookPayload,
         "id" | "url" | "avatarUrl" | "email" | "name"
+      >
+    >;
+  };
+
+export type ReleaseWebhookPayloadFragment = { __typename: "ReleaseWebhookPayload" } & Pick<
+  ReleaseWebhookPayload,
+  | "stageId"
+  | "id"
+  | "pipelineId"
+  | "url"
+  | "commitSha"
+  | "targetDate"
+  | "startDate"
+  | "name"
+  | "description"
+  | "slugId"
+  | "archivedAt"
+  | "createdAt"
+  | "updatedAt"
+  | "canceledAt"
+  | "completedAt"
+  | "startedAt"
+  | "version"
+  | "trashed"
+> & {
+    stage?: Maybe<
+      { __typename: "ReleaseStageChildWebhookPayload" } & Pick<
+        ReleaseStageChildWebhookPayload,
+        "id" | "color" | "name" | "position" | "type"
+      >
+    >;
+    issues?: Maybe<
+      Array<
+        { __typename: "IssueChildWebhookPayload" } & Pick<
+          IssueChildWebhookPayload,
+          "id" | "teamId" | "url" | "identifier" | "title"
+        > & { team: { __typename: "TeamChildWebhookPayload" } & Pick<TeamChildWebhookPayload, "id" | "key" | "name"> }
+      >
+    >;
+    pipeline?: Maybe<
+      { __typename: "ReleasePipelineChildWebhookPayload" } & Pick<
+        ReleasePipelineChildWebhookPayload,
+        "id" | "url" | "name" | "slugId" | "type"
       >
     >;
   };
@@ -35346,6 +35509,7 @@ export type IssueBatchPayloadFragment = { __typename: "IssueBatchPayload" } & Pi
         | "snoozedUntilAt"
         | "slaType"
         | "id"
+        | "inheritsSharedAccess"
       > & {
           reactions: Array<
             { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -35490,6 +35654,7 @@ export type IssueConnectionFragment = { __typename: "IssueConnection" } & {
       | "snoozedUntilAt"
       | "slaType"
       | "id"
+      | "inheritsSharedAccess"
     > & {
         reactions: Array<
           { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -36029,6 +36194,7 @@ export type IssueSearchPayloadFragment = { __typename: "IssueSearchPayload" } & 
         | "snoozedUntilAt"
         | "slaType"
         | "id"
+        | "inheritsSharedAccess"
       > & {
           reactions: Array<
             { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -36176,6 +36342,7 @@ export type IssueSearchResultFragment = { __typename: "IssueSearchResult" } & Pi
   | "snoozedUntilAt"
   | "slaType"
   | "id"
+  | "inheritsSharedAccess"
 > & {
     reactions: Array<
       { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -39663,6 +39830,48 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
         };
       user: { __typename?: "User" } & Pick<User, "id">;
     };
+  documentContentCreated: { __typename: "DocumentContent" } & Pick<
+    DocumentContent,
+    "content" | "contentState" | "updatedAt" | "restoredAt" | "archivedAt" | "createdAt" | "id"
+  > & {
+      aiPromptRules?: Maybe<
+        { __typename: "AiPromptRules" } & Pick<AiPromptRules, "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
+            updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          }
+      >;
+      document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
+      initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+      issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+      projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
+      project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+      welcomeMessage?: Maybe<
+        { __typename: "WelcomeMessage" } & Pick<
+          WelcomeMessage,
+          "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+        > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+      >;
+    };
+  documentContentUpdated: { __typename: "DocumentContent" } & Pick<
+    DocumentContent,
+    "content" | "contentState" | "updatedAt" | "restoredAt" | "archivedAt" | "createdAt" | "id"
+  > & {
+      aiPromptRules?: Maybe<
+        { __typename: "AiPromptRules" } & Pick<AiPromptRules, "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
+            updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          }
+      >;
+      document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
+      initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+      issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+      projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
+      project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+      welcomeMessage?: Maybe<
+        { __typename: "WelcomeMessage" } & Pick<
+          WelcomeMessage,
+          "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
+        > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
+      >;
+    };
   documentArchived: { __typename?: "Document" } & Pick<Document, "id">;
   documentCreated: { __typename?: "Document" } & Pick<Document, "id">;
   documentUpdated: { __typename?: "Document" } & Pick<Document, "id">;
@@ -43110,6 +43319,7 @@ export type AttachmentIssueQuery = { __typename?: "Query" } & {
     | "snoozedUntilAt"
     | "slaType"
     | "id"
+    | "inheritsSharedAccess"
   > & {
       reactions: Array<
         { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -43322,6 +43532,7 @@ export type AttachmentIssue_ChildrenQuery = { __typename?: "Query" } & {
           | "snoozedUntilAt"
           | "slaType"
           | "id"
+          | "inheritsSharedAccess"
         > & {
             reactions: Array<
               { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -44846,6 +45057,7 @@ export type Comment_CreatedIssuesQuery = { __typename?: "Query" } & {
           | "snoozedUntilAt"
           | "slaType"
           | "id"
+          | "inheritsSharedAccess"
         > & {
             reactions: Array<
               { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -45999,6 +46211,7 @@ export type CustomView_IssuesQuery = { __typename?: "Query" } & {
           | "snoozedUntilAt"
           | "slaType"
           | "id"
+          | "inheritsSharedAccess"
         > & {
             reactions: Array<
               { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -48498,6 +48711,7 @@ export type Cycle_IssuesQuery = { __typename?: "Query" } & {
           | "snoozedUntilAt"
           | "slaType"
           | "id"
+          | "inheritsSharedAccess"
         > & {
             reactions: Array<
               { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -48661,6 +48875,7 @@ export type Cycle_UncompletedIssuesUponCloseQuery = { __typename?: "Query" } & {
           | "snoozedUntilAt"
           | "slaType"
           | "id"
+          | "inheritsSharedAccess"
         > & {
             reactions: Array<
               { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -50378,6 +50593,7 @@ export type IssueQuery = { __typename?: "Query" } & {
     | "snoozedUntilAt"
     | "slaType"
     | "id"
+    | "inheritsSharedAccess"
   > & {
       reactions: Array<
         { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -50590,6 +50806,7 @@ export type Issue_ChildrenQuery = { __typename?: "Query" } & {
           | "snoozedUntilAt"
           | "slaType"
           | "id"
+          | "inheritsSharedAccess"
         > & {
             reactions: Array<
               { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -51593,6 +51810,7 @@ export type IssueFigmaFileKeySearchQuery = { __typename?: "Query" } & {
         | "snoozedUntilAt"
         | "slaType"
         | "id"
+        | "inheritsSharedAccess"
       > & {
           reactions: Array<
             { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -51862,6 +52080,7 @@ export type IssueLabel_IssuesQuery = { __typename?: "Query" } & {
           | "snoozedUntilAt"
           | "slaType"
           | "id"
+          | "inheritsSharedAccess"
         > & {
             reactions: Array<
               { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -52119,6 +52338,7 @@ export type IssueSearchQuery = { __typename?: "Query" } & {
         | "snoozedUntilAt"
         | "slaType"
         | "id"
+        | "inheritsSharedAccess"
       > & {
           reactions: Array<
             { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -52283,6 +52503,7 @@ export type IssueVcsBranchSearchQuery = { __typename?: "Query" } & {
       | "snoozedUntilAt"
       | "slaType"
       | "id"
+      | "inheritsSharedAccess"
     > & {
         reactions: Array<
           { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -52504,6 +52725,7 @@ export type IssueVcsBranchSearch_ChildrenQuery = { __typename?: "Query" } & {
             | "snoozedUntilAt"
             | "slaType"
             | "id"
+            | "inheritsSharedAccess"
           > & {
               reactions: Array<
                 { __typename: "Reaction" } & Pick<
@@ -53542,6 +53764,7 @@ export type IssuesQuery = { __typename?: "Query" } & {
         | "snoozedUntilAt"
         | "slaType"
         | "id"
+        | "inheritsSharedAccess"
       > & {
           reactions: Array<
             { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -55934,6 +56157,7 @@ export type Project_IssuesQuery = { __typename?: "Query" } & {
           | "snoozedUntilAt"
           | "slaType"
           | "id"
+          | "inheritsSharedAccess"
         > & {
             reactions: Array<
               { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -56828,6 +57052,7 @@ export type ProjectMilestone_IssuesQuery = { __typename?: "Query" } & {
           | "snoozedUntilAt"
           | "slaType"
           | "id"
+          | "inheritsSharedAccess"
         > & {
             reactions: Array<
               { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -57806,6 +58031,7 @@ export type SearchIssuesQuery = { __typename?: "Query" } & {
           | "snoozedUntilAt"
           | "slaType"
           | "id"
+          | "inheritsSharedAccess"
         > & {
             reactions: Array<
               { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -58337,6 +58563,7 @@ export type Team_IssuesQuery = { __typename?: "Query" } & {
           | "snoozedUntilAt"
           | "slaType"
           | "id"
+          | "inheritsSharedAccess"
         > & {
             reactions: Array<
               { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -59234,6 +59461,7 @@ export type User_AssignedIssuesQuery = { __typename?: "Query" } & {
           | "snoozedUntilAt"
           | "slaType"
           | "id"
+          | "inheritsSharedAccess"
         > & {
             reactions: Array<
               { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -59397,6 +59625,7 @@ export type User_CreatedIssuesQuery = { __typename?: "Query" } & {
           | "snoozedUntilAt"
           | "slaType"
           | "id"
+          | "inheritsSharedAccess"
         > & {
             reactions: Array<
               { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -59560,6 +59789,7 @@ export type User_DelegatedIssuesQuery = { __typename?: "Query" } & {
           | "snoozedUntilAt"
           | "slaType"
           | "id"
+          | "inheritsSharedAccess"
         > & {
             reactions: Array<
               { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -60843,6 +61073,7 @@ export type Viewer_AssignedIssuesQuery = { __typename?: "Query" } & {
           | "snoozedUntilAt"
           | "slaType"
           | "id"
+          | "inheritsSharedAccess"
         > & {
             reactions: Array<
               { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -61005,6 +61236,7 @@ export type Viewer_CreatedIssuesQuery = { __typename?: "Query" } & {
           | "snoozedUntilAt"
           | "slaType"
           | "id"
+          | "inheritsSharedAccess"
         > & {
             reactions: Array<
               { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -61167,6 +61399,7 @@ export type Viewer_DelegatedIssuesQuery = { __typename?: "Query" } & {
           | "snoozedUntilAt"
           | "slaType"
           | "id"
+          | "inheritsSharedAccess"
         > & {
             reactions: Array<
               { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -61559,6 +61792,7 @@ export type WorkflowState_IssuesQuery = { __typename?: "Query" } & {
           | "snoozedUntilAt"
           | "slaType"
           | "id"
+          | "inheritsSharedAccess"
         > & {
             reactions: Array<
               { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -63415,6 +63649,30 @@ export type IntegrationLoomMutation = { __typename?: "Mutation" } & {
     };
 };
 
+export type IntegrationMicrosoftPersonalConnectMutationVariables = Exact<{
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+}>;
+
+export type IntegrationMicrosoftPersonalConnectMutation = { __typename?: "Mutation" } & {
+  integrationMicrosoftPersonalConnect: { __typename: "IntegrationPayload" } & Pick<
+    IntegrationPayload,
+    "lastSyncId" | "success"
+  > & { integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">> };
+};
+
+export type IntegrationMicrosoftTeamsMutationVariables = Exact<{
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+}>;
+
+export type IntegrationMicrosoftTeamsMutation = { __typename?: "Mutation" } & {
+  integrationMicrosoftTeams: { __typename: "IntegrationPayload" } & Pick<
+    IntegrationPayload,
+    "lastSyncId" | "success"
+  > & { integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">> };
+};
+
 export type IntegrationRequestMutationVariables = Exact<{
   input: IntegrationRequestInput;
 }>;
@@ -63701,6 +63959,7 @@ export type CreateIssueBatchMutation = { __typename?: "Mutation" } & {
           | "snoozedUntilAt"
           | "slaType"
           | "id"
+          | "inheritsSharedAccess"
         > & {
             reactions: Array<
               { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -63852,6 +64111,7 @@ export type UpdateIssueBatchMutation = { __typename?: "Mutation" } & {
           | "snoozedUntilAt"
           | "slaType"
           | "id"
+          | "inheritsSharedAccess"
         > & {
             reactions: Array<
               { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
@@ -77011,6 +77271,99 @@ fragment IssueChildWebhookPayload on IssueChildWebhookPayload {
 }`,
   { fragmentName: "ReactionWebhookPayload" }
 ) as unknown as TypedDocumentString<ReactionWebhookPayloadFragment, unknown>;
+export const ReleaseStageChildWebhookPayloadFragmentDoc = new TypedDocumentString(
+  `
+    fragment ReleaseStageChildWebhookPayload on ReleaseStageChildWebhookPayload {
+  __typename
+  id
+  color
+  name
+  position
+  type
+}
+    `,
+  { fragmentName: "ReleaseStageChildWebhookPayload" }
+) as unknown as TypedDocumentString<ReleaseStageChildWebhookPayloadFragment, unknown>;
+export const ReleasePipelineChildWebhookPayloadFragmentDoc = new TypedDocumentString(
+  `
+    fragment ReleasePipelineChildWebhookPayload on ReleasePipelineChildWebhookPayload {
+  __typename
+  id
+  url
+  name
+  slugId
+  type
+}
+    `,
+  { fragmentName: "ReleasePipelineChildWebhookPayload" }
+) as unknown as TypedDocumentString<ReleasePipelineChildWebhookPayloadFragment, unknown>;
+export const ReleaseWebhookPayloadFragmentDoc = new TypedDocumentString(
+  `
+    fragment ReleaseWebhookPayload on ReleaseWebhookPayload {
+  __typename
+  stageId
+  id
+  pipelineId
+  url
+  commitSha
+  stage {
+    ...ReleaseStageChildWebhookPayload
+  }
+  targetDate
+  startDate
+  issues {
+    ...IssueChildWebhookPayload
+  }
+  name
+  pipeline {
+    ...ReleasePipelineChildWebhookPayload
+  }
+  description
+  slugId
+  archivedAt
+  createdAt
+  updatedAt
+  canceledAt
+  completedAt
+  startedAt
+  version
+  trashed
+}
+    fragment ReleasePipelineChildWebhookPayload on ReleasePipelineChildWebhookPayload {
+  __typename
+  id
+  url
+  name
+  slugId
+  type
+}
+fragment ReleaseStageChildWebhookPayload on ReleaseStageChildWebhookPayload {
+  __typename
+  id
+  color
+  name
+  position
+  type
+}
+fragment TeamChildWebhookPayload on TeamChildWebhookPayload {
+  __typename
+  id
+  key
+  name
+}
+fragment IssueChildWebhookPayload on IssueChildWebhookPayload {
+  __typename
+  id
+  team {
+    ...TeamChildWebhookPayload
+  }
+  teamId
+  url
+  identifier
+  title
+}`,
+  { fragmentName: "ReleaseWebhookPayload" }
+) as unknown as TypedDocumentString<ReleaseWebhookPayloadFragment, unknown>;
 export const IssueStatusChangedNotificationWebhookPayloadFragmentDoc = new TypedDocumentString(
   `
     fragment IssueStatusChangedNotificationWebhookPayload on IssueStatusChangedNotificationWebhookPayload {
@@ -84627,6 +84980,7 @@ export const IssueFragmentDoc = new TypedDocumentString(
   state {
     id
   }
+  inheritsSharedAccess
 }
     fragment ActorBot on ActorBot {
   __typename
@@ -84930,6 +85284,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -85164,6 +85519,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -86068,6 +86424,7 @@ export const IssueSearchResultFragmentDoc = new TypedDocumentString(
   state {
     id
   }
+  inheritsSharedAccess
 }
     fragment ActorBot on ActorBot {
   __typename
@@ -86419,6 +86776,7 @@ fragment IssueSearchResult on IssueSearchResult {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
@@ -90238,6 +90596,12 @@ export const SubscriptionFragmentDoc = new TypedDocumentString(
   documentContentDraftUpdated {
     ...DocumentContentDraft
   }
+  documentContentCreated {
+    ...DocumentContent
+  }
+  documentContentUpdated {
+    ...DocumentContent
+  }
   documentArchived {
     id
   }
@@ -93106,6 +93470,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -93419,6 +93784,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -95468,6 +95834,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -96479,6 +96846,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -98902,6 +99270,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -99155,6 +99524,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -101887,6 +102257,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -102200,6 +102571,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -103532,6 +103904,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -103927,6 +104300,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -104332,6 +104706,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -104589,6 +104964,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -104905,6 +105281,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -106262,6 +106639,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -109146,6 +109524,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -110508,6 +110887,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -112105,6 +112485,7 @@ fragment IssueSearchResult on IssueSearchResult {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment IssueSharedAccess on IssueSharedAccess {
   __typename
@@ -112852,6 +113233,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -114150,6 +114532,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -114403,6 +114786,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -114656,6 +115040,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -116225,6 +116610,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -116478,6 +116864,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -116731,6 +117118,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -117327,6 +117715,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -119616,6 +120005,37 @@ export const IntegrationLoomDocument = new TypedDocumentString(`
   }
   success
 }`) as unknown as TypedDocumentString<IntegrationLoomMutation, IntegrationLoomMutationVariables>;
+export const IntegrationMicrosoftPersonalConnectDocument = new TypedDocumentString(`
+    mutation integrationMicrosoftPersonalConnect($code: String!, $redirectUri: String!) {
+  integrationMicrosoftPersonalConnect(code: $code, redirectUri: $redirectUri) {
+    ...IntegrationPayload
+  }
+}
+    fragment IntegrationPayload on IntegrationPayload {
+  __typename
+  lastSyncId
+  integration {
+    id
+  }
+  success
+}`) as unknown as TypedDocumentString<
+  IntegrationMicrosoftPersonalConnectMutation,
+  IntegrationMicrosoftPersonalConnectMutationVariables
+>;
+export const IntegrationMicrosoftTeamsDocument = new TypedDocumentString(`
+    mutation integrationMicrosoftTeams($code: String!, $redirectUri: String!) {
+  integrationMicrosoftTeams(code: $code, redirectUri: $redirectUri) {
+    ...IntegrationPayload
+  }
+}
+    fragment IntegrationPayload on IntegrationPayload {
+  __typename
+  lastSyncId
+  integration {
+    id
+  }
+  success
+}`) as unknown as TypedDocumentString<IntegrationMicrosoftTeamsMutation, IntegrationMicrosoftTeamsMutationVariables>;
 export const IntegrationRequestDocument = new TypedDocumentString(`
     mutation integrationRequest($input: IntegrationRequestInput!) {
   integrationRequest(input: $input) {
@@ -120130,6 +120550,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
@@ -120365,6 +120786,7 @@ fragment Issue on Issue {
   state {
     id
   }
+  inheritsSharedAccess
 }
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
