@@ -1,3 +1,20 @@
+# ⚡ Cbow CrypteX
+
+Mastering the markets with lightning precision.
+
+Cbow CrypteX is a powerful crypto trading system built on Base & Ethereum.  
+It transforms market chaos into clear, data-driven decisions.
+
+## 🚀 Features
+- Real-time trading insights
+- Intelligent market analysis
+- Fast execution systems
+
+## 🌐 Vision
+Empowering traders with speed, precision, and confidence.
+
+The future of trading starts here.
+
 <!-- TEXT_SECTION:header:START -->
 <p align="center">
   <a href="https://linear.app" target="_blank" rel="noopener noreferrer">
