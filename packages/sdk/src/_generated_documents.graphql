@@ -2691,6 +2691,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     ... on AiConversationInvokeMcpToolToolCall {
       ...AiConversationInvokeMcpToolToolCall
     }
+    ... on AiConversationNavigateToPageToolCall {
+      ...AiConversationNavigateToPageToolCall
+    }
     ... on AiConversationQueryActivityToolCall {
       ...AiConversationQueryActivityToolCall
     }
@@ -2891,6 +2894,8 @@ fragment User on User {
   email
   # The user's full name.
   name
+  # The user's job title.
+  title
   # User's profile URL.
   url
   # Whether the user account is active or disabled (suspended).
@@ -4349,7 +4354,7 @@ fragment Team on Team {
   upcomingCycleCount
   # Number of issues in the team.
   issueCount
-  # Period after which automatically closed and completed issues are automatically archived in months.
+  # Period after which automatically closed, completed, and duplicate issues are automatically archived in months.
   autoArchivePeriod
   # Period after which issues are automatically closed in months. Null/undefined means disabled.
   autoClosePeriod
@@ -6166,6 +6171,8 @@ fragment ReleaseWebhookPayload on ReleaseWebhookPayload {
   id
   # The ID of the pipeline this release belongs to.
   pipelineId
+  # The ID of the user who created the release.
+  creatorId
   # The URL of the release.
   url
   # The commit SHA associated with this release.
@@ -7787,6 +7794,10 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
     ...AiConversationInvokeMcpToolToolCall
   }
 
+  ... on AiConversationNavigateToPageToolCall {
+    ...AiConversationNavigateToPageToolCall
+  }
+
   ... on AiConversationQueryActivityToolCall {
     ...AiConversationQueryActivityToolCall
   }
@@ -8103,6 +8114,39 @@ fragment AiConversationInvokeMcpToolToolCallArgsTool on AiConversationInvokeMcpT
   __typename
   name
   title
+}
+
+fragment AiConversationNavigateToPageToolCall on AiConversationNavigateToPageToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationNavigateToPageToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  # The result of the tool call.
+  result {
+    ...AiConversationNavigateToPageToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationNavigateToPageToolCallArgs on AiConversationNavigateToPageToolCallArgs {
+  __typename
+  entityType
+  identifier
+}
+
+fragment AiConversationNavigateToPageToolCallResult on AiConversationNavigateToPageToolCallResult {
+  __typename
+  newTab
+  url
 }
 
 fragment AiConversationQueryActivityToolCall on AiConversationQueryActivityToolCall {

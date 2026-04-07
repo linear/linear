@@ -1507,6 +1507,40 @@ type AiConversationInvokeMcpToolToolCallArgsTool {
   title: String
 }
 
+type AiConversationNavigateToPageToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationNavigateToPageToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+  """
+  The result of the tool call.
+  """
+  result: AiConversationNavigateToPageToolCallResult
+}
+
+type AiConversationNavigateToPageToolCallArgs {
+  entityType: String
+  identifier: String
+}
+
+type AiConversationNavigateToPageToolCallResult {
+  newTab: Boolean
+  url: String!
+}
+
 """
 A part in an AI conversation.
 """
@@ -1928,6 +1962,7 @@ enum AiConversationTool {
   GetPullRequestFile
   GetSlackConversationHistory
   InvokeMcpTool
+  NavigateToPage
   QueryActivity
   QueryUpdates
   QueryView
@@ -1955,6 +1990,7 @@ union AiConversationToolCall =
   | AiConversationGetPullRequestFileToolCall
   | AiConversationGetSlackConversationHistoryToolCall
   | AiConversationInvokeMcpToolToolCall
+  | AiConversationNavigateToPageToolCall
   | AiConversationQueryActivityToolCall
   | AiConversationQueryUpdatesToolCall
   | AiConversationQueryViewToolCall
@@ -13533,6 +13569,39 @@ type Issue implements Node {
   """
   addedToTeamAt: DateTime
   """
+  [Internal] AI prompt progresses associated with this issue.
+  """
+  aiPromptProgresses(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned AI prompt progresses.
+    """
+    filter: AiPromptProgressFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): AiPromptProgressConnection!
+  """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
@@ -14072,6 +14141,39 @@ type Issue implements Node {
     """
     orderBy: PaginationOrderBy
   ): IssueRelationConnection!
+  """
+  [ALPHA] Releases associated with the issue.
+  """
+  releases(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned releases.
+    """
+    filter: ReleaseFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ReleaseConnection!
   """
   Shared access metadata for this issue.
   """
@@ -14894,6 +14996,10 @@ input IssueCreateInput {
   The comment the issue is referencing.
   """
   referenceCommentId: String
+  """
+  [ALPHA] The identifiers of the releases to associate with this issue.
+  """
+  releaseIds: [String!]
   """
   [Internal] The timestamp at which an issue will be considered in breach of SLA.
   """
@@ -16879,6 +16985,39 @@ type IssueSearchResult implements Node {
   """
   addedToTeamAt: DateTime
   """
+  [Internal] AI prompt progresses associated with this issue.
+  """
+  aiPromptProgresses(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned AI prompt progresses.
+    """
+    filter: AiPromptProgressFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): AiPromptProgressConnection!
+  """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
@@ -17422,6 +17561,39 @@ type IssueSearchResult implements Node {
     """
     orderBy: PaginationOrderBy
   ): IssueRelationConnection!
+  """
+  [ALPHA] Releases associated with the issue.
+  """
+  releases(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned releases.
+    """
+    filter: ReleaseFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ReleaseConnection!
   """
   Shared access metadata for this issue.
   """
@@ -18267,6 +18439,10 @@ input IssueUpdateInput {
   """
   addedLabelIds: [String!]
   """
+  The identifiers of the releases to be added to this issue.
+  """
+  addedReleaseIds: [String!]
+  """
   The identifier of the user to assign the issue to.
   """
   assigneeId: String
@@ -18330,6 +18506,10 @@ input IssueUpdateInput {
   The identifiers of the issue labels to be removed from this issue.
   """
   removedLabelIds: [String!]
+  """
+  The identifiers of the releases to be removed from this issue.
+  """
+  removedReleaseIds: [String!]
   """
   [Internal] The timestamp at which an issue will be considered in breach of SLA.
   """
@@ -18786,6 +18966,14 @@ input JiraProjectDataInput {
 
 input JiraSettingsInput {
   """
+  The custom OAuth server token endpoint URL (enterprise SSO).
+  """
+  customOAuthServerUrl: String
+  """
+  Whether this integration uses custom OAuth authentication (enterprise SSO).
+  """
+  isCustomOAuth: Boolean
+  """
   Whether this integration is for Jira Server or not.
   """
   isJiraServer: Boolean = false
@@ -18797,6 +18985,10 @@ input JiraSettingsInput {
   Whether this integration is using a manual setup flow.
   """
   manualSetup: Boolean
+  """
+  The OAuth client ID for the personal connection OAuth app, when using custom OAuth.
+  """
+  personalOAuthClientId: String
   """
   The mapping of Jira project id => Linear team id.
   """
@@ -25047,6 +25239,10 @@ input NullableTeamFilter {
   """
   private: BooleanComparator
   """
+  Comparator for the time at which the team was retired.
+  """
+  retiredAt: NullableDateComparator
+  """
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
@@ -25857,6 +26053,10 @@ type Organization implements Node {
   """
   releaseChannel: ReleaseChannel!
   """
+  [Internal] Whether release management is enabled for the organization.
+  """
+  releasesEnabled: Boolean!
+  """
   [Internal] Whether agent invocation is restricted to full workspace members.
   """
   restrictAgentInvocationToMembers: Boolean
@@ -25897,6 +26097,10 @@ type Organization implements Node {
   """
   slaDayCount: SLADayCountType! @deprecated(reason: "No longer in use")
   """
+  [Internal] Whether to automatically create a Slack channel when a new project is created.
+  """
+  slackAutoCreateProjectChannel: Boolean!
+  """
   The Slack integration used for auto-creating project channels.
   """
   slackProjectChannelIntegration: Integration
@@ -25904,6 +26108,10 @@ type Organization implements Node {
   The prefix used for auto-created Slack project channels.
   """
   slackProjectChannelPrefix: String!
+  """
+  [Internal] Whether the Slack project channels feature is enabled for the organization.
+  """
+  slackProjectChannelsEnabled: Boolean!
   """
   The organization's subscription to a paid plan.
   """
@@ -26727,6 +26935,10 @@ input OrganizationUpdateInput {
   """
   slaEnabled: Boolean
   """
+  [Internal] Whether to automatically create a Slack channel when a new project is created.
+  """
+  slackAutoCreateProjectChannel: Boolean
+  """
   The ID of the Slack integration to use for auto-creating project channels.
   """
   slackProjectChannelIntegrationId: String
@@ -26734,6 +26946,10 @@ input OrganizationUpdateInput {
   The prefix to use for auto-created Slack project channels (p-, proj-, or project-).
   """
   slackProjectChannelPrefix: String
+  """
+  [Internal] Whether the Slack project channels feature is enabled for the organization.
+  """
+  slackProjectChannelsEnabled: Boolean
   """
   [ALPHA] Theme settings for the organization.
   """
@@ -34010,19 +34226,27 @@ type Query {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
+    """
+    [ALPHA] Sort returned release pipelines.
+    """
+    sort: [ReleasePipelineSortInput!]
   ): ReleasePipelineConnection!
   """
-  [ALPHA] Search releases by term with ranked results.
+  [ALPHA] Search releases with optional text matching and filter-based scoping.
   """
   releaseSearch(
+    """
+    Filter to apply to the release results.
+    """
+    filter: ReleaseFilter
     """
     Maximum results. Capped at 50.
     """
     first: Int = 20
     """
-    Search term to match against release name, version, and pipeline name.
+    Search term to match against release name, version, and pipeline name. When omitted, returns releases ordered by stage priority.
     """
-    term: String!
+    term: String
   ): [Release!]!
   """
   [ALPHA] One specific release stage.
@@ -34986,6 +35210,10 @@ type Release implements Node {
   """
   createdAt: DateTime!
   """
+  The user who created the release.
+  """
+  creator: User
+  """
   [Internal] The current progress of the release.
   """
   currentProgress: JSONObject!
@@ -35026,6 +35254,35 @@ type Release implements Node {
     """
     orderBy: PaginationOrderBy
   ): DocumentConnection!
+  """
+  [Internal] History entries associated with the release.
+  """
+  history(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ReleaseHistoryConnection!
   """
   The unique identifier of the entity.
   """
@@ -35191,6 +35448,10 @@ input ReleaseCollectionFilter {
   """
   and: [ReleaseCollectionFilter!]
   """
+  Comparator for the release completion date.
+  """
+  completedAt: NullableDateComparator
+  """
   Comparator for the created at date.
   """
   createdAt: DateComparator
@@ -35353,6 +35614,10 @@ input ReleaseFilter {
   """
   and: [ReleaseFilter!]
   """
+  Comparator for the release completion date.
+  """
+  completedAt: NullableDateComparator
+  """
   Comparator for the created at date.
   """
   createdAt: DateComparator
@@ -35384,6 +35649,51 @@ input ReleaseFilter {
   Comparator for the release version.
   """
   version: StringComparator
+}
+
+"""
+[Internal] A release history containing relevant change events.
+"""
+type ReleaseHistory implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The events that happened while recording that history.
+  """
+  entries: JSONObject!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The release that the history is associated with.
+  """
+  release: Release!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type ReleaseHistoryConnection {
+  edges: [ReleaseHistoryEdge!]!
+  nodes: [ReleaseHistory!]!
+  pageInfo: PageInfo!
+}
+
+type ReleaseHistoryEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: ReleaseHistory!
 }
 
 type ReleasePayload {
@@ -35425,6 +35735,10 @@ type ReleasePipeline implements Node {
   Glob patterns to include commits affecting matching file paths.
   """
   includePathPatterns: [String!]!
+  """
+  [ALPHA] Whether this pipeline targets a production environment. Default to true.
+  """
+  isProduction: Boolean!
   """
   The name of the pipeline.
   """
@@ -35599,6 +35913,10 @@ input ReleasePipelineCreateInput {
   """
   includePathPatterns: [String!]
   """
+  Whether this pipeline targets a production environment. Default to true.
+  """
+  isProduction: Boolean
+  """
   The name of the pipeline.
   """
   name: String!
@@ -35641,6 +35959,10 @@ input ReleasePipelineFilter {
   """
   id: IDComparator
   """
+  Comparator for the pipeline production flag.
+  """
+  isProduction: BooleanComparator
+  """
   Comparator for the pipeline name.
   """
   name: StringComparator
@@ -35652,6 +35974,20 @@ input ReleasePipelineFilter {
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
+}
+
+"""
+Release pipeline name sorting options.
+"""
+input ReleasePipelineNameSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
 }
 
 type ReleasePipelinePayload {
@@ -35670,6 +36006,16 @@ type ReleasePipelinePayload {
 }
 
 """
+Release pipeline sorting options.
+"""
+input ReleasePipelineSortInput {
+  """
+  Sort by release pipeline name.
+  """
+  name: ReleasePipelineNameSort
+}
+
+"""
 A type of release pipeline.
 """
 enum ReleasePipelineType {
@@ -35682,6 +36028,10 @@ input ReleasePipelineUpdateInput {
   Glob patterns to include commits affecting matching file paths.
   """
   includePathPatterns: [String!]
+  """
+  Whether this pipeline targets a production environment. Default to true.
+  """
+  isProduction: Boolean
   """
   The name of the pipeline.
   """
@@ -36179,6 +36529,10 @@ type ReleaseWebhookPayload {
   The time at which the entity was created.
   """
   createdAt: String!
+  """
+  The ID of the user who created the release.
+  """
+  creatorId: String
   """
   The release's description.
   """
@@ -38019,11 +38373,15 @@ type Team implements Node {
   """
   allMembersCanJoin: Boolean
   """
+  [Internal] The team's ancestor teams, ordered from the root to the immediate parent.
+  """
+  ancestors: [Team!]!
+  """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
   """
-  Period after which automatically closed and completed issues are automatically archived in months.
+  Period after which automatically closed, completed, and duplicate issues are automatically archived in months.
   """
   autoArchivePeriod: Float!
   """
@@ -38212,6 +38570,10 @@ type Team implements Node {
   Whether the team should inherit its estimation settings from its parent. Only applies to sub-teams.
   """
   inheritIssueEstimation: Boolean!
+  """
+  [Internal] Whether the team should inherit its Slack auto-create project channel setting from its parent. Only applies to sub-teams.
+  """
+  inheritSlackAutoCreateProjectChannel: Boolean!
   """
   Whether the team should inherit its workflow statuses from its parent. Only applies to sub-teams.
   """
@@ -38512,6 +38874,10 @@ type Team implements Node {
   """
   setIssueSortOrderOnStateChange: String!
   """
+  [Internal] Whether to automatically create a Slack channel when a new project is created in this team.
+  """
+  slackAutoCreateProjectChannel: Boolean
+  """
   Whether to send new issue comment notifications to Slack.
   """
   slackIssueComments: Boolean! @deprecated(reason: "No longer in use")
@@ -38739,7 +39105,7 @@ type TeamConnection {
 
 input TeamCreateInput {
   """
-  Period after which closed and completed issues are automatically archived, in months. 0 means disabled.
+  Period after which closed (completed, canceled, or duplicate) issues are automatically archived, in months. 0 means disabled.
   """
   autoArchivePeriod: Float
   """
@@ -38823,6 +39189,10 @@ input TeamCreateInput {
   """
   inheritProductIntelligenceScope: Boolean
   """
+  [Internal] Whether the team should inherit its Slack auto-create project channel setting from its parent. Only applies to sub-teams.
+  """
+  inheritSlackAutoCreateProjectChannel: Boolean
+  """
   [Internal] Whether the team should inherit workflow statuses from its parent.
   """
   inheritWorkflowStatuses: Boolean
@@ -38839,9 +39209,9 @@ input TeamCreateInput {
   """
   issueEstimationType: String
   """
-  The policy controlling whether and by whom issues in the team can be shared with non-team-members.
+  Whether issue sharing is enabled for this team.
   """
-  issueSharingPolicy: IssueSharingPolicy
+  issueSharingEnabled: Boolean
   """
   The key of the team. If not given, the key will be generated based on the name of the team.
   """
@@ -38874,6 +39244,10 @@ input TeamCreateInput {
   Whether to move issues to bottom of the column when changing state.
   """
   setIssueSortOrderOnStateChange: String
+  """
+  [Internal] Whether to automatically create a Slack channel when a new project is created in this team.
+  """
+  slackAutoCreateProjectChannel: Boolean
   """
   The timezone of the team.
   """
@@ -38944,6 +39318,10 @@ input TeamFilter {
   Comparator for the team privacy.
   """
   private: BooleanComparator
+  """
+  Comparator for the time at which the team was retired.
+  """
+  retiredAt: NullableDateComparator
   """
   Comparator for the updated at date.
   """
@@ -39174,6 +39552,10 @@ enum TeamRoleType {
 
 input TeamSecuritySettingsInput {
   """
+  The minimum team role required to share issues with non-team-members.
+  """
+  issueSharing: TeamRoleType
+  """
   The minimum team role required to manage labels in the team.
   """
   labelManagement: TeamRoleType
@@ -39219,7 +39601,7 @@ input TeamUpdateInput {
   """
   allMembersCanJoin: Boolean
   """
-  Period after which closed and completed issues are automatically archived, in months.
+  Period after which closed (completed, canceled, or duplicate) issues are automatically archived, in months.
   """
   autoArchivePeriod: Float
   """
@@ -39319,6 +39701,10 @@ input TeamUpdateInput {
   """
   inheritProductIntelligenceScope: Boolean
   """
+  [Internal] Whether the team should inherit its Slack auto-create project channel setting from its parent. Only applies to sub-teams.
+  """
+  inheritSlackAutoCreateProjectChannel: Boolean
+  """
   [Internal] Whether the team should inherit workflow statuses from its parent.
   """
   inheritWorkflowStatuses: Boolean
@@ -39335,9 +39721,9 @@ input TeamUpdateInput {
   """
   issueEstimationType: String
   """
-  The policy controlling whether and by whom issues in the team can be shared with non-team-members.
+  Whether issue sharing is enabled for this team.
   """
-  issueSharingPolicy: IssueSharingPolicy
+  issueSharingEnabled: Boolean
   """
   Whether new users should join this team by default. Mutation restricted to workspace admins or owners!
   """
@@ -39386,6 +39772,10 @@ input TeamUpdateInput {
   Whether to move issues to bottom of the column when changing state.
   """
   setIssueSortOrderOnStateChange: String
+  """
+  [Internal] Whether to automatically create a Slack channel when a new project is created in this team.
+  """
+  slackAutoCreateProjectChannel: Boolean
   """
   Whether to send new issue comment notifications to Slack.
   """
@@ -40443,6 +40833,10 @@ type User implements Node {
   """
   timezone: String
   """
+  The user's job title.
+  """
+  title: String
+  """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
@@ -41193,6 +41587,10 @@ input UserUpdateInput {
   The local timezone of the user.
   """
   timezone: String
+  """
+  The user's job title.
+  """
+  title: String
 }
 
 """
@@ -43036,6 +43434,7 @@ enum WorkflowTriggerType {
 
 enum WorkflowType {
   automation
+  release
   sla
   triage
   triageAutomation

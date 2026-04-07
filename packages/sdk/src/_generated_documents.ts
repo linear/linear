@@ -999,6 +999,33 @@ export type AiConversationInvokeMcpToolToolCallArgsTool = {
   title?: Maybe<Scalars["String"]>;
 };
 
+export type AiConversationNavigateToPageToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationNavigateToPageToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationNavigateToPageToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  result?: Maybe<AiConversationNavigateToPageToolCallResult>;
+};
+
+export type AiConversationNavigateToPageToolCallArgs = {
+  __typename?: "AiConversationNavigateToPageToolCallArgs";
+  entityType?: Maybe<Scalars["String"]>;
+  identifier?: Maybe<Scalars["String"]>;
+};
+
+export type AiConversationNavigateToPageToolCallResult = {
+  __typename?: "AiConversationNavigateToPageToolCallResult";
+  newTab?: Maybe<Scalars["Boolean"]>;
+  url: Scalars["String"];
+};
+
 /** A part in an AI conversation. */
 export type AiConversationPart =
   | AiConversationPromptPart
@@ -1307,6 +1334,7 @@ export enum AiConversationTool {
   GetPullRequestFile = "GetPullRequestFile",
   GetSlackConversationHistory = "GetSlackConversationHistory",
   InvokeMcpTool = "InvokeMcpTool",
+  NavigateToPage = "NavigateToPage",
   QueryActivity = "QueryActivity",
   QueryUpdates = "QueryUpdates",
   QueryView = "QueryView",
@@ -1332,6 +1360,7 @@ export type AiConversationToolCall =
   | AiConversationGetPullRequestFileToolCall
   | AiConversationGetSlackConversationHistoryToolCall
   | AiConversationInvokeMcpToolToolCall
+  | AiConversationNavigateToPageToolCall
   | AiConversationQueryActivityToolCall
   | AiConversationQueryUpdatesToolCall
   | AiConversationQueryViewToolCall
@@ -7997,6 +8026,8 @@ export type Issue = Node & {
   addedToProjectAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the issue was added to a team. */
   addedToTeamAt?: Maybe<Scalars["DateTime"]>;
+  /** [Internal] AI prompt progresses associated with this issue. */
+  aiPromptProgresses: AiPromptProgressConnection;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The external user who requested creation of the Asks issue on behalf of the creator. */
@@ -8104,6 +8135,8 @@ export type Issue = Node & {
   recurringIssueTemplate?: Maybe<Template>;
   /** Relations associated with this issue. */
   relations: IssueRelationConnection;
+  /** [ALPHA] Releases associated with the issue. */
+  releases: ReleaseConnection;
   /** Shared access metadata for this issue. */
   sharedAccess: IssueSharedAccess;
   /** The time at which the issue's SLA will breach. */
@@ -8159,6 +8192,17 @@ export type Issue = Node & {
   updatedAt: Scalars["DateTime"];
   /** Issue URL. */
   url: Scalars["String"];
+};
+
+/** An issue. */
+export type IssueAiPromptProgressesArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  filter?: InputMaybe<AiPromptProgressFilter>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
 };
 
 /** An issue. */
@@ -8283,6 +8327,17 @@ export type IssueNeedsArgs = {
 export type IssueRelationsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+/** An issue. */
+export type IssueReleasesArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  filter?: InputMaybe<ReleaseFilter>;
   first?: InputMaybe<Scalars["Int"]>;
   includeArchived?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
@@ -8651,6 +8706,8 @@ export type IssueCreateInput = {
   projectMilestoneId?: InputMaybe<Scalars["String"]>;
   /** The comment the issue is referencing. */
   referenceCommentId?: InputMaybe<Scalars["String"]>;
+  /** [ALPHA] The identifiers of the releases to associate with this issue. */
+  releaseIds?: InputMaybe<Array<Scalars["String"]>>;
   /** [Internal] The timestamp at which an issue will be considered in breach of SLA. */
   slaBreachesAt?: InputMaybe<Scalars["DateTime"]>;
   /** [Internal] The timestamp at which the issue's SLA was started. */
@@ -9765,6 +9822,8 @@ export type IssueSearchResult = Node & {
   addedToProjectAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the issue was added to a team. */
   addedToTeamAt?: Maybe<Scalars["DateTime"]>;
+  /** [Internal] AI prompt progresses associated with this issue. */
+  aiPromptProgresses: AiPromptProgressConnection;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The external user who requested creation of the Asks issue on behalf of the creator. */
@@ -9874,6 +9933,8 @@ export type IssueSearchResult = Node & {
   recurringIssueTemplate?: Maybe<Template>;
   /** Relations associated with this issue. */
   relations: IssueRelationConnection;
+  /** [ALPHA] Releases associated with the issue. */
+  releases: ReleaseConnection;
   /** Shared access metadata for this issue. */
   sharedAccess: IssueSharedAccess;
   /** The time at which the issue's SLA will breach. */
@@ -9929,6 +9990,16 @@ export type IssueSearchResult = Node & {
   updatedAt: Scalars["DateTime"];
   /** Issue URL. */
   url: Scalars["String"];
+};
+
+export type IssueSearchResultAiPromptProgressesArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  filter?: InputMaybe<AiPromptProgressFilter>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
 };
 
 export type IssueSearchResultAttachmentsArgs = {
@@ -10041,6 +10112,16 @@ export type IssueSearchResultNeedsArgs = {
 export type IssueSearchResultRelationsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+export type IssueSearchResultReleasesArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  filter?: InputMaybe<ReleaseFilter>;
   first?: InputMaybe<Scalars["Int"]>;
   includeArchived?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
@@ -10481,6 +10562,8 @@ export type IssueUnassignedFromYouNotificationWebhookPayload = {
 export type IssueUpdateInput = {
   /** The identifiers of the issue labels to be added to this issue. */
   addedLabelIds?: InputMaybe<Array<Scalars["String"]>>;
+  /** The identifiers of the releases to be added to this issue. */
+  addedReleaseIds?: InputMaybe<Array<Scalars["String"]>>;
   /** The identifier of the user to assign the issue to. */
   assigneeId?: InputMaybe<Scalars["String"]>;
   /** Whether the issue was automatically closed because its parent issue was closed. */
@@ -10513,6 +10596,8 @@ export type IssueUpdateInput = {
   projectMilestoneId?: InputMaybe<Scalars["String"]>;
   /** The identifiers of the issue labels to be removed from this issue. */
   removedLabelIds?: InputMaybe<Array<Scalars["String"]>>;
+  /** The identifiers of the releases to be removed from this issue. */
+  removedReleaseIds?: InputMaybe<Array<Scalars["String"]>>;
   /** [Internal] The timestamp at which an issue will be considered in breach of SLA. */
   slaBreachesAt?: InputMaybe<Scalars["DateTime"]>;
   /** [Internal] The timestamp at which the issue's SLA was started. */
@@ -10751,12 +10836,18 @@ export type JiraProjectDataInput = {
 };
 
 export type JiraSettingsInput = {
+  /** The custom OAuth server token endpoint URL (enterprise SSO). */
+  customOAuthServerUrl?: InputMaybe<Scalars["String"]>;
+  /** Whether this integration uses custom OAuth authentication (enterprise SSO). */
+  isCustomOAuth?: InputMaybe<Scalars["Boolean"]>;
   /** Whether this integration is for Jira Server or not. */
   isJiraServer?: InputMaybe<Scalars["Boolean"]>;
   /** The label of the Jira instance, for visual identification purposes only */
   label?: InputMaybe<Scalars["String"]>;
   /** Whether this integration is using a manual setup flow. */
   manualSetup?: InputMaybe<Scalars["Boolean"]>;
+  /** The OAuth client ID for the personal connection OAuth app, when using custom OAuth. */
+  personalOAuthClientId?: InputMaybe<Scalars["String"]>;
   /** The mapping of Jira project id => Linear team id. */
   projectMapping?: InputMaybe<Array<JiraLinearMappingInput>>;
   /** The Jira projects for the organization. */
@@ -14286,6 +14377,8 @@ export type NullableTeamFilter = {
   parent?: InputMaybe<NullableTeamFilter>;
   /** Comparator for the team privacy. */
   private?: InputMaybe<BooleanComparator>;
+  /** Comparator for the time at which the team was retired. */
+  retiredAt?: InputMaybe<NullableDateComparator>;
   /** Comparator for the updated at date. */
   updatedAt?: InputMaybe<DateComparator>;
 };
@@ -14698,6 +14791,8 @@ export type Organization = Node & {
   projectUpdatesReminderFrequency: ProjectUpdateReminderFrequency;
   /** The feature release channel the organization belongs to. */
   releaseChannel: ReleaseChannel;
+  /** [Internal] Whether release management is enabled for the organization. */
+  releasesEnabled: Scalars["Boolean"];
   /** [Internal] Whether agent invocation is restricted to full workspace members. */
   restrictAgentInvocationToMembers?: Maybe<Scalars["Boolean"]>;
   /**
@@ -14727,10 +14822,14 @@ export type Organization = Node & {
    * @deprecated No longer in use
    */
   slaDayCount: SLADayCountType;
+  /** [Internal] Whether to automatically create a Slack channel when a new project is created. */
+  slackAutoCreateProjectChannel: Scalars["Boolean"];
   /** The Slack integration used for auto-creating project channels. */
   slackProjectChannelIntegration?: Maybe<Integration>;
   /** The prefix used for auto-created Slack project channels. */
   slackProjectChannelPrefix: Scalars["String"];
+  /** [Internal] Whether the Slack project channels feature is enabled for the organization. */
+  slackProjectChannelsEnabled: Scalars["Boolean"];
   /** The organization's subscription to a paid plan. */
   subscription?: Maybe<PaidSubscription>;
   /** Teams associated with the organization. */
@@ -15239,10 +15338,14 @@ export type OrganizationUpdateInput = {
   securitySettings?: InputMaybe<OrganizationSecuritySettingsInput>;
   /** Internal. Whether SLAs have been enabled for the organization. */
   slaEnabled?: InputMaybe<Scalars["Boolean"]>;
+  /** [Internal] Whether to automatically create a Slack channel when a new project is created. */
+  slackAutoCreateProjectChannel?: InputMaybe<Scalars["Boolean"]>;
   /** The ID of the Slack integration to use for auto-creating project channels. */
   slackProjectChannelIntegrationId?: InputMaybe<Scalars["String"]>;
   /** The prefix to use for auto-created Slack project channels (p-, proj-, or project-). */
   slackProjectChannelPrefix?: InputMaybe<Scalars["String"]>;
+  /** [Internal] Whether the Slack project channels feature is enabled for the organization. */
+  slackProjectChannelsEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** [ALPHA] Theme settings for the organization. */
   themeSettings?: InputMaybe<Scalars["JSONObject"]>;
   /** The URL key of the organization. */
@@ -18511,7 +18614,7 @@ export type Query = {
   releasePipelineByAccessKey: ReleasePipeline;
   /** [ALPHA] All release pipelines. */
   releasePipelines: ReleasePipelineConnection;
-  /** [ALPHA] Search releases by term with ranked results. */
+  /** [ALPHA] Search releases with optional text matching and filter-based scoping. */
   releaseSearch: Array<Release>;
   /** [ALPHA] One specific release stage. */
   releaseStage: ReleaseStage;
@@ -19235,11 +19338,13 @@ export type QueryReleasePipelinesArgs = {
   includeArchived?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<PaginationOrderBy>;
+  sort?: InputMaybe<Array<ReleasePipelineSortInput>>;
 };
 
 export type QueryReleaseSearchArgs = {
+  filter?: InputMaybe<ReleaseFilter>;
   first?: InputMaybe<Scalars["Int"]>;
-  term: Scalars["String"];
+  term?: InputMaybe<Scalars["String"]>;
 };
 
 export type QueryReleaseStageArgs = {
@@ -19643,12 +19748,16 @@ export type Release = Node & {
   completedAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
+  /** The user who created the release. */
+  creator?: Maybe<User>;
   /** [Internal] The current progress of the release. */
   currentProgress: Scalars["JSONObject"];
   /** The release's description. */
   description?: Maybe<Scalars["String"]>;
   /** [Internal] Documents associated with the release. */
   documents: DocumentConnection;
+  /** [Internal] History entries associated with the release. */
+  history: ReleaseHistoryConnection;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /** [ALPHA] Number of issues associated with the release. */
@@ -19691,6 +19800,16 @@ export type ReleaseDocumentsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
   filter?: InputMaybe<DocumentFilter>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+/** [Internal] A release. */
+export type ReleaseHistoryArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
   first?: InputMaybe<Scalars["Int"]>;
   includeArchived?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
@@ -19748,6 +19867,8 @@ export enum ReleaseChannel {
 export type ReleaseCollectionFilter = {
   /** Compound filters, all of which need to be matched by the release. */
   and?: InputMaybe<Array<ReleaseCollectionFilter>>;
+  /** Comparator for the release completion date. */
+  completedAt?: InputMaybe<NullableDateComparator>;
   /** Comparator for the created at date. */
   createdAt?: InputMaybe<DateComparator>;
   /** Filters that needs to be matched by all releases. */
@@ -19842,6 +19963,8 @@ export type ReleaseEdge = {
 export type ReleaseFilter = {
   /** Compound filters, all of which need to be matched by the release. */
   and?: InputMaybe<Array<ReleaseFilter>>;
+  /** Comparator for the release completion date. */
+  completedAt?: InputMaybe<NullableDateComparator>;
   /** Comparator for the created at date. */
   createdAt?: InputMaybe<DateComparator>;
   /** Comparator for the identifier. */
@@ -19858,6 +19981,40 @@ export type ReleaseFilter = {
   updatedAt?: InputMaybe<DateComparator>;
   /** Comparator for the release version. */
   version?: InputMaybe<StringComparator>;
+};
+
+/** [Internal] A release history containing relevant change events. */
+export type ReleaseHistory = Node & {
+  __typename?: "ReleaseHistory";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The events that happened while recording that history. */
+  entries: Scalars["JSONObject"];
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The release that the history is associated with. */
+  release: Release;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+};
+
+export type ReleaseHistoryConnection = {
+  __typename?: "ReleaseHistoryConnection";
+  edges: Array<ReleaseHistoryEdge>;
+  nodes: Array<ReleaseHistory>;
+  pageInfo: PageInfo;
+};
+
+export type ReleaseHistoryEdge = {
+  __typename?: "ReleaseHistoryEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: ReleaseHistory;
 };
 
 export type ReleasePayload = {
@@ -19883,6 +20040,8 @@ export type ReleasePipeline = Node & {
   id: Scalars["ID"];
   /** Glob patterns to include commits affecting matching file paths. */
   includePathPatterns: Array<Scalars["String"]>;
+  /** [ALPHA] Whether this pipeline targets a production environment. Default to true. */
+  isProduction: Scalars["Boolean"];
   /** The name of the pipeline. */
   name: Scalars["String"];
   /** [ALPHA] Releases associated with this pipeline. */
@@ -19973,6 +20132,8 @@ export type ReleasePipelineCreateInput = {
   id?: InputMaybe<Scalars["String"]>;
   /** Glob patterns to include commits affecting matching file paths. */
   includePathPatterns?: InputMaybe<Array<Scalars["String"]>>;
+  /** Whether this pipeline targets a production environment. Default to true. */
+  isProduction?: InputMaybe<Scalars["Boolean"]>;
   /** The name of the pipeline. */
   name: Scalars["String"];
   /** The pipeline's unique slug identifier. If not provided, it will be auto-generated. */
@@ -19998,12 +20159,22 @@ export type ReleasePipelineFilter = {
   createdAt?: InputMaybe<DateComparator>;
   /** Comparator for the identifier. */
   id?: InputMaybe<IdComparator>;
+  /** Comparator for the pipeline production flag. */
+  isProduction?: InputMaybe<BooleanComparator>;
   /** Comparator for the pipeline name. */
   name?: InputMaybe<StringComparator>;
   /** Compound filters, one of which need to be matched by the pipeline. */
   or?: InputMaybe<Array<ReleasePipelineFilter>>;
   /** Comparator for the updated at date. */
   updatedAt?: InputMaybe<DateComparator>;
+};
+
+/** Release pipeline name sorting options. */
+export type ReleasePipelineNameSort = {
+  /** Whether nulls should be sorted first or last */
+  nulls?: InputMaybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: InputMaybe<PaginationSortOrder>;
 };
 
 export type ReleasePipelinePayload = {
@@ -20016,6 +20187,12 @@ export type ReleasePipelinePayload = {
   success: Scalars["Boolean"];
 };
 
+/** Release pipeline sorting options. */
+export type ReleasePipelineSortInput = {
+  /** Sort by release pipeline name. */
+  name?: InputMaybe<ReleasePipelineNameSort>;
+};
+
 /** A type of release pipeline. */
 export enum ReleasePipelineType {
   Continuous = "continuous",
@@ -20025,6 +20202,8 @@ export enum ReleasePipelineType {
 export type ReleasePipelineUpdateInput = {
   /** Glob patterns to include commits affecting matching file paths. */
   includePathPatterns?: InputMaybe<Array<Scalars["String"]>>;
+  /** Whether this pipeline targets a production environment. Default to true. */
+  isProduction?: InputMaybe<Scalars["Boolean"]>;
   /** The name of the pipeline. */
   name?: InputMaybe<Scalars["String"]>;
   /** The pipeline's unique slug identifier. */
@@ -20308,6 +20487,8 @@ export type ReleaseWebhookPayload = {
   completedAt?: Maybe<Scalars["String"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["String"];
+  /** The ID of the user who created the release. */
+  creatorId?: Maybe<Scalars["String"]>;
   /** The release's description. */
   description?: Maybe<Scalars["String"]>;
   /** The ID of the entity. */
@@ -21368,9 +21549,11 @@ export type Team = Node & {
   aiThreadSummariesEnabled: Scalars["Boolean"];
   /** Whether all members in the workspace can join the team. Only used for public teams. */
   allMembersCanJoin?: Maybe<Scalars["Boolean"]>;
+  /** [Internal] The team's ancestor teams, ordered from the root to the immediate parent. */
+  ancestors: Array<Team>;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
-  /** Period after which automatically closed and completed issues are automatically archived in months. */
+  /** Period after which automatically closed, completed, and duplicate issues are automatically archived in months. */
   autoArchivePeriod: Scalars["Float"];
   /** Whether child issues should automatically close when their parent issue is closed */
   autoCloseChildIssues?: Maybe<Scalars["Boolean"]>;
@@ -21447,6 +21630,8 @@ export type Team = Node & {
   id: Scalars["ID"];
   /** Whether the team should inherit its estimation settings from its parent. Only applies to sub-teams. */
   inheritIssueEstimation: Scalars["Boolean"];
+  /** [Internal] Whether the team should inherit its Slack auto-create project channel setting from its parent. Only applies to sub-teams. */
+  inheritSlackAutoCreateProjectChannel: Scalars["Boolean"];
   /** Whether the team should inherit its workflow statuses from its parent. Only applies to sub-teams. */
   inheritWorkflowStatuses: Scalars["Boolean"];
   /** Settings for all integrations associated with that team. */
@@ -21531,6 +21716,8 @@ export type Team = Node & {
   securitySettings: Scalars["JSONObject"];
   /** Where to move issues when changing state. */
   setIssueSortOrderOnStateChange: Scalars["String"];
+  /** [Internal] Whether to automatically create a Slack channel when a new project is created in this team. */
+  slackAutoCreateProjectChannel?: Maybe<Scalars["Boolean"]>;
   /**
    * Whether to send new issue comment notifications to Slack.
    * @deprecated No longer in use
@@ -21749,7 +21936,7 @@ export type TeamConnection = {
 };
 
 export type TeamCreateInput = {
-  /** Period after which closed and completed issues are automatically archived, in months. 0 means disabled. */
+  /** Period after which closed (completed, canceled, or duplicate) issues are automatically archived, in months. 0 means disabled. */
   autoArchivePeriod?: InputMaybe<Scalars["Float"]>;
   /** Period after which issues are automatically closed, in months. */
   autoClosePeriod?: InputMaybe<Scalars["Float"]>;
@@ -21791,6 +21978,8 @@ export type TeamCreateInput = {
   inheritIssueEstimation?: InputMaybe<Scalars["Boolean"]>;
   /** [Internal] Whether the team should inherit its product intelligence scope from its parent. Only applies to sub-teams. */
   inheritProductIntelligenceScope?: InputMaybe<Scalars["Boolean"]>;
+  /** [Internal] Whether the team should inherit its Slack auto-create project channel setting from its parent. Only applies to sub-teams. */
+  inheritSlackAutoCreateProjectChannel?: InputMaybe<Scalars["Boolean"]>;
   /** [Internal] Whether the team should inherit workflow statuses from its parent. */
   inheritWorkflowStatuses?: InputMaybe<Scalars["Boolean"]>;
   /** Whether to allow zeros in issues estimates. */
@@ -21799,8 +21988,8 @@ export type TeamCreateInput = {
   issueEstimationExtended?: InputMaybe<Scalars["Boolean"]>;
   /** The issue estimation type to use. Must be one of "notUsed", "exponential", "fibonacci", "linear", "tShirt". */
   issueEstimationType?: InputMaybe<Scalars["String"]>;
-  /** The policy controlling whether and by whom issues in the team can be shared with non-team-members. */
-  issueSharingPolicy?: InputMaybe<IssueSharingPolicy>;
+  /** Whether issue sharing is enabled for this team. */
+  issueSharingEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** The key of the team. If not given, the key will be generated based on the name of the team. */
   key?: InputMaybe<Scalars["String"]>;
   /** The workflow state into which issues are moved when they are marked as a duplicate of another issue. */
@@ -21817,6 +22006,8 @@ export type TeamCreateInput = {
   requirePriorityToLeaveTriage?: InputMaybe<Scalars["Boolean"]>;
   /** Whether to move issues to bottom of the column when changing state. */
   setIssueSortOrderOnStateChange?: InputMaybe<Scalars["String"]>;
+  /** [Internal] Whether to automatically create a Slack channel when a new project is created in this team. */
+  slackAutoCreateProjectChannel?: InputMaybe<Scalars["Boolean"]>;
   /** The timezone of the team. */
   timezone?: InputMaybe<Scalars["String"]>;
   /** Whether triage mode is enabled for the team. */
@@ -21856,6 +22047,8 @@ export type TeamFilter = {
   parent?: InputMaybe<NullableTeamFilter>;
   /** Comparator for the team privacy. */
   private?: InputMaybe<BooleanComparator>;
+  /** Comparator for the time at which the team was retired. */
+  retiredAt?: InputMaybe<NullableDateComparator>;
   /** Comparator for the updated at date. */
   updatedAt?: InputMaybe<DateComparator>;
 };
@@ -22004,6 +22197,8 @@ export enum TeamRoleType {
 }
 
 export type TeamSecuritySettingsInput = {
+  /** The minimum team role required to share issues with non-team-members. */
+  issueSharing?: InputMaybe<TeamRoleType>;
   /** The minimum team role required to manage labels in the team. */
   labelManagement?: InputMaybe<TeamRoleType>;
   /** The minimum team role required to manage full workspace members (non-guests) in the team. */
@@ -22029,7 +22224,7 @@ export type TeamUpdateInput = {
   aiThreadSummariesEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** Whether all members in the workspace can join the team. Only used for public teams. */
   allMembersCanJoin?: InputMaybe<Scalars["Boolean"]>;
-  /** Period after which closed and completed issues are automatically archived, in months. */
+  /** Period after which closed (completed, canceled, or duplicate) issues are automatically archived, in months. */
   autoArchivePeriod?: InputMaybe<Scalars["Float"]>;
   /** Whether to automatically close all sub-issues when a parent issue in this team is closed. */
   autoCloseChildIssues?: InputMaybe<Scalars["Boolean"]>;
@@ -22079,6 +22274,8 @@ export type TeamUpdateInput = {
   inheritIssueEstimation?: InputMaybe<Scalars["Boolean"]>;
   /** [Internal] Whether the team should inherit its product intelligence scope from its parent. Only applies to sub-teams. */
   inheritProductIntelligenceScope?: InputMaybe<Scalars["Boolean"]>;
+  /** [Internal] Whether the team should inherit its Slack auto-create project channel setting from its parent. Only applies to sub-teams. */
+  inheritSlackAutoCreateProjectChannel?: InputMaybe<Scalars["Boolean"]>;
   /** [Internal] Whether the team should inherit workflow statuses from its parent. */
   inheritWorkflowStatuses?: InputMaybe<Scalars["Boolean"]>;
   /** Whether to allow zeros in issues estimates. */
@@ -22087,8 +22284,8 @@ export type TeamUpdateInput = {
   issueEstimationExtended?: InputMaybe<Scalars["Boolean"]>;
   /** The issue estimation type to use. Must be one of "notUsed", "exponential", "fibonacci", "linear", "tShirt". */
   issueEstimationType?: InputMaybe<Scalars["String"]>;
-  /** The policy controlling whether and by whom issues in the team can be shared with non-team-members. */
-  issueSharingPolicy?: InputMaybe<IssueSharingPolicy>;
+  /** Whether issue sharing is enabled for this team. */
+  issueSharingEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** Whether new users should join this team by default. Mutation restricted to workspace admins or owners! */
   joinByDefault?: InputMaybe<Scalars["Boolean"]>;
   /** The key of the team. */
@@ -22113,6 +22310,8 @@ export type TeamUpdateInput = {
   securitySettings?: InputMaybe<TeamSecuritySettingsInput>;
   /** Whether to move issues to bottom of the column when changing state. */
   setIssueSortOrderOnStateChange?: InputMaybe<Scalars["String"]>;
+  /** [Internal] Whether to automatically create a Slack channel when a new project is created in this team. */
+  slackAutoCreateProjectChannel?: InputMaybe<Scalars["Boolean"]>;
   /** Whether to send new issue comment notifications to Slack. */
   slackIssueComments?: InputMaybe<Scalars["Boolean"]>;
   /** Whether to send issue status update notifications to Slack. */
@@ -22610,6 +22809,8 @@ export type User = Node & {
   teams: TeamConnection;
   /** The local timezone of the user. */
   timezone?: Maybe<Scalars["String"]>;
+  /** The user's job title. */
+  title?: Maybe<Scalars["String"]>;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -23170,6 +23371,8 @@ export type UserUpdateInput = {
   statusUntilAt?: InputMaybe<Scalars["DateTime"]>;
   /** The local timezone of the user. */
   timezone?: InputMaybe<Scalars["String"]>;
+  /** The user's job title. */
+  title?: InputMaybe<Scalars["String"]>;
 };
 
 /** Payload for a user webhook. */
@@ -24214,6 +24417,7 @@ export enum WorkflowTriggerType {
 
 export enum WorkflowType {
   Automation = "automation",
+  Release = "release",
   Sla = "sla",
   Triage = "triage",
   TriageAutomation = "triageAutomation",
@@ -24420,6 +24624,27 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
                   "name" | "title"
                 >;
               }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationNavigateToPageToolCall" } & Pick<
+          AiConversationNavigateToPageToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationNavigateToPageToolCallArgs" } & Pick<
+                AiConversationNavigateToPageToolCallArgs,
+                "entityType" | "identifier"
+              >
+            >;
+            result?: Maybe<
+              { __typename: "AiConversationNavigateToPageToolCallResult" } & Pick<
+                AiConversationNavigateToPageToolCallResult,
+                "newTab" | "url"
+              >
             >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
               AiConversationToolDisplayInfo,
@@ -27884,6 +28109,7 @@ export type IssueHistoryFragment = { __typename: "IssueHistory" } & Pick<
           | "displayName"
           | "email"
           | "name"
+          | "title"
           | "url"
           | "active"
           | "guest"
@@ -27923,6 +28149,7 @@ export type IssueHistoryFragment = { __typename: "IssueHistory" } & Pick<
           | "displayName"
           | "email"
           | "name"
+          | "title"
           | "url"
           | "active"
           | "guest"
@@ -28049,6 +28276,7 @@ export type IssueHistoryFragment = { __typename: "IssueHistory" } & Pick<
           | "displayName"
           | "email"
           | "name"
+          | "title"
           | "url"
           | "active"
           | "guest"
@@ -28370,6 +28598,27 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
                   "name" | "title"
                 >;
               }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationNavigateToPageToolCall" } & Pick<
+          AiConversationNavigateToPageToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationNavigateToPageToolCallArgs" } & Pick<
+                AiConversationNavigateToPageToolCallArgs,
+                "entityType" | "identifier"
+              >
+            >;
+            result?: Maybe<
+              { __typename: "AiConversationNavigateToPageToolCallResult" } & Pick<
+                AiConversationNavigateToPageToolCallResult,
+                "newTab" | "url"
+              >
             >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
               AiConversationToolDisplayInfo,
@@ -28707,6 +28956,7 @@ export type UserFragment = { __typename: "User" } & Pick<
   | "displayName"
   | "email"
   | "name"
+  | "title"
   | "url"
   | "active"
   | "guest"
@@ -29577,6 +29827,7 @@ export type IssueFragment = { __typename: "Issue" } & Pick<
             | "displayName"
             | "email"
             | "name"
+            | "title"
             | "url"
             | "active"
             | "guest"
@@ -31032,6 +31283,7 @@ export type ReleaseWebhookPayloadFragment = { __typename: "ReleaseWebhookPayload
   | "stageId"
   | "id"
   | "pipelineId"
+  | "creatorId"
   | "url"
   | "commitSha"
   | "targetDate"
@@ -32616,6 +32868,27 @@ type AiConversationBaseToolCall_AiConversationInvokeMcpToolToolCall_Fragment = {
     >;
   };
 
+type AiConversationBaseToolCall_AiConversationNavigateToPageToolCall_Fragment = {
+  __typename: "AiConversationNavigateToPageToolCall";
+} & Pick<AiConversationNavigateToPageToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationNavigateToPageToolCallArgs" } & Pick<
+        AiConversationNavigateToPageToolCallArgs,
+        "entityType" | "identifier"
+      >
+    >;
+    result?: Maybe<
+      { __typename: "AiConversationNavigateToPageToolCallResult" } & Pick<
+        AiConversationNavigateToPageToolCallResult,
+        "newTab" | "url"
+      >
+    >;
+  };
+
 type AiConversationBaseToolCall_AiConversationQueryActivityToolCall_Fragment = {
   __typename: "AiConversationQueryActivityToolCall";
 } & Pick<AiConversationQueryActivityToolCall, "rawArgs" | "name" | "rawResult"> & {
@@ -32864,6 +33137,7 @@ export type AiConversationBaseToolCallFragment =
   | AiConversationBaseToolCall_AiConversationGetPullRequestFileToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationGetSlackConversationHistoryToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationInvokeMcpToolToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationNavigateToPageToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationQueryActivityToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationQueryUpdatesToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationQueryViewToolCall_Fragment
@@ -33156,6 +33430,35 @@ export type AiConversationInvokeMcpToolToolCallArgsServerFragment = {
 export type AiConversationInvokeMcpToolToolCallArgsToolFragment = {
   __typename: "AiConversationInvokeMcpToolToolCallArgsTool";
 } & Pick<AiConversationInvokeMcpToolToolCallArgsTool, "name" | "title">;
+
+export type AiConversationNavigateToPageToolCallFragment = {
+  __typename: "AiConversationNavigateToPageToolCall";
+} & Pick<AiConversationNavigateToPageToolCall, "rawArgs" | "name" | "rawResult"> & {
+    args?: Maybe<
+      { __typename: "AiConversationNavigateToPageToolCallArgs" } & Pick<
+        AiConversationNavigateToPageToolCallArgs,
+        "entityType" | "identifier"
+      >
+    >;
+    result?: Maybe<
+      { __typename: "AiConversationNavigateToPageToolCallResult" } & Pick<
+        AiConversationNavigateToPageToolCallResult,
+        "newTab" | "url"
+      >
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationNavigateToPageToolCallArgsFragment = {
+  __typename: "AiConversationNavigateToPageToolCallArgs";
+} & Pick<AiConversationNavigateToPageToolCallArgs, "entityType" | "identifier">;
+
+export type AiConversationNavigateToPageToolCallResultFragment = {
+  __typename: "AiConversationNavigateToPageToolCallResult";
+} & Pick<AiConversationNavigateToPageToolCallResult, "newTab" | "url">;
 
 export type AiConversationQueryActivityToolCallFragment = { __typename: "AiConversationQueryActivityToolCall" } & Pick<
   AiConversationQueryActivityToolCall,
@@ -35547,6 +35850,7 @@ export type IssueBatchPayloadFragment = { __typename: "IssueBatchPayload" } & Pi
                   | "displayName"
                   | "email"
                   | "name"
+                  | "title"
                   | "url"
                   | "active"
                   | "guest"
@@ -35692,6 +35996,7 @@ export type IssueConnectionFragment = { __typename: "IssueConnection" } & {
                 | "displayName"
                 | "email"
                 | "name"
+                | "title"
                 | "url"
                 | "active"
                 | "guest"
@@ -35842,6 +36147,7 @@ export type IssueHistoryConnectionFragment = { __typename: "IssueHistoryConnecti
               | "displayName"
               | "email"
               | "name"
+              | "title"
               | "url"
               | "active"
               | "guest"
@@ -35881,6 +36187,7 @@ export type IssueHistoryConnectionFragment = { __typename: "IssueHistoryConnecti
               | "displayName"
               | "email"
               | "name"
+              | "title"
               | "url"
               | "active"
               | "guest"
@@ -36010,6 +36317,7 @@ export type IssueHistoryConnectionFragment = { __typename: "IssueHistoryConnecti
               | "displayName"
               | "email"
               | "name"
+              | "title"
               | "url"
               | "active"
               | "guest"
@@ -36232,6 +36540,7 @@ export type IssueSearchPayloadFragment = { __typename: "IssueSearchPayload" } & 
                   | "displayName"
                   | "email"
                   | "name"
+                  | "title"
                   | "url"
                   | "active"
                   | "guest"
@@ -36380,6 +36689,7 @@ export type IssueSearchResultFragment = { __typename: "IssueSearchResult" } & Pi
             | "displayName"
             | "email"
             | "name"
+            | "title"
             | "url"
             | "active"
             | "guest"
@@ -36464,6 +36774,7 @@ export type IssueSharedAccessFragment = { __typename: "IssueSharedAccess" } & Pi
         | "displayName"
         | "email"
         | "name"
+        | "title"
         | "url"
         | "active"
         | "guest"
@@ -36775,6 +37086,8 @@ type Node_Reaction_Fragment = { __typename: "Reaction" } & Pick<Reaction, "id">;
 
 type Node_Release_Fragment = { __typename: "Release" } & Pick<Release, "id">;
 
+type Node_ReleaseHistory_Fragment = { __typename: "ReleaseHistory" } & Pick<ReleaseHistory, "id">;
+
 type Node_ReleasePipeline_Fragment = { __typename: "ReleasePipeline" } & Pick<ReleasePipeline, "id">;
 
 type Node_ReleaseStage_Fragment = { __typename: "ReleaseStage" } & Pick<ReleaseStage, "id">;
@@ -36911,6 +37224,7 @@ export type NodeFragment =
   | Node_PushSubscription_Fragment
   | Node_Reaction_Fragment
   | Node_Release_Fragment
+  | Node_ReleaseHistory_Fragment
   | Node_ReleasePipeline_Fragment
   | Node_ReleaseStage_Fragment
   | Node_Roadmap_Fragment
@@ -41655,6 +41969,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "displayName"
             | "email"
             | "name"
+            | "title"
             | "url"
             | "active"
             | "guest"
@@ -41694,6 +42009,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "displayName"
             | "email"
             | "name"
+            | "title"
             | "url"
             | "active"
             | "guest"
@@ -41823,6 +42139,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "displayName"
             | "email"
             | "name"
+            | "title"
             | "url"
             | "active"
             | "guest"
@@ -41914,6 +42231,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "displayName"
             | "email"
             | "name"
+            | "title"
             | "url"
             | "active"
             | "guest"
@@ -41953,6 +42271,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "displayName"
             | "email"
             | "name"
+            | "title"
             | "url"
             | "active"
             | "guest"
@@ -42082,6 +42401,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "displayName"
             | "email"
             | "name"
+            | "title"
             | "url"
             | "active"
             | "guest"
@@ -42349,6 +42669,7 @@ export type UserConnectionFragment = { __typename: "UserConnection" } & {
       | "displayName"
       | "email"
       | "name"
+      | "title"
       | "url"
       | "active"
       | "guest"
@@ -43357,6 +43678,7 @@ export type AttachmentIssueQuery = { __typename?: "Query" } & {
               | "displayName"
               | "email"
               | "name"
+              | "title"
               | "url"
               | "active"
               | "guest"
@@ -43570,6 +43892,7 @@ export type AttachmentIssue_ChildrenQuery = { __typename?: "Query" } & {
                     | "displayName"
                     | "email"
                     | "name"
+                    | "title"
                     | "url"
                     | "active"
                     | "guest"
@@ -43999,6 +44322,7 @@ export type AttachmentIssue_HistoryQuery = { __typename?: "Query" } & {
                   | "displayName"
                   | "email"
                   | "name"
+                  | "title"
                   | "url"
                   | "active"
                   | "guest"
@@ -44038,6 +44362,7 @@ export type AttachmentIssue_HistoryQuery = { __typename?: "Query" } & {
                   | "displayName"
                   | "email"
                   | "name"
+                  | "title"
                   | "url"
                   | "active"
                   | "guest"
@@ -44167,6 +44492,7 @@ export type AttachmentIssue_HistoryQuery = { __typename?: "Query" } & {
                   | "displayName"
                   | "email"
                   | "name"
+                  | "title"
                   | "url"
                   | "active"
                   | "guest"
@@ -44378,6 +44704,7 @@ export type AttachmentIssue_SharedAccessQuery = { __typename?: "Query" } & {
             | "displayName"
             | "email"
             | "name"
+            | "title"
             | "url"
             | "active"
             | "guest"
@@ -44458,6 +44785,7 @@ export type AttachmentIssue_SubscribersQuery = { __typename?: "Query" } & {
           | "displayName"
           | "email"
           | "name"
+          | "title"
           | "url"
           | "active"
           | "guest"
@@ -45095,6 +45423,7 @@ export type Comment_CreatedIssuesQuery = { __typename?: "Query" } & {
                     | "displayName"
                     | "email"
                     | "name"
+                    | "title"
                     | "url"
                     | "active"
                     | "guest"
@@ -46249,6 +46578,7 @@ export type CustomView_IssuesQuery = { __typename?: "Query" } & {
                     | "displayName"
                     | "email"
                     | "name"
+                    | "title"
                     | "url"
                     | "active"
                     | "guest"
@@ -48749,6 +49079,7 @@ export type Cycle_IssuesQuery = { __typename?: "Query" } & {
                     | "displayName"
                     | "email"
                     | "name"
+                    | "title"
                     | "url"
                     | "active"
                     | "guest"
@@ -48913,6 +49244,7 @@ export type Cycle_UncompletedIssuesUponCloseQuery = { __typename?: "Query" } & {
                     | "displayName"
                     | "email"
                     | "name"
+                    | "title"
                     | "url"
                     | "active"
                     | "guest"
@@ -50631,6 +50963,7 @@ export type IssueQuery = { __typename?: "Query" } & {
               | "displayName"
               | "email"
               | "name"
+              | "title"
               | "url"
               | "active"
               | "guest"
@@ -50844,6 +51177,7 @@ export type Issue_ChildrenQuery = { __typename?: "Query" } & {
                     | "displayName"
                     | "email"
                     | "name"
+                    | "title"
                     | "url"
                     | "active"
                     | "guest"
@@ -51273,6 +51607,7 @@ export type Issue_HistoryQuery = { __typename?: "Query" } & {
                   | "displayName"
                   | "email"
                   | "name"
+                  | "title"
                   | "url"
                   | "active"
                   | "guest"
@@ -51312,6 +51647,7 @@ export type Issue_HistoryQuery = { __typename?: "Query" } & {
                   | "displayName"
                   | "email"
                   | "name"
+                  | "title"
                   | "url"
                   | "active"
                   | "guest"
@@ -51441,6 +51777,7 @@ export type Issue_HistoryQuery = { __typename?: "Query" } & {
                   | "displayName"
                   | "email"
                   | "name"
+                  | "title"
                   | "url"
                   | "active"
                   | "guest"
@@ -51652,6 +51989,7 @@ export type Issue_SharedAccessQuery = { __typename?: "Query" } & {
             | "displayName"
             | "email"
             | "name"
+            | "title"
             | "url"
             | "active"
             | "guest"
@@ -51732,6 +52070,7 @@ export type Issue_SubscribersQuery = { __typename?: "Query" } & {
           | "displayName"
           | "email"
           | "name"
+          | "title"
           | "url"
           | "active"
           | "guest"
@@ -51848,6 +52187,7 @@ export type IssueFigmaFileKeySearchQuery = { __typename?: "Query" } & {
                   | "displayName"
                   | "email"
                   | "name"
+                  | "title"
                   | "url"
                   | "active"
                   | "guest"
@@ -52118,6 +52458,7 @@ export type IssueLabel_IssuesQuery = { __typename?: "Query" } & {
                     | "displayName"
                     | "email"
                     | "name"
+                    | "title"
                     | "url"
                     | "active"
                     | "guest"
@@ -52376,6 +52717,7 @@ export type IssueSearchQuery = { __typename?: "Query" } & {
                   | "displayName"
                   | "email"
                   | "name"
+                  | "title"
                   | "url"
                   | "active"
                   | "guest"
@@ -52541,6 +52883,7 @@ export type IssueVcsBranchSearchQuery = { __typename?: "Query" } & {
                 | "displayName"
                 | "email"
                 | "name"
+                | "title"
                 | "url"
                 | "active"
                 | "guest"
@@ -52766,6 +53109,7 @@ export type IssueVcsBranchSearch_ChildrenQuery = { __typename?: "Query" } & {
                       | "displayName"
                       | "email"
                       | "name"
+                      | "title"
                       | "url"
                       | "active"
                       | "guest"
@@ -53211,6 +53555,7 @@ export type IssueVcsBranchSearch_HistoryQuery = { __typename?: "Query" } & {
                     | "displayName"
                     | "email"
                     | "name"
+                    | "title"
                     | "url"
                     | "active"
                     | "guest"
@@ -53250,6 +53595,7 @@ export type IssueVcsBranchSearch_HistoryQuery = { __typename?: "Query" } & {
                     | "displayName"
                     | "email"
                     | "name"
+                    | "title"
                     | "url"
                     | "active"
                     | "guest"
@@ -53379,6 +53725,7 @@ export type IssueVcsBranchSearch_HistoryQuery = { __typename?: "Query" } & {
                     | "displayName"
                     | "email"
                     | "name"
+                    | "title"
                     | "url"
                     | "active"
                     | "guest"
@@ -53600,6 +53947,7 @@ export type IssueVcsBranchSearch_SharedAccessQuery = { __typename?: "Query" } & 
               | "displayName"
               | "email"
               | "name"
+              | "title"
               | "url"
               | "active"
               | "guest"
@@ -53684,6 +54032,7 @@ export type IssueVcsBranchSearch_SubscribersQuery = { __typename?: "Query" } & {
             | "displayName"
             | "email"
             | "name"
+            | "title"
             | "url"
             | "active"
             | "guest"
@@ -53802,6 +54151,7 @@ export type IssuesQuery = { __typename?: "Query" } & {
                   | "displayName"
                   | "email"
                   | "name"
+                  | "title"
                   | "url"
                   | "active"
                   | "guest"
@@ -55420,6 +55770,7 @@ export type Organization_UsersQuery = { __typename?: "Query" } & {
           | "displayName"
           | "email"
           | "name"
+          | "title"
           | "url"
           | "active"
           | "guest"
@@ -56195,6 +56546,7 @@ export type Project_IssuesQuery = { __typename?: "Query" } & {
                     | "displayName"
                     | "email"
                     | "name"
+                    | "title"
                     | "url"
                     | "active"
                     | "guest"
@@ -56341,6 +56693,7 @@ export type Project_MembersQuery = { __typename?: "Query" } & {
           | "displayName"
           | "email"
           | "name"
+          | "title"
           | "url"
           | "active"
           | "guest"
@@ -57090,6 +57443,7 @@ export type ProjectMilestone_IssuesQuery = { __typename?: "Query" } & {
                     | "displayName"
                     | "email"
                     | "name"
+                    | "title"
                     | "url"
                     | "active"
                     | "guest"
@@ -58069,6 +58423,7 @@ export type SearchIssuesQuery = { __typename?: "Query" } & {
                     | "displayName"
                     | "email"
                     | "name"
+                    | "title"
                     | "url"
                     | "active"
                     | "guest"
@@ -58601,6 +58956,7 @@ export type Team_IssuesQuery = { __typename?: "Query" } & {
                     | "displayName"
                     | "email"
                     | "name"
+                    | "title"
                     | "url"
                     | "active"
                     | "guest"
@@ -58749,6 +59105,7 @@ export type Team_MembersQuery = { __typename?: "Query" } & {
           | "displayName"
           | "email"
           | "name"
+          | "title"
           | "url"
           | "active"
           | "guest"
@@ -59388,6 +59745,7 @@ export type UserQuery = { __typename?: "Query" } & {
     | "displayName"
     | "email"
     | "name"
+    | "title"
     | "url"
     | "active"
     | "guest"
@@ -59499,6 +59857,7 @@ export type User_AssignedIssuesQuery = { __typename?: "Query" } & {
                     | "displayName"
                     | "email"
                     | "name"
+                    | "title"
                     | "url"
                     | "active"
                     | "guest"
@@ -59663,6 +60022,7 @@ export type User_CreatedIssuesQuery = { __typename?: "Query" } & {
                     | "displayName"
                     | "email"
                     | "name"
+                    | "title"
                     | "url"
                     | "active"
                     | "guest"
@@ -59827,6 +60187,7 @@ export type User_DelegatedIssuesQuery = { __typename?: "Query" } & {
                     | "displayName"
                     | "email"
                     | "name"
+                    | "title"
                     | "url"
                     | "active"
                     | "guest"
@@ -60944,6 +61305,7 @@ export type UsersQuery = { __typename?: "Query" } & {
         | "displayName"
         | "email"
         | "name"
+        | "title"
         | "url"
         | "active"
         | "guest"
@@ -61001,6 +61363,7 @@ export type ViewerQuery = { __typename?: "Query" } & {
     | "displayName"
     | "email"
     | "name"
+    | "title"
     | "url"
     | "active"
     | "guest"
@@ -61111,6 +61474,7 @@ export type Viewer_AssignedIssuesQuery = { __typename?: "Query" } & {
                     | "displayName"
                     | "email"
                     | "name"
+                    | "title"
                     | "url"
                     | "active"
                     | "guest"
@@ -61274,6 +61638,7 @@ export type Viewer_CreatedIssuesQuery = { __typename?: "Query" } & {
                     | "displayName"
                     | "email"
                     | "name"
+                    | "title"
                     | "url"
                     | "active"
                     | "guest"
@@ -61437,6 +61802,7 @@ export type Viewer_DelegatedIssuesQuery = { __typename?: "Query" } & {
                     | "displayName"
                     | "email"
                     | "name"
+                    | "title"
                     | "url"
                     | "active"
                     | "guest"
@@ -61830,6 +62196,7 @@ export type WorkflowState_IssuesQuery = { __typename?: "Query" } & {
                     | "displayName"
                     | "email"
                     | "name"
+                    | "title"
                     | "url"
                     | "active"
                     | "guest"
@@ -63997,6 +64364,7 @@ export type CreateIssueBatchMutation = { __typename?: "Mutation" } & {
                     | "displayName"
                     | "email"
                     | "name"
+                    | "title"
                     | "url"
                     | "active"
                     | "guest"
@@ -64149,6 +64517,7 @@ export type UpdateIssueBatchMutation = { __typename?: "Mutation" } & {
                     | "displayName"
                     | "email"
                     | "name"
+                    | "title"
                     | "url"
                     | "active"
                     | "guest"
@@ -70881,6 +71250,63 @@ fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
 }`,
   { fragmentName: "AiConversationInvokeMcpToolToolCall" }
 ) as unknown as TypedDocumentString<AiConversationInvokeMcpToolToolCallFragment, unknown>;
+export const AiConversationNavigateToPageToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationNavigateToPageToolCallArgs on AiConversationNavigateToPageToolCallArgs {
+  __typename
+  entityType
+  identifier
+}
+    `,
+  { fragmentName: "AiConversationNavigateToPageToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationNavigateToPageToolCallArgsFragment, unknown>;
+export const AiConversationNavigateToPageToolCallResultFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationNavigateToPageToolCallResult on AiConversationNavigateToPageToolCallResult {
+  __typename
+  newTab
+  url
+}
+    `,
+  { fragmentName: "AiConversationNavigateToPageToolCallResult" }
+) as unknown as TypedDocumentString<AiConversationNavigateToPageToolCallResultFragment, unknown>;
+export const AiConversationNavigateToPageToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationNavigateToPageToolCall on AiConversationNavigateToPageToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationNavigateToPageToolCallArgs
+  }
+  name
+  rawResult
+  result {
+    ...AiConversationNavigateToPageToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationNavigateToPageToolCallArgs on AiConversationNavigateToPageToolCallArgs {
+  __typename
+  entityType
+  identifier
+}
+fragment AiConversationNavigateToPageToolCallResult on AiConversationNavigateToPageToolCallResult {
+  __typename
+  newTab
+  url
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationNavigateToPageToolCall" }
+) as unknown as TypedDocumentString<AiConversationNavigateToPageToolCallFragment, unknown>;
 export const AiConversationQueryActivityToolCallArgsFragmentDoc = new TypedDocumentString(
   `
     fragment AiConversationQueryActivityToolCallArgs on AiConversationQueryActivityToolCallArgs {
@@ -71538,6 +71964,9 @@ export const AiConversationToolCallPartFragmentDoc = new TypedDocumentString(
     ... on AiConversationInvokeMcpToolToolCall {
       ...AiConversationInvokeMcpToolToolCall
     }
+    ... on AiConversationNavigateToPageToolCall {
+      ...AiConversationNavigateToPageToolCall
+    }
     ... on AiConversationQueryActivityToolCall {
       ...AiConversationQueryActivityToolCall
     }
@@ -71726,6 +72155,31 @@ fragment AiConversationInvokeMcpToolToolCallArgsTool on AiConversationInvokeMcpT
   __typename
   name
   title
+}
+fragment AiConversationNavigateToPageToolCall on AiConversationNavigateToPageToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationNavigateToPageToolCallArgs
+  }
+  name
+  rawResult
+  result {
+    ...AiConversationNavigateToPageToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationNavigateToPageToolCallArgs on AiConversationNavigateToPageToolCallArgs {
+  __typename
+  entityType
+  identifier
+}
+fragment AiConversationNavigateToPageToolCallResult on AiConversationNavigateToPageToolCallResult {
+  __typename
+  newTab
+  url
 }
 fragment AiConversationQueryActivityToolCall on AiConversationQueryActivityToolCall {
   __typename
@@ -72250,6 +72704,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     ... on AiConversationInvokeMcpToolToolCall {
       ...AiConversationInvokeMcpToolToolCall
     }
+    ... on AiConversationNavigateToPageToolCall {
+      ...AiConversationNavigateToPageToolCall
+    }
     ... on AiConversationQueryActivityToolCall {
       ...AiConversationQueryActivityToolCall
     }
@@ -72495,6 +72952,31 @@ fragment AiConversationInvokeMcpToolToolCallArgsTool on AiConversationInvokeMcpT
   __typename
   name
   title
+}
+fragment AiConversationNavigateToPageToolCall on AiConversationNavigateToPageToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationNavigateToPageToolCallArgs
+  }
+  name
+  rawResult
+  result {
+    ...AiConversationNavigateToPageToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationNavigateToPageToolCallArgs on AiConversationNavigateToPageToolCallArgs {
+  __typename
+  entityType
+  identifier
+}
+fragment AiConversationNavigateToPageToolCallResult on AiConversationNavigateToPageToolCallResult {
+  __typename
+  newTab
+  url
 }
 fragment AiConversationQueryActivityToolCall on AiConversationQueryActivityToolCall {
   __typename
@@ -77304,6 +77786,7 @@ export const ReleaseWebhookPayloadFragmentDoc = new TypedDocumentString(
   stageId
   id
   pipelineId
+  creatorId
   url
   commitSha
   stage {
@@ -79694,6 +80177,9 @@ export const AiConversationBaseToolCallFragmentDoc = new TypedDocumentString(
   ... on AiConversationInvokeMcpToolToolCall {
     ...AiConversationInvokeMcpToolToolCall
   }
+  ... on AiConversationNavigateToPageToolCall {
+    ...AiConversationNavigateToPageToolCall
+  }
   ... on AiConversationQueryActivityToolCall {
     ...AiConversationQueryActivityToolCall
   }
@@ -79871,6 +80357,31 @@ fragment AiConversationInvokeMcpToolToolCallArgsTool on AiConversationInvokeMcpT
   __typename
   name
   title
+}
+fragment AiConversationNavigateToPageToolCall on AiConversationNavigateToPageToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationNavigateToPageToolCallArgs
+  }
+  name
+  rawResult
+  result {
+    ...AiConversationNavigateToPageToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationNavigateToPageToolCallArgs on AiConversationNavigateToPageToolCallArgs {
+  __typename
+  entityType
+  identifier
+}
+fragment AiConversationNavigateToPageToolCallResult on AiConversationNavigateToPageToolCallResult {
+  __typename
+  newTab
+  url
 }
 fragment AiConversationQueryActivityToolCall on AiConversationQueryActivityToolCall {
   __typename
@@ -84807,6 +85318,7 @@ export const UserFragmentDoc = new TypedDocumentString(
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -84857,6 +85369,7 @@ export const IssueSharedAccessFragmentDoc = new TypedDocumentString(
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -85038,6 +85551,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -85165,6 +85679,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -85400,6 +85915,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -85784,6 +86300,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -86025,6 +86542,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -86482,6 +87000,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -86614,6 +87133,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -91254,6 +91774,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -92236,6 +92757,7 @@ export const UserConnectionFragmentDoc = new TypedDocumentString(
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -93351,6 +93873,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -93665,6 +94188,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -94465,6 +94989,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -94808,6 +95333,7 @@ export const AttachmentIssue_SharedAccessDocument = new TypedDocumentString(`
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -94904,6 +95430,7 @@ export const AttachmentIssue_SubscribersDocument = new TypedDocumentString(`
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -95715,6 +96242,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -96727,6 +97255,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -99151,6 +99680,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -99405,6 +99935,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -102138,6 +102669,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -102452,6 +102984,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -103249,6 +103782,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -103589,6 +104123,7 @@ export const Issue_SharedAccessDocument = new TypedDocumentString(`
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -103685,6 +104220,7 @@ export const Issue_SubscribersDocument = new TypedDocumentString(`
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -103785,6 +104321,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -104181,6 +104718,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -104587,6 +105125,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -104845,6 +105384,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -105162,6 +105702,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -105968,6 +106509,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -106314,6 +106856,7 @@ export const IssueVcsBranchSearch_SharedAccessDocument = new TypedDocumentString
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -106416,6 +106959,7 @@ export const IssueVcsBranchSearch_SubscribersDocument = new TypedDocumentString(
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -106520,6 +107064,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -108277,6 +108822,7 @@ export const Organization_UsersDocument = new TypedDocumentString(`
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -109405,6 +109951,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -109678,6 +110225,7 @@ export const Project_MembersDocument = new TypedDocumentString(`
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -110768,6 +111316,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -112310,6 +112859,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -113114,6 +113664,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -113393,6 +113944,7 @@ export const Team_MembersDocument = new TypedDocumentString(`
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -114327,6 +114879,7 @@ export const UserDocument = new TypedDocumentString(`
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -114413,6 +114966,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -114667,6 +115221,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -114921,6 +115476,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -116335,6 +116891,7 @@ export const UsersDocument = new TypedDocumentString(`
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -116405,6 +116962,7 @@ export const ViewerDocument = new TypedDocumentString(`
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -116491,6 +117049,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -116745,6 +117304,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -116999,6 +117559,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -117596,6 +118157,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -120431,6 +120993,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
@@ -120667,6 +121230,7 @@ fragment User on User {
   displayName
   email
   name
+  title
   url
   active
   guest
