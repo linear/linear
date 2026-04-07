@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import { createHash } from "crypto";
 import { LinearClient } from "@linear/sdk";
 import chalk from "chalk";
 import { Presets, SingleBar } from "cli-progress";
@@ -7,7 +8,7 @@ import inquirer from "inquirer";
 import uniq from "lodash/uniq.js";
 import ora from "ora";
 import { handleLabels } from "./helpers/labelManager.ts";
-import type { Comment, Importer, ImportResult } from "./types.ts";
+import type { Comment, Importer, ImportResult, Issue } from "./types.ts";
 import { replaceImagesInMarkdown } from "./utils/replaceImages.ts";
 
 type Id = string;
@@ -282,12 +283,27 @@ export const importIssues = async (
   }
 
   spinner.stop();
+  spinner = ora("Checking for previously imported issues").start();
+  const existingHashes = await fetchExistingImportHashes(client);
+  spinner.stop();
+
   const issuesProgressBar = new SingleBar({}, Presets.shades_classic);
   issuesProgressBar.start(importData.issues.length, 0);
   let issueCursor = 0;
+  let skippedCount = 0;
 
   // Create issues
   for (const issue of importData.issues) {
+    const issueHash = computeIssueHash(issue);
+
+    // Skip issues that have already been imported
+    if (existingHashes.has(issueHash)) {
+      skippedCount++;
+      issueCursor++;
+      issuesProgressBar.update(issueCursor);
+      continue;
+    }
+
     const issueDescription = issue.description
       ? await replaceImagesInMarkdown(client, issue.description, importData.resourceURLSuffix)
       : undefined;
@@ -355,8 +371,18 @@ export const importIssues = async (
         estimate: issue.estimate,
       });
 
+      const createdIssueData = await createdIssue.issue;
+      if (createdIssueData?.id) {
+        await client.createAttachment({
+          issueId: createdIssueData.id,
+          title: "Import Hash",
+          url: `${IMPORT_HASH_URL_PREFIX}${issueHash}`,
+        });
+        existingHashes.add(issueHash);
+      }
+
       if (issue.archived) {
-        await (await createdIssue.issue)?.archive();
+        await createdIssueData?.archive();
       }
 
       issueCursor++;
@@ -369,7 +395,15 @@ export const importIssues = async (
 
   issuesProgressBar.stop();
 
-  console.info(chalk.green(`${importer.name} issues imported to your team: https://linear.app/team/${teamKey}/all`));
+  const importedCount = importData.issues.length - skippedCount;
+  if (skippedCount > 0) {
+    console.info(chalk.yellow(`Skipped ${skippedCount} already imported issue(s).`));
+  }
+  console.info(
+    chalk.green(
+      `${importedCount} ${importer.name} issue(s) imported to your team: https://linear.app/team/${teamKey}/all`
+    )
+  );
 };
 
 // Build comments into issue description
@@ -388,6 +422,29 @@ const buildComments = async (
     newComments.push(`**${user.name}**${" " + date}\n\n${body}\n`);
   }
   return `${description}\n\n---\n\n${newComments.join("\n\n")}`;
+};
+
+const IMPORT_HASH_URL_PREFIX = "import-hash://";
+
+/** Compute a deterministic SHA-256 hash from issue fields used for deduplication. */
+const computeIssueHash = (issue: Issue): string => {
+  const content = `${issue.title}\n${issue.description ?? ""}\n${issue.sourceId ?? ""}`;
+  return createHash("sha256").update(content).digest("hex");
+};
+
+/** Fetch the set of import hashes already stored as attachments. */
+const fetchExistingImportHashes = async (client: LinearClient): Promise<Set<string>> => {
+  const hashes = new Set<string>();
+  const attachments = await client.paginate(client.attachments, {
+    filter: { url: { startsWith: IMPORT_HASH_URL_PREFIX } },
+  });
+  for (const attachment of attachments) {
+    const hash = attachment.url.slice(IMPORT_HASH_URL_PREFIX.length);
+    if (hash) {
+      hashes.add(hash);
+    }
+  }
+  return hashes;
 };
 
 const createIssueWithRetries = async (
