@@ -6,6 +6,8 @@ export interface Issue {
   title: string;
   /** Description in markdown */
   description?: string;
+  /** Unique identifier from the source system (used for deduplication) */
+  sourceId?: string;
   /** Status */
   status?: string;
   /** Assigned user */

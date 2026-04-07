@@ -2,6 +2,7 @@
 import { LinearClient } from "@linear/sdk";
 import chalk from "chalk";
 import { Presets, SingleBar } from "cli-progress";
+import { createHash } from "crypto";
 import { format } from "date-fns";
 import inquirer from "inquirer";
 import uniq from "lodash/uniq.js";
@@ -33,6 +34,19 @@ const defaultStateColors: Record<IssueStatus, string> = {
   [IssueStatus.Backlog]: "#bec2c8",
   [IssueStatus.Started]: "#f2c94c",
   [IssueStatus.Completed]: "#5e6ad2",
+};
+
+const IMPORT_HASH_URL_PREFIX = "linear-import://";
+
+/** Compute a deterministic hash for an issue based on its title, description, and sourceId. */
+const computeImportHash = (title: string, description?: string, sourceId?: string): string => {
+  const hash = createHash("sha256");
+  hash.update(title);
+  hash.update("\0");
+  hash.update(description ?? "");
+  hash.update("\0");
+  hash.update(sourceId ?? "");
+  return hash.digest("hex");
 };
 
 interface NonInteractiveFlags {
@@ -282,12 +296,48 @@ export const importIssues = async (
   }
 
   spinner.stop();
+
+  // Compute import hashes for deduplication
+  spinner = ora("Checking for previously imported issues").start();
+
+  const issueHashes = importData.issues.map(issue => computeImportHash(issue.title, issue.description, issue.sourceId));
+  const hashUrls = issueHashes.map(hash => `${IMPORT_HASH_URL_PREFIX}${hash}`);
+
+  // Fetch existing import-hash attachments in batches (the `in` filter has practical limits)
+  const existingHashes = new Set<string>();
+  const BATCH_SIZE = 50;
+  for (let i = 0; i < hashUrls.length; i += BATCH_SIZE) {
+    const batch = hashUrls.slice(i, i + BATCH_SIZE);
+    const attachments = await client.paginate(client.attachments, {
+      filter: { url: { in: batch } },
+    });
+    for (const attachment of attachments) {
+      existingHashes.add(attachment.url);
+    }
+  }
+
+  const skippedCount = issueHashes.filter(hash => existingHashes.has(`${IMPORT_HASH_URL_PREFIX}${hash}`)).length;
+
+  spinner.stop();
+
+  if (skippedCount > 0) {
+    console.info(chalk.yellow(`Skipping ${skippedCount} already imported issue(s)`));
+  }
+
   const issuesProgressBar = new SingleBar({}, Presets.shades_classic);
   issuesProgressBar.start(importData.issues.length, 0);
   let issueCursor = 0;
 
   // Create issues
-  for (const issue of importData.issues) {
+  for (const [index, issue] of importData.issues.entries()) {
+    const hashUrl = hashUrls[index];
+
+    // Skip issues that have already been imported
+    if (existingHashes.has(hashUrl)) {
+      issueCursor++;
+      issuesProgressBar.update(issueCursor);
+      continue;
+    }
     const issueDescription = issue.description
       ? await replaceImagesInMarkdown(client, issue.description, importData.resourceURLSuffix)
       : undefined;
@@ -355,8 +405,17 @@ export const importIssues = async (
         estimate: issue.estimate,
       });
 
+      const createdIssueData = await createdIssue.issue;
+      if (createdIssueData?.id) {
+        await client.createAttachment({
+          issueId: createdIssueData.id,
+          title: "Import Hash",
+          url: hashUrl,
+        });
+      }
+
       if (issue.archived) {
-        await (await createdIssue.issue)?.archive();
+        await createdIssueData?.archive();
       }
 
       issueCursor++;
