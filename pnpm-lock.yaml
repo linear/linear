@@ -31,8 +31,8 @@ catalogs:
       specifier: ^4.0.0
       version: 4.0.0
     lodash:
-      specifier: 4.17.23
-      version: 4.17.23
+      specifier: 4.18.1
+      version: 4.18.1
     ts-node:
       specifier: ^10.9.1
       version: 10.9.2
@@ -223,7 +223,7 @@ importers:
         version: 15.10.1
       lodash:
         specifier: 'catalog:'
-        version: 4.17.23
+        version: 4.18.1
     devDependencies:
       tsdown:
         specifier: 'catalog:'
@@ -4002,6 +4002,9 @@ packages:
 
   lodash@4.17.23:
     resolution: {integrity: sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==}
+
+  lodash@4.18.1:
+    resolution: {integrity: sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==}
 
   log-symbols@4.1.0:
     resolution: {integrity: sha512-8XPvpAA8uyhfteu8pIvQxpJZ7SYYdpUivZpGy6sFsBuKRY/7rQGavedeB8aK+Zkyq6upMFVL/9AW6vOYzfRyLg==}
@@ -10415,6 +10418,8 @@ snapshots:
   lodash@3.10.1: {}
 
   lodash@4.17.23: {}
+
+  lodash@4.18.1: {}
 
   log-symbols@4.1.0:
     dependencies:
