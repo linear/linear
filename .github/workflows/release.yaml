@@ -19,19 +19,24 @@ jobs:
       id-token: write # Required for OIDC (https://docs.npmjs.com/trusted-publishers#github-actions-configuration)
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Use node 22
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: "22"
           registry-url: "https://registry.npmjs.org"
 
-      # Ensure npm 11.5.1 or later is installed (https://docs.npmjs.com/trusted-publishers#github-actions-configuration)
+      # Ensure npm >= 11.5.1 for OIDC trusted publishers (https://docs.npmjs.com/trusted-publishers#github-actions-configuration)
+      # Two-step upgrade works around broken npm in Node 22.22.2 (nodejs/node#62425)
       - name: Update npm
-        run: npm install -g npm@latest
+        run: |
+          npm_major=$(npm --version | cut -d. -f1)
+          if [ "$npm_major" -lt 11 ]; then
+            npm install -g npm@10 && npm install -g npm@latest
+          fi
 
       - name: Enable Corepack
         run: corepack enable
