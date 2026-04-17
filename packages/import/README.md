@@ -15,7 +15,7 @@ npm i --location=global @linear/import
 or run directly without installing:
 
 ```
-pnpm dlx linear-import
+pnpm dlx @linear/import
 ```
 
 Run interactive importer:
