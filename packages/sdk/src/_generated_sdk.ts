@@ -178,7 +178,7 @@ function parseJson(value?: any): Record<string, unknown> | undefined {
 }
 
 /**
- * A bot actor is an actor that is not a user, but an application or integration.
+ * A bot actor representing a non-human entity that performed an action, such as an integration (GitHub, Slack, Zendesk), an AI assistant, or an automated workflow. Bot actors are displayed in activity feeds and history to indicate when changes were made by applications rather than users.
  *
  * @param request - function to call the graphql client
  * @param data - L.ActorBotFragment response data
@@ -194,20 +194,21 @@ export class ActorBot extends Request {
     this.userDisplayName = data.userDisplayName ?? undefined;
   }
 
-  /** A url pointing to the avatar representing this bot. */
+  /** A URL pointing to the avatar image representing this bot, typically the integration's logo or icon. */
   public avatarUrl?: string | null;
+  /** A unique identifier for the bot actor. */
   public id?: string | null;
   /** The display name of the bot. */
   public name?: string | null;
-  /** The sub type of the bot. */
+  /** A more specific classification within the bot type, providing additional context about the integration or application variant. */
   public subType?: string | null;
-  /** The type of bot. */
+  /** The source type of the bot, identifying the application or integration (e.g., 'github', 'slack', 'workflow', 'ai'). */
   public type: string;
-  /** The display name of the external user on behalf of which the bot acted. */
+  /** The display name of the external user on behalf of whom the bot acted. Shown when an integration action was triggered by a specific person in the external system. */
   public userDisplayName?: string | null;
 }
 /**
- * An activity within an agent context.
+ * An activity performed by or directed at an AI coding agent during a session. Activities represent the observable steps of an agent's work, including thoughts, actions (tool calls), responses, prompts from users, errors, and elicitation requests. Each activity belongs to an agent session and is associated with the user who initiated it.
  *
  * @param request - function to call the graphql client
  * @param data - L.AgentActivityFragment response data
@@ -252,7 +253,7 @@ export class AgentActivity extends Request {
   public updatedAt: Date;
   /** An optional modifier that provides additional instructions on how the activity should be interpreted. */
   public signal?: L.AgentActivitySignal | null;
-  /** The content of the activity */
+  /** The content of the activity, which varies by type (thought, action, response, prompt, error, or elicitation). */
   public content: L.AgentActivityFragment["content"];
   /** The agent session this activity belongs to. */
   public get agentSession(): LinearFetch<AgentSession> | undefined {
@@ -262,11 +263,11 @@ export class AgentActivity extends Request {
   public get agentSessionId(): string | undefined {
     return this._agentSession?.id;
   }
-  /** The comment this activity is linked to. */
+  /** The source comment this activity is linked to. Null if the activity was not triggered by a comment. */
   public get sourceComment(): LinearFetch<Comment> | undefined {
     return this._sourceComment?.id ? new CommentQuery(this._request).fetch({ id: this._sourceComment?.id }) : undefined;
   }
-  /** The ID of comment this activity is linked to. */
+  /** The ID of source comment this activity is linked to. null if the activity was not triggered by a comment. */
   public get sourceCommentId(): string | undefined {
     return this._sourceComment?.id;
   }
@@ -366,7 +367,7 @@ export class AgentActivityErrorContent extends Request {
   public type: L.AgentActivityType;
 }
 /**
- * AgentActivityPayload model
+ * The result of an agent activity mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.AgentActivityPayloadFragment response data
@@ -492,7 +493,7 @@ export class AgentActivityWebhookPayload {
   public user: UserChildWebhookPayload;
 }
 /**
- * A session for agent activities and state management.
+ * A session representing an AI coding agent's work on an issue or conversation. Agent sessions track the lifecycle of an agent's engagement, from creation through active work to completion or dismissal. Each session is associated with an agent user (the bot), optionally a human creator, an issue, and a comment thread where the agent posts updates. Sessions contain activities that record the agent's observable steps and can be linked to pull requests created during the work.
  *
  * @param request - function to call the graphql client
  * @param data - L.AgentSessionFragment response data
@@ -516,6 +517,7 @@ export class AgentSession extends Request {
     this.externalUrls = parseJson(data.externalUrls) ?? {};
     this.id = data.id;
     this.plan = parseJson(data.plan) ?? undefined;
+    this.slugId = data.slugId;
     this.sourceMetadata = parseJson(data.sourceMetadata) ?? undefined;
     this.startedAt = parseDate(data.startedAt) ?? undefined;
     this.summary = data.summary ?? undefined;
@@ -534,13 +536,13 @@ export class AgentSession extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** Serialized JSON representing the contexts this session is related to, for direct chat sessions. */
+  /** The entity contexts this session is related to, such as issues or projects referenced in direct chat sessions. Used to provide contextual awareness to the agent. */
   public context: Record<string, unknown>;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** The time the agent session was dismissed. */
+  /** The time a user dismissed this agent session. When dismissed, the agent is removed as delegate from the associated issue. Null if the session has not been dismissed. */
   public dismissedAt?: Date | null;
-  /** The time the agent session ended. */
+  /** The time the agent session completed. Null if the session is still in progress or was dismissed before completion. */
   public endedAt?: Date | null;
   /** The URL of an external agent-hosted page associated with this session. */
   public externalLink?: string | null;
@@ -548,24 +550,26 @@ export class AgentSession extends Request {
   public externalUrls: Record<string, unknown>;
   /** The unique identifier of the entity. */
   public id: string;
-  /** A dynamically updated list of the agent's execution strategy. */
+  /** A dynamically updated plan describing the agent's execution strategy, including steps to be taken and their current status. Updated as the agent progresses through its work. Null if no plan has been set. */
   public plan?: Record<string, unknown> | null;
+  /** The agent session's unique URL slug. */
+  public slugId: string;
   /** Metadata about the external source that created this agent session. */
   public sourceMetadata?: Record<string, unknown> | null;
-  /** The time the agent session started. */
+  /** The time the agent session transitioned to active status and began work. Null if the session has not yet started. */
   public startedAt?: Date | null;
-  /** A summary of the activities in this session. */
+  /** A human-readable summary of the work performed in this session. Null if no summary has been generated yet. */
   public summary?: string | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** Agent session URL. */
+  /** The URL to the agent session page in the Linear app. Null for direct chat sessions without an associated issue. */
   public url?: string | null;
   /** External links associated with this session. */
   public externalLinks: AgentSessionExternalLink[];
-  /** The current status of the agent session. */
+  /** The current status of the agent session, such as pending, active, awaiting input, complete, error, or stale. */
   public status: L.AgentSessionStatus;
   /** [DEPRECATED] The type of the agent session. */
   public type?: L.AgentSessionType | null;
@@ -593,11 +597,11 @@ export class AgentSession extends Request {
   public get creatorId(): string | undefined {
     return this._creator?.id;
   }
-  /** The user who dismissed the agent session. */
+  /** The user who dismissed the agent session. Automatically set when dismissedAt is updated. Null if the session has not been dismissed. */
   public get dismissedBy(): LinearFetch<User> | undefined {
     return this._dismissedBy?.id ? new UserQuery(this._request).fetch(this._dismissedBy?.id) : undefined;
   }
-  /** The ID of user who dismissed the agent session. */
+  /** The ID of user who dismissed the agent session. automatically set when dismissedat is updated. null if the session has not been dismissed. */
   public get dismissedById(): string | undefined {
     return this._dismissedBy?.id;
   }
@@ -746,7 +750,7 @@ export class AgentSessionPayload extends Request {
   }
 }
 /**
- * Join table between agent sessions and pull requests.
+ * A link between an agent session and a pull request created or associated during that session. This join entity tracks which pull requests were produced by or connected to a coding agent's work session, and handles backfilling links when pull requests are synced after the agent has already recorded the URL.
  *
  * @param request - function to call the graphql client
  * @param data - L.AgentSessionToPullRequestFragment response data
@@ -1302,6 +1306,48 @@ export class AiConversationGetSlackConversationHistoryToolCall extends Request {
   public name: L.AiConversationTool;
 }
 /**
+ * AiConversationHandoffToCodingSessionToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationHandoffToCodingSessionToolCallFragment response data
+ */
+export class AiConversationHandoffToCodingSessionToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationHandoffToCodingSessionToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationHandoffToCodingSessionToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationHandoffToCodingSessionToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationHandoffToCodingSessionToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationHandoffToCodingSessionToolCallArgsFragment response data
+ */
+export class AiConversationHandoffToCodingSessionToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationHandoffToCodingSessionToolCallArgsFragment) {
+    super(request);
+    this.instructions = data.instructions ?? undefined;
+    this.entity = new AiConversationSearchEntitiesToolCallResultEntities(request, data.entity);
+  }
+
+  public instructions?: string | null;
+  public entity: AiConversationSearchEntitiesToolCallResultEntities;
+}
+/**
  * AiConversationInvokeMcpToolToolCall model
  *
  * @param request - function to call the graphql client
@@ -1455,13 +1501,13 @@ export class AiConversationPartMetadata extends Request {
     this.phase = data.phase ?? undefined;
   }
 
-  /** The ended timestamp of the part. */
+  /** The time when the part ended, as an ISO 8601 string. */
   public endedAt?: string | null;
   /** The eval log ID of the part. */
   public evalLogId?: string | null;
   /** AI feedback state for this part. */
   public feedback?: L.Scalars["JSONObject"] | null;
-  /** The started timestamp of the part. */
+  /** The time when the part started, as an ISO 8601 string. */
   public startedAt?: string | null;
   /** The turn ID of the part. */
   public turnId: string;
@@ -2217,7 +2263,7 @@ export class AiConversationWidgetPart extends Request {
   public widget: L.AiConversationWidgetPartFragment["widget"];
 }
 /**
- * AI prompt rules for a team.
+ * Custom rules that guide AI behavior for a specific scope. Rules can be defined at the workspace level, team level, integration level, or user level, and are applied hierarchically (workspace rules first, then parent team rules, then team rules). Rules contain structured content that instructs the AI assistant on how to handle specific types of prompts, such as coding agent guidance or triage intelligence configuration.
  *
  * @param request - function to call the graphql client
  * @param data - L.AiPromptRulesFragment response data
@@ -2332,7 +2378,7 @@ export class AppUserTeamAccessChangedWebhookPayload {
   public webhookTimestamp: number;
 }
 /**
- * Public information of the OAuth application.
+ * Public-facing information about an OAuth application. Contains only the fields that are safe to display to users during the authorization flow, excluding sensitive data like client secrets and internal configuration.
  *
  * @param request - function to call the graphql client
  * @param data - L.ApplicationFragment response data
@@ -2355,7 +2401,7 @@ export class Application extends Request {
   public description?: string | null;
   /** Name of the developer. */
   public developer: string;
-  /** Url of the developer (homepage or docs). */
+  /** URL of the developer's website, homepage, or documentation. */
   public developerUrl: string;
   /** OAuth application's ID. */
   public id: string;
@@ -2442,7 +2488,7 @@ export class AsksChannelConnectPayload extends Request {
   }
 }
 /**
- * Issue attachment (e.g. support ticket, pull request).
+ * An attachment linking external content to an issue. Attachments represent connections to external resources such as GitHub pull requests, Slack messages, Zendesk tickets, Figma files, Sentry issues, Intercom conversations, and plain URLs. Each attachment has a title and subtitle displayed in the Linear UI, a URL serving as both the link destination and unique identifier per issue, and optional metadata specific to the source integration.
  *
  * @param request - function to call the graphql client
  * @param data - L.AttachmentFragment response data
@@ -2479,15 +2525,15 @@ export class Attachment extends Request {
   public bodyData?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** Indicates if attachments for the same source application should be grouped in the Linear UI. */
+  /** Whether attachments from the same source application should be visually grouped together in the Linear issue detail view. */
   public groupBySource: boolean;
   /** The unique identifier of the entity. */
   public id: string;
-  /** Custom metadata related to the attachment. */
+  /** Integration-specific metadata for this attachment. The schema varies by source type and may include fields such as pull request status, review counts, commit information, ticket status, or other data from the external system. */
   public metadata: L.Scalars["JSONObject"];
   /** Information about the source which created the attachment. */
   public source?: L.Scalars["JSONObject"] | null;
-  /** An accessor helper to source.type, defines the source type of the attachment. */
+  /** The source type of the attachment, derived from the source metadata. Returns the integration type (e.g., 'github', 'slack', 'zendesk') or 'unknown' if no source is set. */
   public sourceType?: string | null;
   /** Content for the subtitle line in the Linear attachment widget. */
   public subtitle?: string | null;
@@ -2498,7 +2544,7 @@ export class Attachment extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** Location of the attachment which is also used as an identifier. */
+  /** The URL of the external resource this attachment links to. Also serves as a unique identifier for the attachment within an issue; no two attachments on the same issue can share the same URL. */
   public url: string;
   /** The creator of the attachment. */
   public get creator(): LinearFetch<User> | undefined {
@@ -2526,11 +2572,11 @@ export class Attachment extends Request {
   public get issueId(): string | undefined {
     return this._issue?.id;
   }
-  /** The issue this attachment was originally created on. Will be undefined if the attachment hasn't been moved. */
+  /** The issue this attachment was originally created on. Null if the attachment hasn't been moved. */
   public get originalIssue(): LinearFetch<Issue> | undefined {
     return this._originalIssue?.id ? new IssueQuery(this._request).fetch(this._originalIssue?.id) : undefined;
   }
-  /** The ID of issue this attachment was originally created on. will be undefined if the attachment hasn't been moved. */
+  /** The ID of issue this attachment was originally created on. null if the attachment hasn't been moved. */
   public get originalIssueId(): string | undefined {
     return this._originalIssue?.id;
   }
@@ -2570,7 +2616,7 @@ export class AttachmentConnection extends Connection<Attachment> {
   }
 }
 /**
- * AttachmentPayload model
+ * The result of an attachment mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.AttachmentPayloadFragment response data
@@ -2599,7 +2645,7 @@ export class AttachmentPayload extends Request {
   }
 }
 /**
- * AttachmentSourcesPayload model
+ * The result of an attachment sources query.
  *
  * @param request - function to call the graphql client
  * @param data - L.AttachmentSourcesPayloadFragment response data
@@ -2669,7 +2715,7 @@ export class AttachmentWebhookPayload {
   public url: string;
 }
 /**
- * Workspace audit log entry object.
+ * A workspace audit log entry recording a security or compliance-relevant action. Audit entries capture who performed an action, when, from what IP address and country, and include type-specific metadata. The audit log is partitioned by time for performance and is accessible only to workspace administrators. Examples of audited actions include user authentication events, permission changes, data exports, and workspace setting modifications.
  *
  * @param request - function to call the graphql client
  * @param data - L.AuditEntryFragment response data
@@ -2696,18 +2742,19 @@ export class AuditEntry extends Request {
   public actorId?: string | null;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** Country code of request resulting to audit entry. */
+  /** The ISO 3166-1 alpha-2 country code derived from the request IP address. Null if geo-location could not be determined. */
   public countryCode?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** IP from actor when entry was recorded. */
+  /** The IP address of the actor at the time the audited action was performed. Null if the IP was not captured. */
   public ip?: string | null;
   /** Additional metadata related to the audit entry. */
   public metadata?: L.Scalars["JSONObject"] | null;
   /** Additional information related to the request which performed the action. */
   public requestInformation?: L.Scalars["JSONObject"] | null;
+  /** The type of audited action (e.g., user authentication, permission change, data export, setting modification). */
   public type: string;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -2718,7 +2765,7 @@ export class AuditEntry extends Request {
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
-  /** The organization the audit log belongs to. */
+  /** The workspace the audit log belongs to. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
@@ -3009,7 +3056,7 @@ export class AuthUser extends Request {
   public role: L.UserRoleType;
 }
 /**
- * Authentication session information.
+ * Information about an active authentication session, including the device, location, and timestamps for when it was created and last used.
  *
  * @param request - function to call the graphql client
  * @param data - L.AuthenticationSessionResponseFragment response data
@@ -3021,6 +3068,7 @@ export class AuthenticationSessionResponse extends Request {
     this.client = data.client ?? undefined;
     this.countryCodes = data.countryCodes;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.detailedName = data.detailedName;
     this.id = data.id;
     this.ip = data.ip ?? undefined;
     this.isCurrentSession = data.isCurrentSession;
@@ -3046,10 +3094,12 @@ export class AuthenticationSessionResponse extends Request {
   public countryCodes: string[];
   /** The time at which the entity was created. */
   public createdAt: Date;
+  /** Detailed name of the session including version information, derived from the user agent. */
+  public detailedName: string;
   public id: string;
   /** IP address. */
   public ip?: string | null;
-  /** Identifies the session used to make the request. */
+  /** Whether this session is the one used to make the current API request. */
   public isCurrentSession: boolean;
   /** When was the session last seen */
   public lastActiveAt?: Date | null;
@@ -3099,7 +3149,7 @@ export class BaseWebhookPayload {
   public webhookTimestamp: number;
 }
 /**
- * A comment associated with an entity.
+ * A comment associated with an issue, project update, initiative update, document content, post, project, or initiative. Comments support rich text (ProseMirror), emoji reactions, and threaded replies via parentId. Comments can be created by workspace users or by external users through integrations (e.g., Slack, Intercom). Each comment belongs to exactly one parent entity.
  *
  * @param request - function to call the graphql client
  * @param data - L.CommentFragment response data
@@ -3151,31 +3201,31 @@ export class Comment extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** The comment content in markdown format. */
+  /** The comment content in markdown format. This is a derived representation of the canonical bodyData ProseMirror content. */
   public body: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** The ID of the document content that the comment is associated with. */
+  /** The ID of the document content that the comment is associated with. Null if the comment belongs to a different parent entity type. */
   public documentContentId?: string | null;
-  /** The time user edited the comment. */
+  /** The time the comment was last edited by its author. Null if the comment has not been edited since creation. */
   public editedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The ID of the initiative update that the comment is associated with. */
+  /** The ID of the initiative update that the comment is associated with. Null if the comment belongs to a different parent entity type. */
   public initiativeUpdateId?: string | null;
-  /** The ID of the issue that the comment is associated with. */
+  /** The ID of the issue that the comment is associated with. Null if the comment belongs to a different parent entity type. */
   public issueId?: string | null;
-  /** The ID of the parent comment under which the current comment is nested. */
+  /** The ID of the parent comment under which the current comment is nested. Null for top-level comments. */
   public parentId?: string | null;
-  /** The ID of the project update that the comment is associated with. */
+  /** The ID of the project update that the comment is associated with. Null if the comment belongs to a different parent entity type. */
   public projectUpdateId?: string | null;
-  /** The text that this comment references. Only defined for inline comments. */
+  /** The text that this comment references, used for inline comments on documents or issue descriptions. Null for standard comments that do not quote specific text. */
   public quotedText?: string | null;
-  /** Emoji reaction summary, grouped by emoji type. */
+  /** Emoji reaction summary for this comment, grouped by emoji type. Each entry contains the emoji name, count, and the IDs of users who reacted. */
   public reactionData: L.Scalars["JSONObject"];
-  /** The time the resolvingUser resolved the thread. */
+  /** The time when the comment thread was resolved. Null if the thread is unresolved. */
   public resolvedAt?: Date | null;
-  /** The ID of the comment that resolved the thread. */
+  /** The ID of the child comment that resolved this thread. Null if the thread is unresolved. */
   public resolvingCommentId?: string | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -3190,7 +3240,7 @@ export class Comment extends Request {
   public syncedWith?: ExternalEntityInfo[] | null;
   /** The bot that created the comment. */
   public botActor?: ActorBot | null;
-  /** The document content that the comment is associated with. */
+  /** The document content that the comment is associated with. Null if the comment belongs to a different parent entity type. Used for inline comments on documents. */
   public documentContent?: DocumentContent | null;
   /** The external thread that the comment is synced with. */
   public externalThread?: SyncedExternalThread | null;
@@ -3202,51 +3252,51 @@ export class Comment extends Request {
   public get agentSessionId(): string | undefined {
     return this._agentSession?.id;
   }
-  /** The external user who wrote the comment. */
+  /** The external user who wrote the comment, when the comment was created through an integration such as Slack or Intercom. Null for comments created by workspace users. */
   public get externalUser(): LinearFetch<ExternalUser> | undefined {
     return this._externalUser?.id ? new ExternalUserQuery(this._request).fetch(this._externalUser?.id) : undefined;
   }
-  /** The ID of external user who wrote the comment. */
+  /** The ID of external user who wrote the comment, when the comment was created through an integration such as slack or intercom. null for comments created by workspace users. */
   public get externalUserId(): string | undefined {
     return this._externalUser?.id;
   }
-  /** The initiative update that the comment is associated with. */
+  /** The initiative update that the comment is associated with. Null if the comment belongs to a different parent entity type. */
   public get initiativeUpdate(): LinearFetch<InitiativeUpdate> | undefined {
     return this._initiativeUpdate?.id
       ? new InitiativeUpdateQuery(this._request).fetch(this._initiativeUpdate?.id)
       : undefined;
   }
-  /** The issue that the comment is associated with. */
+  /** The issue that the comment is associated with. Null if the comment belongs to a different parent entity type. */
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
-  /** The parent comment under which the current comment is nested. */
+  /** The parent comment under which the current comment is nested. Null for top-level comments that are not replies. */
   public get parent(): LinearFetch<Comment> | undefined {
     return this._parent?.id ? new CommentQuery(this._request).fetch({ id: this._parent?.id }) : undefined;
   }
-  /** The project update that the comment is associated with. */
+  /** The project update that the comment is associated with. Null if the comment belongs to a different parent entity type. */
   public get projectUpdate(): LinearFetch<ProjectUpdate> | undefined {
     return this._projectUpdate?.id ? new ProjectUpdateQuery(this._request).fetch(this._projectUpdate?.id) : undefined;
   }
-  /** The comment that resolved the thread. */
+  /** The child comment that resolved this thread. Only set on top-level (parent) comments. Null if the thread is unresolved. */
   public get resolvingComment(): LinearFetch<Comment> | undefined {
     return this._resolvingComment?.id
       ? new CommentQuery(this._request).fetch({ id: this._resolvingComment?.id })
       : undefined;
   }
-  /** The user that resolved the thread. */
+  /** The user that resolved the comment thread. Null if the thread has not been resolved or if this is not a top-level comment. */
   public get resolvingUser(): LinearFetch<User> | undefined {
     return this._resolvingUser?.id ? new UserQuery(this._request).fetch(this._resolvingUser?.id) : undefined;
   }
-  /** The ID of user that resolved the thread. */
+  /** The ID of user that resolved the comment thread. null if the thread has not been resolved or if this is not a top-level comment. */
   public get resolvingUserId(): string | undefined {
     return this._resolvingUser?.id;
   }
-  /** The user who wrote the comment. */
+  /** The user who wrote the comment. Null for comments created by integrations or bots without a user association. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
-  /** The ID of user who wrote the comment. */
+  /** The ID of user who wrote the comment. null for comments created by integrations or bots without a user association. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
@@ -3324,7 +3374,7 @@ export class CommentConnection extends Connection<Comment> {
   }
 }
 /**
- * CommentPayload model
+ * The result of a comment mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.CommentPayloadFragment response data
@@ -3451,7 +3501,7 @@ export class CommentWebhookPayload {
   public user?: UserChildWebhookPayload | null;
 }
 /**
- * ContactPayload model
+ * Return type for contact mutations.
  *
  * @param request - function to call the graphql client
  * @param data - L.ContactPayloadFragment response data
@@ -3466,7 +3516,7 @@ export class ContactPayload extends Request {
   public success: boolean;
 }
 /**
- * CreateCsvExportReportPayload model
+ * The payload returned by the createCsvExportReport mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.CreateCsvExportReportPayloadFragment response data
@@ -3479,22 +3529,6 @@ export class CreateCsvExportReportPayload extends Request {
 
   /** Whether the operation was successful. */
   public success: boolean;
-}
-/**
- * CreateOrJoinOrganizationResponse model
- *
- * @param request - function to call the graphql client
- * @param data - L.CreateOrJoinOrganizationResponseFragment response data
- */
-export class CreateOrJoinOrganizationResponse extends Request {
-  public constructor(request: LinearRequest, data: L.CreateOrJoinOrganizationResponseFragment) {
-    super(request);
-    this.organization = new AuthOrganization(request, data.organization);
-    this.user = new AuthUser(request, data.user);
-  }
-
-  public organization: AuthOrganization;
-  public user: AuthUser;
 }
 /**
  * Payload for custom webhook resource events.
@@ -3525,7 +3559,7 @@ export class CustomResourceWebhookPayload {
   public webhookTimestamp: number;
 }
 /**
- * A custom view that has been saved by a user.
+ * A custom view built from a saved filter, sort, and grouping configuration. Views can be personal (visible only to the owner) or shared with the entire workspace. They define which issues, projects, initiatives, or feed items are displayed and how they are organized. Views can optionally be scoped to a team, project, or initiative.
  *
  * @param request - function to call the graphql client
  * @param data - L.CustomViewFragment response data
@@ -3571,90 +3605,90 @@ export class CustomView extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** The color of the icon of the custom view. */
+  /** The hex color code of the custom view icon. */
   public color?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The description of the custom view. */
   public description?: string | null;
-  /** The filter applied to feed items in the custom view. */
+  /** The filter applied to feed items in the custom view. When set, this view displays feed items (updates) instead of issues. */
   public feedItemFilterData?: L.Scalars["JSONObject"] | null;
-  /** The filter applied to issues in the custom view. */
+  /** The structured filter applied to issues in the custom view. Used when the view's modelName is "Issue". */
   public filterData: L.Scalars["JSONObject"];
-  /** The filters applied to issues in the custom view. */
+  /** The legacy serialized filters applied to issues in the custom view. */
   public filters: L.Scalars["JSONObject"];
-  /** The icon of the custom view. */
+  /** The icon of the custom view. Can be an emoji or a decorative icon identifier. */
   public icon?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The filter applied to initiatives in the custom view. */
+  /** The filter applied to initiatives in the custom view. When set, this view displays initiatives instead of issues. */
   public initiativeFilterData?: L.Scalars["JSONObject"] | null;
-  /** The model name of the custom view. */
+  /** The entity type this view displays. Determined by which filter is set: "Project" if projectFilterData is set, "Initiative" if initiativeFilterData is set, "FeedItem" if feedItemFilterData is set, or "Issue" by default. */
   public modelName: string;
-  /** The name of the custom view. */
+  /** The name of the custom view, displayed in the sidebar and navigation. */
   public name: string;
-  /** The filter applied to projects in the custom view. */
+  /** The filter applied to projects in the custom view. When set, this view displays projects instead of issues. */
   public projectFilterData?: L.Scalars["JSONObject"] | null;
-  /** Whether the custom view is shared with everyone in the organization. */
+  /** Whether the custom view is shared with everyone in the organization. Shared views appear in the workspace sidebar for all members. Personal (non-shared) views are only visible to their owner. */
   public shared: boolean;
-  /** The custom view's unique URL slug. */
+  /** The custom view's unique URL slug, used to construct human-readable URLs. Automatically generated on creation. */
   public slugId: string;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The organizations default view preferences for this custom view. */
+  /** The workspace-level default view preferences for this custom view, if any have been set. */
   public organizationViewPreferences?: ViewPreferences | null;
-  /** The current users view preferences for this custom view. */
+  /** The current user's personal view preferences for this custom view, if they have set any. */
   public userViewPreferences?: ViewPreferences | null;
-  /** The calculated view preferences values for this custom view. */
+  /** The computed view preferences values for this custom view, merging organization defaults with user overrides and system defaults. Use this for the effective display settings rather than reading raw preferences directly. */
   public viewPreferencesValues?: ViewPreferencesValues | null;
-  /** The user who created the custom view. */
+  /** The user who originally created the custom view. */
   public get creator(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._creator.id);
   }
-  /** The ID of user who created the custom view. */
+  /** The ID of user who originally created the custom view. */
   public get creatorId(): string | undefined {
     return this._creator?.id;
   }
-  /** The organization of the custom view. */
+  /** The workspace of the custom view. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
-  /** The user who owns the custom view. */
+  /** The user who owns the custom view. For personal views, only the owner can see and edit the view. */
   public get owner(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._owner.id);
   }
-  /** The ID of user who owns the custom view. */
+  /** The ID of user who owns the custom view. for personal views, only the owner can see and edit the view. */
   public get ownerId(): string | undefined {
     return this._owner?.id;
   }
-  /** The team associated with the custom view. */
+  /** The team that the custom view is scoped to. Null if the view is workspace-wide or scoped to a project/initiative instead. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
-  /** The ID of team associated with the custom view. */
+  /** The ID of team that the custom view is scoped to. null if the view is workspace-wide or scoped to a project/initiative instead. */
   public get teamId(): string | undefined {
     return this._team?.id;
   }
-  /** The user who last updated the custom view. */
+  /** The user who last updated the custom view. Null if the updater's account has been deleted. */
   public get updatedBy(): LinearFetch<User> | undefined {
     return this._updatedBy?.id ? new UserQuery(this._request).fetch(this._updatedBy?.id) : undefined;
   }
-  /** The ID of user who last updated the custom view. */
+  /** The ID of user who last updated the custom view. null if the updater's account has been deleted. */
   public get updatedById(): string | undefined {
     return this._updatedBy?.id;
   }
-  /** Initiatives associated with the custom view. */
+  /** Initiatives matching the custom view's initiative filter. Returns an empty connection if the view's modelName is not "Initiative". */
   public initiatives(variables?: Omit<L.CustomView_InitiativesQueryVariables, "id">) {
     return new CustomView_InitiativesQuery(this._request, this.id, variables).fetch(variables);
   }
-  /** Issues associated with the custom view. */
+  /** Issues matching the custom view's issue filter. Returns an empty connection if the view's modelName is not "Issue". */
   public issues(variables?: Omit<L.CustomView_IssuesQueryVariables, "id">) {
     return new CustomView_IssuesQuery(this._request, this.id, variables).fetch(variables);
   }
-  /** Projects associated with the custom view. */
+  /** Projects matching the custom view's project filter. Returns an empty connection if the view's modelName is not "Project". */
   public projects(variables?: Omit<L.CustomView_ProjectsQueryVariables, "id">) {
     return new CustomView_ProjectsQuery(this._request, this.id, variables).fetch(variables);
   }
@@ -3693,7 +3727,7 @@ export class CustomViewConnection extends Connection<CustomView> {
   }
 }
 /**
- * CustomViewHasSubscribersPayload model
+ * The result of a custom view subscribers check.
  *
  * @param request - function to call the graphql client
  * @param data - L.CustomViewHasSubscribersPayloadFragment response data
@@ -3708,7 +3742,7 @@ export class CustomViewHasSubscribersPayload extends Request {
   public hasSubscribers: boolean;
 }
 /**
- * A custom view notification subscription.
+ * A notification subscription scoped to a specific custom view. The subscriber receives notifications for events matching the custom view's filter criteria.
  *
  * @param request - function to call the graphql client
  * @param data - L.CustomViewNotificationSubscriptionFragment response data
@@ -3745,7 +3779,7 @@ export class CustomViewNotificationSubscription extends Request {
     this._user = data.user ?? undefined;
   }
 
-  /** Whether the subscription is active or not. */
+  /** Whether the subscription is active. When inactive, no notifications are generated from this subscription even though it still exists. */
   public active: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
@@ -3753,16 +3787,16 @@ export class CustomViewNotificationSubscription extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The type of subscription. */
+  /** The notification event types that this subscription will deliver to the subscriber. */
   public notificationSubscriptionTypes: string[];
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The type of view to which the notification subscription context is associated with. */
+  /** The type of contextual view (e.g., active issues, backlog) that further scopes a team notification subscription. Null if the subscription is not associated with a specific view type. */
   public contextViewType?: L.ContextViewType | null;
-  /** The type of user view to which the notification subscription context is associated with. */
+  /** The type of user-specific view that further scopes a user notification subscription. Null if the subscription is not associated with a user view type. */
   public userContextViewType?: L.UserContextViewType | null;
   /** The custom view subscribed to. */
   public get customView(): LinearFetch<CustomView> | undefined {
@@ -3772,73 +3806,73 @@ export class CustomViewNotificationSubscription extends Request {
   public get customViewId(): string | undefined {
     return this._customView?.id;
   }
-  /** The customer associated with the notification subscription. */
+  /** The customer that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get customer(): LinearFetch<Customer> | undefined {
     return this._customer?.id ? new CustomerQuery(this._request).fetch(this._customer?.id) : undefined;
   }
-  /** The ID of customer associated with the notification subscription. */
+  /** The ID of customer that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get customerId(): string | undefined {
     return this._customer?.id;
   }
-  /** The contextual cycle view associated with the notification subscription. */
+  /** The cycle that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
-  /** The ID of contextual cycle view associated with the notification subscription. */
+  /** The ID of cycle that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get cycleId(): string | undefined {
     return this._cycle?.id;
   }
-  /** The contextual initiative view associated with the notification subscription. */
+  /** The initiative that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
-  /** The ID of contextual initiative view associated with the notification subscription. */
+  /** The ID of initiative that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get initiativeId(): string | undefined {
     return this._initiative?.id;
   }
-  /** The contextual label view associated with the notification subscription. */
+  /** The issue label that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get label(): LinearFetch<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
-  /** The ID of contextual label view associated with the notification subscription. */
+  /** The ID of issue label that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get labelId(): string | undefined {
     return this._label?.id;
   }
-  /** The contextual project view associated with the notification subscription. */
+  /** The project that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
-  /** The ID of contextual project view associated with the notification subscription. */
+  /** The ID of project that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get projectId(): string | undefined {
     return this._project?.id;
   }
-  /** The user that subscribed to receive notifications. */
+  /** The user who will receive notifications from this subscription. */
   public get subscriber(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._subscriber.id);
   }
-  /** The ID of user that subscribed to receive notifications. */
+  /** The ID of user who will receive notifications from this subscription. */
   public get subscriberId(): string | undefined {
     return this._subscriber?.id;
   }
-  /** The team associated with the notification subscription. */
+  /** The team that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
-  /** The ID of team associated with the notification subscription. */
+  /** The ID of team that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get teamId(): string | undefined {
     return this._team?.id;
   }
-  /** The user view associated with the notification subscription. */
+  /** The user that this notification subscription is scoped to, for user-specific view subscriptions. Null if the subscription targets a different entity type. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
-  /** The ID of user view associated with the notification subscription. */
+  /** The ID of user that this notification subscription is scoped to, for user-specific view subscriptions. null if the subscription targets a different entity type. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
 }
 /**
- * CustomViewPayload model
+ * The result of a custom view mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.CustomViewPayloadFragment response data
@@ -3867,7 +3901,7 @@ export class CustomViewPayload extends Request {
   }
 }
 /**
- * CustomViewSuggestionPayload model
+ * The result of a custom view suggestion query.
  *
  * @param request - function to call the graphql client
  * @param data - L.CustomViewSuggestionPayloadFragment response data
@@ -3888,7 +3922,7 @@ export class CustomViewSuggestionPayload extends Request {
   public name?: string | null;
 }
 /**
- * A customer whose needs will be tied to issues or projects.
+ * A customer organization tracked in Linear's customer management system. Customers represent external companies or organizations whose product requests and feedback are captured as customer needs, which can be linked to issues and projects. Customers can be associated with domains, external system IDs, Slack channels, and managed by integrations such as Intercom or Salesforce.
  *
  * @param request - function to call the graphql client
  * @param data - L.CustomerFragment response data
@@ -3923,70 +3957,70 @@ export class Customer extends Request {
     this._tier = data.tier ?? undefined;
   }
 
-  /** The approximate number of needs of the customer. */
+  /** The approximate count of customer needs (requests) associated with this customer. This is a denormalized counter and may not reflect the exact count at all times. */
   public approximateNeedCount: number;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** The domains associated with this customer. */
+  /** The email domains associated with this customer (e.g., 'acme.com'). Used to automatically match incoming requests to this customer. Public email domains (e.g., gmail.com) are not allowed. Domains must be unique across all customers in the workspace. */
   public domains: string[];
-  /** The ids of the customers in external systems. */
+  /** Identifiers for this customer in external systems (e.g., CRM IDs from Intercom, Salesforce, or HubSpot). Used for matching customers during integration syncs and upsert operations. External IDs must be unique across customers in the workspace. */
   public externalIds: string[];
   /** The unique identifier of the entity. */
   public id: string;
-  /** The customer's logo URL. */
+  /** URL of the customer's logo image. Null if no logo has been uploaded. */
   public logoUrl?: string | null;
-  /** The ID of the main source, when a customer has multiple sources. Must be one of externalIds. */
+  /** The primary external source ID when a customer has data from multiple external systems. Must be one of the values in the externalIds array. Null if the customer has zero or one external source. */
   public mainSourceId?: string | null;
-  /** The customer's name. */
+  /** The display name of the customer organization. */
   public name: string;
-  /** The annual revenue generated by the customer. */
+  /** The annual revenue generated by this customer. Null if revenue data has not been provided. May be synced from an external data source such as a CRM integration. */
   public revenue?: number | null;
-  /** The size of the customer. */
+  /** The number of employees or seats at the customer organization. Null if size data has not been provided. May be synced from an external data source such as a CRM integration. */
   public size?: number | null;
-  /** The ID of the Slack channel used to interact with the customer. */
+  /** The ID of the Slack channel linked to this customer for communication. Null if no Slack channel has been associated. Must be unique across all customers in the workspace. */
   public slackChannelId?: string | null;
-  /** The customer's unique URL slug. */
+  /** A unique, human-readable URL slug for the customer. Automatically generated and used in customer page URLs. */
   public slugId: string;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** URL of the customer in Linear. */
+  /** The URL of the customer's page in the Linear application. */
   public url: string;
-  /** Customer needs associated with this customer. */
+  /** The list of customer needs (product requests and feedback) associated with this customer. */
   public needs: CustomerNeed[];
-  /** The integration that manages the Customer. */
+  /** The integration that manages this customer's data (e.g., Intercom, Salesforce). Null if the customer is not managed by any data source integration. */
   public get integration(): LinearFetch<Integration> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
   }
-  /** The ID of integration that manages the customer. */
+  /** The ID of integration that manages this customer's data (e.g., intercom, salesforce). null if the customer is not managed by any data source integration. */
   public get integrationId(): string | undefined {
     return this._integration?.id;
   }
-  /** The user who owns the customer. */
+  /** The workspace member assigned as the owner of this customer. Null if no owner has been assigned. App users cannot be set as customer owners. */
   public get owner(): LinearFetch<User> | undefined {
     return this._owner?.id ? new UserQuery(this._request).fetch(this._owner?.id) : undefined;
   }
-  /** The ID of user who owns the customer. */
+  /** The ID of workspace member assigned as the owner of this customer. null if no owner has been assigned. app users cannot be set as customer owners. */
   public get ownerId(): string | undefined {
     return this._owner?.id;
   }
-  /** The current status of the customer. */
+  /** The current lifecycle status of the customer. Defaults to the first status by position when a customer is created without an explicit status. */
   public get status(): LinearFetch<CustomerStatus> | undefined {
     return new CustomerStatusQuery(this._request).fetch(this._status.id);
   }
-  /** The ID of current status of the customer. */
+  /** The ID of current lifecycle status of the customer. defaults to the first status by position when a customer is created without an explicit status. */
   public get statusId(): string | undefined {
     return this._status?.id;
   }
-  /** The tier of the customer. */
+  /** The tier or segment assigned to this customer for prioritization (e.g., Enterprise, Pro, Free). Null if no tier has been assigned. */
   public get tier(): LinearFetch<CustomerTier> | undefined {
     return this._tier?.id ? new CustomerTierQuery(this._request).fetch(this._tier?.id) : undefined;
   }
-  /** The ID of tier of the customer. */
+  /** The ID of tier or segment assigned to this customer for prioritization (e.g., enterprise, pro, free). null if no tier has been assigned. */
   public get tierId(): string | undefined {
     return this._tier?.id;
   }
@@ -3999,7 +4033,7 @@ export class Customer extends Request {
   public delete() {
     return new DeleteCustomerMutation(this._request).fetch(this.id);
   }
-  /** Updates a customer */
+  /** Updates an existing customer. */
   public update(input: L.CustomerUpdateInput) {
     return new UpdateCustomerMutation(this._request).fetch(this.id, input);
   }
@@ -4048,7 +4082,7 @@ export class CustomerConnection extends Connection<Customer> {
   }
 }
 /**
- * A customer need, expressed through a reference to an issue, project, or comment.
+ * A customer need represents a specific product request or piece of feedback from a customer. Customer needs serve as the bridge between customer feedback and engineering work by linking a customer to an issue or project, optionally with a comment or attachment providing additional context. Needs can be created manually, from integrations, or from intake sources like email.
  *
  * @param request - function to call the graphql client
  * @param data - L.CustomerNeedFragment response data
@@ -4085,7 +4119,7 @@ export class CustomerNeed extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** The need content in markdown format. */
+  /** The body content of the need in Markdown format. Used to capture manual input about needs that cannot be directly tied to an attachment. Null if the need's content comes from an attached source. */
   public body?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
@@ -4098,63 +4132,63 @@ export class CustomerNeed extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The URL of the underlying attachment, if any */
+  /** The URL of the source attachment linked to this need, if any. Returns the URL from either the issue attachment or project attachment. Null if the need has no attached source. */
   public url?: string | null;
-  /** The project attachment this need is referencing. */
+  /** The project attachment linked to this need. Populated when the need originates from an intake source or when a URL is manually provided for a project-level need. Provides a link back to the original source of the customer feedback. Mutually exclusive with attachment. */
   public projectAttachment?: ProjectAttachment | null;
-  /** The attachment this need is referencing. */
+  /** The issue attachment linked to this need. Populated when the need originates from an intake source (e.g., Slack, Intercom) or when a URL is manually provided. Provides a link back to the original source of the customer feedback. Mutually exclusive with projectAttachment. */
   public get attachment(): LinearFetch<Attachment> | undefined {
     return this._attachment?.id ? new AttachmentQuery(this._request).fetch(this._attachment?.id) : undefined;
   }
-  /** The ID of attachment this need is referencing. */
+  /** The ID of issue attachment linked to this need. populated when the need originates from an intake source (e.g., slack, intercom) or when a url is manually provided. provides a link back to the original source of the customer feedback. mutually exclusive with projectattachment. */
   public get attachmentId(): string | undefined {
     return this._attachment?.id;
   }
-  /** The comment this need is referencing. */
+  /** An optional comment providing additional context for this need. Null if the need was not created from or associated with a specific comment. */
   public get comment(): LinearFetch<Comment> | undefined {
     return this._comment?.id ? new CommentQuery(this._request).fetch({ id: this._comment?.id }) : undefined;
   }
-  /** The ID of comment this need is referencing. */
+  /** The ID of an optional comment providing additional context for this need. null if the need was not created from or associated with a specific comment. */
   public get commentId(): string | undefined {
     return this._comment?.id;
   }
-  /** The creator of the customer need. */
+  /** The user who manually created this customer need. Null for needs created automatically by integrations or intake sources. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
-  /** The ID of creator of the customer need. */
+  /** The ID of user who manually created this customer need. null for needs created automatically by integrations or intake sources. */
   public get creatorId(): string | undefined {
     return this._creator?.id;
   }
-  /** The customer that this need is attached to. */
+  /** The customer organization this need belongs to. Null if the need has not yet been associated with a customer. */
   public get customer(): LinearFetch<Customer> | undefined {
     return this._customer?.id ? new CustomerQuery(this._request).fetch(this._customer?.id) : undefined;
   }
-  /** The ID of customer that this need is attached to. */
+  /** The ID of customer organization this need belongs to. null if the need has not yet been associated with a customer. */
   public get customerId(): string | undefined {
     return this._customer?.id;
   }
-  /** The issue this need is referencing. */
+  /** The issue this need is linked to. Either issueId or projectId must be set. When set, the need's projectId is denormalized from the issue's project. */
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
-  /** The ID of issue this need is referencing. */
+  /** The ID of issue this need is linked to. either issueid or projectid must be set. when set, the need's projectid is denormalized from the issue's project. */
   public get issueId(): string | undefined {
     return this._issue?.id;
   }
-  /** The issue this customer need was originally created on. Will be undefined if the customer need hasn't been moved. */
+  /** The issue this customer need was originally created on, before being moved to a different issue or project. Null if the customer need has not been moved from its original location. */
   public get originalIssue(): LinearFetch<Issue> | undefined {
     return this._originalIssue?.id ? new IssueQuery(this._request).fetch(this._originalIssue?.id) : undefined;
   }
-  /** The ID of issue this customer need was originally created on. will be undefined if the customer need hasn't been moved. */
+  /** The ID of issue this customer need was originally created on, before being moved to a different issue or project. null if the customer need has not been moved from its original location. */
   public get originalIssueId(): string | undefined {
     return this._originalIssue?.id;
   }
-  /** The project this need is referencing. */
+  /** The project this need is linked to. For issue-based needs, this is denormalized from the issue's project. For project-only needs, this is set directly. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
-  /** The ID of project this need is referencing. */
+  /** The ID of project this need is linked to. for issue-based needs, this is denormalized from the issue's project. for project-only needs, this is set directly. */
   public get projectId(): string | undefined {
     return this._project?.id;
   }
@@ -4175,7 +4209,7 @@ export class CustomerNeed extends Request {
   public unarchive() {
     return new UnarchiveCustomerNeedMutation(this._request).fetch(this.id);
   }
-  /** Updates a customer need */
+  /** Updates an existing customer need. Supports moving the need to a different issue or project, changing priority, updating the body content, and managing the attached source URL. */
   public update(
     input: L.CustomerNeedUpdateInput,
     variables?: Omit<L.UpdateCustomerNeedMutationVariables, "id" | "input">
@@ -4259,7 +4293,7 @@ export class CustomerNeedConnection extends Connection<CustomerNeed> {
   }
 }
 /**
- * A customer need related notification.
+ * A notification related to a customer need (request), such as creation, resolution, or being marked as important.
  *
  * @param request - function to call the graphql client
  * @param data - L.CustomerNeedNotificationFragment response data
@@ -4300,20 +4334,17 @@ export class CustomerNeedNotification extends Request {
   public createdAt: Date;
   /** Related customer need. */
   public customerNeedId: string;
-  /**
-   * The time at when an email reminder for this notification was sent to the user. Null, if no email
-   *     reminder has been sent.
-   */
+  /** The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent. */
   public emailedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
+  /** The time at which the user marked the notification as read. Null if the notification is unread. */
   public readAt?: Date | null;
-  /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
+  /** The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed. */
   public snoozedUntilAt?: Date | null;
-  /** Notification type. */
+  /** Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated. */
   public type: string;
-  /** The time at which a notification was unsnoozed.. */
+  /** The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed. */
   public unsnoozedAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -4324,11 +4355,11 @@ export class CustomerNeedNotification extends Request {
   public botActor?: ActorBot | null;
   /** The category of the notification. */
   public category: L.NotificationCategory;
-  /** The user that caused the notification. */
+  /** The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
-  /** The ID of user that caused the notification. */
+  /** The ID of user that caused the notification. null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
   public get actorId(): string | undefined {
     return this._actor?.id;
   }
@@ -4336,13 +4367,13 @@ export class CustomerNeedNotification extends Request {
   public get customerNeed(): LinearFetch<CustomerNeed> | undefined {
     return new CustomerNeedQuery(this._request).fetch({ id: this._customerNeed.id });
   }
-  /** The external user that caused the notification. */
+  /** The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member. */
   public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
     return this._externalUserActor?.id
       ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
       : undefined;
   }
-  /** The ID of external user that caused the notification. */
+  /** The ID of external user that caused the notification. populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like slack or github) rather than a linear workspace member. */
   public get externalUserActorId(): string | undefined {
     return this._externalUserActor?.id;
   }
@@ -4362,17 +4393,17 @@ export class CustomerNeedNotification extends Request {
   public get relatedProjectId(): string | undefined {
     return this._relatedProject?.id;
   }
-  /** The user that received the notification. */
+  /** The recipient user of this notification. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
-  /** The ID of user that received the notification. */
+  /** The ID of recipient user of this notification. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
 }
 /**
- * CustomerNeedPayload model
+ * Return type for customer need mutations.
  *
  * @param request - function to call the graphql client
  * @param data - L.CustomerNeedPayloadFragment response data
@@ -4391,17 +4422,17 @@ export class CustomerNeedPayload extends Request {
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
-  /** The customer need that was created or updated. */
+  /** The customer need entity that was created or updated by the mutation. */
   public get need(): LinearFetch<CustomerNeed> | undefined {
     return new CustomerNeedQuery(this._request).fetch({ id: this._need.id });
   }
-  /** The ID of customer need that was created or updated. */
+  /** The ID of customer need entity that was created or updated by the mutation. */
   public get needId(): string | undefined {
     return this._need?.id;
   }
 }
 /**
- * CustomerNeedUpdatePayload model
+ * Return type for customer need update mutations, including any related needs that were also updated.
  *
  * @param request - function to call the graphql client
  * @param data - L.CustomerNeedUpdatePayloadFragment response data
@@ -4421,13 +4452,13 @@ export class CustomerNeedUpdatePayload extends Request {
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
-  /** The related customer needs that were updated. */
+  /** Additional customer needs from the same customer on the same issue/project that were updated when applyPriorityToRelatedNeeds was set. */
   public updatedRelatedNeeds: CustomerNeed[];
-  /** The customer need that was created or updated. */
+  /** The customer need entity that was created or updated by the mutation. */
   public get need(): LinearFetch<CustomerNeed> | undefined {
     return new CustomerNeedQuery(this._request).fetch({ id: this._need.id });
   }
-  /** The ID of customer need that was created or updated. */
+  /** The ID of customer need entity that was created or updated by the mutation. */
   public get needId(): string | undefined {
     return this._need?.id;
   }
@@ -4497,7 +4528,7 @@ export class CustomerNeedWebhookPayload {
   public project?: ProjectChildWebhookPayload | null;
 }
 /**
- * A customer related notification.
+ * A notification related to a customer, such as being added as the customer owner.
  *
  * @param request - function to call the graphql client
  * @param data - L.CustomerNotificationFragment response data
@@ -4534,20 +4565,17 @@ export class CustomerNotification extends Request {
   public createdAt: Date;
   /** Related customer. */
   public customerId: string;
-  /**
-   * The time at when an email reminder for this notification was sent to the user. Null, if no email
-   *     reminder has been sent.
-   */
+  /** The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent. */
   public emailedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
+  /** The time at which the user marked the notification as read. Null if the notification is unread. */
   public readAt?: Date | null;
-  /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
+  /** The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed. */
   public snoozedUntilAt?: Date | null;
-  /** Notification type. */
+  /** Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated. */
   public type: string;
-  /** The time at which a notification was unsnoozed.. */
+  /** The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed. */
   public unsnoozedAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -4558,11 +4586,11 @@ export class CustomerNotification extends Request {
   public botActor?: ActorBot | null;
   /** The category of the notification. */
   public category: L.NotificationCategory;
-  /** The user that caused the notification. */
+  /** The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
-  /** The ID of user that caused the notification. */
+  /** The ID of user that caused the notification. null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
   public get actorId(): string | undefined {
     return this._actor?.id;
   }
@@ -4570,27 +4598,27 @@ export class CustomerNotification extends Request {
   public get customer(): LinearFetch<Customer> | undefined {
     return new CustomerQuery(this._request).fetch(this._customer.id);
   }
-  /** The external user that caused the notification. */
+  /** The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member. */
   public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
     return this._externalUserActor?.id
       ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
       : undefined;
   }
-  /** The ID of external user that caused the notification. */
+  /** The ID of external user that caused the notification. populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like slack or github) rather than a linear workspace member. */
   public get externalUserActorId(): string | undefined {
     return this._externalUserActor?.id;
   }
-  /** The user that received the notification. */
+  /** The recipient user of this notification. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
-  /** The ID of user that received the notification. */
+  /** The ID of recipient user of this notification. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
 }
 /**
- * A customer notification subscription.
+ * A notification subscription scoped to a specific customer. The subscriber receives notifications for events related to this customer, such as new customer needs or ownership changes.
  *
  * @param request - function to call the graphql client
  * @param data - L.CustomerNotificationSubscriptionFragment response data
@@ -4627,7 +4655,7 @@ export class CustomerNotificationSubscription extends Request {
     this._user = data.user ?? undefined;
   }
 
-  /** Whether the subscription is active or not. */
+  /** Whether the subscription is active. When inactive, no notifications are generated from this subscription even though it still exists. */
   public active: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
@@ -4635,22 +4663,22 @@ export class CustomerNotificationSubscription extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The type of subscription. */
+  /** The notification event types that this subscription will deliver to the subscriber. */
   public notificationSubscriptionTypes: string[];
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The type of view to which the notification subscription context is associated with. */
+  /** The type of contextual view (e.g., active issues, backlog) that further scopes a team notification subscription. Null if the subscription is not associated with a specific view type. */
   public contextViewType?: L.ContextViewType | null;
-  /** The type of user view to which the notification subscription context is associated with. */
+  /** The type of user-specific view that further scopes a user notification subscription. Null if the subscription is not associated with a user view type. */
   public userContextViewType?: L.UserContextViewType | null;
-  /** The contextual custom view associated with the notification subscription. */
+  /** The custom view that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
-  /** The ID of contextual custom view associated with the notification subscription. */
+  /** The ID of custom view that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get customViewId(): string | undefined {
     return this._customView?.id;
   }
@@ -4662,65 +4690,65 @@ export class CustomerNotificationSubscription extends Request {
   public get customerId(): string | undefined {
     return this._customer?.id;
   }
-  /** The contextual cycle view associated with the notification subscription. */
+  /** The cycle that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
-  /** The ID of contextual cycle view associated with the notification subscription. */
+  /** The ID of cycle that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get cycleId(): string | undefined {
     return this._cycle?.id;
   }
-  /** The contextual initiative view associated with the notification subscription. */
+  /** The initiative that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
-  /** The ID of contextual initiative view associated with the notification subscription. */
+  /** The ID of initiative that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get initiativeId(): string | undefined {
     return this._initiative?.id;
   }
-  /** The contextual label view associated with the notification subscription. */
+  /** The issue label that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get label(): LinearFetch<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
-  /** The ID of contextual label view associated with the notification subscription. */
+  /** The ID of issue label that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get labelId(): string | undefined {
     return this._label?.id;
   }
-  /** The contextual project view associated with the notification subscription. */
+  /** The project that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
-  /** The ID of contextual project view associated with the notification subscription. */
+  /** The ID of project that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get projectId(): string | undefined {
     return this._project?.id;
   }
-  /** The user that subscribed to receive notifications. */
+  /** The user who will receive notifications from this subscription. */
   public get subscriber(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._subscriber.id);
   }
-  /** The ID of user that subscribed to receive notifications. */
+  /** The ID of user who will receive notifications from this subscription. */
   public get subscriberId(): string | undefined {
     return this._subscriber?.id;
   }
-  /** The team associated with the notification subscription. */
+  /** The team that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
-  /** The ID of team associated with the notification subscription. */
+  /** The ID of team that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get teamId(): string | undefined {
     return this._team?.id;
   }
-  /** The user view associated with the notification subscription. */
+  /** The user that this notification subscription is scoped to, for user-specific view subscriptions. Null if the subscription targets a different entity type. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
-  /** The ID of user view associated with the notification subscription. */
+  /** The ID of user that this notification subscription is scoped to, for user-specific view subscriptions. null if the subscription targets a different entity type. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
 }
 /**
- * CustomerPayload model
+ * Return type for customer mutations.
  *
  * @param request - function to call the graphql client
  * @param data - L.CustomerPayloadFragment response data
@@ -4739,17 +4767,17 @@ export class CustomerPayload extends Request {
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
-  /** The customer that was created or updated. */
+  /** The customer entity that was created or updated by the mutation. */
   public get customer(): LinearFetch<Customer> | undefined {
     return new CustomerQuery(this._request).fetch(this._customer.id);
   }
-  /** The ID of customer that was created or updated. */
+  /** The ID of customer entity that was created or updated by the mutation. */
   public get customerId(): string | undefined {
     return this._customer?.id;
   }
 }
 /**
- * A customer status.
+ * A workspace-defined lifecycle status for customers (e.g., Active, Churned, Trial). Customer statuses are ordered by position and displayed with a color in the UI. Every workspace has at least one status, and a default status is assigned to new customers when none is specified.
  *
  * @param request - function to call the graphql client
  * @param data - L.CustomerStatusFragment response data
@@ -4771,33 +4799,33 @@ export class CustomerStatus extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** The UI color of the status as a HEX string. */
+  /** The color of the status indicator in the UI, as a HEX string (e.g., '#ff0000'). */
   public color: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** Description of the status. */
+  /** An optional description explaining what this status represents in the customer lifecycle. */
   public description?: string | null;
-  /** The display name of the status. */
+  /** The user-facing display name of the status shown in the UI. Defaults to the internal name if not explicitly set. */
   public displayName: string;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The name of the status. */
+  /** The internal name of the status. Used as the default display name if no displayName is explicitly set. */
   public name: string;
-  /** The position of the status in the workspace's customers flow. */
+  /** The sort position of the status in the workspace's customer lifecycle flow. Lower values appear first. Collisions are automatically resolved by redistributing positions. */
   public position: number;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The type of the customer status. */
+  /** [Deprecated] The type of the customer status. Always returns null as statuses are no longer grouped by type. */
   public type?: L.CustomerStatusType | null;
 
   /** Creates a new customer status. */
   public create(input: L.CustomerStatusCreateInput) {
     return new CreateCustomerStatusMutation(this._request).fetch(input);
   }
-  /** Deletes a customer status. */
+  /** Deletes a customer status. Cannot delete the last remaining status in a workspace, and the status must not be in use by any customers. */
   public delete() {
     return new DeleteCustomerStatusMutation(this._request).fetch(this.id);
   }
@@ -4856,7 +4884,7 @@ export class CustomerStatusConnection extends Connection<CustomerStatus> {
   }
 }
 /**
- * CustomerStatusPayload model
+ * Return type for customer status mutations.
  *
  * @param request - function to call the graphql client
  * @param data - L.CustomerStatusPayloadFragment response data
@@ -4875,17 +4903,17 @@ export class CustomerStatusPayload extends Request {
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
-  /** The customer status that was created or updated. */
+  /** The customer status entity that was created or updated by the mutation. */
   public get status(): LinearFetch<CustomerStatus> | undefined {
     return new CustomerStatusQuery(this._request).fetch(this._status.id);
   }
-  /** The ID of customer status that was created or updated. */
+  /** The ID of customer status entity that was created or updated by the mutation. */
   public get statusId(): string | undefined {
     return this._status?.id;
   }
 }
 /**
- * A customer tier.
+ * A workspace-defined tier or segment for categorizing customers (e.g., Enterprise, Pro, Free). Customer tiers are used for prioritization and filtering, are ordered by position, and displayed with a color in the UI. Tier names are unique within a workspace.
  *
  * @param request - function to call the graphql client
  * @param data - L.CustomerTierFragment response data
@@ -4906,19 +4934,19 @@ export class CustomerTier extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** The UI color of the tier as a HEX string. */
+  /** The color of the tier indicator in the UI, as a HEX string (e.g., '#ff0000'). */
   public color: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** Description of the tier. */
+  /** An optional description explaining what this tier represents and its intended use for customer segmentation. */
   public description?: string | null;
-  /** The display name of the tier. */
+  /** The user-facing display name of the tier shown in the UI. Defaults to the internal name if not explicitly set. */
   public displayName: string;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The name of the tier. */
+  /** The internal name of the tier. Must be unique within the workspace. Used as the default display name if no displayName is explicitly set. */
   public name: string;
-  /** The position of the tier in the workspace's customers flow. */
+  /** The sort position of the tier in the workspace's customer tier ordering. Lower values appear first. Collisions are automatically resolved by redistributing positions. */
   public position: number;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -4930,7 +4958,7 @@ export class CustomerTier extends Request {
   public create(input: L.CustomerTierCreateInput) {
     return new CreateCustomerTierMutation(this._request).fetch(input);
   }
-  /** Deletes a customer tier. */
+  /** Deletes a customer tier. The tier must not be in use by any customers. */
   public delete() {
     return new DeleteCustomerTierMutation(this._request).fetch(this.id);
   }
@@ -4986,7 +5014,7 @@ export class CustomerTierConnection extends Connection<CustomerTier> {
   }
 }
 /**
- * CustomerTierPayload model
+ * Return type for customer tier mutations.
  *
  * @param request - function to call the graphql client
  * @param data - L.CustomerTierPayloadFragment response data
@@ -5005,11 +5033,11 @@ export class CustomerTierPayload extends Request {
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
-  /** The customer tier that was created or updated. */
+  /** The customer tier entity that was created or updated by the mutation. */
   public get tier(): LinearFetch<CustomerTier> | undefined {
     return new CustomerTierQuery(this._request).fetch(this._tier.id);
   }
-  /** The ID of customer tier that was created or updated. */
+  /** The ID of customer tier entity that was created or updated by the mutation. */
   public get tierId(): string | undefined {
     return this._tier?.id;
   }
@@ -5085,7 +5113,7 @@ export class CustomerWebhookPayload {
   public tier?: CustomerTierChildWebhookPayload | null;
 }
 /**
- * A set of issues to be resolved in a specified amount of time.
+ * A time-boxed iteration (similar to a sprint) used for planning and tracking work. Cycles belong to a team and have defined start and end dates. Issues are assigned to cycles for time-based planning, and progress is tracked via completed, in-progress, and total scope. Cycles are automatically completed when their end date passes, and uncompleted issues can be carried over to the next cycle.
  *
  * @param request - function to call the graphql client
  * @param data - L.CycleFragment response data
@@ -5124,76 +5152,76 @@ export class Cycle extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** The time at which the cycle was automatically archived by the auto pruning process. */
+  /** The time at which the cycle was automatically archived by the auto-pruning process. Null if the cycle has not been auto-archived. */
   public autoArchivedAt?: Date | null;
-  /** The completion time of the cycle. If null, the cycle hasn't been completed. */
+  /** The completion time of the cycle. If null, the cycle has not been completed yet. A cycle is completed either when its end date passes or when it is manually completed early. */
   public completedAt?: Date | null;
-  /** The number of completed issues in the cycle after each day. */
+  /** The number of completed issues in the cycle after each day. Each entry corresponds to the same day index as issueCountHistory. */
   public completedIssueCountHistory: number[];
-  /** The number of completed estimation points after each day. */
+  /** The number of completed estimation points after each day. Used together with scopeHistory for burndown charts. */
   public completedScopeHistory: number[];
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** The cycle's description. */
+  /** The description of the cycle. */
   public description?: string | null;
-  /** The end time of the cycle. */
+  /** The end date and time of the cycle. When a cycle is completed prematurely, this is updated to match the completion time. When cycles are disabled, both endsAt and completedAt are set to the current time. */
   public endsAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The number of in progress estimation points after each day. */
+  /** The number of in-progress estimation points after each day. Tracks work that has been started but not yet completed. */
   public inProgressScopeHistory: number[];
-  /** Whether the cycle is currently active. */
+  /** Whether the cycle is currently active. A cycle is active if the current time is between its start and end dates and it has not been completed. */
   public isActive: boolean;
-  /** Whether the cycle is in the future. */
+  /** Whether the cycle has not yet started. True if the cycle's start date is in the future. */
   public isFuture: boolean;
-  /** Whether the cycle is the next cycle for the team. */
+  /** Whether this cycle is the next upcoming (not yet started) cycle for the team. */
   public isNext: boolean;
-  /** Whether the cycle is in the past. */
+  /** Whether the cycle's end date has passed. */
   public isPast: boolean;
-  /** Whether the cycle is the previous cycle for the team. */
+  /** Whether this cycle is the most recently completed cycle for the team. */
   public isPrevious: boolean;
-  /** The total number of issues in the cycle after each day. */
+  /** The total number of issues in the cycle after each day. Each entry represents a snapshot at the end of that day, forming the basis for burndown charts. */
   public issueCountHistory: number[];
-  /** The custom name of the cycle. */
+  /** The custom name of the cycle. If not set, the cycle is displayed using its number (e.g., "Cycle 5"). */
   public name?: string | null;
-  /** The number of the cycle. */
+  /** The auto-incrementing number of the cycle, unique within its team. This value is assigned automatically by the database and cannot be set on creation. */
   public number: number;
-  /** The overall progress of the cycle. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
+  /** The overall progress of the cycle as a number between 0 and 1. Calculated as (completed estimate points + 0.25 * in-progress estimate points) / total estimate points. Returns 0 if no estimate points exist. */
   public progress: number;
-  /** The total number of estimation points after each day. */
+  /** The total number of estimation points (scope) in the cycle after each day. Used for scope-based burndown charts. */
   public scopeHistory: number[];
-  /** The start time of the cycle. */
+  /** The start date and time of the cycle. */
   public startsAt: Date;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The cycle inherited from. */
+  /** The parent cycle this cycle was inherited from. When a parent team creates cycles, sub-teams automatically receive corresponding inherited cycles. */
   public get inheritedFrom(): LinearFetch<Cycle> | undefined {
     return this._inheritedFrom?.id ? new CycleQuery(this._request).fetch(this._inheritedFrom?.id) : undefined;
   }
-  /** The ID of cycle inherited from. */
+  /** The ID of parent cycle this cycle was inherited from. when a parent team creates cycles, sub-teams automatically receive corresponding inherited cycles. */
   public get inheritedFromId(): string | undefined {
     return this._inheritedFrom?.id;
   }
-  /** The team that the cycle is associated with. */
+  /** The team that the cycle belongs to. Each cycle is scoped to exactly one team. */
   public get team(): LinearFetch<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
   }
-  /** The ID of team that the cycle is associated with. */
+  /** The ID of team that the cycle belongs to. each cycle is scoped to exactly one team. */
   public get teamId(): string | undefined {
     return this._team?.id;
   }
-  /** Issues associated with the cycle. */
+  /** Issues that are currently assigned to this cycle. */
   public issues(variables?: Omit<L.Cycle_IssuesQueryVariables, "id">) {
     return new Cycle_IssuesQuery(this._request, this.id, variables).fetch(variables);
   }
-  /** Issues that weren't completed when the cycle was closed. */
+  /** Issues that were still open (not completed) when the cycle was closed. These issues may have been moved to the next cycle. */
   public uncompletedIssuesUponClose(variables?: Omit<L.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">) {
     return new Cycle_UncompletedIssuesUponCloseQuery(this._request, this.id, variables).fetch(variables);
   }
-  /** Archives a cycle. */
+  /** Archives a cycle. All issues currently assigned to the cycle are unlinked from it before archiving. */
   public archive() {
     return new ArchiveCycleMutation(this._request).fetch(this.id);
   }
@@ -5282,7 +5310,7 @@ export class CycleConnection extends Connection<Cycle> {
   }
 }
 /**
- * A cycle notification subscription.
+ * A notification subscription scoped to a specific cycle. The subscriber receives notifications for events related to issues in this cycle.
  *
  * @param request - function to call the graphql client
  * @param data - L.CycleNotificationSubscriptionFragment response data
@@ -5319,7 +5347,7 @@ export class CycleNotificationSubscription extends Request {
     this._user = data.user ?? undefined;
   }
 
-  /** Whether the subscription is active or not. */
+  /** Whether the subscription is active. When inactive, no notifications are generated from this subscription even though it still exists. */
   public active: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
@@ -5327,30 +5355,30 @@ export class CycleNotificationSubscription extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The type of subscription. */
+  /** The notification event types that this subscription will deliver to the subscriber. */
   public notificationSubscriptionTypes: string[];
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The type of view to which the notification subscription context is associated with. */
+  /** The type of contextual view (e.g., active issues, backlog) that further scopes a team notification subscription. Null if the subscription is not associated with a specific view type. */
   public contextViewType?: L.ContextViewType | null;
-  /** The type of user view to which the notification subscription context is associated with. */
+  /** The type of user-specific view that further scopes a user notification subscription. Null if the subscription is not associated with a user view type. */
   public userContextViewType?: L.UserContextViewType | null;
-  /** The contextual custom view associated with the notification subscription. */
+  /** The custom view that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
-  /** The ID of contextual custom view associated with the notification subscription. */
+  /** The ID of custom view that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get customViewId(): string | undefined {
     return this._customView?.id;
   }
-  /** The customer associated with the notification subscription. */
+  /** The customer that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get customer(): LinearFetch<Customer> | undefined {
     return this._customer?.id ? new CustomerQuery(this._request).fetch(this._customer?.id) : undefined;
   }
-  /** The ID of customer associated with the notification subscription. */
+  /** The ID of customer that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get customerId(): string | undefined {
     return this._customer?.id;
   }
@@ -5362,57 +5390,57 @@ export class CycleNotificationSubscription extends Request {
   public get cycleId(): string | undefined {
     return this._cycle?.id;
   }
-  /** The contextual initiative view associated with the notification subscription. */
+  /** The initiative that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
-  /** The ID of contextual initiative view associated with the notification subscription. */
+  /** The ID of initiative that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get initiativeId(): string | undefined {
     return this._initiative?.id;
   }
-  /** The contextual label view associated with the notification subscription. */
+  /** The issue label that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get label(): LinearFetch<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
-  /** The ID of contextual label view associated with the notification subscription. */
+  /** The ID of issue label that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get labelId(): string | undefined {
     return this._label?.id;
   }
-  /** The contextual project view associated with the notification subscription. */
+  /** The project that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
-  /** The ID of contextual project view associated with the notification subscription. */
+  /** The ID of project that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get projectId(): string | undefined {
     return this._project?.id;
   }
-  /** The user that subscribed to receive notifications. */
+  /** The user who will receive notifications from this subscription. */
   public get subscriber(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._subscriber.id);
   }
-  /** The ID of user that subscribed to receive notifications. */
+  /** The ID of user who will receive notifications from this subscription. */
   public get subscriberId(): string | undefined {
     return this._subscriber?.id;
   }
-  /** The team associated with the notification subscription. */
+  /** The team that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
-  /** The ID of team associated with the notification subscription. */
+  /** The ID of team that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get teamId(): string | undefined {
     return this._team?.id;
   }
-  /** The user view associated with the notification subscription. */
+  /** The user that this notification subscription is scoped to, for user-specific view subscriptions. Null if the subscription targets a different entity type. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
-  /** The ID of user view associated with the notification subscription. */
+  /** The ID of user that this notification subscription is scoped to, for user-specific view subscriptions. null if the subscription targets a different entity type. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
 }
 /**
- * CyclePayload model
+ * The payload returned by cycle mutations.
  *
  * @param request - function to call the graphql client
  * @param data - L.CyclePayloadFragment response data
@@ -5431,7 +5459,7 @@ export class CyclePayload extends Request {
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
-  /** The Cycle that was created or updated. */
+  /** The cycle that was created or updated. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
@@ -5529,7 +5557,7 @@ export class DeletePayload extends Request {
   public success: boolean;
 }
 /**
- * A document that can be attached to different entities.
+ * A rich-text document that lives within a project, initiative, team, issue, release, or cycle. Documents support collaborative editing via ProseMirror/Yjs and store their content in a separate DocumentContent entity. Each document is associated with exactly one parent entity.
  *
  * @param request - function to call the graphql client
  * @param data - L.DocumentFragment response data
@@ -5568,27 +5596,27 @@ export class Document extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** The color of the icon. */
+  /** The hex color of the document icon. Null if no custom color has been set. */
   public color?: string | null;
-  /** The documents content in markdown format. */
+  /** The document's content in markdown format. */
   public content?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The ID of the document content associated with the document. */
   public documentContentId?: string | null;
-  /** The time at which the document was hidden. Null if the entity has not been hidden. */
+  /** The time at which the document was hidden from the default view. Null if the document has not been hidden. */
   public hiddenAt?: Date | null;
-  /** The icon of the document. */
+  /** The icon of the document, either a decorative icon type or an emoji string. Null if no icon has been set. */
   public icon?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The document's unique URL slug. */
+  /** The document's unique URL slug, used to construct human-readable URLs. */
   public slugId: string;
-  /** The order of the item in the resources list. */
+  /** The sort order of the document in its parent entity's resources list. This order is shared with other resource types such as external links. */
   public sortOrder: number;
-  /** The document title. */
+  /** The title of the document. An empty string indicates an untitled document. */
   public title: string;
-  /** A flag that indicates whether the document is in the trash bin. */
+  /** A flag that indicates whether the document is in the trash bin. Trashed documents are archived and can be restored. */
   public trashed?: boolean | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -5597,53 +5625,53 @@ export class Document extends Request {
   public updatedAt: Date;
   /** The canonical url for the document. */
   public url: string;
-  /** The user who created the document. */
+  /** The user who created the document. Null if the creator's account has been deleted. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
-  /** The ID of user who created the document. */
+  /** The ID of user who created the document. null if the creator's account has been deleted. */
   public get creatorId(): string | undefined {
     return this._creator?.id;
   }
-  /** The initiative that the document is associated with. */
+  /** The initiative that the document is associated with. Null if the document belongs to a different parent entity type. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
-  /** The ID of initiative that the document is associated with. */
+  /** The ID of initiative that the document is associated with. null if the document belongs to a different parent entity type. */
   public get initiativeId(): string | undefined {
     return this._initiative?.id;
   }
-  /** The issue that the document is associated with. */
+  /** The issue that the document is associated with. Null if the document belongs to a different parent entity type. */
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
-  /** The ID of issue that the document is associated with. */
+  /** The ID of issue that the document is associated with. null if the document belongs to a different parent entity type. */
   public get issueId(): string | undefined {
     return this._issue?.id;
   }
-  /** The last template that was applied to this document. */
+  /** The last template that was applied to this document. Null if no template has been applied. */
   public get lastAppliedTemplate(): LinearFetch<Template> | undefined {
     return this._lastAppliedTemplate?.id
       ? new TemplateQuery(this._request).fetch(this._lastAppliedTemplate?.id)
       : undefined;
   }
-  /** The ID of last template that was applied to this document. */
+  /** The ID of last template that was applied to this document. null if no template has been applied. */
   public get lastAppliedTemplateId(): string | undefined {
     return this._lastAppliedTemplate?.id;
   }
-  /** The project that the document is associated with. */
+  /** The project that the document is associated with. Null if the document belongs to a different parent entity type. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
-  /** The ID of project that the document is associated with. */
+  /** The ID of project that the document is associated with. null if the document belongs to a different parent entity type. */
   public get projectId(): string | undefined {
     return this._project?.id;
   }
-  /** The user who last updated the document. */
+  /** The user who last updated the document. Null if the user's account has been deleted. */
   public get updatedBy(): LinearFetch<User> | undefined {
     return this._updatedBy?.id ? new UserQuery(this._request).fetch(this._updatedBy?.id) : undefined;
   }
-  /** The ID of user who last updated the document. */
+  /** The ID of user who last updated the document. null if the user's account has been deleted. */
   public get updatedById(): string | undefined {
     return this._updatedBy?.id;
   }
@@ -5655,11 +5683,11 @@ export class Document extends Request {
   public create(input: L.DocumentCreateInput) {
     return new CreateDocumentMutation(this._request).fetch(input);
   }
-  /** Deletes (trashes) a document. */
+  /** Deletes (trashes) a document. The document is marked as trashed and archived, but not permanently removed. */
   public delete() {
     return new DeleteDocumentMutation(this._request).fetch(this.id);
   }
-  /** Restores a document. */
+  /** Restores a previously trashed document by unarchiving it. */
   public unarchive() {
     return new UnarchiveDocumentMutation(this._request).fetch(this.id);
   }
@@ -5747,7 +5775,7 @@ export class DocumentConnection extends Connection<Document> {
   }
 }
 /**
- * A document content for a project.
+ * The rich-text content body of a document, issue, project, initiative, project milestone, pull request, release note, AI prompt rules, or welcome message. Content is stored as a base64-encoded Yjs state and can be converted to Markdown or ProseMirror JSON. Each DocumentContent belongs to exactly one parent entity and supports real-time collaborative editing.
  *
  * @param request - function to call the graphql client
  * @param data - L.DocumentContentFragment response data
@@ -5779,64 +5807,64 @@ export class DocumentContent extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** The document content in markdown format. */
+  /** The document content in markdown format. This is a derived representation of the canonical Yjs content state. */
   public content?: string | null;
-  /** The document content state as a base64 encoded string. */
+  /** The document content state as a base64-encoded Yjs state update. This is the canonical representation of the document content used for collaborative editing. */
   public contentState?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The time at which the document content was restored from a previous version. */
+  /** The time at which the document content was restored from a previous version in the content history. Null if the content has never been restored. */
   public restoredAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The AI prompt rules that the content is associated with. */
+  /** The AI prompt rules that the content is associated with. Null if the content belongs to a different parent entity type. */
   public aiPromptRules?: AiPromptRules | null;
-  /** The welcome message that the content is associated with. */
+  /** The welcome message that the content is associated with. Null if the content belongs to a different parent entity type. */
   public welcomeMessage?: WelcomeMessage | null;
-  /** The document that the content is associated with. */
+  /** The document that the content is associated with. Null if the content belongs to a different parent entity type. */
   public get document(): LinearFetch<Document> | undefined {
     return this._document?.id ? new DocumentQuery(this._request).fetch(this._document?.id) : undefined;
   }
-  /** The ID of document that the content is associated with. */
+  /** The ID of document that the content is associated with. null if the content belongs to a different parent entity type. */
   public get documentId(): string | undefined {
     return this._document?.id;
   }
-  /** The initiative that the content is associated with. */
+  /** The initiative that the content is associated with. Null if the content belongs to a different parent entity type. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
-  /** The ID of initiative that the content is associated with. */
+  /** The ID of initiative that the content is associated with. null if the content belongs to a different parent entity type. */
   public get initiativeId(): string | undefined {
     return this._initiative?.id;
   }
-  /** The issue that the content is associated with. */
+  /** The issue that the content is associated with. Null if the content belongs to a different parent entity type. */
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
-  /** The ID of issue that the content is associated with. */
+  /** The ID of issue that the content is associated with. null if the content belongs to a different parent entity type. */
   public get issueId(): string | undefined {
     return this._issue?.id;
   }
-  /** The project that the content is associated with. */
+  /** The project that the content is associated with. Null if the content belongs to a different parent entity type. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
-  /** The ID of project that the content is associated with. */
+  /** The ID of project that the content is associated with. null if the content belongs to a different parent entity type. */
   public get projectId(): string | undefined {
     return this._project?.id;
   }
-  /** The project milestone that the content is associated with. */
+  /** The project milestone that the content is associated with. Null if the content belongs to a different parent entity type. */
   public get projectMilestone(): LinearFetch<ProjectMilestone> | undefined {
     return this._projectMilestone?.id
       ? new ProjectMilestoneQuery(this._request).fetch(this._projectMilestone?.id)
       : undefined;
   }
-  /** The ID of project milestone that the content is associated with. */
+  /** The ID of project milestone that the content is associated with. null if the content belongs to a different parent entity type. */
   public get projectMilestoneId(): string | undefined {
     return this._projectMilestone?.id;
   }
@@ -5858,7 +5886,7 @@ export class DocumentContentChildWebhookPayload {
   public project?: ProjectChildWebhookPayload | null;
 }
 /**
- * A draft revision of document content, pending user review.
+ * A draft revision of document content, pending user review. Each user can have at most one draft per document content. Drafts are seeded from the live document state and stored as base64-encoded Yjs state updates, allowing independent editing without affecting the published document until the user explicitly applies their changes.
  *
  * @param request - function to call the graphql client
  * @param data - L.DocumentContentDraftFragment response data
@@ -5881,10 +5909,11 @@ export class DocumentContentDraft extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** The draft content state as a base64 encoded Yjs state update. */
+  /** The draft content state as a base64-encoded Yjs state update. This represents the user's in-progress edits that have not yet been applied to the live document. */
   public contentState: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
+  /** The identifier of the document content that this draft is a revision of. */
   public documentContentId: string;
   /** The unique identifier of the entity. */
   public id: string;
@@ -5893,8 +5922,11 @@ export class DocumentContentDraft extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The identifier of the user who owns this draft. */
   public userId: string;
+  /** The document content that this draft is a revision of. */
   public documentContent: DocumentContent;
+  /** The user who created or owns this draft. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
@@ -5933,19 +5965,19 @@ export class DocumentContentHistoryType extends Request {
     this.metadata = parseJson(data.metadata) ?? undefined;
   }
 
-  /** The ID of the author of the change. */
+  /** IDs of users whose edits are included in this history entry. */
   public actorIds?: string[] | null;
-  /** The date when the document content history snapshot was taken. This can be different than createdAt since the content is captured from its state at the previously known updatedAt timestamp in the case of an update. On document create, these timestamps can be the same. */
+  /** The timestamp of the document content state when this snapshot was captured. This can differ from createdAt because the content is captured from its state at the previously known updatedAt timestamp in the case of an update. On document creation, these timestamps can be identical. */
   public contentDataSnapshotAt: Date;
-  /** The date when the document content history entry was created. */
+  /** The date when this document content history entry record was created. */
   public createdAt: Date;
-  /** The UUID of the document content history entry. */
+  /** The unique identifier of the document content history entry. */
   public id: string;
-  /** Metadata associated with the history item. */
+  /** Metadata associated with the history entry, including content diffs and AI-generated change summaries. */
   public metadata?: Record<string, unknown> | null;
 }
 /**
- * A document related notification.
+ * A notification related to a document, such as comments, mentions, content changes, or document lifecycle events.
  *
  * @param request - function to call the graphql client
  * @param data - L.DocumentNotificationFragment response data
@@ -5985,10 +6017,7 @@ export class DocumentNotification extends Request {
   public createdAt: Date;
   /** Related document ID. */
   public documentId: string;
-  /**
-   * The time at when an email reminder for this notification was sent to the user. Null, if no email
-   *     reminder has been sent.
-   */
+  /** The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent. */
   public emailedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
@@ -5996,13 +6025,13 @@ export class DocumentNotification extends Request {
   public parentCommentId?: string | null;
   /** Name of the reaction emoji related to the notification. */
   public reactionEmoji?: string | null;
-  /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
+  /** The time at which the user marked the notification as read. Null if the notification is unread. */
   public readAt?: Date | null;
-  /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
+  /** The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed. */
   public snoozedUntilAt?: Date | null;
-  /** Notification type. */
+  /** Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated. */
   public type: string;
-  /** The time at which a notification was unsnoozed.. */
+  /** The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed. */
   public unsnoozedAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -6013,35 +6042,35 @@ export class DocumentNotification extends Request {
   public botActor?: ActorBot | null;
   /** The category of the notification. */
   public category: L.NotificationCategory;
-  /** The user that caused the notification. */
+  /** The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
-  /** The ID of user that caused the notification. */
+  /** The ID of user that caused the notification. null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
   public get actorId(): string | undefined {
     return this._actor?.id;
   }
-  /** The external user that caused the notification. */
+  /** The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member. */
   public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
     return this._externalUserActor?.id
       ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
       : undefined;
   }
-  /** The ID of external user that caused the notification. */
+  /** The ID of external user that caused the notification. populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like slack or github) rather than a linear workspace member. */
   public get externalUserActorId(): string | undefined {
     return this._externalUserActor?.id;
   }
-  /** The user that received the notification. */
+  /** The recipient user of this notification. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
-  /** The ID of user that received the notification. */
+  /** The ID of recipient user of this notification. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
 }
 /**
- * DocumentPayload model
+ * The result of a document mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.DocumentPayloadFragment response data
@@ -6084,10 +6113,10 @@ export class DocumentSearchPayload extends Request {
     this.nodes = data.nodes.map(node => new DocumentSearchResult(request, node));
   }
 
-  /** Total number of results for query without filters applied. */
+  /** Total number of matching results before pagination is applied. */
   public totalCount: number;
   public nodes: DocumentSearchResult[];
-  /** Archived entities matching the search term along with all their dependencies. */
+  /** Archived entities matching the search term along with all their dependencies, serialized for the client sync engine. */
   public archivePayload: ArchiveResponse;
   public pageInfo: PageInfo;
 }
@@ -6132,29 +6161,29 @@ export class DocumentSearchResult extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** The color of the icon. */
+  /** The hex color of the document icon. Null if no custom color has been set. */
   public color?: string | null;
-  /** The documents content in markdown format. */
+  /** The document's content in markdown format. */
   public content?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The ID of the document content associated with the document. */
   public documentContentId?: string | null;
-  /** The time at which the document was hidden. Null if the entity has not been hidden. */
+  /** The time at which the document was hidden from the default view. Null if the document has not been hidden. */
   public hiddenAt?: Date | null;
-  /** The icon of the document. */
+  /** The icon of the document, either a decorative icon type or an emoji string. Null if no icon has been set. */
   public icon?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** Metadata related to search result. */
   public metadata: L.Scalars["JSONObject"];
-  /** The document's unique URL slug. */
+  /** The document's unique URL slug, used to construct human-readable URLs. */
   public slugId: string;
-  /** The order of the item in the resources list. */
+  /** The sort order of the document in its parent entity's resources list. This order is shared with other resource types such as external links. */
   public sortOrder: number;
-  /** The document title. */
+  /** The title of the document. An empty string indicates an untitled document. */
   public title: string;
-  /** A flag that indicates whether the document is in the trash bin. */
+  /** A flag that indicates whether the document is in the trash bin. Trashed documents are archived and can be restored. */
   public trashed?: boolean | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -6163,53 +6192,53 @@ export class DocumentSearchResult extends Request {
   public updatedAt: Date;
   /** The canonical url for the document. */
   public url: string;
-  /** The user who created the document. */
+  /** The user who created the document. Null if the creator's account has been deleted. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
-  /** The ID of user who created the document. */
+  /** The ID of user who created the document. null if the creator's account has been deleted. */
   public get creatorId(): string | undefined {
     return this._creator?.id;
   }
-  /** The initiative that the document is associated with. */
+  /** The initiative that the document is associated with. Null if the document belongs to a different parent entity type. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
-  /** The ID of initiative that the document is associated with. */
+  /** The ID of initiative that the document is associated with. null if the document belongs to a different parent entity type. */
   public get initiativeId(): string | undefined {
     return this._initiative?.id;
   }
-  /** The issue that the document is associated with. */
+  /** The issue that the document is associated with. Null if the document belongs to a different parent entity type. */
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
-  /** The ID of issue that the document is associated with. */
+  /** The ID of issue that the document is associated with. null if the document belongs to a different parent entity type. */
   public get issueId(): string | undefined {
     return this._issue?.id;
   }
-  /** The last template that was applied to this document. */
+  /** The last template that was applied to this document. Null if no template has been applied. */
   public get lastAppliedTemplate(): LinearFetch<Template> | undefined {
     return this._lastAppliedTemplate?.id
       ? new TemplateQuery(this._request).fetch(this._lastAppliedTemplate?.id)
       : undefined;
   }
-  /** The ID of last template that was applied to this document. */
+  /** The ID of last template that was applied to this document. null if no template has been applied. */
   public get lastAppliedTemplateId(): string | undefined {
     return this._lastAppliedTemplate?.id;
   }
-  /** The project that the document is associated with. */
+  /** The project that the document is associated with. Null if the document belongs to a different parent entity type. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
-  /** The ID of project that the document is associated with. */
+  /** The ID of project that the document is associated with. null if the document belongs to a different parent entity type. */
   public get projectId(): string | undefined {
     return this._project?.id;
   }
-  /** The user who last updated the document. */
+  /** The user who last updated the document. Null if the user's account has been deleted. */
   public get updatedBy(): LinearFetch<User> | undefined {
     return this._updatedBy?.id ? new UserQuery(this._request).fetch(this._updatedBy?.id) : undefined;
   }
-  /** The ID of user who last updated the document. */
+  /** The ID of user who last updated the document. null if the user's account has been deleted. */
   public get updatedById(): string | undefined {
     return this._updatedBy?.id;
   }
@@ -6285,7 +6314,7 @@ export class DocumentWebhookPayload {
   public updatedById?: string | null;
 }
 /**
- * A general purpose draft. Used for comments, project updates, etc.
+ * A general-purpose draft for unsaved content. Drafts store in-progress text for comments, project updates, initiative updates, posts, pull request comments, and customer needs. Each draft belongs to a user and is associated with exactly one parent entity. Drafts are automatically deleted when the user publishes the corresponding comment or update.
  *
  * @param request - function to call the graphql client
  * @param data - L.DraftFragment response data
@@ -6323,11 +6352,11 @@ export class Draft extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** The text content as a Prosemirror document. */
+  /** The draft text content as a ProseMirror document. */
   public bodyData: Record<string, unknown>;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** Additional properties for the draft. */
+  /** Additional properties for the draft, such as generation metadata for AI-generated drafts, health status for project updates, or post titles. */
   public data?: L.Scalars["JSONObject"] | null;
   /** The unique identifier of the entity. */
   public id: string;
@@ -6338,71 +6367,71 @@ export class Draft extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The customer need that this draft is referencing. */
+  /** The customer need that this draft is referencing. Null if the draft belongs to a different parent entity type. */
   public get customerNeed(): LinearFetch<CustomerNeed> | undefined {
     return this._customerNeed?.id
       ? new CustomerNeedQuery(this._request).fetch({ id: this._customerNeed?.id })
       : undefined;
   }
-  /** The ID of customer need that this draft is referencing. */
+  /** The ID of customer need that this draft is referencing. null if the draft belongs to a different parent entity type. */
   public get customerNeedId(): string | undefined {
     return this._customerNeed?.id;
   }
-  /** The initiative for which this is a draft comment or initiative update. */
+  /** The initiative for which this is a draft comment or initiative update. Null if the draft belongs to a different parent entity type. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
-  /** The ID of initiative for which this is a draft comment or initiative update. */
+  /** The ID of initiative for which this is a draft comment or initiative update. null if the draft belongs to a different parent entity type. */
   public get initiativeId(): string | undefined {
     return this._initiative?.id;
   }
-  /** The initiative update for which this is a draft comment. */
+  /** The initiative update for which this is a draft comment. Null if the draft belongs to a different parent entity type. */
   public get initiativeUpdate(): LinearFetch<InitiativeUpdate> | undefined {
     return this._initiativeUpdate?.id
       ? new InitiativeUpdateQuery(this._request).fetch(this._initiativeUpdate?.id)
       : undefined;
   }
-  /** The ID of initiative update for which this is a draft comment. */
+  /** The ID of initiative update for which this is a draft comment. null if the draft belongs to a different parent entity type. */
   public get initiativeUpdateId(): string | undefined {
     return this._initiativeUpdate?.id;
   }
-  /** The issue for which this is a draft comment. */
+  /** The issue for which this is a draft comment. Null if the draft belongs to a different parent entity type. */
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
-  /** The ID of issue for which this is a draft comment. */
+  /** The ID of issue for which this is a draft comment. null if the draft belongs to a different parent entity type. */
   public get issueId(): string | undefined {
     return this._issue?.id;
   }
-  /** The comment for which this is a draft comment reply. */
+  /** The parent comment for which this is a draft reply. Null if the draft is a top-level comment or belongs to a different parent entity type. */
   public get parentComment(): LinearFetch<Comment> | undefined {
     return this._parentComment?.id ? new CommentQuery(this._request).fetch({ id: this._parentComment?.id }) : undefined;
   }
-  /** The ID of comment for which this is a draft comment reply. */
+  /** The ID of parent comment for which this is a draft reply. null if the draft is a top-level comment or belongs to a different parent entity type. */
   public get parentCommentId(): string | undefined {
     return this._parentComment?.id;
   }
-  /** The project for which this is a draft comment or project update. */
+  /** The project for which this is a draft comment or project update. Null if the draft belongs to a different parent entity type. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
-  /** The ID of project for which this is a draft comment or project update. */
+  /** The ID of project for which this is a draft comment or project update. null if the draft belongs to a different parent entity type. */
   public get projectId(): string | undefined {
     return this._project?.id;
   }
-  /** The project update for which this is a draft comment. */
+  /** The project update for which this is a draft comment. Null if the draft belongs to a different parent entity type. */
   public get projectUpdate(): LinearFetch<ProjectUpdate> | undefined {
     return this._projectUpdate?.id ? new ProjectUpdateQuery(this._request).fetch(this._projectUpdate?.id) : undefined;
   }
-  /** The ID of project update for which this is a draft comment. */
+  /** The ID of project update for which this is a draft comment. null if the draft belongs to a different parent entity type. */
   public get projectUpdateId(): string | undefined {
     return this._projectUpdate?.id;
   }
-  /** The team for which this is a draft post. */
+  /** The team for which this is a draft post. Null if the draft belongs to a different parent entity type. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
-  /** The ID of team for which this is a draft post. */
+  /** The ID of team for which this is a draft post. null if the draft belongs to a different parent entity type. */
   public get teamId(): string | undefined {
     return this._team?.id;
   }
@@ -6437,7 +6466,7 @@ export class DraftConnection extends Connection<Draft> {
   }
 }
 /**
- * An email address that can be used for submitting issues.
+ * An email address that creates Linear issues when emails are sent to it. Email intake addresses can be scoped to a specific team or issue template, and support configurable auto-reply messages for issue creation, completion, and cancellation events. They can also be configured for the Asks web form feature, enabling external users to submit requests via email.
  *
  * @param request - function to call the graphql client
  * @param data - L.EmailIntakeAddressFragment response data
@@ -6476,13 +6505,13 @@ export class EmailIntakeAddress extends Request {
     this._template = data.template ?? undefined;
   }
 
-  /** Unique email address user name (before @) used for incoming email. */
+  /** The unique local part (before the @) of the intake email address, used to route incoming emails to the correct intake handler. */
   public address: string;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** Whether issues created from that email address will be turned into customer requests. */
+  /** Whether issues created from emails sent to this address are automatically converted into customer requests, linking the sender as a customer contact. */
   public customerRequestsEnabled: boolean;
   /** Whether the email address is enabled. */
   public enabled: boolean;
@@ -6527,7 +6556,7 @@ export class EmailIntakeAddress extends Request {
   public get creatorId(): string | undefined {
     return this._creator?.id;
   }
-  /** The organization that the email address is associated with. */
+  /** The workspace that the email address is associated with. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
@@ -6562,7 +6591,7 @@ export class EmailIntakeAddress extends Request {
   }
 }
 /**
- * EmailIntakeAddressPayload model
+ * The result of an email intake address mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.EmailIntakeAddressPayloadFragment response data
@@ -6591,7 +6620,7 @@ export class EmailIntakeAddressPayload extends Request {
   }
 }
 /**
- * EmailUnsubscribePayload model
+ * The result of an email unsubscribe mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.EmailUnsubscribePayloadFragment response data
@@ -6624,7 +6653,7 @@ export class EmailUserAccountAuthChallengeResponse extends Request {
   public success: boolean;
 }
 /**
- * A custom emoji.
+ * A custom emoji defined in the workspace. Custom emojis are uploaded by users and can be used in reactions and other places where standard emojis are supported. Each emoji has a unique name within the workspace.
  *
  * @param request - function to call the graphql client
  * @param data - L.EmojiFragment response data
@@ -6650,16 +6679,16 @@ export class Emoji extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The emoji's name. */
+  /** The unique name of the custom emoji within the workspace. */
   public name: string;
-  /** The source of the emoji. */
+  /** The source of the emoji, indicating how it was created (e.g., uploaded by a user or imported). */
   public source: string;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The emoji image URL. */
+  /** The URL of the uploaded image for this custom emoji. */
   public url: string;
   /** The user who created the emoji. */
   public get creator(): LinearFetch<User> | undefined {
@@ -6669,7 +6698,7 @@ export class Emoji extends Request {
   public get creatorId(): string | undefined {
     return this._creator?.id;
   }
-  /** The organization that the emoji belongs to. */
+  /** The workspace that the emoji belongs to. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
@@ -6705,7 +6734,7 @@ export class EmojiConnection extends Connection<Emoji> {
   }
 }
 /**
- * EmojiPayload model
+ * The result of a custom emoji mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.EmojiPayloadFragment response data
@@ -6761,7 +6790,7 @@ export class Entity extends Request {
   public updatedAt: Date;
 }
 /**
- * An external link for an entity like initiative, etc...
+ * An external link attached to a Linear entity such as an initiative, project, team, release, or cycle. External links provide a way to reference related resources outside of Linear (e.g., documentation, design files, dashboards) directly from the entity's resources section. Each link has a URL, display label, and sort order within its parent entity.
  *
  * @param request - function to call the graphql client
  * @param data - L.EntityExternalLinkFragment response data
@@ -6791,7 +6820,7 @@ export class EntityExternalLink extends Request {
   public id: string;
   /** The link's label. */
   public label: string;
-  /** The order of the item in the resources list. */
+  /** The sort order of this link within the parent entity's resources list. Links are sorted together with documents and other resources attached to the entity. */
   public sortOrder: number;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -6817,15 +6846,15 @@ export class EntityExternalLink extends Request {
     return this._initiative?.id;
   }
 
-  /** Creates a new entity link. */
+  /** Creates a new external link on an initiative, project, team, release, or cycle. */
   public create(input: L.EntityExternalLinkCreateInput) {
     return new CreateEntityExternalLinkMutation(this._request).fetch(input);
   }
-  /** Deletes an entity link. */
+  /** Deletes an entity external link. */
   public delete() {
     return new DeleteEntityExternalLinkMutation(this._request).fetch(this.id);
   }
-  /** Updates an entity link. */
+  /** Updates an existing entity external link's URL, label, or sort order. */
   public update(input: L.EntityExternalLinkUpdateInput) {
     return new UpdateEntityExternalLinkMutation(this._request).fetch(this.id, input);
   }
@@ -6852,7 +6881,7 @@ export class EntityExternalLinkConnection extends Connection<EntityExternalLink>
   }
 }
 /**
- * EntityExternalLinkPayload model
+ * The result of an entity external link mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.EntityExternalLinkPayloadFragment response data
@@ -6930,7 +6959,7 @@ export class EventTrackingPayload extends Request {
   public success: boolean;
 }
 /**
- * Information about an external entity.
+ * Information about an entity in an external system that is linked to a Linear entity. Provides the external ID, the service it belongs to, and optional service-specific metadata.
  *
  * @param request - function to call the graphql client
  * @param data - L.ExternalEntityInfoFragment response data
@@ -6943,11 +6972,11 @@ export class ExternalEntityInfo extends Request {
     this.metadata = data.metadata ?? undefined;
   }
 
-  /** The id of the external entity. */
+  /** The unique identifier of the entity in the external system (e.g., the Jira issue ID, GitHub issue node ID, or Slack message timestamp). */
   public id: string;
-  /** The name of the service this entity is synced with. */
+  /** The external service that this entity belongs to (e.g., jira, github, slack). */
   public service: L.ExternalSyncService;
-  /** Metadata about the external entity. */
+  /** Service-specific metadata about the external entity. The concrete type depends on the service (e.g., Jira issue key, GitHub repo and issue number, Slack channel info). Null for entity types that do not have additional metadata. */
   public metadata?: L.ExternalEntityInfoFragment["metadata"] | null;
 }
 /**
@@ -7017,7 +7046,7 @@ export class ExternalEntitySlackMetadata extends Request {
   public messageUrl?: string | null;
 }
 /**
- * An external authenticated (e.g., through Slack) user which doesn't have a Linear account, but can create and update entities in Linear from the external system that authenticated them.
+ * An external user who interacts with Linear through an integrated external service (such as Slack, Jira, GitHub, GitLab, Salesforce, or Microsoft Teams) but does not have a Linear account. External users can create issues, post comments, and add reactions from their respective platforms. They are identified by service-specific user IDs and may optionally have an email address. External users are scoped to a single workspace.
  *
  * @param request - function to call the graphql client
  * @param data - L.ExternalUserFragment response data
@@ -7038,17 +7067,17 @@ export class ExternalUser extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** An URL to the external user's avatar image. */
+  /** A URL to the external user's avatar image. Null if no avatar is available from the external service. */
   public avatarUrl?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** The external user's display name. Unique within each organization. Can match the display name of an actual user. */
+  /** The external user's display name. Unique within each workspace. Can match the display name of an actual user. */
   public displayName: string;
   /** The external user's email address. */
   public email?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The last time the external user was seen interacting with Linear. */
+  /** The last time the external user was seen interacting with Linear through their external service. Defaults to the creation time and is updated on subsequent interactions. */
   public lastSeen?: Date | null;
   /** The external user's full name. */
   public name: string;
@@ -7057,7 +7086,7 @@ export class ExternalUser extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** Organization the external user belongs to. */
+  /** The workspace that the external user belongs to. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
@@ -7103,7 +7132,7 @@ export class ExternalUserConnection extends Connection<ExternalUser> {
   }
 }
 /**
- * A facet. Facets are joins between entities. A facet can tie a custom view to a project, or a a project to a roadmap for example.
+ * A facet representing a join between entities. Facets connect a custom view to an owning entity such as a project, initiative, team page, workspace page, or user feed. They control the order of views within their parent via the sortOrder field. Exactly one source entity and one target entity must be set.
  *
  * @param request - function to call the graphql client
  * @param data - L.FacetFragment response data
@@ -7136,60 +7165,60 @@ export class Facet extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The sort order of the facet. */
+  /** The sort order of the facet within its owning entity scope. Lower values appear first. Sort order is scoped by the source entity (e.g., all facets on a project are sorted independently from facets on an initiative). */
   public sortOrder: number;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The owning page. */
+  /** The fixed page type (e.g., projects, issues) that this facet is displayed on. Used together with sourceOrganizationId or sourceTeamId to place a view on a specific page at the workspace or team level. */
   public sourcePage?: L.FacetPageSource | null;
-  /** The owning feed user. */
+  /** The user whose feed this facet belongs to. Set when this facet represents a view in a user's personal feed. */
   public get sourceFeedUser(): LinearFetch<User> | undefined {
     return this._sourceFeedUser?.id ? new UserQuery(this._request).fetch(this._sourceFeedUser?.id) : undefined;
   }
-  /** The ID of owning feed user. */
+  /** The ID of user whose feed this facet belongs to. set when this facet represents a view in a user's personal feed. */
   public get sourceFeedUserId(): string | undefined {
     return this._sourceFeedUser?.id;
   }
-  /** The owning initiative. */
+  /** The owning initiative. Set when this facet represents a view tab on an initiative. */
   public get sourceInitiative(): LinearFetch<Initiative> | undefined {
     return this._sourceInitiative?.id
       ? new InitiativeQuery(this._request).fetch(this._sourceInitiative?.id)
       : undefined;
   }
-  /** The ID of owning initiative. */
+  /** The ID of owning initiative. set when this facet represents a view tab on an initiative. */
   public get sourceInitiativeId(): string | undefined {
     return this._sourceInitiative?.id;
   }
-  /** The owning organization. */
+  /** The owning organization. Set for workspace-level facets that are not scoped to a specific team, project, or initiative. */
   public get sourceOrganization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
-  /** The owning project. */
+  /** The owning project. Set when this facet represents a view tab on a project. */
   public get sourceProject(): LinearFetch<Project> | undefined {
     return this._sourceProject?.id ? new ProjectQuery(this._request).fetch(this._sourceProject?.id) : undefined;
   }
-  /** The ID of owning project. */
+  /** The ID of owning project. set when this facet represents a view tab on a project. */
   public get sourceProjectId(): string | undefined {
     return this._sourceProject?.id;
   }
-  /** The owning team. */
+  /** The owning team. Set when this facet represents a view on a team-level page. */
   public get sourceTeam(): LinearFetch<Team> | undefined {
     return this._sourceTeam?.id ? new TeamQuery(this._request).fetch(this._sourceTeam?.id) : undefined;
   }
-  /** The ID of owning team. */
+  /** The ID of owning team. set when this facet represents a view on a team-level page. */
   public get sourceTeamId(): string | undefined {
     return this._sourceTeam?.id;
   }
-  /** The targeted custom view. */
+  /** The custom view that this facet points to. Each facet targets exactly one custom view, establishing a one-to-one relationship. */
   public get targetCustomView(): LinearFetch<CustomView> | undefined {
     return this._targetCustomView?.id
       ? new CustomViewQuery(this._request).fetch(this._targetCustomView?.id)
       : undefined;
   }
-  /** The ID of targeted custom view. */
+  /** The ID of custom view that this facet points to. each facet targets exactly one custom view, establishing a one-to-one relationship. */
   public get targetCustomViewId(): string | undefined {
     return this._targetCustomView?.id;
   }
@@ -7216,7 +7245,7 @@ export class FacetConnection extends Connection<Facet> {
   }
 }
 /**
- * User favorites presented in the sidebar.
+ * A user's bookmarked item that appears in their sidebar for quick access. Favorites can reference various entity types including issues, projects, cycles, views, documents, initiatives, labels, users, customers, dashboards, and pull requests. Favorites can be organized into folders and ordered by the user. Each favorite is owned by a single user and links to exactly one target entity (or is a folder containing other favorites).
  *
  * @param request - function to call the graphql client
  * @param data - L.FavoriteFragment response data
@@ -7235,6 +7264,7 @@ export class Favorite extends Request {
   private _project?: L.FavoriteFragment["project"];
   private _projectLabel?: L.FavoriteFragment["projectLabel"];
   private _projectTeam?: L.FavoriteFragment["projectTeam"];
+  private _team?: L.FavoriteFragment["team"];
   private _user?: L.FavoriteFragment["user"];
 
   public constructor(request: LinearRequest, data: L.FavoriteFragment) {
@@ -7263,6 +7293,7 @@ export class Favorite extends Request {
     this._project = data.project ?? undefined;
     this._projectLabel = data.projectLabel ?? undefined;
     this._projectTeam = data.projectTeam ?? undefined;
+    this._team = data.team ?? undefined;
     this._user = data.user ?? undefined;
   }
 
@@ -7274,11 +7305,11 @@ export class Favorite extends Request {
   public folderName?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The type of favorited predefined view. */
+  /** The type of favorited predefined view (e.g., 'allIssues', 'activeCycle', 'backlog', 'triage'). Only populated when the favorite type is 'predefinedView'. */
   public predefinedViewType?: string | null;
-  /** The order of the item in the favorites list. */
+  /** The position of this item in the user's favorites list. Lower values appear first. Used to maintain user-defined ordering within the sidebar. */
   public sortOrder: number;
-  /** The type of the favorite. */
+  /** The type of entity this favorite references, such as 'issue', 'project', 'cycle', 'customView', 'document', 'folder', etc. Determines which associated entity field is populated. */
   public type: string;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -7347,19 +7378,19 @@ export class Favorite extends Request {
   public get labelId(): string | undefined {
     return this._label?.id;
   }
-  /** The owner of the favorite. */
+  /** The user who owns this favorite. Favorites are personal and only visible to their owner. */
   public get owner(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._owner.id);
   }
-  /** The ID of owner of the favorite. */
+  /** The ID of user who owns this favorite. favorites are personal and only visible to their owner. */
   public get ownerId(): string | undefined {
     return this._owner?.id;
   }
-  /** The parent folder of the favorite. */
+  /** The parent folder of the favorite. Null if the favorite is at the top level of the sidebar. Only favorites of type 'folder' can be parents. */
   public get parent(): LinearFetch<Favorite> | undefined {
     return this._parent?.id ? new FavoriteQuery(this._request).fetch(this._parent?.id) : undefined;
   }
-  /** The ID of parent folder of the favorite. */
+  /** The ID of parent folder of the favorite. null if the favorite is at the top level of the sidebar. only favorites of type 'folder' can be parents. */
   public get parentId(): string | undefined {
     return this._parent?.id;
   }
@@ -7395,6 +7426,14 @@ export class Favorite extends Request {
   public get projectTeamId(): string | undefined {
     return this._projectTeam?.id;
   }
+  /** The favorited team. */
+  public get team(): LinearFetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+  }
+  /** The ID of favorited team. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
+  }
   /** The favorited user. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
@@ -7407,15 +7446,15 @@ export class Favorite extends Request {
   public children(variables?: Omit<L.Favorite_ChildrenQueryVariables, "id">) {
     return new Favorite_ChildrenQuery(this._request, this.id, variables).fetch(variables);
   }
-  /** Creates a new favorite (project, cycle etc). */
+  /** Creates a new favorite for the authenticated user. Exactly one target entity must be specified. If a favorite for the same entity already exists, the existing favorite is returned (upsert behavior). */
   public create(input: L.FavoriteCreateInput) {
     return new CreateFavoriteMutation(this._request).fetch(input);
   }
-  /** Deletes a favorite reference. */
+  /** Deletes a favorite, removing it from the user's sidebar. This is an idempotent operation -- deleting a non-existent favorite succeeds silently. */
   public delete() {
     return new DeleteFavoriteMutation(this._request).fetch(this.id);
   }
-  /** Updates a favorite. */
+  /** Updates a favorite's position, parent folder, or folder name. */
   public update(input: L.FavoriteUpdateInput) {
     return new UpdateFavoriteMutation(this._request).fetch(this.id, input);
   }
@@ -7442,7 +7481,7 @@ export class FavoriteConnection extends Connection<Favorite> {
   }
 }
 /**
- * FavoritePayload model
+ * Return type for favorite mutations.
  *
  * @param request - function to call the graphql client
  * @param data - L.FavoritePayloadFragment response data
@@ -7461,17 +7500,17 @@ export class FavoritePayload extends Request {
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
-  /** The object that was added as a favorite. */
+  /** The favorite that was created or updated. */
   public get favorite(): LinearFetch<Favorite> | undefined {
     return new FavoriteQuery(this._request).fetch(this._favorite.id);
   }
-  /** The ID of object that was added as a favorite. */
+  /** The ID of favorite that was created or updated. */
   public get favoriteId(): string | undefined {
     return this._favorite?.id;
   }
 }
 /**
- * FetchDataPayload model
+ * The result of a data fetch query using natural language.
  *
  * @param request - function to call the graphql client
  * @param data - L.FetchDataPayloadFragment response data
@@ -7485,11 +7524,11 @@ export class FetchDataPayload extends Request {
     this.success = data.success;
   }
 
-  /** The fetched data based on the natural language query. */
+  /** The fetched data as a JSON object. The shape depends on the natural language query and the resolved GraphQL query. Null if the query returned no results. */
   public data?: L.Scalars["JSONObject"] | null;
-  /** The filters used to fetch the data. */
+  /** The filter variables that were generated and applied to the GraphQL query. Null if no filters were needed. */
   public filters?: L.Scalars["JSONObject"] | null;
-  /** The GraphQL query used to fetch the data. */
+  /** The GraphQL query that was generated from the natural language input and executed to produce the data. Useful for debugging or reusing the query directly. */
   public query?: string | null;
   /** Whether the fetch operation was successful. */
   public success: boolean;
@@ -7510,7 +7549,7 @@ export class FileUploadDeletePayload extends Request {
   public success: boolean;
 }
 /**
- * FrontAttachmentPayload model
+ * The result of a Front attachment mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.FrontAttachmentPayloadFragment response data
@@ -7539,7 +7578,7 @@ export class FrontAttachmentPayload extends Request {
   }
 }
 /**
- * A trigger that updates the issue status according to Git automations.
+ * A Git automation rule that automatically transitions issues to a specified workflow state when a Git event occurs (e.g., when a PR is opened, move the linked issue to 'In Review'). Each rule is scoped to a team and optionally to a specific target branch. When no target branch is specified, the rule acts as the default for all branches. Target-branch-specific rules override the defaults.
  *
  * @param request - function to call the graphql client
  * @param data - L.GitAutomationStateFragment response data
@@ -7574,36 +7613,36 @@ export class GitAutomationState extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The target branch associated to this automation state. */
+  /** The target branch that this automation rule applies to. When set, this rule only fires for pull requests targeting the specified branch pattern, overriding any default rule for the same event. Null if this is a default rule that applies to all branches. */
   public targetBranch?: GitAutomationTargetBranch | null;
-  /** The event that triggers the automation. */
+  /** The Git event that triggers this automation rule (e.g., branch created, PR opened for review, or PR merged). */
   public event: L.GitAutomationStates;
-  /** The associated workflow state. */
+  /** The workflow state that linked issues will be transitioned to when the Git event fires. Null if this rule is configured to take no action, overriding any default rule for the same event. */
   public get state(): LinearFetch<WorkflowState> | undefined {
     return this._state?.id ? new WorkflowStateQuery(this._request).fetch(this._state?.id) : undefined;
   }
-  /** The ID of associated workflow state. */
+  /** The ID of workflow state that linked issues will be transitioned to when the git event fires. null if this rule is configured to take no action, overriding any default rule for the same event. */
   public get stateId(): string | undefined {
     return this._state?.id;
   }
-  /** The team to which this automation state belongs. */
+  /** The team that this automation rule belongs to. Issues must belong to this team for the automation to apply. */
   public get team(): LinearFetch<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
   }
-  /** The ID of team to which this automation state belongs. */
+  /** The ID of team that this automation rule belongs to. issues must belong to this team for the automation to apply. */
   public get teamId(): string | undefined {
     return this._team?.id;
   }
 
-  /** Creates a new automation state. */
+  /** Creates a new Git automation rule that maps a Git event to a workflow state transition for a team. */
   public create(input: L.GitAutomationStateCreateInput) {
     return new CreateGitAutomationStateMutation(this._request).fetch(input);
   }
-  /** Archives an automation state. */
+  /** Deletes a Git automation rule. */
   public delete() {
     return new DeleteGitAutomationStateMutation(this._request).fetch(this.id);
   }
-  /** Updates an existing state. */
+  /** Updates an existing Git automation rule, including its workflow state, target branch, and triggering event. */
   public update(input: L.GitAutomationStateUpdateInput) {
     return new UpdateGitAutomationStateMutation(this._request).fetch(this.id, input);
   }
@@ -7630,7 +7669,7 @@ export class GitAutomationStateConnection extends Connection<GitAutomationState>
   }
 }
 /**
- * GitAutomationStatePayload model
+ * The result of a git automation state mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.GitAutomationStatePayloadFragment response data
@@ -7651,7 +7690,7 @@ export class GitAutomationStatePayload extends Request {
   public gitAutomationState: GitAutomationState;
 }
 /**
- * A Git target branch for which there are automations (GitAutomationState).
+ * A target branch definition used by Git automation rules to scope automations to specific branches. The branch can be specified as an exact name (e.g., 'main') or as a regular expression pattern (e.g., 'release/.*'). Each target branch belongs to a team and can have multiple automation rules associated with it, which override the team's default automation rules when a PR targets a matching branch.
  *
  * @param request - function to call the graphql client
  * @param data - L.GitAutomationTargetBranchFragment response data
@@ -7672,43 +7711,43 @@ export class GitAutomationTargetBranch extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** The target branch pattern. */
+  /** The branch name or pattern to match against pull request target branches. Interpreted as a literal branch name unless isRegex is true, in which case it is treated as a regular expression. */
   public branchPattern: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** Whether the branch pattern is a regular expression. */
+  /** Whether the branch pattern should be interpreted as a regular expression. When false, the pattern is matched as an exact branch name. */
   public isRegex: boolean;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The team to which this Git target branch automation belongs. */
+  /** The team that this target branch definition belongs to. The branch pattern is unique within a team. */
   public get team(): LinearFetch<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
   }
-  /** The ID of team to which this git target branch automation belongs. */
+  /** The ID of team that this target branch definition belongs to. the branch pattern is unique within a team. */
   public get teamId(): string | undefined {
     return this._team?.id;
   }
 
-  /** Creates a Git target branch automation. */
+  /** Creates a new Git target branch definition that scopes automation rules to pull requests targeting a specific branch pattern. */
   public create(input: L.GitAutomationTargetBranchCreateInput) {
     return new CreateGitAutomationTargetBranchMutation(this._request).fetch(input);
   }
-  /** Archives a Git target branch automation. */
+  /** Deletes a Git target branch definition and its associated automation rules. */
   public delete() {
     return new DeleteGitAutomationTargetBranchMutation(this._request).fetch(this.id);
   }
-  /** Updates an existing Git target branch automation. */
+  /** Updates an existing Git target branch definition, including its branch pattern and regex flag. */
   public update(input: L.GitAutomationTargetBranchUpdateInput) {
     return new UpdateGitAutomationTargetBranchMutation(this._request).fetch(this.id, input);
   }
 }
 /**
- * GitAutomationTargetBranchPayload model
+ * The result of a git automation target branch mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.GitAutomationTargetBranchPayloadFragment response data
@@ -7906,7 +7945,7 @@ export class GuidanceRuleWebhookPayload {
   public body: string;
 }
 /**
- * An identity provider.
+ * A SAML/SSO or web forms identity provider configuration for a workspace. Identity providers enable single sign-on authentication via SAML 2.0 and can optionally support SCIM for automated user provisioning and group-based role mapping. Each workspace can have a default general-purpose identity provider and additional web forms identity providers for Asks web authentication.
  *
  * @param request - function to call the graphql client
  * @param data - L.IdentityProviderFragment response data
@@ -7946,9 +7985,9 @@ export class IdentityProvider extends Request {
   public issuerEntityId?: string | null;
   /** The SAML priority used to pick default workspace in SAML SP initiated flow, when same domain is claimed for SAML by multiple workspaces. Lower priority value means higher preference. */
   public priority?: number | null;
-  /** Whether SAML authentication is enabled for organization. */
+  /** Whether SAML authentication is enabled for the workspace. */
   public samlEnabled: boolean;
-  /** Whether SCIM provisioning is enabled for organization. */
+  /** Whether SCIM provisioning is enabled for the workspace. */
   public scimEnabled: boolean;
   /** The service provider (Linear) custom entity ID. Defaults to https://auth.linear.app/sso */
   public spEntityId?: string | null;
@@ -7990,7 +8029,7 @@ export class ImageUploadFromUrlPayload extends Request {
   public url?: string | null;
 }
 /**
- * An initiative to group projects.
+ * An initiative is a high-level strategic grouping of projects toward a business goal. Initiatives can contain multiple projects, have their own status updates and health tracking, and can be organized hierarchically with parent-child relationships.
  *
  * @param request - function to call the graphql client
  * @param data - L.InitiativeFragment response data
@@ -8041,7 +8080,7 @@ export class Initiative extends Request {
   public archivedAt?: Date | null;
   /** The initiative's color. */
   public color?: string | null;
-  /** The time at which the initiative was moved into completed status. */
+  /** The time at which the initiative was moved into Completed status. Null if the initiative has not been completed. */
   public completedAt?: Date | null;
   /** The initiative's content in markdown format. */
   public content?: string | null;
@@ -8049,21 +8088,21 @@ export class Initiative extends Request {
   public createdAt: Date;
   /** The description of the initiative. */
   public description?: string | null;
-  /** The time at which the initiative health was updated. */
+  /** The time at which the initiative health was last updated, typically when a new initiative update is posted. Null if health has never been set. */
   public healthUpdatedAt?: Date | null;
-  /** The icon of the initiative. */
+  /** The icon of the initiative. Can be an emoji or a decorative icon type. */
   public icon?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** The name of the initiative. */
   public name: string;
-  /** The initiative's unique URL slug. */
+  /** The initiative's unique URL slug, used to construct human-readable URLs. */
   public slugId: string;
-  /** The sort order of the initiative within the organization. */
+  /** The sort order of the initiative within the workspace. */
   public sortOrder: number;
-  /** The time at which the initiative was moved into active status. */
+  /** The time at which the initiative was moved into Active status. Null if the initiative has not been activated. */
   public startedAt?: Date | null;
-  /** The estimated completion date of the initiative. */
+  /** The estimated completion date of the initiative. Null if no target date is set. */
   public targetDate?: L.Scalars["TimelessDate"] | null;
   /** A flag that indicates whether the initiative is in the trash bin. */
   public trashed?: boolean | null;
@@ -8084,11 +8123,11 @@ export class Initiative extends Request {
   public documentContent?: DocumentContent | null;
   /** The resolution of the reminder frequency. */
   public frequencyResolution: L.FrequencyResolutionType;
-  /** The health of the initiative. */
+  /** The overall health of the initiative, derived from the most recent initiative update. Possible values are onTrack, atRisk, or offTrack. Null if no health has been reported. */
   public health?: L.InitiativeUpdateHealthType | null;
-  /** The status of the initiative. One of Planned, Active, Completed */
+  /** The lifecycle status of the initiative. One of Planned, Active, Completed. */
   public status: L.InitiativeStatus;
-  /** The resolution of the initiative's estimated completion date. */
+  /** The resolution of the initiative's estimated completion date, indicating whether it refers to a specific day, week, month, quarter, or year. */
   public targetDateResolution?: L.DateResolutionType | null;
   /** The day at which to prompt for updates. */
   public updateRemindersDay?: L.Day | null;
@@ -8110,23 +8149,23 @@ export class Initiative extends Request {
   public get integrationsSettingsId(): string | undefined {
     return this._integrationsSettings?.id;
   }
-  /** The last initiative update posted for this initiative. */
+  /** The most recent status update posted for this initiative. Null if no updates have been posted. */
   public get lastUpdate(): LinearFetch<InitiativeUpdate> | undefined {
     return this._lastUpdate?.id ? new InitiativeUpdateQuery(this._request).fetch(this._lastUpdate?.id) : undefined;
   }
-  /** The ID of last initiative update posted for this initiative. */
+  /** The ID of most recent status update posted for this initiative. null if no updates have been posted. */
   public get lastUpdateId(): string | undefined {
     return this._lastUpdate?.id;
   }
-  /** The organization of the initiative. */
+  /** The workspace of the initiative. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
-  /** The user who owns the initiative. */
+  /** The user who owns the initiative. The owner is typically responsible for posting status updates and driving the initiative to completion. Null if no owner is assigned. */
   public get owner(): LinearFetch<User> | undefined {
     return this._owner?.id ? new UserQuery(this._request).fetch(this._owner?.id) : undefined;
   }
-  /** The ID of user who owns the initiative. */
+  /** The ID of user who owns the initiative. the owner is typically responsible for posting status updates and driving the initiative to completion. null if no owner is assigned. */
   public get ownerId(): string | undefined {
     return this._owner?.id;
   }
@@ -8164,7 +8203,7 @@ export class Initiative extends Request {
   public subInitiatives(variables?: Omit<L.Initiative_SubInitiativesQueryVariables, "id">) {
     return new Initiative_SubInitiativesQuery(this._request, this.id, variables).fetch(variables);
   }
-  /** Archives a initiative. */
+  /** Archives an initiative. */
   public archive() {
     return new ArchiveInitiativeMutation(this._request).fetch(this.id);
   }
@@ -8176,11 +8215,11 @@ export class Initiative extends Request {
   public delete() {
     return new DeleteInitiativeMutation(this._request).fetch(this.id);
   }
-  /** Unarchives a initiative. */
+  /** Unarchives an initiative. */
   public unarchive() {
     return new UnarchiveInitiativeMutation(this._request).fetch(this.id);
   }
-  /** Updates a initiative. */
+  /** Updates an initiative. */
   public update() {
     return new InitiativeUpdateQuery(this._request).fetch(this.id);
   }
@@ -8255,7 +8294,7 @@ export class InitiativeConnection extends Connection<Initiative> {
   }
 }
 /**
- * A initiative history containing relevant change events.
+ * A history record associated with an initiative. Tracks changes to initiative properties such as name, status, owner, target date, icon, color, and parent-child relationships over time.
  *
  * @param request - function to call the graphql client
  * @param data - L.InitiativeHistoryFragment response data
@@ -8286,11 +8325,11 @@ export class InitiativeHistory extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The initiative that the history is associated with. */
+  /** The initiative that this history record belongs to. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return new InitiativeQuery(this._request).fetch(this._initiative.id);
   }
-  /** The ID of initiative that the history is associated with. */
+  /** The ID of initiative that this history record belongs to. */
   public get initiativeId(): string | undefined {
     return this._initiative?.id;
   }
@@ -8317,7 +8356,7 @@ export class InitiativeHistoryConnection extends Connection<InitiativeHistory> {
   }
 }
 /**
- * An initiative related notification.
+ * A notification related to an initiative, such as being added as owner, initiative updates, comments, or mentions.
  *
  * @param request - function to call the graphql client
  * @param data - L.InitiativeNotificationFragment response data
@@ -8366,10 +8405,7 @@ export class InitiativeNotification extends Request {
   public commentId?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /**
-   * The time at when an email reminder for this notification was sent to the user. Null, if no email
-   *     reminder has been sent.
-   */
+  /** The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent. */
   public emailedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
@@ -8381,13 +8417,13 @@ export class InitiativeNotification extends Request {
   public parentCommentId?: string | null;
   /** Name of the reaction emoji related to the notification. */
   public reactionEmoji?: string | null;
-  /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
+  /** The time at which the user marked the notification as read. Null if the notification is unread. */
   public readAt?: Date | null;
-  /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
+  /** The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed. */
   public snoozedUntilAt?: Date | null;
-  /** Notification type. */
+  /** Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated. */
   public type: string;
-  /** The time at which a notification was unsnoozed.. */
+  /** The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed. */
   public unsnoozedAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -8398,11 +8434,11 @@ export class InitiativeNotification extends Request {
   public botActor?: ActorBot | null;
   /** The category of the notification. */
   public category: L.NotificationCategory;
-  /** The user that caused the notification. */
+  /** The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
-  /** The ID of user that caused the notification. */
+  /** The ID of user that caused the notification. null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
   public get actorId(): string | undefined {
     return this._actor?.id;
   }
@@ -8418,13 +8454,13 @@ export class InitiativeNotification extends Request {
   public get documentId(): string | undefined {
     return this._document?.id;
   }
-  /** The external user that caused the notification. */
+  /** The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member. */
   public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
     return this._externalUserActor?.id
       ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
       : undefined;
   }
-  /** The ID of external user that caused the notification. */
+  /** The ID of external user that caused the notification. populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like slack or github) rather than a linear workspace member. */
   public get externalUserActorId(): string | undefined {
     return this._externalUserActor?.id;
   }
@@ -8442,17 +8478,17 @@ export class InitiativeNotification extends Request {
   public get parentComment(): LinearFetch<Comment> | undefined {
     return this._parentComment?.id ? new CommentQuery(this._request).fetch({ id: this._parentComment?.id }) : undefined;
   }
-  /** The user that received the notification. */
+  /** The recipient user of this notification. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
-  /** The ID of user that received the notification. */
+  /** The ID of recipient user of this notification. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
 }
 /**
- * An initiative notification subscription.
+ * A notification subscription scoped to a specific initiative. The subscriber receives notifications for events related to this initiative, such as updates, comments, and ownership changes.
  *
  * @param request - function to call the graphql client
  * @param data - L.InitiativeNotificationSubscriptionFragment response data
@@ -8489,7 +8525,7 @@ export class InitiativeNotificationSubscription extends Request {
     this._user = data.user ?? undefined;
   }
 
-  /** Whether the subscription is active or not. */
+  /** Whether the subscription is active. When inactive, no notifications are generated from this subscription even though it still exists. */
   public active: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
@@ -8497,38 +8533,38 @@ export class InitiativeNotificationSubscription extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The type of subscription. */
+  /** The notification event types that this subscription will deliver to the subscriber. */
   public notificationSubscriptionTypes: string[];
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The type of view to which the notification subscription context is associated with. */
+  /** The type of contextual view (e.g., active issues, backlog) that further scopes a team notification subscription. Null if the subscription is not associated with a specific view type. */
   public contextViewType?: L.ContextViewType | null;
-  /** The type of user view to which the notification subscription context is associated with. */
+  /** The type of user-specific view that further scopes a user notification subscription. Null if the subscription is not associated with a user view type. */
   public userContextViewType?: L.UserContextViewType | null;
-  /** The contextual custom view associated with the notification subscription. */
+  /** The custom view that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
-  /** The ID of contextual custom view associated with the notification subscription. */
+  /** The ID of custom view that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get customViewId(): string | undefined {
     return this._customView?.id;
   }
-  /** The customer associated with the notification subscription. */
+  /** The customer that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get customer(): LinearFetch<Customer> | undefined {
     return this._customer?.id ? new CustomerQuery(this._request).fetch(this._customer?.id) : undefined;
   }
-  /** The ID of customer associated with the notification subscription. */
+  /** The ID of customer that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get customerId(): string | undefined {
     return this._customer?.id;
   }
-  /** The contextual cycle view associated with the notification subscription. */
+  /** The cycle that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
-  /** The ID of contextual cycle view associated with the notification subscription. */
+  /** The ID of cycle that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get cycleId(): string | undefined {
     return this._cycle?.id;
   }
@@ -8540,43 +8576,43 @@ export class InitiativeNotificationSubscription extends Request {
   public get initiativeId(): string | undefined {
     return this._initiative?.id;
   }
-  /** The contextual label view associated with the notification subscription. */
+  /** The issue label that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get label(): LinearFetch<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
-  /** The ID of contextual label view associated with the notification subscription. */
+  /** The ID of issue label that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get labelId(): string | undefined {
     return this._label?.id;
   }
-  /** The contextual project view associated with the notification subscription. */
+  /** The project that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
-  /** The ID of contextual project view associated with the notification subscription. */
+  /** The ID of project that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get projectId(): string | undefined {
     return this._project?.id;
   }
-  /** The user that subscribed to receive notifications. */
+  /** The user who will receive notifications from this subscription. */
   public get subscriber(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._subscriber.id);
   }
-  /** The ID of user that subscribed to receive notifications. */
+  /** The ID of user who will receive notifications from this subscription. */
   public get subscriberId(): string | undefined {
     return this._subscriber?.id;
   }
-  /** The team associated with the notification subscription. */
+  /** The team that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
-  /** The ID of team associated with the notification subscription. */
+  /** The ID of team that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get teamId(): string | undefined {
     return this._team?.id;
   }
-  /** The user view associated with the notification subscription. */
+  /** The user that this notification subscription is scoped to, for user-specific view subscriptions. Null if the subscription targets a different entity type. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
-  /** The ID of user view associated with the notification subscription. */
+  /** The ID of user that this notification subscription is scoped to, for user-specific view subscriptions. null if the subscription targets a different entity type. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
@@ -8611,7 +8647,7 @@ export class InitiativePayload extends Request {
   }
 }
 /**
- * A relation representing the dependency between two initiatives.
+ * A parent-child relation between two initiatives, forming a hierarchy. The initiative field is the parent and relatedInitiative is the child. Cycles and excessive nesting depth are prevented.
  *
  * @param request - function to call the graphql client
  * @param data - L.InitiativeRelationFragment response data
@@ -8639,39 +8675,39 @@ export class InitiativeRelation extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The sort order of the relation within the initiative. */
+  /** The sort order of the child initiative within its parent initiative. */
   public sortOrder: number;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The parent initiative. */
+  /** The parent initiative in this hierarchical relation. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return new InitiativeQuery(this._request).fetch(this._initiative.id);
   }
-  /** The ID of parent initiative. */
+  /** The ID of parent initiative in this hierarchical relation. */
   public get initiativeId(): string | undefined {
     return this._initiative?.id;
   }
-  /** The child initiative. */
+  /** The child initiative in this hierarchical relation. */
   public get relatedInitiative(): LinearFetch<Initiative> | undefined {
     return new InitiativeQuery(this._request).fetch(this._relatedInitiative.id);
   }
-  /** The ID of child initiative. */
+  /** The ID of child initiative in this hierarchical relation. */
   public get relatedInitiativeId(): string | undefined {
     return this._relatedInitiative?.id;
   }
-  /** The last user who created or modified the relation. */
+  /** The user who last created or modified the relation. Null if the user has been deleted. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
-  /** The ID of last user who created or modified the relation. */
+  /** The ID of user who last created or modified the relation. null if the user has been deleted. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
 
-  /** Creates a new initiative relation. */
+  /** Creates a new parent-child relation between two initiatives. The relation cannot create cycles or exceed maximum nesting depth. */
   public create(input: L.InitiativeRelationCreateInput) {
     return new CreateInitiativeRelationMutation(this._request).fetch(input);
   }
@@ -8706,17 +8742,19 @@ export class InitiativeRelationConnection extends Connection<InitiativeRelation>
   }
 }
 /**
- * InitiativeRelationPayload model
+ * The result of an initiative relation mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.InitiativeRelationPayloadFragment response data
  */
 export class InitiativeRelationPayload extends Request {
+  private _initiativeRelation: L.InitiativeRelationPayloadFragment["initiativeRelation"];
+
   public constructor(request: LinearRequest, data: L.InitiativeRelationPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId;
     this.success = data.success;
-    this.initiativeRelation = new InitiativeRelation(request, data.initiativeRelation);
+    this._initiativeRelation = data.initiativeRelation;
   }
 
   /** The identifier of the last sync operation. */
@@ -8724,10 +8762,16 @@ export class InitiativeRelationPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The initiative relation that was created or updated. */
-  public initiativeRelation: InitiativeRelation;
+  public get initiativeRelation(): LinearFetch<InitiativeRelation> | undefined {
+    return new InitiativeRelationQuery(this._request).fetch(this._initiativeRelation.id);
+  }
+  /** The ID of initiative relation that was created or updated. */
+  public get initiativeRelationId(): string | undefined {
+    return this._initiativeRelation?.id;
+  }
 }
 /**
- * Join table between projects and initiatives.
+ * The join entity linking a project to an initiative. A project can only appear once in an initiative hierarchy -- it cannot be on both an initiative and one of its ancestor or descendant initiatives.
  *
  * @param request - function to call the graphql client
  * @param data - L.InitiativeToProjectFragment response data
@@ -8753,7 +8797,7 @@ export class InitiativeToProject extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The sort order of the project within the initiative. */
+  /** The sort order of the project within its parent initiative. */
   public sortOrder: string;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -8777,15 +8821,15 @@ export class InitiativeToProject extends Request {
     return this._project?.id;
   }
 
-  /** Creates a new initiativeToProject join. */
+  /** Associates a project with an initiative. A project can only appear once in an initiative hierarchy. */
   public create(input: L.InitiativeToProjectCreateInput) {
     return new CreateInitiativeToProjectMutation(this._request).fetch(input);
   }
-  /** Deletes a initiativeToProject. */
+  /** Removes a project from an initiative. */
   public delete() {
     return new DeleteInitiativeToProjectMutation(this._request).fetch(this.id);
   }
-  /** Updates a initiativeToProject. */
+  /** Updates an initiative-to-project association, such as its sort order. */
   public update(input: L.InitiativeToProjectUpdateInput) {
     return new UpdateInitiativeToProjectMutation(this._request).fetch(this.id, input);
   }
@@ -8812,7 +8856,7 @@ export class InitiativeToProjectConnection extends Connection<InitiativeToProjec
   }
 }
 /**
- * The result of a initiativeToProject mutation.
+ * The result of an initiative-to-project mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.InitiativeToProjectPayloadFragment response data
@@ -8831,17 +8875,17 @@ export class InitiativeToProjectPayload extends Request {
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
-  /** The initiativeToProject that was created or updated. */
+  /** The initiative-to-project association that was created or updated. */
   public get initiativeToProject(): LinearFetch<InitiativeToProject> | undefined {
     return new InitiativeToProjectQuery(this._request).fetch(this._initiativeToProject.id);
   }
-  /** The ID of initiativetoproject that was created or updated. */
+  /** The ID of initiative-to-project association that was created or updated. */
   public get initiativeToProjectId(): string | undefined {
     return this._initiativeToProject?.id;
   }
 }
 /**
- * An initiative update.
+ * A status update posted to an initiative. Initiative updates communicate progress, health, and blockers to stakeholders. Each update captures the initiative's health at the time of writing and includes a rich-text body with the update content.
  *
  * @param request - function to call the graphql client
  * @param data - L.InitiativeUpdateFragment response data
@@ -8888,7 +8932,7 @@ export class InitiativeUpdate extends Request {
   public editedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
-  /** Whether initiative update diff should be hidden. */
+  /** Whether the diff between this update and the previous one should be hidden in the UI. */
   public isDiffHidden: boolean;
   /** Whether the initiative update is stale. */
   public isStale: boolean;
@@ -8905,13 +8949,13 @@ export class InitiativeUpdate extends Request {
   public url: string;
   /** Reactions associated with the initiative update. */
   public reactions: Reaction[];
-  /** The health at the time of the update. */
+  /** The health of the initiative at the time this update was posted. Possible values are onTrack, atRisk, or offTrack. */
   public health: L.InitiativeUpdateHealthType;
-  /** The initiative that the update is associated with. */
+  /** The initiative that this status update was posted to. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return new InitiativeQuery(this._request).fetch(this._initiative.id);
   }
-  /** The ID of initiative that the update is associated with. */
+  /** The ID of initiative that this status update was posted to. */
   public get initiativeId(): string | undefined {
     return this._initiative?.id;
   }
@@ -8931,7 +8975,7 @@ export class InitiativeUpdate extends Request {
   public archive() {
     return new ArchiveInitiativeUpdateMutation(this._request).fetch(this.id);
   }
-  /** Creates a initiative update. */
+  /** Creates an initiative update. */
   public create(input: L.InitiativeUpdateCreateInput) {
     return new CreateInitiativeUpdateMutation(this._request).fetch(input);
   }
@@ -8939,7 +8983,7 @@ export class InitiativeUpdate extends Request {
   public unarchive() {
     return new UnarchiveInitiativeUpdateMutation(this._request).fetch(this.id);
   }
-  /** Updates an update. */
+  /** Updates an initiative update. */
   public update(input: L.InitiativeUpdateUpdateInput) {
     return new UpdateInitiativeUpdateMutation(this._request).fetch(this.id, input);
   }
@@ -9017,7 +9061,7 @@ export class InitiativeUpdateConnection extends Connection<InitiativeUpdate> {
   }
 }
 /**
- * InitiativeUpdatePayload model
+ * The result of an initiative update mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.InitiativeUpdatePayloadFragment response data
@@ -9036,17 +9080,17 @@ export class InitiativeUpdatePayload extends Request {
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
-  /** The initiative update that was created. */
+  /** The initiative update that was created or updated. */
   public get initiativeUpdate(): LinearFetch<InitiativeUpdate> | undefined {
     return new InitiativeUpdateQuery(this._request).fetch(this._initiativeUpdate.id);
   }
-  /** The ID of initiative update that was created. */
+  /** The ID of initiative update that was created or updated. */
   public get initiativeUpdateId(): string | undefined {
     return this._initiativeUpdate?.id;
   }
 }
 /**
- * InitiativeUpdateReminderPayload model
+ * The result of an initiative update reminder mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.InitiativeUpdateReminderPayloadFragment response data
@@ -9243,7 +9287,7 @@ export class InitiativeWebhookPayload {
   public parentInitiative?: InitiativeChildWebhookPayload | null;
 }
 /**
- * An integration with an external service.
+ * An integration with an external service. Integrations connect Linear to tools like Slack, GitHub, GitLab, Jira, Figma, Sentry, Zendesk, Intercom, Front, PagerDuty, Opsgenie, Google Sheets, Microsoft Teams, Discord, Salesforce, and others. Each integration record represents a single configured connection, scoped to a workspace and optionally to a specific team, project, initiative, or custom view. Personal integrations (e.g., Slack Personal, Jira Personal, GitHub Personal) are scoped to the user who created them.
  *
  * @param request - function to call the graphql client
  * @param data - L.IntegrationFragment response data
@@ -9269,7 +9313,7 @@ export class Integration extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The integration's type. */
+  /** The integration's type, identifying which external service this integration connects to (e.g., 'slack', 'github', 'jira', 'figma'). This determines the shape of the integration's settings and data. */
   public service: string;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -9284,7 +9328,7 @@ export class Integration extends Request {
   public get creatorId(): string | undefined {
     return this._creator?.id;
   }
-  /** The organization that the integration is associated with. */
+  /** The workspace that the integration is associated with. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
@@ -9410,7 +9454,7 @@ export class IntegrationPayload extends Request {
   }
 }
 /**
- * IntegrationRequestPayload model
+ * The result of an integration request mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.IntegrationRequestPayloadFragment response data
@@ -9443,7 +9487,7 @@ export class IntegrationSlackWorkspaceNamePayload extends Request {
   public success: boolean;
 }
 /**
- * Join table between templates and integrations.
+ * A connection between a template and an integration. This join entity links Linear issue templates to integrations so that external systems (e.g., Slack Asks channels) can use specific templates when creating issues. Each record optionally includes a foreign entity ID to scope the template to a specific external resource, such as a particular Slack channel.
  *
  * @param request - function to call the graphql client
  * @param data - L.IntegrationTemplateFragment response data
@@ -9467,7 +9511,7 @@ export class IntegrationTemplate extends Request {
   public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** ID of the foreign entity in the external integration this template is for, e.g., Slack channel ID. */
+  /** The identifier of the foreign entity in the external service that this template is scoped to. For example, a Slack channel ID indicating which channel should use this template for creating issues. When null, the template applies to the integration as a whole rather than a specific external resource. */
   public foreignEntityId?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
@@ -9493,11 +9537,11 @@ export class IntegrationTemplate extends Request {
     return this._template?.id;
   }
 
-  /** Creates a new integrationTemplate join. */
+  /** Creates a new connection between a template and an integration, optionally scoped to a specific external resource such as a Slack channel. */
   public create(input: L.IntegrationTemplateCreateInput) {
     return new CreateIntegrationTemplateMutation(this._request).fetch(input);
   }
-  /** Deletes a integrationTemplate. */
+  /** Deletes an integration template connection, removing the link between a template and an integration. */
   public delete() {
     return new DeleteIntegrationTemplateMutation(this._request).fetch(this.id);
   }
@@ -9524,7 +9568,7 @@ export class IntegrationTemplateConnection extends Connection<IntegrationTemplat
   }
 }
 /**
- * IntegrationTemplatePayload model
+ * The result of an integration template mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.IntegrationTemplatePayloadFragment response data
@@ -9553,7 +9597,7 @@ export class IntegrationTemplatePayload extends Request {
   }
 }
 /**
- * The configuration of all integrations for different entities.
+ * The configuration of all integrations for different entities. Controls Slack notification preferences for a specific team, project, initiative, or custom view. Exactly one of teamId, projectId, customViewId, or initiativeId must be set, determining which entity these integration settings apply to.
  *
  * @param request - function to call the graphql client
  * @param data - L.IntegrationsSettingsFragment response data
@@ -9568,6 +9612,7 @@ export class IntegrationsSettings extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
+    this.microsoftTeamsProjectUpdateCreated = data.microsoftTeamsProjectUpdateCreated ?? undefined;
     this.slackInitiativeUpdateCreated = data.slackInitiativeUpdateCreated ?? undefined;
     this.slackIssueAddedToTriage = data.slackIssueAddedToTriage ?? undefined;
     this.slackIssueAddedToView = data.slackIssueAddedToView ?? undefined;
@@ -9593,7 +9638,9 @@ export class IntegrationsSettings extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** Whether to send a Slack message when a initiate update is created. */
+  /** Whether to send a Microsoft Teams message when a project update is created. */
+  public microsoftTeamsProjectUpdateCreated?: boolean | null;
+  /** Whether to send a Slack message when an initiative update is created. */
   public slackInitiativeUpdateCreated?: boolean | null;
   /** Whether to send a Slack message when a new issue is added to triage. */
   public slackIssueAddedToTriage?: boolean | null;
@@ -9649,11 +9696,11 @@ export class IntegrationsSettings extends Request {
     return this._team?.id;
   }
 
-  /** Creates new settings for one or more integrations. */
+  /** Creates new Slack notification settings for a team, project, initiative, or custom view. */
   public create(input: L.IntegrationsSettingsCreateInput) {
     return new CreateIntegrationsSettingsMutation(this._request).fetch(input);
   }
-  /** Updates settings related to integrations for a project or a team. */
+  /** Updates Slack notification settings for a team, project, initiative, or custom view. */
   public update(input: L.IntegrationsSettingsUpdateInput) {
     return new UpdateIntegrationsSettingsMutation(this._request).fetch(this.id, input);
   }
@@ -9688,7 +9735,7 @@ export class IntegrationsSettingsPayload extends Request {
   }
 }
 /**
- * An issue.
+ * An issue is the core work item in Linear. Issues belong to a team, have a workflow status, can be assigned to users, carry a priority level, and can be organized into projects and cycles. Issues support sub-issues (parent-child hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking. They can also be linked to other issues via relations, attached to releases, and tracked through their full history of changes.
  *
  * @param request - function to call the graphql client
  * @param data - L.IssueFragment response data
@@ -9806,7 +9853,7 @@ export class Issue extends Request {
   public description?: string | null;
   /** The date at which the issue is due. */
   public dueDate?: L.Scalars["TimelessDate"] | null;
-  /** The estimate of the complexity of the issue.. */
+  /** The estimate of the complexity of the issue. The specific scale used depends on the team's estimation configuration (e.g., points, T-shirt sizes). Null if no estimate has been set. */
   public estimate?: number | null;
   /** The unique identifier of the entity. */
   public id: string;
@@ -9814,9 +9861,9 @@ export class Issue extends Request {
   public identifier: string;
   /** Whether this issue inherits shared access from its parent issue. */
   public inheritsSharedAccess: boolean;
-  /** Id of the labels associated with this issue. */
+  /** Identifiers of the labels associated with this issue. Can be used to query the labels directly. */
   public labelIds: string[];
-  /** The issue's unique number. */
+  /** The issue's unique number, scoped to the issue's team. Together with the team key, this forms the issue's human-readable identifier (e.g., ENG-123). */
   public number: number;
   /** Previous identifiers of the issue if it has been moved between teams. */
   public previousIdentifiers: string[];
@@ -9824,9 +9871,9 @@ export class Issue extends Request {
   public priority: number;
   /** Label for the priority. */
   public priorityLabel: string;
-  /** The order of the item in relation to other items in the organization, when ordered by priority. */
+  /** The order of the item in relation to other items in the workspace, when ordered by priority. */
   public prioritySortOrder: number;
-  /** Emoji reaction summary, grouped by emoji type. */
+  /** Emoji reaction summary for the issue, grouped by emoji type. Contains the count and reacting user information for each emoji. */
   public reactionData: L.Scalars["JSONObject"];
   /** The time at which the issue's SLA will breach. */
   public slaBreachesAt?: Date | null;
@@ -9840,7 +9887,7 @@ export class Issue extends Request {
   public slaType?: string | null;
   /** The time until an issue will be snoozed in Triage view. */
   public snoozedUntilAt?: Date | null;
-  /** The order of the item in relation to other items in the organization. */
+  /** The order of the item in relation to other items in the organization. Used for manual sorting in list views. */
   public sortOrder: number;
   /** The time at which the issue was moved into started state. */
   public startedAt?: Date | null;
@@ -9848,7 +9895,7 @@ export class Issue extends Request {
   public startedTriageAt?: Date | null;
   /** The order of the item in the sub-issue list. Only set if the issue has a parent. */
   public subIssueSortOrder?: number | null;
-  /** The issue's title. */
+  /** The issue's title. This is the primary human-readable summary of the work item. */
   public title: string;
   /** A flag that indicates whether the issue is in the trash bin. */
   public trashed?: boolean | null;
@@ -9889,45 +9936,45 @@ export class Issue extends Request {
   public get asksRequesterId(): string | undefined {
     return this._asksRequester?.id;
   }
-  /** The user to whom the issue is assigned to. */
+  /** The user to whom the issue is assigned. Null if the issue is unassigned. */
   public get assignee(): LinearFetch<User> | undefined {
     return this._assignee?.id ? new UserQuery(this._request).fetch(this._assignee?.id) : undefined;
   }
-  /** The ID of user to whom the issue is assigned to. */
+  /** The ID of user to whom the issue is assigned. null if the issue is unassigned. */
   public get assigneeId(): string | undefined {
     return this._assignee?.id;
   }
-  /** The user who created the issue. */
+  /** The user who created the issue. Null if the creator's account has been deleted or if the issue was created by an integration or system process. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
-  /** The ID of user who created the issue. */
+  /** The ID of user who created the issue. null if the creator's account has been deleted or if the issue was created by an integration or system process. */
   public get creatorId(): string | undefined {
     return this._creator?.id;
   }
-  /** The cycle that the issue is associated with. */
+  /** The cycle that the issue is associated with. Null if the issue is not part of any cycle. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
-  /** The ID of cycle that the issue is associated with. */
+  /** The ID of cycle that the issue is associated with. null if the issue is not part of any cycle. */
   public get cycleId(): string | undefined {
     return this._cycle?.id;
   }
-  /** The agent user that is delegated to work on this issue. */
+  /** The agent user that is delegated to work on this issue. Set when an AI agent has been assigned to perform work on this issue. Null if no agent is working on the issue. */
   public get delegate(): LinearFetch<User> | undefined {
     return this._delegate?.id ? new UserQuery(this._request).fetch(this._delegate?.id) : undefined;
   }
-  /** The ID of agent user that is delegated to work on this issue. */
+  /** The ID of agent user that is delegated to work on this issue. set when an ai agent has been assigned to perform work on this issue. null if no agent is working on the issue. */
   public get delegateId(): string | undefined {
     return this._delegate?.id;
   }
-  /** The external user who created the issue. */
+  /** The external user who created the issue. Set when the issue was created via an integration (e.g., Slack, Intercom) on behalf of a non-Linear user. Null if the issue was created by a Linear user. */
   public get externalUserCreator(): LinearFetch<ExternalUser> | undefined {
     return this._externalUserCreator?.id
       ? new ExternalUserQuery(this._request).fetch(this._externalUserCreator?.id)
       : undefined;
   }
-  /** The ID of external user who created the issue. */
+  /** The ID of external user who created the issue. set when the issue was created via an integration (e.g., slack, intercom) on behalf of a non-linear user. null if the issue was created by a linear user. */
   public get externalUserCreatorId(): string | undefined {
     return this._externalUserCreator?.id;
   }
@@ -9957,21 +10004,21 @@ export class Issue extends Request {
   public get parentId(): string | undefined {
     return this._parent?.id;
   }
-  /** The project that the issue is associated with. */
+  /** The project that the issue is associated with. Null if the issue is not part of any project. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
-  /** The ID of project that the issue is associated with. */
+  /** The ID of project that the issue is associated with. null if the issue is not part of any project. */
   public get projectId(): string | undefined {
     return this._project?.id;
   }
-  /** The projectMilestone that the issue is associated with. */
+  /** The project milestone that the issue is associated with. Null if the issue is not assigned to a specific milestone within its project. */
   public get projectMilestone(): LinearFetch<ProjectMilestone> | undefined {
     return this._projectMilestone?.id
       ? new ProjectMilestoneQuery(this._request).fetch(this._projectMilestone?.id)
       : undefined;
   }
-  /** The ID of projectmilestone that the issue is associated with. */
+  /** The ID of project milestone that the issue is associated with. null if the issue is not assigned to a specific milestone within its project. */
   public get projectMilestoneId(): string | undefined {
     return this._projectMilestone?.id;
   }
@@ -9993,27 +10040,27 @@ export class Issue extends Request {
   public get snoozedById(): string | undefined {
     return this._snoozedBy?.id;
   }
-  /** The comment that this issue was created from. */
+  /** The comment that this issue was created from, when an issue is created from an existing comment. Null if the issue was not created from a comment. */
   public get sourceComment(): LinearFetch<Comment> | undefined {
     return this._sourceComment?.id ? new CommentQuery(this._request).fetch({ id: this._sourceComment?.id }) : undefined;
   }
-  /** The ID of comment that this issue was created from. */
+  /** The ID of comment that this issue was created from, when an issue is created from an existing comment. null if the issue was not created from a comment. */
   public get sourceCommentId(): string | undefined {
     return this._sourceComment?.id;
   }
-  /** The workflow state that the issue is associated with. */
+  /** The workflow state (issue status) that the issue is currently in. Workflow states represent the issue's progress through the team's workflow, such as Triage, Todo, In Progress, Done, or Canceled. */
   public get state(): LinearFetch<WorkflowState> | undefined {
     return new WorkflowStateQuery(this._request).fetch(this._state.id);
   }
-  /** The ID of workflow state that the issue is associated with. */
+  /** The ID of workflow state (issue status) that the issue is currently in. workflow states represent the issue's progress through the team's workflow, such as triage, todo, in progress, done, or canceled. */
   public get stateId(): string | undefined {
     return this._state?.id;
   }
-  /** The team that the issue is associated with. */
+  /** The team that the issue belongs to. Every issue must belong to exactly one team, which determines the available workflow states, labels, and other team-specific configuration. */
   public get team(): LinearFetch<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
   }
-  /** The ID of team that the issue is associated with. */
+  /** The ID of team that the issue belongs to. every issue must belong to exactly one team, which determines the available workflow states, labels, and other team-specific configuration. */
   public get teamId(): string | undefined {
     return this._team?.id;
   }
@@ -10163,7 +10210,7 @@ export class IssueAssignedToYouNotificationWebhookPayload {
   public issue: IssueWithDescriptionChildWebhookPayload;
 }
 /**
- * IssueBatchPayload model
+ * The result of a batch issue mutation, containing the updated issues and a success indicator.
  *
  * @param request - function to call the graphql client
  * @param data - L.IssueBatchPayloadFragment response data
@@ -10392,7 +10439,7 @@ export class IssueEmojiReactionNotificationWebhookPayload {
   public issue: IssueWithDescriptionChildWebhookPayload;
 }
 /**
- * IssueFilterSuggestionPayload model
+ * The result of an AI-generated issue filter suggestion based on a text prompt.
  *
  * @param request - function to call the graphql client
  * @param data - L.IssueFilterSuggestionPayloadFragment response data
@@ -10410,7 +10457,7 @@ export class IssueFilterSuggestionPayload extends Request {
   public logId?: string | null;
 }
 /**
- * A record of changes to an issue.
+ * A record of changes to an issue. Each history entry captures one or more property changes made to an issue within a short grouping window by the same actor. History entries track changes to fields such as title, assignee, status, priority, project, cycle, labels, due date, estimate, parent issue, and more. They also record metadata about what triggered the change (e.g., a user action, workflow automation, triage rule, or integration).
  *
  * @param request - function to call the graphql client
  * @param data - L.IssueHistoryFragment response data
@@ -10521,15 +10568,15 @@ export class IssueHistory extends Request {
     this._triageResponsibilityTeam = data.triageResponsibilityTeam ?? undefined;
   }
 
-  /** The id of user who made these changes. If null, possibly means that the change made by an integration. */
+  /** Identifier of the user who made these changes. Can be used to query the user directly. Null if the change was made by an integration, automation, or system process. */
   public actorId?: string | null;
   /** ID's of labels that were added. */
   public addedLabelIds?: string[] | null;
-  /** Whether the issue is archived at the time of this history entry. */
+  /** Whether the issue was archived (true) or unarchived (false) in this change. Null if the archive status was not changed. */
   public archived?: boolean | null;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** The id of linked attachment. */
+  /** Identifier of the attachment that was linked to or unlinked from the issue. Can be used to query the attachment directly. Null if no attachment change occurred. */
   public attachmentId?: string | null;
   /** Whether the issue was auto-archived. */
   public autoArchived?: boolean | null;
@@ -10537,21 +10584,21 @@ export class IssueHistory extends Request {
   public autoClosed?: boolean | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** The id of linked customer need. */
+  /** [Deprecated] Identifier of the customer need that was linked to the issue. Use customer need related arrays in changes instead. */
   public customerNeedId?: string | null;
-  /** The id of user from whom the issue was re-assigned from. */
+  /** Identifier of the user from whom the issue was re-assigned. Can be used to query the user directly. Null if the assignee was not changed or the issue was previously unassigned. */
   public fromAssigneeId?: string | null;
-  /** The id of previous cycle of the issue. */
+  /** Identifier of the previous cycle of the issue. Can be used to query the cycle directly. Null if the cycle was not changed or the issue was not in a cycle. */
   public fromCycleId?: string | null;
   /** What the due date was changed from. */
   public fromDueDate?: L.Scalars["TimelessDate"] | null;
   /** What the estimate was changed from. */
   public fromEstimate?: number | null;
-  /** The id of previous parent of the issue. */
+  /** Identifier of the previous parent issue. Can be used to query the issue directly. Null if the parent was not changed or the issue previously had no parent. */
   public fromParentId?: string | null;
   /** What the priority was changed from. */
   public fromPriority?: number | null;
-  /** The id of previous project of the issue. */
+  /** Identifier of the previous project of the issue. Can be used to query the project directly. Null if the project was not changed or the issue was not in a project. */
   public fromProjectId?: string | null;
   /** Whether the issue had previously breached its SLA. */
   public fromSlaBreached?: boolean | null;
@@ -10561,9 +10608,9 @@ export class IssueHistory extends Request {
   public fromSlaStartedAt?: Date | null;
   /** The type of SLA that was previously set on the issue. */
   public fromSlaType?: string | null;
-  /** The id of previous workflow state of the issue. */
+  /** Identifier of the previous workflow state (issue status) of the issue. Can be used to query the workflow state directly. Null if the status was not changed. */
   public fromStateId?: string | null;
-  /** The id of team from which the issue was moved from. */
+  /** Identifier of the team from which the issue was moved. Can be used to query the team directly. Null if the team was not changed. */
   public fromTeamId?: string | null;
   /** What the title was changed from. */
   public fromTitle?: string | null;
@@ -10571,21 +10618,21 @@ export class IssueHistory extends Request {
   public id: string;
   /** ID's of labels that were removed. */
   public removedLabelIds?: string[] | null;
-  /** The id of user to whom the issue was assigned to. */
+  /** Identifier of the user to whom the issue was assigned. Can be used to query the user directly. Null if the assignee was not changed or the issue was unassigned. */
   public toAssigneeId?: string | null;
-  /** The id of new project created from the issue. */
+  /** Identifier of the new project that was created by converting this issue to a project. Can be used to query the project directly. Null if the issue was not converted to a project. */
   public toConvertedProjectId?: string | null;
-  /** The id of new cycle of the issue. */
+  /** Identifier of the new cycle of the issue. Can be used to query the cycle directly. Null if the cycle was not changed or the issue was removed from a cycle. */
   public toCycleId?: string | null;
   /** What the due date was changed to. */
   public toDueDate?: L.Scalars["TimelessDate"] | null;
   /** What the estimate was changed to. */
   public toEstimate?: number | null;
-  /** The id of new parent of the issue. */
+  /** Identifier of the new parent issue. Can be used to query the issue directly. Null if the parent was not changed or the issue was removed from its parent. */
   public toParentId?: string | null;
   /** What the priority was changed to. */
   public toPriority?: number | null;
-  /** The id of new project of the issue. */
+  /** Identifier of the new project of the issue. Can be used to query the project directly. Null if the project was not changed or the issue was removed from a project. */
   public toProjectId?: string | null;
   /** Whether the issue has now breached its SLA. */
   public toSlaBreached?: boolean | null;
@@ -10595,9 +10642,9 @@ export class IssueHistory extends Request {
   public toSlaStartedAt?: Date | null;
   /** The type of SLA that is now set on the issue. */
   public toSlaType?: string | null;
-  /** The id of new workflow state of the issue. */
+  /** Identifier of the new workflow state (issue status) of the issue. Can be used to query the workflow state directly. Null if the status was not changed. */
   public toStateId?: string | null;
-  /** The id of team to which the issue was moved to. */
+  /** Identifier of the team to which the issue was moved. Can be used to query the team directly. Null if the team was not changed. */
   public toTeamId?: string | null;
   /** What the title was changed to. */
   public toTitle?: string | null;
@@ -10767,7 +10814,7 @@ export class IssueHistoryConnection extends Connection<IssueHistory> {
   }
 }
 /**
- * An error that occurred during triage rule execution.
+ * An error that occurred during triage rule execution, such as a conflicting label assignment or an invalid property value. Contains the error type and optionally the property that caused the failure.
  *
  * @param request - function to call the graphql client
  * @param data - L.IssueHistoryTriageRuleErrorFragment response data
@@ -10814,7 +10861,7 @@ export class IssueHistoryTriageRuleError extends Request {
   }
 }
 /**
- * Metadata about a triage rule that made changes to an issue.
+ * Metadata about a triage responsibility rule that made changes to an issue, such as auto-assigning an issue when it enters triage. Includes information about any errors that occurred during rule execution.
  *
  * @param request - function to call the graphql client
  * @param data - L.IssueHistoryTriageRuleMetadataFragment response data
@@ -10836,7 +10883,7 @@ export class IssueHistoryTriageRuleMetadata extends Request {
   public updatedByTriageRule?: WorkflowDefinition | null;
 }
 /**
- * Metadata about a workflow that made changes to an issue.
+ * Metadata about a workflow automation that made changes to an issue. Links the issue history entry back to the workflow definition that triggered the change, and optionally to any AI conversation involved in the automation.
  *
  * @param request - function to call the graphql client
  * @param data - L.IssueHistoryWorkflowMetadataFragment response data
@@ -10853,7 +10900,7 @@ export class IssueHistoryWorkflowMetadata extends Request {
   public workflowDefinition?: WorkflowDefinition | null;
 }
 /**
- * An import job for data from an external service.
+ * An import job for data from an external service such as Jira, Asana, GitHub, Shortcut, or other project management tools. Import jobs track the full lifecycle of importing issues, labels, workflow states, and other data into a Linear workspace, including progress, status, error states, and data mapping configuration.
  *
  * @param request - function to call the graphql client
  * @param data - L.IssueImportFragment response data
@@ -10882,7 +10929,7 @@ export class IssueImport extends Request {
   public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** The id for the user that started the job. */
+  /** Identifier of the user who started the import job. Can be used to query the user directly. Null if the user has been deleted. */
   public creatorId?: string | null;
   /** File URL for the uploaded CSV for the import, if there is one. */
   public csvFileUrl?: string | null;
@@ -10896,15 +10943,15 @@ export class IssueImport extends Request {
   public id: string;
   /** The data mapping configuration for the import job. */
   public mapping?: L.Scalars["JSONObject"] | null;
-  /** Current step progress in % (0-100). */
+  /** Current step progress as a percentage (0-100). Null if the import has not yet started or progress tracking is not available. */
   public progress?: number | null;
-  /** The service from which data will be imported. */
+  /** The external service from which data is being imported (e.g., jira, asana, github, shortcut, linear). */
   public service: string;
   /** Metadata related to import service. */
   public serviceMetadata?: L.Scalars["JSONObject"] | null;
-  /** The status for the import job. */
+  /** The current status of the import job, indicating its position in the import lifecycle (e.g., not started, in progress, complete, error). */
   public status: string;
-  /** New team's name in cases when teamId not set. */
+  /** The name of the new team to be created for the import, when the import is configured to create a new team rather than importing into an existing one. Null if importing into an existing team. */
   public teamName?: string | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -10922,7 +10969,7 @@ export class IssueImport extends Request {
   }
 }
 /**
- * IssueImportCheckPayload model
+ * The result of checking whether an import from an external service can proceed.
  *
  * @param request - function to call the graphql client
  * @param data - L.IssueImportCheckPayloadFragment response data
@@ -10937,7 +10984,7 @@ export class IssueImportCheckPayload extends Request {
   public success: boolean;
 }
 /**
- * IssueImportDeletePayload model
+ * The result of deleting an issue import, containing the deleted import job and a success indicator.
  *
  * @param request - function to call the graphql client
  * @param data - L.IssueImportDeletePayloadFragment response data
@@ -10958,7 +11005,7 @@ export class IssueImportDeletePayload extends Request {
   public issueImport?: IssueImport | null;
 }
 /**
- * Whether a custom JQL query is valid or not
+ * The result of validating a custom JQL query for a Jira import.
  *
  * @param request - function to call the graphql client
  * @param data - L.IssueImportJqlCheckPayloadFragment response data
@@ -10971,7 +11018,7 @@ export class IssueImportJqlCheckPayload extends Request {
     this.success = data.success;
   }
 
-  /** Returns an approximate number of issues matching the JQL query, if available */
+  /** An approximate number of issues matching the JQL query. Null when the query is invalid or the count is unavailable. */
   public count?: number | null;
   /** An error message returned by Jira when validating the JQL query. */
   public error?: string | null;
@@ -10979,7 +11026,7 @@ export class IssueImportJqlCheckPayload extends Request {
   public success: boolean;
 }
 /**
- * IssueImportPayload model
+ * The result of an issue import mutation, containing the import job and a success indicator.
  *
  * @param request - function to call the graphql client
  * @param data - L.IssueImportPayloadFragment response data
@@ -11000,7 +11047,7 @@ export class IssueImportPayload extends Request {
   public issueImport?: IssueImport | null;
 }
 /**
- * Whether an issue import can be synced at the end of an import or not
+ * The result of checking whether an issue import can be synced with its source service after import completes.
  *
  * @param request - function to call the graphql client
  * @param data - L.IssueImportSyncCheckPayloadFragment response data
@@ -11014,11 +11061,11 @@ export class IssueImportSyncCheckPayload extends Request {
 
   /** Returns true if the import can be synced, false otherwise */
   public canSync: boolean;
-  /** An error message with a root cause of why the import cannot be synced */
+  /** An error message explaining why the import cannot be synced. Null when canSync is true. */
   public error?: string | null;
 }
 /**
- * Labels that can be associated with issues.
+ * Labels that can be associated with issues. Labels help categorize and filter issues across a workspace. They can be workspace-level (shared across all teams) or team-scoped. Labels have a color for visual identification and can be organized hierarchically into groups, where a parent label acts as a group containing child labels. Labels may also be inherited from parent teams to sub-teams.
  *
  * @param request - function to call the graphql client
  * @param data - L.IssueLabelFragment response data
@@ -11050,7 +11097,7 @@ export class IssueLabel extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** The label's color as a HEX string. */
+  /** The label's color as a HEX string (e.g., '#EB5757'). Used for visual identification of the label in the UI. */
   public color: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
@@ -11058,9 +11105,9 @@ export class IssueLabel extends Request {
   public description?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
-  /** Whether the label is a group. */
+  /** Whether the label is a group. When true, this label acts as a container for child labels and cannot be directly applied to issues or projects. When false, the label can be directly applied. */
   public isGroup: boolean;
-  /** The date when the label was last applied to an issue or project. */
+  /** The date when the label was last applied to an issue or project. Null if the label has never been applied. */
   public lastAppliedAt?: Date | null;
   /** The label's name. */
   public name: string;
@@ -11077,11 +11124,11 @@ export class IssueLabel extends Request {
   public get creatorId(): string | undefined {
     return this._creator?.id;
   }
-  /** The original label inherited from. */
+  /** The original workspace or parent-team label that this label was inherited from. Null if the label is not inherited. */
   public get inheritedFrom(): LinearFetch<IssueLabel> | undefined {
     return this._inheritedFrom?.id ? new IssueLabelQuery(this._request).fetch(this._inheritedFrom?.id) : undefined;
   }
-  /** The ID of original label inherited from. */
+  /** The ID of original workspace or parent-team label that this label was inherited from. null if the label is not inherited. */
   public get inheritedFromId(): string | undefined {
     return this._inheritedFrom?.id;
   }
@@ -11104,15 +11151,15 @@ export class IssueLabel extends Request {
   public get retiredById(): string | undefined {
     return this._retiredBy?.id;
   }
-  /** The team that the label is associated with. If null, the label is associated with the global workspace. */
+  /** The team that the label is scoped to. If null, the label is a workspace-level label available to all teams in the workspace. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
-  /** The ID of team that the label is associated with. if null, the label is associated with the global workspace. */
+  /** The ID of team that the label is scoped to. if null, the label is a workspace-level label available to all teams in the workspace. */
   public get teamId(): string | undefined {
     return this._team?.id;
   }
-  /** Children of the label. */
+  /** Child labels within this label group. Only populated when the label is a group (isGroup is true). */
   public children(variables?: Omit<L.IssueLabel_ChildrenQueryVariables, "id">) {
     return new IssueLabel_ChildrenQuery(this._request, this.id, variables).fetch(variables);
   }
@@ -11177,7 +11224,7 @@ export class IssueLabelConnection extends Connection<IssueLabel> {
   }
 }
 /**
- * IssueLabelPayload model
+ * The result of a label mutation, containing the created or updated label and a success indicator.
  *
  * @param request - function to call the graphql client
  * @param data - L.IssueLabelPayloadFragment response data
@@ -11350,7 +11397,7 @@ export class IssueNewCommentNotificationWebhookPayload {
   public parentComment?: CommentChildWebhookPayload | null;
 }
 /**
- * An issue related notification.
+ * A notification related to an issue, such as assignment, comment, mention, status change, or priority change.
  *
  * @param request - function to call the graphql client
  * @param data - L.IssueNotificationFragment response data
@@ -11399,10 +11446,7 @@ export class IssueNotification extends Request {
   public commentId?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /**
-   * The time at when an email reminder for this notification was sent to the user. Null, if no email
-   *     reminder has been sent.
-   */
+  /** The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent. */
   public emailedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
@@ -11412,13 +11456,13 @@ export class IssueNotification extends Request {
   public parentCommentId?: string | null;
   /** Name of the reaction emoji related to the notification. */
   public reactionEmoji?: string | null;
-  /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
+  /** The time at which the user marked the notification as read. Null if the notification is unread. */
   public readAt?: Date | null;
-  /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
+  /** The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed. */
   public snoozedUntilAt?: Date | null;
-  /** Notification type. */
+  /** Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated. */
   public type: string;
-  /** The time at which a notification was unsnoozed.. */
+  /** The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed. */
   public unsnoozedAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -11431,11 +11475,11 @@ export class IssueNotification extends Request {
   public botActor?: ActorBot | null;
   /** The category of the notification. */
   public category: L.NotificationCategory;
-  /** The user that caused the notification. */
+  /** The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
-  /** The ID of user that caused the notification. */
+  /** The ID of user that caused the notification. null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
   public get actorId(): string | undefined {
     return this._actor?.id;
   }
@@ -11443,13 +11487,13 @@ export class IssueNotification extends Request {
   public get comment(): LinearFetch<Comment> | undefined {
     return this._comment?.id ? new CommentQuery(this._request).fetch({ id: this._comment?.id }) : undefined;
   }
-  /** The external user that caused the notification. */
+  /** The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member. */
   public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
     return this._externalUserActor?.id
       ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
       : undefined;
   }
-  /** The ID of external user that caused the notification. */
+  /** The ID of external user that caused the notification. populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like slack or github) rather than a linear workspace member. */
   public get externalUserActorId(): string | undefined {
     return this._externalUserActor?.id;
   }
@@ -11469,17 +11513,17 @@ export class IssueNotification extends Request {
   public get teamId(): string | undefined {
     return this._team?.id;
   }
-  /** The user that received the notification. */
+  /** The recipient user of this notification. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
-  /** The ID of user that received the notification. */
+  /** The ID of recipient user of this notification. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
 }
 /**
- * IssuePayload model
+ * The result of an issue mutation, containing the created or updated issue and a success indicator.
  *
  * @param request - function to call the graphql client
  * @param data - L.IssuePayloadFragment response data
@@ -11508,7 +11552,7 @@ export class IssuePayload extends Request {
   }
 }
 /**
- * IssuePriorityValue model
+ * A mapping of an issue priority value to its human-readable label.
  *
  * @param request - function to call the graphql client
  * @param data - L.IssuePriorityValueFragment response data
@@ -11526,7 +11570,7 @@ export class IssuePriorityValue extends Request {
   public priority: number;
 }
 /**
- * A relation between two issues.
+ * A relation between two issues. Issue relations represent directional relationships such as blocking, being blocked by, relating to, or duplicating another issue. Each relation connects a source issue to a related issue with a specific type describing the nature of the relationship.
  *
  * @param request - function to call the graphql client
  * @param data - L.IssueRelationFragment response data
@@ -11552,26 +11596,26 @@ export class IssueRelation extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The relationship of the issue with the related issue. */
+  /** The type of relationship between the source issue and the related issue. Possible values include blocks, duplicate, and related. */
   public type: string;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The issue whose relationship is being described. */
+  /** The source issue whose relationship is being described. This is the issue from which the relation originates. */
   public get issue(): LinearFetch<Issue> | undefined {
     return new IssueQuery(this._request).fetch(this._issue.id);
   }
-  /** The ID of issue whose relationship is being described. */
+  /** The ID of source issue whose relationship is being described. this is the issue from which the relation originates. */
   public get issueId(): string | undefined {
     return this._issue?.id;
   }
-  /** The related issue. */
+  /** The target issue that the source issue is related to. The relation type describes how the source issue relates to this issue. */
   public get relatedIssue(): LinearFetch<Issue> | undefined {
     return new IssueQuery(this._request).fetch(this._relatedIssue.id);
   }
-  /** The ID of related issue. */
+  /** The ID of target issue that the source issue is related to. the relation type describes how the source issue relates to this issue. */
   public get relatedIssueId(): string | undefined {
     return this._relatedIssue?.id;
   }
@@ -11611,7 +11655,7 @@ export class IssueRelationConnection extends Connection<IssueRelation> {
   }
 }
 /**
- * Issue relation history's payload.
+ * Payload describing a change to an issue relation, including which issue was involved and the type of change that occurred.
  *
  * @param request - function to call the graphql client
  * @param data - L.IssueRelationHistoryPayloadFragment response data
@@ -11623,13 +11667,13 @@ export class IssueRelationHistoryPayload extends Request {
     this.type = data.type;
   }
 
-  /** The identifier of the related issue. */
+  /** The human-readable identifier of the related issue (e.g., ENG-123). */
   public identifier: string;
-  /** The type of the change. */
+  /** The type of relation change that occurred (e.g., relation added or removed). */
   public type: string;
 }
 /**
- * IssueRelationPayload model
+ * The result of an issue relation mutation, containing the created or updated issue relation and a success indicator.
  *
  * @param request - function to call the graphql client
  * @param data - L.IssueRelationPayloadFragment response data
@@ -11672,10 +11716,10 @@ export class IssueSearchPayload extends Request {
     this.nodes = data.nodes.map(node => new IssueSearchResult(request, node));
   }
 
-  /** Total number of results for query without filters applied. */
+  /** Total number of matching results before pagination is applied. */
   public totalCount: number;
   public nodes: IssueSearchResult[];
-  /** Archived entities matching the search term along with all their dependencies. */
+  /** Archived entities matching the search term along with all their dependencies, serialized for the client sync engine. */
   public archivePayload: ArchiveResponse;
   public pageInfo: PageInfo;
 }
@@ -11799,7 +11843,7 @@ export class IssueSearchResult extends Request {
   public description?: string | null;
   /** The date at which the issue is due. */
   public dueDate?: L.Scalars["TimelessDate"] | null;
-  /** The estimate of the complexity of the issue.. */
+  /** The estimate of the complexity of the issue. The specific scale used depends on the team's estimation configuration (e.g., points, T-shirt sizes). Null if no estimate has been set. */
   public estimate?: number | null;
   /** The unique identifier of the entity. */
   public id: string;
@@ -11807,11 +11851,11 @@ export class IssueSearchResult extends Request {
   public identifier: string;
   /** Whether this issue inherits shared access from its parent issue. */
   public inheritsSharedAccess: boolean;
-  /** Id of the labels associated with this issue. */
+  /** Identifiers of the labels associated with this issue. Can be used to query the labels directly. */
   public labelIds: string[];
   /** Metadata related to search result. */
   public metadata: L.Scalars["JSONObject"];
-  /** The issue's unique number. */
+  /** The issue's unique number, scoped to the issue's team. Together with the team key, this forms the issue's human-readable identifier (e.g., ENG-123). */
   public number: number;
   /** Previous identifiers of the issue if it has been moved between teams. */
   public previousIdentifiers: string[];
@@ -11819,9 +11863,9 @@ export class IssueSearchResult extends Request {
   public priority: number;
   /** Label for the priority. */
   public priorityLabel: string;
-  /** The order of the item in relation to other items in the organization, when ordered by priority. */
+  /** The order of the item in relation to other items in the workspace, when ordered by priority. */
   public prioritySortOrder: number;
-  /** Emoji reaction summary, grouped by emoji type. */
+  /** Emoji reaction summary for the issue, grouped by emoji type. Contains the count and reacting user information for each emoji. */
   public reactionData: L.Scalars["JSONObject"];
   /** The time at which the issue's SLA will breach. */
   public slaBreachesAt?: Date | null;
@@ -11835,7 +11879,7 @@ export class IssueSearchResult extends Request {
   public slaType?: string | null;
   /** The time until an issue will be snoozed in Triage view. */
   public snoozedUntilAt?: Date | null;
-  /** The order of the item in relation to other items in the organization. */
+  /** The order of the item in relation to other items in the organization. Used for manual sorting in list views. */
   public sortOrder: number;
   /** The time at which the issue was moved into started state. */
   public startedAt?: Date | null;
@@ -11843,7 +11887,7 @@ export class IssueSearchResult extends Request {
   public startedTriageAt?: Date | null;
   /** The order of the item in the sub-issue list. Only set if the issue has a parent. */
   public subIssueSortOrder?: number | null;
-  /** The issue's title. */
+  /** The issue's title. This is the primary human-readable summary of the work item. */
   public title: string;
   /** A flag that indicates whether the issue is in the trash bin. */
   public trashed?: boolean | null;
@@ -11884,45 +11928,45 @@ export class IssueSearchResult extends Request {
   public get asksRequesterId(): string | undefined {
     return this._asksRequester?.id;
   }
-  /** The user to whom the issue is assigned to. */
+  /** The user to whom the issue is assigned. Null if the issue is unassigned. */
   public get assignee(): LinearFetch<User> | undefined {
     return this._assignee?.id ? new UserQuery(this._request).fetch(this._assignee?.id) : undefined;
   }
-  /** The ID of user to whom the issue is assigned to. */
+  /** The ID of user to whom the issue is assigned. null if the issue is unassigned. */
   public get assigneeId(): string | undefined {
     return this._assignee?.id;
   }
-  /** The user who created the issue. */
+  /** The user who created the issue. Null if the creator's account has been deleted or if the issue was created by an integration or system process. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
-  /** The ID of user who created the issue. */
+  /** The ID of user who created the issue. null if the creator's account has been deleted or if the issue was created by an integration or system process. */
   public get creatorId(): string | undefined {
     return this._creator?.id;
   }
-  /** The cycle that the issue is associated with. */
+  /** The cycle that the issue is associated with. Null if the issue is not part of any cycle. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
-  /** The ID of cycle that the issue is associated with. */
+  /** The ID of cycle that the issue is associated with. null if the issue is not part of any cycle. */
   public get cycleId(): string | undefined {
     return this._cycle?.id;
   }
-  /** The agent user that is delegated to work on this issue. */
+  /** The agent user that is delegated to work on this issue. Set when an AI agent has been assigned to perform work on this issue. Null if no agent is working on the issue. */
   public get delegate(): LinearFetch<User> | undefined {
     return this._delegate?.id ? new UserQuery(this._request).fetch(this._delegate?.id) : undefined;
   }
-  /** The ID of agent user that is delegated to work on this issue. */
+  /** The ID of agent user that is delegated to work on this issue. set when an ai agent has been assigned to perform work on this issue. null if no agent is working on the issue. */
   public get delegateId(): string | undefined {
     return this._delegate?.id;
   }
-  /** The external user who created the issue. */
+  /** The external user who created the issue. Set when the issue was created via an integration (e.g., Slack, Intercom) on behalf of a non-Linear user. Null if the issue was created by a Linear user. */
   public get externalUserCreator(): LinearFetch<ExternalUser> | undefined {
     return this._externalUserCreator?.id
       ? new ExternalUserQuery(this._request).fetch(this._externalUserCreator?.id)
       : undefined;
   }
-  /** The ID of external user who created the issue. */
+  /** The ID of external user who created the issue. set when the issue was created via an integration (e.g., slack, intercom) on behalf of a non-linear user. null if the issue was created by a linear user. */
   public get externalUserCreatorId(): string | undefined {
     return this._externalUserCreator?.id;
   }
@@ -11952,21 +11996,21 @@ export class IssueSearchResult extends Request {
   public get parentId(): string | undefined {
     return this._parent?.id;
   }
-  /** The project that the issue is associated with. */
+  /** The project that the issue is associated with. Null if the issue is not part of any project. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
-  /** The ID of project that the issue is associated with. */
+  /** The ID of project that the issue is associated with. null if the issue is not part of any project. */
   public get projectId(): string | undefined {
     return this._project?.id;
   }
-  /** The projectMilestone that the issue is associated with. */
+  /** The project milestone that the issue is associated with. Null if the issue is not assigned to a specific milestone within its project. */
   public get projectMilestone(): LinearFetch<ProjectMilestone> | undefined {
     return this._projectMilestone?.id
       ? new ProjectMilestoneQuery(this._request).fetch(this._projectMilestone?.id)
       : undefined;
   }
-  /** The ID of projectmilestone that the issue is associated with. */
+  /** The ID of project milestone that the issue is associated with. null if the issue is not assigned to a specific milestone within its project. */
   public get projectMilestoneId(): string | undefined {
     return this._projectMilestone?.id;
   }
@@ -11988,33 +12032,33 @@ export class IssueSearchResult extends Request {
   public get snoozedById(): string | undefined {
     return this._snoozedBy?.id;
   }
-  /** The comment that this issue was created from. */
+  /** The comment that this issue was created from, when an issue is created from an existing comment. Null if the issue was not created from a comment. */
   public get sourceComment(): LinearFetch<Comment> | undefined {
     return this._sourceComment?.id ? new CommentQuery(this._request).fetch({ id: this._sourceComment?.id }) : undefined;
   }
-  /** The ID of comment that this issue was created from. */
+  /** The ID of comment that this issue was created from, when an issue is created from an existing comment. null if the issue was not created from a comment. */
   public get sourceCommentId(): string | undefined {
     return this._sourceComment?.id;
   }
-  /** The workflow state that the issue is associated with. */
+  /** The workflow state (issue status) that the issue is currently in. Workflow states represent the issue's progress through the team's workflow, such as Triage, Todo, In Progress, Done, or Canceled. */
   public get state(): LinearFetch<WorkflowState> | undefined {
     return new WorkflowStateQuery(this._request).fetch(this._state.id);
   }
-  /** The ID of workflow state that the issue is associated with. */
+  /** The ID of workflow state (issue status) that the issue is currently in. workflow states represent the issue's progress through the team's workflow, such as triage, todo, in progress, done, or canceled. */
   public get stateId(): string | undefined {
     return this._state?.id;
   }
-  /** The team that the issue is associated with. */
+  /** The team that the issue belongs to. Every issue must belong to exactly one team, which determines the available workflow states, labels, and other team-specific configuration. */
   public get team(): LinearFetch<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
   }
-  /** The ID of team that the issue is associated with. */
+  /** The ID of team that the issue belongs to. every issue must belong to exactly one team, which determines the available workflow states, labels, and other team-specific configuration. */
   public get teamId(): string | undefined {
     return this._team?.id;
   }
 }
 /**
- * IssueSharedAccess model
+ * Metadata about an issue's shared access state, including which users the issue is shared with and any field restrictions for shared-only viewers.
  *
  * @param request - function to call the graphql client
  * @param data - L.IssueSharedAccessFragment response data
@@ -12170,138 +12214,7 @@ export class IssueStatusChangedNotificationWebhookPayload {
   public issue: IssueWithDescriptionChildWebhookPayload;
 }
 /**
- * IssueSuggestion model
- *
- * @param request - function to call the graphql client
- * @param data - L.IssueSuggestionFragment response data
- */
-export class IssueSuggestion extends Request {
-  private _issue: L.IssueSuggestionFragment["issue"];
-  private _suggestedIssue?: L.IssueSuggestionFragment["suggestedIssue"];
-  private _suggestedLabel?: L.IssueSuggestionFragment["suggestedLabel"];
-  private _suggestedProject?: L.IssueSuggestionFragment["suggestedProject"];
-  private _suggestedTeam?: L.IssueSuggestionFragment["suggestedTeam"];
-  private _suggestedUser?: L.IssueSuggestionFragment["suggestedUser"];
-
-  public constructor(request: LinearRequest, data: L.IssueSuggestionFragment) {
-    super(request);
-    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? new Date();
-    this.dismissalReason = data.dismissalReason ?? undefined;
-    this.id = data.id;
-    this.issueId = data.issueId;
-    this.stateChangedAt = parseDate(data.stateChangedAt) ?? new Date();
-    this.suggestedIssueId = data.suggestedIssueId ?? undefined;
-    this.suggestedLabelId = data.suggestedLabelId ?? undefined;
-    this.suggestedUserId = data.suggestedUserId ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
-    this.metadata = data.metadata ? new IssueSuggestionMetadata(request, data.metadata) : undefined;
-    this.state = data.state;
-    this.type = data.type;
-    this._issue = data.issue;
-    this._suggestedIssue = data.suggestedIssue ?? undefined;
-    this._suggestedLabel = data.suggestedLabel ?? undefined;
-    this._suggestedProject = data.suggestedProject ?? undefined;
-    this._suggestedTeam = data.suggestedTeam ?? undefined;
-    this._suggestedUser = data.suggestedUser ?? undefined;
-  }
-
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date | null;
-  /** The time at which the entity was created. */
-  public createdAt: Date;
-  public dismissalReason?: string | null;
-  /** The unique identifier of the entity. */
-  public id: string;
-  public issueId: string;
-  public stateChangedAt: Date;
-  public suggestedIssueId?: string | null;
-  public suggestedLabelId?: string | null;
-  public suggestedUserId?: string | null;
-  /**
-   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-   *     been updated after creation.
-   */
-  public updatedAt: Date;
-  public metadata?: IssueSuggestionMetadata | null;
-  public state: L.IssueSuggestionState;
-  public type: L.IssueSuggestionType;
-  public get issue(): LinearFetch<Issue> | undefined {
-    return new IssueQuery(this._request).fetch(this._issue.id);
-  }
-  public get suggestedIssue(): LinearFetch<Issue> | undefined {
-    return this._suggestedIssue?.id ? new IssueQuery(this._request).fetch(this._suggestedIssue?.id) : undefined;
-  }
-  public get suggestedLabel(): LinearFetch<IssueLabel> | undefined {
-    return this._suggestedLabel?.id ? new IssueLabelQuery(this._request).fetch(this._suggestedLabel?.id) : undefined;
-  }
-  public get suggestedProject(): LinearFetch<Project> | undefined {
-    return this._suggestedProject?.id ? new ProjectQuery(this._request).fetch(this._suggestedProject?.id) : undefined;
-  }
-  /** The ID of suggestedProject */
-  public get suggestedProjectId(): string | undefined {
-    return this._suggestedProject?.id;
-  }
-  public get suggestedTeam(): LinearFetch<Team> | undefined {
-    return this._suggestedTeam?.id ? new TeamQuery(this._request).fetch(this._suggestedTeam?.id) : undefined;
-  }
-  /** The ID of suggestedTeam */
-  public get suggestedTeamId(): string | undefined {
-    return this._suggestedTeam?.id;
-  }
-  public get suggestedUser(): LinearFetch<User> | undefined {
-    return this._suggestedUser?.id ? new UserQuery(this._request).fetch(this._suggestedUser?.id) : undefined;
-  }
-}
-/**
- * IssueSuggestionConnection model
- *
- * @param request - function to call the graphql client
- * @param fetch - function to trigger a refetch of this IssueSuggestionConnection model
- * @param data - IssueSuggestionConnection response data
- */
-export class IssueSuggestionConnection extends Connection<IssueSuggestion> {
-  public constructor(
-    request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<IssueSuggestion> | undefined>,
-    data: L.IssueSuggestionConnectionFragment
-  ) {
-    super(
-      request,
-      fetch,
-      data.nodes.map(node => new IssueSuggestion(request, node)),
-      new PageInfo(request, data.pageInfo)
-    );
-  }
-}
-/**
- * IssueSuggestionMetadata model
- *
- * @param request - function to call the graphql client
- * @param data - L.IssueSuggestionMetadataFragment response data
- */
-export class IssueSuggestionMetadata extends Request {
-  public constructor(request: LinearRequest, data: L.IssueSuggestionMetadataFragment) {
-    super(request);
-    this.appliedAutomationRuleId = data.appliedAutomationRuleId ?? undefined;
-    this.classification = data.classification ?? undefined;
-    this.evalLogId = data.evalLogId ?? undefined;
-    this.rank = data.rank ?? undefined;
-    this.reasons = data.reasons ?? undefined;
-    this.score = data.score ?? undefined;
-    this.variant = data.variant ?? undefined;
-  }
-
-  public appliedAutomationRuleId?: string | null;
-  public classification?: string | null;
-  public evalLogId?: string | null;
-  public rank?: number | null;
-  public reasons?: string[] | null;
-  public score?: number | null;
-  public variant?: string | null;
-}
-/**
- * IssueTitleSuggestionFromCustomerRequestPayload model
+ * Return type for AI-generated issue title suggestions based on customer request content.
  *
  * @param request - function to call the graphql client
  * @param data - L.IssueTitleSuggestionFromCustomerRequestPayloadFragment response data
@@ -12315,7 +12228,7 @@ export class IssueTitleSuggestionFromCustomerRequestPayload extends Request {
 
   /** The identifier of the last sync operation. */
   public lastSyncId: number;
-  /** The suggested issue title. */
+  /** The AI-suggested issue title based on the customer request content. */
   public title: string;
 }
 /**
@@ -12634,7 +12547,7 @@ export class JiraFetchProjectStatusesPayload extends Request {
   }
 }
 /**
- * A label notification subscription.
+ * A notification subscription scoped to a specific issue label. The subscriber receives notifications for events related to issues with this label.
  *
  * @param request - function to call the graphql client
  * @param data - L.LabelNotificationSubscriptionFragment response data
@@ -12671,7 +12584,7 @@ export class LabelNotificationSubscription extends Request {
     this._user = data.user ?? undefined;
   }
 
-  /** Whether the subscription is active or not. */
+  /** Whether the subscription is active. When inactive, no notifications are generated from this subscription even though it still exists. */
   public active: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
@@ -12679,46 +12592,46 @@ export class LabelNotificationSubscription extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The type of subscription. */
+  /** The notification event types that this subscription will deliver to the subscriber. */
   public notificationSubscriptionTypes: string[];
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The type of view to which the notification subscription context is associated with. */
+  /** The type of contextual view (e.g., active issues, backlog) that further scopes a team notification subscription. Null if the subscription is not associated with a specific view type. */
   public contextViewType?: L.ContextViewType | null;
-  /** The type of user view to which the notification subscription context is associated with. */
+  /** The type of user-specific view that further scopes a user notification subscription. Null if the subscription is not associated with a user view type. */
   public userContextViewType?: L.UserContextViewType | null;
-  /** The contextual custom view associated with the notification subscription. */
+  /** The custom view that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
-  /** The ID of contextual custom view associated with the notification subscription. */
+  /** The ID of custom view that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get customViewId(): string | undefined {
     return this._customView?.id;
   }
-  /** The customer associated with the notification subscription. */
+  /** The customer that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get customer(): LinearFetch<Customer> | undefined {
     return this._customer?.id ? new CustomerQuery(this._request).fetch(this._customer?.id) : undefined;
   }
-  /** The ID of customer associated with the notification subscription. */
+  /** The ID of customer that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get customerId(): string | undefined {
     return this._customer?.id;
   }
-  /** The contextual cycle view associated with the notification subscription. */
+  /** The cycle that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
-  /** The ID of contextual cycle view associated with the notification subscription. */
+  /** The ID of cycle that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get cycleId(): string | undefined {
     return this._cycle?.id;
   }
-  /** The contextual initiative view associated with the notification subscription. */
+  /** The initiative that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
-  /** The ID of contextual initiative view associated with the notification subscription. */
+  /** The ID of initiative that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get initiativeId(): string | undefined {
     return this._initiative?.id;
   }
@@ -12730,35 +12643,35 @@ export class LabelNotificationSubscription extends Request {
   public get labelId(): string | undefined {
     return this._label?.id;
   }
-  /** The contextual project view associated with the notification subscription. */
+  /** The project that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
-  /** The ID of contextual project view associated with the notification subscription. */
+  /** The ID of project that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get projectId(): string | undefined {
     return this._project?.id;
   }
-  /** The user that subscribed to receive notifications. */
+  /** The user who will receive notifications from this subscription. */
   public get subscriber(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._subscriber.id);
   }
-  /** The ID of user that subscribed to receive notifications. */
+  /** The ID of user who will receive notifications from this subscription. */
   public get subscriberId(): string | undefined {
     return this._subscriber?.id;
   }
-  /** The team associated with the notification subscription. */
+  /** The team that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
-  /** The ID of team associated with the notification subscription. */
+  /** The ID of team that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get teamId(): string | undefined {
     return this._team?.id;
   }
-  /** The user view associated with the notification subscription. */
+  /** The user that this notification subscription is scoped to, for user-specific view subscriptions. Null if the subscription targets a different entity type. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
-  /** The ID of user view associated with the notification subscription. */
+  /** The ID of user that this notification subscription is scoped to, for user-specific view subscriptions. null if the subscription targets a different entity type. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
@@ -12779,6 +12692,66 @@ export class LogoutResponse extends Request {
   public success: boolean;
 }
 /**
+ * MicrosoftTeamsChannel model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.MicrosoftTeamsChannelFragment response data
+ */
+export class MicrosoftTeamsChannel extends Request {
+  public constructor(request: LinearRequest, data: L.MicrosoftTeamsChannelFragment) {
+    super(request);
+    this.displayName = data.displayName;
+    this.id = data.id;
+    this.membershipType = data.membershipType;
+  }
+
+  /** The display name of the channel. */
+  public displayName: string;
+  /** The Microsoft Teams channel id (e.g. `19:abc@thread.tacv2`). */
+  public id: string;
+  /** The membership type of the channel: standard, private, or shared. */
+  public membershipType: string;
+}
+/**
+ * MicrosoftTeamsChannelsPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.MicrosoftTeamsChannelsPayloadFragment response data
+ */
+export class MicrosoftTeamsChannelsPayload extends Request {
+  public constructor(request: LinearRequest, data: L.MicrosoftTeamsChannelsPayloadFragment) {
+    super(request);
+    this.success = data.success;
+    this.teams = data.teams.map(node => new MicrosoftTeamsTeam(request, node));
+  }
+
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The teams the user belongs to with their channels. */
+  public teams: MicrosoftTeamsTeam[];
+}
+/**
+ * MicrosoftTeamsTeam model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.MicrosoftTeamsTeamFragment response data
+ */
+export class MicrosoftTeamsTeam extends Request {
+  public constructor(request: LinearRequest, data: L.MicrosoftTeamsTeamFragment) {
+    super(request);
+    this.displayName = data.displayName;
+    this.id = data.id;
+    this.channels = data.channels.map(node => new MicrosoftTeamsChannel(request, node));
+  }
+
+  /** The display name of the team. */
+  public displayName: string;
+  /** The AAD group id of the team. */
+  public id: string;
+  /** The channels in the team the user can access. */
+  public channels: MicrosoftTeamsChannel[];
+}
+/**
  * Node model
  *
  * @param request - function to call the graphql client
@@ -12794,7 +12767,7 @@ export class Node extends Request {
   public id: string;
 }
 /**
- * A notification sent to a user.
+ * A notification delivered to a user's inbox. Notifications are created in response to activity in the workspace such as issue assignments, comments, mentions, and status changes. Each notification has a specific type that determines the associated entity (issue, project, document, etc.) and the nature of the event. Notifications can be read, snoozed, or archived by the user.
  *
  * @param request - function to call the graphql client
  * @param data - L.NotificationFragment response data
@@ -12826,20 +12799,17 @@ export class Notification extends Request {
   public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /**
-   * The time at when an email reminder for this notification was sent to the user. Null, if no email
-   *     reminder has been sent.
-   */
+  /** The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent. */
   public emailedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
+  /** The time at which the user marked the notification as read. Null if the notification is unread. */
   public readAt?: Date | null;
-  /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
+  /** The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed. */
   public snoozedUntilAt?: Date | null;
-  /** Notification type. */
+  /** Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated. */
   public type: string;
-  /** The time at which a notification was unsnoozed.. */
+  /** The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed. */
   public unsnoozedAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -12850,29 +12820,29 @@ export class Notification extends Request {
   public botActor?: ActorBot | null;
   /** The category of the notification. */
   public category: L.NotificationCategory;
-  /** The user that caused the notification. */
+  /** The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
-  /** The ID of user that caused the notification. */
+  /** The ID of user that caused the notification. null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
   public get actorId(): string | undefined {
     return this._actor?.id;
   }
-  /** The external user that caused the notification. */
+  /** The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member. */
   public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
     return this._externalUserActor?.id
       ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
       : undefined;
   }
-  /** The ID of external user that caused the notification. */
+  /** The ID of external user that caused the notification. populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like slack or github) rather than a linear workspace member. */
   public get externalUserActorId(): string | undefined {
     return this._externalUserActor?.id;
   }
-  /** The user that received the notification. */
+  /** The recipient user of this notification. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
-  /** The ID of user that received the notification. */
+  /** The ID of recipient user of this notification. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
@@ -12909,7 +12879,7 @@ export class NotificationArchivePayload extends Request {
   public success: boolean;
 }
 /**
- * NotificationBatchActionPayload model
+ * Return type for batch notification mutations that operate on multiple notifications at once.
  *
  * @param request - function to call the graphql client
  * @param data - L.NotificationBatchActionPayloadFragment response data
@@ -12926,11 +12896,11 @@ export class NotificationBatchActionPayload extends Request {
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
-  /** The notifications that were updated. */
+  /** The notifications that were updated by the batch operation. */
   public notifications: Notification[];
 }
 /**
- * A user's notification category preferences.
+ * A user's fully resolved notification category preferences. Each category maps to channel preferences indicating whether mobile, desktop, email, and Slack delivery are enabled.
  *
  * @param request - function to call the graphql client
  * @param data - L.NotificationCategoryPreferencesFragment response data
@@ -12987,7 +12957,7 @@ export class NotificationCategoryPreferences extends Request {
   public triage: NotificationChannelPreferences;
 }
 /**
- * A user's notification channel preferences, indicating if a channel is enabled or not
+ * A user's resolved notification channel preferences, indicating whether each delivery channel (mobile, desktop, email, Slack) is enabled or disabled.
  *
  * @param request - function to call the graphql client
  * @param data - L.NotificationChannelPreferencesFragment response data
@@ -13087,7 +13057,7 @@ export class NotificationConnection extends Connection<
   }
 }
 /**
- * A user's notification delivery preferences.
+ * A user's notification delivery preferences across channels. Currently only supports mobile channel delivery scheduling.
  *
  * @param request - function to call the graphql client
  * @param data - L.NotificationDeliveryPreferencesFragment response data
@@ -13102,7 +13072,7 @@ export class NotificationDeliveryPreferences extends Request {
   public mobile?: NotificationDeliveryPreferencesChannel | null;
 }
 /**
- * A user's notification delivery preferences.
+ * Delivery preferences for a specific notification channel, including an optional delivery schedule that restricts when notifications are sent.
  *
  * @param request - function to call the graphql client
  * @param data - L.NotificationDeliveryPreferencesChannelFragment response data
@@ -13120,7 +13090,7 @@ export class NotificationDeliveryPreferencesChannel extends Request {
   public schedule?: NotificationDeliveryPreferencesSchedule | null;
 }
 /**
- * A user's notification delivery schedule for a particular day.
+ * A user's notification delivery window for a specific day of the week. Defines the time range during which notifications will be delivered.
  *
  * @param request - function to call the graphql client
  * @param data - L.NotificationDeliveryPreferencesDayFragment response data
@@ -13132,13 +13102,13 @@ export class NotificationDeliveryPreferencesDay extends Request {
     this.start = data.start ?? undefined;
   }
 
-  /** The time notifications end. */
+  /** The end time of the notification delivery window in HH:MM military time format (e.g., '18:00'). Must be later than 'start'. */
   public end?: string | null;
-  /** The time notifications start. */
+  /** The start time of the notification delivery window in HH:MM military time format (e.g., '09:00'). Must be earlier than 'end'. */
   public start?: string | null;
 }
 /**
- * A user's notification delivery schedule for a particular day.
+ * A user's weekly notification delivery schedule, defining delivery windows for each day of the week. Notifications outside these windows are held and delivered when the window opens.
  *
  * @param request - function to call the graphql client
  * @param data - L.NotificationDeliveryPreferencesScheduleFragment response data
@@ -13156,7 +13126,7 @@ export class NotificationDeliveryPreferencesSchedule extends Request {
     this.wednesday = new NotificationDeliveryPreferencesDay(request, data.wednesday);
   }
 
-  /** Whether the schedule is disabled. */
+  /** Whether the entire delivery schedule is disabled. When true, notifications are delivered at any time regardless of the per-day settings. */
   public disabled?: boolean | null;
   /** Delivery preferences for Friday. */
   public friday: NotificationDeliveryPreferencesDay;
@@ -13174,7 +13144,7 @@ export class NotificationDeliveryPreferencesSchedule extends Request {
   public wednesday: NotificationDeliveryPreferencesDay;
 }
 /**
- * NotificationPayload model
+ * Return type for notification mutations.
  *
  * @param request - function to call the graphql client
  * @param data - L.NotificationPayloadFragment response data
@@ -13192,7 +13162,7 @@ export class NotificationPayload extends Request {
   public success: boolean;
 }
 /**
- * Notification subscriptions for models.
+ * A subscription that controls which notifications a user receives for a specific entity such as a team, project, cycle, label, custom view, initiative, or user. This is not a billing subscription -- it determines notification preferences. Each subscription is scoped to exactly one target entity and specifies the notification types the subscriber wants to receive. When active, matching events on the target entity generate notifications for the subscriber.
  *
  * @param request - function to call the graphql client
  * @param data - L.NotificationSubscriptionFragment response data
@@ -13228,7 +13198,7 @@ export class NotificationSubscription extends Request {
     this._user = data.user ?? undefined;
   }
 
-  /** Whether the subscription is active or not. */
+  /** Whether the subscription is active. When inactive, no notifications are generated from this subscription even though it still exists. */
   public active: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
@@ -13241,84 +13211,84 @@ export class NotificationSubscription extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The type of view to which the notification subscription context is associated with. */
+  /** The type of contextual view (e.g., active issues, backlog) that further scopes a team notification subscription. Null if the subscription is not associated with a specific view type. */
   public contextViewType?: L.ContextViewType | null;
-  /** The type of user view to which the notification subscription context is associated with. */
+  /** The type of user-specific view that further scopes a user notification subscription. Null if the subscription is not associated with a user view type. */
   public userContextViewType?: L.UserContextViewType | null;
-  /** The contextual custom view associated with the notification subscription. */
+  /** The custom view that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
-  /** The ID of contextual custom view associated with the notification subscription. */
+  /** The ID of custom view that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get customViewId(): string | undefined {
     return this._customView?.id;
   }
-  /** The customer associated with the notification subscription. */
+  /** The customer that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get customer(): LinearFetch<Customer> | undefined {
     return this._customer?.id ? new CustomerQuery(this._request).fetch(this._customer?.id) : undefined;
   }
-  /** The ID of customer associated with the notification subscription. */
+  /** The ID of customer that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get customerId(): string | undefined {
     return this._customer?.id;
   }
-  /** The contextual cycle view associated with the notification subscription. */
+  /** The cycle that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
-  /** The ID of contextual cycle view associated with the notification subscription. */
+  /** The ID of cycle that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get cycleId(): string | undefined {
     return this._cycle?.id;
   }
-  /** The contextual initiative view associated with the notification subscription. */
+  /** The initiative that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
-  /** The ID of contextual initiative view associated with the notification subscription. */
+  /** The ID of initiative that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get initiativeId(): string | undefined {
     return this._initiative?.id;
   }
-  /** The contextual label view associated with the notification subscription. */
+  /** The issue label that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get label(): LinearFetch<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
-  /** The ID of contextual label view associated with the notification subscription. */
+  /** The ID of issue label that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get labelId(): string | undefined {
     return this._label?.id;
   }
-  /** The contextual project view associated with the notification subscription. */
+  /** The project that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
-  /** The ID of contextual project view associated with the notification subscription. */
+  /** The ID of project that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get projectId(): string | undefined {
     return this._project?.id;
   }
-  /** The user that subscribed to receive notifications. */
+  /** The user who will receive notifications from this subscription. */
   public get subscriber(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._subscriber.id);
   }
-  /** The ID of user that subscribed to receive notifications. */
+  /** The ID of user who will receive notifications from this subscription. */
   public get subscriberId(): string | undefined {
     return this._subscriber?.id;
   }
-  /** The team associated with the notification subscription. */
+  /** The team that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
-  /** The ID of team associated with the notification subscription. */
+  /** The ID of team that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get teamId(): string | undefined {
     return this._team?.id;
   }
-  /** The user view associated with the notification subscription. */
+  /** The user that this notification subscription is scoped to, for user-specific view subscriptions. Null if the subscription targets a different entity type. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
-  /** The ID of user view associated with the notification subscription. */
+  /** The ID of user that this notification subscription is scoped to, for user-specific view subscriptions. null if the subscription targets a different entity type. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
 
-  /** Creates a new notification subscription for a cycle, custom view, label, project or team. */
+  /** Creates a new notification subscription for a specific entity. The subscription determines which notification types the authenticated user will receive for the target entity. Exactly one target entity (customer, custom view, cycle, initiative, label, project, team, or user) must be specified. */
   public create(input: L.NotificationSubscriptionCreateInput) {
     return new CreateNotificationSubscriptionMutation(this._request).fetch(input);
   }
@@ -13406,7 +13376,7 @@ export class NotificationSubscriptionConnection extends Connection<
   }
 }
 /**
- * NotificationSubscriptionPayload model
+ * The result of a notification subscription mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.NotificationSubscriptionPayloadFragment response data
@@ -13517,7 +13487,7 @@ export class OauthClientActorWebhookPayload {
   public type: string;
 }
 /**
- * Request to install OAuth clients on organizations and the response to the request.
+ * A request to install an OAuth client application on a workspace, along with the admin's approval or denial response. When a user attempts to install an OAuth application that requires admin approval, an approval record is created. A workspace admin can then approve or deny the request, optionally providing a reason. The record also tracks any newly requested scopes that were added after the initial approval.
  *
  * @param request - function to call the graphql client
  * @param data - L.OauthClientApprovalFragment response data
@@ -13543,32 +13513,32 @@ export class OauthClientApproval extends Request {
   public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** The reason the request for the OAuth client approval was denied. */
+  /** An optional explanation from the admin for why the installation request was denied. */
   public denyReason?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
-  /** New scopes that were requested for approval after the initial request. */
+  /** Additional OAuth scopes requested after the initial approval. These scopes are not yet approved and require a separate admin decision. Null if no additional scopes have been requested. These scopes will never overlap with the already-approved scopes. */
   public newlyRequestedScopes?: string[] | null;
-  /** The uuid of the OAuth client being requested for installation. */
+  /** The identifier of the OAuth client application being requested for installation in this workspace. */
   public oauthClientId: string;
-  /** The reason the person wants to install this OAuth client. */
+  /** An optional message from the requester explaining why they want to install the OAuth application. */
   public requestReason?: string | null;
-  /** The person who requested installing the OAuth client. */
+  /** The identifier of the user who initiated the request to install the OAuth client application. */
   public requesterId: string;
-  /** The person who responded to the request to install the OAuth client. */
+  /** The identifier of the workspace admin who approved or denied the installation request. Null if the request has not yet been responded to. */
   public responderId?: string | null;
-  /** The scopes the app has been approved for. */
+  /** The OAuth scopes that the application has been approved to use within this workspace (e.g., 'read', 'write', 'issues:create'). */
   public scopes: string[];
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The status for the OAuth client approval request. */
+  /** The current status of the approval request: requested (pending admin review), approved, or denied. */
   public status: L.OAuthClientApprovalStatus;
 }
 /**
- * An oauth client approval related notification.
+ * A notification related to an OAuth client approval request, sent to workspace admins when an application requests access.
  *
  * @param request - function to call the graphql client
  * @param data - L.OauthClientApprovalNotificationFragment response data
@@ -13602,22 +13572,19 @@ export class OauthClientApprovalNotification extends Request {
   public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /**
-   * The time at when an email reminder for this notification was sent to the user. Null, if no email
-   *     reminder has been sent.
-   */
+  /** The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent. */
   public emailedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** Related OAuth client approval request ID. */
   public oauthClientApprovalId: string;
-  /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
+  /** The time at which the user marked the notification as read. Null if the notification is unread. */
   public readAt?: Date | null;
-  /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
+  /** The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed. */
   public snoozedUntilAt?: Date | null;
-  /** Notification type. */
+  /** Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated. */
   public type: string;
-  /** The time at which a notification was unsnoozed.. */
+  /** The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed. */
   public unsnoozedAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -13630,29 +13597,29 @@ export class OauthClientApprovalNotification extends Request {
   public oauthClientApproval: OauthClientApproval;
   /** The category of the notification. */
   public category: L.NotificationCategory;
-  /** The user that caused the notification. */
+  /** The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
-  /** The ID of user that caused the notification. */
+  /** The ID of user that caused the notification. null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
   public get actorId(): string | undefined {
     return this._actor?.id;
   }
-  /** The external user that caused the notification. */
+  /** The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member. */
   public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
     return this._externalUserActor?.id
       ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
       : undefined;
   }
-  /** The ID of external user that caused the notification. */
+  /** The ID of external user that caused the notification. populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like slack or github) rather than a linear workspace member. */
   public get externalUserActorId(): string | undefined {
     return this._externalUserActor?.id;
   }
-  /** The user that received the notification. */
+  /** The recipient user of this notification. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
-  /** The ID of user that received the notification. */
+  /** The ID of recipient user of this notification. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
@@ -13674,7 +13641,7 @@ export class OauthClientChildWebhookPayload {
   public name: string;
 }
 /**
- * An organization. Organizations are root-level objects that contain user accounts and teams.
+ * A workspace (referred to as Organization in the API). Workspaces are the root-level container for all teams, users, projects, issues, and settings. Every user belongs to at least one workspace, and all data is scoped within a workspace boundary.
  *
  * @param request - function to call the graphql client
  * @param data - L.OrganizationFragment response data
@@ -13727,9 +13694,6 @@ export class Organization extends Request {
     this.urlKey = data.urlKey;
     this.userCount = data.userCount;
     this.subscription = data.subscription ? new PaidSubscription(request, data.subscription) : undefined;
-    this.ipRestrictions = data.ipRestrictions
-      ? data.ipRestrictions.map(node => new OrganizationIpRestriction(request, node))
-      : undefined;
     this.projectStatuses = data.projectStatuses.map(node => new ProjectStatus(request, node));
     this.defaultFeedSummarySchedule = data.defaultFeedSummarySchedule ?? undefined;
     this.initiativeUpdateRemindersDay = data.initiativeUpdateRemindersDay;
@@ -13740,9 +13704,9 @@ export class Organization extends Request {
     this._slackProjectChannelIntegration = data.slackProjectChannelIntegration ?? undefined;
   }
 
-  /** Whether the organization has enabled AI discussion summaries for issues. */
+  /** Whether the workspace has enabled AI discussion summaries for issues. */
   public aiDiscussionSummariesEnabled: boolean;
-  /** Whether the organization has enabled resolved thread AI summaries. */
+  /** Whether the workspace has enabled resolved thread AI summaries. */
   public aiThreadSummariesEnabled: boolean;
   /** [DEPRECATED] Whether member users are allowed to send invites. */
   public allowMembersToInvite?: boolean | null;
@@ -13752,96 +13716,94 @@ export class Organization extends Request {
   public allowedFileUploadContentTypes?: string[] | null;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** Authentication settings for the organization. */
+  /** Authentication settings for the workspace, including allowed auth providers, bypass rules, and organization visibility during signup. */
   public authSettings: L.Scalars["JSONObject"];
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** Aproximate number of issues in the organization, including archived ones. */
+  /** Approximate total number of issues created in the workspace, including archived ones. This count is cached and may not reflect the exact real-time count. */
   public createdIssueCount: number;
-  /** Number of customers in the organization. */
+  /** The number of active (non-archived) customers tracked in the workspace. */
   public customerCount: number;
-  /** Configuration settings for the Customers feature. */
+  /** Configuration settings for the Customers feature, including revenue currency and other customer tracking preferences. */
   public customersConfiguration: L.Scalars["JSONObject"];
-  /** Whether the organization is using Customers. */
+  /** Whether the Customers feature is enabled and accessible for the workspace based on the current plan. */
   public customersEnabled: boolean;
-  /** The time at which deletion of the organization was requested. */
+  /** The time at which deletion of the workspace was requested. Null if no deletion has been requested. */
   public deletionRequestedAt?: Date | null;
-  /** Whether the organization has enabled the feed feature. */
+  /** Whether the activity feed feature is enabled for the workspace. */
   public feedEnabled: boolean;
-  /** The month at which the fiscal year starts. Defaults to January (0). */
+  /** The zero-indexed month at which the fiscal year starts (0 = January, 11 = December). Defaults to 0 (January). */
   public fiscalYearStartMonth: number;
-  /** How git branches are formatted. If null, default formatting will be used. */
+  /** The template format for Git branch names created from issues. Supports template variables like {issueIdentifier} and {issueTitle}. If null, the default formatting will be used. */
   public gitBranchFormat?: string | null;
-  /** Whether issue descriptions should be included in Git integration linkback messages. */
+  /** Whether issue descriptions should be included in the Git integration linkback messages posted to pull requests. */
   public gitLinkbackDescriptionsEnabled: boolean;
-  /** Whether the Git integration linkback messages should be sent to private repositories. */
+  /** Whether the Git integration linkback messages should be posted as comments on pull requests in private repositories. */
   public gitLinkbackMessagesEnabled: boolean;
-  /** Whether the Git integration linkback messages should be sent to public repositories. */
+  /** Whether the Git integration linkback messages should be posted as comments on pull requests in public repositories. */
   public gitPublicLinkbackMessagesEnabled: boolean;
   /** Whether to hide other organizations for new users signing up with email domains claimed by this organization. */
   public hideNonPrimaryOrganizations: boolean;
-  /** Whether HIPAA compliance is enabled for organization. */
+  /** Whether HIPAA compliance is enabled for the workspace. When enabled, certain data processing features are restricted to meet compliance requirements. */
   public hipaaComplianceEnabled: boolean;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The n-weekly frequency at which to prompt for initiative updates. When not set, reminders are off. */
+  /** The frequency in weeks at which to prompt for initiative updates. When null, initiative update reminders are disabled. Valid values range from 0 to 8. */
   public initiativeUpdateReminderFrequencyInWeeks?: number | null;
-  /** The hour at which to prompt for initiative updates. */
+  /** The hour of the day (0-23) at which initiative update reminders are sent. */
   public initiativeUpdateRemindersHour: number;
-  /** The organization's logo URL. */
+  /** The URL of the workspace's logo image. Null if no logo has been uploaded. */
   public logoUrl?: string | null;
-  /** The organization's name. */
+  /** The workspace's name. */
   public name: string;
-  /** Rolling 30-day total upload volume for the organization, in megabytes. */
+  /** Rolling 30-day total file upload volume for the workspace, measured in megabytes. Used for enforcing upload quotas. */
   public periodUploadVolume: number;
-  /** Previously used URL keys for the organization (last 3 are kept and redirected). */
+  /** Previously used URL keys for the workspace. The last 3 are kept and automatically redirected to the current URL key. */
   public previousUrlKeys: string[];
-  /** The n-weekly frequency at which to prompt for project updates. When not set, reminders are off. */
+  /** The frequency in weeks at which to prompt for project updates. When null, project update reminders are disabled. Valid values range from 0 to 8. */
   public projectUpdateReminderFrequencyInWeeks?: number | null;
-  /** The hour at which to prompt for project updates. */
+  /** The hour of the day (0-23) at which project update reminders are sent. */
   public projectUpdateRemindersHour: number;
   /** [DEPRECATED] Whether workspace label creation, update, and deletion is restricted to admins. */
   public restrictLabelManagementToAdmins?: boolean | null;
   /** [DEPRECATED] Whether team creation is restricted to admins. */
   public restrictTeamCreationToAdmins?: boolean | null;
-  /** Whether the organization is using a roadmap. */
+  /** Whether the roadmap feature is enabled for the workspace. */
   public roadmapEnabled: boolean;
-  /** Whether SAML authentication is enabled for organization. */
+  /** Whether SAML-based single sign-on authentication is enabled for the workspace. */
   public samlEnabled: boolean;
-  /** Whether SCIM provisioning is enabled for organization. */
+  /** Whether SCIM provisioning is enabled for the workspace, allowing automated user and team management from an identity provider. */
   public scimEnabled: boolean;
-  /** Security settings for the organization. */
+  /** Security settings for the workspace, including role-based restrictions for invitations, team creation, label management, and other sensitive operations. */
   public securitySettings: L.Scalars["JSONObject"];
   /** The prefix used for auto-created Slack project channels. */
   public slackProjectChannelPrefix: string;
-  /** The time at which the trial will end. */
+  /** The time at which the current plan trial will end. Null if the workspace is not in a trial period. */
   public trialEndsAt?: Date | null;
-  /** The time at which the trial started. */
+  /** The time at which the current plan trial started. Null if the workspace is not in a trial period. */
   public trialStartsAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The organization's unique URL key. */
+  /** The workspace's unique URL key, used in URLs to identify the workspace. */
   public urlKey: string;
-  /** Number of active users in the organization. */
+  /** The number of active (non-deactivated) users in the workspace. */
   public userCount: number;
-  /** IP restriction configurations. */
-  public ipRestrictions?: OrganizationIpRestriction[] | null;
-  /** The organization's project statuses. */
+  /** The workspace's available project statuses, which define the lifecycle stages for projects. */
   public projectStatuses: ProjectStatus[];
-  /** The organization's subscription to a paid plan. */
+  /** The workspace's subscription to a paid plan. */
   public subscription?: PaidSubscription | null;
   /** Default schedule for how often feed summaries are generated. */
   public defaultFeedSummarySchedule?: L.FeedSummarySchedule | null;
-  /** The day at which to prompt for initiative updates. */
+  /** The day of the week on which initiative update reminders are sent. */
   public initiativeUpdateRemindersDay: L.Day;
-  /** The day at which to prompt for project updates. */
+  /** The day of the week on which project update reminders are sent. */
   public projectUpdateRemindersDay: L.Day;
   /** [DEPRECATED] The frequency at which to prompt for project updates. */
   public projectUpdatesReminderFrequency: L.ProjectUpdateReminderFrequency;
-  /** The feature release channel the organization belongs to. */
+  /** The feature release channel the workspace belongs to, which controls access to pre-release features. */
   public releaseChannel: L.ReleaseChannel;
   /** [DEPRECATED] Which day count to use for SLA calculations. */
   public slaDayCount: L.SLADayCountType;
@@ -13855,35 +13817,35 @@ export class Organization extends Request {
   public get slackProjectChannelIntegrationId(): string | undefined {
     return this._slackProjectChannelIntegration?.id;
   }
-  /** Integrations associated with the organization. */
+  /** Third-party integrations configured for the workspace (e.g., GitHub, Slack, Figma). */
   public integrations(variables?: L.Organization_IntegrationsQueryVariables) {
     return new Organization_IntegrationsQuery(this._request, variables).fetch(variables);
   }
-  /** Labels associated with the organization. */
+  /** Workspace-level issue labels (not associated with any specific team). These labels are available across all teams in the workspace. */
   public labels(variables?: L.Organization_LabelsQueryVariables) {
     return new Organization_LabelsQuery(this._request, variables).fetch(variables);
   }
-  /** Project labels associated with the organization. */
+  /** Project labels available in the workspace for categorizing projects. */
   public projectLabels(variables?: L.Organization_ProjectLabelsQueryVariables) {
     return new Organization_ProjectLabelsQuery(this._request, variables).fetch(variables);
   }
-  /** Teams associated with the organization. */
+  /** Teams in the workspace. Returns only teams visible to the requesting user (all public teams plus private teams the user is a member of). */
   public teams(variables?: L.Organization_TeamsQueryVariables) {
     return new Organization_TeamsQuery(this._request, variables).fetch(variables);
   }
-  /** Templates associated with the organization. */
+  /** Workspace-level templates (not associated with any specific team). These templates are available across all teams in the workspace. */
   public templates(variables?: L.Organization_TemplatesQueryVariables) {
     return new Organization_TemplatesQuery(this._request, variables).fetch(variables);
   }
-  /** Users associated with the organization. */
+  /** Users belonging to the workspace. By default only returns active users; use the includeDisabled argument to include deactivated users. */
   public users(variables?: L.Organization_UsersQueryVariables) {
     return new Organization_UsersQuery(this._request, variables).fetch(variables);
   }
-  /** Deletes an organization. */
+  /** Permanently deletes the workspace and all its data. Requires a valid deletion code obtained from organizationDeleteChallenge. This action is irreversible. */
   public delete(input: L.DeleteOrganizationInput) {
     return new DeleteOrganizationMutation(this._request).fetch(input);
   }
-  /** Updates the user's organization. */
+  /** Updates the user's workspace settings. Different settings require different permission levels; most require the workspaceSettings admin permission. */
   public update(input: L.OrganizationUpdateInput) {
     return new UpdateOrganizationMutation(this._request).fetch(input);
   }
@@ -13904,7 +13866,7 @@ export class OrganizationAcceptedOrExpiredInviteDetailsPayload extends Request {
   public status: L.OrganizationInviteStatus;
 }
 /**
- * OrganizationCancelDeletePayload model
+ * Workspace deletion cancellation response.
  *
  * @param request - function to call the graphql client
  * @param data - L.OrganizationCancelDeletePayloadFragment response data
@@ -13919,7 +13881,7 @@ export class OrganizationCancelDeletePayload extends Request {
   public success: boolean;
 }
 /**
- * OrganizationDeletePayload model
+ * Workspace deletion operation response.
  *
  * @param request - function to call the graphql client
  * @param data - L.OrganizationDeletePayloadFragment response data
@@ -13934,7 +13896,7 @@ export class OrganizationDeletePayload extends Request {
   public success: boolean;
 }
 /**
- * Defines the use of a domain by an organization.
+ * A verified email domain associated with a workspace. Domains are used for automatic team joining, SSO/SAML authentication, and controlling workspace access. Each domain has an authentication type (general or SAML) and can be verified via email or DNS.
  *
  * @param request - function to call the graphql client
  * @param data - L.OrganizationDomainFragment response data
@@ -13960,28 +13922,28 @@ export class OrganizationDomain extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** Whether the domains was claimed by the organization through DNS verification. */
+  /** Whether the domain was claimed by the workspace through DNS TXT record verification. Claimed domains provide stronger ownership proof than email verification and enable additional features like preventing users from creating new workspaces. */
   public claimed?: boolean | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** Prevent users with this domain to create new workspaces. */
+  /** Whether users with email addresses from this domain are prevented from creating new workspaces. Can only be set on claimed domains. */
   public disableOrganizationCreation?: boolean | null;
   /** The unique identifier of the entity. */
   public id: string;
-  /** Domain name. */
+  /** The domain name (e.g., 'example.com'). */
   public name: string;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** E-mail used to verify this domain. */
+  /** The email address used to verify this domain. Null if the domain was verified via DNS or has not been verified. */
   public verificationEmail?: string | null;
-  /** Is this domain verified. */
+  /** Whether the domain has been verified via email verification. */
   public verified: boolean;
   /** The identity provider the domain belongs to. */
   public identityProvider?: IdentityProvider | null;
-  /** What type of auth is the domain used for. */
+  /** The authentication type this domain is used for. 'general' means standard email-based auth, 'saml' means SAML SSO authentication. */
   public authType: L.OrganizationDomainAuthType;
   /** The user who added the domain. */
   public get creator(): LinearFetch<User> | undefined {
@@ -13998,7 +13960,7 @@ export class OrganizationDomain extends Request {
   }
 }
 /**
- * OrganizationExistsPayload model
+ * Response for checking whether a workspace exists.
  *
  * @param request - function to call the graphql client
  * @param data - L.OrganizationExistsPayloadFragment response data
@@ -14016,7 +13978,7 @@ export class OrganizationExistsPayload extends Request {
   public success: boolean;
 }
 /**
- * An invitation to the organization that has been sent via email.
+ * A pending invitation to join the workspace, sent via email. Invites specify the role the invitee will receive and can optionally include team assignments. Invites can expire and must be accepted by the invitee to grant workspace access.
  *
  * @param request - function to call the graphql client
  * @param data - L.OrganizationInviteFragment response data
@@ -14041,28 +14003,28 @@ export class OrganizationInvite extends Request {
     this._inviter = data.inviter;
   }
 
-  /** The time at which the invite was accepted. Null, if the invite hasn't been accepted. */
+  /** The time at which the invite was accepted by the invitee. Null if the invite is still pending. */
   public acceptedAt?: Date | null;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** The invitees email address. */
+  /** The email address of the person being invited to the workspace. */
   public email: string;
-  /** The time at which the invite will be expiring. Null, if the invite shouldn't expire. */
+  /** The time at which the invite will expire and can no longer be accepted. Null if the invite does not have an expiration date. */
   public expiresAt?: Date | null;
-  /** The invite was sent to external address. */
+  /** Whether the invite was sent to an email address outside the workspace's verified domains. */
   public external: boolean;
   /** The unique identifier of the entity. */
   public id: string;
-  /** Extra metadata associated with the organization invite. */
+  /** Extra metadata associated with the invite. */
   public metadata?: L.Scalars["JSONObject"] | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The user role that the invitee will receive upon accepting the invite. */
+  /** The workspace role (admin, member, guest, or owner) that the invitee will receive upon accepting the invite. */
   public role: L.UserRoleType;
   /** The user who has accepted the invite. Null, if the invite hasn't been accepted. */
   public get invitee(): LinearFetch<User> | undefined {
@@ -14080,20 +14042,20 @@ export class OrganizationInvite extends Request {
   public get inviterId(): string | undefined {
     return this._inviter?.id;
   }
-  /** The organization that the invite is associated with. */
+  /** The workspace that the invite is associated with. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
 
-  /** Creates a new organization invite. */
+  /** Creates a new workspace invite and sends an invitation email to the specified address. The invite includes a role assignment and optional team memberships. */
   public create(input: L.OrganizationInviteCreateInput) {
     return new CreateOrganizationInviteMutation(this._request).fetch(input);
   }
-  /** Deletes an organization invite. */
+  /** Deletes (archives) a workspace invite, preventing it from being accepted. */
   public delete() {
     return new DeleteOrganizationInviteMutation(this._request).fetch(this.id);
   }
-  /** Updates an organization invite. */
+  /** Updates an existing workspace invite, such as changing the teams the invitee will be added to. */
   public update(input: L.OrganizationInviteUpdateInput) {
     return new UpdateOrganizationInviteMutation(this._request).fetch(this.id, input);
   }
@@ -14165,7 +14127,7 @@ export class OrganizationInviteFullDetailsPayload extends Request {
   public status: L.OrganizationInviteStatus;
 }
 /**
- * OrganizationInvitePayload model
+ * Workspace invite operation response.
  *
  * @param request - function to call the graphql client
  * @param data - L.OrganizationInvitePayloadFragment response data
@@ -14194,48 +14156,6 @@ export class OrganizationInvitePayload extends Request {
   }
 }
 /**
- * OrganizationIpRestriction model
- *
- * @param request - function to call the graphql client
- * @param data - L.OrganizationIpRestrictionFragment response data
- */
-export class OrganizationIpRestriction extends Request {
-  public constructor(request: LinearRequest, data: L.OrganizationIpRestrictionFragment) {
-    super(request);
-    this.description = data.description ?? undefined;
-    this.enabled = data.enabled;
-    this.range = data.range;
-    this.type = data.type;
-  }
-
-  /** Optional restriction description. */
-  public description?: string | null;
-  /** Whether the restriction is enabled. */
-  public enabled: boolean;
-  /** IP range in CIDR format. */
-  public range: string;
-  /** Restriction type. */
-  public type: string;
-}
-/**
- * OrganizationMeta model
- *
- * @param request - function to call the graphql client
- * @param data - L.OrganizationMetaFragment response data
- */
-export class OrganizationMeta extends Request {
-  public constructor(request: LinearRequest, data: L.OrganizationMetaFragment) {
-    super(request);
-    this.allowedAuthServices = data.allowedAuthServices;
-    this.region = data.region;
-  }
-
-  /** Allowed authentication providers, empty array means all are allowed. */
-  public allowedAuthServices: string[];
-  /** The region the organization is hosted in. */
-  public region: string;
-}
-/**
  * Organization origin for guidance rules.
  *
  * @param data - L.OrganizationOriginWebhookPayloadFragment response data
@@ -14249,7 +14169,7 @@ export class OrganizationOriginWebhookPayload {
   public type: string;
 }
 /**
- * OrganizationPayload model
+ * Workspace update operation response.
  *
  * @param request - function to call the graphql client
  * @param data - L.OrganizationPayloadFragment response data
@@ -14265,13 +14185,13 @@ export class OrganizationPayload extends Request {
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
-  /** The organization that was created or updated. */
+  /** The workspace that was created or updated. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
 }
 /**
- * OrganizationStartTrialPayload model
+ * Workspace trial start response.
  *
  * @param request - function to call the graphql client
  * @param data - L.OrganizationStartTrialPayloadFragment response data
@@ -14386,7 +14306,7 @@ export class PageInfo extends Request {
   public startCursor?: string | null;
 }
 /**
- * The paid subscription of an organization.
+ * The billing subscription of a workspace. Represents an active paid plan (e.g., Basic, Business, Enterprise) backed by a Stripe subscription. If a workspace has no Subscription record, it is on the free plan. Only one active subscription per workspace is expected.
  *
  * @param request - function to call the graphql client
  * @param data - L.PaidSubscriptionFragment response data
@@ -14414,42 +14334,42 @@ export class PaidSubscription extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** The date the subscription is scheduled to be canceled, if any. */
+  /** The date the subscription is scheduled to be canceled in the future. Null if no cancellation is scheduled. The subscription remains active until this date. */
   public cancelAt?: Date | null;
-  /** The date the subscription was canceled, if any. */
+  /** The date the subscription was canceled. Null if the subscription has not been canceled. */
   public canceledAt?: Date | null;
-  /** The collection method for this subscription, either automatically charged or invoiced. */
+  /** The billing collection method for this subscription. 'automatic' means the payment method on file is charged automatically. 'send_invoice' means invoices are sent to the billing email for manual payment. */
   public collectionMethod: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The date the subscription will be billed next. */
+  /** The date the subscription will be billed next. Null if the subscription is canceled or has no upcoming billing date. */
   public nextBillingAt?: Date | null;
-  /** The subscription type of a pending change. Null if no change pending. */
+  /** The subscription plan type that the workspace is scheduled to change to at the next billing cycle. Null if no plan change is pending. */
   public pendingChangeType?: string | null;
-  /** The number of seats in the subscription. */
+  /** The number of seats (active members) in the subscription. This is the raw count before applying minimum and maximum seat limits. */
   public seats: number;
-  /** The maximum number of seats that will be billed in the subscription. */
+  /** The maximum number of seats that will be billed in the subscription. The billed seat count will never exceed this value even if actual member count is higher. Null if no maximum is enforced. */
   public seatsMaximum?: number | null;
-  /** The minimum number of seats that will be billed in the subscription. */
+  /** The minimum number of seats that will be billed in the subscription. The billed seat count will never go below this value even if actual member count is lower. Null if no minimum is enforced. */
   public seatsMinimum?: number | null;
-  /** The subscription type. */
+  /** The subscription plan type (e.g., basic, business, enterprise). Determines the feature set and pricing tier for the workspace. */
   public type: string;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The creator of the subscription. */
+  /** The user who initially created (purchased) the subscription. Null if the creator has been removed from the workspace. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
-  /** The ID of creator of the subscription. */
+  /** The ID of user who initially created (purchased) the subscription. null if the creator has been removed from the workspace. */
   public get creatorId(): string | undefined {
     return this._creator?.id;
   }
-  /** The organization that the subscription is associated with. */
+  /** The workspace that the subscription is associated with. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
@@ -14467,11 +14387,13 @@ export class PasskeyLoginStartResponse extends Request {
     this.success = data.success;
   }
 
+  /** The passkey authentication options to pass to the WebAuthn API. */
   public options: L.Scalars["JSONObject"];
+  /** Whether the operation was successful. */
   public success: boolean;
 }
 /**
- * A post related notification.
+ * A notification related to a post, such as new comments or reactions.
  *
  * @param request - function to call the graphql client
  * @param data - L.PostNotificationFragment response data
@@ -14509,10 +14431,7 @@ export class PostNotification extends Request {
   public commentId?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /**
-   * The time at when an email reminder for this notification was sent to the user. Null, if no email
-   *     reminder has been sent.
-   */
+  /** The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent. */
   public emailedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
@@ -14522,13 +14441,13 @@ export class PostNotification extends Request {
   public postId: string;
   /** Name of the reaction emoji related to the notification. */
   public reactionEmoji?: string | null;
-  /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
+  /** The time at which the user marked the notification as read. Null if the notification is unread. */
   public readAt?: Date | null;
-  /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
+  /** The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed. */
   public snoozedUntilAt?: Date | null;
-  /** Notification type. */
+  /** Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated. */
   public type: string;
-  /** The time at which a notification was unsnoozed.. */
+  /** The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed. */
   public unsnoozedAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -14539,35 +14458,35 @@ export class PostNotification extends Request {
   public botActor?: ActorBot | null;
   /** The category of the notification. */
   public category: L.NotificationCategory;
-  /** The user that caused the notification. */
+  /** The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
-  /** The ID of user that caused the notification. */
+  /** The ID of user that caused the notification. null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
   public get actorId(): string | undefined {
     return this._actor?.id;
   }
-  /** The external user that caused the notification. */
+  /** The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member. */
   public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
     return this._externalUserActor?.id
       ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
       : undefined;
   }
-  /** The ID of external user that caused the notification. */
+  /** The ID of external user that caused the notification. populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like slack or github) rather than a linear workspace member. */
   public get externalUserActorId(): string | undefined {
     return this._externalUserActor?.id;
   }
-  /** The user that received the notification. */
+  /** The recipient user of this notification. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
-  /** The ID of user that received the notification. */
+  /** The ID of recipient user of this notification. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
 }
 /**
- * A project.
+ * A project is a collection of issues working toward a shared goal. Projects have start and target dates, milestones, status tracking, and progress metrics. They can span multiple teams and be grouped under initiatives.
  *
  * @param request - function to call the graphql client
  * @param data - L.ProjectFragment response data
@@ -14642,51 +14561,51 @@ export class Project extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** The time at which the project was automatically archived by the auto pruning process. */
+  /** The time at which the project was automatically archived by the auto-pruning process. Null if the project has not been auto-archived. */
   public autoArchivedAt?: Date | null;
-  /** The time at which the project was moved into canceled state. */
+  /** The time at which the project was moved into a canceled status. Null if the project has not been canceled. */
   public canceledAt?: Date | null;
-  /** The project's color. */
+  /** The project's color as a HEX string. Used in the UI to visually identify the project. */
   public color: string;
-  /** The time at which the project was moved into completed state. */
+  /** The time at which the project was moved into a completed status. Null if the project has not been completed. */
   public completedAt?: Date | null;
-  /** The number of completed issues in the project after each week. */
+  /** The number of completed issues in the project at the end of each week since project creation. Each entry represents one week. */
   public completedIssueCountHistory: number[];
-  /** The number of completed estimation points after each week. */
+  /** The number of completed estimation points at the end of each week since project creation. Each entry represents one week. */
   public completedScopeHistory: number[];
   /** The project's content in markdown format. */
   public content?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** The project's description. */
+  /** The short description of the project. */
   public description: string;
-  /** The time at which the project health was updated. */
+  /** The time at which the project health was last updated, typically when a new project update is posted. Null if health has never been set. */
   public healthUpdatedAt?: Date | null;
-  /** The icon of the project. */
+  /** The icon of the project. Can be an emoji or a decorative icon type. */
   public icon?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The number of in progress estimation points after each week. */
+  /** The number of in-progress estimation points at the end of each week since project creation. Each entry represents one week. */
   public inProgressScopeHistory: number[];
-  /** The total number of issues in the project after each week. */
+  /** The total number of issues in the project at the end of each week since project creation. Each entry represents one week. */
   public issueCountHistory: number[];
-  /** Id of the labels associated with this project. */
+  /** The IDs of the project labels associated with this project. */
   public labelIds: string[];
-  /** The project's name. */
+  /** The name of the project. */
   public name: string;
   /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
   public priority: number;
   /** The priority of the project as a label. */
   public priorityLabel: string;
-  /** The sort order for the project within the organization, when ordered by priority. */
+  /** The sort order for the project within the workspace when ordered by priority. */
   public prioritySortOrder: number;
   /** The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
   public progress: number;
-  /** The time until which project update reminders are paused. */
+  /** The time until which project update reminders are paused. When set, no update reminders will be sent for this project until this date passes. Null means reminders are active. */
   public projectUpdateRemindersPausedUntilAt?: Date | null;
   /** The overall scope (total estimate points) of the project. */
   public scope: number;
-  /** The total number of estimation points after each week. */
+  /** The total scope (estimation points) of the project at the end of each week since project creation. Each entry represents one week. */
   public scopeHistory: number[];
   /** Whether to send new issue comment notifications to Slack. */
   public slackIssueComments: boolean;
@@ -14694,17 +14613,17 @@ export class Project extends Request {
   public slackIssueStatuses: boolean;
   /** Whether to send new issue notifications to Slack. */
   public slackNewIssue: boolean;
-  /** The project's unique URL slug. */
+  /** The project's unique URL slug, used to construct human-readable URLs. */
   public slugId: string;
-  /** The sort order for the project within the organization. */
+  /** The sort order for the project within the workspace. Used for manual ordering in list views. */
   public sortOrder: number;
-  /** The estimated start date of the project. */
+  /** The estimated start date of the project. Null if no start date is set. */
   public startDate?: L.Scalars["TimelessDate"] | null;
-  /** The time at which the project was moved into started state. */
+  /** The time at which the project was moved into a started status. Null if the project has not been started. */
   public startedAt?: Date | null;
   /** [DEPRECATED] The type of the state. */
   public state: string;
-  /** The estimated completion date of the project. */
+  /** The estimated completion date of the project. Null if no target date is set. */
   public targetDate?: L.Scalars["TimelessDate"] | null;
   /** A flag that indicates whether the project is in the trash bin. */
   public trashed?: boolean | null;
@@ -14727,19 +14646,19 @@ export class Project extends Request {
   public documentContent?: DocumentContent | null;
   /** The resolution of the reminder frequency. */
   public frequencyResolution: L.FrequencyResolutionType;
-  /** The health of the project. */
+  /** The overall health of the project, derived from the most recent project update. Possible values are onTrack, atRisk, or offTrack. Null if no health has been reported. */
   public health?: L.ProjectUpdateHealthType | null;
-  /** The resolution of the project's start date. */
+  /** The resolution of the project's start date, indicating whether it refers to a specific month, quarter, half-year, or year. */
   public startDateResolution?: L.DateResolutionType | null;
-  /** The resolution of the project's estimated completion date. */
+  /** The resolution of the project's estimated completion date, indicating whether it refers to a specific month, quarter, half-year, or year. */
   public targetDateResolution?: L.DateResolutionType | null;
   /** The day at which to prompt for updates. */
   public updateRemindersDay?: L.Day | null;
-  /** The project was created based on this issue. */
+  /** The issue that was converted into this project. Null if the project was not created from an issue. */
   public get convertedFromIssue(): LinearFetch<Issue> | undefined {
     return this._convertedFromIssue?.id ? new IssueQuery(this._request).fetch(this._convertedFromIssue?.id) : undefined;
   }
-  /** The ID of project was created based on this issue. */
+  /** The ID of issue that was converted into this project. null if the project was not created from an issue. */
   public get convertedFromIssueId(): string | undefined {
     return this._convertedFromIssue?.id;
   }
@@ -14779,27 +14698,27 @@ export class Project extends Request {
   public get lastAppliedTemplateId(): string | undefined {
     return this._lastAppliedTemplate?.id;
   }
-  /** The last project update posted for this project. */
+  /** The most recent status update posted for this project. Null if no updates have been posted. */
   public get lastUpdate(): LinearFetch<ProjectUpdate> | undefined {
     return this._lastUpdate?.id ? new ProjectUpdateQuery(this._request).fetch(this._lastUpdate?.id) : undefined;
   }
-  /** The ID of last project update posted for this project. */
+  /** The ID of most recent status update posted for this project. null if no updates have been posted. */
   public get lastUpdateId(): string | undefined {
     return this._lastUpdate?.id;
   }
-  /** The project lead. */
+  /** The user who leads the project. The project lead is typically responsible for posting status updates and driving the project to completion. Null if no lead is assigned. */
   public get lead(): LinearFetch<User> | undefined {
     return this._lead?.id ? new UserQuery(this._request).fetch(this._lead?.id) : undefined;
   }
-  /** The ID of project lead. */
+  /** The ID of user who leads the project. the project lead is typically responsible for posting status updates and driving the project to completion. null if no lead is assigned. */
   public get leadId(): string | undefined {
     return this._lead?.id;
   }
-  /** The status that the project is associated with. */
+  /** The current project status. Defines the project's position in its lifecycle (e.g., backlog, planned, started, paused, completed, canceled). */
   public get status(): LinearFetch<ProjectStatus> | undefined {
     return new ProjectStatusQuery(this._request).fetch(this._status.id);
   }
-  /** The ID of status that the project is associated with. */
+  /** The ID of current project status. defines the project's position in its lifecycle (e.g., backlog, planned, started, paused, completed, canceled). */
   public get statusId(): string | undefined {
     return this._status?.id;
   }
@@ -14875,11 +14794,11 @@ export class Project extends Request {
   public create(input: L.ProjectCreateInput, variables?: Omit<L.CreateProjectMutationVariables, "input">) {
     return new CreateProjectMutation(this._request).fetch(input, variables);
   }
-  /** Deletes (trashes) a project. */
+  /** Deletes (trashes) a project. The project can be restored later with projectUnarchive. */
   public delete() {
     return new DeleteProjectMutation(this._request).fetch(this.id);
   }
-  /** Unarchives a project. */
+  /** Restores a previously trashed or archived project. */
   public unarchive() {
     return new UnarchiveProjectMutation(this._request).fetch(this.id);
   }
@@ -14918,7 +14837,7 @@ export class ProjectArchivePayload extends Request {
   }
 }
 /**
- * Project attachment
+ * An attachment (link, reference, or integration data) associated with a project. Attachments are typically created by integrations and contain metadata for rendering in the client.
  *
  * @param request - function to call the graphql client
  * @param data - L.ProjectAttachmentFragment response data
@@ -14947,13 +14866,13 @@ export class ProjectAttachment extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** Custom metadata related to the attachment. */
+  /** Custom metadata related to the attachment. Contains user-facing content such as conversation messages or rendered attributes from integrations. */
   public metadata: L.Scalars["JSONObject"];
-  /** Information about the external source which created the attachment. */
+  /** Metadata about the external source which created the attachment, including foreign identifiers used for syncing with external services. Null if the attachment was not created by an integration. */
   public source?: L.Scalars["JSONObject"] | null;
-  /** An accessor helper to source.type, defines the source type of the attachment. */
+  /** The source type of the attachment, derived from the source metadata. Returns the integration type that created the attachment (e.g., 'slack', 'github'), or null if not set. */
   public sourceType?: string | null;
-  /** Optional subtitle of the attachment */
+  /** Optional subtitle of the attachment, providing additional context below the title. */
   public subtitle?: string | null;
   /** Title of the attachment. */
   public title: string;
@@ -15035,7 +14954,7 @@ export class ProjectConnection extends Connection<Project> {
   }
 }
 /**
- * ProjectFilterSuggestionPayload model
+ * The result of a project filter suggestion query.
  *
  * @param request - function to call the graphql client
  * @param data - L.ProjectFilterSuggestionPayloadFragment response data
@@ -15053,7 +14972,7 @@ export class ProjectFilterSuggestionPayload extends Request {
   public logId?: string | null;
 }
 /**
- * An history associated with a project.
+ * A history record associated with a project. Tracks changes to project properties, status, members, teams, milestones, labels, and relationships over time.
  *
  * @param request - function to call the graphql client
  * @param data - L.ProjectHistoryFragment response data
@@ -15084,11 +15003,11 @@ export class ProjectHistory extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The project that the history is associated with. */
+  /** The project that this history record belongs to. */
   public get project(): LinearFetch<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
   }
-  /** The ID of project that the history is associated with. */
+  /** The ID of project that this history record belongs to. */
   public get projectId(): string | undefined {
     return this._project?.id;
   }
@@ -15115,7 +15034,7 @@ export class ProjectHistoryConnection extends Connection<ProjectHistory> {
   }
 }
 /**
- * Labels that can be associated with projects.
+ * A label that can be applied to projects for categorization. Project labels are workspace-level and can be organized into groups with a parent-child hierarchy. Only child labels (not group labels) can be directly applied to projects.
  *
  * @param request - function to call the graphql client
  * @param data - L.ProjectLabelFragment response data
@@ -15143,7 +15062,7 @@ export class ProjectLabel extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** The label's color as a HEX string. */
+  /** The label's color as a HEX string (e.g., '#EB5757'). Used for visual identification of the label in the UI. */
   public color: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
@@ -15151,9 +15070,9 @@ export class ProjectLabel extends Request {
   public description?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
-  /** Whether the label is a group. */
+  /** Whether the label is a group. When true, this label acts as a container for child labels and cannot be directly applied to issues or projects. When false, the label can be directly applied. */
   public isGroup: boolean;
-  /** The date when the label was last applied to an issue or project. */
+  /** The date when the label was last applied to an issue or project. Null if the label has never been applied. */
   public lastAppliedAt?: Date | null;
   /** The label's name. */
   public name: string;
@@ -15170,22 +15089,23 @@ export class ProjectLabel extends Request {
   public get creatorId(): string | undefined {
     return this._creator?.id;
   }
+  /** The workspace that the project label belongs to. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
-  /** The parent label. */
+  /** The parent label group. If set, this label is a child within a group. Only one child label from each group can be applied to a project at a time. */
   public get parent(): LinearFetch<ProjectLabel> | undefined {
     return this._parent?.id ? new ProjectLabelQuery(this._request).fetch(this._parent?.id) : undefined;
   }
-  /** The ID of parent label. */
+  /** The ID of parent label group. if set, this label is a child within a group. only one child label from each group can be applied to a project at a time. */
   public get parentId(): string | undefined {
     return this._parent?.id;
   }
-  /** The user who retired the label. */
+  /** The user who retired the label. Retired labels cannot be applied to new projects but remain on existing ones. Null if the label is active. */
   public get retiredBy(): LinearFetch<User> | undefined {
     return this._retiredBy?.id ? new UserQuery(this._request).fetch(this._retiredBy?.id) : undefined;
   }
-  /** The ID of user who retired the label. */
+  /** The ID of user who retired the label. retired labels cannot be applied to new projects but remain on existing ones. null if the label is active. */
   public get retiredById(): string | undefined {
     return this._retiredBy?.id;
   }
@@ -15254,7 +15174,7 @@ export class ProjectLabelConnection extends Connection<ProjectLabel> {
   }
 }
 /**
- * ProjectLabelPayload model
+ * The result of a project label mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.ProjectLabelPayloadFragment response data
@@ -15323,7 +15243,7 @@ export class ProjectLabelWebhookPayload {
   public updatedAt: string;
 }
 /**
- * A milestone for a project.
+ * A milestone within a project. Milestones break a project into phases or target checkpoints, each with its own target date and set of issues. Issues can be assigned to a milestone to track progress toward that checkpoint.
  *
  * @param request - function to call the graphql client
  * @param data - L.ProjectMilestoneFragment response data
@@ -15361,22 +15281,22 @@ export class ProjectMilestone extends Request {
   public progress: number;
   /** The order of the milestone in relation to other milestones within a project. */
   public sortOrder: number;
-  /** The planned completion date of the milestone. */
+  /** The planned completion date of the milestone. Null if no target date is set. */
   public targetDate?: L.Scalars["TimelessDate"] | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The content of the project milestone description. */
+  /** The rich-text content of the milestone description. Null if no description has been set. */
   public documentContent?: DocumentContent | null;
   /** The status of the project milestone. */
   public status: L.ProjectMilestoneStatus;
-  /** The project of the milestone. */
+  /** The project that this milestone belongs to. */
   public get project(): LinearFetch<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
   }
-  /** The ID of project of the milestone. */
+  /** The ID of project that this milestone belongs to. */
   public get projectId(): string | undefined {
     return this._project?.id;
   }
@@ -15456,45 +15376,6 @@ export class ProjectMilestoneMoveIssueToTeam extends Request {
   public teamId: string;
 }
 /**
- * ProjectMilestoneMovePayload model
- *
- * @param request - function to call the graphql client
- * @param data - L.ProjectMilestoneMovePayloadFragment response data
- */
-export class ProjectMilestoneMovePayload extends Request {
-  private _projectMilestone: L.ProjectMilestoneMovePayloadFragment["projectMilestone"];
-
-  public constructor(request: LinearRequest, data: L.ProjectMilestoneMovePayloadFragment) {
-    super(request);
-    this.lastSyncId = data.lastSyncId;
-    this.success = data.success;
-    this.previousProjectTeamIds = data.previousProjectTeamIds
-      ? new ProjectMilestoneMoveProjectTeams(request, data.previousProjectTeamIds)
-      : undefined;
-    this.previousIssueTeamIds = data.previousIssueTeamIds
-      ? data.previousIssueTeamIds.map(node => new ProjectMilestoneMoveIssueToTeam(request, node))
-      : undefined;
-    this._projectMilestone = data.projectMilestone;
-  }
-
-  /** The identifier of the last sync operation. */
-  public lastSyncId: number;
-  /** Whether the operation was successful. */
-  public success: boolean;
-  /** A snapshot of the issues that were moved to new teams, if the user selected to do it, containing an array of mappings between an issue and its previous team. Store on the client to use for undoing a previous milestone move. */
-  public previousIssueTeamIds?: ProjectMilestoneMoveIssueToTeam[] | null;
-  /** A snapshot of the project that had new teams added to it, if the user selected to do it, containing an array of mappings between a project and its previous teams. Store on the client to use for undoing a previous milestone move. */
-  public previousProjectTeamIds?: ProjectMilestoneMoveProjectTeams | null;
-  /** The project milestone that was created or updated. */
-  public get projectMilestone(): LinearFetch<ProjectMilestone> | undefined {
-    return new ProjectMilestoneQuery(this._request).fetch(this._projectMilestone.id);
-  }
-  /** The ID of project milestone that was created or updated. */
-  public get projectMilestoneId(): string | undefined {
-    return this._projectMilestone?.id;
-  }
-}
-/**
  * ProjectMilestoneMoveProjectTeams model
  *
  * @param request - function to call the graphql client
@@ -15513,7 +15394,7 @@ export class ProjectMilestoneMoveProjectTeams extends Request {
   public teamIds: string[];
 }
 /**
- * ProjectMilestonePayload model
+ * The result of a project milestone mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.ProjectMilestonePayloadFragment response data
@@ -15542,7 +15423,7 @@ export class ProjectMilestonePayload extends Request {
   }
 }
 /**
- * A project related notification.
+ * A notification related to a project, such as being added as a member or lead, project updates, comments, or mentions on the project or its milestones.
  *
  * @param request - function to call the graphql client
  * @param data - L.ProjectNotificationFragment response data
@@ -15592,10 +15473,7 @@ export class ProjectNotification extends Request {
   public commentId?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /**
-   * The time at when an email reminder for this notification was sent to the user. Null, if no email
-   *     reminder has been sent.
-   */
+  /** The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent. */
   public emailedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
@@ -15609,13 +15487,13 @@ export class ProjectNotification extends Request {
   public projectUpdateId?: string | null;
   /** Name of the reaction emoji related to the notification. */
   public reactionEmoji?: string | null;
-  /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
+  /** The time at which the user marked the notification as read. Null if the notification is unread. */
   public readAt?: Date | null;
-  /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
+  /** The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed. */
   public snoozedUntilAt?: Date | null;
-  /** Notification type. */
+  /** Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated. */
   public type: string;
-  /** The time at which a notification was unsnoozed.. */
+  /** The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed. */
   public unsnoozedAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -15626,11 +15504,11 @@ export class ProjectNotification extends Request {
   public botActor?: ActorBot | null;
   /** The category of the notification. */
   public category: L.NotificationCategory;
-  /** The user that caused the notification. */
+  /** The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
-  /** The ID of user that caused the notification. */
+  /** The ID of user that caused the notification. null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
   public get actorId(): string | undefined {
     return this._actor?.id;
   }
@@ -15646,13 +15524,13 @@ export class ProjectNotification extends Request {
   public get documentId(): string | undefined {
     return this._document?.id;
   }
-  /** The external user that caused the notification. */
+  /** The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member. */
   public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
     return this._externalUserActor?.id
       ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
       : undefined;
   }
-  /** The ID of external user that caused the notification. */
+  /** The ID of external user that caused the notification. populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like slack or github) rather than a linear workspace member. */
   public get externalUserActorId(): string | undefined {
     return this._externalUserActor?.id;
   }
@@ -15668,17 +15546,17 @@ export class ProjectNotification extends Request {
   public get projectUpdate(): LinearFetch<ProjectUpdate> | undefined {
     return this._projectUpdate?.id ? new ProjectUpdateQuery(this._request).fetch(this._projectUpdate?.id) : undefined;
   }
-  /** The user that received the notification. */
+  /** The recipient user of this notification. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
-  /** The ID of user that received the notification. */
+  /** The ID of recipient user of this notification. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
 }
 /**
- * A project notification subscription.
+ * A notification subscription scoped to a specific project. The subscriber receives notifications for events related to this project, such as updates, comments, and membership changes.
  *
  * @param request - function to call the graphql client
  * @param data - L.ProjectNotificationSubscriptionFragment response data
@@ -15715,7 +15593,7 @@ export class ProjectNotificationSubscription extends Request {
     this._user = data.user ?? undefined;
   }
 
-  /** Whether the subscription is active or not. */
+  /** Whether the subscription is active. When inactive, no notifications are generated from this subscription even though it still exists. */
   public active: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
@@ -15723,54 +15601,54 @@ export class ProjectNotificationSubscription extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The type of subscription. */
+  /** The notification event types that this subscription will deliver to the subscriber. */
   public notificationSubscriptionTypes: string[];
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The type of view to which the notification subscription context is associated with. */
+  /** The type of contextual view (e.g., active issues, backlog) that further scopes a team notification subscription. Null if the subscription is not associated with a specific view type. */
   public contextViewType?: L.ContextViewType | null;
-  /** The type of user view to which the notification subscription context is associated with. */
+  /** The type of user-specific view that further scopes a user notification subscription. Null if the subscription is not associated with a user view type. */
   public userContextViewType?: L.UserContextViewType | null;
-  /** The contextual custom view associated with the notification subscription. */
+  /** The custom view that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
-  /** The ID of contextual custom view associated with the notification subscription. */
+  /** The ID of custom view that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get customViewId(): string | undefined {
     return this._customView?.id;
   }
-  /** The customer associated with the notification subscription. */
+  /** The customer that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get customer(): LinearFetch<Customer> | undefined {
     return this._customer?.id ? new CustomerQuery(this._request).fetch(this._customer?.id) : undefined;
   }
-  /** The ID of customer associated with the notification subscription. */
+  /** The ID of customer that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get customerId(): string | undefined {
     return this._customer?.id;
   }
-  /** The contextual cycle view associated with the notification subscription. */
+  /** The cycle that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
-  /** The ID of contextual cycle view associated with the notification subscription. */
+  /** The ID of cycle that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get cycleId(): string | undefined {
     return this._cycle?.id;
   }
-  /** The contextual initiative view associated with the notification subscription. */
+  /** The initiative that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
-  /** The ID of contextual initiative view associated with the notification subscription. */
+  /** The ID of initiative that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get initiativeId(): string | undefined {
     return this._initiative?.id;
   }
-  /** The contextual label view associated with the notification subscription. */
+  /** The issue label that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get label(): LinearFetch<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
-  /** The ID of contextual label view associated with the notification subscription. */
+  /** The ID of issue label that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get labelId(): string | undefined {
     return this._label?.id;
   }
@@ -15782,33 +15660,33 @@ export class ProjectNotificationSubscription extends Request {
   public get projectId(): string | undefined {
     return this._project?.id;
   }
-  /** The user that subscribed to receive notifications. */
+  /** The user who will receive notifications from this subscription. */
   public get subscriber(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._subscriber.id);
   }
-  /** The ID of user that subscribed to receive notifications. */
+  /** The ID of user who will receive notifications from this subscription. */
   public get subscriberId(): string | undefined {
     return this._subscriber?.id;
   }
-  /** The team associated with the notification subscription. */
+  /** The team that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
-  /** The ID of team associated with the notification subscription. */
+  /** The ID of team that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get teamId(): string | undefined {
     return this._team?.id;
   }
-  /** The user view associated with the notification subscription. */
+  /** The user that this notification subscription is scoped to, for user-specific view subscriptions. Null if the subscription targets a different entity type. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
-  /** The ID of user view associated with the notification subscription. */
+  /** The ID of user that this notification subscription is scoped to, for user-specific view subscriptions. null if the subscription targets a different entity type. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
 }
 /**
- * ProjectPayload model
+ * The result of a project mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.ProjectPayloadFragment response data
@@ -15837,7 +15715,7 @@ export class ProjectPayload extends Request {
   }
 }
 /**
- * A relation between two projects.
+ * A dependency relation between two projects. Relations can optionally be anchored to specific milestones within each project, allowing fine-grained dependency tracking.
  *
  * @param request - function to call the graphql client
  * @param data - L.ProjectRelationFragment response data
@@ -15865,7 +15743,7 @@ export class ProjectRelation extends Request {
     this._user = data.user ?? undefined;
   }
 
-  /** The type of anchor on the project end of the relation. */
+  /** The type of anchor on the source project end of the relation, indicating whether it is anchored to the project itself or a specific milestone. */
   public anchorType: string;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
@@ -15873,56 +15751,56 @@ export class ProjectRelation extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The type of anchor on the relatedProject end of the relation. */
+  /** The type of anchor on the target project end of the relation, indicating whether it is anchored to the project itself or a specific milestone. */
   public relatedAnchorType: string;
-  /** The relationship of the project with the related project. */
+  /** The type of dependency relationship from the project to the related project (e.g., blocks). */
   public type: string;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The project whose relationship is being described. */
+  /** The source project in the dependency relation. */
   public get project(): LinearFetch<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
   }
-  /** The ID of project whose relationship is being described. */
+  /** The ID of source project in the dependency relation. */
   public get projectId(): string | undefined {
     return this._project?.id;
   }
-  /** The milestone within the project whose relationship is being described. */
+  /** The specific milestone within the source project that the relation is anchored to. Null if the relation applies to the project as a whole. */
   public get projectMilestone(): LinearFetch<ProjectMilestone> | undefined {
     return this._projectMilestone?.id
       ? new ProjectMilestoneQuery(this._request).fetch(this._projectMilestone?.id)
       : undefined;
   }
-  /** The ID of milestone within the project whose relationship is being described. */
+  /** The ID of specific milestone within the source project that the relation is anchored to. null if the relation applies to the project as a whole. */
   public get projectMilestoneId(): string | undefined {
     return this._projectMilestone?.id;
   }
-  /** The related project. */
+  /** The target project in the dependency relation. */
   public get relatedProject(): LinearFetch<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._relatedProject.id);
   }
-  /** The ID of related project. */
+  /** The ID of target project in the dependency relation. */
   public get relatedProjectId(): string | undefined {
     return this._relatedProject?.id;
   }
-  /** The milestone within the related project whose relationship is being described. */
+  /** The specific milestone within the target project that the relation is anchored to. Null if the relation applies to the target project as a whole. */
   public get relatedProjectMilestone(): LinearFetch<ProjectMilestone> | undefined {
     return this._relatedProjectMilestone?.id
       ? new ProjectMilestoneQuery(this._request).fetch(this._relatedProjectMilestone?.id)
       : undefined;
   }
-  /** The ID of milestone within the related project whose relationship is being described. */
+  /** The ID of specific milestone within the target project that the relation is anchored to. null if the relation applies to the target project as a whole. */
   public get relatedProjectMilestoneId(): string | undefined {
     return this._relatedProjectMilestone?.id;
   }
-  /** The last user who created or modified the relation. */
+  /** The user who last created or modified the relation. Null if the user has been deleted. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
-  /** The ID of last user who created or modified the relation. */
+  /** The ID of user who last created or modified the relation. null if the user has been deleted. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
@@ -15962,7 +15840,7 @@ export class ProjectRelationConnection extends Connection<ProjectRelation> {
   }
 }
 /**
- * ProjectRelationPayload model
+ * The result of a project relation mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.ProjectRelationPayloadFragment response data
@@ -16005,10 +15883,10 @@ export class ProjectSearchPayload extends Request {
     this.nodes = data.nodes.map(node => new ProjectSearchResult(request, node));
   }
 
-  /** Total number of results for query without filters applied. */
+  /** Total number of matching results before pagination is applied. */
   public totalCount: number;
   public nodes: ProjectSearchResult[];
-  /** Archived entities matching the search term along with all their dependencies. */
+  /** Archived entities matching the search term along with all their dependencies, serialized for the client sync engine. */
   public archivePayload: ArchiveResponse;
   public pageInfo: PageInfo;
 }
@@ -16089,53 +15967,53 @@ export class ProjectSearchResult extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** The time at which the project was automatically archived by the auto pruning process. */
+  /** The time at which the project was automatically archived by the auto-pruning process. Null if the project has not been auto-archived. */
   public autoArchivedAt?: Date | null;
-  /** The time at which the project was moved into canceled state. */
+  /** The time at which the project was moved into a canceled status. Null if the project has not been canceled. */
   public canceledAt?: Date | null;
-  /** The project's color. */
+  /** The project's color as a HEX string. Used in the UI to visually identify the project. */
   public color: string;
-  /** The time at which the project was moved into completed state. */
+  /** The time at which the project was moved into a completed status. Null if the project has not been completed. */
   public completedAt?: Date | null;
-  /** The number of completed issues in the project after each week. */
+  /** The number of completed issues in the project at the end of each week since project creation. Each entry represents one week. */
   public completedIssueCountHistory: number[];
-  /** The number of completed estimation points after each week. */
+  /** The number of completed estimation points at the end of each week since project creation. Each entry represents one week. */
   public completedScopeHistory: number[];
   /** The project's content in markdown format. */
   public content?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** The project's description. */
+  /** The short description of the project. */
   public description: string;
-  /** The time at which the project health was updated. */
+  /** The time at which the project health was last updated, typically when a new project update is posted. Null if health has never been set. */
   public healthUpdatedAt?: Date | null;
-  /** The icon of the project. */
+  /** The icon of the project. Can be an emoji or a decorative icon type. */
   public icon?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The number of in progress estimation points after each week. */
+  /** The number of in-progress estimation points at the end of each week since project creation. Each entry represents one week. */
   public inProgressScopeHistory: number[];
-  /** The total number of issues in the project after each week. */
+  /** The total number of issues in the project at the end of each week since project creation. Each entry represents one week. */
   public issueCountHistory: number[];
-  /** Id of the labels associated with this project. */
+  /** The IDs of the project labels associated with this project. */
   public labelIds: string[];
   /** Metadata related to search result. */
   public metadata: L.Scalars["JSONObject"];
-  /** The project's name. */
+  /** The name of the project. */
   public name: string;
   /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
   public priority: number;
   /** The priority of the project as a label. */
   public priorityLabel: string;
-  /** The sort order for the project within the organization, when ordered by priority. */
+  /** The sort order for the project within the workspace when ordered by priority. */
   public prioritySortOrder: number;
   /** The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
   public progress: number;
-  /** The time until which project update reminders are paused. */
+  /** The time until which project update reminders are paused. When set, no update reminders will be sent for this project until this date passes. Null means reminders are active. */
   public projectUpdateRemindersPausedUntilAt?: Date | null;
   /** The overall scope (total estimate points) of the project. */
   public scope: number;
-  /** The total number of estimation points after each week. */
+  /** The total scope (estimation points) of the project at the end of each week since project creation. Each entry represents one week. */
   public scopeHistory: number[];
   /** Whether to send new issue comment notifications to Slack. */
   public slackIssueComments: boolean;
@@ -16143,17 +16021,17 @@ export class ProjectSearchResult extends Request {
   public slackIssueStatuses: boolean;
   /** Whether to send new issue notifications to Slack. */
   public slackNewIssue: boolean;
-  /** The project's unique URL slug. */
+  /** The project's unique URL slug, used to construct human-readable URLs. */
   public slugId: string;
-  /** The sort order for the project within the organization. */
+  /** The sort order for the project within the workspace. Used for manual ordering in list views. */
   public sortOrder: number;
-  /** The estimated start date of the project. */
+  /** The estimated start date of the project. Null if no start date is set. */
   public startDate?: L.Scalars["TimelessDate"] | null;
-  /** The time at which the project was moved into started state. */
+  /** The time at which the project was moved into a started status. Null if the project has not been started. */
   public startedAt?: Date | null;
   /** [DEPRECATED] The type of the state. */
   public state: string;
-  /** The estimated completion date of the project. */
+  /** The estimated completion date of the project. Null if no target date is set. */
   public targetDate?: L.Scalars["TimelessDate"] | null;
   /** A flag that indicates whether the project is in the trash bin. */
   public trashed?: boolean | null;
@@ -16176,19 +16054,19 @@ export class ProjectSearchResult extends Request {
   public documentContent?: DocumentContent | null;
   /** The resolution of the reminder frequency. */
   public frequencyResolution: L.FrequencyResolutionType;
-  /** The health of the project. */
+  /** The overall health of the project, derived from the most recent project update. Possible values are onTrack, atRisk, or offTrack. Null if no health has been reported. */
   public health?: L.ProjectUpdateHealthType | null;
-  /** The resolution of the project's start date. */
+  /** The resolution of the project's start date, indicating whether it refers to a specific month, quarter, half-year, or year. */
   public startDateResolution?: L.DateResolutionType | null;
-  /** The resolution of the project's estimated completion date. */
+  /** The resolution of the project's estimated completion date, indicating whether it refers to a specific month, quarter, half-year, or year. */
   public targetDateResolution?: L.DateResolutionType | null;
   /** The day at which to prompt for updates. */
   public updateRemindersDay?: L.Day | null;
-  /** The project was created based on this issue. */
+  /** The issue that was converted into this project. Null if the project was not created from an issue. */
   public get convertedFromIssue(): LinearFetch<Issue> | undefined {
     return this._convertedFromIssue?.id ? new IssueQuery(this._request).fetch(this._convertedFromIssue?.id) : undefined;
   }
-  /** The ID of project was created based on this issue. */
+  /** The ID of issue that was converted into this project. null if the project was not created from an issue. */
   public get convertedFromIssueId(): string | undefined {
     return this._convertedFromIssue?.id;
   }
@@ -16228,33 +16106,33 @@ export class ProjectSearchResult extends Request {
   public get lastAppliedTemplateId(): string | undefined {
     return this._lastAppliedTemplate?.id;
   }
-  /** The last project update posted for this project. */
+  /** The most recent status update posted for this project. Null if no updates have been posted. */
   public get lastUpdate(): LinearFetch<ProjectUpdate> | undefined {
     return this._lastUpdate?.id ? new ProjectUpdateQuery(this._request).fetch(this._lastUpdate?.id) : undefined;
   }
-  /** The ID of last project update posted for this project. */
+  /** The ID of most recent status update posted for this project. null if no updates have been posted. */
   public get lastUpdateId(): string | undefined {
     return this._lastUpdate?.id;
   }
-  /** The project lead. */
+  /** The user who leads the project. The project lead is typically responsible for posting status updates and driving the project to completion. Null if no lead is assigned. */
   public get lead(): LinearFetch<User> | undefined {
     return this._lead?.id ? new UserQuery(this._request).fetch(this._lead?.id) : undefined;
   }
-  /** The ID of project lead. */
+  /** The ID of user who leads the project. the project lead is typically responsible for posting status updates and driving the project to completion. null if no lead is assigned. */
   public get leadId(): string | undefined {
     return this._lead?.id;
   }
-  /** The status that the project is associated with. */
+  /** The current project status. Defines the project's position in its lifecycle (e.g., backlog, planned, started, paused, completed, canceled). */
   public get status(): LinearFetch<ProjectStatus> | undefined {
     return new ProjectStatusQuery(this._request).fetch(this._status.id);
   }
-  /** The ID of status that the project is associated with. */
+  /** The ID of current project status. defines the project's position in its lifecycle (e.g., backlog, planned, started, paused, completed, canceled). */
   public get statusId(): string | undefined {
     return this._status?.id;
   }
 }
 /**
- * A project status.
+ * A custom project status within a workspace. Statuses are grouped by type (backlog, planned, started, paused, completed, canceled) and define the lifecycle stages a project can move through. Each workspace can customize the names and colors of its project statuses.
  *
  * @param request - function to call the graphql client
  * @param data - L.ProjectStatusFragment response data
@@ -16276,7 +16154,7 @@ export class ProjectStatus extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** The UI color of the status as a HEX string. */
+  /** The color of the status as a HEX string, used for display in the UI. */
   public color: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
@@ -16284,21 +16162,21 @@ export class ProjectStatus extends Request {
   public description?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
-  /** Whether or not a project can be in this status indefinitely. */
+  /** Whether a project can remain in this status indefinitely. When false, projects in this status may trigger reminders or auto-archiving after a period of inactivity. */
   public indefinite: boolean;
   /** The name of the status. */
   public name: string;
-  /** The position of the status in the workspace's project flow. */
+  /** The position of the status within its type group in the workspace's project flow. Used for ordering statuses of the same type. */
   public position: number;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The type of the project status. */
+  /** The category type of the project status (e.g., backlog, planned, started, paused, completed, canceled). Determines the status's behavior and position in the project lifecycle. */
   public type: L.ProjectStatusType;
 
-  /** Archives a project status. */
+  /** Archives a project status. The status must not have any active projects assigned to it and must not be the last status of its type. */
   public archive() {
     return new ArchiveProjectStatusMutation(this._request).fetch(this.id);
   }
@@ -16388,7 +16266,7 @@ export class ProjectStatusConnection extends Connection<ProjectStatus> {
   }
 }
 /**
- * ProjectStatusCountPayload model
+ * The count of projects using a specific project status.
  *
  * @param request - function to call the graphql client
  * @param data - L.ProjectStatusCountPayloadFragment response data
@@ -16409,7 +16287,7 @@ export class ProjectStatusCountPayload extends Request {
   public privateCount: number;
 }
 /**
- * ProjectStatusPayload model
+ * The result of a project status mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.ProjectStatusPayloadFragment response data
@@ -16438,7 +16316,7 @@ export class ProjectStatusPayload extends Request {
   }
 }
 /**
- * An update associated with a project.
+ * A status update posted to a project. Project updates communicate progress, health, and blockers to stakeholders. Each update captures the project's health at the time of writing and includes a rich-text body with the update content.
  *
  * @param request - function to call the graphql client
  * @param data - L.ProjectUpdateFragment response data
@@ -16485,7 +16363,7 @@ export class ProjectUpdate extends Request {
   public editedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
-  /** Whether project update diff should be hidden. */
+  /** Whether the diff between this update and the previous one should be hidden in the UI. */
   public isDiffHidden: boolean;
   /** Whether the project update is stale. */
   public isStale: boolean;
@@ -16502,13 +16380,13 @@ export class ProjectUpdate extends Request {
   public url: string;
   /** Reactions associated with the project update. */
   public reactions: Reaction[];
-  /** The health of the project at the time of the update. */
+  /** The health of the project at the time this update was posted. Possible values are onTrack, atRisk, or offTrack. */
   public health: L.ProjectUpdateHealthType;
-  /** The project that the update is associated with. */
+  /** The project that this status update was posted to. */
   public get project(): LinearFetch<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
   }
-  /** The ID of project that the update is associated with. */
+  /** The ID of project that this status update was posted to. */
   public get projectId(): string | undefined {
     return this._project?.id;
   }
@@ -16618,7 +16496,7 @@ export class ProjectUpdateConnection extends Connection<ProjectUpdate> {
   }
 }
 /**
- * ProjectUpdatePayload model
+ * The result of a project update mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.ProjectUpdatePayloadFragment response data
@@ -16647,7 +16525,7 @@ export class ProjectUpdatePayload extends Request {
   }
 }
 /**
- * ProjectUpdateReminderPayload model
+ * The result of a project update reminder mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.ProjectUpdateReminderPayloadFragment response data
@@ -16875,7 +16753,7 @@ export class ProjectWebhookPayload {
   public status?: ProjectStatusChildWebhookPayload | null;
 }
 /**
- * A pull request related notification.
+ * A notification related to a pull request, such as review requests, approvals, comments, check failures, or merge queue events.
  *
  * @param request - function to call the graphql client
  * @param data - L.PullRequestNotificationFragment response data
@@ -16909,10 +16787,7 @@ export class PullRequestNotification extends Request {
   public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /**
-   * The time at when an email reminder for this notification was sent to the user. Null, if no email
-   *     reminder has been sent.
-   */
+  /** The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent. */
   public emailedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
@@ -16920,13 +16795,13 @@ export class PullRequestNotification extends Request {
   public pullRequestCommentId?: string | null;
   /** Related pull request. */
   public pullRequestId: string;
-  /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
+  /** The time at which the user marked the notification as read. Null if the notification is unread. */
   public readAt?: Date | null;
-  /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
+  /** The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed. */
   public snoozedUntilAt?: Date | null;
-  /** Notification type. */
+  /** Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated. */
   public type: string;
-  /** The time at which a notification was unsnoozed.. */
+  /** The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed. */
   public unsnoozedAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -16937,35 +16812,35 @@ export class PullRequestNotification extends Request {
   public botActor?: ActorBot | null;
   /** The category of the notification. */
   public category: L.NotificationCategory;
-  /** The user that caused the notification. */
+  /** The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
-  /** The ID of user that caused the notification. */
+  /** The ID of user that caused the notification. null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
   public get actorId(): string | undefined {
     return this._actor?.id;
   }
-  /** The external user that caused the notification. */
+  /** The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member. */
   public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
     return this._externalUserActor?.id
       ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
       : undefined;
   }
-  /** The ID of external user that caused the notification. */
+  /** The ID of external user that caused the notification. populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like slack or github) rather than a linear workspace member. */
   public get externalUserActorId(): string | undefined {
     return this._externalUserActor?.id;
   }
-  /** The user that received the notification. */
+  /** The recipient user of this notification. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
-  /** The ID of user that received the notification. */
+  /** The ID of recipient user of this notification. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
 }
 /**
- * A user's web or mobile push notification subscription.
+ * A device registration for receiving push notifications. Each PushSubscription represents a specific browser or mobile device endpoint where a user has opted in to receive real-time push notifications. A user may have multiple push subscriptions across different devices and browsers.
  *
  * @param request - function to call the graphql client
  * @param data - L.PushSubscriptionFragment response data
@@ -16991,17 +16866,17 @@ export class PushSubscription extends Request {
    */
   public updatedAt: Date;
 
-  /** Creates a push subscription. */
+  /** Creates a push subscription for the authenticated user's current device or browser. If a subscription already exists for the same session, the old one is replaced. */
   public create(input: L.PushSubscriptionCreateInput) {
     return new CreatePushSubscriptionMutation(this._request).fetch(input);
   }
-  /** Deletes a push subscription. */
+  /** Deletes a push subscription, unregistering the device from receiving push notifications. */
   public delete() {
     return new DeletePushSubscriptionMutation(this._request).fetch(this.id);
   }
 }
 /**
- * PushSubscriptionPayload model
+ * Return type for push subscription mutations.
  *
  * @param request - function to call the graphql client
  * @param data - L.PushSubscriptionPayloadFragment response data
@@ -17018,11 +16893,11 @@ export class PushSubscriptionPayload extends Request {
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
-  /** The push subscription that was created or updated. */
+  /** The push subscription that was created or deleted. */
   public entity: PushSubscription;
 }
 /**
- * PushSubscriptionTestPayload model
+ * Return type for the push subscription test query.
  *
  * @param request - function to call the graphql client
  * @param data - L.PushSubscriptionTestPayloadFragment response data
@@ -17037,7 +16912,7 @@ export class PushSubscriptionTestPayload extends Request {
   public success: boolean;
 }
 /**
- * RateLimitPayload model
+ * The current rate limit status for the authenticated entity.
  *
  * @param request - function to call the graphql client
  * @param data - L.RateLimitPayloadFragment response data
@@ -17050,15 +16925,15 @@ export class RateLimitPayload extends Request {
     this.limits = data.limits.map(node => new RateLimitResultPayload(request, node));
   }
 
-  /** The identifier we rate limit on. */
+  /** The identifier being rate limited, typically the API key or user ID. */
   public identifier?: string | null;
-  /** The kind of rate limit selected for this request. */
+  /** The category of rate limit applied to this request, such as API complexity or request count. */
   public kind: string;
-  /** The state of the rate limit. */
+  /** The current state of each rate limit type, including remaining quota and reset timing. */
   public limits: RateLimitResultPayload[];
 }
 /**
- * RateLimitResultPayload model
+ * The state of a specific rate limit type, including remaining quota and reset timing.
  *
  * @param request - function to call the graphql client
  * @param data - L.RateLimitResultPayloadFragment response data
@@ -17076,19 +16951,19 @@ export class RateLimitResultPayload extends Request {
 
   /** The total allowed quantity for this type of limit. */
   public allowedAmount: number;
-  /** The period in which the rate limit is fully replenished in ms. */
+  /** The duration in milliseconds of the rate limit window. After this period elapses, the limit is fully replenished. */
   public period: number;
   /** The remaining quantity for this type of limit after this request. */
   public remainingAmount: number;
   /** The requested quantity for this type of limit. */
   public requestedAmount: number;
-  /** The timestamp after the rate limit is fully replenished as a UNIX timestamp. */
+  /** The UNIX timestamp (in milliseconds) at which the rate limit will be fully replenished. */
   public reset: number;
-  /** What is being rate limited. */
+  /** The specific type of rate limit being tracked, such as query complexity or mutation count. */
   public type: string;
 }
 /**
- * A reaction associated with a comment or a project update.
+ * An emoji reaction on a comment, issue, project update, initiative update, post, pull request, or pull request comment. Each reaction is associated with exactly one parent entity and is created by either a workspace user or an external user. Reactions are persisted individually but surfaced on their parent entities as aggregated reactionData.
  *
  * @param request - function to call the graphql client
  * @param data - L.ReactionFragment response data
@@ -17120,7 +16995,7 @@ export class Reaction extends Request {
   public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** Name of the reaction's emoji. */
+  /** The name of the emoji used for this reaction. For custom workspace emojis, this is the custom emoji name; for standard emojis, this is the normalized emoji name. */
   public emoji: string;
   /** The unique identifier of the entity. */
   public id: string;
@@ -17129,53 +17004,53 @@ export class Reaction extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The comment that the reaction is associated with. */
+  /** The comment that the reaction is associated with. Null if the reaction belongs to a different parent entity type. */
   public get comment(): LinearFetch<Comment> | undefined {
     return this._comment?.id ? new CommentQuery(this._request).fetch({ id: this._comment?.id }) : undefined;
   }
-  /** The ID of comment that the reaction is associated with. */
+  /** The ID of comment that the reaction is associated with. null if the reaction belongs to a different parent entity type. */
   public get commentId(): string | undefined {
     return this._comment?.id;
   }
-  /** The external user that created the reaction. */
+  /** The external user that created the reaction through an integration. Null if the reaction was created by a workspace user. */
   public get externalUser(): LinearFetch<ExternalUser> | undefined {
     return this._externalUser?.id ? new ExternalUserQuery(this._request).fetch(this._externalUser?.id) : undefined;
   }
-  /** The ID of external user that created the reaction. */
+  /** The ID of external user that created the reaction through an integration. null if the reaction was created by a workspace user. */
   public get externalUserId(): string | undefined {
     return this._externalUser?.id;
   }
-  /** The initiative update that the reaction is associated with. */
+  /** The initiative update that the reaction is associated with. Null if the reaction belongs to a different parent entity type. */
   public get initiativeUpdate(): LinearFetch<InitiativeUpdate> | undefined {
     return this._initiativeUpdate?.id
       ? new InitiativeUpdateQuery(this._request).fetch(this._initiativeUpdate?.id)
       : undefined;
   }
-  /** The ID of initiative update that the reaction is associated with. */
+  /** The ID of initiative update that the reaction is associated with. null if the reaction belongs to a different parent entity type. */
   public get initiativeUpdateId(): string | undefined {
     return this._initiativeUpdate?.id;
   }
-  /** The issue that the reaction is associated with. */
+  /** The issue that the reaction is associated with. Null if the reaction belongs to a different parent entity type. */
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
-  /** The ID of issue that the reaction is associated with. */
+  /** The ID of issue that the reaction is associated with. null if the reaction belongs to a different parent entity type. */
   public get issueId(): string | undefined {
     return this._issue?.id;
   }
-  /** The project update that the reaction is associated with. */
+  /** The project update that the reaction is associated with. Null if the reaction belongs to a different parent entity type. */
   public get projectUpdate(): LinearFetch<ProjectUpdate> | undefined {
     return this._projectUpdate?.id ? new ProjectUpdateQuery(this._request).fetch(this._projectUpdate?.id) : undefined;
   }
-  /** The ID of project update that the reaction is associated with. */
+  /** The ID of project update that the reaction is associated with. null if the reaction belongs to a different parent entity type. */
   public get projectUpdateId(): string | undefined {
     return this._projectUpdate?.id;
   }
-  /** The user that created the reaction. */
+  /** The workspace user that created the reaction. Null if the reaction was created by an external user through an integration. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
-  /** The ID of user that created the reaction. */
+  /** The ID of workspace user that created the reaction. null if the reaction was created by an external user through an integration. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
@@ -17190,7 +17065,7 @@ export class Reaction extends Request {
   }
 }
 /**
- * ReactionPayload model
+ * The result of a reaction mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.ReactionPayloadFragment response data
@@ -17205,7 +17080,9 @@ export class ReactionPayload extends Request {
 
   /** The identifier of the last sync operation. */
   public lastSyncId: number;
+  /** Whether the operation was successful. */
   public success: boolean;
+  /** The reaction that was created. */
   public reaction: Reaction;
 }
 /**
@@ -17285,7 +17162,7 @@ export class ReleaseArchivePayload extends Request {
   public success: boolean;
 }
 /**
- * ReleasePayload model
+ * The result of a release mutation, containing the release that was created or updated and a success indicator.
  *
  * @param request - function to call the graphql client
  * @param data - L.ReleasePayloadFragment response data
@@ -17346,7 +17223,7 @@ export class ReleasePipelineChildWebhookPayload {
   public url: string;
 }
 /**
- * ReleasePipelinePayload model
+ * The result of a release pipeline mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.ReleasePipelinePayloadFragment response data
@@ -17407,7 +17284,7 @@ export class ReleaseStageChildWebhookPayload {
   public type: string;
 }
 /**
- * ReleaseStagePayload model
+ * The result of a release stage mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.ReleaseStagePayloadFragment response data
@@ -17501,7 +17378,7 @@ export class ReleaseWebhookPayload {
   public stage?: ReleaseStageChildWebhookPayload | null;
 }
 /**
- * RepositorySuggestion model
+ * A suggested code repository that may be relevant for implementing an issue.
  *
  * @param request - function to call the graphql client
  * @param data - L.RepositorySuggestionFragment response data
@@ -17522,7 +17399,7 @@ export class RepositorySuggestion extends Request {
   public repositoryFullName: string;
 }
 /**
- * RepositorySuggestionsPayload model
+ * The result of a repository suggestions query, containing the list of suggested repositories.
  *
  * @param request - function to call the graphql client
  * @param data - L.RepositorySuggestionsPayloadFragment response data
@@ -17537,7 +17414,7 @@ export class RepositorySuggestionsPayload extends Request {
   public suggestions: RepositorySuggestion[];
 }
 /**
- * [Deprecated] A roadmap for projects.
+ * [Deprecated] A roadmap for grouping projects. Use Initiative instead, which supersedes this entity and provides richer hierarchy and tracking capabilities.
  *
  * @param request - function to call the graphql client
  * @param data - L.RoadmapFragment response data
@@ -17576,7 +17453,7 @@ export class Roadmap extends Request {
   public name: string;
   /** The roadmap's unique URL slug. */
   public slugId: string;
-  /** The sort order of the roadmap within the organization. */
+  /** The sort order of the roadmap within the workspace. */
   public sortOrder: number;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -17593,7 +17470,7 @@ export class Roadmap extends Request {
   public get creatorId(): string | undefined {
     return this._creator?.id;
   }
-  /** The organization of the roadmap. */
+  /** The workspace of the roadmap. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
@@ -17681,7 +17558,7 @@ export class RoadmapConnection extends Connection<Roadmap> {
   }
 }
 /**
- * RoadmapPayload model
+ * The result of a roadmap mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.RoadmapPayloadFragment response data
@@ -17710,7 +17587,7 @@ export class RoadmapPayload extends Request {
   }
 }
 /**
- * [Deprecated] Join table between projects and roadmaps.
+ * [Deprecated] The join entity linking a project to a roadmap. Use InitiativeToProject instead, which supersedes this entity.
  *
  * @param request - function to call the graphql client
  * @param data - L.RoadmapToProjectFragment response data
@@ -17760,15 +17637,15 @@ export class RoadmapToProject extends Request {
     return this._roadmap?.id;
   }
 
-  /** Creates a new roadmapToProject join. */
+  /** [Deprecated] Creates a new roadmap-to-project association. Use InitiativeToProject instead. */
   public create(input: L.RoadmapToProjectCreateInput) {
     return new CreateRoadmapToProjectMutation(this._request).fetch(input);
   }
-  /** Deletes a roadmapToProject. */
+  /** [Deprecated] Deletes a roadmap-to-project association. Use InitiativeToProject instead. */
   public delete() {
     return new DeleteRoadmapToProjectMutation(this._request).fetch(this.id);
   }
-  /** Updates a roadmapToProject. */
+  /** [Deprecated] Updates a roadmap-to-project association. Use InitiativeToProject instead. */
   public update(input: L.RoadmapToProjectUpdateInput) {
     return new UpdateRoadmapToProjectMutation(this._request).fetch(this.id, input);
   }
@@ -17795,7 +17672,7 @@ export class RoadmapToProjectConnection extends Connection<RoadmapToProject> {
   }
 }
 /**
- * RoadmapToProjectPayload model
+ * The result of a roadmap-to-project mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.RoadmapToProjectPayloadFragment response data
@@ -17824,7 +17701,7 @@ export class RoadmapToProjectPayload extends Request {
   }
 }
 /**
- * Payload returned by semantic search.
+ * The payload returned by the semantic search query, containing the list of matching results.
  *
  * @param request - function to call the graphql client
  * @param data - L.SemanticSearchPayloadFragment response data
@@ -17838,10 +17715,11 @@ export class SemanticSearchPayload extends Request {
 
   /** Whether the semantic search is enabled. */
   public enabled: boolean;
+  /** The list of matching search results, ordered by relevance score. */
   public results: SemanticSearchResult[];
 }
 /**
- * A semantic search result reference.
+ * A reference to an entity returned by semantic search, containing its type and ID. Resolve the specific entity using the type-specific field resolvers (issue, project, initiative, document).
  *
  * @param request - function to call the graphql client
  * @param data - L.SemanticSearchResultFragment response data
@@ -17866,41 +17744,41 @@ export class SemanticSearchResult extends Request {
   public id: string;
   /** The type of the semantic search result. */
   public type: L.SemanticSearchResultType;
-  /** The document related to the semantic search result. */
+  /** The document entity, if this search result is of type Document. Null for other result types. */
   public get document(): LinearFetch<Document> | undefined {
     return this._document?.id ? new DocumentQuery(this._request).fetch(this._document?.id) : undefined;
   }
-  /** The ID of document related to the semantic search result. */
+  /** The ID of document entity, if this search result is of type document. null for other result types. */
   public get documentId(): string | undefined {
     return this._document?.id;
   }
-  /** The initiative related to the semantic search result. */
+  /** The initiative entity, if this search result is of type Initiative. Null for other result types. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
-  /** The ID of initiative related to the semantic search result. */
+  /** The ID of initiative entity, if this search result is of type initiative. null for other result types. */
   public get initiativeId(): string | undefined {
     return this._initiative?.id;
   }
-  /** The issue related to the semantic search result. */
+  /** The issue entity, if this search result is of type Issue. Null for other result types. */
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
-  /** The ID of issue related to the semantic search result. */
+  /** The ID of issue entity, if this search result is of type issue. null for other result types. */
   public get issueId(): string | undefined {
     return this._issue?.id;
   }
-  /** The project related to the semantic search result. */
+  /** The project entity, if this search result is of type Project. Null for other result types. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
-  /** The ID of project related to the semantic search result. */
+  /** The ID of project entity, if this search result is of type project. null for other result types. */
   public get projectId(): string | undefined {
     return this._project?.id;
   }
 }
 /**
- * SES domain identity used for sending emails from a custom domain.
+ * A verified Amazon SES domain identity that enables sending emails from a custom domain. Organizations configure SES domain identities to send issue notification replies and Asks auto-replies from their own domain instead of the default Linear domain. Full verification requires DKIM signing, a custom MAIL FROM domain, and organization ownership confirmation. Multiple organizations sharing the same domain each have their own SesDomainIdentity record but share the underlying SES identity.
  *
  * @param request - function to call the graphql client
  * @param data - L.SesDomainIdentityFragment response data
@@ -17948,7 +17826,7 @@ export class SesDomainIdentity extends Request {
   public get creatorId(): string | undefined {
     return this._creator?.id;
   }
-  /** The organization of the SES domain identity. */
+  /** The workspace of the SES domain identity. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
@@ -17978,7 +17856,37 @@ export class SesDomainIdentityDnsRecord extends Request {
   public type: string;
 }
 /**
- * Tuple for mapping Slack channel IDs to names.
+ * An active SLA rule that can apply to a team.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.SlaConfigurationFragment response data
+ */
+export class SlaConfiguration extends Request {
+  public constructor(request: LinearRequest, data: L.SlaConfigurationFragment) {
+    super(request);
+    this.conditions = data.conditions;
+    this.id = data.id;
+    this.name = data.name;
+    this.removesSla = data.removesSla;
+    this.sla = data.sla ?? undefined;
+    this.slaType = data.slaType ?? undefined;
+  }
+
+  /** The workflow conditions that determine when this SLA rule applies. */
+  public conditions: L.Scalars["JSONObject"];
+  /** The identifier of the SLA rule. */
+  public id: string;
+  /** The name of the SLA rule. */
+  public name: string;
+  /** Whether the rule removes an SLA instead of setting one. */
+  public removesSla: boolean;
+  /** The SLA value configured by the rule, expressed in milliseconds or business days depending on the day-count type. */
+  public sla?: number | null;
+  /** The SLA type used when the rule sets an SLA. */
+  public slaType?: L.SLADayCountType | null;
+}
+/**
+ * Configuration for a Linear team within a Slack Asks channel mapping. Controls whether the default Asks template is enabled for the team in a given Slack channel.
  *
  * @param request - function to call the graphql client
  * @param data - L.SlackAsksTeamSettingsFragment response data
@@ -18034,7 +17942,7 @@ export class SlackChannelConnectPayload extends Request {
   }
 }
 /**
- * Object for mapping Slack channel IDs to names and other settings.
+ * Configuration for a Slack channel connected to Linear via Slack Asks. Maps the Slack channel ID and name to team assignments and auto-creation settings that control how issues are created from Slack messages in this channel.
  *
  * @param request - function to call the graphql client
  * @param data - L.SlackChannelNameMappingFragment response data
@@ -18701,7 +18609,7 @@ export class SuccessPayload extends Request {
   public success: boolean;
 }
 /**
- * An AI-generated summary.
+ * An AI-generated summary of an issue. Each issue can have at most one summary. The summary content is stored as ProseMirror data and tracks its generation status and timing.
  *
  * @param request - function to call the graphql client
  * @param data - L.SummaryFragment response data
@@ -18724,13 +18632,13 @@ export class Summary extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** The summary content as a Prosemirror document. */
+  /** The summary content as a ProseMirror document containing the AI-generated summary text. */
   public content: L.Scalars["JSONObject"];
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** The evaluation log id for this summary generation. */
+  /** The evaluation log ID for this summary generation, used for tracking and debugging AI output quality. Null if not available. */
   public evalLogId?: string | null;
-  /** The time at which the summary was generated. */
+  /** The time at which the summary content was generated or last regenerated. */
   public generatedAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
@@ -18739,19 +18647,19 @@ export class Summary extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The generation status of the summary. */
+  /** The current generation status of the summary, indicating whether generation is in progress, completed, or failed. */
   public generationStatus: L.SummaryGenerationStatus;
-  /** The issue this summary belongs to. */
+  /** The issue that this summary was generated for. */
   public get issue(): LinearFetch<Issue> | undefined {
     return new IssueQuery(this._request).fetch(this._issue.id);
   }
-  /** The ID of issue this summary belongs to. */
+  /** The ID of issue that this summary was generated for. */
   public get issueId(): string | undefined {
     return this._issue?.id;
   }
 }
 /**
- * A comment thread that is synced with an external source.
+ * A comment thread that is synced with an external source such as Slack, Jira, GitHub, Salesforce, or email. Provides information about the external thread's origin, its current sync status, and whether the user has the necessary personal integration connected to participate in the thread.
  *
  * @param request - function to call the graphql client
  * @param data - L.SyncedExternalThreadFragment response data
@@ -18770,26 +18678,27 @@ export class SyncedExternalThread extends Request {
     this.url = data.url ?? undefined;
   }
 
-  /** The display name of the thread. */
+  /** A human-readable display name for the thread, derived from the external source. For Slack threads this is the channel name, for Jira it's the issue key, for email it's the sender name and count of other participants. */
   public displayName?: string | null;
+  /** The unique identifier of this synced external thread. Auto-generated if not provided. */
   public id?: string | null;
-  /** Whether this thread is syncing with the external service. */
+  /** Whether this thread is currently syncing comments bidirectionally with the external service. False if the external entity relation has been removed or if the thread was explicitly unsynced. */
   public isConnected: boolean;
-  /** Whether the current user has the corresponding personal integration connected for the external service. */
+  /** Whether the current user has a working personal integration connected for the external service. For example, whether they have connected their personal Jira, GitHub, or Slack account. A connected personal integration may still return false if it has an authentication error. */
   public isPersonalIntegrationConnected: boolean;
-  /** Whether a connected personal integration is required to comment in this thread. */
+  /** Whether a connected personal integration is required to post comments in this synced thread. True for Jira and GitHub threads, where comments must be attributed to a specific user in the external system. False for Slack and other services where the workspace integration can post on behalf of users. */
   public isPersonalIntegrationRequired: boolean;
-  /** The display name of the source. */
+  /** A human-readable display name for the external source (e.g., 'Slack', 'Jira', 'GitHub'). */
   public name?: string | null;
-  /** The sub type of the external source. */
+  /** The specific integration service for the external source (e.g., 'slack', 'jira', 'github', 'salesforce'). Null if the source type does not have a sub-type. */
   public subType?: string | null;
-  /** The type of the external source. */
+  /** The category of the external source (e.g., 'integration' for service integrations, 'email' for email-based threads). */
   public type: string;
-  /** The external url of the thread. */
+  /** A URL linking to the thread in the external service. For example, a Slack message permalink, a Jira issue URL, or a GitHub issue URL. */
   public url?: string | null;
 }
 /**
- * An organizational unit that contains issues.
+ * A team is the primary organizational unit in Linear. Issues belong to teams, and each team has its own workflow states, cycles, labels, and settings. Teams can be public (visible to all workspace members) or private (visible only to team members). Teams can also have sub-teams that inherit settings from their parent.
  *
  * @param request - function to call the graphql client
  * @param data - L.TeamFragment response data
@@ -18908,7 +18817,7 @@ export class Team extends Request {
   public cycleCalenderUrl: string;
   /** The cooldown time after each cycle in weeks. */
   public cycleCooldownTime: number;
-  /** The duration of a cycle in weeks. */
+  /** The duration of each cycle in weeks. */
   public cycleDuration: number;
   /** Auto assign completed issues to current cycle. */
   public cycleIssueAutoAssignCompleted: boolean;
@@ -18916,9 +18825,9 @@ export class Team extends Request {
   public cycleIssueAutoAssignStarted: boolean;
   /** Auto assign issues to current cycle if in active status. */
   public cycleLockToActive: boolean;
-  /** The day of the week that a new cycle starts. */
+  /** The day of the week that a new cycle starts (0 = Sunday, 1 = Monday, ..., 6 = Saturday). */
   public cycleStartDay: number;
-  /** Whether the team uses cycles. */
+  /** Whether the team uses cycles for sprint-style issue management. */
   public cyclesEnabled: boolean;
   /** What to use as a default estimate for unestimated issues. */
   public defaultIssueEstimate: number;
@@ -18942,7 +18851,7 @@ export class Team extends Request {
   public inheritWorkflowStatuses: boolean;
   /** [DEPRECATED] Unique hash for the team to be used in invite URLs. */
   public inviteHash: string;
-  /** Number of issues in the team. */
+  /** The total number of issues in the team. By default excludes archived issues; use the includeArchived argument to include them. */
   public issueCount: number;
   /** Whether to allow zeros in issues estimates. */
   public issueEstimationAllowZero: boolean;
@@ -18954,21 +18863,21 @@ export class Team extends Request {
   public issueOrderingNoPriorityFirst: boolean;
   /** [DEPRECATED] Whether to move issues to bottom of the column when changing state. */
   public issueSortOrderDefaultToBottom: boolean;
-  /** The team's unique key. The key is used in URLs. */
+  /** The team's unique key, used as a prefix in issue identifiers (e.g., 'ENG' in 'ENG-123') and in URLs. */
   public key: string;
   /** The team's name. */
   public name: string;
-  /** Whether the team is private or not. */
+  /** Whether the team is private. Private teams are only visible to their members and require an explicit invitation to join. */
   public private: boolean;
   /** Whether an issue needs to have a priority set before leaving triage. */
   public requirePriorityToLeaveTriage: boolean;
-  /** The time at which the team was retired. Null if the team has not been retired. */
+  /** The time at which the team was retired. Retired teams no longer accept new issues or members. Null if the team has not been retired. */
   public retiredAt?: Date | null;
   /** The SCIM group name for the team. */
   public scimGroupName?: string | null;
-  /** Whether the team is managed by SCIM integration. */
+  /** Whether the team is managed by a SCIM integration. SCIM-managed teams have their membership controlled by the identity provider. */
   public scimManaged: boolean;
-  /** Security settings for the team. */
+  /** Security settings for the team, including role-based restrictions for issue sharing, label management, member management, and template management. */
   public securitySettings: L.Scalars["JSONObject"];
   /** Where to move issues when changing state. */
   public setIssueSortOrderOnStateChange: string;
@@ -18980,7 +18889,7 @@ export class Team extends Request {
   public slackNewIssue: boolean;
   /** The timezone of the team. Defaults to "America/Los_Angeles" */
   public timezone: string;
-  /** Whether triage mode is enabled for the team or not. */
+  /** Whether triage mode is enabled for the team. When enabled, issues created by non-members or integrations are routed to a triage state for review before entering the normal workflow. */
   public triageEnabled: boolean;
   /** How many upcoming cycles to create. */
   public upcomingCycleCount: number;
@@ -19079,7 +18988,7 @@ export class Team extends Request {
   public get mergeableWorkflowStateId(): string | undefined {
     return this._mergeableWorkflowState?.id;
   }
-  /** The organization that the team is associated with. */
+  /** The workspace that the team belongs to. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
@@ -19139,7 +19048,7 @@ export class Team extends Request {
   public gitAutomationStates(variables?: Omit<L.Team_GitAutomationStatesQueryVariables, "id">) {
     return new Team_GitAutomationStatesQuery(this._request, this.id, variables).fetch(variables);
   }
-  /** Issues associated with the team. */
+  /** Issues belonging to the team. Supports filtering and optional inclusion of sub-team issues. */
   public issues(variables?: Omit<L.Team_IssuesQueryVariables, "id">) {
     return new Team_IssuesQuery(this._request, this.id, variables).fetch(variables);
   }
@@ -19147,7 +19056,7 @@ export class Team extends Request {
   public labels(variables?: Omit<L.Team_LabelsQueryVariables, "id">) {
     return new Team_LabelsQuery(this._request, this.id, variables).fetch(variables);
   }
-  /** Users who are members of this team. */
+  /** Users who are members of this team. Supports filtering and pagination. */
   public members(variables?: Omit<L.Team_MembersQueryVariables, "id">) {
     return new Team_MembersQuery(this._request, this.id, variables).fetch(variables);
   }
@@ -19171,11 +19080,11 @@ export class Team extends Request {
   public webhooks(variables?: Omit<L.Team_WebhooksQueryVariables, "id">) {
     return new Team_WebhooksQuery(this._request, this.id, variables).fetch(variables);
   }
-  /** Creates a new team. The user who creates the team will automatically be added as a member to the newly created team. */
+  /** Creates a new team. The user who creates the team will automatically be added as a member and owner of the newly created team. Default workflow states, labels, and other team resources are created alongside the team. */
   public create(input: L.TeamCreateInput, variables?: Omit<L.CreateTeamMutationVariables, "input">) {
     return new CreateTeamMutation(this._request).fetch(input, variables);
   }
-  /** Deletes a team. */
+  /** Archives a team and schedules its data for deletion. Requires team owner or workspace admin permissions. */
   public delete() {
     return new DeleteTeamMutation(this._request).fetch(this.id);
   }
@@ -19183,7 +19092,7 @@ export class Team extends Request {
   public unarchive() {
     return new UnarchiveTeamMutation(this._request).fetch(this.id);
   }
-  /** Updates a team. */
+  /** Updates a team's settings, properties, or configuration. Requires team owner or workspace admin permissions for most changes. */
   public update(input: L.TeamUpdateInput, variables?: Omit<L.UpdateTeamMutationVariables, "id" | "input">) {
     return new UpdateTeamMutation(this._request).fetch(this.id, input, variables);
   }
@@ -19258,7 +19167,7 @@ export class TeamConnection extends Connection<Team> {
   }
 }
 /**
- * Defines the membership of a user to a team.
+ * A join entity that defines a user's membership in a team. Each membership record links a user to a team and tracks whether the user is a team owner. Users can be members of multiple teams, and their memberships determine which teams' issues and resources they can access.
  *
  * @param request - function to call the graphql client
  * @param data - L.TeamMembershipFragment response data
@@ -19285,9 +19194,9 @@ export class TeamMembership extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** Whether the user is an owner of the team. */
+  /** Whether the user is an owner of the team. Team owners have elevated permissions for managing team settings, members, and resources. */
   public owner: boolean;
-  /** The order of the item in the users team list. */
+  /** The sort order of this team in the user's personal team list. Lower values appear first. */
   public sortOrder: number;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -19311,15 +19220,15 @@ export class TeamMembership extends Request {
     return this._user?.id;
   }
 
-  /** Creates a new team membership. */
+  /** Creates a new team membership, adding a user to a team. Validates that the user is not already a member, the team is not archived or retired, and the requesting user has permission to add members. */
   public create(input: L.TeamMembershipCreateInput) {
     return new CreateTeamMembershipMutation(this._request).fetch(input);
   }
-  /** Deletes a team membership. */
+  /** Deletes a team membership, removing the user from the team. Users can remove their own membership, or team owners and workspace admins can remove other members. */
   public delete(variables?: Omit<L.DeleteTeamMembershipMutationVariables, "id">) {
     return new DeleteTeamMembershipMutation(this._request).fetch(this.id, variables);
   }
-  /** Updates a team membership. */
+  /** Updates a team membership, such as changing ownership status or sort order. */
   public update(input: L.TeamMembershipUpdateInput) {
     return new UpdateTeamMembershipMutation(this._request).fetch(this.id, input);
   }
@@ -19346,7 +19255,7 @@ export class TeamMembershipConnection extends Connection<TeamMembership> {
   }
 }
 /**
- * TeamMembershipPayload model
+ * Team membership operation response.
  *
  * @param request - function to call the graphql client
  * @param data - L.TeamMembershipPayloadFragment response data
@@ -19377,7 +19286,7 @@ export class TeamMembershipPayload extends Request {
   }
 }
 /**
- * A team notification subscription.
+ * A notification subscription scoped to a specific team. The subscriber receives notifications for events related to issues and activity in this team.
  *
  * @param request - function to call the graphql client
  * @param data - L.TeamNotificationSubscriptionFragment response data
@@ -19414,7 +19323,7 @@ export class TeamNotificationSubscription extends Request {
     this._user = data.user ?? undefined;
   }
 
-  /** Whether the subscription is active or not. */
+  /** Whether the subscription is active. When inactive, no notifications are generated from this subscription even though it still exists. */
   public active: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
@@ -19422,70 +19331,70 @@ export class TeamNotificationSubscription extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The type of subscription. */
+  /** The notification event types that this subscription will deliver to the subscriber. */
   public notificationSubscriptionTypes: string[];
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The type of view to which the notification subscription context is associated with. */
+  /** The type of contextual view (e.g., active issues, backlog) that further scopes a team notification subscription. Null if the subscription is not associated with a specific view type. */
   public contextViewType?: L.ContextViewType | null;
-  /** The type of user view to which the notification subscription context is associated with. */
+  /** The type of user-specific view that further scopes a user notification subscription. Null if the subscription is not associated with a user view type. */
   public userContextViewType?: L.UserContextViewType | null;
-  /** The contextual custom view associated with the notification subscription. */
+  /** The custom view that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
-  /** The ID of contextual custom view associated with the notification subscription. */
+  /** The ID of custom view that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get customViewId(): string | undefined {
     return this._customView?.id;
   }
-  /** The customer associated with the notification subscription. */
+  /** The customer that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get customer(): LinearFetch<Customer> | undefined {
     return this._customer?.id ? new CustomerQuery(this._request).fetch(this._customer?.id) : undefined;
   }
-  /** The ID of customer associated with the notification subscription. */
+  /** The ID of customer that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get customerId(): string | undefined {
     return this._customer?.id;
   }
-  /** The contextual cycle view associated with the notification subscription. */
+  /** The cycle that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
-  /** The ID of contextual cycle view associated with the notification subscription. */
+  /** The ID of cycle that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get cycleId(): string | undefined {
     return this._cycle?.id;
   }
-  /** The contextual initiative view associated with the notification subscription. */
+  /** The initiative that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
-  /** The ID of contextual initiative view associated with the notification subscription. */
+  /** The ID of initiative that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get initiativeId(): string | undefined {
     return this._initiative?.id;
   }
-  /** The contextual label view associated with the notification subscription. */
+  /** The issue label that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get label(): LinearFetch<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
-  /** The ID of contextual label view associated with the notification subscription. */
+  /** The ID of issue label that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get labelId(): string | undefined {
     return this._label?.id;
   }
-  /** The contextual project view associated with the notification subscription. */
+  /** The project that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
-  /** The ID of contextual project view associated with the notification subscription. */
+  /** The ID of project that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get projectId(): string | undefined {
     return this._project?.id;
   }
-  /** The user that subscribed to receive notifications. */
+  /** The user who will receive notifications from this subscription. */
   public get subscriber(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._subscriber.id);
   }
-  /** The ID of user that subscribed to receive notifications. */
+  /** The ID of user who will receive notifications from this subscription. */
   public get subscriberId(): string | undefined {
     return this._subscriber?.id;
   }
@@ -19497,11 +19406,11 @@ export class TeamNotificationSubscription extends Request {
   public get teamId(): string | undefined {
     return this._team?.id;
   }
-  /** The user view associated with the notification subscription. */
+  /** The user that this notification subscription is scoped to, for user-specific view subscriptions. Null if the subscription targets a different entity type. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
-  /** The ID of user view associated with the notification subscription. */
+  /** The ID of user that this notification subscription is scoped to, for user-specific view subscriptions. null if the subscription targets a different entity type. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
@@ -19523,7 +19432,7 @@ export class TeamOriginWebhookPayload {
   public team: TeamWithParentWebhookPayload;
 }
 /**
- * TeamPayload model
+ * Team operation response.
  *
  * @param request - function to call the graphql client
  * @param data - L.TeamPayloadFragment response data
@@ -19577,7 +19486,7 @@ export class TeamWithParentWebhookPayload {
   public parentId?: string | null;
 }
 /**
- * A template object used for creating entities faster.
+ * A reusable template for creating issues, projects, or documents. Templates store pre-filled field values and content as JSON data. They can be scoped to a specific team or shared across the entire workspace. Team-scoped templates may be inherited from parent teams.
  *
  * @param request - function to call the graphql client
  * @param data - L.TemplateFragment response data
@@ -19610,56 +19519,56 @@ export class Template extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** The color of the template icon. */
+  /** The hex color of the template icon. Null if no custom color has been set. */
   public color?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** Template description. */
+  /** A description of what the template is used for. */
   public description?: string | null;
-  /** The icon of the template. */
+  /** The icon of the template, either a decorative icon type or an emoji string. Null if no icon has been set. */
   public icon?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The date when the template was last applied. */
+  /** The date when the template was last applied to create or update an entity. Null if the template has never been applied. */
   public lastAppliedAt?: Date | null;
   /** The name of the template. */
   public name: string;
-  /** The sort order of the template. */
+  /** The sort order of the template within the templates list. */
   public sortOrder: number;
-  /** Template data. */
+  /** The template data as a JSON-encoded string containing the pre-filled attributes for the entity type (e.g., issue fields, project configuration, or document content). */
   public templateData: Record<string, unknown>;
-  /** The entity type this template is for. */
+  /** The entity type this template is for, such as 'issue', 'project', or 'document'. */
   public type: string;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The user who created the template. */
+  /** The user who created the template. Null if the creator's account has been deleted. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
-  /** The ID of user who created the template. */
+  /** The ID of user who created the template. null if the creator's account has been deleted. */
   public get creatorId(): string | undefined {
     return this._creator?.id;
   }
-  /** The original template inherited from. */
+  /** The parent team template this template was inherited from. Null for original (non-inherited) templates. */
   public get inheritedFrom(): LinearFetch<Template> | undefined {
     return this._inheritedFrom?.id ? new TemplateQuery(this._request).fetch(this._inheritedFrom?.id) : undefined;
   }
-  /** The ID of original template inherited from. */
+  /** The ID of parent team template this template was inherited from. null for original (non-inherited) templates. */
   public get inheritedFromId(): string | undefined {
     return this._inheritedFrom?.id;
   }
-  /** The user who last updated the template. */
+  /** The user who last updated the template. Null if the user's account has been deleted. */
   public get lastUpdatedBy(): LinearFetch<User> | undefined {
     return this._lastUpdatedBy?.id ? new UserQuery(this._request).fetch(this._lastUpdatedBy?.id) : undefined;
   }
-  /** The ID of user who last updated the template. */
+  /** The ID of user who last updated the template. null if the user's account has been deleted. */
   public get lastUpdatedById(): string | undefined {
     return this._lastUpdatedBy?.id;
   }
-  /** The organization that the template is associated with. If null, the template is associated with a particular team. */
+  /** The workspace that owns this template. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
@@ -19707,7 +19616,7 @@ export class TemplateConnection extends Connection<Template> {
   }
 }
 /**
- * TemplatePayload model
+ * The result of a template mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.TemplatePayloadFragment response data
@@ -19736,7 +19645,7 @@ export class TemplatePayload extends Request {
   }
 }
 /**
- * A time schedule.
+ * A time-based schedule defining on-call rotations or availability windows. Schedules contain a series of time entries, each specifying a user and their active period. They can be synced from external services (such as PagerDuty or Opsgenie) via integrations, or created manually. Schedules are used by triage responsibilities to determine who should be assigned or notified when issues enter triage.
  *
  * @param request - function to call the graphql client
  * @param data - L.TimeScheduleFragment response data
@@ -19784,7 +19693,7 @@ export class TimeSchedule extends Request {
   public get integrationId(): string | undefined {
     return this._integration?.id;
   }
-  /** The organization of the schedule. */
+  /** The workspace of the schedule. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
@@ -19824,7 +19733,7 @@ export class TimeScheduleConnection extends Connection<TimeSchedule> {
   }
 }
 /**
- * TimeScheduleEntry model
+ * A single entry in a time schedule, defining a time range and the user responsible during that period.
  *
  * @param request - function to call the graphql client
  * @param data - L.TimeScheduleEntryFragment response data
@@ -19838,9 +19747,9 @@ export class TimeScheduleEntry extends Request {
     this.userId = data.userId ?? undefined;
   }
 
-  /** The end date of the schedule in ISO 8601 date-time format. */
+  /** The end time of the schedule entry in ISO 8601 date-time format. */
   public endsAt: Date;
-  /** The start date of the schedule in ISO 8601 date-time format. */
+  /** The start time of the schedule entry in ISO 8601 date-time format. */
   public startsAt: Date;
   /** The email, name or reference to the user on schedule. This is used in case the external user could not be mapped to a Linear user id. */
   public userEmail?: string | null;
@@ -19848,7 +19757,7 @@ export class TimeScheduleEntry extends Request {
   public userId?: string | null;
 }
 /**
- * TimeSchedulePayload model
+ * The result of a time schedule mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.TimeSchedulePayloadFragment response data
@@ -19867,16 +19776,17 @@ export class TimeSchedulePayload extends Request {
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
+  /** The time schedule that was created or updated. */
   public get timeSchedule(): LinearFetch<TimeSchedule> | undefined {
     return new TimeScheduleQuery(this._request).fetch(this._timeSchedule.id);
   }
-  /** The ID of timeSchedule */
+  /** The ID of time schedule that was created or updated. */
   public get timeScheduleId(): string | undefined {
     return this._timeSchedule?.id;
   }
 }
 /**
- * A team's triage responsibility.
+ * A team's triage responsibility configuration that defines how issues entering triage are handled. Each team can have one triage responsibility, which specifies the action to take (notify or assign) and the responsible users, determined either by a manual selection of specific users or by an on-call time schedule.
  *
  * @param request - function to call the graphql client
  * @param data - L.TriageResponsibilityFragment response data
@@ -19976,7 +19886,7 @@ export class TriageResponsibilityConnection extends Connection<TriageResponsibil
   }
 }
 /**
- * TriageResponsibilityManualSelection model
+ * Manual triage responsibility configuration specifying a set of users to assign triaged issues to, with optional round-robin rotation.
  *
  * @param request - function to call the graphql client
  * @param data - L.TriageResponsibilityManualSelectionFragment response data
@@ -19991,7 +19901,7 @@ export class TriageResponsibilityManualSelection extends Request {
   public userIds: string[];
 }
 /**
- * TriageResponsibilityPayload model
+ * The result of a triage responsibility mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.TriageResponsibilityPayloadFragment response data
@@ -20010,16 +19920,17 @@ export class TriageResponsibilityPayload extends Request {
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
+  /** The triage responsibility that was created or updated. */
   public get triageResponsibility(): LinearFetch<TriageResponsibility> | undefined {
     return new TriageResponsibilityQuery(this._request).fetch(this._triageResponsibility.id);
   }
-  /** The ID of triageResponsibility */
+  /** The ID of triage responsibility that was created or updated. */
   public get triageResponsibilityId(): string | undefined {
     return this._triageResponsibility?.id;
   }
 }
 /**
- * Object representing Google Cloud upload policy, plus additional data.
+ * Represents a file upload destination with a pre-signed upload URL, asset URL, and required request headers for uploading to cloud storage.
  *
  * @param request - function to call the graphql client
  * @param data - L.UploadFileFragment response data
@@ -20036,17 +19947,19 @@ export class UploadFile extends Request {
     this.headers = data.headers.map(node => new UploadFileHeader(request, node));
   }
 
-  /** The asset URL for the uploaded file. (assigned automatically). */
+  /** The permanent asset URL where the file will be accessible after upload. */
   public assetUrl: string;
   /** The content type. */
   public contentType: string;
   /** The filename. */
   public filename: string;
+  /** Optional metadata associated with the upload, such as the related issue or comment ID. */
   public metaData?: L.Scalars["JSONObject"] | null;
   /** The size of the uploaded file. */
   public size: number;
-  /** The signed URL the for the uploaded file. (assigned automatically). */
+  /** The pre-signed URL to which the file should be uploaded via a PUT request. */
   public uploadUrl: string;
+  /** HTTP headers that must be included in the PUT request to the upload URL. */
   public headers: UploadFileHeader[];
 }
 /**
@@ -20085,11 +19998,11 @@ export class UploadPayload extends Request {
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
-  /** Object describing the file to be uploaded. */
+  /** The upload file details including signed URL, asset URL, and required headers. Null if the upload could not be prepared. */
   public uploadFile?: UploadFile | null;
 }
 /**
- * A user that has access to the the resources of an organization.
+ * A user that belongs to a workspace. Users can have different roles (admin, member, guest, or app) that determine their level of access. Users can be members of multiple teams, and can be active or deactivated. Guest users have limited access scoped to specific teams they are invited to.
  *
  * @param request - function to call the graphql client
  * @param data - L.UserFragment response data
@@ -20134,7 +20047,7 @@ export class User extends Request {
 
   /** Whether the user account is active or disabled (suspended). */
   public active: boolean;
-  /** Whether the user is an organization administrator. */
+  /** Whether the user is a workspace administrator. On Free plans, all members are treated as admins. */
   public admin: boolean;
   /** Whether the user is an app. */
   public app: boolean;
@@ -20146,17 +20059,17 @@ export class User extends Request {
   public avatarUrl?: string | null;
   /** [DEPRECATED] Hash for the user to be used in calendar URLs. */
   public calendarHash?: string | null;
-  /** Whether this user can access any public team in the organization. */
+  /** Whether this user can access any public team in the workspace. True for non-guest members and app users with public team access. */
   public canAccessAnyPublicTeam: boolean;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** Number of issues created. */
   public createdIssueCount: number;
-  /** A short description of the user, either its title or bio. */
+  /** A short description of the user, such as their title or a brief bio. */
   public description?: string | null;
-  /** Reason why is the account disabled. */
+  /** The reason why the user account is disabled. Null if the user is active. Possible values include admin suspension, downgrade, voluntary departure, or pending invite. */
   public disableReason?: string | null;
-  /** The user's display (nick) name. Unique within each organization. */
+  /** The user's display (nick) name. Must be unique within the workspace. */
   public displayName: string;
   /** The user's email address. */
   public email: string;
@@ -20170,23 +20083,23 @@ export class User extends Request {
   public initials: string;
   /** [DEPRECATED] Unique hash for the user to be used in invite URLs. */
   public inviteHash: string;
-  /** Whether the user is assignable. */
+  /** Whether the user can be assigned to issues. Regular users are always assignable; app users are assignable only if they have the app:assignable scope. */
   public isAssignable: boolean;
   /** Whether the user is the currently authenticated user. */
   public isMe: boolean;
   /** Whether the user is mentionable. */
   public isMentionable: boolean;
-  /** The last time the user was seen online. */
+  /** The last time the user was seen online. Updated based on user activity. Null if the user has never been seen. */
   public lastSeen?: Date | null;
   /** The user's full name. */
   public name: string;
-  /** Whether the user is an organization owner. */
+  /** Whether the user is a workspace owner, which is the highest permission level. */
   public owner: boolean;
-  /** The emoji to represent the user current status. */
+  /** The emoji representing the user's current status. Null if no status is set. */
   public statusEmoji?: string | null;
-  /** The label of the user current status. */
+  /** The text label of the user's current status. Null if no status is set. */
   public statusLabel?: string | null;
-  /** A date at which the user current status should be cleared. */
+  /** The date and time at which the user's current status should be automatically cleared. Null if the status has no expiration. */
   public statusUntilAt?: Date | null;
   /** Whether this agent user supports agent sessions. */
   public supportsAgentSessions: boolean;
@@ -20201,7 +20114,7 @@ export class User extends Request {
   public updatedAt: Date;
   /** User's profile URL. */
   public url: string;
-  /** Organization the user belongs to. */
+  /** The workspace that the user belongs to. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
@@ -20217,7 +20130,7 @@ export class User extends Request {
   public delegatedIssues(variables?: Omit<L.User_DelegatedIssuesQueryVariables, "id">) {
     return new User_DelegatedIssuesQuery(this._request, this.id, variables).fetch(variables);
   }
-  /** The user's drafts */
+  /** The user's saved drafts. */
   public drafts(variables?: Omit<L.User_DraftsQueryVariables, "id">) {
     return new User_DraftsQuery(this._request, this.id, variables).fetch(variables);
   }
@@ -20225,19 +20138,19 @@ export class User extends Request {
   public teamMemberships(variables?: Omit<L.User_TeamMembershipsQueryVariables, "id">) {
     return new User_TeamMembershipsQuery(this._request, this.id, variables).fetch(variables);
   }
-  /** Teams the user is part of. */
+  /** Teams the user is a member of. Supports filtering by team properties. */
   public teams(variables?: Omit<L.User_TeamsQueryVariables, "id">) {
     return new User_TeamsQuery(this._request, this.id, variables).fetch(variables);
   }
-  /** Suspends a user. Can only be called by an admin or owner. */
+  /** Suspends a user, deactivating their account and revoking access to the workspace. The suspended user's sessions are invalidated. Can only be called by a workspace admin or owner. */
   public suspend(variables?: Omit<L.SuspendUserMutationVariables, "id">) {
     return new SuspendUserMutation(this._request).fetch(this.id, variables);
   }
-  /** Un-suspends a user. Can only be called by an admin or owner. */
+  /** Re-activates a suspended user, restoring their access to the workspace. Can only be called by a workspace admin or owner. */
   public unsuspend(variables?: Omit<L.UnsuspendUserMutationVariables, "id">) {
     return new UnsuspendUserMutation(this._request).fetch(this.id, variables);
   }
-  /** Updates a user. Only available to organization admins and the user themselves. */
+  /** Updates a user's profile information. Users can update their own profile; workspace admins can update any user's profile. SCIM-managed users may have restricted name changes. */
   public update(input: L.UserUpdateInput) {
     return new UpdateUserMutation(this._request).fetch(this.id, input);
   }
@@ -20271,7 +20184,7 @@ export class UserActorWebhookPayload {
   public url: string;
 }
 /**
- * UserAdminPayload model
+ * User admin operation response.
  *
  * @param request - function to call the graphql client
  * @param data - L.UserAdminPayloadFragment response data
@@ -20332,7 +20245,7 @@ export class UserConnection extends Connection<User> {
   }
 }
 /**
- * A user notification subscription.
+ * A notification subscription scoped to a specific user view. The subscriber receives notifications for events in the context of a particular user's activity view.
  *
  * @param request - function to call the graphql client
  * @param data - L.UserNotificationSubscriptionFragment response data
@@ -20369,7 +20282,7 @@ export class UserNotificationSubscription extends Request {
     this._user = data.user;
   }
 
-  /** Whether the subscription is active or not. */
+  /** Whether the subscription is active. When inactive, no notifications are generated from this subscription even though it still exists. */
   public active: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
@@ -20377,78 +20290,78 @@ export class UserNotificationSubscription extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The type of subscription. */
+  /** The notification event types that this subscription will deliver to the subscriber. */
   public notificationSubscriptionTypes: string[];
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The type of view to which the notification subscription context is associated with. */
+  /** The type of contextual view (e.g., active issues, backlog) that further scopes a team notification subscription. Null if the subscription is not associated with a specific view type. */
   public contextViewType?: L.ContextViewType | null;
-  /** The type of user view to which the notification subscription context is associated with. */
+  /** The type of user-specific view that further scopes a user notification subscription. Null if the subscription is not associated with a user view type. */
   public userContextViewType?: L.UserContextViewType | null;
-  /** The contextual custom view associated with the notification subscription. */
+  /** The custom view that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
-  /** The ID of contextual custom view associated with the notification subscription. */
+  /** The ID of custom view that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get customViewId(): string | undefined {
     return this._customView?.id;
   }
-  /** The customer associated with the notification subscription. */
+  /** The customer that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get customer(): LinearFetch<Customer> | undefined {
     return this._customer?.id ? new CustomerQuery(this._request).fetch(this._customer?.id) : undefined;
   }
-  /** The ID of customer associated with the notification subscription. */
+  /** The ID of customer that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get customerId(): string | undefined {
     return this._customer?.id;
   }
-  /** The contextual cycle view associated with the notification subscription. */
+  /** The cycle that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
-  /** The ID of contextual cycle view associated with the notification subscription. */
+  /** The ID of cycle that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get cycleId(): string | undefined {
     return this._cycle?.id;
   }
-  /** The contextual initiative view associated with the notification subscription. */
+  /** The initiative that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
-  /** The ID of contextual initiative view associated with the notification subscription. */
+  /** The ID of initiative that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get initiativeId(): string | undefined {
     return this._initiative?.id;
   }
-  /** The contextual label view associated with the notification subscription. */
+  /** The issue label that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get label(): LinearFetch<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
-  /** The ID of contextual label view associated with the notification subscription. */
+  /** The ID of issue label that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get labelId(): string | undefined {
     return this._label?.id;
   }
-  /** The contextual project view associated with the notification subscription. */
+  /** The project that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
-  /** The ID of contextual project view associated with the notification subscription. */
+  /** The ID of project that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get projectId(): string | undefined {
     return this._project?.id;
   }
-  /** The user that subscribed to receive notifications. */
+  /** The user who will receive notifications from this subscription. */
   public get subscriber(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._subscriber.id);
   }
-  /** The ID of user that subscribed to receive notifications. */
+  /** The ID of user who will receive notifications from this subscription. */
   public get subscriberId(): string | undefined {
     return this._subscriber?.id;
   }
-  /** The team associated with the notification subscription. */
+  /** The team that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
-  /** The ID of team associated with the notification subscription. */
+  /** The ID of team that this notification subscription is scoped to. null if the subscription targets a different entity type. */
   public get teamId(): string | undefined {
     return this._team?.id;
   }
@@ -20462,7 +20375,7 @@ export class UserNotificationSubscription extends Request {
   }
 }
 /**
- * UserPayload model
+ * User operation response.
  *
  * @param request - function to call the graphql client
  * @param data - L.UserPayloadFragment response data
@@ -20491,7 +20404,7 @@ export class UserPayload extends Request {
   }
 }
 /**
- * The settings of a user as a JSON object.
+ * Per-user settings and preferences for a workspace member. Includes notification delivery preferences, email subscription settings, notification category and channel preferences, theme configuration, and various UI preferences. Each user has exactly one UserSettings record per workspace.
  *
  * @param request - function to call the graphql client
  * @param data - L.UserSettingsFragment response data
@@ -20535,7 +20448,7 @@ export class UserSettings extends Request {
   public archivedAt?: Date | null;
   /** Whether to auto-assign newly created issues to the current user by default. */
   public autoAssignToSelf: boolean;
-  /** Hash for the user to be used in calendar URLs. */
+  /** A unique hash for the user, used to construct secure calendar subscription URLs. */
   public calendarHash?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
@@ -20545,13 +20458,13 @@ export class UserSettings extends Request {
   public id: string;
   /** Whether to show full user names instead of display names. */
   public showFullUserNames: boolean;
-  /** Whether this user is subscribed to changelog email or not. */
+  /** Whether this user is subscribed to receive changelog emails about Linear product updates. */
   public subscribedToChangelog: boolean;
-  /** Whether this user is subscribed to DPA emails or not. */
+  /** Whether this user is subscribed to receive Data Processing Agreement (DPA) related emails. */
   public subscribedToDPA: boolean;
-  /** Whether this user is subscribed to invite accepted emails or not. */
+  /** Whether this user is subscribed to receive email notifications when their workspace invitations are accepted. */
   public subscribedToInviteAccepted: boolean;
-  /** Whether this user is subscribed to privacy and legal update emails or not. */
+  /** Whether this user is subscribed to receive emails about privacy policy and legal updates. */
   public subscribedToPrivacyLegalUpdates: boolean;
   /** The email types the user has unsubscribed from. */
   public unsubscribedFrom: string[];
@@ -20560,32 +20473,32 @@ export class UserSettings extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The user's notification category preferences. */
+  /** The user's notification category preferences, indicating which notification categories are enabled or disabled per notification channel. */
   public notificationCategoryPreferences: NotificationCategoryPreferences;
-  /** The user's notification channel preferences. */
+  /** The user's notification channel preferences, indicating which notification delivery channels (email, in-app, mobile push, Slack) are enabled. */
   public notificationChannelPreferences: NotificationChannelPreferences;
   /** The notification delivery preferences for the user. Note: notificationDisabled field is deprecated in favor of notificationChannelPreferences. */
   public notificationDeliveryPreferences: NotificationDeliveryPreferences;
-  /** The user's theme for a given mode and device type. */
+  /** The user's theme configuration for the specified color mode (light/dark) and device type (desktop/mobile). Returns null if no valid theme preset is configured. */
   public theme?: UserSettingsTheme | null;
-  /** The user's feed summary schedule preference. */
+  /** The user's preferred schedule for receiving feed summary digests. Null if the user has not set a preference and will use the workspace default. */
   public feedSummarySchedule?: L.FeedSummarySchedule | null;
-  /** The user associated with these settings. */
+  /** The user that these settings belong to. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
-  /** The ID of user associated with these settings. */
+  /** The ID of user that these settings belong to. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
 
-  /** Updates the user's settings. */
+  /** Updates the authenticated user's settings, including notification preferences, email subscriptions, theme, and other UI preferences. */
   public update(input: L.UserSettingsUpdateInput) {
     return new UpdateUserSettingsMutation(this._request).fetch(this.id, input);
   }
 }
 /**
- * UserSettingsCustomSidebarTheme model
+ * Custom sidebar theme definition with accent, base colors and contrast.
  *
  * @param request - function to call the graphql client
  * @param data - L.UserSettingsCustomSidebarThemeFragment response data
@@ -20606,7 +20519,7 @@ export class UserSettingsCustomSidebarTheme extends Request {
   public contrast: number;
 }
 /**
- * UserSettingsCustomTheme model
+ * Custom theme definition with accent, base colors, contrast, and optional sidebar theme.
  *
  * @param request - function to call the graphql client
  * @param data - L.UserSettingsCustomThemeFragment response data
@@ -20630,7 +20543,7 @@ export class UserSettingsCustomTheme extends Request {
   public sidebar?: UserSettingsCustomSidebarTheme | null;
 }
 /**
- * UserSettingsFlagPayload model
+ * User settings flag update response.
  *
  * @param request - function to call the graphql client
  * @param data - L.UserSettingsFlagPayloadFragment response data
@@ -20654,7 +20567,7 @@ export class UserSettingsFlagPayload extends Request {
   public value?: number | null;
 }
 /**
- * UserSettingsFlagsResetPayload model
+ * User settings flags reset response.
  *
  * @param request - function to call the graphql client
  * @param data - L.UserSettingsFlagsResetPayloadFragment response data
@@ -20672,7 +20585,7 @@ export class UserSettingsFlagsResetPayload extends Request {
   public success: boolean;
 }
 /**
- * UserSettingsPayload model
+ * User settings operation response.
  *
  * @param request - function to call the graphql client
  * @param data - L.UserSettingsPayloadFragment response data
@@ -20694,7 +20607,7 @@ export class UserSettingsPayload extends Request {
   }
 }
 /**
- * UserSettingsTheme model
+ * The user's resolved theme configuration for a specific color mode and device type.
  *
  * @param request - function to call the graphql client
  * @param data - L.UserSettingsThemeFragment response data
@@ -20773,7 +20686,7 @@ export class UserWebhookPayload {
   public url: string;
 }
 /**
- * View preferences.
+ * The display preferences for a view, controlling layout mode (list, board, spreadsheet), grouping, sorting, column visibility, and other visual settings. View preferences exist at two levels: organization-wide defaults and per-user overrides. The effective preferences are computed by merging both layers, with user preferences taking priority.
  *
  * @param request - function to call the graphql client
  * @param data - L.ViewPreferencesFragment response data
@@ -20796,33 +20709,33 @@ export class ViewPreferences extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The view preference type. */
+  /** The type of view preferences: "organization" for workspace-wide defaults or "user" for personal overrides. */
   public type: string;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The view type. */
+  /** The type of view these preferences apply to, such as board, cycle, project, customView, myIssues, etc. */
   public viewType: string;
-  /** The view preferences */
+  /** The view preferences values, containing layout, grouping, sorting, and field visibility settings. */
   public preferences: ViewPreferencesValues;
 
-  /** Creates a new ViewPreferences object. */
+  /** Creates a new view preferences object. If conflicting preferences already exist for the same view type and scope, the existing preferences are replaced. */
   public create(input: L.ViewPreferencesCreateInput) {
     return new CreateViewPreferencesMutation(this._request).fetch(input);
   }
-  /** Deletes a ViewPreferences. */
+  /** Deletes a view preferences object. If the preferences do not exist, the operation is treated as a successful idempotent deletion. */
   public delete() {
     return new DeleteViewPreferencesMutation(this._request).fetch(this.id);
   }
-  /** Updates an existing ViewPreferences object. */
+  /** Updates an existing view preferences object. For user-type preferences, only the owning user can update them. */
   public update(input: L.ViewPreferencesUpdateInput) {
     return new UpdateViewPreferencesMutation(this._request).fetch(this.id, input);
   }
 }
 /**
- * ViewPreferencesPayload model
+ * The result of a view preferences mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.ViewPreferencesPayloadFragment response data
@@ -20861,7 +20774,7 @@ export class ViewPreferencesProjectLabelGroupColumn extends Request {
   public id: string;
 }
 /**
- * ViewPreferencesValues model
+ * The computed view preferences values for a view, containing all display settings such as layout mode, grouping, sorting, field visibility, and other visual configuration. These values represent the merged result of organization defaults and user overrides.
  *
  * @param request - function to call the graphql client
  * @param data - L.ViewPreferencesValuesFragment response data
@@ -20870,6 +20783,11 @@ export class ViewPreferencesValues extends Request {
   public constructor(request: LinearRequest, data: L.ViewPreferencesValuesFragment) {
     super(request);
     this.closedIssuesOrderedByRecency = data.closedIssuesOrderedByRecency ?? undefined;
+    this.columnOrderBoard = data.columnOrderBoard ?? undefined;
+    this.columnOrderList = data.columnOrderList ?? undefined;
+    this.continuousPipelineReleaseFieldReleaseDate = data.continuousPipelineReleaseFieldReleaseDate ?? undefined;
+    this.continuousPipelineReleaseFieldVersion = data.continuousPipelineReleaseFieldVersion ?? undefined;
+    this.continuousPipelineReleasesViewGrouping = data.continuousPipelineReleasesViewGrouping ?? undefined;
     this.customViewFieldDateCreated = data.customViewFieldDateCreated ?? undefined;
     this.customViewFieldDateUpdated = data.customViewFieldDateUpdated ?? undefined;
     this.customViewFieldOwner = data.customViewFieldOwner ?? undefined;
@@ -20926,6 +20844,7 @@ export class ViewPreferencesValues extends Request {
     this.focusViewOrdering = data.focusViewOrdering ?? undefined;
     this.focusViewOrderingDirection = data.focusViewOrderingDirection ?? undefined;
     this.hiddenColumns = data.hiddenColumns ?? undefined;
+    this.hiddenGroupsList = data.hiddenGroupsList ?? undefined;
     this.hiddenRows = data.hiddenRows ?? undefined;
     this.inboxViewOrdering = data.inboxViewOrdering ?? undefined;
     this.initiativeFieldActivity = data.initiativeFieldActivity ?? undefined;
@@ -20938,6 +20857,7 @@ export class ViewPreferencesValues extends Request {
     this.initiativeFieldOwner = data.initiativeFieldOwner ?? undefined;
     this.initiativeFieldProjects = data.initiativeFieldProjects ?? undefined;
     this.initiativeFieldStartDate = data.initiativeFieldStartDate ?? undefined;
+    this.initiativeFieldStatus = data.initiativeFieldStatus ?? undefined;
     this.initiativeFieldTargetDate = data.initiativeFieldTargetDate ?? undefined;
     this.initiativeFieldTeams = data.initiativeFieldTeams ?? undefined;
     this.initiativeGrouping = data.initiativeGrouping ?? undefined;
@@ -21078,6 +20998,16 @@ export class ViewPreferencesValues extends Request {
 
   /** Whether issues in closed columns should be ordered by recency. */
   public closedIssuesOrderedByRecency?: boolean | null;
+  /** Custom ordering of groups on the board layout. */
+  public columnOrderBoard?: string[] | null;
+  /** Custom ordering of groups on the list layout. */
+  public columnOrderList?: string[] | null;
+  /** Whether to show the release date field for continuous pipeline releases. */
+  public continuousPipelineReleaseFieldReleaseDate?: boolean | null;
+  /** Whether to show the version field for continuous pipeline releases. */
+  public continuousPipelineReleaseFieldVersion?: boolean | null;
+  /** The continuous pipeline releases view grouping. */
+  public continuousPipelineReleasesViewGrouping?: string | null;
   /** Whether to show the custom view creation date field. */
   public customViewFieldDateCreated?: boolean | null;
   /** Whether to show the custom view updated date field. */
@@ -21188,6 +21118,8 @@ export class ViewPreferencesValues extends Request {
   public focusViewOrderingDirection?: string | null;
   /** List of column model IDs which should be hidden on a board. */
   public hiddenColumns?: string[] | null;
+  /** List of group model IDs which should be hidden on a list. */
+  public hiddenGroupsList?: string[] | null;
   /** List of row model IDs which should be hidden on a board. */
   public hiddenRows?: string[] | null;
   /** The inbox view ordering. */
@@ -21212,6 +21144,8 @@ export class ViewPreferencesValues extends Request {
   public initiativeFieldProjects?: boolean | null;
   /** Whether to show the initiative start date field. */
   public initiativeFieldStartDate?: boolean | null;
+  /** Whether to show the initiative status field. */
+  public initiativeFieldStatus?: boolean | null;
   /** Whether to show the initiative target date field. */
   public initiativeFieldTargetDate?: boolean | null;
   /** Whether to show the initiative teams field. */
@@ -21482,7 +21416,7 @@ export class ViewPreferencesValues extends Request {
   public projectLabelGroupColumns?: ViewPreferencesProjectLabelGroupColumn[] | null;
 }
 /**
- * A webhook used to send HTTP notifications over data updates.
+ * A webhook subscription that sends HTTP POST callbacks to an external URL when events occur in Linear. Webhooks can be scoped to a specific team, multiple teams, or all public teams in the organization. They support filtering by resource type (e.g., Issue, Comment, Project) and can be created either manually by users or automatically by OAuth applications. Each webhook has a signing secret for verifying payload authenticity on the recipient side.
  *
  * @param request - function to call the graphql client
  * @param data - L.WebhookFragment response data
@@ -21507,28 +21441,28 @@ export class Webhook extends Request {
     this._team = data.team ?? undefined;
   }
 
-  /** Whether the Webhook is enabled for all public teams, including teams created after the webhook was created. */
+  /** Whether the webhook receives events from all public (non-private) teams in the organization, including teams created after the webhook was set up. When true, the webhook automatically covers new public teams without requiring reconfiguration. */
   public allPublicTeams: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** Whether the Webhook is enabled. */
+  /** Whether the webhook is enabled. When disabled, no payloads will be delivered even if matching events occur. */
   public enabled: boolean;
   /** The unique identifier of the entity. */
   public id: string;
-  /** Webhook label. */
+  /** A human-readable label for the webhook, used for identification in the UI. Null if no label has been set. */
   public label?: string | null;
-  /** The resource types this webhook is subscribed to. */
+  /** The resource types this webhook is subscribed to (e.g., 'Issue', 'Comment', 'Project', 'Cycle'). The webhook will only receive payloads for events affecting these resource types. */
   public resourceTypes: string[];
-  /** Secret token for verifying the origin on the recipient side. */
+  /** A secret token used to sign webhook payloads with HMAC-SHA256, allowing the recipient to verify that the payload originated from Linear and was not tampered with. Automatically generated if not provided during creation. */
   public secret?: string | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** Webhook URL. */
+  /** The destination URL where webhook payloads will be sent via HTTP POST. Null for OAuth application webhooks, which use the webhook URL configured on the OAuth client instead. */
   public url?: string | null;
   /** The user who created the webhook. */
   public get creator(): LinearFetch<User> | undefined {
@@ -21538,16 +21472,16 @@ export class Webhook extends Request {
   public get creatorId(): string | undefined {
     return this._creator?.id;
   }
-  /** The team that the webhook is associated with. If null, the webhook is associated with all public teams of the organization or multiple teams. */
+  /** The single team that the webhook is scoped to. When null, the webhook either targets all public teams (if allPublicTeams is true), multiple specific teams (if teamIds is set), or organization-wide events. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
-  /** The ID of team that the webhook is associated with. if null, the webhook is associated with all public teams of the organization or multiple teams. */
+  /** The ID of single team that the webhook is scoped to. when null, the webhook either targets all public teams (if allpublicteams is true), multiple specific teams (if teamids is set), or organization-wide events. */
   public get teamId(): string | undefined {
     return this._team?.id;
   }
 
-  /** Creates a new webhook. */
+  /** Creates a new webhook subscription for the workspace. Requires specifying a URL, resource types to subscribe to, and either a specific team or all public teams. */
   public create(input: L.WebhookCreateInput) {
     return new CreateWebhookMutation(this._request).fetch(input);
   }
@@ -21555,7 +21489,7 @@ export class Webhook extends Request {
   public delete() {
     return new DeleteWebhookMutation(this._request).fetch(this.id);
   }
-  /** Rotates the signing secret for a Webhook. */
+  /** Rotates the signing secret for a webhook, generating a new HMAC-SHA256 key and returning it. The old secret is immediately invalidated. */
   public rotateSecret() {
     return new RotateSecretWebhookMutation(this._request).fetch(this.id);
   }
@@ -21586,7 +21520,7 @@ export class WebhookConnection extends Connection<Webhook> {
   }
 }
 /**
- * Entity representing a webhook execution failure.
+ * A record of a failed webhook delivery attempt. Created when a webhook payload could not be successfully delivered to the destination URL, either due to an HTTP error response or a network failure. Each failure event captures the HTTP status code (if available), the response body or error message, and a stable execution ID that is shared across retries of the same delivery.
  *
  * @param request - function to call the graphql client
  * @param data - L.WebhookFailureEventFragment response data
@@ -21607,13 +21541,13 @@ export class WebhookFailureEvent extends Request {
 
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** The unique execution ID of the webhook push. This is retained between retries of the same push. */
+  /** A stable identifier for the webhook delivery attempt. This ID remains the same across retries of the same payload, making it useful for correlating multiple failure events that belong to the same logical delivery. */
   public executionId: string;
-  /** The HTTP status code returned by the recipient. */
+  /** The HTTP status code returned by the webhook recipient. Null if the request failed before receiving a response (e.g., DNS resolution failure, connection timeout). */
   public httpStatus?: number | null;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The HTTP response body returned by the recipient or error occured. */
+  /** The HTTP response body returned by the recipient, or the error message if the request failed before receiving a response. Truncated to 1000 characters. */
   public responseOrError?: string | null;
   /** The URL that the webhook was trying to push to. */
   public url: string;
@@ -21627,7 +21561,7 @@ export class WebhookFailureEvent extends Request {
   }
 }
 /**
- * WebhookPayload model
+ * The result of a webhook mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.WebhookPayloadFragment response data
@@ -21656,7 +21590,7 @@ export class WebhookPayload extends Request {
   }
 }
 /**
- * WebhookRotateSecretPayload model
+ * The result of a webhook secret rotation mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.WebhookRotateSecretPayloadFragment response data
@@ -21677,7 +21611,7 @@ export class WebhookRotateSecretPayload extends Request {
   public success: boolean;
 }
 /**
- * A welcome message for new users joining the workspace.
+ * A welcome message configuration for the workspace. When enabled, new users joining the workspace receive a notification with this message in their inbox. Each workspace has at most one welcome message. The message body is stored in a related DocumentContent entity.
  *
  * @param request - function to call the graphql client
  * @param data - L.WelcomeMessageFragment response data
@@ -21700,28 +21634,28 @@ export class WelcomeMessage extends Request {
   public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** Whether the welcome message is enabled. */
+  /** Whether the welcome message is enabled and should be sent to new users joining the workspace. */
   public enabled: boolean;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The title of the welcome message notification. */
+  /** The title of the welcome message notification. Null defaults to 'Welcome to {workspace name}'. */
   public title?: string | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The user who last updated the welcome message. */
+  /** The user who last updated the welcome message configuration. Null if the user's account has been deleted. */
   public get updatedBy(): LinearFetch<User> | undefined {
     return this._updatedBy?.id ? new UserQuery(this._request).fetch(this._updatedBy?.id) : undefined;
   }
-  /** The ID of user who last updated the welcome message. */
+  /** The ID of user who last updated the welcome message configuration. null if the user's account has been deleted. */
   public get updatedById(): string | undefined {
     return this._updatedBy?.id;
   }
 }
 /**
- * A welcome message related notification.
+ * A notification containing a workspace welcome message, sent to newly joined users.
  *
  * @param request - function to call the graphql client
  * @param data - L.WelcomeMessageNotificationFragment response data
@@ -21754,20 +21688,17 @@ export class WelcomeMessageNotification extends Request {
   public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /**
-   * The time at when an email reminder for this notification was sent to the user. Null, if no email
-   *     reminder has been sent.
-   */
+  /** The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent. */
   public emailedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
+  /** The time at which the user marked the notification as read. Null if the notification is unread. */
   public readAt?: Date | null;
-  /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
+  /** The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed. */
   public snoozedUntilAt?: Date | null;
-  /** Notification type. */
+  /** Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated. */
   public type: string;
-  /** The time at which a notification was unsnoozed.. */
+  /** The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed. */
   public unsnoozedAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -21780,35 +21711,35 @@ export class WelcomeMessageNotification extends Request {
   public botActor?: ActorBot | null;
   /** The category of the notification. */
   public category: L.NotificationCategory;
-  /** The user that caused the notification. */
+  /** The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
-  /** The ID of user that caused the notification. */
+  /** The ID of user that caused the notification. null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
   public get actorId(): string | undefined {
     return this._actor?.id;
   }
-  /** The external user that caused the notification. */
+  /** The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member. */
   public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
     return this._externalUserActor?.id
       ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
       : undefined;
   }
-  /** The ID of external user that caused the notification. */
+  /** The ID of external user that caused the notification. populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like slack or github) rather than a linear workspace member. */
   public get externalUserActorId(): string | undefined {
     return this._externalUserActor?.id;
   }
-  /** The user that received the notification. */
+  /** The recipient user of this notification. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
-  /** The ID of user that received the notification. */
+  /** The ID of recipient user of this notification. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
 }
 /**
- * WorkflowDefinition model
+ * An automation workflow definition that executes a set of activities when triggered by specific events. Workflows can be scoped to a team, project, cycle, label, custom view, initiative, or user context. They are triggered by entity changes (e.g., issue status change, new comment) and can include conditions that filter which events actually execute the workflow. Activities define the actions taken, such as updating issue properties, sending notifications, or posting to Slack.
  *
  * @param request - function to call the graphql client
  * @param data - L.WorkflowDefinitionFragment response data
@@ -21855,22 +21786,23 @@ export class WorkflowDefinition extends Request {
     this._user = data.user ?? undefined;
   }
 
-  /** An array of activities that will be executed as part of the workflow. */
+  /** The ordered list of activities (actions) that are executed when the workflow triggers, such as updating issue properties, sending notifications, or calling webhooks. */
   public activities: L.Scalars["JSONObject"];
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** The conditions that need to be match for the workflow to be triggered. */
+  /** The filter conditions that must match for the workflow to execute. When null, the workflow triggers on all matching events. */
   public conditions?: L.Scalars["JSONObject"] | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The description of the workflow. */
   public description?: string | null;
+  /** Whether the workflow is enabled and will execute when its trigger conditions are met. */
   public enabled: boolean;
   /** The name of the group that the workflow belongs to. */
   public groupName?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The date when the workflow was last executed. */
+  /** The date and time when the workflow was last triggered and executed. Null if the workflow has never been executed. */
   public lastExecutedAt?: Date | null;
   /** The name of the workflow. */
   public name: string;
@@ -21885,11 +21817,11 @@ export class WorkflowDefinition extends Request {
   public updatedAt: Date;
   /** The type of view to which this workflow's context is associated with. */
   public contextViewType?: L.ContextViewType | null;
-  /** The type of the event that triggers off the workflow. */
+  /** The event that triggers the workflow, such as entity creation, update, or a specific state change. */
   public trigger: L.WorkflowTrigger;
-  /** The object type (e.g. Issue) that triggers this workflow. */
+  /** The entity type that triggers this workflow, such as Issue, Project, or Release. */
   public triggerType: L.WorkflowTriggerType;
-  /** The type of the workflow. */
+  /** The type of the workflow, such as custom automation, SLA, or auto-close. */
   public type: L.WorkflowType;
   /** The type of user view to which this workflow's context is associated with. */
   public userContextViewType?: L.UserContextViewType | null;
@@ -21949,11 +21881,11 @@ export class WorkflowDefinition extends Request {
   public get projectId(): string | undefined {
     return this._project?.id;
   }
-  /** The team associated with the workflow. If not set, the workflow is associated with the entire organization. */
+  /** The team associated with the workflow. If not set, the workflow is associated with the entire workspace. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
-  /** The ID of team associated with the workflow. if not set, the workflow is associated with the entire organization. */
+  /** The ID of team associated with the workflow. if not set, the workflow is associated with the entire workspace. */
   public get teamId(): string | undefined {
     return this._team?.id;
   }
@@ -21967,7 +21899,7 @@ export class WorkflowDefinition extends Request {
   }
 }
 /**
- * A state in a team workflow.
+ * A state in a team's workflow, representing an issue status such as Triage, Backlog, Todo, In Progress, In Review, Done, or Canceled. Each team has its own set of workflow states that define the progression of issues through the team's process. Workflow states have a type that categorizes them (triage, backlog, unstarted, started, completed, canceled), a position that determines their display order, and a color for visual identification. States can be inherited from parent teams to sub-teams.
  *
  * @param request - function to call the graphql client
  * @param data - L.WorkflowStateFragment response data
@@ -22001,9 +21933,9 @@ export class WorkflowState extends Request {
   public description?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The state's name. */
+  /** The state's human-readable name (e.g., 'In Progress', 'Done', 'Backlog'). */
   public name: string;
-  /** The position of the state in the team flow. */
+  /** The position of the state in the team's workflow. States are displayed in ascending order of position within their type group. */
   public position: number;
   /** The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled", "duplicate". */
   public type: string;
@@ -22012,23 +21944,23 @@ export class WorkflowState extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The state inherited from */
+  /** The parent team's workflow state that this state was inherited from. Null if the state is not inherited from a parent team. */
   public get inheritedFrom(): LinearFetch<WorkflowState> | undefined {
     return this._inheritedFrom?.id ? new WorkflowStateQuery(this._request).fetch(this._inheritedFrom?.id) : undefined;
   }
-  /** The ID of state inherited from */
+  /** The ID of parent team's workflow state that this state was inherited from. null if the state is not inherited from a parent team. */
   public get inheritedFromId(): string | undefined {
     return this._inheritedFrom?.id;
   }
-  /** The team to which this state belongs to. */
+  /** The team that this workflow state belongs to. Each team has its own set of workflow states. */
   public get team(): LinearFetch<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
   }
-  /** The ID of team to which this state belongs to. */
+  /** The ID of team that this workflow state belongs to. each team has its own set of workflow states. */
   public get teamId(): string | undefined {
     return this._team?.id;
   }
-  /** Issues belonging in this state. */
+  /** Issues that currently have this workflow state. Returns a paginated and filterable list of issues. */
   public issues(variables?: Omit<L.WorkflowState_IssuesQueryVariables, "id">) {
     return new WorkflowState_IssuesQuery(this._request, this.id, variables).fetch(variables);
   }
@@ -22118,7 +22050,7 @@ export class WorkflowStateConnection extends Connection<WorkflowState> {
   }
 }
 /**
- * WorkflowStatePayload model
+ * The result of a workflow state mutation, containing the created or updated state and a success indicator.
  *
  * @param request - function to call the graphql client
  * @param data - L.WorkflowStatePayloadFragment response data
@@ -23460,12 +23392,12 @@ export class InitiativeRelationQuery extends Request {
   }
 
   /**
-   * Call the InitiativeRelation query and return a ProjectRelation
+   * Call the InitiativeRelation query and return a InitiativeRelation
    *
    * @param id - required id to pass to initiativeRelation
    * @returns parsed response from InitiativeRelationQuery
    */
-  public async fetch(id: string): LinearFetch<ProjectRelation> {
+  public async fetch(id: string): LinearFetch<InitiativeRelation> {
     const response = await this._request<L.InitiativeRelationQuery, L.InitiativeRelationQueryVariables>(
       L.InitiativeRelationDocument.toString(),
       {
@@ -23474,7 +23406,7 @@ export class InitiativeRelationQuery extends Request {
     );
     const data = response.initiativeRelation;
 
-    return new ProjectRelation(this._request, data);
+    return new InitiativeRelation(this._request, data);
   }
 }
 
@@ -25487,6 +25419,37 @@ export class SemanticSearchQuery extends Request {
 }
 
 /**
+ * A fetchable SlaConfigurations Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class SlaConfigurationsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the SlaConfigurations query and return a SlaConfiguration list
+   *
+   * @param teamId - required teamId to pass to slaConfigurations
+   * @returns parsed response from SlaConfigurationsQuery
+   */
+  public async fetch(teamId: string): LinearFetch<SlaConfiguration[]> {
+    const response = await this._request<L.SlaConfigurationsQuery, L.SlaConfigurationsQueryVariables>(
+      L.SlaConfigurationsDocument.toString(),
+      {
+        teamId,
+      }
+    );
+    const data = response.slaConfigurations;
+
+    return data.map(node => {
+      return new SlaConfiguration(this._request, node);
+    });
+  }
+}
+
+/**
  * A fetchable SsoUrlFromEmail Query
  *
  * @param request - function to call the graphql client
@@ -27127,40 +27090,6 @@ export class CreateInitiativeUpdateReminderMutation extends Request {
     const data = response.createInitiativeUpdateReminder;
 
     return new InitiativeUpdateReminderPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable CreateOrganizationFromOnboarding Mutation
- *
- * @param request - function to call the graphql client
- */
-export class CreateOrganizationFromOnboardingMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the CreateOrganizationFromOnboarding mutation and return a CreateOrJoinOrganizationResponse
-   *
-   * @param input - required input to pass to createOrganizationFromOnboarding
-   * @param variables - variables without 'input' to pass into the CreateOrganizationFromOnboardingMutation
-   * @returns parsed response from CreateOrganizationFromOnboardingMutation
-   */
-  public async fetch(
-    input: L.CreateOrganizationInput,
-    variables?: Omit<L.CreateOrganizationFromOnboardingMutationVariables, "input">
-  ): LinearFetch<CreateOrJoinOrganizationResponse> {
-    const response = await this._request<
-      L.CreateOrganizationFromOnboardingMutation,
-      L.CreateOrganizationFromOnboardingMutationVariables
-    >(L.CreateOrganizationFromOnboardingDocument.toString(), {
-      input,
-      ...variables,
-    });
-    const data = response.createOrganizationFromOnboarding;
-
-    return new CreateOrJoinOrganizationResponse(this._request, data);
   }
 }
 
@@ -29011,13 +28940,13 @@ export class UpdateInitiativeRelationMutation extends Request {
   }
 
   /**
-   * Call the UpdateInitiativeRelation mutation and return a DeletePayload
+   * Call the UpdateInitiativeRelation mutation and return a InitiativeRelationPayload
    *
    * @param id - required id to pass to updateInitiativeRelation
    * @param input - required input to pass to updateInitiativeRelation
    * @returns parsed response from UpdateInitiativeRelationMutation
    */
-  public async fetch(id: string, input: L.InitiativeRelationUpdateInput): LinearFetch<DeletePayload> {
+  public async fetch(id: string, input: L.InitiativeRelationUpdateInput): LinearFetch<InitiativeRelationPayload> {
     const response = await this._request<
       L.UpdateInitiativeRelationMutation,
       L.UpdateInitiativeRelationMutationVariables
@@ -29027,7 +28956,7 @@ export class UpdateInitiativeRelationMutation extends Request {
     });
     const data = response.initiativeRelationUpdate;
 
-    return new DeletePayload(this._request, data);
+    return new InitiativeRelationPayload(this._request, data);
   }
 }
 
@@ -31514,64 +31443,6 @@ export class UpdateIssueMutation extends Request {
     const data = response.issueUpdate;
 
     return new IssuePayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable JoinOrganizationFromOnboarding Mutation
- *
- * @param request - function to call the graphql client
- */
-export class JoinOrganizationFromOnboardingMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the JoinOrganizationFromOnboarding mutation and return a CreateOrJoinOrganizationResponse
-   *
-   * @param input - required input to pass to joinOrganizationFromOnboarding
-   * @returns parsed response from JoinOrganizationFromOnboardingMutation
-   */
-  public async fetch(input: L.JoinOrganizationInput): LinearFetch<CreateOrJoinOrganizationResponse> {
-    const response = await this._request<
-      L.JoinOrganizationFromOnboardingMutation,
-      L.JoinOrganizationFromOnboardingMutationVariables
-    >(L.JoinOrganizationFromOnboardingDocument.toString(), {
-      input,
-    });
-    const data = response.joinOrganizationFromOnboarding;
-
-    return new CreateOrJoinOrganizationResponse(this._request, data);
-  }
-}
-
-/**
- * A fetchable LeaveOrganization Mutation
- *
- * @param request - function to call the graphql client
- */
-export class LeaveOrganizationMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the LeaveOrganization mutation and return a CreateOrJoinOrganizationResponse
-   *
-   * @param organizationId - required organizationId to pass to leaveOrganization
-   * @returns parsed response from LeaveOrganizationMutation
-   */
-  public async fetch(organizationId: string): LinearFetch<CreateOrJoinOrganizationResponse> {
-    const response = await this._request<L.LeaveOrganizationMutation, L.LeaveOrganizationMutationVariables>(
-      L.LeaveOrganizationDocument.toString(),
-      {
-        organizationId,
-      }
-    );
-    const data = response.leaveOrganization;
-
-    return new CreateOrJoinOrganizationResponse(this._request, data);
   }
 }
 
@@ -42342,7 +42213,7 @@ export class LinearSdk extends Request {
   }
 
   /**
-   * All teams you the user can administrate. Administrable teams are teams whose settings the user can change, but to whose issues the user doesn't necessarily have access to.
+   * All teams whose settings the user can administer. This includes teams the user can change settings for, but whose issues they may not have direct access to. This differs from the `teams` query which returns teams based on issue access.
    *
    * @param variables - variables to pass into the AdministrableTeamsQuery
    * @returns TeamConnection
@@ -42387,7 +42258,7 @@ export class LinearSdk extends Request {
     return new AgentSessionsQuery(this._request).fetch(variables);
   }
   /**
-   * Get basic information for an application.
+   * Retrieves public information about an OAuth application by its client ID. Used during the authorization flow to display application details to the user.
    *
    * @param clientId - required clientId to pass to applicationInfo
    * @returns Application
@@ -42481,7 +42352,7 @@ export class LinearSdk extends Request {
     return new CommentQuery(this._request).fetch(variables);
   }
   /**
-   * All comments.
+   * All comments the user has access to in the workspace.
    *
    * @param variables - variables to pass into the CommentsQuery
    * @returns CommentConnection
@@ -42490,7 +42361,7 @@ export class LinearSdk extends Request {
     return new CommentsQuery(this._request).fetch(variables);
   }
   /**
-   * One specific custom view.
+   * One specific custom view, looked up by ID or slug.
    *
    * @param id - required id to pass to customView
    * @returns CustomView
@@ -42499,7 +42370,7 @@ export class LinearSdk extends Request {
     return new CustomViewQuery(this._request).fetch(id);
   }
   /**
-   * Whether a custom view has other subscribers than the current user in the organization.
+   * Whether a custom view has active notification subscribers other than the current user. Useful for warning before deleting a shared view.
    *
    * @param id - required id to pass to customViewHasSubscribers
    * @returns CustomViewHasSubscribersPayload
@@ -42508,7 +42379,7 @@ export class LinearSdk extends Request {
     return new CustomViewHasSubscribersQuery(this._request).fetch(id);
   }
   /**
-   * Custom views for the user.
+   * All custom views accessible to the user, including personal views and shared workspace views. Excludes views scoped to a specific project or initiative.
    *
    * @param variables - variables to pass into the CustomViewsQuery
    * @returns CustomViewConnection
@@ -42517,7 +42388,7 @@ export class LinearSdk extends Request {
     return new CustomViewsQuery(this._request).fetch(variables);
   }
   /**
-   * One specific customer.
+   * Retrieves a single customer by ID or slug.
    *
    * @param id - required id to pass to customer
    * @returns Customer
@@ -42526,7 +42397,7 @@ export class LinearSdk extends Request {
     return new CustomerQuery(this._request).fetch(id);
   }
   /**
-   * One specific customer need
+   * Retrieves a single customer need by ID or hash.
    *
    * @param variables - variables to pass into the CustomerNeedQuery
    * @returns CustomerNeed
@@ -42535,7 +42406,7 @@ export class LinearSdk extends Request {
     return new CustomerNeedQuery(this._request).fetch(variables);
   }
   /**
-   * All customer needs.
+   * All customer needs in the workspace, with optional filtering.
    *
    * @param variables - variables to pass into the CustomerNeedsQuery
    * @returns CustomerNeedConnection
@@ -42553,7 +42424,7 @@ export class LinearSdk extends Request {
     return new CustomerStatusQuery(this._request).fetch(id);
   }
   /**
-   * All customer statuses.
+   * All customer statuses defined in the workspace.
    *
    * @param variables - variables to pass into the CustomerStatusesQuery
    * @returns CustomerStatusConnection
@@ -42571,7 +42442,7 @@ export class LinearSdk extends Request {
     return new CustomerTierQuery(this._request).fetch(id);
   }
   /**
-   * All customer tiers.
+   * All customer tiers defined in the workspace.
    *
    * @param variables - variables to pass into the CustomerTiersQuery
    * @returns CustomerTierConnection
@@ -42580,7 +42451,7 @@ export class LinearSdk extends Request {
     return new CustomerTiersQuery(this._request).fetch(variables);
   }
   /**
-   * All customers.
+   * All customers in the workspace, with optional filtering and sorting.
    *
    * @param variables - variables to pass into the CustomersQuery
    * @returns CustomerConnection
@@ -42589,7 +42460,7 @@ export class LinearSdk extends Request {
     return new CustomersQuery(this._request).fetch(variables);
   }
   /**
-   * One specific cycle.
+   * One specific cycle, looked up by ID or slug.
    *
    * @param id - required id to pass to cycle
    * @returns Cycle
@@ -42598,7 +42469,7 @@ export class LinearSdk extends Request {
     return new CycleQuery(this._request).fetch(id);
   }
   /**
-   * All cycles.
+   * All cycles accessible to the user.
    *
    * @param variables - variables to pass into the CyclesQuery
    * @returns CycleConnection
@@ -42607,7 +42478,7 @@ export class LinearSdk extends Request {
     return new CyclesQuery(this._request).fetch(variables);
   }
   /**
-   * One specific document.
+   * A specific document by ID or slug.
    *
    * @param id - required id to pass to document
    * @returns Document
@@ -42625,7 +42496,7 @@ export class LinearSdk extends Request {
     return new DocumentContentHistoryQuery(this._request).fetch(id);
   }
   /**
-   * All documents in the workspace.
+   * All documents the user has access to in the workspace.
    *
    * @param variables - variables to pass into the DocumentsQuery
    * @returns DocumentConnection
@@ -42643,7 +42514,7 @@ export class LinearSdk extends Request {
     return new EmailIntakeAddressQuery(this._request).fetch(id);
   }
   /**
-   * A specific emoji.
+   * A specific custom emoji by ID or name.
    *
    * @param id - required id to pass to emoji
    * @returns Emoji
@@ -42652,7 +42523,7 @@ export class LinearSdk extends Request {
     return new EmojiQuery(this._request).fetch(id);
   }
   /**
-   * All custom emojis.
+   * All custom emojis in the workspace.
    *
    * @param variables - variables to pass into the EmojisQuery
    * @returns EmojiConnection
@@ -42661,7 +42532,7 @@ export class LinearSdk extends Request {
     return new EmojisQuery(this._request).fetch(variables);
   }
   /**
-   * One specific entity link.
+   * Retrieves a single entity external link by its identifier.
    *
    * @param id - required id to pass to entityExternalLink
    * @returns EntityExternalLink
@@ -42670,7 +42541,7 @@ export class LinearSdk extends Request {
     return new EntityExternalLinkQuery(this._request).fetch(id);
   }
   /**
-   * One specific external user.
+   * Retrieves a single external user by their identifier.
    *
    * @param id - required id to pass to externalUser
    * @returns ExternalUser
@@ -42679,7 +42550,7 @@ export class LinearSdk extends Request {
     return new ExternalUserQuery(this._request).fetch(id);
   }
   /**
-   * All external users for the organization.
+   * All external users for the organization. External users are people who interact with Linear through integrated services (Slack, Jira, GitHub, etc.) without having a Linear account.
    *
    * @param variables - variables to pass into the ExternalUsersQuery
    * @returns ExternalUserConnection
@@ -42688,7 +42559,7 @@ export class LinearSdk extends Request {
     return new ExternalUsersQuery(this._request).fetch(variables);
   }
   /**
-   * One specific favorite.
+   * A specific favorite by ID.
    *
    * @param id - required id to pass to favorite
    * @returns Favorite
@@ -42697,7 +42568,7 @@ export class LinearSdk extends Request {
     return new FavoriteQuery(this._request).fetch(id);
   }
   /**
-   * The user's favorites.
+   * The authenticated user's favorites. Returns all bookmarked items that appear in the user's sidebar.
    *
    * @param variables - variables to pass into the FavoritesQuery
    * @returns FavoriteConnection
@@ -42706,7 +42577,7 @@ export class LinearSdk extends Request {
     return new FavoritesQuery(this._request).fetch(variables);
   }
   /**
-   * One specific initiative.
+   * Returns a single initiative by its identifier or URL slug.
    *
    * @param id - required id to pass to initiative
    * @returns Initiative
@@ -42715,16 +42586,16 @@ export class LinearSdk extends Request {
     return new InitiativeQuery(this._request).fetch(id);
   }
   /**
-   * One specific initiative relation.
+   * Returns a single initiative relation by its identifier.
    *
    * @param id - required id to pass to initiativeRelation
-   * @returns ProjectRelation
+   * @returns InitiativeRelation
    */
-  public initiativeRelation(id: string): LinearFetch<ProjectRelation> {
+  public initiativeRelation(id: string): LinearFetch<InitiativeRelation> {
     return new InitiativeRelationQuery(this._request).fetch(id);
   }
   /**
-   * All initiative relationships.
+   * Returns all initiative parent-child relations in the workspace.
    *
    * @param variables - variables to pass into the InitiativeRelationsQuery
    * @returns InitiativeRelationConnection
@@ -42735,7 +42606,7 @@ export class LinearSdk extends Request {
     return new InitiativeRelationsQuery(this._request).fetch(variables);
   }
   /**
-   * One specific initiativeToProject.
+   * Returns a single initiative-to-project association by its identifier.
    *
    * @param id - required id to pass to initiativeToProject
    * @returns InitiativeToProject
@@ -42744,7 +42615,7 @@ export class LinearSdk extends Request {
     return new InitiativeToProjectQuery(this._request).fetch(id);
   }
   /**
-   * returns a list of initiative to project entities.
+   * Returns all initiative-to-project associations in the workspace.
    *
    * @param variables - variables to pass into the InitiativeToProjectsQuery
    * @returns InitiativeToProjectConnection
@@ -42755,7 +42626,7 @@ export class LinearSdk extends Request {
     return new InitiativeToProjectsQuery(this._request).fetch(variables);
   }
   /**
-   * A specific  initiative update.
+   * Returns a single initiative update by its identifier.
    *
    * @param id - required id to pass to initiativeUpdate
    * @returns InitiativeUpdate
@@ -42764,7 +42635,7 @@ export class LinearSdk extends Request {
     return new InitiativeUpdateQuery(this._request).fetch(id);
   }
   /**
-   * All  InitiativeUpdates.
+   * Returns all initiative status updates in the workspace, with optional filtering.
    *
    * @param variables - variables to pass into the InitiativeUpdatesQuery
    * @returns InitiativeUpdateConnection
@@ -42773,7 +42644,7 @@ export class LinearSdk extends Request {
     return new InitiativeUpdatesQuery(this._request).fetch(variables);
   }
   /**
-   * All initiatives in the workspace.
+   * Returns all initiatives in the workspace, with optional filtering and sorting.
    *
    * @param variables - variables to pass into the InitiativesQuery
    * @returns InitiativeConnection
@@ -42782,7 +42653,7 @@ export class LinearSdk extends Request {
     return new InitiativesQuery(this._request).fetch(variables);
   }
   /**
-   * One specific integration.
+   * Retrieves a single integration by its identifier.
    *
    * @param id - required id to pass to integration
    * @returns Integration
@@ -42801,7 +42672,7 @@ export class LinearSdk extends Request {
     return new IntegrationHasScopesQuery(this._request).fetch(integrationId, scopes);
   }
   /**
-   * One specific integrationTemplate.
+   * Retrieves a single integration template connection by its identifier.
    *
    * @param id - required id to pass to integrationTemplate
    * @returns IntegrationTemplate
@@ -42810,7 +42681,7 @@ export class LinearSdk extends Request {
     return new IntegrationTemplateQuery(this._request).fetch(id);
   }
   /**
-   * Template and integration connections.
+   * All integration template connections for the workspace, linking templates to integrations.
    *
    * @param variables - variables to pass into the IntegrationTemplatesQuery
    * @returns IntegrationTemplateConnection
@@ -42821,7 +42692,7 @@ export class LinearSdk extends Request {
     return new IntegrationTemplatesQuery(this._request).fetch(variables);
   }
   /**
-   * All integrations.
+   * All integrations for the workspace.
    *
    * @param variables - variables to pass into the IntegrationsQuery
    * @returns IntegrationConnection
@@ -42830,7 +42701,7 @@ export class LinearSdk extends Request {
     return new IntegrationsQuery(this._request).fetch(variables);
   }
   /**
-   * One specific set of settings.
+   * Retrieves a specific integration settings configuration by its identifier.
    *
    * @param id - required id to pass to integrationsSettings
    * @returns IntegrationsSettings
@@ -42839,7 +42710,7 @@ export class LinearSdk extends Request {
     return new IntegrationsSettingsQuery(this._request).fetch(id);
   }
   /**
-   * One specific issue.
+   * One specific issue, looked up by its unique identifier.
    *
    * @param id - required id to pass to issue
    * @returns Issue
@@ -42884,7 +42755,7 @@ export class LinearSdk extends Request {
     return new IssueImportCheckCsvQuery(this._request).fetch(csvUrl, service);
   }
   /**
-   * Checks whether it will be possible to setup sync for this project or repository at the end of import
+   * Checks whether it will be possible to set up sync for this project or repository at the end of import.
    *
    * @param issueImportId - required issueImportId to pass to issueImportCheckSync
    * @returns IssueImportSyncCheckPayload
@@ -42893,7 +42764,7 @@ export class LinearSdk extends Request {
     return new IssueImportCheckSyncQuery(this._request).fetch(issueImportId);
   }
   /**
-   * Checks whether a custom JQL query is valid and can be used to filter issues of a Jira import
+   * Checks whether a custom JQL query is valid and can be used to filter issues of a Jira import.
    *
    * @param jiraEmail - required jiraEmail to pass to issueImportJqlCheck
    * @param jiraHostname - required jiraHostname to pass to issueImportJqlCheck
@@ -42912,7 +42783,7 @@ export class LinearSdk extends Request {
     return new IssueImportJqlCheckQuery(this._request).fetch(jiraEmail, jiraHostname, jiraProject, jiraToken, jql);
   }
   /**
-   * One specific label.
+   * One specific label, looked up by its unique identifier.
    *
    * @param id - required id to pass to issueLabel
    * @returns IssueLabel
@@ -42921,7 +42792,7 @@ export class LinearSdk extends Request {
     return new IssueLabelQuery(this._request).fetch(id);
   }
   /**
-   * All issue labels.
+   * All issue labels. Returns a paginated list of labels visible to the authenticated user, including both workspace-level and team-scoped labels.
    *
    * @param variables - variables to pass into the IssueLabelsQuery
    * @returns IssueLabelConnection
@@ -42938,7 +42809,7 @@ export class LinearSdk extends Request {
     return new IssuePriorityValuesQuery(this._request).fetch();
   }
   /**
-   * One specific issue relation.
+   * One specific issue relation, looked up by its unique identifier.
    *
    * @param id - required id to pass to issueRelation
    * @returns IssueRelation
@@ -42947,7 +42818,7 @@ export class LinearSdk extends Request {
     return new IssueRelationQuery(this._request).fetch(id);
   }
   /**
-   * All issue relationships.
+   * All issue relations. Returns a paginated list of all issue relations (blocks, blocked by, relates to, duplicates) visible to the authenticated user.
    *
    * @param variables - variables to pass into the IssueRelationsQuery
    * @returns IssueRelationConnection
@@ -42980,7 +42851,7 @@ export class LinearSdk extends Request {
     return new IssueSearchQuery(this._request).fetch(variables);
   }
   /**
-   * Suggests issue title based on a customer request.
+   * Suggests an issue title based on a customer request message using AI summarization.
    *
    * @param request - required request to pass to issueTitleSuggestionFromCustomerRequest
    * @returns IssueTitleSuggestionFromCustomerRequestPayload
@@ -43000,7 +42871,7 @@ export class LinearSdk extends Request {
     return new IssueVcsBranchSearchQuery(this._request).fetch(branchName);
   }
   /**
-   * All issues.
+   * All issues. Returns a paginated list of issues visible to the authenticated user. Can be filtered by various criteria including team, assignee, state, labels, project, and cycle.
    *
    * @param variables - variables to pass into the IssuesQuery
    * @returns IssueConnection
@@ -43009,7 +42880,7 @@ export class LinearSdk extends Request {
     return new IssuesQuery(this._request).fetch(variables);
   }
   /**
-   * One specific notification.
+   * A specific notification by ID.
    *
    * @param id - required id to pass to notification
    * @returns Notification
@@ -43032,7 +42903,7 @@ export class LinearSdk extends Request {
     return new NotificationQuery(this._request).fetch(id);
   }
   /**
-   * One specific notification subscription.
+   * A specific notification subscription by ID.
    *
    * @param id - required id to pass to notificationSubscription
    * @returns NotificationSubscription
@@ -43053,7 +42924,7 @@ export class LinearSdk extends Request {
     return new NotificationSubscriptionQuery(this._request).fetch(id);
   }
   /**
-   * The user's notification subscriptions.
+   * The authenticated user's notification subscriptions. These subscriptions control which notifications the user receives for specific entities such as teams, projects, cycles, labels, custom views, initiatives, customers, and users.
    *
    * @param variables - variables to pass into the NotificationSubscriptionsQuery
    * @returns NotificationSubscriptionConnection
@@ -43064,7 +42935,7 @@ export class LinearSdk extends Request {
     return new NotificationSubscriptionsQuery(this._request).fetch(variables);
   }
   /**
-   * All notifications.
+   * The authenticated user's notifications.
    *
    * @param variables - variables to pass into the NotificationsQuery
    * @returns NotificationConnection
@@ -43073,7 +42944,7 @@ export class LinearSdk extends Request {
     return new NotificationsQuery(this._request).fetch(variables);
   }
   /**
-   * The user's organization.
+   * The authenticated user's workspace.
    *
    * @returns Organization
    */
@@ -43081,7 +42952,7 @@ export class LinearSdk extends Request {
     return new OrganizationQuery(this._request).fetch();
   }
   /**
-   * Does the organization exist.
+   * Checks whether a workspace with the given URL key exists.
    *
    * @param urlKey - required urlKey to pass to organizationExists
    * @returns OrganizationExistsPayload
@@ -43090,7 +42961,7 @@ export class LinearSdk extends Request {
     return new OrganizationExistsQuery(this._request).fetch(urlKey);
   }
   /**
-   * One specific organization invite.
+   * Fetches a specific workspace invite by its ID.
    *
    * @param id - required id to pass to organizationInvite
    * @returns OrganizationInvite
@@ -43099,7 +42970,7 @@ export class LinearSdk extends Request {
     return new OrganizationInviteQuery(this._request).fetch(id);
   }
   /**
-   * All invites for the organization.
+   * All pending and accepted invites for the workspace.
    *
    * @param variables - variables to pass into the OrganizationInvitesQuery
    * @returns OrganizationInviteConnection
@@ -43110,7 +42981,7 @@ export class LinearSdk extends Request {
     return new OrganizationInvitesQuery(this._request).fetch(variables);
   }
   /**
-   * One specific project.
+   * Returns a single project by its identifier or URL slug.
    *
    * @param id - required id to pass to project
    * @returns Project
@@ -43132,7 +43003,7 @@ export class LinearSdk extends Request {
     return new ProjectFilterSuggestionQuery(this._request).fetch(prompt, variables);
   }
   /**
-   * One specific label.
+   * Returns a single project label by its identifier.
    *
    * @param id - required id to pass to projectLabel
    * @returns ProjectLabel
@@ -43141,7 +43012,7 @@ export class LinearSdk extends Request {
     return new ProjectLabelQuery(this._request).fetch(id);
   }
   /**
-   * All project labels.
+   * Returns all project labels in the workspace, with optional filtering.
    *
    * @param variables - variables to pass into the ProjectLabelsQuery
    * @returns ProjectLabelConnection
@@ -43150,7 +43021,7 @@ export class LinearSdk extends Request {
     return new ProjectLabelsQuery(this._request).fetch(variables);
   }
   /**
-   * One specific project milestone.
+   * Returns a single project milestone by its identifier.
    *
    * @param id - required id to pass to projectMilestone
    * @returns ProjectMilestone
@@ -43159,7 +43030,7 @@ export class LinearSdk extends Request {
     return new ProjectMilestoneQuery(this._request).fetch(id);
   }
   /**
-   * All milestones for the project.
+   * Returns all project milestones in the workspace, with optional filtering.
    *
    * @param variables - variables to pass into the ProjectMilestonesQuery
    * @returns ProjectMilestoneConnection
@@ -43168,7 +43039,7 @@ export class LinearSdk extends Request {
     return new ProjectMilestonesQuery(this._request).fetch(variables);
   }
   /**
-   * One specific project relation.
+   * Returns a single project relation by its identifier.
    *
    * @param id - required id to pass to projectRelation
    * @returns ProjectRelation
@@ -43177,7 +43048,7 @@ export class LinearSdk extends Request {
     return new ProjectRelationQuery(this._request).fetch(id);
   }
   /**
-   * All project relationships.
+   * Returns all project dependency relations in the workspace.
    *
    * @param variables - variables to pass into the ProjectRelationsQuery
    * @returns ProjectRelationConnection
@@ -43186,7 +43057,7 @@ export class LinearSdk extends Request {
     return new ProjectRelationsQuery(this._request).fetch(variables);
   }
   /**
-   * One specific project status.
+   * Returns a single project status by its identifier.
    *
    * @param id - required id to pass to projectStatus
    * @returns ProjectStatus
@@ -43195,7 +43066,7 @@ export class LinearSdk extends Request {
     return new ProjectStatusQuery(this._request).fetch(id);
   }
   /**
-   * All project statuses.
+   * Returns all project statuses in the workspace.
    *
    * @param variables - variables to pass into the ProjectStatusesQuery
    * @returns ProjectStatusConnection
@@ -43204,7 +43075,7 @@ export class LinearSdk extends Request {
     return new ProjectStatusesQuery(this._request).fetch(variables);
   }
   /**
-   * A specific project update.
+   * Returns a single project update by its identifier.
    *
    * @param id - required id to pass to projectUpdate
    * @returns ProjectUpdate
@@ -43213,7 +43084,7 @@ export class LinearSdk extends Request {
     return new ProjectUpdateQuery(this._request).fetch(id);
   }
   /**
-   * All project updates.
+   * Returns all project status updates in the workspace, with optional filtering.
    *
    * @param variables - variables to pass into the ProjectUpdatesQuery
    * @returns ProjectUpdateConnection
@@ -43222,7 +43093,7 @@ export class LinearSdk extends Request {
     return new ProjectUpdatesQuery(this._request).fetch(variables);
   }
   /**
-   * All projects.
+   * Returns all projects in the workspace, with optional filtering and sorting.
    *
    * @param variables - variables to pass into the ProjectsQuery
    * @returns ProjectConnection
@@ -43231,7 +43102,7 @@ export class LinearSdk extends Request {
     return new ProjectsQuery(this._request).fetch(variables);
   }
   /**
-   * Sends a test push message.
+   * Sends a test push notification to the authenticated user's registered devices. Useful for verifying that push notification delivery is working correctly.
    *
    * @param variables - variables to pass into the PushSubscriptionTestQuery
    * @returns PushSubscriptionTestPayload
@@ -43242,7 +43113,7 @@ export class LinearSdk extends Request {
     return new PushSubscriptionTestQuery(this._request).fetch(variables);
   }
   /**
-   * The status of the rate limiter.
+   * The current rate limit status for the authenticated client, including remaining quota and reset timing for each limit type.
    *
    * @returns RateLimitPayload
    */
@@ -43250,7 +43121,7 @@ export class LinearSdk extends Request {
     return new RateLimitStatusQuery(this._request).fetch();
   }
   /**
-   * One specific roadmap.
+   * [Deprecated] Returns a single roadmap by its identifier. Use initiatives instead.
    *
    * @param id - required id to pass to roadmap
    * @returns Roadmap
@@ -43259,7 +43130,7 @@ export class LinearSdk extends Request {
     return new RoadmapQuery(this._request).fetch(id);
   }
   /**
-   * One specific roadmapToProject.
+   * [Deprecated] Returns a single roadmap-to-project association. Use InitiativeToProject instead.
    *
    * @param id - required id to pass to roadmapToProject
    * @returns RoadmapToProject
@@ -43268,7 +43139,7 @@ export class LinearSdk extends Request {
     return new RoadmapToProjectQuery(this._request).fetch(id);
   }
   /**
-   * Query roadmapToProjects for RoadmapToProjectConnection
+   * [Deprecated] Returns all roadmap-to-project associations. Use InitiativeToProject instead.
    *
    * @param variables - variables to pass into the RoadmapToProjectsQuery
    * @returns RoadmapToProjectConnection
@@ -43277,7 +43148,7 @@ export class LinearSdk extends Request {
     return new RoadmapToProjectsQuery(this._request).fetch(variables);
   }
   /**
-   * All roadmaps in the workspace.
+   * [Deprecated] Returns all roadmaps in the workspace. Use initiatives instead.
    *
    * @param variables - variables to pass into the RoadmapsQuery
    * @returns RoadmapConnection
@@ -43286,7 +43157,7 @@ export class LinearSdk extends Request {
     return new RoadmapsQuery(this._request).fetch(variables);
   }
   /**
-   * Search documents.
+   * Search documents by text query using full-text and vector search. Results are ranked by relevance unless an orderBy parameter is specified. Rate-limited to 30 requests per minute.
    *
    * @param term - required term to pass to searchDocuments
    * @param variables - variables without 'term' to pass into the SearchDocumentsQuery
@@ -43299,7 +43170,7 @@ export class LinearSdk extends Request {
     return new SearchDocumentsQuery(this._request).fetch(term, variables);
   }
   /**
-   * Search issues.
+   * Search issues by text query using full-text and vector search. Results are ranked by relevance unless an orderBy parameter is specified. Supports optional issue filters and comment inclusion. Rate-limited to 30 requests per minute.
    *
    * @param term - required term to pass to searchIssues
    * @param variables - variables without 'term' to pass into the SearchIssuesQuery
@@ -43312,7 +43183,7 @@ export class LinearSdk extends Request {
     return new SearchIssuesQuery(this._request).fetch(term, variables);
   }
   /**
-   * Search projects.
+   * Search projects by text query using full-text and vector search. Results are ranked by relevance unless an orderBy parameter is specified. Rate-limited to 30 requests per minute.
    *
    * @param term - required term to pass to searchProjects
    * @param variables - variables without 'term' to pass into the SearchProjectsQuery
@@ -43325,7 +43196,7 @@ export class LinearSdk extends Request {
     return new SearchProjectsQuery(this._request).fetch(term, variables);
   }
   /**
-   * Search for various resources using natural language.
+   * Search for issues, projects, initiatives, and documents using natural language. Uses vector-based semantic search with optional full-text search and reranking. Results can be filtered by type and by entity-specific filters. Rate-limited to 30 requests per minute.
    *
    * @param query - required query to pass to semanticSearch
    * @param variables - variables without 'query' to pass into the SemanticSearchQuery
@@ -43336,6 +43207,15 @@ export class LinearSdk extends Request {
     variables?: Omit<L.SemanticSearchQueryVariables, "query">
   ): LinearFetch<SemanticSearchPayload> {
     return new SemanticSearchQuery(this._request).fetch(query, variables);
+  }
+  /**
+   * Active SLA configurations that can apply to the requested team.
+   *
+   * @param teamId - required teamId to pass to slaConfigurations
+   * @returns SlaConfiguration[]
+   */
+  public slaConfigurations(teamId: string): LinearFetch<SlaConfiguration[]> {
+    return new SlaConfigurationsQuery(this._request).fetch(teamId);
   }
   /**
    * Fetch SSO login URL for the email provided.
@@ -43353,7 +43233,7 @@ export class LinearSdk extends Request {
     return new SsoUrlFromEmailQuery(this._request).fetch(email, type, variables);
   }
   /**
-   * One specific team.
+   * Fetches a specific team by its ID.
    *
    * @param id - required id to pass to team
    * @returns Team
@@ -43362,7 +43242,7 @@ export class LinearSdk extends Request {
     return new TeamQuery(this._request).fetch(id);
   }
   /**
-   * One specific team membership.
+   * Fetches a specific team membership by its ID.
    *
    * @param id - required id to pass to teamMembership
    * @returns TeamMembership
@@ -43371,7 +43251,7 @@ export class LinearSdk extends Request {
     return new TeamMembershipQuery(this._request).fetch(id);
   }
   /**
-   * All team memberships.
+   * All team memberships in the workspace.
    *
    * @param variables - variables to pass into the TeamMembershipsQuery
    * @returns TeamMembershipConnection
@@ -43380,7 +43260,7 @@ export class LinearSdk extends Request {
     return new TeamMembershipsQuery(this._request).fetch(variables);
   }
   /**
-   * All teams whose issues can be accessed by the user. This might be different from `administrableTeams`, which also includes teams whose settings can be changed by the user.
+   * All teams whose issues the user can access. This includes public teams and private teams the user is a member of. This may differ from `administrableTeams`, which returns teams whose settings the user can change but whose issues they don't necessarily have access to.
    *
    * @param variables - variables to pass into the TeamsQuery
    * @returns TeamConnection
@@ -43398,7 +43278,7 @@ export class LinearSdk extends Request {
     return new TemplateQuery(this._request).fetch(id);
   }
   /**
-   * All templates from all users.
+   * All templates in the workspace, including both team-scoped and workspace-level templates.
    *
    * @returns Template[]
    */
@@ -43453,7 +43333,7 @@ export class LinearSdk extends Request {
     return new TriageResponsibilityQuery(this._request).fetch(id);
   }
   /**
-   * One specific user.
+   * Fetches a specific user by their ID.
    *
    * @param id - required id to pass to user
    * @returns User
@@ -43462,7 +43342,7 @@ export class LinearSdk extends Request {
     return new UserQuery(this._request).fetch(id);
   }
   /**
-   * Lists the sessions of a user. Can only be called by an admin or owner.
+   * Lists all active authentication sessions for a user. Can only be called by a workspace admin or owner.
    *
    * @param id - required id to pass to userSessions
    * @returns AuthenticationSessionResponse[]
@@ -43471,7 +43351,7 @@ export class LinearSdk extends Request {
     return new UserSessionsQuery(this._request).fetch(id);
   }
   /**
-   * The user's settings.
+   * The authenticated user's notification and UI settings.
    *
    * @returns UserSettings
    */
@@ -43479,7 +43359,7 @@ export class LinearSdk extends Request {
     return new UserSettingsQuery(this._request).fetch();
   }
   /**
-   * All users for the organization.
+   * All users in the workspace. Supports filtering, sorting, and pagination.
    *
    * @param variables - variables to pass into the UsersQuery
    * @returns UserConnection
@@ -43499,7 +43379,7 @@ export class LinearSdk extends Request {
     return new VerifyGitHubEnterpriseServerInstallationQuery(this._request).fetch(integrationId);
   }
   /**
-   * The currently authenticated user.
+   * The currently authenticated user making the API request.
    *
    * @returns User
    */
@@ -43507,7 +43387,7 @@ export class LinearSdk extends Request {
     return new ViewerQuery(this._request).fetch();
   }
   /**
-   * A specific webhook.
+   * Retrieves a single webhook by its identifier.
    *
    * @param id - required id to pass to webhook
    * @returns Webhook
@@ -43516,7 +43396,7 @@ export class LinearSdk extends Request {
     return new WebhookQuery(this._request).fetch(id);
   }
   /**
-   * All webhooks.
+   * All webhooks for the current workspace.
    *
    * @param variables - variables to pass into the WebhooksQuery
    * @returns WebhookConnection
@@ -43525,7 +43405,7 @@ export class LinearSdk extends Request {
     return new WebhooksQuery(this._request).fetch(variables);
   }
   /**
-   * One specific state.
+   * One specific workflow state (issue status), looked up by its unique identifier.
    *
    * @param id - required id to pass to workflowState
    * @returns WorkflowState
@@ -43534,7 +43414,7 @@ export class LinearSdk extends Request {
     return new WorkflowStateQuery(this._request).fetch(id);
   }
   /**
-   * All issue workflow states.
+   * All issue workflow states (issue statuses). Returns a paginated list of workflow states visible to the authenticated user, across all teams they have access to.
    *
    * @param variables - variables to pass into the WorkflowStatesQuery
    * @returns WorkflowStateConnection
@@ -43552,7 +43432,7 @@ export class LinearSdk extends Request {
     return new CreateAgentActivityMutation(this._request).fetch(input);
   }
   /**
-   * Creates a new agent session on a rootcomment.
+   * Creates a new agent session on a root comment.
    *
    * @param input - required input to pass to agentSessionCreateOnComment
    * @returns AgentSessionPayload
@@ -43839,7 +43719,7 @@ export class LinearSdk extends Request {
     return new DeleteCommentMutation(this._request).fetch(id);
   }
   /**
-   * Resolves a comment.
+   * Resolves a comment thread. Marks the root comment as resolved by the current user.
    *
    * @param id - required id to pass to commentResolve
    * @param variables - variables without 'id' to pass into the CommentResolveMutation
@@ -43852,7 +43732,7 @@ export class LinearSdk extends Request {
     return new CommentResolveMutation(this._request).fetch(id, variables);
   }
   /**
-   * Unresolves a comment.
+   * Unresolves a previously resolved comment thread. Clears the resolved state on the root comment.
    *
    * @param id - required id to pass to commentUnresolve
    * @returns CommentPayload
@@ -43876,7 +43756,7 @@ export class LinearSdk extends Request {
     return new UpdateCommentMutation(this._request).fetch(id, input, variables);
   }
   /**
-   * Saves user message.
+   * Creates a support contact message from an authenticated user. The message is saved and forwarded to Intercom for support handling.
    *
    * @param input - required input to pass to createContact
    * @returns ContactPayload
@@ -43885,7 +43765,7 @@ export class LinearSdk extends Request {
     return new CreateContactMutation(this._request).fetch(input);
   }
   /**
-   * Create CSV export report for the organization.
+   * Creates a CSV export report for the workspace. The report is generated asynchronously and delivered via email. Requires workspace admin export permission.
    *
    * @param variables - variables to pass into the CreateCsvExportReportMutation
    * @returns CreateCsvExportReportPayload
@@ -43907,19 +43787,6 @@ export class LinearSdk extends Request {
     variables?: Omit<L.CreateInitiativeUpdateReminderMutationVariables, "initiativeId">
   ): LinearFetch<InitiativeUpdateReminderPayload> {
     return new CreateInitiativeUpdateReminderMutation(this._request).fetch(initiativeId, variables);
-  }
-  /**
-   * Creates an organization from onboarding.
-   *
-   * @param input - required input to pass to createOrganizationFromOnboarding
-   * @param variables - variables without 'input' to pass into the CreateOrganizationFromOnboardingMutation
-   * @returns CreateOrJoinOrganizationResponse
-   */
-  public createOrganizationFromOnboarding(
-    input: L.CreateOrganizationInput,
-    variables?: Omit<L.CreateOrganizationFromOnboardingMutationVariables, "input">
-  ): LinearFetch<CreateOrJoinOrganizationResponse> {
-    return new CreateOrganizationFromOnboardingMutation(this._request).fetch(input, variables);
   }
   /**
    * Create a notification to remind a user about a project update.
@@ -43981,7 +43848,7 @@ export class LinearSdk extends Request {
     return new DeleteCustomerMutation(this._request).fetch(id);
   }
   /**
-   * Merges two customers.
+   * Merges two customers by transferring all needs from the source customer to the target customer. The source customer is archived after the merge. Domains, external IDs, and metadata are combined on the target customer.
    *
    * @param sourceCustomerId - required sourceCustomerId to pass to customerMerge
    * @param targetCustomerId - required targetCustomerId to pass to customerMerge
@@ -44009,7 +43876,7 @@ export class LinearSdk extends Request {
     return new CreateCustomerNeedMutation(this._request).fetch(input);
   }
   /**
-   * Creates a new customer need out of an attachment
+   * Creates a new customer need from an existing issue attachment. If the attachment already has an archived need, it will be unarchived instead of creating a duplicate.
    *
    * @param input - required input to pass to customerNeedCreateFromAttachment
    * @returns CustomerNeedPayload
@@ -44042,7 +43909,7 @@ export class LinearSdk extends Request {
     return new UnarchiveCustomerNeedMutation(this._request).fetch(id);
   }
   /**
-   * Updates a customer need
+   * Updates an existing customer need. Supports moving the need to a different issue or project, changing priority, updating the body content, and managing the attached source URL.
    *
    * @param id - required id to pass to updateCustomerNeed
    * @param input - required input to pass to updateCustomerNeed
@@ -44066,7 +43933,7 @@ export class LinearSdk extends Request {
     return new CreateCustomerStatusMutation(this._request).fetch(input);
   }
   /**
-   * Deletes a customer status.
+   * Deletes a customer status. Cannot delete the last remaining status in a workspace, and the status must not be in use by any customers.
    *
    * @param id - required id to pass to deleteCustomerStatus
    * @returns DeletePayload
@@ -44094,7 +43961,7 @@ export class LinearSdk extends Request {
     return new CreateCustomerTierMutation(this._request).fetch(input);
   }
   /**
-   * Deletes a customer tier.
+   * Deletes a customer tier. The tier must not be in use by any customers.
    *
    * @param id - required id to pass to deleteCustomerTier
    * @returns DeletePayload
@@ -44113,7 +43980,7 @@ export class LinearSdk extends Request {
     return new UpdateCustomerTierMutation(this._request).fetch(id, input);
   }
   /**
-   * Unsyncs a managed customer from the its current data source. External IDs mapping to the external source will be cleared.
+   * Unsyncs a managed customer from its current data source integration. External IDs mapping to the external source will be cleared, and the customer will no longer be updated by the integration.
    *
    * @param id - required id to pass to customerUnsync
    * @returns CustomerPayload
@@ -44122,7 +43989,7 @@ export class LinearSdk extends Request {
     return new CustomerUnsyncMutation(this._request).fetch(id);
   }
   /**
-   * Updates a customer
+   * Updates an existing customer.
    *
    * @param id - required id to pass to updateCustomer
    * @param input - required input to pass to updateCustomer
@@ -44132,7 +43999,7 @@ export class LinearSdk extends Request {
     return new UpdateCustomerMutation(this._request).fetch(id, input);
   }
   /**
-   * Upserts a customer, creating it if it doesn't exists, updating it otherwise. Matches against an existing customer with `id` or `externalId`
+   * Upserts a customer, creating it if no match is found, or updating it otherwise. Matches against existing customers using `id`, `externalId`, `slackChannelId`, or `domains`.
    *
    * @param input - required input to pass to customerUpsert
    * @returns CustomerPayload
@@ -44141,7 +44008,7 @@ export class LinearSdk extends Request {
     return new CustomerUpsertMutation(this._request).fetch(input);
   }
   /**
-   * Archives a cycle.
+   * Archives a cycle. All issues currently assigned to the cycle are unlinked from it before archiving.
    *
    * @param id - required id to pass to archiveCycle
    * @returns CycleArchivePayload
@@ -44168,7 +44035,7 @@ export class LinearSdk extends Request {
     return new CycleShiftAllMutation(this._request).fetch(input);
   }
   /**
-   * Shifts all cycles starts and ends by a certain number of days, starting from the provided cycle onwards.
+   * Starts the upcoming cycle as of midnight today. Completes the previous cycle if it has not yet ended. Only the next upcoming (not yet started) cycle for the team can be started.
    *
    * @param id - required id to pass to cycleStartUpcomingCycleToday
    * @returns CyclePayload
@@ -44196,7 +44063,7 @@ export class LinearSdk extends Request {
     return new CreateDocumentMutation(this._request).fetch(input);
   }
   /**
-   * Deletes (trashes) a document.
+   * Deletes (trashes) a document. The document is marked as trashed and archived, but not permanently removed.
    *
    * @param id - required id to pass to deleteDocument
    * @returns DocumentArchivePayload
@@ -44205,7 +44072,7 @@ export class LinearSdk extends Request {
     return new DeleteDocumentMutation(this._request).fetch(id);
   }
   /**
-   * Restores a document.
+   * Restores a previously trashed document by unarchiving it.
    *
    * @param id - required id to pass to unarchiveDocument
    * @returns DocumentArchivePayload
@@ -44311,7 +44178,7 @@ export class LinearSdk extends Request {
     return new DeleteEmojiMutation(this._request).fetch(id);
   }
   /**
-   * Creates a new entity link.
+   * Creates a new external link on an initiative, project, team, release, or cycle.
    *
    * @param input - required input to pass to createEntityExternalLink
    * @returns EntityExternalLinkPayload
@@ -44320,7 +44187,7 @@ export class LinearSdk extends Request {
     return new CreateEntityExternalLinkMutation(this._request).fetch(input);
   }
   /**
-   * Deletes an entity link.
+   * Deletes an entity external link.
    *
    * @param id - required id to pass to deleteEntityExternalLink
    * @returns DeletePayload
@@ -44329,7 +44196,7 @@ export class LinearSdk extends Request {
     return new DeleteEntityExternalLinkMutation(this._request).fetch(id);
   }
   /**
-   * Updates an entity link.
+   * Updates an existing entity external link's URL, label, or sort order.
    *
    * @param id - required id to pass to updateEntityExternalLink
    * @param input - required input to pass to updateEntityExternalLink
@@ -44342,7 +44209,7 @@ export class LinearSdk extends Request {
     return new UpdateEntityExternalLinkMutation(this._request).fetch(id, input);
   }
   /**
-   * Creates a new favorite (project, cycle etc).
+   * Creates a new favorite for the authenticated user. Exactly one target entity must be specified. If a favorite for the same entity already exists, the existing favorite is returned (upsert behavior).
    *
    * @param input - required input to pass to createFavorite
    * @returns FavoritePayload
@@ -44351,7 +44218,7 @@ export class LinearSdk extends Request {
     return new CreateFavoriteMutation(this._request).fetch(input);
   }
   /**
-   * Deletes a favorite reference.
+   * Deletes a favorite, removing it from the user's sidebar. This is an idempotent operation -- deleting a non-existent favorite succeeds silently.
    *
    * @param id - required id to pass to deleteFavorite
    * @returns DeletePayload
@@ -44360,7 +44227,7 @@ export class LinearSdk extends Request {
     return new DeleteFavoriteMutation(this._request).fetch(id);
   }
   /**
-   * Updates a favorite.
+   * Updates a favorite's position, parent folder, or folder name.
    *
    * @param id - required id to pass to updateFavorite
    * @param input - required input to pass to updateFavorite
@@ -44387,7 +44254,7 @@ export class LinearSdk extends Request {
     return new FileUploadMutation(this._request).fetch(contentType, filename, size, variables);
   }
   /**
-   * Creates a new automation state.
+   * Creates a new Git automation rule that maps a Git event to a workflow state transition for a team.
    *
    * @param input - required input to pass to createGitAutomationState
    * @returns GitAutomationStatePayload
@@ -44396,7 +44263,7 @@ export class LinearSdk extends Request {
     return new CreateGitAutomationStateMutation(this._request).fetch(input);
   }
   /**
-   * Archives an automation state.
+   * Deletes a Git automation rule.
    *
    * @param id - required id to pass to deleteGitAutomationState
    * @returns DeletePayload
@@ -44405,7 +44272,7 @@ export class LinearSdk extends Request {
     return new DeleteGitAutomationStateMutation(this._request).fetch(id);
   }
   /**
-   * Updates an existing state.
+   * Updates an existing Git automation rule, including its workflow state, target branch, and triggering event.
    *
    * @param id - required id to pass to updateGitAutomationState
    * @param input - required input to pass to updateGitAutomationState
@@ -44418,7 +44285,7 @@ export class LinearSdk extends Request {
     return new UpdateGitAutomationStateMutation(this._request).fetch(id, input);
   }
   /**
-   * Creates a Git target branch automation.
+   * Creates a new Git target branch definition that scopes automation rules to pull requests targeting a specific branch pattern.
    *
    * @param input - required input to pass to createGitAutomationTargetBranch
    * @returns GitAutomationTargetBranchPayload
@@ -44429,7 +44296,7 @@ export class LinearSdk extends Request {
     return new CreateGitAutomationTargetBranchMutation(this._request).fetch(input);
   }
   /**
-   * Archives a Git target branch automation.
+   * Deletes a Git target branch definition and its associated automation rules.
    *
    * @param id - required id to pass to deleteGitAutomationTargetBranch
    * @returns DeletePayload
@@ -44438,7 +44305,7 @@ export class LinearSdk extends Request {
     return new DeleteGitAutomationTargetBranchMutation(this._request).fetch(id);
   }
   /**
-   * Updates an existing Git target branch automation.
+   * Updates an existing Git target branch definition, including its branch pattern and regex flag.
    *
    * @param id - required id to pass to updateGitAutomationTargetBranch
    * @param input - required input to pass to updateGitAutomationTargetBranch
@@ -44486,7 +44353,7 @@ export class LinearSdk extends Request {
     return new ImportFileUploadMutation(this._request).fetch(contentType, filename, size, variables);
   }
   /**
-   * Archives a initiative.
+   * Archives an initiative.
    *
    * @param id - required id to pass to archiveInitiative
    * @returns InitiativeArchivePayload
@@ -44513,7 +44380,7 @@ export class LinearSdk extends Request {
     return new DeleteInitiativeMutation(this._request).fetch(id);
   }
   /**
-   * Creates a new initiative relation.
+   * Creates a new parent-child relation between two initiatives. The relation cannot create cycles or exceed maximum nesting depth.
    *
    * @param input - required input to pass to createInitiativeRelation
    * @returns InitiativeRelationPayload
@@ -44535,13 +44402,16 @@ export class LinearSdk extends Request {
    *
    * @param id - required id to pass to updateInitiativeRelation
    * @param input - required input to pass to updateInitiativeRelation
-   * @returns DeletePayload
+   * @returns InitiativeRelationPayload
    */
-  public updateInitiativeRelation(id: string, input: L.InitiativeRelationUpdateInput): LinearFetch<DeletePayload> {
+  public updateInitiativeRelation(
+    id: string,
+    input: L.InitiativeRelationUpdateInput
+  ): LinearFetch<InitiativeRelationPayload> {
     return new UpdateInitiativeRelationMutation(this._request).fetch(id, input);
   }
   /**
-   * Creates a new initiativeToProject join.
+   * Associates a project with an initiative. A project can only appear once in an initiative hierarchy.
    *
    * @param input - required input to pass to createInitiativeToProject
    * @returns InitiativeToProjectPayload
@@ -44550,7 +44420,7 @@ export class LinearSdk extends Request {
     return new CreateInitiativeToProjectMutation(this._request).fetch(input);
   }
   /**
-   * Deletes a initiativeToProject.
+   * Removes a project from an initiative.
    *
    * @param id - required id to pass to deleteInitiativeToProject
    * @returns DeletePayload
@@ -44559,7 +44429,7 @@ export class LinearSdk extends Request {
     return new DeleteInitiativeToProjectMutation(this._request).fetch(id);
   }
   /**
-   * Updates a initiativeToProject.
+   * Updates an initiative-to-project association, such as its sort order.
    *
    * @param id - required id to pass to updateInitiativeToProject
    * @param input - required input to pass to updateInitiativeToProject
@@ -44572,7 +44442,7 @@ export class LinearSdk extends Request {
     return new UpdateInitiativeToProjectMutation(this._request).fetch(id, input);
   }
   /**
-   * Unarchives a initiative.
+   * Unarchives an initiative.
    *
    * @param id - required id to pass to unarchiveInitiative
    * @returns InitiativeArchivePayload
@@ -44581,7 +44451,7 @@ export class LinearSdk extends Request {
     return new UnarchiveInitiativeMutation(this._request).fetch(id);
   }
   /**
-   * Updates a initiative.
+   * Updates an initiative.
    *
    * @param id - required id to pass to updateInitiative
    * @param input - required input to pass to updateInitiative
@@ -44600,7 +44470,7 @@ export class LinearSdk extends Request {
     return new ArchiveInitiativeUpdateMutation(this._request).fetch(id);
   }
   /**
-   * Creates a initiative update.
+   * Creates an initiative update.
    *
    * @param input - required input to pass to createInitiativeUpdate
    * @returns InitiativeUpdatePayload
@@ -44618,7 +44488,7 @@ export class LinearSdk extends Request {
     return new UnarchiveInitiativeUpdateMutation(this._request).fetch(id);
   }
   /**
-   * Updates an update.
+   * Updates an initiative update.
    *
    * @param id - required id to pass to updateInitiativeUpdate
    * @param input - required input to pass to updateInitiativeUpdate
@@ -44663,7 +44533,7 @@ export class LinearSdk extends Request {
     return new DeleteIntegrationMutation(this._request).fetch(id, variables);
   }
   /**
-   * Integrates the organization with Discord.
+   * Integrates the workspace with Discord.
    *
    * @param code - required code to pass to integrationDiscord
    * @param redirectUri - required redirectUri to pass to integrationDiscord
@@ -44673,7 +44543,7 @@ export class LinearSdk extends Request {
     return new IntegrationDiscordMutation(this._request).fetch(code, redirectUri);
   }
   /**
-   * Integrates the organization with Figma.
+   * Integrates the workspace with Figma.
    *
    * @param code - required code to pass to integrationFigma
    * @param redirectUri - required redirectUri to pass to integrationFigma
@@ -44683,7 +44553,7 @@ export class LinearSdk extends Request {
     return new IntegrationFigmaMutation(this._request).fetch(code, redirectUri);
   }
   /**
-   * Integrates the organization with Front.
+   * Integrates the workspace with Front.
    *
    * @param code - required code to pass to integrationFront
    * @param redirectUri - required redirectUri to pass to integrationFront
@@ -44693,7 +44563,7 @@ export class LinearSdk extends Request {
     return new IntegrationFrontMutation(this._request).fetch(code, redirectUri);
   }
   /**
-   * Connects the organization with a GitHub Enterprise Server.
+   * Connects the workspace with a GitHub Enterprise Server.
    *
    * @param githubUrl - required githubUrl to pass to integrationGitHubEnterpriseServerConnect
    * @param organizationName - required organizationName to pass to integrationGitHubEnterpriseServerConnect
@@ -44727,7 +44597,7 @@ export class LinearSdk extends Request {
     return new CreateIntegrationGithubCommitMutation(this._request).fetch();
   }
   /**
-   * Connects the organization with the GitHub App.
+   * Connects the workspace with the GitHub App.
    *
    * @param code - required code to pass to integrationGithubConnect
    * @param installationId - required installationId to pass to integrationGithubConnect
@@ -44742,7 +44612,7 @@ export class LinearSdk extends Request {
     return new IntegrationGithubConnectMutation(this._request).fetch(code, installationId, variables);
   }
   /**
-   * Connects the organization with the GitHub Import App.
+   * Connects the workspace with the GitHub Import App.
    *
    * @param code - required code to pass to integrationGithubImportConnect
    * @param installationId - required installationId to pass to integrationGithubImportConnect
@@ -44761,7 +44631,7 @@ export class LinearSdk extends Request {
     return new IntegrationGithubImportRefreshMutation(this._request).fetch(id);
   }
   /**
-   * Connects the organization with a GitLab Access Token.
+   * Connects the workspace with a GitLab Access Token.
    *
    * @param accessToken - required accessToken to pass to integrationGitlabConnect
    * @param gitlabUrl - required gitlabUrl to pass to integrationGitlabConnect
@@ -44780,7 +44650,7 @@ export class LinearSdk extends Request {
     return new IntegrationGitlabTestConnectionMutation(this._request).fetch(integrationId);
   }
   /**
-   * Integrates the organization with Gong.
+   * Integrates the workspace with Gong.
    *
    * @param code - required code to pass to integrationGong
    * @param redirectUri - required redirectUri to pass to integrationGong
@@ -44790,7 +44660,7 @@ export class LinearSdk extends Request {
     return new IntegrationGongMutation(this._request).fetch(code, redirectUri);
   }
   /**
-   * Integrates the organization with Google Sheets.
+   * Integrates the workspace with Google Sheets.
    *
    * @param code - required code to pass to integrationGoogleSheets
    * @returns IntegrationPayload
@@ -44799,7 +44669,7 @@ export class LinearSdk extends Request {
     return new IntegrationGoogleSheetsMutation(this._request).fetch(code);
   }
   /**
-   * Integrates the organization with Intercom.
+   * Integrates the workspace with Intercom.
    *
    * @param code - required code to pass to integrationIntercom
    * @param redirectUri - required redirectUri to pass to integrationIntercom
@@ -44814,7 +44684,7 @@ export class LinearSdk extends Request {
     return new IntegrationIntercomMutation(this._request).fetch(code, redirectUri, variables);
   }
   /**
-   * Disconnects the organization from Intercom.
+   * Disconnects the workspace from Intercom.
    *
    * @returns IntegrationPayload
    */
@@ -44842,7 +44712,7 @@ export class LinearSdk extends Request {
     return new IntegrationJiraPersonalMutation(this._request).fetch(variables);
   }
   /**
-   * Enables Loom integration for the organization.
+   * Enables Loom integration for the workspace.
    *
    * @returns IntegrationPayload
    */
@@ -44860,7 +44730,7 @@ export class LinearSdk extends Request {
     return new IntegrationMicrosoftPersonalConnectMutation(this._request).fetch(code, redirectUri);
   }
   /**
-   * Integrates the organization with Microsoft Teams.
+   * Integrates the workspace with Microsoft Teams.
    *
    * @param code - required code to pass to integrationMicrosoftTeams
    * @param redirectUri - required redirectUri to pass to integrationMicrosoftTeams
@@ -44879,7 +44749,7 @@ export class LinearSdk extends Request {
     return new IntegrationRequestMutation(this._request).fetch(input);
   }
   /**
-   * Integrates the organization with Salesforce.
+   * Integrates the workspace with Salesforce.
    *
    * @param code - required code to pass to integrationSalesforce
    * @param redirectUri - required redirectUri to pass to integrationSalesforce
@@ -44890,7 +44760,7 @@ export class LinearSdk extends Request {
     return new IntegrationSalesforceMutation(this._request).fetch(code, redirectUri, subdomain);
   }
   /**
-   * Integrates the organization with Sentry.
+   * Integrates the workspace with Sentry.
    *
    * @param code - required code to pass to integrationSentryConnect
    * @param installationId - required installationId to pass to integrationSentryConnect
@@ -44905,7 +44775,7 @@ export class LinearSdk extends Request {
     return new IntegrationSentryConnectMutation(this._request).fetch(code, installationId, organizationSlug);
   }
   /**
-   * Integrates the organization with Slack.
+   * Integrates the workspace with Slack.
    *
    * @param code - required code to pass to integrationSlack
    * @param redirectUri - required redirectUri to pass to integrationSlack
@@ -44920,7 +44790,7 @@ export class LinearSdk extends Request {
     return new IntegrationSlackMutation(this._request).fetch(code, redirectUri, variables);
   }
   /**
-   * Integrates the organization with the Slack Asks app.
+   * Integrates the workspace with the Slack Asks app.
    *
    * @param code - required code to pass to integrationSlackAsks
    * @param redirectUri - required redirectUri to pass to integrationSlackAsks
@@ -44981,7 +44851,7 @@ export class LinearSdk extends Request {
     return new IntegrationSlackOrAsksUpdateSlackTeamNameMutation(this._request).fetch(integrationId);
   }
   /**
-   * Slack integration for organization level project update notifications.
+   * Slack integration for workspace-level project update notifications.
    *
    * @param code - required code to pass to integrationSlackOrgProjectUpdatesPost
    * @param redirectUri - required redirectUri to pass to integrationSlackOrgProjectUpdatesPost
@@ -45038,7 +44908,7 @@ export class LinearSdk extends Request {
     return new IntegrationSlackProjectPostMutation(this._request).fetch(code, projectId, redirectUri, service);
   }
   /**
-   * Creates a new integrationTemplate join.
+   * Creates a new connection between a template and an integration, optionally scoped to a specific external resource such as a Slack channel.
    *
    * @param input - required input to pass to createIntegrationTemplate
    * @returns IntegrationTemplatePayload
@@ -45047,7 +44917,7 @@ export class LinearSdk extends Request {
     return new CreateIntegrationTemplateMutation(this._request).fetch(input);
   }
   /**
-   * Deletes a integrationTemplate.
+   * Deletes an integration template connection, removing the link between a template and an integration.
    *
    * @param id - required id to pass to deleteIntegrationTemplate
    * @returns DeletePayload
@@ -45056,7 +44926,7 @@ export class LinearSdk extends Request {
     return new DeleteIntegrationTemplateMutation(this._request).fetch(id);
   }
   /**
-   * Integrates the organization with Zendesk.
+   * Integrates the workspace with Zendesk.
    *
    * @param code - required code to pass to integrationZendesk
    * @param redirectUri - required redirectUri to pass to integrationZendesk
@@ -45073,7 +44943,7 @@ export class LinearSdk extends Request {
     return new IntegrationZendeskMutation(this._request).fetch(code, redirectUri, scope, subdomain);
   }
   /**
-   * Creates new settings for one or more integrations.
+   * Creates new Slack notification settings for a team, project, initiative, or custom view.
    *
    * @param input - required input to pass to createIntegrationsSettings
    * @returns IntegrationsSettingsPayload
@@ -45084,7 +44954,7 @@ export class LinearSdk extends Request {
     return new CreateIntegrationsSettingsMutation(this._request).fetch(input);
   }
   /**
-   * Updates settings related to integrations for a project or a team.
+   * Updates Slack notification settings for a team, project, initiative, or custom view.
    *
    * @param id - required id to pass to updateIntegrationsSettings
    * @param input - required input to pass to updateIntegrationsSettings
@@ -45303,7 +45173,7 @@ export class LinearSdk extends Request {
     return new DeleteIssueLabelMutation(this._request).fetch(id);
   }
   /**
-   * Restores a label.
+   * Restores a previously retired label, making it available for use again.
    *
    * @param id - required id to pass to issueLabelRestore
    * @returns IssueLabelPayload
@@ -45312,7 +45182,7 @@ export class LinearSdk extends Request {
     return new IssueLabelRestoreMutation(this._request).fetch(id);
   }
   /**
-   * Retires a label.
+   * Retires a label. Retired labels are still visible but cannot be applied to new issues. Existing issues with the label are not affected.
    *
    * @param id - required id to pass to issueLabelRetire
    * @returns IssueLabelPayload
@@ -45433,24 +45303,6 @@ export class LinearSdk extends Request {
     return new UpdateIssueMutation(this._request).fetch(id, input);
   }
   /**
-   * Join an organization from onboarding.
-   *
-   * @param input - required input to pass to joinOrganizationFromOnboarding
-   * @returns CreateOrJoinOrganizationResponse
-   */
-  public joinOrganizationFromOnboarding(input: L.JoinOrganizationInput): LinearFetch<CreateOrJoinOrganizationResponse> {
-    return new JoinOrganizationFromOnboardingMutation(this._request).fetch(input);
-  }
-  /**
-   * Leave an organization.
-   *
-   * @param organizationId - required organizationId to pass to leaveOrganization
-   * @returns CreateOrJoinOrganizationResponse
-   */
-  public leaveOrganization(organizationId: string): LinearFetch<CreateOrJoinOrganizationResponse> {
-    return new LeaveOrganizationMutation(this._request).fetch(organizationId);
-  }
-  /**
    * Logout the client.
    *
    * @param variables - variables to pass into the LogoutMutation
@@ -45505,7 +45357,7 @@ export class LinearSdk extends Request {
     return new NotificationArchiveAllMutation(this._request).fetch(input);
   }
   /**
-   * Subscribes to or unsubscribes from a notification category for a given notification channel for the user
+   * Subscribes to or unsubscribes from a specific notification category for a given notification channel. For example, subscribe to 'issueAssignment' notifications via the 'email' channel.
    *
    * @param category - required category to pass to updateNotificationCategoryChannelSubscription
    * @param channel - required channel to pass to updateNotificationCategoryChannelSubscription
@@ -45555,7 +45407,7 @@ export class LinearSdk extends Request {
     return new NotificationSnoozeAllMutation(this._request).fetch(input, snoozedUntilAt);
   }
   /**
-   * Creates a new notification subscription for a cycle, custom view, label, project or team.
+   * Creates a new notification subscription for a specific entity. The subscription determines which notification types the authenticated user will receive for the target entity. Exactly one target entity (customer, custom view, cycle, initiative, label, project, team, or user) must be specified.
    *
    * @param input - required input to pass to createNotificationSubscription
    * @returns NotificationSubscriptionPayload
@@ -45620,7 +45472,7 @@ export class LinearSdk extends Request {
     return new UpdateNotificationMutation(this._request).fetch(id, input);
   }
   /**
-   * Cancels the deletion of an organization.
+   * Cancels a previously requested workspace deletion, if the workspace has not yet been fully deleted.
    *
    * @returns OrganizationCancelDeletePayload
    */
@@ -45628,7 +45480,7 @@ export class LinearSdk extends Request {
     return new DeleteOrganizationCancelMutation(this._request).fetch();
   }
   /**
-   * Deletes an organization.
+   * Permanently deletes the workspace and all its data. Requires a valid deletion code obtained from organizationDeleteChallenge. This action is irreversible.
    *
    * @param input - required input to pass to deleteOrganization
    * @returns OrganizationDeletePayload
@@ -45637,7 +45489,7 @@ export class LinearSdk extends Request {
     return new DeleteOrganizationMutation(this._request).fetch(input);
   }
   /**
-   * Get an organization's delete confirmation token.
+   * Requests a deletion confirmation code for the workspace. The code is sent to the requesting user's email and must be used with the organizationDelete mutation to confirm deletion.
    *
    * @returns OrganizationDeletePayload
    */
@@ -45654,7 +45506,7 @@ export class LinearSdk extends Request {
     return new DeleteOrganizationDomainMutation(this._request).fetch(id);
   }
   /**
-   * Creates a new organization invite.
+   * Creates a new workspace invite and sends an invitation email to the specified address. The invite includes a role assignment and optional team memberships.
    *
    * @param input - required input to pass to createOrganizationInvite
    * @returns OrganizationInvitePayload
@@ -45663,7 +45515,7 @@ export class LinearSdk extends Request {
     return new CreateOrganizationInviteMutation(this._request).fetch(input);
   }
   /**
-   * Deletes an organization invite.
+   * Deletes (archives) a workspace invite, preventing it from being accepted.
    *
    * @param id - required id to pass to deleteOrganizationInvite
    * @returns DeletePayload
@@ -45672,7 +45524,7 @@ export class LinearSdk extends Request {
     return new DeleteOrganizationInviteMutation(this._request).fetch(id);
   }
   /**
-   * Updates an organization invite.
+   * Updates an existing workspace invite, such as changing the teams the invitee will be added to.
    *
    * @param id - required id to pass to updateOrganizationInvite
    * @param input - required input to pass to updateOrganizationInvite
@@ -45685,7 +45537,7 @@ export class LinearSdk extends Request {
     return new UpdateOrganizationInviteMutation(this._request).fetch(id, input);
   }
   /**
-   * [DEPRECATED] Starts a trial for the organization.
+   * [DEPRECATED] Starts a trial for the workspace.
    *
    * @returns OrganizationStartTrialPayload
    */
@@ -45693,7 +45545,7 @@ export class LinearSdk extends Request {
     return new OrganizationStartTrialMutation(this._request).fetch();
   }
   /**
-   * Starts a trial for the organization on the specified plan type.
+   * Starts a trial for the workspace on the specified plan type. The workspace must not already be on a paid plan or in an active trial.
    *
    * @param input - required input to pass to organizationStartTrialForPlan
    * @returns OrganizationStartTrialPayload
@@ -45704,7 +45556,7 @@ export class LinearSdk extends Request {
     return new OrganizationStartTrialForPlanMutation(this._request).fetch(input);
   }
   /**
-   * Updates the user's organization.
+   * Updates the user's workspace settings. Different settings require different permission levels; most require the workspaceSettings admin permission.
    *
    * @param input - required input to pass to updateOrganization
    * @returns OrganizationPayload
@@ -45749,7 +45601,7 @@ export class LinearSdk extends Request {
     return new CreateProjectMutation(this._request).fetch(input, variables);
   }
   /**
-   * Deletes (trashes) a project.
+   * Deletes (trashes) a project. The project can be restored later with projectUnarchive.
    *
    * @param id - required id to pass to deleteProject
    * @returns ProjectArchivePayload
@@ -45786,7 +45638,7 @@ export class LinearSdk extends Request {
     return new DeleteProjectLabelMutation(this._request).fetch(id);
   }
   /**
-   * Restores a project label.
+   * Restores a previously retired project label, making it available for use on new projects.
    *
    * @param id - required id to pass to projectLabelRestore
    * @returns ProjectLabelPayload
@@ -45795,7 +45647,7 @@ export class LinearSdk extends Request {
     return new ProjectLabelRestoreMutation(this._request).fetch(id);
   }
   /**
-   * Retires a project label.
+   * Retires a project label. Retired labels remain on existing projects but cannot be applied to new ones.
    *
    * @param id - required id to pass to projectLabelRetire
    * @returns ProjectLabelPayload
@@ -45883,7 +45735,7 @@ export class LinearSdk extends Request {
     return new ProjectRemoveLabelMutation(this._request).fetch(id, labelId);
   }
   /**
-   * Archives a project status.
+   * Archives a project status. The status must not have any active projects assigned to it and must not be the last status of its type.
    *
    * @param id - required id to pass to archiveProjectStatus
    * @returns ProjectStatusArchivePayload
@@ -45920,7 +45772,7 @@ export class LinearSdk extends Request {
     return new UpdateProjectStatusMutation(this._request).fetch(id, input);
   }
   /**
-   * Unarchives a project.
+   * Restores a previously trashed or archived project.
    *
    * @param id - required id to pass to unarchiveProject
    * @returns ProjectArchivePayload
@@ -45985,7 +45837,7 @@ export class LinearSdk extends Request {
     return new UpdateProjectUpdateMutation(this._request).fetch(id, input);
   }
   /**
-   * Creates a push subscription.
+   * Creates a push subscription for the authenticated user's current device or browser. If a subscription already exists for the same session, the old one is replaced.
    *
    * @param input - required input to pass to createPushSubscription
    * @returns PushSubscriptionPayload
@@ -45994,7 +45846,7 @@ export class LinearSdk extends Request {
     return new CreatePushSubscriptionMutation(this._request).fetch(input);
   }
   /**
-   * Deletes a push subscription.
+   * Deletes a push subscription, unregistering the device from receiving push notifications.
    *
    * @param id - required id to pass to deletePushSubscription
    * @returns PushSubscriptionPayload
@@ -46034,7 +45886,7 @@ export class LinearSdk extends Request {
     return new RefreshGoogleSheetsDataMutation(this._request).fetch(id, variables);
   }
   /**
-   * Re-send an organization invite.
+   * Re-sends a workspace invitation email for the specified invite ID.
    *
    * @param id - required id to pass to resendOrganizationInvite
    * @returns DeletePayload
@@ -46043,7 +45895,7 @@ export class LinearSdk extends Request {
     return new ResendOrganizationInviteMutation(this._request).fetch(id);
   }
   /**
-   * Re-send an organization invite tied to an email address.
+   * Re-sends a workspace invitation email to the specified email address, if an outstanding invite exists for that address.
    *
    * @param email - required email to pass to resendOrganizationInviteByEmail
    * @returns DeletePayload
@@ -46079,7 +45931,7 @@ export class LinearSdk extends Request {
     return new DeleteRoadmapMutation(this._request).fetch(id);
   }
   /**
-   * Creates a new roadmapToProject join.
+   * [Deprecated] Creates a new roadmap-to-project association. Use InitiativeToProject instead.
    *
    * @param input - required input to pass to createRoadmapToProject
    * @returns RoadmapToProjectPayload
@@ -46088,7 +45940,7 @@ export class LinearSdk extends Request {
     return new CreateRoadmapToProjectMutation(this._request).fetch(input);
   }
   /**
-   * Deletes a roadmapToProject.
+   * [Deprecated] Deletes a roadmap-to-project association. Use InitiativeToProject instead.
    *
    * @param id - required id to pass to deleteRoadmapToProject
    * @returns DeletePayload
@@ -46097,7 +45949,7 @@ export class LinearSdk extends Request {
     return new DeleteRoadmapToProjectMutation(this._request).fetch(id);
   }
   /**
-   * Updates a roadmapToProject.
+   * [Deprecated] Updates a roadmap-to-project association. Use InitiativeToProject instead.
    *
    * @param id - required id to pass to updateRoadmapToProject
    * @param input - required input to pass to updateRoadmapToProject
@@ -46138,7 +45990,7 @@ export class LinearSdk extends Request {
     return new SamlTokenUserAccountAuthMutation(this._request).fetch(input);
   }
   /**
-   * Creates a new team. The user who creates the team will automatically be added as a member to the newly created team.
+   * Creates a new team. The user who creates the team will automatically be added as a member and owner of the newly created team. Default workflow states, labels, and other team resources are created alongside the team.
    *
    * @param input - required input to pass to createTeam
    * @param variables - variables without 'input' to pass into the CreateTeamMutation
@@ -46151,7 +46003,7 @@ export class LinearSdk extends Request {
     return new CreateTeamMutation(this._request).fetch(input, variables);
   }
   /**
-   * Deletes team's cycles data
+   * Deletes all cycle data for a team, disabling the cycles feature. This removes all cycles and their issue associations.
    *
    * @param id - required id to pass to deleteTeamCycles
    * @returns TeamPayload
@@ -46160,7 +46012,7 @@ export class LinearSdk extends Request {
     return new DeleteTeamCyclesMutation(this._request).fetch(id);
   }
   /**
-   * Deletes a team.
+   * Archives a team and schedules its data for deletion. Requires team owner or workspace admin permissions.
    *
    * @param id - required id to pass to deleteTeam
    * @returns DeletePayload
@@ -46169,7 +46021,7 @@ export class LinearSdk extends Request {
     return new DeleteTeamMutation(this._request).fetch(id);
   }
   /**
-   * Deletes a previously used team key.
+   * Deletes a previously used team key. The active team key (the team's current key) cannot be deleted.
    *
    * @param id - required id to pass to deleteTeamKey
    * @returns DeletePayload
@@ -46178,7 +46030,7 @@ export class LinearSdk extends Request {
     return new DeleteTeamKeyMutation(this._request).fetch(id);
   }
   /**
-   * Creates a new team membership.
+   * Creates a new team membership, adding a user to a team. Validates that the user is not already a member, the team is not archived or retired, and the requesting user has permission to add members.
    *
    * @param input - required input to pass to createTeamMembership
    * @returns TeamMembershipPayload
@@ -46187,7 +46039,7 @@ export class LinearSdk extends Request {
     return new CreateTeamMembershipMutation(this._request).fetch(input);
   }
   /**
-   * Deletes a team membership.
+   * Deletes a team membership, removing the user from the team. Users can remove their own membership, or team owners and workspace admins can remove other members.
    *
    * @param id - required id to pass to deleteTeamMembership
    * @param variables - variables without 'id' to pass into the DeleteTeamMembershipMutation
@@ -46200,7 +46052,7 @@ export class LinearSdk extends Request {
     return new DeleteTeamMembershipMutation(this._request).fetch(id, variables);
   }
   /**
-   * Updates a team membership.
+   * Updates a team membership, such as changing ownership status or sort order.
    *
    * @param id - required id to pass to updateTeamMembership
    * @param input - required input to pass to updateTeamMembership
@@ -46219,7 +46071,7 @@ export class LinearSdk extends Request {
     return new UnarchiveTeamMutation(this._request).fetch(id);
   }
   /**
-   * Updates a team.
+   * Updates a team's settings, properties, or configuration. Requires team owner or workspace admin permissions for most changes.
    *
    * @param id - required id to pass to updateTeam
    * @param input - required input to pass to updateTeam
@@ -46354,7 +46206,7 @@ export class LinearSdk extends Request {
     return new UpdateTriageResponsibilityMutation(this._request).fetch(id, input);
   }
   /**
-   * Changes the role of a user.
+   * Changes the workspace role of a user. The requesting user must have a role equal to or higher than the target role. Requires workspace admin permissions.
    *
    * @param id - required id to pass to userChangeRole
    * @param role - required role to pass to userChangeRole
@@ -46383,7 +46235,7 @@ export class LinearSdk extends Request {
     return new UserExternalUserDisconnectMutation(this._request).fetch(service);
   }
   /**
-   * Updates a user's settings flag.
+   * Updates a specific user settings flag by performing an operation (e.g., increment or clear) on it.
    *
    * @param flag - required flag to pass to updateUserFlag
    * @param operation - required operation to pass to updateUserFlag
@@ -46396,7 +46248,7 @@ export class LinearSdk extends Request {
     return new UpdateUserFlagMutation(this._request).fetch(flag, operation);
   }
   /**
-   * Revokes a user's sessions. Can only be called by an admin or owner.
+   * Revokes all active sessions for a user, forcing them to re-authenticate. Can only be called by a workspace admin or owner.
    *
    * @param id - required id to pass to userRevokeAllSessions
    * @returns UserAdminPayload
@@ -46405,7 +46257,7 @@ export class LinearSdk extends Request {
     return new UserRevokeAllSessionsMutation(this._request).fetch(id);
   }
   /**
-   * Revokes a specific session for a user. Can only be called by an admin or owner.
+   * Revokes a specific authentication session for a user. The admin cannot revoke their own sessions with this mutation. Can only be called by a workspace admin or owner.
    *
    * @param id - required id to pass to userRevokeSession
    * @param sessionId - required sessionId to pass to userRevokeSession
@@ -46415,7 +46267,7 @@ export class LinearSdk extends Request {
     return new UserRevokeSessionMutation(this._request).fetch(id, sessionId);
   }
   /**
-   * Resets user's setting flags.
+   * Resets one or more of the user's setting flags. If no specific flags are provided, all flags are reset.
    *
    * @param variables - variables to pass into the UserSettingsFlagsResetMutation
    * @returns UserSettingsFlagsResetPayload
@@ -46426,7 +46278,7 @@ export class LinearSdk extends Request {
     return new UserSettingsFlagsResetMutation(this._request).fetch(variables);
   }
   /**
-   * Updates the user's settings.
+   * Updates the authenticated user's settings, including notification preferences, email subscriptions, theme, and other UI preferences.
    *
    * @param id - required id to pass to updateUserSettings
    * @param input - required input to pass to updateUserSettings
@@ -46436,7 +46288,7 @@ export class LinearSdk extends Request {
     return new UpdateUserSettingsMutation(this._request).fetch(id, input);
   }
   /**
-   * Suspends a user. Can only be called by an admin or owner.
+   * Suspends a user, deactivating their account and revoking access to the workspace. The suspended user's sessions are invalidated. Can only be called by a workspace admin or owner.
    *
    * @param id - required id to pass to suspendUser
    * @param variables - variables without 'id' to pass into the SuspendUserMutation
@@ -46458,7 +46310,7 @@ export class LinearSdk extends Request {
     return new UserUnlinkFromIdentityProviderMutation(this._request).fetch(id);
   }
   /**
-   * Un-suspends a user. Can only be called by an admin or owner.
+   * Re-activates a suspended user, restoring their access to the workspace. Can only be called by a workspace admin or owner.
    *
    * @param id - required id to pass to unsuspendUser
    * @param variables - variables without 'id' to pass into the UnsuspendUserMutation
@@ -46471,7 +46323,7 @@ export class LinearSdk extends Request {
     return new UnsuspendUserMutation(this._request).fetch(id, variables);
   }
   /**
-   * Updates a user. Only available to organization admins and the user themselves.
+   * Updates a user's profile information. Users can update their own profile; workspace admins can update any user's profile. SCIM-managed users may have restricted name changes.
    *
    * @param id - required id to pass to updateUser
    * @param input - required input to pass to updateUser
@@ -46481,7 +46333,7 @@ export class LinearSdk extends Request {
     return new UpdateUserMutation(this._request).fetch(id, input);
   }
   /**
-   * Creates a new ViewPreferences object.
+   * Creates a new view preferences object. If conflicting preferences already exist for the same view type and scope, the existing preferences are replaced.
    *
    * @param input - required input to pass to createViewPreferences
    * @returns ViewPreferencesPayload
@@ -46490,7 +46342,7 @@ export class LinearSdk extends Request {
     return new CreateViewPreferencesMutation(this._request).fetch(input);
   }
   /**
-   * Deletes a ViewPreferences.
+   * Deletes a view preferences object. If the preferences do not exist, the operation is treated as a successful idempotent deletion.
    *
    * @param id - required id to pass to deleteViewPreferences
    * @returns DeletePayload
@@ -46499,7 +46351,7 @@ export class LinearSdk extends Request {
     return new DeleteViewPreferencesMutation(this._request).fetch(id);
   }
   /**
-   * Updates an existing ViewPreferences object.
+   * Updates an existing view preferences object. For user-type preferences, only the owning user can update them.
    *
    * @param id - required id to pass to updateViewPreferences
    * @param input - required input to pass to updateViewPreferences
@@ -46509,7 +46361,7 @@ export class LinearSdk extends Request {
     return new UpdateViewPreferencesMutation(this._request).fetch(id, input);
   }
   /**
-   * Creates a new webhook.
+   * Creates a new webhook subscription for the workspace. Requires specifying a URL, resource types to subscribe to, and either a specific team or all public teams.
    *
    * @param input - required input to pass to createWebhook
    * @returns WebhookPayload
@@ -46527,7 +46379,7 @@ export class LinearSdk extends Request {
     return new DeleteWebhookMutation(this._request).fetch(id);
   }
   /**
-   * Rotates the signing secret for a Webhook.
+   * Rotates the signing secret for a webhook, generating a new HMAC-SHA256 key and returning it. The old secret is immediately invalidated.
    *
    * @param id - required id to pass to rotateSecretWebhook
    * @returns WebhookRotateSecretPayload
@@ -46579,6 +46431,7 @@ export {
   AgentActivityType,
   AgentSessionStatus,
   AgentSessionType,
+  AiConversationClientPlatform,
   AiConversationEntityCardWidgetArgsAction,
   AiConversationEntityCardWidgetArgsType,
   AiConversationEntityListWidgetArgsAction,
