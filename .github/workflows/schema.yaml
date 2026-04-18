@@ -55,6 +55,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           schema: "master:packages/sdk/src/schema.graphql"
           fail-on-breaking: false
+          annotations: false
 
       - name: Create schema pull request
         uses: peter-evans/create-pull-request@v7
