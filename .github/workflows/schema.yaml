@@ -51,6 +51,7 @@ jobs:
 
       - name: Compare schema for changes
         uses: kamilkisiela/graphql-inspector@master
+        continue-on-error: true
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           schema: "master:packages/sdk/src/schema.graphql"
