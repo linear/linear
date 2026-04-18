@@ -1835,6 +1835,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the favorite.team query for L.Team */
+    it("favorite.team", async () => {
+      if (_favorite) {
+        const favorite_team: L.Team | undefined | null = await _favorite.team;
+        expect(favorite_team instanceof L.Team);
+      } else {
+        console.warn("codegen-doc:print: No Favorite found - cannot test favorite.team query");
+      }
+    });
+
     /** Test the favorite.user query for L.User */
     it("favorite.user", async () => {
       if (_favorite) {
@@ -1848,10 +1858,64 @@ describe("generated", () => {
 
   /** Test all InitiativeRelation queries */
   describe("InitiativeRelations", () => {
+    let _initiativeRelation: L.InitiativeRelation | undefined | null;
+    let _initiativeRelation_id: string | undefined | null;
+
     /** Test the root connection query for the InitiativeRelation */
     it("initiativeRelations", async () => {
       const initiativeRelations: L.InitiativeRelationConnection | undefined | null = await client.initiativeRelations();
+      const initiativeRelation = initiativeRelations?.nodes?.[0];
+      _initiativeRelation_id = initiativeRelation?.id;
       expect(initiativeRelations instanceof L.InitiativeRelationConnection);
+    });
+
+    /** Test the root query for a single InitiativeRelation */
+    it("initiativeRelation", async () => {
+      if (_initiativeRelation_id) {
+        const initiativeRelation: L.InitiativeRelation | undefined | null =
+          await client.initiativeRelation(_initiativeRelation_id);
+        _initiativeRelation = initiativeRelation;
+        expect(initiativeRelation instanceof L.InitiativeRelation);
+      } else {
+        console.warn(
+          "codegen-doc:print: No first InitiativeRelation found in connection - cannot test initiativeRelation query"
+        );
+      }
+    });
+
+    /** Test the initiativeRelation.initiative query for L.Initiative */
+    it("initiativeRelation.initiative", async () => {
+      if (_initiativeRelation) {
+        const initiativeRelation_initiative: L.Initiative | undefined | null = await _initiativeRelation.initiative;
+        expect(initiativeRelation_initiative instanceof L.Initiative);
+      } else {
+        console.warn(
+          "codegen-doc:print: No InitiativeRelation found - cannot test initiativeRelation.initiative query"
+        );
+      }
+    });
+
+    /** Test the initiativeRelation.relatedInitiative query for L.Initiative */
+    it("initiativeRelation.relatedInitiative", async () => {
+      if (_initiativeRelation) {
+        const initiativeRelation_relatedInitiative: L.Initiative | undefined | null =
+          await _initiativeRelation.relatedInitiative;
+        expect(initiativeRelation_relatedInitiative instanceof L.Initiative);
+      } else {
+        console.warn(
+          "codegen-doc:print: No InitiativeRelation found - cannot test initiativeRelation.relatedInitiative query"
+        );
+      }
+    });
+
+    /** Test the initiativeRelation.user query for L.User */
+    it("initiativeRelation.user", async () => {
+      if (_initiativeRelation) {
+        const initiativeRelation_user: L.User | undefined | null = await _initiativeRelation.user;
+        expect(initiativeRelation_user instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No InitiativeRelation found - cannot test initiativeRelation.user query");
+      }
     });
   });
 
@@ -4940,6 +5004,15 @@ describe("generated", () => {
     it("semanticSearch", async () => {
       const semanticSearch: L.SemanticSearchPayload | undefined | null = await client.semanticSearch("mock-query");
       expect(semanticSearch instanceof L.SemanticSearchPayload);
+    });
+  });
+
+  /** Test SlaConfigurations query */
+  describe("SlaConfigurations", () => {
+    /** Test the root model query for SlaConfigurations */
+    it("slaConfigurations", async () => {
+      const slaConfigurations: L.SlaConfiguration[] | undefined | null = await client.slaConfigurations("mock-teamId");
+      slaConfigurations?.map(node => expect(node instanceof L.SlaConfiguration));
     });
   });
 
