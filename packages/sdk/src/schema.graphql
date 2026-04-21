@@ -27370,6 +27370,10 @@ input OrganizationIpRestrictionInput {
 """
 input OrganizationLinearAgentMcpServerAllowlistEntryInput {
   """
+  [Internal] Slug of the built-in MCP integration this entry was added from, if any.
+  """
+  knownIntegrationKey: String
+  """
   [Internal] The MCP server URL that Linear Agent is allowed to use.
   """
   url: String!
@@ -43265,6 +43269,10 @@ type ViewPreferencesValues {
   """
   continuousPipelineReleaseFieldReleaseDate: Boolean
   """
+  Whether to show the release-note field for continuous pipeline releases.
+  """
+  continuousPipelineReleaseFieldReleaseNote: Boolean
+  """
   Whether to show the version field for continuous pipeline releases.
   """
   continuousPipelineReleaseFieldVersion: Boolean
@@ -43904,6 +43912,10 @@ type ViewPreferencesValues {
   Whether to show the release date field for scheduled pipeline releases.
   """
   scheduledPipelineReleaseFieldReleaseDate: Boolean
+  """
+  Whether to show the release-note field for scheduled pipeline releases.
+  """
+  scheduledPipelineReleaseFieldReleaseNote: Boolean
   """
   Whether to show the version field for scheduled pipeline releases.
   """

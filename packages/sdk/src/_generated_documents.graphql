@@ -8390,6 +8390,10 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   scheduledPipelineReleaseFieldReleaseDate
   # Whether to show the release field.
   fieldRelease
+  # Whether to show the release-note field for continuous pipeline releases.
+  continuousPipelineReleaseFieldReleaseNote
+  # Whether to show the release-note field for scheduled pipeline releases.
+  scheduledPipelineReleaseFieldReleaseNote
   # Whether to show the releases field for release pipelines.
   releasePipelineFieldReleases
   # Whether to show the review avatar field.

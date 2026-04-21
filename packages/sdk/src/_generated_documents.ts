@@ -15467,6 +15467,8 @@ export type OrganizationIpRestrictionInput = {
 
 /** [Internal] An MCP server URL entry for the Linear Agent allowlist. */
 export type OrganizationLinearAgentMcpServerAllowlistEntryInput = {
+  /** [Internal] Slug of the built-in MCP integration this entry was added from, if any. */
+  knownIntegrationKey?: InputMaybe<Scalars["String"]>;
   /** [Internal] The MCP server URL that Linear Agent is allowed to use. */
   url: Scalars["String"];
 };
@@ -24037,6 +24039,8 @@ export type ViewPreferencesValues = {
   columnOrderList?: Maybe<Array<Scalars["String"]>>;
   /** Whether to show the release date field for continuous pipeline releases. */
   continuousPipelineReleaseFieldReleaseDate?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show the release-note field for continuous pipeline releases. */
+  continuousPipelineReleaseFieldReleaseNote?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the version field for continuous pipeline releases. */
   continuousPipelineReleaseFieldVersion?: Maybe<Scalars["Boolean"]>;
   /** The continuous pipeline releases view grouping. */
@@ -24360,6 +24364,8 @@ export type ViewPreferencesValues = {
   scheduledPipelineReleaseFieldDescription?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the release date field for scheduled pipeline releases. */
   scheduledPipelineReleaseFieldReleaseDate?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show the release-note field for scheduled pipeline releases. */
+  scheduledPipelineReleaseFieldReleaseNote?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the version field for scheduled pipeline releases. */
   scheduledPipelineReleaseFieldVersion?: Maybe<Scalars["Boolean"]>;
   /** The scheduled pipeline releases view grouping. */
@@ -26019,6 +26025,8 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "continuousPipelineReleaseFieldReleaseDate"
         | "scheduledPipelineReleaseFieldReleaseDate"
         | "fieldRelease"
+        | "continuousPipelineReleaseFieldReleaseNote"
+        | "scheduledPipelineReleaseFieldReleaseNote"
         | "releasePipelineFieldReleases"
         | "reviewFieldAvatar"
         | "reviewFieldChecks"
@@ -26245,6 +26253,8 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "continuousPipelineReleaseFieldReleaseDate"
             | "scheduledPipelineReleaseFieldReleaseDate"
             | "fieldRelease"
+            | "continuousPipelineReleaseFieldReleaseNote"
+            | "scheduledPipelineReleaseFieldReleaseNote"
             | "releasePipelineFieldReleases"
             | "reviewFieldAvatar"
             | "reviewFieldChecks"
@@ -26476,6 +26486,8 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "continuousPipelineReleaseFieldReleaseDate"
             | "scheduledPipelineReleaseFieldReleaseDate"
             | "fieldRelease"
+            | "continuousPipelineReleaseFieldReleaseNote"
+            | "scheduledPipelineReleaseFieldReleaseNote"
             | "releasePipelineFieldReleases"
             | "reviewFieldAvatar"
             | "reviewFieldChecks"
@@ -34267,6 +34279,8 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "continuousPipelineReleaseFieldReleaseDate"
   | "scheduledPipelineReleaseFieldReleaseDate"
   | "fieldRelease"
+  | "continuousPipelineReleaseFieldReleaseNote"
+  | "scheduledPipelineReleaseFieldReleaseNote"
   | "releasePipelineFieldReleases"
   | "reviewFieldAvatar"
   | "reviewFieldChecks"
@@ -34535,6 +34549,8 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "continuousPipelineReleaseFieldReleaseDate"
       | "scheduledPipelineReleaseFieldReleaseDate"
       | "fieldRelease"
+      | "continuousPipelineReleaseFieldReleaseNote"
+      | "scheduledPipelineReleaseFieldReleaseNote"
       | "releasePipelineFieldReleases"
       | "reviewFieldAvatar"
       | "reviewFieldChecks"
@@ -35242,6 +35258,8 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "continuousPipelineReleaseFieldReleaseDate"
           | "scheduledPipelineReleaseFieldReleaseDate"
           | "fieldRelease"
+          | "continuousPipelineReleaseFieldReleaseNote"
+          | "scheduledPipelineReleaseFieldReleaseNote"
           | "releasePipelineFieldReleases"
           | "reviewFieldAvatar"
           | "reviewFieldChecks"
@@ -37290,6 +37308,8 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "continuousPipelineReleaseFieldReleaseDate"
             | "scheduledPipelineReleaseFieldReleaseDate"
             | "fieldRelease"
+            | "continuousPipelineReleaseFieldReleaseNote"
+            | "scheduledPipelineReleaseFieldReleaseNote"
             | "releasePipelineFieldReleases"
             | "reviewFieldAvatar"
             | "reviewFieldChecks"
@@ -37516,6 +37536,8 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "continuousPipelineReleaseFieldReleaseDate"
                 | "scheduledPipelineReleaseFieldReleaseDate"
                 | "fieldRelease"
+                | "continuousPipelineReleaseFieldReleaseNote"
+                | "scheduledPipelineReleaseFieldReleaseNote"
                 | "releasePipelineFieldReleases"
                 | "reviewFieldAvatar"
                 | "reviewFieldChecks"
@@ -37747,6 +37769,8 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "continuousPipelineReleaseFieldReleaseDate"
                 | "scheduledPipelineReleaseFieldReleaseDate"
                 | "fieldRelease"
+                | "continuousPipelineReleaseFieldReleaseNote"
+                | "scheduledPipelineReleaseFieldReleaseNote"
                 | "releasePipelineFieldReleases"
                 | "reviewFieldAvatar"
                 | "reviewFieldChecks"
@@ -46511,6 +46535,8 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "continuousPipelineReleaseFieldReleaseDate"
           | "scheduledPipelineReleaseFieldReleaseDate"
           | "fieldRelease"
+          | "continuousPipelineReleaseFieldReleaseNote"
+          | "scheduledPipelineReleaseFieldReleaseNote"
           | "releasePipelineFieldReleases"
           | "reviewFieldAvatar"
           | "reviewFieldChecks"
@@ -46737,6 +46763,8 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "continuousPipelineReleaseFieldReleaseDate"
               | "scheduledPipelineReleaseFieldReleaseDate"
               | "fieldRelease"
+              | "continuousPipelineReleaseFieldReleaseNote"
+              | "scheduledPipelineReleaseFieldReleaseNote"
               | "releasePipelineFieldReleases"
               | "reviewFieldAvatar"
               | "reviewFieldChecks"
@@ -46968,6 +46996,8 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "continuousPipelineReleaseFieldReleaseDate"
               | "scheduledPipelineReleaseFieldReleaseDate"
               | "fieldRelease"
+              | "continuousPipelineReleaseFieldReleaseNote"
+              | "scheduledPipelineReleaseFieldReleaseNote"
               | "releasePipelineFieldReleases"
               | "reviewFieldAvatar"
               | "reviewFieldChecks"
@@ -47453,6 +47483,8 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "continuousPipelineReleaseFieldReleaseDate"
             | "scheduledPipelineReleaseFieldReleaseDate"
             | "fieldRelease"
+            | "continuousPipelineReleaseFieldReleaseNote"
+            | "scheduledPipelineReleaseFieldReleaseNote"
             | "releasePipelineFieldReleases"
             | "reviewFieldAvatar"
             | "reviewFieldChecks"
@@ -47686,6 +47718,8 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "continuousPipelineReleaseFieldReleaseDate"
           | "scheduledPipelineReleaseFieldReleaseDate"
           | "fieldRelease"
+          | "continuousPipelineReleaseFieldReleaseNote"
+          | "scheduledPipelineReleaseFieldReleaseNote"
           | "releasePipelineFieldReleases"
           | "reviewFieldAvatar"
           | "reviewFieldChecks"
@@ -48048,6 +48082,8 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "continuousPipelineReleaseFieldReleaseDate"
             | "scheduledPipelineReleaseFieldReleaseDate"
             | "fieldRelease"
+            | "continuousPipelineReleaseFieldReleaseNote"
+            | "scheduledPipelineReleaseFieldReleaseNote"
             | "releasePipelineFieldReleases"
             | "reviewFieldAvatar"
             | "reviewFieldChecks"
@@ -48281,6 +48317,8 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "continuousPipelineReleaseFieldReleaseDate"
           | "scheduledPipelineReleaseFieldReleaseDate"
           | "fieldRelease"
+          | "continuousPipelineReleaseFieldReleaseNote"
+          | "scheduledPipelineReleaseFieldReleaseNote"
           | "releasePipelineFieldReleases"
           | "reviewFieldAvatar"
           | "reviewFieldChecks"
@@ -48513,6 +48551,8 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "continuousPipelineReleaseFieldReleaseDate"
         | "scheduledPipelineReleaseFieldReleaseDate"
         | "fieldRelease"
+        | "continuousPipelineReleaseFieldReleaseNote"
+        | "scheduledPipelineReleaseFieldReleaseNote"
         | "releasePipelineFieldReleases"
         | "reviewFieldAvatar"
         | "reviewFieldChecks"
@@ -48782,6 +48822,8 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "continuousPipelineReleaseFieldReleaseDate"
               | "scheduledPipelineReleaseFieldReleaseDate"
               | "fieldRelease"
+              | "continuousPipelineReleaseFieldReleaseNote"
+              | "scheduledPipelineReleaseFieldReleaseNote"
               | "releasePipelineFieldReleases"
               | "reviewFieldAvatar"
               | "reviewFieldChecks"
@@ -49008,6 +49050,8 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "continuousPipelineReleaseFieldReleaseDate"
                   | "scheduledPipelineReleaseFieldReleaseDate"
                   | "fieldRelease"
+                  | "continuousPipelineReleaseFieldReleaseNote"
+                  | "scheduledPipelineReleaseFieldReleaseNote"
                   | "releasePipelineFieldReleases"
                   | "reviewFieldAvatar"
                   | "reviewFieldChecks"
@@ -49239,6 +49283,8 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "continuousPipelineReleaseFieldReleaseDate"
                   | "scheduledPipelineReleaseFieldReleaseDate"
                   | "fieldRelease"
+                  | "continuousPipelineReleaseFieldReleaseNote"
+                  | "scheduledPipelineReleaseFieldReleaseNote"
                   | "releasePipelineFieldReleases"
                   | "reviewFieldAvatar"
                   | "reviewFieldChecks"
@@ -70915,6 +70961,8 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "continuousPipelineReleaseFieldReleaseDate"
             | "scheduledPipelineReleaseFieldReleaseDate"
             | "fieldRelease"
+            | "continuousPipelineReleaseFieldReleaseNote"
+            | "scheduledPipelineReleaseFieldReleaseNote"
             | "releasePipelineFieldReleases"
             | "reviewFieldAvatar"
             | "reviewFieldChecks"
@@ -71161,6 +71209,8 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "continuousPipelineReleaseFieldReleaseDate"
             | "scheduledPipelineReleaseFieldReleaseDate"
             | "fieldRelease"
+            | "continuousPipelineReleaseFieldReleaseNote"
+            | "scheduledPipelineReleaseFieldReleaseNote"
             | "releasePipelineFieldReleases"
             | "reviewFieldAvatar"
             | "reviewFieldChecks"
@@ -82960,6 +83010,8 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  continuousPipelineReleaseFieldReleaseNote
+  scheduledPipelineReleaseFieldReleaseNote
   releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
@@ -83200,6 +83252,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  continuousPipelineReleaseFieldReleaseNote
+  scheduledPipelineReleaseFieldReleaseNote
   releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
@@ -83431,6 +83485,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  continuousPipelineReleaseFieldReleaseNote
+  scheduledPipelineReleaseFieldReleaseNote
   releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
@@ -86027,6 +86083,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  continuousPipelineReleaseFieldReleaseNote
+  scheduledPipelineReleaseFieldReleaseNote
   releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
@@ -86311,6 +86369,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  continuousPipelineReleaseFieldReleaseNote
+  scheduledPipelineReleaseFieldReleaseNote
   releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
@@ -97506,6 +97566,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  continuousPipelineReleaseFieldReleaseNote
+  scheduledPipelineReleaseFieldReleaseNote
   releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
@@ -98133,6 +98195,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  continuousPipelineReleaseFieldReleaseNote
+  scheduledPipelineReleaseFieldReleaseNote
   releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
@@ -98377,6 +98441,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  continuousPipelineReleaseFieldReleaseNote
+  scheduledPipelineReleaseFieldReleaseNote
   releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
@@ -98806,6 +98872,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  continuousPipelineReleaseFieldReleaseNote
+  scheduledPipelineReleaseFieldReleaseNote
   releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
@@ -99050,6 +99118,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  continuousPipelineReleaseFieldReleaseNote
+  scheduledPipelineReleaseFieldReleaseNote
   releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
@@ -99280,6 +99350,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  continuousPipelineReleaseFieldReleaseNote
+  scheduledPipelineReleaseFieldReleaseNote
   releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
@@ -99567,6 +99639,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  continuousPipelineReleaseFieldReleaseNote
+  scheduledPipelineReleaseFieldReleaseNote
   releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
@@ -127776,6 +127850,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  continuousPipelineReleaseFieldReleaseNote
+  scheduledPipelineReleaseFieldReleaseNote
   releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
@@ -128033,6 +128109,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
+  continuousPipelineReleaseFieldReleaseNote
+  scheduledPipelineReleaseFieldReleaseNote
   releasePipelineFieldReleases
   reviewFieldAvatar
   reviewFieldChecks
