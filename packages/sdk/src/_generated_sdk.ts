@@ -20786,6 +20786,7 @@ export class ViewPreferencesValues extends Request {
     this.columnOrderBoard = data.columnOrderBoard ?? undefined;
     this.columnOrderList = data.columnOrderList ?? undefined;
     this.continuousPipelineReleaseFieldReleaseDate = data.continuousPipelineReleaseFieldReleaseDate ?? undefined;
+    this.continuousPipelineReleaseFieldReleaseNote = data.continuousPipelineReleaseFieldReleaseNote ?? undefined;
     this.continuousPipelineReleaseFieldVersion = data.continuousPipelineReleaseFieldVersion ?? undefined;
     this.continuousPipelineReleasesViewGrouping = data.continuousPipelineReleasesViewGrouping ?? undefined;
     this.customViewFieldDateCreated = data.customViewFieldDateCreated ?? undefined;
@@ -20946,6 +20947,7 @@ export class ViewPreferencesValues extends Request {
     this.scheduledPipelineReleaseFieldCompletion = data.scheduledPipelineReleaseFieldCompletion ?? undefined;
     this.scheduledPipelineReleaseFieldDescription = data.scheduledPipelineReleaseFieldDescription ?? undefined;
     this.scheduledPipelineReleaseFieldReleaseDate = data.scheduledPipelineReleaseFieldReleaseDate ?? undefined;
+    this.scheduledPipelineReleaseFieldReleaseNote = data.scheduledPipelineReleaseFieldReleaseNote ?? undefined;
     this.scheduledPipelineReleaseFieldVersion = data.scheduledPipelineReleaseFieldVersion ?? undefined;
     this.scheduledPipelineReleasesViewGrouping = data.scheduledPipelineReleasesViewGrouping ?? undefined;
     this.scheduledPipelineReleasesViewOrdering = data.scheduledPipelineReleasesViewOrdering ?? undefined;
@@ -21004,6 +21006,8 @@ export class ViewPreferencesValues extends Request {
   public columnOrderList?: string[] | null;
   /** Whether to show the release date field for continuous pipeline releases. */
   public continuousPipelineReleaseFieldReleaseDate?: boolean | null;
+  /** Whether to show the release-note field for continuous pipeline releases. */
+  public continuousPipelineReleaseFieldReleaseNote?: boolean | null;
   /** Whether to show the version field for continuous pipeline releases. */
   public continuousPipelineReleaseFieldVersion?: boolean | null;
   /** The continuous pipeline releases view grouping. */
@@ -21322,6 +21326,8 @@ export class ViewPreferencesValues extends Request {
   public scheduledPipelineReleaseFieldDescription?: boolean | null;
   /** Whether to show the release date field for scheduled pipeline releases. */
   public scheduledPipelineReleaseFieldReleaseDate?: boolean | null;
+  /** Whether to show the release-note field for scheduled pipeline releases. */
+  public scheduledPipelineReleaseFieldReleaseNote?: boolean | null;
   /** Whether to show the version field for scheduled pipeline releases. */
   public scheduledPipelineReleaseFieldVersion?: boolean | null;
   /** The scheduled pipeline releases view grouping. */
