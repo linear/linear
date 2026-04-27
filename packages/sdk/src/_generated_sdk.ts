@@ -1175,6 +1175,36 @@ export class AiConversationEntityListWidgetArgsEntities extends Request {
   public note?: string | null;
 }
 /**
+ * An event part in an AI conversation.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationEventPartFragment response data
+ */
+export class AiConversationEventPart extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationEventPartFragment) {
+    super(request);
+    this.body = data.body;
+    this.bodyData = data.bodyData;
+    this.id = data.id;
+    this.subscriptionId = data.subscriptionId ?? undefined;
+    this.metadata = new AiConversationPartMetadata(request, data.metadata);
+    this.type = data.type;
+  }
+
+  /** The Markdown body of the event part. */
+  public body: string;
+  /** The data of the event part. */
+  public bodyData: L.Scalars["JSONObject"];
+  /** The ID of the part. */
+  public id: string;
+  /** The ID of the subscription to resolve when this event is delivered. */
+  public subscriptionId?: string | null;
+  /** The metadata of the part. */
+  public metadata: AiConversationPartMetadata;
+  /** The type of the part. */
+  public type: L.AiConversationPartType;
+}
+/**
  * AiConversationGetMicrosoftTeamsConversationHistoryToolCall model
  *
  * @param request - function to call the graphql client
@@ -1199,6 +1229,50 @@ export class AiConversationGetMicrosoftTeamsConversationHistoryToolCall extends 
   public displayInfo: AiConversationToolDisplayInfo;
   /** The name of the tool that was called. */
   public name: L.AiConversationTool;
+}
+/**
+ * AiConversationGetPullRequestCheckLogsToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationGetPullRequestCheckLogsToolCallFragment response data
+ */
+export class AiConversationGetPullRequestCheckLogsToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationGetPullRequestCheckLogsToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationGetPullRequestCheckLogsToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationGetPullRequestCheckLogsToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationGetPullRequestCheckLogsToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationGetPullRequestCheckLogsToolCallArgsFragment response data
+ */
+export class AiConversationGetPullRequestCheckLogsToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationGetPullRequestCheckLogsToolCallArgsFragment) {
+    super(request);
+    this.checkName = data.checkName;
+    this.workflowName = data.workflowName ?? undefined;
+    this.entity = new AiConversationSearchEntitiesToolCallResultEntities(request, data.entity);
+  }
+
+  public checkName: string;
+  public workflowName?: string | null;
+  public entity: AiConversationSearchEntitiesToolCallResultEntities;
 }
 /**
  * AiConversationGetPullRequestDiffToolCall model
@@ -1461,12 +1535,26 @@ export class AiConversationNavigateToPageToolCall extends Request {
 export class AiConversationNavigateToPageToolCallArgs extends Request {
   public constructor(request: LinearRequest, data: L.AiConversationNavigateToPageToolCallArgsFragment) {
     super(request);
-    this.entityType = data.entityType ?? undefined;
-    this.identifier = data.identifier ?? undefined;
+    this.entities = data.entities.map(node => new AiConversationNavigateToPageToolCallArgsEntities(request, node));
   }
 
-  public entityType?: string | null;
-  public identifier?: string | null;
+  public entities: AiConversationNavigateToPageToolCallArgsEntities[];
+}
+/**
+ * AiConversationNavigateToPageToolCallArgsEntities model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationNavigateToPageToolCallArgsEntitiesFragment response data
+ */
+export class AiConversationNavigateToPageToolCallArgsEntities extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationNavigateToPageToolCallArgsEntitiesFragment) {
+    super(request);
+    this.entityType = data.entityType;
+    this.uuid = data.uuid;
+  }
+
+  public entityType: string;
+  public uuid: string;
 }
 /**
  * AiConversationNavigateToPageToolCallResult model
@@ -1477,12 +1565,10 @@ export class AiConversationNavigateToPageToolCallArgs extends Request {
 export class AiConversationNavigateToPageToolCallResult extends Request {
   public constructor(request: LinearRequest, data: L.AiConversationNavigateToPageToolCallResultFragment) {
     super(request);
-    this.newTab = data.newTab ?? undefined;
-    this.url = data.url;
+    this.urls = data.urls;
   }
 
-  public newTab?: boolean | null;
-  public url: string;
+  public urls: string[];
 }
 /**
  * Metadata about a part in an AI conversation.
@@ -1874,6 +1960,50 @@ export class AiConversationRetrieveEntitiesToolCallArgs extends Request {
   public entities: AiConversationSearchEntitiesToolCallResultEntities[];
 }
 /**
+ * AiConversationRetryPullRequestCheckToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationRetryPullRequestCheckToolCallFragment response data
+ */
+export class AiConversationRetryPullRequestCheckToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationRetryPullRequestCheckToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationRetryPullRequestCheckToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationRetryPullRequestCheckToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationRetryPullRequestCheckToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationRetryPullRequestCheckToolCallArgsFragment response data
+ */
+export class AiConversationRetryPullRequestCheckToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationRetryPullRequestCheckToolCallArgsFragment) {
+    super(request);
+    this.checkName = data.checkName;
+    this.workflowName = data.workflowName ?? undefined;
+    this.entity = new AiConversationSearchEntitiesToolCallResultEntities(request, data.entity);
+  }
+
+  public checkName: string;
+  public workflowName?: string | null;
+  public entity: AiConversationSearchEntitiesToolCallResultEntities;
+}
+/**
  * AiConversationSearchDocumentationToolCall model
  *
  * @param request - function to call the graphql client
@@ -1970,6 +2100,54 @@ export class AiConversationSearchEntitiesToolCallResultEntities extends Request 
 
   public id: string;
   public type: string;
+}
+/**
+ * AiConversationSubscribeToEventToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSubscribeToEventToolCallFragment response data
+ */
+export class AiConversationSubscribeToEventToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSubscribeToEventToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationSubscribeToEventToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationSubscribeToEventToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationSubscribeToEventToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSubscribeToEventToolCallArgsFragment response data
+ */
+export class AiConversationSubscribeToEventToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSubscribeToEventToolCallArgsFragment) {
+    super(request);
+    this.endsAt = data.endsAt ?? undefined;
+    this.message = data.message ?? undefined;
+    this.subscriptionId = data.subscriptionId ?? undefined;
+    this.kind = data.kind ?? undefined;
+    this.type = data.type;
+  }
+
+  public endsAt?: string | null;
+  public message?: string | null;
+  public subscriptionId?: string | null;
+  public kind?: L.AiConversationSubscribeToEventToolCallArgsKind | null;
+  public type: L.AiConversationSubscribeToEventToolCallArgsType;
 }
 /**
  * AiConversationSuggestValuesToolCall model
@@ -2131,6 +2309,48 @@ export class AiConversationTranscribeVideoToolCall extends Request {
   public displayInfo: AiConversationToolDisplayInfo;
   /** The name of the tool that was called. */
   public name: L.AiConversationTool;
+}
+/**
+ * AiConversationUnsubscribeFromEventToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationUnsubscribeFromEventToolCallFragment response data
+ */
+export class AiConversationUnsubscribeFromEventToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationUnsubscribeFromEventToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationUnsubscribeFromEventToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationUnsubscribeFromEventToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationUnsubscribeFromEventToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationUnsubscribeFromEventToolCallArgsFragment response data
+ */
+export class AiConversationUnsubscribeFromEventToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationUnsubscribeFromEventToolCallArgsFragment) {
+    super(request);
+    this.message = data.message ?? undefined;
+    this.subscriptionId = data.subscriptionId;
+  }
+
+  public message?: string | null;
+  public subscriptionId: string;
 }
 /**
  * AiConversationUpdateEntityToolCall model
@@ -9656,7 +9876,7 @@ export class IntegrationsSettings extends Request {
   public slackIssueSlaHighRisk?: boolean | null;
   /** Whether to send a Slack message when any of the project or team's issues has a change in status. */
   public slackIssueStatusChangedAll?: boolean | null;
-  /** Whether to send a Slack message when any of the project or team's issues change to completed or cancelled. */
+  /** Whether to send a Slack message when any of the project or team's issues change to completed or canceled. */
   public slackIssueStatusChangedDone?: boolean | null;
   /** Whether to send a Slack message when a project update is created. */
   public slackProjectUpdateCreated?: boolean | null;
@@ -46448,6 +46668,8 @@ export {
   AiConversationQueryUpdatesToolCallArgsUpdateType,
   AiConversationQueryViewToolCallArgsMode,
   AiConversationStatus,
+  AiConversationSubscribeToEventToolCallArgsKind,
+  AiConversationSubscribeToEventToolCallArgsType,
   AiConversationTool,
   AiConversationWidgetName,
   AiPromptProgressStatus,
