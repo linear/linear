@@ -21,6 +21,31 @@ import { findUnion, getUnionMemberTypes } from "./union.js";
 import { nonNullable, reduceTypeName } from "./utils.js";
 import { conflictsWithInterfaceDefinition } from "./interface.js";
 
+function getNodeName(node?: { name?: NameNode | string }): string | undefined {
+  return typeof node?.name === "string" ? node.name : node?.name?.value;
+}
+
+function findEnclosingTypeDefinition(
+  ancestors: readonly unknown[] = []
+): ObjectTypeDefinitionNode | InterfaceTypeDefinitionNode | undefined {
+  return [...ancestors]
+    .reverse()
+    .find((ancestor): ancestor is ObjectTypeDefinitionNode | InterfaceTypeDefinitionNode => {
+      return (
+        !Array.isArray(ancestor) &&
+        ((ancestor as { kind?: string }).kind === Kind.OBJECT_TYPE_DEFINITION ||
+          (ancestor as { kind?: string }).kind === Kind.INTERFACE_TYPE_DEFINITION)
+      );
+    });
+}
+
+function isSelfReferentialField(
+  ancestors: readonly unknown[] | undefined,
+  fragment: ObjectTypeDefinitionNode | InterfaceTypeDefinitionNode
+): boolean {
+  return getNodeName(findEnclosingTypeDefinition(ancestors)) === getNodeName(fragment);
+}
+
 /**
  * Graphql-codegen visitor for processing the ast and generating fragments
  */
@@ -114,7 +139,13 @@ export class FragmentVisitor {
   };
 
   public FieldDefinition = {
-    leave: (_node: FieldDefinitionNode): string | null => {
+    leave: (
+      _node: FieldDefinitionNode,
+      _key: unknown,
+      _parent: unknown,
+      _path: unknown,
+      ancestors?: readonly unknown[]
+    ): string | null => {
       const type = reduceTypeName(_node.type);
 
       /** Skip objects defined in constants */
@@ -164,6 +195,10 @@ export class FragmentVisitor {
           const interfaceFragment = findInterface(this._context, node);
 
           if (objectFragment && !isConnection(objectFragment)) {
+            if (isSelfReferentialField(ancestors, objectFragment)) {
+              return null;
+            }
+
             return printLines([
               description,
               printGraphqlDebug(_node),
@@ -173,6 +208,10 @@ export class FragmentVisitor {
               }`,
             ]);
           } else if (interfaceFragment) {
+            if (isSelfReferentialField(ancestors, interfaceFragment)) {
+              return null;
+            }
+
             return printLines([
               description,
               printGraphqlDebug(_node),

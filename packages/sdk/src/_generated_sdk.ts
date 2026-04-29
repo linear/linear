@@ -8576,6 +8576,156 @@ export class InitiativeHistoryConnection extends Connection<InitiativeHistory> {
   }
 }
 /**
+ * A label that can be applied to initiatives for categorization. Initiative labels are workspace-level and can be organized into groups with a parent-child hierarchy. Only child labels (not group labels) can be directly applied to initiatives.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.InitiativeLabelFragment response data
+ */
+export class InitiativeLabel extends Request {
+  private _creator?: L.InitiativeLabelFragment["creator"];
+  private _retiredBy?: L.InitiativeLabelFragment["retiredBy"];
+
+  public constructor(request: LinearRequest, data: L.InitiativeLabelFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.color = data.color;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.description = data.description ?? undefined;
+    this.id = data.id;
+    this.isGroup = data.isGroup;
+    this.lastAppliedAt = parseDate(data.lastAppliedAt) ?? undefined;
+    this.name = data.name;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._creator = data.creator ?? undefined;
+    this._retiredBy = data.retiredBy ?? undefined;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The label's color as a HEX string (e.g., '#EB5757'). Used for visual identification of the label in the UI. */
+  public color: string;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The label's description. */
+  public description?: string | null;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** Whether the label is a group. When true, this label acts as a container for child labels and cannot be directly applied to issues or projects. When false, the label can be directly applied. */
+  public isGroup: boolean;
+  /** The date when the label was last applied to an issue or project. Null if the label has never been applied. */
+  public lastAppliedAt?: Date | null;
+  /** The label's name. */
+  public name: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The user who created the label. */
+  public get creator(): LinearFetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+  }
+  /** The ID of user who created the label. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
+  /** The workspace that the initiative label belongs to. */
+  public get organization(): LinearFetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
+  }
+  /** The user who retired the label. Retired labels cannot be applied to new initiatives but remain on existing ones. Null if the label is active. */
+  public get retiredBy(): LinearFetch<User> | undefined {
+    return this._retiredBy?.id ? new UserQuery(this._request).fetch(this._retiredBy?.id) : undefined;
+  }
+  /** The ID of user who retired the label. retired labels cannot be applied to new initiatives but remain on existing ones. null if the label is active. */
+  public get retiredById(): string | undefined {
+    return this._retiredBy?.id;
+  }
+}
+/**
+ * Certain properties of an initiative label.
+ *
+ * @param data - L.InitiativeLabelChildWebhookPayloadFragment response data
+ */
+export class InitiativeLabelChildWebhookPayload {
+  public constructor(data: L.InitiativeLabelChildWebhookPayloadFragment) {
+    this.color = data.color;
+    this.id = data.id;
+    this.name = data.name;
+    this.parentId = data.parentId ?? undefined;
+  }
+
+  /** The color of the initiative label. */
+  public color: string;
+  /** The ID of the initiative label. */
+  public id: string;
+  /** The name of the initiative label. */
+  public name: string;
+  /** The parent ID of the initiative label. */
+  public parentId?: string | null;
+}
+/**
+ * InitiativeLabelConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this InitiativeLabelConnection model
+ * @param data - InitiativeLabelConnection response data
+ */
+export class InitiativeLabelConnection extends Connection<InitiativeLabel> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<InitiativeLabel> | undefined>,
+    data: L.InitiativeLabelConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new InitiativeLabel(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
+ * Payload for an initiative label webhook.
+ *
+ * @param data - L.InitiativeLabelWebhookPayloadFragment response data
+ */
+export class InitiativeLabelWebhookPayload {
+  public constructor(data: L.InitiativeLabelWebhookPayloadFragment) {
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.color = data.color;
+    this.createdAt = data.createdAt;
+    this.creatorId = data.creatorId ?? undefined;
+    this.description = data.description ?? undefined;
+    this.id = data.id;
+    this.isGroup = data.isGroup;
+    this.name = data.name;
+    this.parentId = data.parentId ?? undefined;
+    this.updatedAt = data.updatedAt;
+  }
+
+  /** The time at which the entity was archived. */
+  public archivedAt?: string | null;
+  /** The color of the initiative label. */
+  public color: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The creator ID of the initiative label. */
+  public creatorId?: string | null;
+  /** The label's description. */
+  public description?: string | null;
+  /** The ID of the entity. */
+  public id: string;
+  /** Whether the label is a group. */
+  public isGroup: boolean;
+  /** The name of the initiative label. */
+  public name: string;
+  /** The parent ID of the initiative label. */
+  public parentId?: string | null;
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+}
+/**
  * A notification related to an initiative, such as being added as owner, initiative updates, comments, or mentions.
  *
  * @param request - function to call the graphql client
@@ -21064,6 +21214,7 @@ export class ViewPreferencesValues extends Request {
     this.focusViewGrouping = data.focusViewGrouping ?? undefined;
     this.focusViewOrdering = data.focusViewOrdering ?? undefined;
     this.focusViewOrderingDirection = data.focusViewOrderingDirection ?? undefined;
+    this.groupOrderingMode = data.groupOrderingMode ?? undefined;
     this.hiddenColumns = data.hiddenColumns ?? undefined;
     this.hiddenGroupsList = data.hiddenGroupsList ?? undefined;
     this.hiddenRows = data.hiddenRows ?? undefined;
@@ -21107,6 +21258,7 @@ export class ViewPreferencesValues extends Request {
     this.projectFieldHealth = data.projectFieldHealth ?? undefined;
     this.projectFieldHealthTimeline = data.projectFieldHealthTimeline ?? undefined;
     this.projectFieldInitiatives = data.projectFieldInitiatives ?? undefined;
+    this.projectFieldIssues = data.projectFieldIssues ?? undefined;
     this.projectFieldLabels = data.projectFieldLabels ?? undefined;
     this.projectFieldLead = data.projectFieldLead ?? undefined;
     this.projectFieldLeadTimeline = data.projectFieldLeadTimeline ?? undefined;
@@ -21340,6 +21492,8 @@ export class ViewPreferencesValues extends Request {
   public focusViewOrdering?: string | null;
   /** The focus view ordering direction. */
   public focusViewOrderingDirection?: string | null;
+  /** The ordering mode for groups. Supersedes projectGroupOrdering. */
+  public groupOrderingMode?: string | null;
   /** List of column model IDs which should be hidden on a board. */
   public hiddenColumns?: string[] | null;
   /** List of group model IDs which should be hidden on a list. */
@@ -21426,6 +21580,8 @@ export class ViewPreferencesValues extends Request {
   public projectFieldHealthTimeline?: boolean | null;
   /** Whether to show the project initiatives field. */
   public projectFieldInitiatives?: boolean | null;
+  /** Whether to show the project issue count field. */
+  public projectFieldIssues?: boolean | null;
   /** Whether to show the project labels field. */
   public projectFieldLabels?: boolean | null;
   /** Whether to show the project lead field. */

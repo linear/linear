@@ -24,6 +24,7 @@ import {
   FieldDefinitionNode,
   InterfaceTypeDefinitionNode,
   Kind,
+  NameNode,
   ObjectTypeDefinitionNode,
 } from "graphql";
 import { Sdk } from "./constants.js";
@@ -70,6 +71,28 @@ function isValidModel(model: ObjectTypeDefinitionNode | InterfaceTypeDefinitionN
   );
 }
 
+function getNodeName(node?: { name?: NameNode | string }): string | undefined {
+  return typeof node?.name === "string" ? node.name : node?.name?.value;
+}
+
+function findEnclosingTypeDefinition(
+  ancestors: readonly unknown[] = []
+): ObjectTypeDefinitionNode | InterfaceTypeDefinitionNode | undefined {
+  return [...ancestors]
+    .reverse()
+    .find((ancestor): ancestor is ObjectTypeDefinitionNode | InterfaceTypeDefinitionNode => {
+      return (
+        !Array.isArray(ancestor) &&
+        ((ancestor as { kind?: string }).kind === Kind.OBJECT_TYPE_DEFINITION ||
+          (ancestor as { kind?: string }).kind === Kind.INTERFACE_TYPE_DEFINITION)
+      );
+    });
+}
+
+function isSelfReferentialField(ancestors: readonly unknown[] | undefined, fieldTypeName: string | undefined): boolean {
+  return getNodeName(findEnclosingTypeDefinition(ancestors)) === fieldTypeName;
+}
+
 /**
  * Graphql-codegen visitor for processing the ast and generating fragments
  */
@@ -104,7 +127,13 @@ export class ModelVisitor {
 
   public FieldDefinition = {
     /** Process fields for use in the model output */
-    leave: (node: FieldDefinitionNode): SdkModelField | null => {
+    leave: (
+      node: FieldDefinitionNode,
+      _key: unknown,
+      _parent: unknown,
+      _path: unknown,
+      ancestors?: readonly unknown[]
+    ): SdkModelField | null => {
       if (isValidField(this._context, node)) {
         const name = node.name.value;
         const type = printTypescriptType(this._context, node.type, Sdk.NAMESPACE);
@@ -150,6 +179,10 @@ export class ModelVisitor {
         /** Identify list fields */
         const listType = reduceListType(node.type);
         if (listType) {
+          if (isSelfReferentialField(ancestors, listType)) {
+            return null;
+          }
+
           if (Object.keys(this._context.scalars).includes(listType) || findEnum(this._context, node)) {
             return {
               __typename: SdkModelFieldType.scalarList,
@@ -174,6 +207,10 @@ export class ModelVisitor {
         /** Identify object fields without queries */
         const object = findObject(this._context, node);
         if (object) {
+          if (isSelfReferentialField(ancestors, object.name.value)) {
+            return null;
+          }
+
           if (isConnection(object)) {
             return {
               __typename: SdkModelFieldType.connection,

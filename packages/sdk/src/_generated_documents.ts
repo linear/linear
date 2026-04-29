@@ -852,6 +852,7 @@ export enum AiConversationEntityCardWidgetArgsType {
   Initiative = "Initiative",
   InitiativeUpdate = "InitiativeUpdate",
   Issue = "Issue",
+  IssueDraft = "IssueDraft",
   Project = "Project",
   ProjectUpdate = "ProjectUpdate",
   PullRequest = "PullRequest",
@@ -913,6 +914,7 @@ export enum AiConversationEntityListWidgetArgsEntitiesType {
   Initiative = "Initiative",
   InitiativeUpdate = "InitiativeUpdate",
   Issue = "Issue",
+  IssueDraft = "IssueDraft",
   Project = "Project",
   ProjectUpdate = "ProjectUpdate",
   PullRequest = "PullRequest",
@@ -2008,6 +2010,8 @@ export type AttachmentCreateInput = {
   commentBodyData?: InputMaybe<Scalars["JSONObject"]>;
   /** Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode. */
   createAsUser?: InputMaybe<Scalars["String"]>;
+  /** Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating attachments in `actor=app` mode. */
+  displayIconUrl?: InputMaybe<Scalars["String"]>;
   /** Indicates if attachments for the same source application should be grouped in the Linear UI. */
   groupBySource?: InputMaybe<Scalars["Boolean"]>;
   /** An icon url to display with the attachment. Should be of jpg or png format. Maximum of 1MB in size. Dimensions should be 20x20px for optimal display quality. */
@@ -6834,6 +6838,10 @@ export type Initiative = Node & {
   initiativeUpdates: InitiativeUpdateConnection;
   /** Settings for all integrations associated with that initiative. */
   integrationsSettings?: Maybe<IntegrationsSettings>;
+  /** [Internal] The IDs of the initiative labels associated with this initiative. */
+  labelIds: Array<Scalars["String"]>;
+  /** [Internal] Labels associated with this initiative. */
+  labels: InitiativeLabelConnection;
   /** The most recent status update posted for this initiative. Null if no updates have been posted. */
   lastUpdate?: Maybe<InitiativeUpdate>;
   /** Links associated with the initiative. */
@@ -6908,6 +6916,17 @@ export type InitiativeHistoryArgs = {
 export type InitiativeInitiativeUpdatesArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+/** An initiative is a high-level strategic grouping of projects toward a business goal. Initiatives can contain multiple projects, have their own status updates and health tracking, and can be organized hierarchically with parent-child relationships. */
+export type InitiativeLabelsArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  filter?: InputMaybe<InitiativeLabelFilter>;
   first?: InputMaybe<Scalars["Int"]>;
   includeArchived?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
@@ -7050,6 +7069,8 @@ export type InitiativeCreateInput = {
   icon?: InputMaybe<Scalars["String"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars["String"]>;
+  /** [Internal] The identifiers of the initiative labels associated with this initiative. */
+  labelIds?: InputMaybe<Array<Scalars["String"]>>;
   /** The name of the initiative. */
   name: Scalars["String"];
   /** The owner of the initiative. */
@@ -7169,6 +7190,116 @@ export type InitiativeHistoryEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: InitiativeHistory;
+};
+
+/** A label that can be applied to initiatives for categorization. Initiative labels are workspace-level and can be organized into groups with a parent-child hierarchy. Only child labels (not group labels) can be directly applied to initiatives. */
+export type InitiativeLabel = Node & {
+  __typename?: "InitiativeLabel";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The label's color as a HEX string (e.g., '#EB5757'). Used for visual identification of the label in the UI. */
+  color: Scalars["String"];
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The user who created the label. */
+  creator?: Maybe<User>;
+  /** The label's description. */
+  description?: Maybe<Scalars["String"]>;
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** Whether the label is a group. When true, this label acts as a container for child labels and cannot be directly applied to issues or projects. When false, the label can be directly applied. */
+  isGroup: Scalars["Boolean"];
+  /** The date when the label was last applied to an issue or project. Null if the label has never been applied. */
+  lastAppliedAt?: Maybe<Scalars["DateTime"]>;
+  /** The label's name. */
+  name: Scalars["String"];
+  /** The workspace that the initiative label belongs to. */
+  organization: Organization;
+  /** The parent label group. If set, this label is a child within a group. Only one child label from each group can be applied to an initiative at a time. */
+  parent?: Maybe<InitiativeLabel>;
+  /** [Internal] When the label was retired. */
+  retiredAt?: Maybe<Scalars["DateTime"]>;
+  /** The user who retired the label. Retired labels cannot be applied to new initiatives but remain on existing ones. Null if the label is active. */
+  retiredBy?: Maybe<User>;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+};
+
+/** Certain properties of an initiative label. */
+export type InitiativeLabelChildWebhookPayload = {
+  __typename?: "InitiativeLabelChildWebhookPayload";
+  /** The color of the initiative label. */
+  color: Scalars["String"];
+  /** The ID of the initiative label. */
+  id: Scalars["String"];
+  /** The name of the initiative label. */
+  name: Scalars["String"];
+  /** The parent ID of the initiative label. */
+  parentId?: Maybe<Scalars["String"]>;
+};
+
+export type InitiativeLabelConnection = {
+  __typename?: "InitiativeLabelConnection";
+  edges: Array<InitiativeLabelEdge>;
+  nodes: Array<InitiativeLabel>;
+  pageInfo: PageInfo;
+};
+
+export type InitiativeLabelEdge = {
+  __typename?: "InitiativeLabelEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: InitiativeLabel;
+};
+
+/** Initiative label filtering options. */
+export type InitiativeLabelFilter = {
+  /** Compound filters, all of which need to be matched by the label. */
+  and?: InputMaybe<Array<InitiativeLabelFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: InputMaybe<DateComparator>;
+  /** Filters that the initiative labels creator must satisfy. */
+  creator?: InputMaybe<NullableUserFilter>;
+  /** Comparator for the identifier. */
+  id?: InputMaybe<IdComparator>;
+  /** Comparator for whether the label is a group label. */
+  isGroup?: InputMaybe<BooleanComparator>;
+  /** Comparator for the name. */
+  name?: InputMaybe<StringComparator>;
+  /** Compound filters, one of which need to be matched by the label. */
+  or?: InputMaybe<Array<InitiativeLabelFilter>>;
+  /** Filters that the initiative label's parent label must satisfy. */
+  parent?: InputMaybe<InitiativeLabelFilter>;
+  /** Comparator for the updated at date. */
+  updatedAt?: InputMaybe<DateComparator>;
+};
+
+/** Payload for an initiative label webhook. */
+export type InitiativeLabelWebhookPayload = {
+  __typename?: "InitiativeLabelWebhookPayload";
+  /** The time at which the entity was archived. */
+  archivedAt?: Maybe<Scalars["String"]>;
+  /** The color of the initiative label. */
+  color: Scalars["String"];
+  /** The time at which the entity was created. */
+  createdAt: Scalars["String"];
+  /** The creator ID of the initiative label. */
+  creatorId?: Maybe<Scalars["String"]>;
+  /** The label's description. */
+  description?: Maybe<Scalars["String"]>;
+  /** The ID of the entity. */
+  id: Scalars["String"];
+  /** Whether the label is a group. */
+  isGroup: Scalars["Boolean"];
+  /** The name of the initiative label. */
+  name: Scalars["String"];
+  /** The parent ID of the initiative label. */
+  parentId?: Maybe<Scalars["String"]>;
+  /** The time at which the entity was updated. */
+  updatedAt: Scalars["String"];
 };
 
 /** Initiative manual sorting options. */
@@ -7661,6 +7792,8 @@ export type InitiativeUpdateInput = {
   frequencyResolution?: InputMaybe<FrequencyResolutionType>;
   /** The initiative's icon. */
   icon?: InputMaybe<Scalars["String"]>;
+  /** [Internal] The identifiers of the initiative labels associated with this initiative. */
+  labelIds?: InputMaybe<Array<Scalars["String"]>>;
   /** The name of the initiative. */
   name?: InputMaybe<Scalars["String"]>;
   /** The owner of the initiative. */
@@ -11531,6 +11664,8 @@ export type Mutation = {
   imageUploadFromUrl: ImageUploadFromUrlPayload;
   /** XHR request payload to upload a file for import, directly to Linear's cloud storage. */
   importFileUpload: UploadPayload;
+  /** [Internal]Adds a label to an initiative. */
+  initiativeAddLabel: InitiativePayload;
   /** Archives an initiative. */
   initiativeArchive: InitiativeArchivePayload;
   /** Creates a new initiative. */
@@ -11543,6 +11678,8 @@ export type Mutation = {
   initiativeRelationDelete: DeletePayload;
   /** Updates an initiative relation. */
   initiativeRelationUpdate: InitiativeRelationPayload;
+  /** [Internal]Removes a label from an initiative. */
+  initiativeRemoveLabel: InitiativePayload;
   /** Associates a project with an initiative. A project can only appear once in an initiative hierarchy. */
   initiativeToProjectCreate: InitiativeToProjectPayload;
   /** Removes a project from an initiative. */
@@ -12542,6 +12679,11 @@ export type MutationImportFileUploadArgs = {
   size: Scalars["Int"];
 };
 
+export type MutationInitiativeAddLabelArgs = {
+  id: Scalars["String"];
+  labelId: Scalars["String"];
+};
+
 export type MutationInitiativeArchiveArgs = {
   id: Scalars["String"];
 };
@@ -12565,6 +12707,11 @@ export type MutationInitiativeRelationDeleteArgs = {
 export type MutationInitiativeRelationUpdateArgs = {
   id: Scalars["String"];
   input: InitiativeRelationUpdateInput;
+};
+
+export type MutationInitiativeRemoveLabelArgs = {
+  id: Scalars["String"];
+  labelId: Scalars["String"];
 };
 
 export type MutationInitiativeToProjectCreateArgs = {
@@ -16666,7 +16813,7 @@ export type ProjectCreateInput = {
   icon?: InputMaybe<Scalars["String"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars["String"]>;
-  /** [Internal] The identifiers of the project labels associated with this project. */
+  /** The identifiers of the project labels associated with this project. */
   labelIds?: InputMaybe<Array<Scalars["String"]>>;
   /** The ID of the last template applied to the project. */
   lastAppliedTemplateId?: InputMaybe<Scalars["String"]>;
@@ -19044,7 +19191,7 @@ export type Query = {
   rateLimitStatus: RateLimitPayload;
   /** [ALPHA] Fetch a single release by its UUID or slug identifier. */
   release: Release;
-  /** [ALPHA] Fetch a release note by its identifier. */
+  /** [ALPHA] Fetch a release note by its UUID or slug identifier. */
   releaseNote: ReleaseNote;
   /** [ALPHA] Release notes in the workspace. */
   releaseNotes: ReleaseNoteConnection;
@@ -20502,6 +20649,10 @@ export type ReleaseNote = Node & {
   id: Scalars["ID"];
   /** [ALPHA] Releases included in the note. */
   releases: Array<Release>;
+  /** The release note's unique URL slug, used to construct human-readable URLs for the note. */
+  slugId: Scalars["String"];
+  /** [ALPHA] User-supplied title for the release note. */
+  title?: Maybe<Scalars["String"]>;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -20522,8 +20673,14 @@ export type ReleaseNoteCreateInput = {
   id?: InputMaybe<Scalars["String"]>;
   /** Identifier of the release pipeline. */
   pipelineId: Scalars["String"];
-  /** The releases included in this note. */
-  releaseIds: Array<Scalars["String"]>;
+  /** Oldest release (by createdAt) to include. When paired with rangeToReleaseId, expands to every release in the pipeline within the createdAt window. */
+  rangeFromReleaseId?: InputMaybe<Scalars["String"]>;
+  /** Newest release (by createdAt) to include. Paired with rangeFromReleaseId. */
+  rangeToReleaseId?: InputMaybe<Scalars["String"]>;
+  /** Explicit release IDs to include. Mutually exclusive with rangeFromReleaseId/rangeToReleaseId — exactly one of the two shapes must be provided. */
+  releaseIds?: InputMaybe<Array<Scalars["String"]>>;
+  /** Optional user-supplied title. */
+  title?: InputMaybe<Scalars["String"]>;
 };
 
 export type ReleaseNoteEdge = {
@@ -20546,8 +20703,14 @@ export type ReleaseNotePayload = {
 
 /** [ALPHA] Input for updating a release note. */
 export type ReleaseNoteUpdateInput = {
-  /** The releases included in this note. */
+  /** Oldest release (by createdAt) of the new range. Paired with rangeToReleaseId. */
+  rangeFromReleaseId?: InputMaybe<Scalars["String"]>;
+  /** Newest release (by createdAt) of the new range. Paired with rangeFromReleaseId. */
+  rangeToReleaseId?: InputMaybe<Scalars["String"]>;
+  /** Explicit release IDs to set. Mutually exclusive with rangeFromReleaseId/rangeToReleaseId. */
   releaseIds?: InputMaybe<Array<Scalars["String"]>>;
+  /** Optional user-supplied title. */
+  title?: InputMaybe<Scalars["String"]>;
 };
 
 /** The result of a release mutation, containing the release that was created or updated and a success indicator. */
@@ -20578,6 +20741,8 @@ export type ReleasePipeline = Node & {
   isProduction: Scalars["Boolean"];
   /** The name of the pipeline. */
   name: Scalars["String"];
+  /** [Internal] The document template used to define the release notes format for this pipeline. AI-generated release notes follow the structure and tone of this template. Null if no template has been configured. */
+  releaseNoteTemplate?: Maybe<Template>;
   /** [ALPHA] Releases associated with this pipeline. */
   releases: ReleaseConnection;
   /** The pipeline's unique slug identifier, used in URLs and for lookup by human-readable identifier instead of UUID. */
@@ -22992,6 +23157,8 @@ export type Template = Node & {
   name: Scalars["String"];
   /** The workspace that owns this template. */
   organization: Organization;
+  /** [Internal] The release pipeline this template is bound to. Required when the template type is 'releaseNote' and forbidden otherwise. The pipeline owns at most one release note template, which defines the format AI follows when generating release notes. */
+  pipeline?: Maybe<ReleasePipeline>;
   /** The sort order of the template within the templates list. */
   sortOrder: Scalars["Float"];
   /** The team that the template is associated with. If null, the template is global to the workspace. */
@@ -23026,6 +23193,8 @@ export type TemplateCreateInput = {
   id?: InputMaybe<Scalars["String"]>;
   /** The template name. */
   name: Scalars["String"];
+  /** The identifier of the release pipeline this template is bound to. Required when the template type is 'releaseNote' and rejected otherwise. Each pipeline can have at most one release note template. */
+  pipelineId?: InputMaybe<Scalars["String"]>;
   /** The sort position of the template in the templates list. */
   sortOrder?: InputMaybe<Scalars["Float"]>;
   /** The identifier or key of the team associated with the template. If not given, the template will be shared across all teams. */
@@ -24276,6 +24445,8 @@ export type ViewPreferencesValues = {
   focusViewOrdering?: Maybe<Scalars["String"]>;
   /** The focus view ordering direction. */
   focusViewOrderingDirection?: Maybe<Scalars["String"]>;
+  /** The ordering mode for groups. Supersedes projectGroupOrdering. */
+  groupOrderingMode?: Maybe<Scalars["String"]>;
   /** List of column model IDs which should be hidden on a board. */
   hiddenColumns?: Maybe<Array<Scalars["String"]>>;
   /** List of group model IDs which should be hidden on a list. */
@@ -24362,6 +24533,8 @@ export type ViewPreferencesValues = {
   projectFieldHealthTimeline?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the project initiatives field. */
   projectFieldInitiatives?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show the project issue count field. */
+  projectFieldIssues?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the project labels field. */
   projectFieldLabels?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the project lead field. */
@@ -24416,7 +24589,10 @@ export type ViewPreferencesValues = {
   projectFieldTeamsList?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the project teams field on the timeline. */
   projectFieldTeamsTimeline?: Maybe<Scalars["Boolean"]>;
-  /** The ordering of project groups. */
+  /**
+   * The ordering of project groups.
+   * @deprecated Use groupOrderingMode instead.
+   */
   projectGroupOrdering?: Maybe<Scalars["String"]>;
   /** The project grouping. */
   projectGrouping?: Maybe<Scalars["String"]>;
@@ -26085,6 +26261,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "issueSubGroupingLabelGroupId"
         | "projectGroupingLabelGroupId"
         | "projectSubGroupingLabelGroupId"
+        | "groupOrderingMode"
         | "projectGroupOrdering"
         | "projectCustomerNeedsViewGrouping"
         | "projectCustomerNeedsViewOrdering"
@@ -26201,6 +26378,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "projectFieldHealthTimeline"
         | "projectFieldHealth"
         | "projectFieldInitiatives"
+        | "projectFieldIssues"
         | "projectFieldLabels"
         | "projectFieldLeadTimeline"
         | "projectFieldLead"
@@ -26313,6 +26491,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "issueSubGroupingLabelGroupId"
             | "projectGroupingLabelGroupId"
             | "projectSubGroupingLabelGroupId"
+            | "groupOrderingMode"
             | "projectGroupOrdering"
             | "projectCustomerNeedsViewGrouping"
             | "projectCustomerNeedsViewOrdering"
@@ -26429,6 +26608,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "projectFieldHealthTimeline"
             | "projectFieldHealth"
             | "projectFieldInitiatives"
+            | "projectFieldIssues"
             | "projectFieldLabels"
             | "projectFieldLeadTimeline"
             | "projectFieldLead"
@@ -26546,6 +26726,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "issueSubGroupingLabelGroupId"
             | "projectGroupingLabelGroupId"
             | "projectSubGroupingLabelGroupId"
+            | "groupOrderingMode"
             | "projectGroupOrdering"
             | "projectCustomerNeedsViewGrouping"
             | "projectCustomerNeedsViewOrdering"
@@ -26662,6 +26843,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "projectFieldHealthTimeline"
             | "projectFieldHealth"
             | "projectFieldInitiatives"
+            | "projectFieldIssues"
             | "projectFieldLabels"
             | "projectFieldLeadTimeline"
             | "projectFieldLead"
@@ -28008,6 +28190,14 @@ export type TeamMembershipFragment = { __typename: "TeamMembership" } & Pick<
 export type ViewPreferencesProjectLabelGroupColumnFragment = {
   __typename: "ViewPreferencesProjectLabelGroupColumn";
 } & Pick<ViewPreferencesProjectLabelGroupColumn, "id" | "active">;
+
+export type InitiativeLabelFragment = { __typename: "InitiativeLabel" } & Pick<
+  InitiativeLabel,
+  "lastAppliedAt" | "color" | "description" | "name" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "isGroup"
+> & {
+    creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+    retiredBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+  };
 
 export type ProjectLabelFragment = { __typename: "ProjectLabel" } & Pick<
   ProjectLabel,
@@ -31479,6 +31669,11 @@ export type ExternalUserChildWebhookPayloadFragment = { __typename: "ExternalUse
   "id" | "email" | "name"
 >;
 
+export type InitiativeLabelChildWebhookPayloadFragment = { __typename: "InitiativeLabelChildWebhookPayload" } & Pick<
+  InitiativeLabelChildWebhookPayload,
+  "id" | "color" | "name" | "parentId"
+>;
+
 export type InitiativeUpdateChildWebhookPayloadFragment = { __typename: "InitiativeUpdateChildWebhookPayload" } & Pick<
   InitiativeUpdateChildWebhookPayload,
   "id" | "bodyData" | "editedAt" | "health"
@@ -32611,6 +32806,20 @@ export type AuditEntryWebhookPayloadFragment = { __typename: "AuditEntryWebhookP
   | "createdAt"
   | "updatedAt"
   | "type"
+>;
+
+export type InitiativeLabelWebhookPayloadFragment = { __typename: "InitiativeLabelWebhookPayload" } & Pick<
+  InitiativeLabelWebhookPayload,
+  | "id"
+  | "color"
+  | "creatorId"
+  | "description"
+  | "name"
+  | "parentId"
+  | "archivedAt"
+  | "createdAt"
+  | "updatedAt"
+  | "isGroup"
 >;
 
 export type InitiativeUpdateWebhookPayloadFragment = { __typename: "InitiativeUpdateWebhookPayload" } & Pick<
@@ -34423,6 +34632,7 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "issueSubGroupingLabelGroupId"
   | "projectGroupingLabelGroupId"
   | "projectSubGroupingLabelGroupId"
+  | "groupOrderingMode"
   | "projectGroupOrdering"
   | "projectCustomerNeedsViewGrouping"
   | "projectCustomerNeedsViewOrdering"
@@ -34539,6 +34749,7 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "projectFieldHealthTimeline"
   | "projectFieldHealth"
   | "projectFieldInitiatives"
+  | "projectFieldIssues"
   | "projectFieldLabels"
   | "projectFieldLeadTimeline"
   | "projectFieldLead"
@@ -34693,6 +34904,7 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "issueSubGroupingLabelGroupId"
       | "projectGroupingLabelGroupId"
       | "projectSubGroupingLabelGroupId"
+      | "groupOrderingMode"
       | "projectGroupOrdering"
       | "projectCustomerNeedsViewGrouping"
       | "projectCustomerNeedsViewOrdering"
@@ -34809,6 +35021,7 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "projectFieldHealthTimeline"
       | "projectFieldHealth"
       | "projectFieldInitiatives"
+      | "projectFieldIssues"
       | "projectFieldLabels"
       | "projectFieldLeadTimeline"
       | "projectFieldLead"
@@ -35402,6 +35615,7 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "issueSubGroupingLabelGroupId"
           | "projectGroupingLabelGroupId"
           | "projectSubGroupingLabelGroupId"
+          | "groupOrderingMode"
           | "projectGroupOrdering"
           | "projectCustomerNeedsViewGrouping"
           | "projectCustomerNeedsViewOrdering"
@@ -35518,6 +35732,7 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "projectFieldHealthTimeline"
           | "projectFieldHealth"
           | "projectFieldInitiatives"
+          | "projectFieldIssues"
           | "projectFieldLabels"
           | "projectFieldLeadTimeline"
           | "projectFieldLead"
@@ -37641,6 +37856,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "issueSubGroupingLabelGroupId"
             | "projectGroupingLabelGroupId"
             | "projectSubGroupingLabelGroupId"
+            | "groupOrderingMode"
             | "projectGroupOrdering"
             | "projectCustomerNeedsViewGrouping"
             | "projectCustomerNeedsViewOrdering"
@@ -37757,6 +37973,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "projectFieldHealthTimeline"
             | "projectFieldHealth"
             | "projectFieldInitiatives"
+            | "projectFieldIssues"
             | "projectFieldLabels"
             | "projectFieldLeadTimeline"
             | "projectFieldLead"
@@ -37869,6 +38086,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "issueSubGroupingLabelGroupId"
                 | "projectGroupingLabelGroupId"
                 | "projectSubGroupingLabelGroupId"
+                | "groupOrderingMode"
                 | "projectGroupOrdering"
                 | "projectCustomerNeedsViewGrouping"
                 | "projectCustomerNeedsViewOrdering"
@@ -37985,6 +38203,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "projectFieldHealthTimeline"
                 | "projectFieldHealth"
                 | "projectFieldInitiatives"
+                | "projectFieldIssues"
                 | "projectFieldLabels"
                 | "projectFieldLeadTimeline"
                 | "projectFieldLead"
@@ -38102,6 +38321,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "issueSubGroupingLabelGroupId"
                 | "projectGroupingLabelGroupId"
                 | "projectSubGroupingLabelGroupId"
+                | "groupOrderingMode"
                 | "projectGroupOrdering"
                 | "projectCustomerNeedsViewGrouping"
                 | "projectCustomerNeedsViewOrdering"
@@ -38218,6 +38438,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "projectFieldHealthTimeline"
                 | "projectFieldHealth"
                 | "projectFieldInitiatives"
+                | "projectFieldIssues"
                 | "projectFieldLabels"
                 | "projectFieldLeadTimeline"
                 | "projectFieldLead"
@@ -38841,6 +39062,22 @@ export type InitiativeHistoryConnectionFragment = { __typename: "InitiativeHisto
       InitiativeHistory,
       "entries" | "updatedAt" | "archivedAt" | "createdAt" | "id"
     > & { initiative: { __typename?: "Initiative" } & Pick<Initiative, "id"> }
+  >;
+  pageInfo: { __typename: "PageInfo" } & Pick<
+    PageInfo,
+    "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
+  >;
+};
+
+export type InitiativeLabelConnectionFragment = { __typename: "InitiativeLabelConnection" } & {
+  nodes: Array<
+    { __typename: "InitiativeLabel" } & Pick<
+      InitiativeLabel,
+      "lastAppliedAt" | "color" | "description" | "name" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "isGroup"
+    > & {
+        creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+        retiredBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+      }
   >;
   pageInfo: { __typename: "PageInfo" } & Pick<
     PageInfo,
@@ -39867,6 +40104,8 @@ type Node_Initiative_Fragment = { __typename: "Initiative" } & Pick<Initiative, 
 
 type Node_InitiativeHistory_Fragment = { __typename: "InitiativeHistory" } & Pick<InitiativeHistory, "id">;
 
+type Node_InitiativeLabel_Fragment = { __typename: "InitiativeLabel" } & Pick<InitiativeLabel, "id">;
+
 type Node_InitiativeNotification_Fragment = { __typename: "InitiativeNotification" } & Pick<
   InitiativeNotification,
   "id"
@@ -40068,6 +40307,7 @@ export type NodeFragment =
   | Node_IdentityProvider_Fragment
   | Node_Initiative_Fragment
   | Node_InitiativeHistory_Fragment
+  | Node_InitiativeLabel_Fragment
   | Node_InitiativeNotification_Fragment
   | Node_InitiativeNotificationSubscription_Fragment
   | Node_InitiativeRelation_Fragment
@@ -46868,6 +47108,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "issueSubGroupingLabelGroupId"
           | "projectGroupingLabelGroupId"
           | "projectSubGroupingLabelGroupId"
+          | "groupOrderingMode"
           | "projectGroupOrdering"
           | "projectCustomerNeedsViewGrouping"
           | "projectCustomerNeedsViewOrdering"
@@ -46984,6 +47225,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "projectFieldHealthTimeline"
           | "projectFieldHealth"
           | "projectFieldInitiatives"
+          | "projectFieldIssues"
           | "projectFieldLabels"
           | "projectFieldLeadTimeline"
           | "projectFieldLead"
@@ -47096,6 +47338,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "issueSubGroupingLabelGroupId"
               | "projectGroupingLabelGroupId"
               | "projectSubGroupingLabelGroupId"
+              | "groupOrderingMode"
               | "projectGroupOrdering"
               | "projectCustomerNeedsViewGrouping"
               | "projectCustomerNeedsViewOrdering"
@@ -47212,6 +47455,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "projectFieldHealthTimeline"
               | "projectFieldHealth"
               | "projectFieldInitiatives"
+              | "projectFieldIssues"
               | "projectFieldLabels"
               | "projectFieldLeadTimeline"
               | "projectFieldLead"
@@ -47329,6 +47573,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "issueSubGroupingLabelGroupId"
               | "projectGroupingLabelGroupId"
               | "projectSubGroupingLabelGroupId"
+              | "groupOrderingMode"
               | "projectGroupOrdering"
               | "projectCustomerNeedsViewGrouping"
               | "projectCustomerNeedsViewOrdering"
@@ -47445,6 +47690,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "projectFieldHealthTimeline"
               | "projectFieldHealth"
               | "projectFieldInitiatives"
+              | "projectFieldIssues"
               | "projectFieldLabels"
               | "projectFieldLeadTimeline"
               | "projectFieldLead"
@@ -47816,6 +48062,7 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "issueSubGroupingLabelGroupId"
             | "projectGroupingLabelGroupId"
             | "projectSubGroupingLabelGroupId"
+            | "groupOrderingMode"
             | "projectGroupOrdering"
             | "projectCustomerNeedsViewGrouping"
             | "projectCustomerNeedsViewOrdering"
@@ -47932,6 +48179,7 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "projectFieldHealthTimeline"
             | "projectFieldHealth"
             | "projectFieldInitiatives"
+            | "projectFieldIssues"
             | "projectFieldLabels"
             | "projectFieldLeadTimeline"
             | "projectFieldLead"
@@ -48051,6 +48299,7 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "issueSubGroupingLabelGroupId"
           | "projectGroupingLabelGroupId"
           | "projectSubGroupingLabelGroupId"
+          | "groupOrderingMode"
           | "projectGroupOrdering"
           | "projectCustomerNeedsViewGrouping"
           | "projectCustomerNeedsViewOrdering"
@@ -48167,6 +48416,7 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "projectFieldHealthTimeline"
           | "projectFieldHealth"
           | "projectFieldInitiatives"
+          | "projectFieldIssues"
           | "projectFieldLabels"
           | "projectFieldLeadTimeline"
           | "projectFieldLead"
@@ -48415,6 +48665,7 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "issueSubGroupingLabelGroupId"
             | "projectGroupingLabelGroupId"
             | "projectSubGroupingLabelGroupId"
+            | "groupOrderingMode"
             | "projectGroupOrdering"
             | "projectCustomerNeedsViewGrouping"
             | "projectCustomerNeedsViewOrdering"
@@ -48531,6 +48782,7 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "projectFieldHealthTimeline"
             | "projectFieldHealth"
             | "projectFieldInitiatives"
+            | "projectFieldIssues"
             | "projectFieldLabels"
             | "projectFieldLeadTimeline"
             | "projectFieldLead"
@@ -48650,6 +48902,7 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "issueSubGroupingLabelGroupId"
           | "projectGroupingLabelGroupId"
           | "projectSubGroupingLabelGroupId"
+          | "groupOrderingMode"
           | "projectGroupOrdering"
           | "projectCustomerNeedsViewGrouping"
           | "projectCustomerNeedsViewOrdering"
@@ -48766,6 +49019,7 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "projectFieldHealthTimeline"
           | "projectFieldHealth"
           | "projectFieldInitiatives"
+          | "projectFieldIssues"
           | "projectFieldLabels"
           | "projectFieldLeadTimeline"
           | "projectFieldLead"
@@ -48884,6 +49138,7 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "issueSubGroupingLabelGroupId"
         | "projectGroupingLabelGroupId"
         | "projectSubGroupingLabelGroupId"
+        | "groupOrderingMode"
         | "projectGroupOrdering"
         | "projectCustomerNeedsViewGrouping"
         | "projectCustomerNeedsViewOrdering"
@@ -49000,6 +49255,7 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "projectFieldHealthTimeline"
         | "projectFieldHealth"
         | "projectFieldInitiatives"
+        | "projectFieldIssues"
         | "projectFieldLabels"
         | "projectFieldLeadTimeline"
         | "projectFieldLead"
@@ -49155,6 +49411,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "issueSubGroupingLabelGroupId"
               | "projectGroupingLabelGroupId"
               | "projectSubGroupingLabelGroupId"
+              | "groupOrderingMode"
               | "projectGroupOrdering"
               | "projectCustomerNeedsViewGrouping"
               | "projectCustomerNeedsViewOrdering"
@@ -49271,6 +49528,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "projectFieldHealthTimeline"
               | "projectFieldHealth"
               | "projectFieldInitiatives"
+              | "projectFieldIssues"
               | "projectFieldLabels"
               | "projectFieldLeadTimeline"
               | "projectFieldLead"
@@ -49383,6 +49641,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "issueSubGroupingLabelGroupId"
                   | "projectGroupingLabelGroupId"
                   | "projectSubGroupingLabelGroupId"
+                  | "groupOrderingMode"
                   | "projectGroupOrdering"
                   | "projectCustomerNeedsViewGrouping"
                   | "projectCustomerNeedsViewOrdering"
@@ -49499,6 +49758,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "projectFieldHealthTimeline"
                   | "projectFieldHealth"
                   | "projectFieldInitiatives"
+                  | "projectFieldIssues"
                   | "projectFieldLabels"
                   | "projectFieldLeadTimeline"
                   | "projectFieldLead"
@@ -49616,6 +49876,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "issueSubGroupingLabelGroupId"
                   | "projectGroupingLabelGroupId"
                   | "projectSubGroupingLabelGroupId"
+                  | "groupOrderingMode"
                   | "projectGroupOrdering"
                   | "projectCustomerNeedsViewGrouping"
                   | "projectCustomerNeedsViewOrdering"
@@ -49732,6 +49993,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "projectFieldHealthTimeline"
                   | "projectFieldHealth"
                   | "projectFieldInitiatives"
+                  | "projectFieldIssues"
                   | "projectFieldLabels"
                   | "projectFieldLeadTimeline"
                   | "projectFieldLead"
@@ -71294,6 +71556,7 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "issueSubGroupingLabelGroupId"
             | "projectGroupingLabelGroupId"
             | "projectSubGroupingLabelGroupId"
+            | "groupOrderingMode"
             | "projectGroupOrdering"
             | "projectCustomerNeedsViewGrouping"
             | "projectCustomerNeedsViewOrdering"
@@ -71410,6 +71673,7 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "projectFieldHealthTimeline"
             | "projectFieldHealth"
             | "projectFieldInitiatives"
+            | "projectFieldIssues"
             | "projectFieldLabels"
             | "projectFieldLeadTimeline"
             | "projectFieldLead"
@@ -71542,6 +71806,7 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "issueSubGroupingLabelGroupId"
             | "projectGroupingLabelGroupId"
             | "projectSubGroupingLabelGroupId"
+            | "groupOrderingMode"
             | "projectGroupOrdering"
             | "projectCustomerNeedsViewGrouping"
             | "projectCustomerNeedsViewOrdering"
@@ -71658,6 +71923,7 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "projectFieldHealthTimeline"
             | "projectFieldHealth"
             | "projectFieldInitiatives"
+            | "projectFieldIssues"
             | "projectFieldLabels"
             | "projectFieldLeadTimeline"
             | "projectFieldLead"
@@ -77942,6 +78208,18 @@ export const ProjectLabelChildWebhookPayloadFragmentDoc = new TypedDocumentStrin
     `,
   { fragmentName: "ProjectLabelChildWebhookPayload" }
 ) as unknown as TypedDocumentString<ProjectLabelChildWebhookPayloadFragment, unknown>;
+export const InitiativeLabelChildWebhookPayloadFragmentDoc = new TypedDocumentString(
+  `
+    fragment InitiativeLabelChildWebhookPayload on InitiativeLabelChildWebhookPayload {
+  __typename
+  id
+  color
+  name
+  parentId
+}
+    `,
+  { fragmentName: "InitiativeLabelChildWebhookPayload" }
+) as unknown as TypedDocumentString<InitiativeLabelChildWebhookPayloadFragment, unknown>;
 export const IntegrationChildWebhookPayloadFragmentDoc = new TypedDocumentString(
   `
     fragment IntegrationChildWebhookPayload on IntegrationChildWebhookPayload {
@@ -79731,6 +80009,24 @@ export const AuditEntryWebhookPayloadFragmentDoc = new TypedDocumentString(
     `,
   { fragmentName: "AuditEntryWebhookPayload" }
 ) as unknown as TypedDocumentString<AuditEntryWebhookPayloadFragment, unknown>;
+export const InitiativeLabelWebhookPayloadFragmentDoc = new TypedDocumentString(
+  `
+    fragment InitiativeLabelWebhookPayload on InitiativeLabelWebhookPayload {
+  __typename
+  id
+  color
+  creatorId
+  description
+  name
+  parentId
+  archivedAt
+  createdAt
+  updatedAt
+  isGroup
+}
+    `,
+  { fragmentName: "InitiativeLabelWebhookPayload" }
+) as unknown as TypedDocumentString<InitiativeLabelWebhookPayloadFragment, unknown>;
 export const InitiativeUpdateWebhookPayloadFragmentDoc = new TypedDocumentString(
   `
     fragment InitiativeUpdateWebhookPayload on InitiativeUpdateWebhookPayload {
@@ -83777,6 +84073,7 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   issueSubGroupingLabelGroupId
   projectGroupingLabelGroupId
   projectSubGroupingLabelGroupId
+  groupOrderingMode
   projectGroupOrdering
   projectCustomerNeedsViewGrouping
   projectCustomerNeedsViewOrdering
@@ -83896,6 +84193,7 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldInitiatives
+  projectFieldIssues
   projectFieldLabels
   projectFieldLeadTimeline
   projectFieldLead
@@ -84019,6 +84317,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   issueSubGroupingLabelGroupId
   projectGroupingLabelGroupId
   projectSubGroupingLabelGroupId
+  groupOrderingMode
   projectGroupOrdering
   projectCustomerNeedsViewGrouping
   projectCustomerNeedsViewOrdering
@@ -84138,6 +84437,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldInitiatives
+  projectFieldIssues
   projectFieldLabels
   projectFieldLeadTimeline
   projectFieldLead
@@ -84252,6 +84552,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   issueSubGroupingLabelGroupId
   projectGroupingLabelGroupId
   projectSubGroupingLabelGroupId
+  groupOrderingMode
   projectGroupOrdering
   projectCustomerNeedsViewGrouping
   projectCustomerNeedsViewOrdering
@@ -84371,6 +84672,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldInitiatives
+  projectFieldIssues
   projectFieldLabels
   projectFieldLeadTimeline
   projectFieldLead
@@ -86944,6 +87246,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   issueSubGroupingLabelGroupId
   projectGroupingLabelGroupId
   projectSubGroupingLabelGroupId
+  groupOrderingMode
   projectGroupOrdering
   projectCustomerNeedsViewGrouping
   projectCustomerNeedsViewOrdering
@@ -87063,6 +87366,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldInitiatives
+  projectFieldIssues
   projectFieldLabels
   projectFieldLeadTimeline
   projectFieldLead
@@ -87230,6 +87534,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   issueSubGroupingLabelGroupId
   projectGroupingLabelGroupId
   projectSubGroupingLabelGroupId
+  groupOrderingMode
   projectGroupOrdering
   projectCustomerNeedsViewGrouping
   projectCustomerNeedsViewOrdering
@@ -87349,6 +87654,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldInitiatives
+  projectFieldIssues
   projectFieldLabels
   projectFieldLeadTimeline
   projectFieldLead
@@ -89023,6 +89329,67 @@ fragment PageInfo on PageInfo {
 }`,
   { fragmentName: "InitiativeHistoryConnection" }
 ) as unknown as TypedDocumentString<InitiativeHistoryConnectionFragment, unknown>;
+export const InitiativeLabelFragmentDoc = new TypedDocumentString(
+  `
+    fragment InitiativeLabel on InitiativeLabel {
+  __typename
+  lastAppliedAt
+  color
+  description
+  name
+  updatedAt
+  archivedAt
+  createdAt
+  id
+  creator {
+    id
+  }
+  retiredBy {
+    id
+  }
+  isGroup
+}
+    `,
+  { fragmentName: "InitiativeLabel" }
+) as unknown as TypedDocumentString<InitiativeLabelFragment, unknown>;
+export const InitiativeLabelConnectionFragmentDoc = new TypedDocumentString(
+  `
+    fragment InitiativeLabelConnection on InitiativeLabelConnection {
+  __typename
+  nodes {
+    ...InitiativeLabel
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+    fragment InitiativeLabel on InitiativeLabel {
+  __typename
+  lastAppliedAt
+  color
+  description
+  name
+  updatedAt
+  archivedAt
+  createdAt
+  id
+  creator {
+    id
+  }
+  retiredBy {
+    id
+  }
+  isGroup
+}
+fragment PageInfo on PageInfo {
+  __typename
+  startCursor
+  endCursor
+  hasPreviousPage
+  hasNextPage
+}`,
+  { fragmentName: "InitiativeLabelConnection" }
+) as unknown as TypedDocumentString<InitiativeLabelConnectionFragment, unknown>;
 export const InitiativeRelationFragmentDoc = new TypedDocumentString(
   `
     fragment InitiativeRelation on InitiativeRelation {
@@ -98427,6 +98794,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   issueSubGroupingLabelGroupId
   projectGroupingLabelGroupId
   projectSubGroupingLabelGroupId
+  groupOrderingMode
   projectGroupOrdering
   projectCustomerNeedsViewGrouping
   projectCustomerNeedsViewOrdering
@@ -98546,6 +98914,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldInitiatives
+  projectFieldIssues
   projectFieldLabels
   projectFieldLeadTimeline
   projectFieldLead
@@ -99056,6 +99425,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   issueSubGroupingLabelGroupId
   projectGroupingLabelGroupId
   projectSubGroupingLabelGroupId
+  groupOrderingMode
   projectGroupOrdering
   projectCustomerNeedsViewGrouping
   projectCustomerNeedsViewOrdering
@@ -99175,6 +99545,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldInitiatives
+  projectFieldIssues
   projectFieldLabels
   projectFieldLeadTimeline
   projectFieldLead
@@ -99302,6 +99673,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   issueSubGroupingLabelGroupId
   projectGroupingLabelGroupId
   projectSubGroupingLabelGroupId
+  groupOrderingMode
   projectGroupOrdering
   projectCustomerNeedsViewGrouping
   projectCustomerNeedsViewOrdering
@@ -99421,6 +99793,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldInitiatives
+  projectFieldIssues
   projectFieldLabels
   projectFieldLeadTimeline
   projectFieldLead
@@ -99733,6 +100106,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   issueSubGroupingLabelGroupId
   projectGroupingLabelGroupId
   projectSubGroupingLabelGroupId
+  groupOrderingMode
   projectGroupOrdering
   projectCustomerNeedsViewGrouping
   projectCustomerNeedsViewOrdering
@@ -99852,6 +100226,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldInitiatives
+  projectFieldIssues
   projectFieldLabels
   projectFieldLeadTimeline
   projectFieldLead
@@ -99979,6 +100354,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   issueSubGroupingLabelGroupId
   projectGroupingLabelGroupId
   projectSubGroupingLabelGroupId
+  groupOrderingMode
   projectGroupOrdering
   projectCustomerNeedsViewGrouping
   projectCustomerNeedsViewOrdering
@@ -100098,6 +100474,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldInitiatives
+  projectFieldIssues
   projectFieldLabels
   projectFieldLeadTimeline
   projectFieldLead
@@ -100211,6 +100588,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   issueSubGroupingLabelGroupId
   projectGroupingLabelGroupId
   projectSubGroupingLabelGroupId
+  groupOrderingMode
   projectGroupOrdering
   projectCustomerNeedsViewGrouping
   projectCustomerNeedsViewOrdering
@@ -100330,6 +100708,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldInitiatives
+  projectFieldIssues
   projectFieldLabels
   projectFieldLeadTimeline
   projectFieldLead
@@ -100500,6 +100879,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   issueSubGroupingLabelGroupId
   projectGroupingLabelGroupId
   projectSubGroupingLabelGroupId
+  groupOrderingMode
   projectGroupOrdering
   projectCustomerNeedsViewGrouping
   projectCustomerNeedsViewOrdering
@@ -100619,6 +100999,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldInitiatives
+  projectFieldIssues
   projectFieldLabels
   projectFieldLeadTimeline
   projectFieldLead
@@ -128711,6 +129092,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   issueSubGroupingLabelGroupId
   projectGroupingLabelGroupId
   projectSubGroupingLabelGroupId
+  groupOrderingMode
   projectGroupOrdering
   projectCustomerNeedsViewGrouping
   projectCustomerNeedsViewOrdering
@@ -128830,6 +129212,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldInitiatives
+  projectFieldIssues
   projectFieldLabels
   projectFieldLeadTimeline
   projectFieldLead
@@ -128970,6 +129353,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   issueSubGroupingLabelGroupId
   projectGroupingLabelGroupId
   projectSubGroupingLabelGroupId
+  groupOrderingMode
   projectGroupOrdering
   projectCustomerNeedsViewGrouping
   projectCustomerNeedsViewOrdering
@@ -129089,6 +129473,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldInitiatives
+  projectFieldIssues
   projectFieldLabels
   projectFieldLeadTimeline
   projectFieldLead
