@@ -97,6 +97,10 @@ fragment AiConversationBasePart on AiConversationBasePart {
   # The type of the part.
   type
 
+  ... on AiConversationEventPart {
+    ...AiConversationEventPart
+  }
+
   ... on AiConversationPromptPart {
     ...AiConversationPromptPart
   }
@@ -3664,6 +3668,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     ... on AiConversationGetMicrosoftTeamsConversationHistoryToolCall {
       ...AiConversationGetMicrosoftTeamsConversationHistoryToolCall
     }
+    ... on AiConversationGetPullRequestCheckLogsToolCall {
+      ...AiConversationGetPullRequestCheckLogsToolCall
+    }
     ... on AiConversationGetPullRequestDiffToolCall {
       ...AiConversationGetPullRequestDiffToolCall
     }
@@ -3700,11 +3707,17 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     ... on AiConversationRetrieveEntitiesToolCall {
       ...AiConversationRetrieveEntitiesToolCall
     }
+    ... on AiConversationRetryPullRequestCheckToolCall {
+      ...AiConversationRetryPullRequestCheckToolCall
+    }
     ... on AiConversationSearchDocumentationToolCall {
       ...AiConversationSearchDocumentationToolCall
     }
     ... on AiConversationSearchEntitiesToolCall {
       ...AiConversationSearchEntitiesToolCall
+    }
+    ... on AiConversationSubscribeToEventToolCall {
+      ...AiConversationSubscribeToEventToolCall
     }
     ... on AiConversationSuggestValuesToolCall {
       ...AiConversationSuggestValuesToolCall
@@ -3714,6 +3727,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     }
     ... on AiConversationTranscribeVideoToolCall {
       ...AiConversationTranscribeVideoToolCall
+    }
+    ... on AiConversationUnsubscribeFromEventToolCall {
+      ...AiConversationUnsubscribeFromEventToolCall
     }
     ... on AiConversationUpdateEntityToolCall {
       ...AiConversationUpdateEntityToolCall
@@ -4804,6 +4820,25 @@ fragment IssueHistoryTriageRuleError on IssueHistoryTriageRuleError {
   type
   # Whether the conflict was for the same child label.
   conflictForSameChildLabel
+}
+
+# An event part in an AI conversation.
+fragment AiConversationEventPart on AiConversationEventPart {
+  __typename
+  # The ID of the part.
+  id
+  # The ID of the subscription to resolve when this event is delivered.
+  subscriptionId
+  # The Markdown body of the event part.
+  body
+  # The data of the event part.
+  bodyData
+  # The metadata of the part.
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  # The type of the part.
+  type
 }
 
 # An external link associated with an agent session.
@@ -8487,7 +8522,7 @@ fragment IntegrationsSettings on IntegrationsSettings {
   slackInitiativeUpdateCreated
   # Whether to send a Slack message when an issue is added to the custom view.
   slackIssueAddedToView
-  # Whether to send a Slack message when any of the project or team's issues change to completed or cancelled.
+  # Whether to send a Slack message when any of the project or team's issues change to completed or canceled.
   slackIssueStatusChangedDone
   # Whether to send a Slack message when any of the project or team's issues has a change in status.
   slackIssueStatusChangedAll
@@ -9582,6 +9617,10 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
     ...AiConversationGetMicrosoftTeamsConversationHistoryToolCall
   }
 
+  ... on AiConversationGetPullRequestCheckLogsToolCall {
+    ...AiConversationGetPullRequestCheckLogsToolCall
+  }
+
   ... on AiConversationGetPullRequestDiffToolCall {
     ...AiConversationGetPullRequestDiffToolCall
   }
@@ -9630,12 +9669,20 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
     ...AiConversationRetrieveEntitiesToolCall
   }
 
+  ... on AiConversationRetryPullRequestCheckToolCall {
+    ...AiConversationRetryPullRequestCheckToolCall
+  }
+
   ... on AiConversationSearchDocumentationToolCall {
     ...AiConversationSearchDocumentationToolCall
   }
 
   ... on AiConversationSearchEntitiesToolCall {
     ...AiConversationSearchEntitiesToolCall
+  }
+
+  ... on AiConversationSubscribeToEventToolCall {
+    ...AiConversationSubscribeToEventToolCall
   }
 
   ... on AiConversationSuggestValuesToolCall {
@@ -9648,6 +9695,10 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
 
   ... on AiConversationTranscribeVideoToolCall {
     ...AiConversationTranscribeVideoToolCall
+  }
+
+  ... on AiConversationUnsubscribeFromEventToolCall {
+    ...AiConversationUnsubscribeFromEventToolCall
   }
 
   ... on AiConversationUpdateEntityToolCall {
@@ -9822,6 +9873,32 @@ fragment AiConversationGetMicrosoftTeamsConversationHistoryToolCall on AiConvers
   }
 }
 
+fragment AiConversationGetPullRequestCheckLogsToolCall on AiConversationGetPullRequestCheckLogsToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationGetPullRequestCheckLogsToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationGetPullRequestCheckLogsToolCallArgs on AiConversationGetPullRequestCheckLogsToolCallArgs {
+  __typename
+  checkName
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  workflowName
+}
+
 fragment AiConversationGetPullRequestDiffToolCall on AiConversationGetPullRequestDiffToolCall {
   __typename
   # The arguments of the tool call.
@@ -9972,14 +10049,20 @@ fragment AiConversationNavigateToPageToolCall on AiConversationNavigateToPageToo
 
 fragment AiConversationNavigateToPageToolCallArgs on AiConversationNavigateToPageToolCallArgs {
   __typename
+  entities {
+    ...AiConversationNavigateToPageToolCallArgsEntities
+  }
+}
+
+fragment AiConversationNavigateToPageToolCallArgsEntities on AiConversationNavigateToPageToolCallArgsEntities {
+  __typename
   entityType
-  identifier
+  uuid
 }
 
 fragment AiConversationNavigateToPageToolCallResult on AiConversationNavigateToPageToolCallResult {
   __typename
-  newTab
-  url
+  urls
 }
 
 fragment AiConversationQueryActivityToolCall on AiConversationQueryActivityToolCall {
@@ -10149,6 +10232,32 @@ fragment AiConversationRetrieveEntitiesToolCallArgs on AiConversationRetrieveEnt
   }
 }
 
+fragment AiConversationRetryPullRequestCheckToolCall on AiConversationRetryPullRequestCheckToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationRetryPullRequestCheckToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationRetryPullRequestCheckToolCallArgs on AiConversationRetryPullRequestCheckToolCallArgs {
+  __typename
+  checkName
+  entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  workflowName
+}
+
 fragment AiConversationSearchDocumentationToolCall on AiConversationSearchDocumentationToolCall {
   __typename
   # The arguments of the tool call.
@@ -10199,6 +10308,32 @@ fragment AiConversationSearchEntitiesToolCallResult on AiConversationSearchEntit
 fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
   __typename
   id
+  type
+}
+
+fragment AiConversationSubscribeToEventToolCall on AiConversationSubscribeToEventToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationSubscribeToEventToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationSubscribeToEventToolCallArgs on AiConversationSubscribeToEventToolCallArgs {
+  __typename
+  endsAt
+  kind
+  message
+  subscriptionId
   type
 }
 
@@ -10258,6 +10393,29 @@ fragment AiConversationTranscribeVideoToolCall on AiConversationTranscribeVideoT
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
+}
+
+fragment AiConversationUnsubscribeFromEventToolCall on AiConversationUnsubscribeFromEventToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationUnsubscribeFromEventToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationUnsubscribeFromEventToolCallArgs on AiConversationUnsubscribeFromEventToolCallArgs {
+  __typename
+  message
+  subscriptionId
 }
 
 fragment AiConversationUpdateEntityToolCall on AiConversationUpdateEntityToolCall {
