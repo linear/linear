@@ -9777,6 +9777,24 @@ export class IntegrationConnection extends Connection<Integration> {
   }
 }
 /**
+ * IntegrationGithubRemoveCodeAccessPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IntegrationGithubRemoveCodeAccessPayloadFragment response data
+ */
+export class IntegrationGithubRemoveCodeAccessPayload extends Request {
+  public constructor(request: LinearRequest, data: L.IntegrationGithubRemoveCodeAccessPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.action = data.action;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** The action the client should take next. */
+  public action: L.GitHubRemoveCodeAccessAction;
+}
+/**
  * IntegrationHasScopesPayload model
  *
  * @param request - function to call the graphql client
@@ -29985,6 +30003,35 @@ export class IntegrationGithubImportRefreshMutation extends Request {
 }
 
 /**
+ * A fetchable IntegrationGithubRemoveCodeAccess Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationGithubRemoveCodeAccessMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationGithubRemoveCodeAccess mutation and return a IntegrationGithubRemoveCodeAccessPayload
+   *
+   * @param integrationId - required integrationId to pass to integrationGithubRemoveCodeAccess
+   * @returns parsed response from IntegrationGithubRemoveCodeAccessMutation
+   */
+  public async fetch(integrationId: string): LinearFetch<IntegrationGithubRemoveCodeAccessPayload> {
+    const response = await this._request<
+      L.IntegrationGithubRemoveCodeAccessMutation,
+      L.IntegrationGithubRemoveCodeAccessMutationVariables
+    >(L.IntegrationGithubRemoveCodeAccessDocument.toString(), {
+      integrationId,
+    });
+    const data = response.integrationGithubRemoveCodeAccess;
+
+    return new IntegrationGithubRemoveCodeAccessPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable IntegrationGitlabConnect Mutation
  *
  * @param request - function to call the graphql client
@@ -45013,6 +45060,17 @@ export class LinearSdk extends Request {
     return new IntegrationGithubImportRefreshMutation(this._request).fetch(id);
   }
   /**
+   * Removes code access from a GitHub integration, downgrading to the basic GitHub App.
+   *
+   * @param integrationId - required integrationId to pass to integrationGithubRemoveCodeAccess
+   * @returns IntegrationGithubRemoveCodeAccessPayload
+   */
+  public integrationGithubRemoveCodeAccess(
+    integrationId: string
+  ): LinearFetch<IntegrationGithubRemoveCodeAccessPayload> {
+    return new IntegrationGithubRemoveCodeAccessMutation(this._request).fetch(integrationId);
+  }
+  /**
    * Connects the workspace with a GitLab Access Token.
    *
    * @param accessToken - required accessToken to pass to integrationGitlabConnect
@@ -46843,6 +46901,7 @@ export {
   FeedSummarySchedule,
   FrequencyResolutionType,
   GitAutomationStates,
+  GitHubRemoveCodeAccessAction,
   GitLinkKind,
   GithubOrgType,
   IdentityProviderType,
