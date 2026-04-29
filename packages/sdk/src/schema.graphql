@@ -1340,6 +1340,7 @@ enum AiConversationEntityCardWidgetArgsType {
   Initiative
   InitiativeUpdate
   Issue
+  IssueDraft
   Project
   ProjectUpdate
   PullRequest
@@ -1417,6 +1418,7 @@ enum AiConversationEntityListWidgetArgsEntitiesType {
   Initiative
   InitiativeUpdate
   Issue
+  IssueDraft
   Project
   ProjectUpdate
   PullRequest
@@ -2991,6 +2993,10 @@ input AttachmentCreateInput {
   Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
   """
   createAsUser: String
+  """
+  Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating attachments in `actor=app` mode.
+  """
+  displayIconUrl: String
   """
   Indicates if attachments for the same source application should be grouped in the Linear UI.
   """
@@ -11632,6 +11638,43 @@ type Initiative implements Node {
   """
   integrationsSettings: IntegrationsSettings
   """
+  [Internal] The IDs of the initiative labels associated with this initiative.
+  """
+  labelIds: [String!]!
+  """
+  [Internal] Labels associated with this initiative.
+  """
+  labels(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned initiative labels.
+    """
+    filter: InitiativeLabelFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): InitiativeLabelConnection!
+  """
   The most recent status update posted for this initiative. Null if no updates have been posted.
   """
   lastUpdate: InitiativeUpdate
@@ -12011,6 +12054,10 @@ input InitiativeCreateInput {
   """
   id: String
   """
+  [Internal] The identifiers of the initiative labels associated with this initiative.
+  """
+  labelIds: [String!]
+  """
   The name of the initiative.
   """
   name: String!
@@ -12211,6 +12258,193 @@ type InitiativeHistoryEdge {
   """
   cursor: String!
   node: InitiativeHistory!
+}
+
+"""
+A label that can be applied to initiatives for categorization. Initiative labels are workspace-level and can be organized into groups with a parent-child hierarchy. Only child labels (not group labels) can be directly applied to initiatives.
+"""
+type InitiativeLabel implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The label's color as a HEX string (e.g., '#EB5757'). Used for visual identification of the label in the UI.
+  """
+  color: String!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who created the label.
+  """
+  creator: User
+  """
+  The label's description.
+  """
+  description: String
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  Whether the label is a group. When true, this label acts as a container for child labels and cannot be directly applied to issues or projects. When false, the label can be directly applied.
+  """
+  isGroup: Boolean!
+  """
+  The date when the label was last applied to an issue or project. Null if the label has never been applied.
+  """
+  lastAppliedAt: DateTime
+  """
+  The label's name.
+  """
+  name: String!
+  """
+  The workspace that the initiative label belongs to.
+  """
+  organization: Organization!
+  """
+  The parent label group. If set, this label is a child within a group. Only one child label from each group can be applied to an initiative at a time.
+  """
+  parent: InitiativeLabel
+  """
+  [Internal] When the label was retired.
+  """
+  retiredAt: DateTime
+  """
+  The user who retired the label. Retired labels cannot be applied to new initiatives but remain on existing ones. Null if the label is active.
+  """
+  retiredBy: User
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+"""
+Certain properties of an initiative label.
+"""
+type InitiativeLabelChildWebhookPayload {
+  """
+  The color of the initiative label.
+  """
+  color: String!
+  """
+  The ID of the initiative label.
+  """
+  id: String!
+  """
+  The name of the initiative label.
+  """
+  name: String!
+  """
+  The parent ID of the initiative label.
+  """
+  parentId: String
+}
+
+type InitiativeLabelConnection {
+  edges: [InitiativeLabelEdge!]!
+  nodes: [InitiativeLabel!]!
+  pageInfo: PageInfo!
+}
+
+type InitiativeLabelEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: InitiativeLabel!
+}
+
+"""
+Initiative label filtering options.
+"""
+input InitiativeLabelFilter {
+  """
+  Compound filters, all of which need to be matched by the label.
+  """
+  and: [InitiativeLabelFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that the initiative labels creator must satisfy.
+  """
+  creator: NullableUserFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for whether the label is a group label.
+  """
+  isGroup: BooleanComparator
+  """
+  Comparator for the name.
+  """
+  name: StringComparator
+  """
+  Compound filters, one of which need to be matched by the label.
+  """
+  or: [InitiativeLabelFilter!]
+  """
+  Filters that the initiative label's parent label must satisfy.
+  """
+  parent: InitiativeLabelFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
+"""
+Payload for an initiative label webhook.
+"""
+type InitiativeLabelWebhookPayload {
+  """
+  The time at which the entity was archived.
+  """
+  archivedAt: String
+  """
+  The color of the initiative label.
+  """
+  color: String!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: String!
+  """
+  The creator ID of the initiative label.
+  """
+  creatorId: String
+  """
+  The label's description.
+  """
+  description: String
+  """
+  The ID of the entity.
+  """
+  id: String!
+  """
+  Whether the label is a group.
+  """
+  isGroup: Boolean!
+  """
+  The name of the initiative label.
+  """
+  name: String!
+  """
+  The parent ID of the initiative label.
+  """
+  parentId: String
+  """
+  The time at which the entity was updated.
+  """
+  updatedAt: String!
 }
 
 """
@@ -13047,6 +13281,10 @@ input InitiativeUpdateInput {
   The initiative's icon.
   """
   icon: String
+  """
+  [Internal] The identifiers of the initiative labels associated with this initiative.
+  """
+  labelIds: [String!]
   """
   The name of the initiative.
   """
@@ -21168,6 +21406,19 @@ type Mutation {
     size: Int!
   ): UploadPayload!
   """
+  [Internal]Adds a label to an initiative.
+  """
+  initiativeAddLabel(
+    """
+    The identifier of the initiative to add the label to.
+    """
+    id: String!
+    """
+    The identifier of the label to add.
+    """
+    labelId: String!
+  ): InitiativePayload!
+  """
   Archives an initiative.
   """
   initiativeArchive(
@@ -21225,6 +21476,19 @@ type Mutation {
     """
     input: InitiativeRelationUpdateInput!
   ): InitiativeRelationPayload!
+  """
+  [Internal]Removes a label from an initiative.
+  """
+  initiativeRemoveLabel(
+    """
+    The identifier of the initiative to remove the label from.
+    """
+    id: String!
+    """
+    The identifier of the label to remove.
+    """
+    labelId: String!
+  ): InitiativePayload!
   """
   Associates a project with an initiative. A project can only appear once in an initiative hierarchy.
   """
@@ -29513,7 +29777,7 @@ input ProjectCreateInput {
   """
   id: String
   """
-  [Internal] The identifiers of the project labels associated with this project.
+  The identifiers of the project labels associated with this project.
   """
   labelIds: [String!]
   """
@@ -35296,7 +35560,7 @@ type Query {
   """
   release(id: String!): Release!
   """
-  [ALPHA] Fetch a release note by its identifier.
+  [ALPHA] Fetch a release note by its UUID or slug identifier.
   """
   releaseNote(id: String!): ReleaseNote!
   """
@@ -36918,6 +37182,14 @@ type ReleaseNote implements Node {
   """
   releases: [Release!]!
   """
+  The release note's unique URL slug, used to construct human-readable URLs for the note.
+  """
+  slugId: String!
+  """
+  [ALPHA] User-supplied title for the release note.
+  """
+  title: String
+  """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
@@ -36943,9 +37215,21 @@ input ReleaseNoteCreateInput {
   """
   pipelineId: String!
   """
-  The releases included in this note.
+  Oldest release (by createdAt) to include. When paired with rangeToReleaseId, expands to every release in the pipeline within the createdAt window.
   """
-  releaseIds: [String!]!
+  rangeFromReleaseId: String
+  """
+  Newest release (by createdAt) to include. Paired with rangeFromReleaseId.
+  """
+  rangeToReleaseId: String
+  """
+  Explicit release IDs to include. Mutually exclusive with rangeFromReleaseId/rangeToReleaseId — exactly one of the two shapes must be provided.
+  """
+  releaseIds: [String!]
+  """
+  Optional user-supplied title.
+  """
+  title: String
 }
 
 type ReleaseNoteEdge {
@@ -36979,9 +37263,21 @@ type ReleaseNotePayload {
 """
 input ReleaseNoteUpdateInput {
   """
-  The releases included in this note.
+  Oldest release (by createdAt) of the new range. Paired with rangeToReleaseId.
+  """
+  rangeFromReleaseId: String
+  """
+  Newest release (by createdAt) of the new range. Paired with rangeFromReleaseId.
+  """
+  rangeToReleaseId: String
+  """
+  Explicit release IDs to set. Mutually exclusive with rangeFromReleaseId/rangeToReleaseId.
   """
   releaseIds: [String!]
+  """
+  Optional user-supplied title.
+  """
+  title: String
 }
 
 """
@@ -37034,6 +37330,10 @@ type ReleasePipeline implements Node {
   The name of the pipeline.
   """
   name: String!
+  """
+  [Internal] The document template used to define the release notes format for this pipeline. AI-generated release notes follow the structure and tone of this template. Null if no template has been configured.
+  """
+  releaseNoteTemplate: Template
   """
   [ALPHA] Releases associated with this pipeline.
   """
@@ -41399,6 +41699,10 @@ type Template implements Node {
   """
   organization: Organization!
   """
+  [Internal] The release pipeline this template is bound to. Required when the template type is 'releaseNote' and forbidden otherwise. The pipeline owns at most one release note template, which defines the format AI follows when generating release notes.
+  """
+  pipeline: ReleasePipeline
+  """
   The sort order of the template within the templates list.
   """
   sortOrder: Float!
@@ -41451,6 +41755,10 @@ input TemplateCreateInput {
   The template name.
   """
   name: String!
+  """
+  The identifier of the release pipeline this template is bound to. Required when the template type is 'releaseNote' and rejected otherwise. Each pipeline can have at most one release note template.
+  """
+  pipelineId: String
   """
   The sort position of the template in the templates list.
   """
@@ -43656,6 +43964,10 @@ type ViewPreferencesValues {
   """
   focusViewOrderingDirection: String
   """
+  The ordering mode for groups. Supersedes projectGroupOrdering.
+  """
+  groupOrderingMode: String
+  """
   List of column model IDs which should be hidden on a board.
   """
   hiddenColumns: [String!]
@@ -43828,6 +44140,10 @@ type ViewPreferencesValues {
   """
   projectFieldInitiatives: Boolean
   """
+  Whether to show the project issue count field.
+  """
+  projectFieldIssues: Boolean
+  """
   Whether to show the project labels field.
   """
   projectFieldLabels: Boolean
@@ -43938,7 +44254,7 @@ type ViewPreferencesValues {
   """
   The ordering of project groups.
   """
-  projectGroupOrdering: String
+  projectGroupOrdering: String @deprecated(reason: "Use groupOrderingMode instead.")
   """
   The project grouping.
   """

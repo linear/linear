@@ -1109,6 +1109,40 @@ fragment ViewPreferencesProjectLabelGroupColumn on ViewPreferencesProjectLabelGr
   active
 }
 
+# A label that can be applied to initiatives for categorization. Initiative labels are workspace-level
+# and can be organized into groups with a parent-child hierarchy. Only child labels (not group labels)
+# can be directly applied to initiatives.
+fragment InitiativeLabel on InitiativeLabel {
+  __typename
+  # The date when the label was last applied to an issue or project. Null if the label has never been applied.
+  lastAppliedAt
+  # The label's color as a HEX string (e.g., '#EB5757'). Used for visual identification of the label in the UI.
+  color
+  # The label's description.
+  description
+  # The label's name.
+  name
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who created the label.
+  creator {
+    id
+  }
+  # The user who retired the label. Retired labels cannot be applied to new initiatives but remain on existing ones. Null if the label is active.
+  retiredBy {
+    id
+  }
+  # Whether the label is a group. When true, this label acts as a container for child labels and cannot be directly applied to issues or projects. When false, the label can be directly applied.
+  isGroup
+}
+
 # A label that can be applied to projects for categorization. Project labels are workspace-level and
 # can be organized into groups with a parent-child hierarchy. Only child labels (not group labels) can
 # be directly applied to projects.
@@ -5599,6 +5633,19 @@ fragment ExternalUserChildWebhookPayload on ExternalUserChildWebhookPayload {
   name
 }
 
+# Certain properties of an initiative label.
+fragment InitiativeLabelChildWebhookPayload on InitiativeLabelChildWebhookPayload {
+  __typename
+  # The ID of the initiative label.
+  id
+  # The color of the initiative label.
+  color
+  # The name of the initiative label.
+  name
+  # The parent ID of the initiative label.
+  parentId
+}
+
 # Certain properties of an initiative update.
 fragment InitiativeUpdateChildWebhookPayload on InitiativeUpdateChildWebhookPayload {
   __typename
@@ -7023,6 +7070,31 @@ fragment AuditEntryWebhookPayload on AuditEntryWebhookPayload {
   type
 }
 
+# Payload for an initiative label webhook.
+fragment InitiativeLabelWebhookPayload on InitiativeLabelWebhookPayload {
+  __typename
+  # The ID of the entity.
+  id
+  # The color of the initiative label.
+  color
+  # The creator ID of the initiative label.
+  creatorId
+  # The label's description.
+  description
+  # The name of the initiative label.
+  name
+  # The parent ID of the initiative label.
+  parentId
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # Whether the label is a group.
+  isGroup
+}
+
 # Payload for an initiative update webhook.
 fragment InitiativeUpdateWebhookPayload on InitiativeUpdateWebhookPayload {
   __typename
@@ -8125,6 +8197,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectGroupingLabelGroupId
   # The label group ID used for project sub-grouping.
   projectSubGroupingLabelGroupId
+  # The ordering mode for groups. Supersedes projectGroupOrdering.
+  groupOrderingMode
   # The ordering of project groups.
   projectGroupOrdering
   # The project customer needs view grouping.
@@ -8361,6 +8435,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealth
   # Whether to show the project initiatives field.
   projectFieldInitiatives
+  # Whether to show the project issue count field.
+  projectFieldIssues
   # Whether to show the project labels field.
   projectFieldLabels
   # Whether to show the project lead field on the timeline.
@@ -10923,6 +10999,16 @@ fragment InitiativeHistoryConnection on InitiativeHistoryConnection {
   __typename
   nodes {
     ...InitiativeHistory
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment InitiativeLabelConnection on InitiativeLabelConnection {
+  __typename
+  nodes {
+    ...InitiativeLabel
   }
   pageInfo {
     ...PageInfo
