@@ -11056,6 +11056,14 @@ input GitHubPersonalSettingsInput {
   login: String!
 }
 
+"""
+Instruction for the client after attempting to remove code access from a GitHub integration.
+"""
+enum GitHubRemoveCodeAccessAction {
+  Done
+  InstallBasicApp
+}
+
 input GitHubRepoInput {
   """
   Whether the repository is archived.
@@ -11978,6 +11986,10 @@ input InitiativeCollectionFilter {
   """
   initiativeUpdates: InitiativeUpdatesCollectionFilter
   """
+  [Internal] Filters that the initiative labels must satisfy.
+  """
+  labels: InitiativeLabelCollectionFilter
+  """
   Comparator for the collection length.
   """
   length: NumberComparator
@@ -12149,6 +12161,10 @@ input InitiativeFilter {
   Filters that the initiative updates must satisfy.
   """
   initiativeUpdates: InitiativeUpdatesCollectionFilter
+  """
+  [Internal] Filters that the initiative labels must satisfy.
+  """
+  labels: InitiativeLabelCollectionFilter
   """
   Comparator for the initiative name.
   """
@@ -12343,6 +12359,64 @@ type InitiativeLabelChildWebhookPayload {
   The parent ID of the initiative label.
   """
   parentId: String
+}
+
+"""
+Initiative label filtering options.
+"""
+input InitiativeLabelCollectionFilter {
+  """
+  Compound filters, all of which need to be matched by the label.
+  """
+  and: [InitiativeLabelCollectionFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that the initiative labels creator must satisfy.
+  """
+  creator: NullableUserFilter
+  """
+  Filters that needs to be matched by all initiative labels.
+  """
+  every: InitiativeLabelFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for whether the label is a group label.
+  """
+  isGroup: BooleanComparator
+  """
+  Comparator for the collection length.
+  """
+  length: NumberComparator
+  """
+  Comparator for the name.
+  """
+  name: StringComparator
+  """
+  Filter based on the existence of the relation.
+  """
+  null: Boolean
+  """
+  Compound filters, one of which need to be matched by the label.
+  """
+  or: [InitiativeLabelCollectionFilter!]
+  """
+  Filters that the initiative label's parent label must satisfy.
+  """
+  parent: InitiativeLabelFilter
+  """
+  Filters that needs to be matched by some initiative labels.
+  """
+  some: InitiativeLabelCollectionFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 type InitiativeLabelConnection {
@@ -13769,6 +13843,17 @@ type IntegrationEdge {
   """
   cursor: String!
   node: Integration!
+}
+
+type IntegrationGithubRemoveCodeAccessPayload {
+  """
+  The action the client should take next.
+  """
+  action: GitHubRemoveCodeAccessAction!
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
 }
 
 type IntegrationHasScopesPayload {
@@ -21743,6 +21828,15 @@ type Mutation {
     id: String!
   ): IntegrationPayload!
   """
+  Removes code access from a GitHub integration, downgrading to the basic GitHub App.
+  """
+  integrationGithubRemoveCodeAccess(
+    """
+    The ID of the integration to remove code access from.
+    """
+    integrationId: String!
+  ): IntegrationGithubRemoveCodeAccessPayload!
+  """
   Connects the workspace with a GitLab Access Token.
   """
   integrationGitlabConnect(
@@ -25605,6 +25699,10 @@ input NullableInitiativeFilter {
   Filters that the initiative updates must satisfy.
   """
   initiativeUpdates: InitiativeUpdatesCollectionFilter
+  """
+  [Internal] Filters that the initiative labels must satisfy.
+  """
+  labels: InitiativeLabelCollectionFilter
   """
   Comparator for the initiative name.
   """
@@ -37178,6 +37276,10 @@ type ReleaseNote implements Node {
   """
   id: ID!
   """
+  The most recent release covered by this note.
+  """
+  lastRelease: Release
+  """
   [ALPHA] Releases included in the note.
   """
   releases: [Release!]!
@@ -37206,6 +37308,10 @@ type ReleaseNoteConnection {
 [ALPHA] Input for creating a release note.
 """
 input ReleaseNoteCreateInput {
+  """
+  The release note body as markdown.
+  """
+  content: String
   """
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
@@ -37262,6 +37368,10 @@ type ReleaseNotePayload {
 [ALPHA] Input for updating a release note.
 """
 input ReleaseNoteUpdateInput {
+  """
+  The release note body as markdown.
+  """
+  content: String
   """
   Oldest release (by createdAt) of the new range. Paired with rangeToReleaseId.
   """
@@ -37326,6 +37436,10 @@ type ReleasePipeline implements Node {
   [ALPHA] Whether this pipeline targets a production environment. Defaults to true. Used to distinguish production pipelines from staging or development pipelines.
   """
   isProduction: Boolean!
+  """
+  The release note in this pipeline whose covered range ends with the most recent release.
+  """
+  latestReleaseNote: ReleaseNote
   """
   The name of the pipeline.
   """
@@ -44011,6 +44125,10 @@ type ViewPreferencesValues {
   Whether to show the initiative health field.
   """
   initiativeFieldInitiativeHealth: Boolean
+  """
+  [Internal] Whether to show the initiative labels field.
+  """
+  initiativeFieldLabels: Boolean
   """
   Whether to show the initiative owner field.
   """

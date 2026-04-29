@@ -6548,6 +6548,12 @@ export type GitHubPersonalSettingsInput = {
   login: Scalars["String"];
 };
 
+/** Instruction for the client after attempting to remove code access from a GitHub integration. */
+export enum GitHubRemoveCodeAccessAction {
+  Done = "Done",
+  InstallBasicApp = "InstallBasicApp",
+}
+
 export type GitHubRepoInput = {
   /** Whether the repository is archived. */
   archived?: InputMaybe<Scalars["Boolean"]>;
@@ -7026,6 +7032,8 @@ export type InitiativeCollectionFilter = {
   id?: InputMaybe<IdComparator>;
   /** Filters that the initiative updates must satisfy. */
   initiativeUpdates?: InputMaybe<InitiativeUpdatesCollectionFilter>;
+  /** [Internal] Filters that the initiative labels must satisfy. */
+  labels?: InputMaybe<InitiativeLabelCollectionFilter>;
   /** Comparator for the collection length. */
   length?: InputMaybe<NumberComparator>;
   /** Comparator for the initiative name. */
@@ -7122,6 +7130,8 @@ export type InitiativeFilter = {
   id?: InputMaybe<IdComparator>;
   /** Filters that the initiative updates must satisfy. */
   initiativeUpdates?: InputMaybe<InitiativeUpdatesCollectionFilter>;
+  /** [Internal] Filters that the initiative labels must satisfy. */
+  labels?: InputMaybe<InitiativeLabelCollectionFilter>;
   /** Comparator for the initiative name. */
   name?: InputMaybe<StringComparator>;
   /** Compound filters, one of which need to be matched by the initiative. */
@@ -7239,6 +7249,36 @@ export type InitiativeLabelChildWebhookPayload = {
   name: Scalars["String"];
   /** The parent ID of the initiative label. */
   parentId?: Maybe<Scalars["String"]>;
+};
+
+/** Initiative label filtering options. */
+export type InitiativeLabelCollectionFilter = {
+  /** Compound filters, all of which need to be matched by the label. */
+  and?: InputMaybe<Array<InitiativeLabelCollectionFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: InputMaybe<DateComparator>;
+  /** Filters that the initiative labels creator must satisfy. */
+  creator?: InputMaybe<NullableUserFilter>;
+  /** Filters that needs to be matched by all initiative labels. */
+  every?: InputMaybe<InitiativeLabelFilter>;
+  /** Comparator for the identifier. */
+  id?: InputMaybe<IdComparator>;
+  /** Comparator for whether the label is a group label. */
+  isGroup?: InputMaybe<BooleanComparator>;
+  /** Comparator for the collection length. */
+  length?: InputMaybe<NumberComparator>;
+  /** Comparator for the name. */
+  name?: InputMaybe<StringComparator>;
+  /** Filter based on the existence of the relation. */
+  null?: InputMaybe<Scalars["Boolean"]>;
+  /** Compound filters, one of which need to be matched by the label. */
+  or?: InputMaybe<Array<InitiativeLabelCollectionFilter>>;
+  /** Filters that the initiative label's parent label must satisfy. */
+  parent?: InputMaybe<InitiativeLabelFilter>;
+  /** Filters that needs to be matched by some initiative labels. */
+  some?: InputMaybe<InitiativeLabelCollectionFilter>;
+  /** Comparator for the updated at date. */
+  updatedAt?: InputMaybe<DateComparator>;
 };
 
 export type InitiativeLabelConnection = {
@@ -8065,6 +8105,14 @@ export type IntegrationEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: Integration;
+};
+
+export type IntegrationGithubRemoveCodeAccessPayload = {
+  __typename?: "IntegrationGithubRemoveCodeAccessPayload";
+  /** The action the client should take next. */
+  action: GitHubRemoveCodeAccessAction;
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars["Float"];
 };
 
 export type IntegrationHasScopesPayload = {
@@ -11724,6 +11772,8 @@ export type Mutation = {
   integrationGithubImportConnect: IntegrationPayload;
   /** Refreshes the data for a GitHub import integration. */
   integrationGithubImportRefresh: IntegrationPayload;
+  /** Removes code access from a GitHub integration, downgrading to the basic GitHub App. */
+  integrationGithubRemoveCodeAccess: IntegrationGithubRemoveCodeAccessPayload;
   /** Connects the workspace with a GitLab Access Token. */
   integrationGitlabConnect: GitLabIntegrationCreatePayload;
   /** Tests connectivity to a self-hosted GitLab instance and clears auth errors if successful. */
@@ -12811,6 +12861,10 @@ export type MutationIntegrationGithubImportConnectArgs = {
 
 export type MutationIntegrationGithubImportRefreshArgs = {
   id: Scalars["String"];
+};
+
+export type MutationIntegrationGithubRemoveCodeAccessArgs = {
+  integrationId: Scalars["String"];
 };
 
 export type MutationIntegrationGitlabConnectArgs = {
@@ -14545,6 +14599,8 @@ export type NullableInitiativeFilter = {
   id?: InputMaybe<IdComparator>;
   /** Filters that the initiative updates must satisfy. */
   initiativeUpdates?: InputMaybe<InitiativeUpdatesCollectionFilter>;
+  /** [Internal] Filters that the initiative labels must satisfy. */
+  labels?: InputMaybe<InitiativeLabelCollectionFilter>;
   /** Comparator for the initiative name. */
   name?: InputMaybe<StringComparator>;
   /** Filter based on the existence of the relation. */
@@ -20647,6 +20703,8 @@ export type ReleaseNote = Node & {
   documentContent?: Maybe<DocumentContent>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** The most recent release covered by this note. */
+  lastRelease?: Maybe<Release>;
   /** [ALPHA] Releases included in the note. */
   releases: Array<Release>;
   /** The release note's unique URL slug, used to construct human-readable URLs for the note. */
@@ -20669,6 +20727,8 @@ export type ReleaseNoteConnection = {
 
 /** [ALPHA] Input for creating a release note. */
 export type ReleaseNoteCreateInput = {
+  /** The release note body as markdown. */
+  content?: InputMaybe<Scalars["String"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars["String"]>;
   /** Identifier of the release pipeline. */
@@ -20703,6 +20763,8 @@ export type ReleaseNotePayload = {
 
 /** [ALPHA] Input for updating a release note. */
 export type ReleaseNoteUpdateInput = {
+  /** The release note body as markdown. */
+  content?: InputMaybe<Scalars["String"]>;
   /** Oldest release (by createdAt) of the new range. Paired with rangeToReleaseId. */
   rangeFromReleaseId?: InputMaybe<Scalars["String"]>;
   /** Newest release (by createdAt) of the new range. Paired with rangeFromReleaseId. */
@@ -20739,6 +20801,8 @@ export type ReleasePipeline = Node & {
   includePathPatterns: Array<Scalars["String"]>;
   /** [ALPHA] Whether this pipeline targets a production environment. Defaults to true. Used to distinguish production pipelines from staging or development pipelines. */
   isProduction: Scalars["Boolean"];
+  /** The release note in this pipeline whose covered range ends with the most recent release. */
+  latestReleaseNote?: Maybe<ReleaseNote>;
   /** The name of the pipeline. */
   name: Scalars["String"];
   /** [Internal] The document template used to define the release notes format for this pipeline. AI-generated release notes follow the structure and tone of this template. Null if no template has been configured. */
@@ -24469,6 +24533,8 @@ export type ViewPreferencesValues = {
   initiativeFieldHealth?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the initiative health field. */
   initiativeFieldInitiativeHealth?: Maybe<Scalars["Boolean"]>;
+  /** [Internal] Whether to show the initiative labels field. */
+  initiativeFieldLabels?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the initiative owner field. */
   initiativeFieldOwner?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the initiative projects field. */
@@ -39170,6 +39236,10 @@ export type IntegrationConnectionFragment = { __typename: "IntegrationConnection
     "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
   >;
 };
+
+export type IntegrationGithubRemoveCodeAccessPayloadFragment = {
+  __typename: "IntegrationGithubRemoveCodeAccessPayload";
+} & Pick<IntegrationGithubRemoveCodeAccessPayload, "action" | "lastSyncId">;
 
 export type IntegrationHasScopesPayloadFragment = { __typename: "IntegrationHasScopesPayload" } & Pick<
   IntegrationHasScopesPayload,
@@ -65314,6 +65384,17 @@ export type IntegrationGithubImportRefreshMutation = { __typename?: "Mutation" }
   > & { integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">> };
 };
 
+export type IntegrationGithubRemoveCodeAccessMutationVariables = Exact<{
+  integrationId: Scalars["String"];
+}>;
+
+export type IntegrationGithubRemoveCodeAccessMutation = { __typename?: "Mutation" } & {
+  integrationGithubRemoveCodeAccess: { __typename: "IntegrationGithubRemoveCodeAccessPayload" } & Pick<
+    IntegrationGithubRemoveCodeAccessPayload,
+    "action" | "lastSyncId"
+  >;
+};
+
 export type IntegrationGitlabConnectMutationVariables = Exact<{
   accessToken: Scalars["String"];
   gitlabUrl: Scalars["String"];
@@ -89685,6 +89766,16 @@ fragment PageInfo on PageInfo {
 }`,
   { fragmentName: "IntegrationConnection" }
 ) as unknown as TypedDocumentString<IntegrationConnectionFragment, unknown>;
+export const IntegrationGithubRemoveCodeAccessPayloadFragmentDoc = new TypedDocumentString(
+  `
+    fragment IntegrationGithubRemoveCodeAccessPayload on IntegrationGithubRemoveCodeAccessPayload {
+  __typename
+  action
+  lastSyncId
+}
+    `,
+  { fragmentName: "IntegrationGithubRemoveCodeAccessPayload" }
+) as unknown as TypedDocumentString<IntegrationGithubRemoveCodeAccessPayloadFragment, unknown>;
 export const IntegrationHasScopesPayloadFragmentDoc = new TypedDocumentString(
   `
     fragment IntegrationHasScopesPayload on IntegrationHasScopesPayload {
@@ -122362,6 +122453,20 @@ export const IntegrationGithubImportRefreshDocument = new TypedDocumentString(`
 }`) as unknown as TypedDocumentString<
   IntegrationGithubImportRefreshMutation,
   IntegrationGithubImportRefreshMutationVariables
+>;
+export const IntegrationGithubRemoveCodeAccessDocument = new TypedDocumentString(`
+    mutation integrationGithubRemoveCodeAccess($integrationId: String!) {
+  integrationGithubRemoveCodeAccess(integrationId: $integrationId) {
+    ...IntegrationGithubRemoveCodeAccessPayload
+  }
+}
+    fragment IntegrationGithubRemoveCodeAccessPayload on IntegrationGithubRemoveCodeAccessPayload {
+  __typename
+  action
+  lastSyncId
+}`) as unknown as TypedDocumentString<
+  IntegrationGithubRemoveCodeAccessMutation,
+  IntegrationGithubRemoveCodeAccessMutationVariables
 >;
 export const IntegrationGitlabConnectDocument = new TypedDocumentString(`
     mutation integrationGitlabConnect($accessToken: String!, $gitlabUrl: String!) {

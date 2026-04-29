@@ -11055,6 +11055,14 @@ fragment IntegrationConnection on IntegrationConnection {
   }
 }
 
+fragment IntegrationGithubRemoveCodeAccessPayload on IntegrationGithubRemoveCodeAccessPayload {
+  __typename
+  # The action the client should take next.
+  action
+  # The identifier of the last sync operation.
+  lastSyncId
+}
+
 fragment IntegrationHasScopesPayload on IntegrationHasScopesPayload {
   __typename
   # The missing scopes.
@@ -19848,6 +19856,15 @@ mutation integrationGithubImportRefresh(
 ) {
   integrationGithubImportRefresh(id: $id) {
     ...IntegrationPayload
+  }
+}
+# Removes code access from a GitHub integration, downgrading to the basic GitHub App.
+mutation integrationGithubRemoveCodeAccess(
+  # The ID of the integration to remove code access from.
+  $integrationId: String!
+) {
+  integrationGithubRemoveCodeAccess(integrationId: $integrationId) {
+    ...IntegrationGithubRemoveCodeAccessPayload
   }
 }
 # Connects the workspace with a GitLab Access Token.
