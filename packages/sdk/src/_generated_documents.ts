@@ -1770,7 +1770,7 @@ export type AiPromptRules = Node & {
   updatedBy?: Maybe<User>;
 };
 
-/** The type of AI prompt workflow. */
+/** [Internal] The type of AI prompt workflow. */
 export enum AiPromptType {
   AgentGuidance = "agentGuidance",
   AiConversation = "aiConversation",
@@ -7219,7 +7219,7 @@ export type InitiativeLabel = Node & {
   id: Scalars["ID"];
   /** Whether the label is a group. When true, this label acts as a container for child labels and cannot be directly applied to issues or projects. When false, the label can be directly applied. */
   isGroup: Scalars["Boolean"];
-  /** The date when the label was last applied to an issue or project. Null if the label has never been applied. */
+  /** The date when the label was last applied to an issue, project, or initiative. Null if the label has never been applied. */
   lastAppliedAt?: Maybe<Scalars["DateTime"]>;
   /** The label's name. */
   name: Scalars["String"];
@@ -9797,7 +9797,7 @@ export type IssueLabel = Node & {
   isGroup: Scalars["Boolean"];
   /** Issues associated with the label. */
   issues: IssueConnection;
-  /** The date when the label was last applied to an issue or project. Null if the label has never been applied. */
+  /** The date when the label was last applied to an issue, project, or initiative. Null if the label has never been applied. */
   lastAppliedAt?: Maybe<Scalars["DateTime"]>;
   /** The label's name. */
   name: Scalars["String"];
@@ -15312,6 +15312,8 @@ export type Organization = Node & {
   codeIntelligenceRepository?: Maybe<Scalars["String"]>;
   /** [INTERNAL] Whether the workspace has enabled the Coding Agent. */
   codingAgentEnabled: Scalars["Boolean"];
+  /** [Internal] Settings for Coding Agent features. */
+  codingAgentSettings: Scalars["JSONObject"];
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /** Approximate total number of issues created in the workspace, including archived ones. This count is cached and may not reflect the exact real-time count. */
@@ -15546,6 +15548,12 @@ export type OrganizationCancelDeletePayload = {
   __typename?: "OrganizationCancelDeletePayload";
   /** Whether the operation was successful. */
   success: Scalars["Boolean"];
+};
+
+/** [Internal] Input for updating Coding Agent settings for the workspace. */
+export type OrganizationCodingAgentSettingsInput = {
+  /** [Internal] The model preference used for Coding Agent sessions. */
+  model?: InputMaybe<Scalars["String"]>;
 };
 
 /** Workspace deletion operation response. */
@@ -15897,6 +15905,8 @@ export type OrganizationUpdateInput = {
   codeIntelligenceRepository?: InputMaybe<Scalars["String"]>;
   /** [INTERNAL] Whether the workspace has enabled the Coding Agent. */
   codingAgentEnabled?: InputMaybe<Scalars["Boolean"]>;
+  /** [Internal] Settings for Coding Agent features. */
+  codingAgentSettings?: InputMaybe<OrganizationCodingAgentSettingsInput>;
   /** [INTERNAL] Configuration settings for the Customers feature. */
   customersConfiguration?: InputMaybe<Scalars["JSONObject"]>;
   /** [INTERNAL] Whether the workspace is using customers. */
@@ -17074,7 +17084,7 @@ export type ProjectLabel = Node & {
   id: Scalars["ID"];
   /** Whether the label is a group. When true, this label acts as a container for child labels and cannot be directly applied to issues or projects. When false, the label can be directly applied. */
   isGroup: Scalars["Boolean"];
-  /** The date when the label was last applied to an issue or project. Null if the label has never been applied. */
+  /** The date when the label was last applied to an issue, project, or initiative. Null if the label has never been applied. */
   lastAppliedAt?: Maybe<Scalars["DateTime"]>;
   /** The label's name. */
   name: Scalars["String"];

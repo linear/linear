@@ -8612,7 +8612,7 @@ export class InitiativeLabel extends Request {
   public id: string;
   /** Whether the label is a group. When true, this label acts as a container for child labels and cannot be directly applied to issues or projects. When false, the label can be directly applied. */
   public isGroup: boolean;
-  /** The date when the label was last applied to an issue or project. Null if the label has never been applied. */
+  /** The date when the label was last applied to an issue, project, or initiative. Null if the label has never been applied. */
   public lastAppliedAt?: Date | null;
   /** The label's name. */
   public name: string;
@@ -11495,7 +11495,7 @@ export class IssueLabel extends Request {
   public id: string;
   /** Whether the label is a group. When true, this label acts as a container for child labels and cannot be directly applied to issues or projects. When false, the label can be directly applied. */
   public isGroup: boolean;
-  /** The date when the label was last applied to an issue or project. Null if the label has never been applied. */
+  /** The date when the label was last applied to an issue, project, or initiative. Null if the label has never been applied. */
   public lastAppliedAt?: Date | null;
   /** The label's name. */
   public name: string;
@@ -15460,7 +15460,7 @@ export class ProjectLabel extends Request {
   public id: string;
   /** Whether the label is a group. When true, this label acts as a container for child labels and cannot be directly applied to issues or projects. When false, the label can be directly applied. */
   public isGroup: boolean;
-  /** The date when the label was last applied to an issue or project. Null if the label has never been applied. */
+  /** The date when the label was last applied to an issue, project, or initiative. Null if the label has never been applied. */
   public lastAppliedAt?: Date | null;
   /** The label's name. */
   public name: string;

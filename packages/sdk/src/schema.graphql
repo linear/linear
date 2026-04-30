@@ -2579,7 +2579,7 @@ type AiPromptRules implements Node {
 }
 
 """
-The type of AI prompt workflow.
+[Internal] The type of AI prompt workflow.
 """
 enum AiPromptType {
   agentGuidance
@@ -12309,7 +12309,7 @@ type InitiativeLabel implements Node {
   """
   isGroup: Boolean!
   """
-  The date when the label was last applied to an issue or project. Null if the label has never been applied.
+  The date when the label was last applied to an issue, project, or initiative. Null if the label has never been applied.
   """
   lastAppliedAt: DateTime
   """
@@ -17067,7 +17067,7 @@ type IssueLabel implements Node {
     orderBy: PaginationOrderBy
   ): IssueConnection!
   """
-  The date when the label was last applied to an issue or project. Null if the label has never been applied.
+  The date when the label was last applied to an issue, project, or initiative. Null if the label has never been applied.
   """
   lastAppliedAt: DateTime
   """
@@ -27031,6 +27031,10 @@ type Organization implements Node {
   """
   codingAgentEnabled: Boolean!
   """
+  [Internal] Settings for Coding Agent features.
+  """
+  codingAgentSettings: JSONObject!
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
@@ -27493,6 +27497,16 @@ type OrganizationCancelDeletePayload {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+
+"""
+[Internal] Input for updating Coding Agent settings for the workspace.
+"""
+input OrganizationCodingAgentSettingsInput {
+  """
+  [Internal] The model preference used for Coding Agent sessions.
+  """
+  model: String
 }
 
 """
@@ -28074,6 +28088,10 @@ input OrganizationUpdateInput {
   [INTERNAL] Whether the workspace has enabled the Coding Agent.
   """
   codingAgentEnabled: Boolean
+  """
+  [Internal] Settings for Coding Agent features.
+  """
+  codingAgentSettings: OrganizationCodingAgentSettingsInput
   """
   [INTERNAL] Configuration settings for the Customers feature.
   """
@@ -30271,7 +30289,7 @@ type ProjectLabel implements Node {
   """
   isGroup: Boolean!
   """
-  The date when the label was last applied to an issue or project. Null if the label has never been applied.
+  The date when the label was last applied to an issue, project, or initiative. Null if the label has never been applied.
   """
   lastAppliedAt: DateTime
   """
