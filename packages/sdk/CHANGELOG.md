@@ -1,5 +1,129 @@
 # Change Log
 
+## 83.0.0
+
+### Major Changes
+
+- f9c9ea6: feat(schema): [breaking] Field 'entityType' was removed from object type 'AiConversationNavigateToPageToolCallArgs' (AiConversationNavigateToPageToolCallArgs.entityType)
+
+  feat(schema): [breaking] Field 'identifier' was removed from object type 'AiConversationNavigateToPageToolCallArgs' (AiConversationNavigateToPageToolCallArgs.identifier)
+
+  feat(schema): [breaking] Field 'newTab' was removed from object type 'AiConversationNavigateToPageToolCallResult' (AiConversationNavigateToPageToolCallResult.newTab)
+
+  feat(schema): [breaking] Field 'url' was removed from object type 'AiConversationNavigateToPageToolCallResult' (AiConversationNavigateToPageToolCallResult.url)
+
+  feat(schema): [dangerous] Member 'AiConversationEventPart' was added to Union type 'AiConversationPart' (AiConversationPart)
+
+  feat(schema): [dangerous] Enum value 'event' was added to enum 'AiConversationPartType' (AiConversationPartType.event)
+
+  feat(schema): [dangerous] Enum value 'waiting' was added to enum 'AiConversationStatus' (AiConversationStatus.waiting)
+
+  feat(schema): [dangerous] Enum value 'GetPullRequestCheckLogs' was added to enum 'AiConversationTool' (AiConversationTool.GetPullRequestCheckLogs)
+
+  feat(schema): [dangerous] Enum value 'RetryPullRequestCheck' was added to enum 'AiConversationTool' (AiConversationTool.RetryPullRequestCheck)
+
+  feat(schema): [dangerous] Enum value 'SubscribeToEvent' was added to enum 'AiConversationTool' (AiConversationTool.SubscribeToEvent)
+
+  feat(schema): [dangerous] Enum value 'UnsubscribeFromEvent' was added to enum 'AiConversationTool' (AiConversationTool.UnsubscribeFromEvent)
+
+  feat(schema): [dangerous] Member 'AiConversationGetPullRequestCheckLogsToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Member 'AiConversationRetryPullRequestCheckToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Member 'AiConversationSubscribeToEventToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Member 'AiConversationUnsubscribeFromEventToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationEventPart' was added (AiConversationEventPart)
+
+  feat(schema): [non_breaking] Type 'AiConversationGetPullRequestCheckLogsToolCall' was added (AiConversationGetPullRequestCheckLogsToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationGetPullRequestCheckLogsToolCallArgs' was added (AiConversationGetPullRequestCheckLogsToolCallArgs)
+
+  feat(schema): [non_breaking] Type 'AiConversationNavigateToPageToolCallArgsEntities' was added (AiConversationNavigateToPageToolCallArgsEntities)
+
+  feat(schema): [non_breaking] Type 'AiConversationRetryPullRequestCheckToolCall' was added (AiConversationRetryPullRequestCheckToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationRetryPullRequestCheckToolCallArgs' was added (AiConversationRetryPullRequestCheckToolCallArgs)
+
+  feat(schema): [non_breaking] Type 'AiConversationSubscribeToEventToolCall' was added (AiConversationSubscribeToEventToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationSubscribeToEventToolCallArgs' was added (AiConversationSubscribeToEventToolCallArgs)
+
+  feat(schema): [non_breaking] Type 'AiConversationSubscribeToEventToolCallArgsKind' was added (AiConversationSubscribeToEventToolCallArgsKind)
+
+  feat(schema): [non_breaking] Type 'AiConversationSubscribeToEventToolCallArgsType' was added (AiConversationSubscribeToEventToolCallArgsType)
+
+  feat(schema): [non_breaking] Type 'AiConversationUnsubscribeFromEventToolCall' was added (AiConversationUnsubscribeFromEventToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationUnsubscribeFromEventToolCallArgs' was added (AiConversationUnsubscribeFromEventToolCallArgs)
+
+  feat(schema): [non_breaking] Field 'entities' was added to object type 'AiConversationNavigateToPageToolCallArgs' (AiConversationNavigateToPageToolCallArgs.entities)
+
+  feat(schema): [non_breaking] Field 'urls' was added to object type 'AiConversationNavigateToPageToolCallResult' (AiConversationNavigateToPageToolCallResult.urls)
+
+  feat(schema): [non_breaking] Input field 'FrontSettingsInput.automateTicketReopeningOnCancellation' description changed from 'Whether a ticket should be automatically reopened when its linked Linear issue is cancelled.' to 'Whether a ticket should be automatically reopened when its linked Linear issue is canceled.' (FrontSettingsInput.automateTicketReopeningOnCancellation)
+
+  feat(schema): [non_breaking] Input field 'FrontSettingsInput.automateTicketReopeningOnProjectCancellation' description changed from 'Whether a ticket should be automatically reopened when its linked Linear project is cancelled.' to 'Whether a ticket should be automatically reopened when its linked Linear project is canceled.' (FrontSettingsInput.automateTicketReopeningOnProjectCancellation)
+
+  feat(schema): [non_breaking] Field 'IntegrationsSettings.slackIssueStatusChangedDone' description changed from 'Whether to send a Slack message when any of the project or team's issues change to completed or cancelled.' to 'Whether to send a Slack message when any of the project or team's issues change to completed or canceled.' (IntegrationsSettings.slackIssueStatusChangedDone)
+
+  feat(schema): [non_breaking] Input field 'IntegrationsSettingsCreateInput.slackIssueStatusChangedDone' description changed from 'Whether to send a Slack message when any of the project or team's issues change to completed or cancelled.' to 'Whether to send a Slack message when any of the project or team's issues change to completed or canceled.' (IntegrationsSettingsCreateInput.slackIssueStatusChangedDone)
+
+  feat(schema): [non_breaking] Input field 'IntegrationsSettingsUpdateInput.slackIssueStatusChangedDone' description changed from 'Whether to send a Slack message when any of the project or team's issues change to completed or cancelled.' to 'Whether to send a Slack message when any of the project or team's issues change to completed or canceled.' (IntegrationsSettingsUpdateInput.slackIssueStatusChangedDone)
+
+  feat(schema): [non_breaking] Input field 'IntercomSettingsInput.automateTicketReopeningOnCancellation' description changed from 'Whether a ticket should be automatically reopened when its linked Linear issue is cancelled.' to 'Whether a ticket should be automatically reopened when its linked Linear issue is canceled.' (IntercomSettingsInput.automateTicketReopeningOnCancellation)
+
+  feat(schema): [non_breaking] Input field 'IntercomSettingsInput.automateTicketReopeningOnProjectCancellation' description changed from 'Whether a ticket should be automatically reopened when its linked Linear project is cancelled.' to 'Whether a ticket should be automatically reopened when its linked Linear project is canceled.' (IntercomSettingsInput.automateTicketReopeningOnProjectCancellation)
+
+  feat(schema): [non_breaking] Input field 'SalesforceSettingsInput.automateTicketReopeningOnCancellation' description changed from 'Whether a ticket should be automatically reopened when its linked Linear issue is cancelled.' to 'Whether a ticket should be automatically reopened when its linked Linear issue is canceled.' (SalesforceSettingsInput.automateTicketReopeningOnCancellation)
+
+  feat(schema): [non_breaking] Input field 'SalesforceSettingsInput.automateTicketReopeningOnProjectCancellation' description changed from 'Whether a ticket should be automatically reopened when its linked Linear project is cancelled.' to 'Whether a ticket should be automatically reopened when its linked Linear project is canceled.' (SalesforceSettingsInput.automateTicketReopeningOnProjectCancellation)
+
+  feat(schema): [non_breaking] Input field 'ZendeskSettingsInput.automateTicketReopeningOnCancellation' description changed from 'Whether a ticket should be automatically reopened when its linked Linear issue is cancelled.' to 'Whether a ticket should be automatically reopened when its linked Linear issue is canceled.' (ZendeskSettingsInput.automateTicketReopeningOnCancellation)
+
+  feat(schema): [non_breaking] Input field 'ZendeskSettingsInput.automateTicketReopeningOnProjectCancellation' description changed from 'Whether a ticket should be automatically reopened when its linked Linear project is cancelled.' to 'Whether a ticket should be automatically reopened when its linked Linear project is canceled.' (ZendeskSettingsInput.automateTicketReopeningOnProjectCancellation)
+
+### Minor Changes
+
+- eca02b9: feat(schema): [dangerous] Input field 'codingAgentSettings' was added to input object type 'OrganizationUpdateInput' (OrganizationUpdateInput.codingAgentSettings)
+
+  feat(schema): [non_breaking] Type 'OrganizationCodingAgentSettingsInput' was added (OrganizationCodingAgentSettingsInput)
+
+  feat(schema): [non_breaking] Description 'The type of AI prompt workflow.' on type 'AiPromptType' has changed to '[Internal] The type of AI prompt workflow.' (AiPromptType)
+
+  feat(schema): [non_breaking] Field 'InitiativeLabel.lastAppliedAt' description changed from 'The date when the label was last applied to an issue or project. Null if the label has never been applied.' to 'The date when the label was last applied to an issue, project, or initiative. Null if the label has never been applied.' (InitiativeLabel.lastAppliedAt)
+
+  feat(schema): [non_breaking] Field 'IssueLabel.lastAppliedAt' description changed from 'The date when the label was last applied to an issue or project. Null if the label has never been applied.' to 'The date when the label was last applied to an issue, project, or initiative. Null if the label has never been applied.' (IssueLabel.lastAppliedAt)
+
+  feat(schema): [non_breaking] Field 'codingAgentSettings' was added to object type 'Organization' (Organization.codingAgentSettings)
+
+  feat(schema): [non_breaking] Field 'ProjectLabel.lastAppliedAt' description changed from 'The date when the label was last applied to an issue or project. Null if the label has never been applied.' to 'The date when the label was last applied to an issue, project, or initiative. Null if the label has never been applied.' (ProjectLabel.lastAppliedAt)
+
+- e93813d: feat(schema): [dangerous] Input field 'labels' was added to input object type 'InitiativeCollectionFilter' (InitiativeCollectionFilter.labels)
+
+  feat(schema): [dangerous] Input field 'labels' was added to input object type 'InitiativeFilter' (InitiativeFilter.labels)
+
+  feat(schema): [dangerous] Input field 'labels' was added to input object type 'NullableInitiativeFilter' (NullableInitiativeFilter.labels)
+
+  feat(schema): [dangerous] Input field 'content' was added to input object type 'ReleaseNoteCreateInput' (ReleaseNoteCreateInput.content)
+
+  feat(schema): [dangerous] Input field 'content' was added to input object type 'ReleaseNoteUpdateInput' (ReleaseNoteUpdateInput.content)
+
+  feat(schema): [non_breaking] Type 'GitHubRemoveCodeAccessAction' was added (GitHubRemoveCodeAccessAction)
+
+  feat(schema): [non_breaking] Type 'InitiativeLabelCollectionFilter' was added (InitiativeLabelCollectionFilter)
+
+  feat(schema): [non_breaking] Type 'IntegrationGithubRemoveCodeAccessPayload' was added (IntegrationGithubRemoveCodeAccessPayload)
+
+  feat(schema): [non_breaking] Field 'integrationGithubRemoveCodeAccess' was added to object type 'Mutation' (Mutation.integrationGithubRemoveCodeAccess)
+
+  feat(schema): [non_breaking] Field 'lastRelease' was added to object type 'ReleaseNote' (ReleaseNote.lastRelease)
+
+  feat(schema): [non_breaking] Field 'latestReleaseNote' was added to object type 'ReleasePipeline' (ReleasePipeline.latestReleaseNote)
+
+  feat(schema): [non_breaking] Field 'initiativeFieldLabels' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.initiativeFieldLabels)
+
 ## 82.1.0
 
 ### Minor Changes
