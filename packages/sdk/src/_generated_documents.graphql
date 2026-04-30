@@ -1114,7 +1114,7 @@ fragment ViewPreferencesProjectLabelGroupColumn on ViewPreferencesProjectLabelGr
 # can be directly applied to initiatives.
 fragment InitiativeLabel on InitiativeLabel {
   __typename
-  # The date when the label was last applied to an issue or project. Null if the label has never been applied.
+  # The date when the label was last applied to an issue, project, or initiative. Null if the label has never been applied.
   lastAppliedAt
   # The label's color as a HEX string (e.g., '#EB5757'). Used for visual identification of the label in the UI.
   color
@@ -1148,7 +1148,7 @@ fragment InitiativeLabel on InitiativeLabel {
 # be directly applied to projects.
 fragment ProjectLabel on ProjectLabel {
   __typename
-  # The date when the label was last applied to an issue or project. Null if the label has never been applied.
+  # The date when the label was last applied to an issue, project, or initiative. Null if the label has never been applied.
   lastAppliedAt
   # The label's color as a HEX string (e.g., '#EB5757'). Used for visual identification of the label in the UI.
   color
@@ -6057,7 +6057,7 @@ fragment IntegrationActorWebhookPayload on IntegrationActorWebhookPayload {
 # as a group containing child labels. Labels may also be inherited from parent teams to sub-teams.
 fragment IssueLabel on IssueLabel {
   __typename
-  # The date when the label was last applied to an issue or project. Null if the label has never been applied.
+  # The date when the label was last applied to an issue, project, or initiative. Null if the label has never been applied.
   lastAppliedAt
   # The label's color as a HEX string (e.g., '#EB5757'). Used for visual identification of the label in the UI.
   color
