@@ -149,6 +149,8 @@ export function printOperations(
       /** Find an object matching the type of this query */
       const object = findObject(context, lastField);
 
+      const existingArgNames = new Set(fields.flatMap(f => (f.arguments ?? []).map(a => a.name.value)));
+
       const fieldOperations = object?.fields?.map(field => {
         if (
           /** No need to go further than scalar fields */
@@ -162,7 +164,12 @@ export function printOperations(
           /** Skip connection fields on nested types that aren't directly fetchable via a root query. Connection methods
            * require re-querying the parent by ID (e.g. issue_comments calls issue(id) { comments }), which isn't
            * currently possible for types like DocumentContent that are only accessible as nested fields. */
-          (fields.length > 1 && reduceTypeName(field.type)?.endsWith("Connection"))
+          (fields.length > 1 && reduceTypeName(field.type)?.endsWith("Connection")) ||
+          /** Skip when the child's args would collide with the chain's existing args. The generated
+           * operation flattens args from every step in the chain into a single variable list, so any
+           * shared arg name (e.g. `filter`, `first`) on both the parent and child produces invalid
+           * GraphQL with duplicate variable declarations. */
+          (field.arguments ?? []).some(arg => existingArgNames.has(arg.name.value))
         ) {
           return undefined;
         } else {

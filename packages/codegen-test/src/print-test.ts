@@ -412,9 +412,12 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
                         field.type,
                         operation.print.list
                       )} = await _${itemField}.${field.name}`,
-                      operation.print.list
-                        ? `${itemField}_${field.name}?.map(node => expect(node instanceof ${field.type}))`
-                        : `expect(${itemField}_${field.name} instanceof ${field.type})`,
+                      /** `instanceof Foo[]` is not valid TS; iterate items when the field returns a list. */
+                      field.type.endsWith("[]")
+                        ? `${itemField}_${field.name}?.map(node => expect(node instanceof ${field.type.slice(0, -2)}))`
+                        : operation.print.list
+                          ? `${itemField}_${field.name}?.map(node => expect(node instanceof ${field.type}))`
+                          : `expect(${itemField}_${field.name} instanceof ${field.type})`,
                     ]),
                     `No ${connectionType} found - cannot test ${itemField}.${field.name} query`
                   )
