@@ -115,6 +115,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the team connection query for the ReleasePipeline */
+    it("team.releasePipelines", async () => {
+      if (_team) {
+        const releasePipelines: L.ReleasePipelineConnection | undefined | null = await _team.releasePipelines();
+        expect(releasePipelines instanceof L.ReleasePipelineConnection);
+      } else {
+        console.warn("codegen-doc:print: No team found - cannot test _team.releasePipelines query");
+      }
+    });
+
     /** Test the team connection query for the WorkflowState */
     it("team.states", async () => {
       if (_team) {
@@ -600,6 +610,16 @@ describe("generated", () => {
         expect(relations instanceof L.IssueRelationConnection);
       } else {
         console.warn("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.relations query");
+      }
+    });
+
+    /** Test the attachmentIssue connection query for the Release */
+    it("attachmentIssue.releases", async () => {
+      if (_attachmentIssue) {
+        const releases: L.ReleaseConnection | undefined | null = await _attachmentIssue.releases();
+        expect(releases instanceof L.ReleaseConnection);
+      } else {
+        console.warn("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.releases query");
       }
     });
 
@@ -1547,6 +1567,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the document.release query for L.Release */
+    it("document.release", async () => {
+      if (_document) {
+        const document_release: L.Release | undefined | null = await _document.release;
+        expect(document_release instanceof L.Release);
+      } else {
+        console.warn("codegen-doc:print: No Document found - cannot test document.release query");
+      }
+    });
+
     /** Test the document.updatedBy query for L.User */
     it("document.updatedBy", async () => {
       if (_document) {
@@ -1832,6 +1862,26 @@ describe("generated", () => {
         expect(favorite_projectTeam instanceof L.Team);
       } else {
         console.warn("codegen-doc:print: No Favorite found - cannot test favorite.projectTeam query");
+      }
+    });
+
+    /** Test the favorite.release query for L.Release */
+    it("favorite.release", async () => {
+      if (_favorite) {
+        const favorite_release: L.Release | undefined | null = await _favorite.release;
+        expect(favorite_release instanceof L.Release);
+      } else {
+        console.warn("codegen-doc:print: No Favorite found - cannot test favorite.release query");
+      }
+    });
+
+    /** Test the favorite.releasePipeline query for L.ReleasePipeline */
+    it("favorite.releasePipeline", async () => {
+      if (_favorite) {
+        const favorite_releasePipeline: L.ReleasePipeline | undefined | null = await _favorite.releasePipeline;
+        expect(favorite_releasePipeline instanceof L.ReleasePipeline);
+      } else {
+        console.warn("codegen-doc:print: No Favorite found - cannot test favorite.releasePipeline query");
       }
     });
 
@@ -2484,6 +2534,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issue connection query for the Release */
+    it("issue.releases", async () => {
+      if (_issue) {
+        const releases: L.ReleaseConnection | undefined | null = await _issue.releases();
+        expect(releases instanceof L.ReleaseConnection);
+      } else {
+        console.warn("codegen-doc:print: No issue found - cannot test _issue.releases query");
+      }
+    });
+
     /** Test the issue model query for Issue_SharedAccess */
     it("issue.sharedAccess", async () => {
       if (_issue) {
@@ -3049,6 +3109,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issue connection query for the Release */
+    it("issue.releases", async () => {
+      if (_issue) {
+        const releases: L.ReleaseConnection | undefined | null = await _issue.releases();
+        expect(releases instanceof L.ReleaseConnection);
+      } else {
+        console.warn("codegen-doc:print: No issue found - cannot test _issue.releases query");
+      }
+    });
+
     /** Test the issue model query for Issue_SharedAccess */
     it("issue.sharedAccess", async () => {
       if (_issue) {
@@ -3263,6 +3333,53 @@ describe("generated", () => {
     });
   });
 
+  /** Test all IssueToRelease queries */
+  describe("IssueToReleases", () => {
+    let _issueToRelease: L.IssueToRelease | undefined | null;
+    let _issueToRelease_id: string | undefined | null;
+
+    /** Test the root connection query for the IssueToRelease */
+    it("issueToReleases", async () => {
+      const issueToReleases: L.IssueToReleaseConnection | undefined | null = await client.issueToReleases();
+      const issueToRelease = issueToReleases?.nodes?.[0];
+      _issueToRelease_id = issueToRelease?.id;
+      expect(issueToReleases instanceof L.IssueToReleaseConnection);
+    });
+
+    /** Test the root query for a single IssueToRelease */
+    it("issueToRelease", async () => {
+      if (_issueToRelease_id) {
+        const issueToRelease: L.IssueToRelease | undefined | null = await client.issueToRelease(_issueToRelease_id);
+        _issueToRelease = issueToRelease;
+        expect(issueToRelease instanceof L.IssueToRelease);
+      } else {
+        console.warn(
+          "codegen-doc:print: No first IssueToRelease found in connection - cannot test issueToRelease query"
+        );
+      }
+    });
+
+    /** Test the issueToRelease.issue query for L.Issue */
+    it("issueToRelease.issue", async () => {
+      if (_issueToRelease) {
+        const issueToRelease_issue: L.Issue | undefined | null = await _issueToRelease.issue;
+        expect(issueToRelease_issue instanceof L.Issue);
+      } else {
+        console.warn("codegen-doc:print: No IssueToRelease found - cannot test issueToRelease.issue query");
+      }
+    });
+
+    /** Test the issueToRelease.release query for L.Release */
+    it("issueToRelease.release", async () => {
+      if (_issueToRelease) {
+        const issueToRelease_release: L.Release | undefined | null = await _issueToRelease.release;
+        expect(issueToRelease_release instanceof L.Release);
+      } else {
+        console.warn("codegen-doc:print: No IssueToRelease found - cannot test issueToRelease.release query");
+      }
+    });
+  });
+
   /** Test IssueVcsBranchSearch query */
   describe("IssueVcsBranchSearch", () => {
     let _issueVcsBranchSearch: L.Issue | undefined | null;
@@ -3416,6 +3533,18 @@ describe("generated", () => {
       } else {
         console.warn(
           "codegen-doc:print: No issueVcsBranchSearch found - cannot test _issueVcsBranchSearch.relations query"
+        );
+      }
+    });
+
+    /** Test the issueVcsBranchSearch connection query for the Release */
+    it("issueVcsBranchSearch.releases", async () => {
+      if (_issueVcsBranchSearch) {
+        const releases: L.ReleaseConnection | undefined | null = await _issueVcsBranchSearch.releases();
+        expect(releases instanceof L.ReleaseConnection);
+      } else {
+        console.warn(
+          "codegen-doc:print: No issueVcsBranchSearch found - cannot test _issueVcsBranchSearch.releases query"
         );
       }
     });
@@ -3598,6 +3727,16 @@ describe("generated", () => {
         expect(relations instanceof L.IssueRelationConnection);
       } else {
         console.warn("codegen-doc:print: No issue found - cannot test _issue.relations query");
+      }
+    });
+
+    /** Test the issue connection query for the Release */
+    it("issue.releases", async () => {
+      if (_issue) {
+        const releases: L.ReleaseConnection | undefined | null = await _issue.releases();
+        expect(releases instanceof L.ReleaseConnection);
+      } else {
+        console.warn("codegen-doc:print: No issue found - cannot test _issue.releases query");
       }
     });
 
@@ -3799,6 +3938,66 @@ describe("generated", () => {
         expect(issue_team instanceof L.Team);
       } else {
         console.warn("codegen-doc:print: No Issue found - cannot test issue.team query");
+      }
+    });
+  });
+
+  /** Test LatestReleaseByAccessKey query */
+  describe("LatestReleaseByAccessKey", () => {
+    let _latestReleaseByAccessKey: L.Release | undefined | null;
+
+    /** Test the root model query for LatestReleaseByAccessKey */
+    it("latestReleaseByAccessKey", async () => {
+      const latestReleaseByAccessKey: L.Release | undefined | null = await client.latestReleaseByAccessKey;
+      _latestReleaseByAccessKey = latestReleaseByAccessKey;
+      expect(latestReleaseByAccessKey instanceof L.Release);
+    });
+
+    /** Test the latestReleaseByAccessKey connection query for the Document */
+    it("latestReleaseByAccessKey.documents", async () => {
+      if (_latestReleaseByAccessKey) {
+        const documents: L.DocumentConnection | undefined | null = await _latestReleaseByAccessKey.documents();
+        expect(documents instanceof L.DocumentConnection);
+      } else {
+        console.warn(
+          "codegen-doc:print: No latestReleaseByAccessKey found - cannot test _latestReleaseByAccessKey.documents query"
+        );
+      }
+    });
+
+    /** Test the latestReleaseByAccessKey connection query for the ReleaseHistory */
+    it("latestReleaseByAccessKey.history", async () => {
+      if (_latestReleaseByAccessKey) {
+        const history: L.ReleaseHistoryConnection | undefined | null = await _latestReleaseByAccessKey.history();
+        expect(history instanceof L.ReleaseHistoryConnection);
+      } else {
+        console.warn(
+          "codegen-doc:print: No latestReleaseByAccessKey found - cannot test _latestReleaseByAccessKey.history query"
+        );
+      }
+    });
+
+    /** Test the latestReleaseByAccessKey connection query for the Issue */
+    it("latestReleaseByAccessKey.issues", async () => {
+      if (_latestReleaseByAccessKey) {
+        const issues: L.IssueConnection | undefined | null = await _latestReleaseByAccessKey.issues();
+        expect(issues instanceof L.IssueConnection);
+      } else {
+        console.warn(
+          "codegen-doc:print: No latestReleaseByAccessKey found - cannot test _latestReleaseByAccessKey.issues query"
+        );
+      }
+    });
+
+    /** Test the latestReleaseByAccessKey connection query for the EntityExternalLink */
+    it("latestReleaseByAccessKey.links", async () => {
+      if (_latestReleaseByAccessKey) {
+        const links: L.EntityExternalLinkConnection | undefined | null = await _latestReleaseByAccessKey.links();
+        expect(links instanceof L.EntityExternalLinkConnection);
+      } else {
+        console.warn(
+          "codegen-doc:print: No latestReleaseByAccessKey found - cannot test _latestReleaseByAccessKey.links query"
+        );
       }
     });
   });
@@ -4858,6 +5057,364 @@ describe("generated", () => {
     });
   });
 
+  /** Test all ReleaseNote queries */
+  describe("ReleaseNotes", () => {
+    let _releaseNote: L.ReleaseNote | undefined | null;
+    let _releaseNote_id: string | undefined | null;
+
+    /** Test the root connection query for the ReleaseNote */
+    it("releaseNotes", async () => {
+      const releaseNotes: L.ReleaseNoteConnection | undefined | null = await client.releaseNotes();
+      const releaseNote = releaseNotes?.nodes?.[0];
+      _releaseNote_id = releaseNote?.id;
+      expect(releaseNotes instanceof L.ReleaseNoteConnection);
+    });
+
+    /** Test the root query for a single ReleaseNote */
+    it("releaseNote", async () => {
+      if (_releaseNote_id) {
+        const releaseNote: L.ReleaseNote | undefined | null = await client.releaseNote(_releaseNote_id);
+        _releaseNote = releaseNote;
+        expect(releaseNote instanceof L.ReleaseNote);
+      } else {
+        console.warn("codegen-doc:print: No first ReleaseNote found in connection - cannot test releaseNote query");
+      }
+    });
+
+    let _documentContent: L.DocumentContent | undefined | null;
+
+    /** Test the releaseNote model query for ReleaseNote_DocumentContent */
+    it("releaseNote.documentContent", async () => {
+      if (_releaseNote) {
+        const documentContent: L.DocumentContent | undefined | null = _releaseNote.documentContent;
+        _documentContent = documentContent;
+        expect(documentContent instanceof L.DocumentContent);
+      } else {
+        console.warn("codegen-doc:print: No releaseNote found - cannot test _releaseNote.documentContent query");
+      }
+    });
+
+    /** Test the releaseNote_documentContent model query for ReleaseNote_DocumentContent_AiPromptRules */
+    it("releaseNote_documentContent.aiPromptRules", async () => {
+      if (_documentContent) {
+        const aiPromptRules: L.AiPromptRules | undefined | null = _documentContent.aiPromptRules;
+        expect(aiPromptRules instanceof L.AiPromptRules);
+      } else {
+        console.warn("codegen-doc:print: No documentContent found - cannot test _documentContent.aiPromptRules query");
+      }
+    });
+
+    /** Test the releaseNote_documentContent model query for ReleaseNote_DocumentContent_WelcomeMessage */
+    it("releaseNote_documentContent.welcomeMessage", async () => {
+      if (_documentContent) {
+        const welcomeMessage: L.WelcomeMessage | undefined | null = _documentContent.welcomeMessage;
+        expect(welcomeMessage instanceof L.WelcomeMessage);
+      } else {
+        console.warn("codegen-doc:print: No documentContent found - cannot test _documentContent.welcomeMessage query");
+      }
+    });
+
+    /** Test the releaseNote.lastRelease query for L.Release */
+    it("releaseNote.lastRelease", async () => {
+      if (_releaseNote) {
+        const releaseNote_lastRelease: L.Release | undefined | null = await _releaseNote.lastRelease;
+        expect(releaseNote_lastRelease instanceof L.Release);
+      } else {
+        console.warn("codegen-doc:print: No ReleaseNote found - cannot test releaseNote.lastRelease query");
+      }
+    });
+
+    /** Test the releaseNote.releases query for L.Release[] */
+    it("releaseNote.releases", async () => {
+      if (_releaseNote) {
+        const releaseNote_releases: L.Release[] | undefined | null = await _releaseNote.releases;
+        releaseNote_releases?.map(node => expect(node instanceof L.Release));
+      } else {
+        console.warn("codegen-doc:print: No ReleaseNote found - cannot test releaseNote.releases query");
+      }
+    });
+  });
+
+  /** Test ReleasePipelineByAccessKey query */
+  describe("ReleasePipelineByAccessKey", () => {
+    let _releasePipelineByAccessKey: L.ReleasePipeline | undefined | null;
+
+    /** Test the root model query for ReleasePipelineByAccessKey */
+    it("releasePipelineByAccessKey", async () => {
+      const releasePipelineByAccessKey: L.ReleasePipeline | undefined | null = await client.releasePipelineByAccessKey;
+      _releasePipelineByAccessKey = releasePipelineByAccessKey;
+      expect(releasePipelineByAccessKey instanceof L.ReleasePipeline);
+    });
+
+    /** Test the releasePipelineByAccessKey connection query for the Release */
+    it("releasePipelineByAccessKey.releases", async () => {
+      if (_releasePipelineByAccessKey) {
+        const releases: L.ReleaseConnection | undefined | null = await _releasePipelineByAccessKey.releases();
+        expect(releases instanceof L.ReleaseConnection);
+      } else {
+        console.warn(
+          "codegen-doc:print: No releasePipelineByAccessKey found - cannot test _releasePipelineByAccessKey.releases query"
+        );
+      }
+    });
+
+    /** Test the releasePipelineByAccessKey connection query for the ReleaseStage */
+    it("releasePipelineByAccessKey.stages", async () => {
+      if (_releasePipelineByAccessKey) {
+        const stages: L.ReleaseStageConnection | undefined | null = await _releasePipelineByAccessKey.stages();
+        expect(stages instanceof L.ReleaseStageConnection);
+      } else {
+        console.warn(
+          "codegen-doc:print: No releasePipelineByAccessKey found - cannot test _releasePipelineByAccessKey.stages query"
+        );
+      }
+    });
+
+    /** Test the releasePipelineByAccessKey connection query for the Team */
+    it("releasePipelineByAccessKey.teams", async () => {
+      if (_releasePipelineByAccessKey) {
+        const teams: L.TeamConnection | undefined | null = await _releasePipelineByAccessKey.teams();
+        expect(teams instanceof L.TeamConnection);
+      } else {
+        console.warn(
+          "codegen-doc:print: No releasePipelineByAccessKey found - cannot test _releasePipelineByAccessKey.teams query"
+        );
+      }
+    });
+  });
+
+  /** Test all ReleasePipeline queries */
+  describe("ReleasePipelines", () => {
+    let _releasePipeline: L.ReleasePipeline | undefined | null;
+    let _releasePipeline_id: string | undefined | null;
+
+    /** Test the root connection query for the ReleasePipeline */
+    it("releasePipelines", async () => {
+      const releasePipelines: L.ReleasePipelineConnection | undefined | null = await client.releasePipelines();
+      const releasePipeline = releasePipelines?.nodes?.[0];
+      _releasePipeline_id = releasePipeline?.id;
+      expect(releasePipelines instanceof L.ReleasePipelineConnection);
+    });
+
+    /** Test the root query for a single ReleasePipeline */
+    it("releasePipeline", async () => {
+      if (_releasePipeline_id) {
+        const releasePipeline: L.ReleasePipeline | undefined | null = await client.releasePipeline(_releasePipeline_id);
+        _releasePipeline = releasePipeline;
+        expect(releasePipeline instanceof L.ReleasePipeline);
+      } else {
+        console.warn(
+          "codegen-doc:print: No first ReleasePipeline found in connection - cannot test releasePipeline query"
+        );
+      }
+    });
+
+    /** Test the releasePipeline connection query for the Release */
+    it("releasePipeline.releases", async () => {
+      if (_releasePipeline) {
+        const releases: L.ReleaseConnection | undefined | null = await _releasePipeline.releases();
+        expect(releases instanceof L.ReleaseConnection);
+      } else {
+        console.warn("codegen-doc:print: No releasePipeline found - cannot test _releasePipeline.releases query");
+      }
+    });
+
+    /** Test the releasePipeline connection query for the ReleaseStage */
+    it("releasePipeline.stages", async () => {
+      if (_releasePipeline) {
+        const stages: L.ReleaseStageConnection | undefined | null = await _releasePipeline.stages();
+        expect(stages instanceof L.ReleaseStageConnection);
+      } else {
+        console.warn("codegen-doc:print: No releasePipeline found - cannot test _releasePipeline.stages query");
+      }
+    });
+
+    /** Test the releasePipeline connection query for the Team */
+    it("releasePipeline.teams", async () => {
+      if (_releasePipeline) {
+        const teams: L.TeamConnection | undefined | null = await _releasePipeline.teams();
+        expect(teams instanceof L.TeamConnection);
+      } else {
+        console.warn("codegen-doc:print: No releasePipeline found - cannot test _releasePipeline.teams query");
+      }
+    });
+
+    /** Test the releasePipeline.latestReleaseNote query for L.ReleaseNote */
+    it("releasePipeline.latestReleaseNote", async () => {
+      if (_releasePipeline) {
+        const releasePipeline_latestReleaseNote: L.ReleaseNote | undefined | null =
+          await _releasePipeline.latestReleaseNote;
+        expect(releasePipeline_latestReleaseNote instanceof L.ReleaseNote);
+      } else {
+        console.warn(
+          "codegen-doc:print: No ReleasePipeline found - cannot test releasePipeline.latestReleaseNote query"
+        );
+      }
+    });
+
+    /** Test the releasePipeline.releaseNoteTemplate query for L.Template */
+    it("releasePipeline.releaseNoteTemplate", async () => {
+      if (_releasePipeline) {
+        const releasePipeline_releaseNoteTemplate: L.Template | undefined | null =
+          await _releasePipeline.releaseNoteTemplate;
+        expect(releasePipeline_releaseNoteTemplate instanceof L.Template);
+      } else {
+        console.warn(
+          "codegen-doc:print: No ReleasePipeline found - cannot test releasePipeline.releaseNoteTemplate query"
+        );
+      }
+    });
+  });
+
+  /** Test ReleaseSearch query */
+  describe("ReleaseSearch", () => {
+    /** Test the root model query for ReleaseSearch */
+    it("releaseSearch", async () => {
+      const releaseSearch: L.Release[] | undefined | null = await client.releaseSearch();
+      releaseSearch?.map(node => expect(node instanceof L.Release));
+    });
+  });
+
+  /** Test all ReleaseStage queries */
+  describe("ReleaseStages", () => {
+    let _releaseStage: L.ReleaseStage | undefined | null;
+    let _releaseStage_id: string | undefined | null;
+
+    /** Test the root connection query for the ReleaseStage */
+    it("releaseStages", async () => {
+      const releaseStages: L.ReleaseStageConnection | undefined | null = await client.releaseStages();
+      const releaseStage = releaseStages?.nodes?.[0];
+      _releaseStage_id = releaseStage?.id;
+      expect(releaseStages instanceof L.ReleaseStageConnection);
+    });
+
+    /** Test the root query for a single ReleaseStage */
+    it("releaseStage", async () => {
+      if (_releaseStage_id) {
+        const releaseStage: L.ReleaseStage | undefined | null = await client.releaseStage(_releaseStage_id);
+        _releaseStage = releaseStage;
+        expect(releaseStage instanceof L.ReleaseStage);
+      } else {
+        console.warn("codegen-doc:print: No first ReleaseStage found in connection - cannot test releaseStage query");
+      }
+    });
+
+    /** Test the releaseStage connection query for the Release */
+    it("releaseStage.releases", async () => {
+      if (_releaseStage) {
+        const releases: L.ReleaseConnection | undefined | null = await _releaseStage.releases();
+        expect(releases instanceof L.ReleaseConnection);
+      } else {
+        console.warn("codegen-doc:print: No releaseStage found - cannot test _releaseStage.releases query");
+      }
+    });
+
+    /** Test the releaseStage.pipeline query for L.ReleasePipeline */
+    it("releaseStage.pipeline", async () => {
+      if (_releaseStage) {
+        const releaseStage_pipeline: L.ReleasePipeline | undefined | null = await _releaseStage.pipeline;
+        expect(releaseStage_pipeline instanceof L.ReleasePipeline);
+      } else {
+        console.warn("codegen-doc:print: No ReleaseStage found - cannot test releaseStage.pipeline query");
+      }
+    });
+  });
+
+  /** Test all Release queries */
+  describe("Releases", () => {
+    let _release: L.Release | undefined | null;
+    let _release_id: string | undefined | null;
+
+    /** Test the root connection query for the Release */
+    it("releases", async () => {
+      const releases: L.ReleaseConnection | undefined | null = await client.releases();
+      const release = releases?.nodes?.[0];
+      _release_id = release?.id;
+      expect(releases instanceof L.ReleaseConnection);
+    });
+
+    /** Test the root query for a single Release */
+    it("release", async () => {
+      if (_release_id) {
+        const release: L.Release | undefined | null = await client.release(_release_id);
+        _release = release;
+        expect(release instanceof L.Release);
+      } else {
+        console.warn("codegen-doc:print: No first Release found in connection - cannot test release query");
+      }
+    });
+
+    /** Test the release connection query for the Document */
+    it("release.documents", async () => {
+      if (_release) {
+        const documents: L.DocumentConnection | undefined | null = await _release.documents();
+        expect(documents instanceof L.DocumentConnection);
+      } else {
+        console.warn("codegen-doc:print: No release found - cannot test _release.documents query");
+      }
+    });
+
+    /** Test the release connection query for the ReleaseHistory */
+    it("release.history", async () => {
+      if (_release) {
+        const history: L.ReleaseHistoryConnection | undefined | null = await _release.history();
+        expect(history instanceof L.ReleaseHistoryConnection);
+      } else {
+        console.warn("codegen-doc:print: No release found - cannot test _release.history query");
+      }
+    });
+
+    /** Test the release connection query for the Issue */
+    it("release.issues", async () => {
+      if (_release) {
+        const issues: L.IssueConnection | undefined | null = await _release.issues();
+        expect(issues instanceof L.IssueConnection);
+      } else {
+        console.warn("codegen-doc:print: No release found - cannot test _release.issues query");
+      }
+    });
+
+    /** Test the release connection query for the EntityExternalLink */
+    it("release.links", async () => {
+      if (_release) {
+        const links: L.EntityExternalLinkConnection | undefined | null = await _release.links();
+        expect(links instanceof L.EntityExternalLinkConnection);
+      } else {
+        console.warn("codegen-doc:print: No release found - cannot test _release.links query");
+      }
+    });
+
+    /** Test the release.creator query for L.User */
+    it("release.creator", async () => {
+      if (_release) {
+        const release_creator: L.User | undefined | null = await _release.creator;
+        expect(release_creator instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Release found - cannot test release.creator query");
+      }
+    });
+
+    /** Test the release.pipeline query for L.ReleasePipeline */
+    it("release.pipeline", async () => {
+      if (_release) {
+        const release_pipeline: L.ReleasePipeline | undefined | null = await _release.pipeline;
+        expect(release_pipeline instanceof L.ReleasePipeline);
+      } else {
+        console.warn("codegen-doc:print: No Release found - cannot test release.pipeline query");
+      }
+    });
+
+    /** Test the release.stage query for L.ReleaseStage */
+    it("release.stage", async () => {
+      if (_release) {
+        const release_stage: L.ReleaseStage | undefined | null = await _release.stage;
+        expect(release_stage instanceof L.ReleaseStage);
+      } else {
+        console.warn("codegen-doc:print: No Release found - cannot test release.stage query");
+      }
+    });
+  });
+
   /** Test all RoadmapToProject queries */
   describe("RoadmapToProjects", () => {
     let _roadmapToProject: L.RoadmapToProject | undefined | null;
@@ -5167,6 +5724,16 @@ describe("generated", () => {
         expect(projects instanceof L.ProjectConnection);
       } else {
         console.warn("codegen-doc:print: No team found - cannot test _team.projects query");
+      }
+    });
+
+    /** Test the team connection query for the ReleasePipeline */
+    it("team.releasePipelines", async () => {
+      if (_team) {
+        const releasePipelines: L.ReleasePipelineConnection | undefined | null = await _team.releasePipelines();
+        expect(releasePipelines instanceof L.ReleasePipelineConnection);
+      } else {
+        console.warn("codegen-doc:print: No team found - cannot test _team.releasePipelines query");
       }
     });
 
