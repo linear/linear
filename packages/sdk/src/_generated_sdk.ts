@@ -5788,6 +5788,7 @@ export class Document extends Request {
   private _issue?: L.DocumentFragment["issue"];
   private _lastAppliedTemplate?: L.DocumentFragment["lastAppliedTemplate"];
   private _project?: L.DocumentFragment["project"];
+  private _release?: L.DocumentFragment["release"];
   private _updatedBy?: L.DocumentFragment["updatedBy"];
 
   public constructor(request: LinearRequest, data: L.DocumentFragment) {
@@ -5811,6 +5812,7 @@ export class Document extends Request {
     this._issue = data.issue ?? undefined;
     this._lastAppliedTemplate = data.lastAppliedTemplate ?? undefined;
     this._project = data.project ?? undefined;
+    this._release = data.release ?? undefined;
     this._updatedBy = data.updatedBy ?? undefined;
   }
 
@@ -5886,6 +5888,14 @@ export class Document extends Request {
   /** The ID of project that the document is associated with. null if the document belongs to a different parent entity type. */
   public get projectId(): string | undefined {
     return this._project?.id;
+  }
+  /** The release that the document is associated with. Null if the document belongs to a different parent entity type. */
+  public get release(): LinearFetch<Release> | undefined {
+    return this._release?.id ? new ReleaseQuery(this._request).fetch(this._release?.id) : undefined;
+  }
+  /** The ID of release that the document is associated with. null if the document belongs to a different parent entity type. */
+  public get releaseId(): string | undefined {
+    return this._release?.id;
   }
   /** The user who last updated the document. Null if the user's account has been deleted. */
   public get updatedBy(): LinearFetch<User> | undefined {
@@ -6352,6 +6362,7 @@ export class DocumentSearchResult extends Request {
   private _issue?: L.DocumentSearchResultFragment["issue"];
   private _lastAppliedTemplate?: L.DocumentSearchResultFragment["lastAppliedTemplate"];
   private _project?: L.DocumentSearchResultFragment["project"];
+  private _release?: L.DocumentSearchResultFragment["release"];
   private _updatedBy?: L.DocumentSearchResultFragment["updatedBy"];
 
   public constructor(request: LinearRequest, data: L.DocumentSearchResultFragment) {
@@ -6376,6 +6387,7 @@ export class DocumentSearchResult extends Request {
     this._issue = data.issue ?? undefined;
     this._lastAppliedTemplate = data.lastAppliedTemplate ?? undefined;
     this._project = data.project ?? undefined;
+    this._release = data.release ?? undefined;
     this._updatedBy = data.updatedBy ?? undefined;
   }
 
@@ -6453,6 +6465,14 @@ export class DocumentSearchResult extends Request {
   /** The ID of project that the document is associated with. null if the document belongs to a different parent entity type. */
   public get projectId(): string | undefined {
     return this._project?.id;
+  }
+  /** The release that the document is associated with. Null if the document belongs to a different parent entity type. */
+  public get release(): LinearFetch<Release> | undefined {
+    return this._release?.id ? new ReleaseQuery(this._request).fetch(this._release?.id) : undefined;
+  }
+  /** The ID of release that the document is associated with. null if the document belongs to a different parent entity type. */
+  public get releaseId(): string | undefined {
+    return this._release?.id;
   }
   /** The user who last updated the document. Null if the user's account has been deleted. */
   public get updatedBy(): LinearFetch<User> | undefined {
@@ -7484,6 +7504,8 @@ export class Favorite extends Request {
   private _project?: L.FavoriteFragment["project"];
   private _projectLabel?: L.FavoriteFragment["projectLabel"];
   private _projectTeam?: L.FavoriteFragment["projectTeam"];
+  private _release?: L.FavoriteFragment["release"];
+  private _releasePipeline?: L.FavoriteFragment["releasePipeline"];
   private _team?: L.FavoriteFragment["team"];
   private _user?: L.FavoriteFragment["user"];
 
@@ -7513,6 +7535,8 @@ export class Favorite extends Request {
     this._project = data.project ?? undefined;
     this._projectLabel = data.projectLabel ?? undefined;
     this._projectTeam = data.projectTeam ?? undefined;
+    this._release = data.release ?? undefined;
+    this._releasePipeline = data.releasePipeline ?? undefined;
     this._team = data.team ?? undefined;
     this._user = data.user ?? undefined;
   }
@@ -7645,6 +7669,24 @@ export class Favorite extends Request {
   /** The ID of [deprecated] the favorited team of the project. */
   public get projectTeamId(): string | undefined {
     return this._projectTeam?.id;
+  }
+  /** The favorited release. */
+  public get release(): LinearFetch<Release> | undefined {
+    return this._release?.id ? new ReleaseQuery(this._request).fetch(this._release?.id) : undefined;
+  }
+  /** The ID of favorited release. */
+  public get releaseId(): string | undefined {
+    return this._release?.id;
+  }
+  /** The favorited release pipeline. */
+  public get releasePipeline(): LinearFetch<ReleasePipeline> | undefined {
+    return this._releasePipeline?.id
+      ? new ReleasePipelineQuery(this._request).fetch(this._releasePipeline?.id)
+      : undefined;
+  }
+  /** The ID of favorited release pipeline. */
+  public get releasePipelineId(): string | undefined {
+    return this._releasePipeline?.id;
   }
   /** The favorited team. */
   public get team(): LinearFetch<Team> | undefined {
@@ -8084,6 +8126,7 @@ export class GitLabIntegrationCreatePayload extends Request {
   public constructor(request: LinearRequest, data: L.GitLabIntegrationCreatePayloadFragment) {
     super(request);
     this.error = data.error ?? undefined;
+    this.errorRequest = data.errorRequest ?? undefined;
     this.errorResponseBody = data.errorResponseBody ?? undefined;
     this.errorResponseHeaders = data.errorResponseHeaders ?? undefined;
     this.lastSyncId = data.lastSyncId;
@@ -8094,6 +8137,8 @@ export class GitLabIntegrationCreatePayload extends Request {
 
   /** Error message if the connection failed. */
   public error?: string | null;
+  /** Method and post-encoding upstream URI of the failed request, for debugging proxy allowlist rules (e.g. `GET /api/v4/projects/aire%2Fagents`). */
+  public errorRequest?: string | null;
   /** Response body from GitLab for debugging. */
   public errorResponseBody?: string | null;
   /** Response headers from GitLab for debugging (JSON stringified). */
@@ -8125,6 +8170,7 @@ export class GitLabTestConnectionPayload extends Request {
   public constructor(request: LinearRequest, data: L.GitLabTestConnectionPayloadFragment) {
     super(request);
     this.error = data.error ?? undefined;
+    this.errorRequest = data.errorRequest ?? undefined;
     this.errorResponseBody = data.errorResponseBody ?? undefined;
     this.errorResponseHeaders = data.errorResponseHeaders ?? undefined;
     this.lastSyncId = data.lastSyncId;
@@ -8134,6 +8180,8 @@ export class GitLabTestConnectionPayload extends Request {
 
   /** Error message if the connection test failed. */
   public error?: string | null;
+  /** Method and post-encoding upstream URI of the failed request, for debugging proxy allowlist rules (e.g. `GET /api/v4/projects/aire%2Fagents`). */
+  public errorRequest?: string | null;
   /** Response body from GitLab for debugging. */
   public errorResponseBody?: string | null;
   /** Response headers from GitLab for debugging (JSON stringified). */
@@ -10496,6 +10544,10 @@ export class Issue extends Request {
   public relations(variables?: Omit<L.Issue_RelationsQueryVariables, "id">) {
     return new Issue_RelationsQuery(this._request, this.id, variables).fetch(variables);
   }
+  /** Releases associated with the issue. */
+  public releases(variables?: Omit<L.Issue_ReleasesQueryVariables, "id">) {
+    return new Issue_ReleasesQuery(this._request, this.id, variables).fetch(variables);
+  }
   /** The issue's workflow states over time. */
   public stateHistory(variables?: Omit<L.Issue_StateHistoryQueryVariables, "id">) {
     return new Issue_StateHistoryQuery(this._request, this.id, variables).fetch(variables);
@@ -10877,6 +10929,7 @@ export class IssueHistory extends Request {
     super(request);
     this.actorId = data.actorId ?? undefined;
     this.addedLabelIds = data.addedLabelIds ?? undefined;
+    this.addedToReleaseIds = data.addedToReleaseIds ?? undefined;
     this.archived = data.archived ?? undefined;
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.attachmentId = data.attachmentId ?? undefined;
@@ -10899,6 +10952,7 @@ export class IssueHistory extends Request {
     this.fromTeamId = data.fromTeamId ?? undefined;
     this.fromTitle = data.fromTitle ?? undefined;
     this.id = data.id;
+    this.removedFromReleaseIds = data.removedFromReleaseIds ?? undefined;
     this.removedLabelIds = data.removedLabelIds ?? undefined;
     this.toAssigneeId = data.toAssigneeId ?? undefined;
     this.toConvertedProjectId = data.toConvertedProjectId ?? undefined;
@@ -10960,6 +11014,8 @@ export class IssueHistory extends Request {
   public actorId?: string | null;
   /** ID's of labels that were added. */
   public addedLabelIds?: string[] | null;
+  /** ID's of releases that the issue was added to. */
+  public addedToReleaseIds?: string[] | null;
   /** Whether the issue was archived (true) or unarchived (false) in this change. Null if the archive status was not changed. */
   public archived?: boolean | null;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -11004,6 +11060,8 @@ export class IssueHistory extends Request {
   public fromTitle?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
+  /** ID's of releases that the issue was removed from. */
+  public removedFromReleaseIds?: string[] | null;
   /** ID's of labels that were removed. */
   public removedLabelIds?: string[] | null;
   /** Identifier of the user to whom the issue was assigned. Can be used to query the user directly. Null if the assignee was not changed or the issue was unassigned. */
@@ -11067,6 +11125,10 @@ export class IssueHistory extends Request {
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
+  /** The releases that the issue was added to. */
+  public get addedToReleases(): LinearFetch<Release[]> {
+    return new ReleaseSearchQuery(this._request).fetch();
+  }
   /** The linked attachment. */
   public get attachment(): LinearFetch<Attachment> | undefined {
     return this._attachment?.id ? new AttachmentQuery(this._request).fetch(this._attachment?.id) : undefined;
@@ -11120,6 +11182,10 @@ export class IssueHistory extends Request {
   /** The ID of issue that was changed. */
   public get issueId(): string | undefined {
     return this._issue?.id;
+  }
+  /** The releases that the issue was removed from. */
+  public get removedFromReleases(): LinearFetch<Release[]> {
+    return new ReleaseSearchQuery(this._request).fetch();
   }
   /** The user that was assigned to the issue. */
   public get toAssignee(): LinearFetch<User> | undefined {
@@ -12620,6 +12686,113 @@ export class IssueTitleSuggestionFromCustomerRequestPayload extends Request {
   public title: string;
 }
 /**
+ * A join entity linking an issue to a release for release tracking. Each record represents an association between a single issue and a single release, along with metadata about the source of the link (e.g., which pull requests connected the issue to the release). Creating or deleting these associations automatically records the change in issue history.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssueToReleaseFragment response data
+ */
+export class IssueToRelease extends Request {
+  private _issue: L.IssueToReleaseFragment["issue"];
+  private _release: L.IssueToReleaseFragment["release"];
+
+  public constructor(request: LinearRequest, data: L.IssueToReleaseFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._issue = data.issue;
+    this._release = data.release;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The issue that is linked to the release. */
+  public get issue(): LinearFetch<Issue> | undefined {
+    return new IssueQuery(this._request).fetch(this._issue.id);
+  }
+  /** The ID of issue that is linked to the release. */
+  public get issueId(): string | undefined {
+    return this._issue?.id;
+  }
+  /** The release that the issue is linked to. */
+  public get release(): LinearFetch<Release> | undefined {
+    return new ReleaseQuery(this._request).fetch(this._release.id);
+  }
+  /** The ID of release that the issue is linked to. */
+  public get releaseId(): string | undefined {
+    return this._release?.id;
+  }
+
+  /** Creates a new association between an issue and a release, linking the issue to the release for tracking purposes. */
+  public create(input: L.IssueToReleaseCreateInput) {
+    return new CreateIssueToReleaseMutation(this._request).fetch(input);
+  }
+  /** Deletes an issue-to-release association by its identifier, removing the issue from the release. */
+  public delete() {
+    return new DeleteIssueToReleaseMutation(this._request).fetch(this.id);
+  }
+}
+/**
+ * IssueToReleaseConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this IssueToReleaseConnection model
+ * @param data - IssueToReleaseConnection response data
+ */
+export class IssueToReleaseConnection extends Connection<IssueToRelease> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<IssueToRelease> | undefined>,
+    data: L.IssueToReleaseConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new IssueToRelease(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
+ * The result of an issue-to-release mutation, containing the created or updated association and a success indicator.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssueToReleasePayloadFragment response data
+ */
+export class IssueToReleasePayload extends Request {
+  private _issueToRelease: L.IssueToReleasePayloadFragment["issueToRelease"];
+
+  public constructor(request: LinearRequest, data: L.IssueToReleasePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._issueToRelease = data.issueToRelease;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The issueToRelease that was created or updated. */
+  public get issueToRelease(): LinearFetch<IssueToRelease> | undefined {
+    return new IssueToReleaseQuery(this._request).fetch(this._issueToRelease.id);
+  }
+  /** The ID of issuetorelease that was created or updated. */
+  public get issueToReleaseId(): string | undefined {
+    return this._issueToRelease?.id;
+  }
+}
+/**
  * Payload for an issue unassignment notification.
  *
  * @param data - L.IssueUnassignedFromYouNotificationWebhookPayloadFragment response data
@@ -14069,6 +14242,7 @@ export class Organization extends Request {
     this.previousUrlKeys = data.previousUrlKeys;
     this.projectUpdateReminderFrequencyInWeeks = data.projectUpdateReminderFrequencyInWeeks ?? undefined;
     this.projectUpdateRemindersHour = data.projectUpdateRemindersHour;
+    this.releasesEnabled = data.releasesEnabled;
     this.restrictLabelManagementToAdmins = data.restrictLabelManagementToAdmins ?? undefined;
     this.restrictTeamCreationToAdmins = data.restrictTeamCreationToAdmins ?? undefined;
     this.roadmapEnabled = data.roadmapEnabled;
@@ -14152,6 +14326,8 @@ export class Organization extends Request {
   public projectUpdateReminderFrequencyInWeeks?: number | null;
   /** The hour of the day (0-23) at which project update reminders are sent. */
   public projectUpdateRemindersHour: number;
+  /** Whether release management is enabled for the workspace. */
+  public releasesEnabled: boolean;
   /** [DEPRECATED] Whether workspace label creation, update, and deletion is restricted to admins. */
   public restrictLabelManagementToAdmins?: boolean | null;
   /** [DEPRECATED] Whether team creation is restricted to admins. */
@@ -17532,22 +17708,372 @@ export class ReactionWebhookPayload {
   public user?: UserChildWebhookPayload | null;
 }
 /**
+ * A release that bundles issues together for a software deployment or version. Releases belong to a release pipeline and progress through stages (e.g., planned, started, completed, canceled). Issues are associated with releases via the IssueToRelease join entity, and the release tracks lifecycle timestamps such as when it was started, completed, or canceled.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ReleaseFragment response data
+ */
+export class Release extends Request {
+  private _creator?: L.ReleaseFragment["creator"];
+  private _pipeline: L.ReleaseFragment["pipeline"];
+  private _stage: L.ReleaseFragment["stage"];
+
+  public constructor(request: LinearRequest, data: L.ReleaseFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.canceledAt = parseDate(data.canceledAt) ?? undefined;
+    this.commitSha = data.commitSha ?? undefined;
+    this.completedAt = parseDate(data.completedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.currentProgress = data.currentProgress;
+    this.description = data.description ?? undefined;
+    this.id = data.id;
+    this.issueCount = data.issueCount;
+    this.name = data.name;
+    this.progressHistory = data.progressHistory;
+    this.slugId = data.slugId;
+    this.startDate = data.startDate ?? undefined;
+    this.startedAt = parseDate(data.startedAt) ?? undefined;
+    this.targetDate = data.targetDate ?? undefined;
+    this.trashed = data.trashed ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.url = data.url;
+    this.version = data.version ?? undefined;
+    this.releaseNotes = data.releaseNotes.map(node => new ReleaseNote(request, node));
+    this._creator = data.creator ?? undefined;
+    this._pipeline = data.pipeline;
+    this._stage = data.stage;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The time at which the release was canceled. Set automatically when the release moves to a canceled stage. Reset to null if the release moves back to a non-canceled stage. */
+  public canceledAt?: Date | null;
+  /** The Git commit SHA associated with this release. Used for SHA-based idempotency when completing releases and for linking releases to specific points in the repository history. Null if the release was created without a commit reference. */
+  public commitSha?: string | null;
+  /** The time at which the release was completed. Set automatically when the release moves to a completed stage. Reset to null if the release moves back to a non-completed stage. */
+  public completedAt?: Date | null;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The current progress summary for the release, including counts of issues by workflow state type (e.g., completed, in progress, unstarted). */
+  public currentProgress: L.Scalars["JSONObject"];
+  /** The description of the release in plain text or markdown. Null if no description has been set. */
+  public description?: string | null;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** Number of issues associated with the release. */
+  public issueCount: number;
+  /** The name of the release. */
+  public name: string;
+  /** The historical progress snapshots for the release, tracking how issue completion has evolved over time. */
+  public progressHistory: L.Scalars["JSONObject"];
+  /** The release's unique URL slug, used to construct human-readable URLs for the release. */
+  public slugId: string;
+  /** The estimated start date of the release. This is a date-only value without a time component. Automatically set to today when the release moves to a started stage if not already set. Null if no start date has been specified. */
+  public startDate?: L.Scalars["TimelessDate"] | null;
+  /** The time at which the release first entered a started stage. Null if the release has not yet been started. */
+  public startedAt?: Date | null;
+  /** The estimated completion date of the release. This is a date-only value without a time component. Null if no target date has been specified. */
+  public targetDate?: L.Scalars["TimelessDate"] | null;
+  /** A flag that indicates whether the release is in the trash bin. Trashed releases are archived and will be permanently deleted after a retention period. Null when the release is not trashed. */
+  public trashed?: boolean | null;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The URL to the release page in the Linear app. */
+  public url: string;
+  /** The version identifier for this release (e.g., 'v1.2.3' or a short commit hash). Must be unique within the pipeline. Null if no version has been assigned. */
+  public version?: string | null;
+  /** Release notes for the release. */
+  public releaseNotes: ReleaseNote[];
+  /** The user who created the release. Null if the release was created by a non-user context such as an access key or automation. */
+  public get creator(): LinearFetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+  }
+  /** The ID of user who created the release. null if the release was created by a non-user context such as an access key or automation. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
+  /** The release pipeline that this release belongs to. A release always belongs to exactly one pipeline. */
+  public get pipeline(): LinearFetch<ReleasePipeline> | undefined {
+    return new ReleasePipelineQuery(this._request).fetch(this._pipeline.id);
+  }
+  /** The ID of release pipeline that this release belongs to. a release always belongs to exactly one pipeline. */
+  public get pipelineId(): string | undefined {
+    return this._pipeline?.id;
+  }
+  /** The current stage of the release within its pipeline (e.g., Planned, In Progress, Completed, Canceled). Changing the stage triggers lifecycle timestamp updates and may move non-closed issues to a new release when completing a scheduled pipeline release. */
+  public get stage(): LinearFetch<ReleaseStage> | undefined {
+    return new ReleaseStageQuery(this._request).fetch(this._stage.id);
+  }
+  /** The ID of current stage of the release within its pipeline (e.g., planned, in progress, completed, canceled). changing the stage triggers lifecycle timestamp updates and may move non-closed issues to a new release when completing a scheduled pipeline release. */
+  public get stageId(): string | undefined {
+    return this._stage?.id;
+  }
+  /** Documents associated with the release. */
+  public documents(variables?: Omit<L.Release_DocumentsQueryVariables, "id">) {
+    return new Release_DocumentsQuery(this._request, this.id, variables).fetch(variables);
+  }
+  /** History entries associated with the release. */
+  public history(variables?: Omit<L.Release_HistoryQueryVariables, "id">) {
+    return new Release_HistoryQuery(this._request, this.id, variables).fetch(variables);
+  }
+  /** Issues associated with the release. */
+  public issues(variables?: Omit<L.Release_IssuesQueryVariables, "id">) {
+    return new Release_IssuesQuery(this._request, this.id, variables).fetch(variables);
+  }
+  /** Links associated with the release. */
+  public links(variables?: Omit<L.Release_LinksQueryVariables, "id">) {
+    return new Release_LinksQuery(this._request, this.id, variables).fetch(variables);
+  }
+  /** Archives a release. */
+  public archive() {
+    return new ArchiveReleaseMutation(this._request).fetch(this.id);
+  }
+  /** Creates a new release in a pipeline. If no stage is specified, defaults to the first completed stage for continuous pipelines or the first started stage for scheduled pipelines. */
+  public create(input: L.ReleaseCreateInput) {
+    return new CreateReleaseMutation(this._request).fetch(input);
+  }
+  /** Moves a release to the trash bin. Trashed releases are archived and will be permanently deleted after a retention period. If the release is already archived, it is marked as trashed with a fresh archive timestamp. */
+  public delete() {
+    return new DeleteReleaseMutation(this._request).fetch(this.id);
+  }
+  /** Unarchives a release. */
+  public unarchive() {
+    return new UnarchiveReleaseMutation(this._request).fetch(this.id);
+  }
+  /** Updates an existing release by ID. Supports updating name, description, version, commit SHA, pipeline, stage, and dates. */
+  public update(input: L.ReleaseUpdateInput) {
+    return new UpdateReleaseMutation(this._request).fetch(this.id, input);
+  }
+}
+/**
  * A generic payload return from entity archive mutations.
  *
  * @param request - function to call the graphql client
  * @param data - L.ReleaseArchivePayloadFragment response data
  */
 export class ReleaseArchivePayload extends Request {
+  private _entity?: L.ReleaseArchivePayloadFragment["entity"];
+
   public constructor(request: LinearRequest, data: L.ReleaseArchivePayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId;
     this.success = data.success;
+    this._entity = data.entity ?? undefined;
   }
 
   /** The identifier of the last sync operation. */
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
+  /** The archived/unarchived entity. Null if entity was deleted. */
+  public get entity(): LinearFetch<Release> | undefined {
+    return this._entity?.id ? new ReleaseQuery(this._request).fetch(this._entity?.id) : undefined;
+  }
+  /** The ID of archived/unarchived entity. null if entity was deleted. */
+  public get entityId(): string | undefined {
+    return this._entity?.id;
+  }
+}
+/**
+ * ReleaseConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this ReleaseConnection model
+ * @param data - ReleaseConnection response data
+ */
+export class ReleaseConnection extends Connection<Release> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Release> | undefined>,
+    data: L.ReleaseConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new Release(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
+ * A release history record containing a batch of chronologically ordered change events for a release. Each record holds up to 30 entries, and new records are created once the current record is full and a time window has elapsed. Tracks changes to name, description, version, stage, dates, pipeline, and archive status.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ReleaseHistoryFragment response data
+ */
+export class ReleaseHistory extends Request {
+  private _release: L.ReleaseHistoryFragment["release"];
+
+  public constructor(request: LinearRequest, data: L.ReleaseHistoryFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.entries = data.entries;
+    this.id = data.id;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._release = data.release;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The events that happened while recording that history. */
+  public entries: L.Scalars["JSONObject"];
+  /** The unique identifier of the entity. */
+  public id: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The release that this history record tracks changes for. */
+  public get release(): LinearFetch<Release> | undefined {
+    return new ReleaseQuery(this._request).fetch(this._release.id);
+  }
+  /** The ID of release that this history record tracks changes for. */
+  public get releaseId(): string | undefined {
+    return this._release?.id;
+  }
+}
+/**
+ * ReleaseHistoryConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this ReleaseHistoryConnection model
+ * @param data - ReleaseHistoryConnection response data
+ */
+export class ReleaseHistoryConnection extends Connection<ReleaseHistory> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<ReleaseHistory> | undefined>,
+    data: L.ReleaseHistoryConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new ReleaseHistory(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
+ * A release note. The note body is stored in related document content, and the releases it covers are tracked in releaseIds.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ReleaseNoteFragment response data
+ */
+export class ReleaseNote extends Request {
+  private _lastRelease?: L.ReleaseNoteFragment["lastRelease"];
+
+  public constructor(request: LinearRequest, data: L.ReleaseNoteFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.slugId = data.slugId;
+    this.title = data.title ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.documentContent = data.documentContent ? new DocumentContent(request, data.documentContent) : undefined;
+    this._lastRelease = data.lastRelease ?? undefined;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The release note's unique URL slug, used to construct human-readable URLs for the note. */
+  public slugId: string;
+  /** User-supplied title for the release note. */
+  public title?: string | null;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** Document content backing the release note body. */
+  public documentContent?: DocumentContent | null;
+  /** The most recent release covered by this note. */
+  public get lastRelease(): LinearFetch<Release> | undefined {
+    return this._lastRelease?.id ? new ReleaseQuery(this._request).fetch(this._lastRelease?.id) : undefined;
+  }
+  /** The ID of most recent release covered by this note. */
+  public get lastReleaseId(): string | undefined {
+    return this._lastRelease?.id;
+  }
+  /** Releases included in the note. */
+  public get releases(): LinearFetch<Release[]> {
+    return new ReleaseSearchQuery(this._request).fetch();
+  }
+
+  /** Creates a release note. */
+  public create(input: L.ReleaseNoteCreateInput) {
+    return new CreateReleaseNoteMutation(this._request).fetch(input);
+  }
+  /** Deletes a release note. */
+  public delete() {
+    return new DeleteReleaseNoteMutation(this._request).fetch(this.id);
+  }
+  /** Updates a release note. */
+  public update(input: L.ReleaseNoteUpdateInput) {
+    return new UpdateReleaseNoteMutation(this._request).fetch(this.id, input);
+  }
+}
+/**
+ * ReleaseNoteConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this ReleaseNoteConnection model
+ * @param data - ReleaseNoteConnection response data
+ */
+export class ReleaseNoteConnection extends Connection<ReleaseNote> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<ReleaseNote> | undefined>,
+    data: L.ReleaseNoteConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new ReleaseNote(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
+ * The result of a release note mutation.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ReleaseNotePayloadFragment response data
+ */
+export class ReleaseNotePayload extends Request {
+  private _releaseNote: L.ReleaseNotePayloadFragment["releaseNote"];
+
+  public constructor(request: LinearRequest, data: L.ReleaseNotePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._releaseNote = data.releaseNote;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The release note that was created or updated. */
+  public get releaseNote(): LinearFetch<ReleaseNote> | undefined {
+    return new ReleaseNoteQuery(this._request).fetch(this._releaseNote.id);
+  }
+  /** The ID of release note that was created or updated. */
+  public get releaseNoteId(): string | undefined {
+    return this._releaseNote?.id;
+  }
 }
 /**
  * The result of a release mutation, containing the release that was created or updated and a success indicator.
@@ -17556,16 +18082,132 @@ export class ReleaseArchivePayload extends Request {
  * @param data - L.ReleasePayloadFragment response data
  */
 export class ReleasePayload extends Request {
+  private _release: L.ReleasePayloadFragment["release"];
+
   public constructor(request: LinearRequest, data: L.ReleasePayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId;
     this.success = data.success;
+    this._release = data.release;
   }
 
   /** The identifier of the last sync operation. */
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
+  /** The release that was created or updated. */
+  public get release(): LinearFetch<Release> | undefined {
+    return new ReleaseQuery(this._request).fetch(this._release.id);
+  }
+  /** The ID of release that was created or updated. */
+  public get releaseId(): string | undefined {
+    return this._release?.id;
+  }
+}
+/**
+ * A release pipeline that defines a release workflow with ordered stages. Pipelines can be continuous (each sync creates a completed release) or scheduled (issues accumulate in a started release that is explicitly completed). Pipelines are associated with teams and can filter commits by file path patterns.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ReleasePipelineFragment response data
+ */
+export class ReleasePipeline extends Request {
+  private _latestReleaseNote?: L.ReleasePipelineFragment["latestReleaseNote"];
+  private _releaseNoteTemplate?: L.ReleasePipelineFragment["releaseNoteTemplate"];
+
+  public constructor(request: LinearRequest, data: L.ReleasePipelineFragment) {
+    super(request);
+    this.approximateReleaseCount = data.approximateReleaseCount;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.includePathPatterns = data.includePathPatterns;
+    this.isProduction = data.isProduction;
+    this.name = data.name;
+    this.slugId = data.slugId;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.url = data.url;
+    this.type = data.type;
+    this._latestReleaseNote = data.latestReleaseNote ?? undefined;
+    this._releaseNoteTemplate = data.releaseNoteTemplate ?? undefined;
+  }
+
+  /** The approximate number of non-archived releases in this pipeline. This is a denormalized count that is updated when releases are created or archived, and may not reflect the exact count at all times. */
+  public approximateReleaseCount: number;
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** Glob patterns to filter commits by file path. When non-empty, only commits that modify files matching at least one pattern will be included in release syncs. An empty array means all commits are included regardless of file paths. */
+  public includePathPatterns: string[];
+  /** Whether this pipeline targets a production environment. Defaults to true. Used to distinguish production pipelines from staging or development pipelines. */
+  public isProduction: boolean;
+  /** The name of the pipeline. */
+  public name: string;
+  /** The pipeline's unique slug identifier, used in URLs and for lookup by human-readable identifier instead of UUID. */
+  public slugId: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The URL to the release pipeline's releases list in the Linear app. */
+  public url: string;
+  /** The type of the pipeline, which determines how releases are created and managed. Continuous pipelines create a completed release per sync, while scheduled pipelines accumulate issues in a started release. */
+  public type: L.ReleasePipelineType;
+  /** The release note in this pipeline whose covered range ends with the most recent release. */
+  public get latestReleaseNote(): LinearFetch<ReleaseNote> | undefined {
+    return this._latestReleaseNote?.id
+      ? new ReleaseNoteQuery(this._request).fetch(this._latestReleaseNote?.id)
+      : undefined;
+  }
+  /** The ID of release note in this pipeline whose covered range ends with the most recent release. */
+  public get latestReleaseNoteId(): string | undefined {
+    return this._latestReleaseNote?.id;
+  }
+  /** The document template used to define the release notes format for this pipeline. AI-generated release notes follow the structure and tone of this template. Null if no template has been configured. */
+  public get releaseNoteTemplate(): LinearFetch<Template> | undefined {
+    return this._releaseNoteTemplate?.id
+      ? new TemplateQuery(this._request).fetch(this._releaseNoteTemplate?.id)
+      : undefined;
+  }
+  /** The ID of document template used to define the release notes format for this pipeline. ai-generated release notes follow the structure and tone of this template. null if no template has been configured. */
+  public get releaseNoteTemplateId(): string | undefined {
+    return this._releaseNoteTemplate?.id;
+  }
+  /** Releases associated with this pipeline. */
+  public releases(variables?: Omit<L.ReleasePipeline_ReleasesQueryVariables, "id">) {
+    return new ReleasePipeline_ReleasesQuery(this._request, this.id, variables).fetch(variables);
+  }
+  /** Stages associated with this pipeline. */
+  public stages(variables?: Omit<L.ReleasePipeline_StagesQueryVariables, "id">) {
+    return new ReleasePipeline_StagesQuery(this._request, this.id, variables).fetch(variables);
+  }
+  /** Teams associated with this pipeline. */
+  public teams(variables?: Omit<L.ReleasePipeline_TeamsQueryVariables, "id">) {
+    return new ReleasePipeline_TeamsQuery(this._request, this.id, variables).fetch(variables);
+  }
+  /** Archives a release pipeline. */
+  public archive() {
+    return new ArchiveReleasePipelineMutation(this._request).fetch(this.id);
+  }
+  /** Creates a new release pipeline with default stages. Subject to plan entitlement and quota limits. */
+  public create(input: L.ReleasePipelineCreateInput) {
+    return new CreateReleasePipelineMutation(this._request).fetch(input);
+  }
+  /** Permanently deletes a release pipeline and all associated stages and releases. */
+  public delete() {
+    return new DeleteReleasePipelineMutation(this._request).fetch(this.id);
+  }
+  /** Unarchives a release pipeline. */
+  public unarchive() {
+    return new UnarchiveReleasePipelineMutation(this._request).fetch(this.id);
+  }
+  /** Updates an existing release pipeline. Supports updating name, slug, type, production flag, path patterns, and team associations. Private teams that the current user cannot access are preserved in the team list. */
+  public update(input: L.ReleasePipelineUpdateInput) {
+    return new UpdateReleasePipelineMutation(this._request).fetch(this.id, input);
+  }
 }
 /**
  * A generic payload return from entity archive mutations.
@@ -17574,16 +18216,27 @@ export class ReleasePayload extends Request {
  * @param data - L.ReleasePipelineArchivePayloadFragment response data
  */
 export class ReleasePipelineArchivePayload extends Request {
+  private _entity?: L.ReleasePipelineArchivePayloadFragment["entity"];
+
   public constructor(request: LinearRequest, data: L.ReleasePipelineArchivePayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId;
     this.success = data.success;
+    this._entity = data.entity ?? undefined;
   }
 
   /** The identifier of the last sync operation. */
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
+  /** The archived/unarchived entity. Null if entity was deleted. */
+  public get entity(): LinearFetch<ReleasePipeline> | undefined {
+    return this._entity?.id ? new ReleasePipelineQuery(this._request).fetch(this._entity?.id) : undefined;
+  }
+  /** The ID of archived/unarchived entity. null if entity was deleted. */
+  public get entityId(): string | undefined {
+    return this._entity?.id;
+  }
 }
 /**
  * Certain properties of a release pipeline.
@@ -17611,22 +18264,127 @@ export class ReleasePipelineChildWebhookPayload {
   public url: string;
 }
 /**
+ * ReleasePipelineConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this ReleasePipelineConnection model
+ * @param data - ReleasePipelineConnection response data
+ */
+export class ReleasePipelineConnection extends Connection<ReleasePipeline> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<ReleasePipeline> | undefined>,
+    data: L.ReleasePipelineConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new ReleasePipeline(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
  * The result of a release pipeline mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.ReleasePipelinePayloadFragment response data
  */
 export class ReleasePipelinePayload extends Request {
+  private _releasePipeline: L.ReleasePipelinePayloadFragment["releasePipeline"];
+
   public constructor(request: LinearRequest, data: L.ReleasePipelinePayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId;
     this.success = data.success;
+    this._releasePipeline = data.releasePipeline;
   }
 
   /** The identifier of the last sync operation. */
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
+  /** The release pipeline that was created or updated. */
+  public get releasePipeline(): LinearFetch<ReleasePipeline> | undefined {
+    return new ReleasePipelineQuery(this._request).fetch(this._releasePipeline.id);
+  }
+  /** The ID of release pipeline that was created or updated. */
+  public get releasePipelineId(): string | undefined {
+    return this._releasePipeline?.id;
+  }
+}
+/**
+ * A stage within a release pipeline that represents a phase in the release lifecycle (e.g., Planned, In Progress, Completed, Canceled). Releases progress through stages as they move toward production. Started-type stages can be frozen to prevent new issues from being automatically synced into releases at that stage.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ReleaseStageFragment response data
+ */
+export class ReleaseStage extends Request {
+  private _pipeline: L.ReleaseStageFragment["pipeline"];
+
+  public constructor(request: LinearRequest, data: L.ReleaseStageFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.color = data.color;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.frozen = data.frozen;
+    this.id = data.id;
+    this.name = data.name;
+    this.position = data.position;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.type = data.type;
+    this._pipeline = data.pipeline;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The display color of the stage as a HEX string (e.g., '#0f783c'), used for visual representation in the UI. */
+  public color: string;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** Whether this stage is frozen. Only applicable to started-type stages. When a stage is frozen, automated release syncs will not target releases in this stage, and new issues will not be automatically added. At least one started stage in the pipeline must remain non-frozen. */
+  public frozen: boolean;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The name of the stage. */
+  public name: string;
+  /** The position of the stage within its pipeline, used for ordering stages in the UI. Lower values appear first. */
+  public position: number;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The lifecycle type of the stage (planned, started, completed, or canceled). The type determines what lifecycle timestamps are set on a release when it enters this stage. */
+  public type: L.ReleaseStageType;
+  /** The release pipeline that this stage belongs to. A stage always belongs to exactly one pipeline. */
+  public get pipeline(): LinearFetch<ReleasePipeline> | undefined {
+    return new ReleasePipelineQuery(this._request).fetch(this._pipeline.id);
+  }
+  /** The ID of release pipeline that this stage belongs to. a stage always belongs to exactly one pipeline. */
+  public get pipelineId(): string | undefined {
+    return this._pipeline?.id;
+  }
+  /** Releases associated with this stage. */
+  public releases(variables?: Omit<L.ReleaseStage_ReleasesQueryVariables, "id">) {
+    return new ReleaseStage_ReleasesQuery(this._request, this.id, variables).fetch(variables);
+  }
+  /** Archives a release stage. Only started-type stages can be archived, and only if they have no active releases and at least one other stage of the same type remains. Cannot archive the last non-frozen started stage. */
+  public archive() {
+    return new ArchiveReleaseStageMutation(this._request).fetch(this.id);
+  }
+  /** Creates a new release stage in a pipeline. Non-started stages must use default names and colors, and only one stage of each non-started type is allowed per pipeline. Started stages can optionally be frozen, but at least one non-frozen started stage must remain. */
+  public create(input: L.ReleaseStageCreateInput) {
+    return new CreateReleaseStageMutation(this._request).fetch(input);
+  }
+  /** Unarchives a release stage. */
+  public unarchive() {
+    return new UnarchiveReleaseStageMutation(this._request).fetch(this.id);
+  }
+  /** Updates an existing release stage. Only started-type stages can be edited. Supports updating name, color, position, and frozen status. */
+  public update(input: L.ReleaseStageUpdateInput) {
+    return new UpdateReleaseStageMutation(this._request).fetch(this.id, input);
+  }
 }
 /**
  * A generic payload return from entity archive mutations.
@@ -17635,16 +18393,27 @@ export class ReleasePipelinePayload extends Request {
  * @param data - L.ReleaseStageArchivePayloadFragment response data
  */
 export class ReleaseStageArchivePayload extends Request {
+  private _entity?: L.ReleaseStageArchivePayloadFragment["entity"];
+
   public constructor(request: LinearRequest, data: L.ReleaseStageArchivePayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId;
     this.success = data.success;
+    this._entity = data.entity ?? undefined;
   }
 
   /** The identifier of the last sync operation. */
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
+  /** The archived/unarchived entity. Null if entity was deleted. */
+  public get entity(): LinearFetch<ReleaseStage> | undefined {
+    return this._entity?.id ? new ReleaseStageQuery(this._request).fetch(this._entity?.id) : undefined;
+  }
+  /** The ID of archived/unarchived entity. null if entity was deleted. */
+  public get entityId(): string | undefined {
+    return this._entity?.id;
+  }
 }
 /**
  * Certain properties of a release stage.
@@ -17672,22 +18441,54 @@ export class ReleaseStageChildWebhookPayload {
   public type: string;
 }
 /**
+ * ReleaseStageConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this ReleaseStageConnection model
+ * @param data - ReleaseStageConnection response data
+ */
+export class ReleaseStageConnection extends Connection<ReleaseStage> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<ReleaseStage> | undefined>,
+    data: L.ReleaseStageConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new ReleaseStage(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
  * The result of a release stage mutation.
  *
  * @param request - function to call the graphql client
  * @param data - L.ReleaseStagePayloadFragment response data
  */
 export class ReleaseStagePayload extends Request {
+  private _releaseStage: L.ReleaseStagePayloadFragment["releaseStage"];
+
   public constructor(request: LinearRequest, data: L.ReleaseStagePayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId;
     this.success = data.success;
+    this._releaseStage = data.releaseStage;
   }
 
   /** The identifier of the last sync operation. */
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
+  /** The release stage that was created or updated. */
+  public get releaseStage(): LinearFetch<ReleaseStage> | undefined {
+    return new ReleaseStageQuery(this._request).fetch(this._releaseStage.id);
+  }
+  /** The ID of release stage that was created or updated. */
+  public get releaseStageId(): string | undefined {
+    return this._releaseStage?.id;
+  }
 }
 /**
  * Payload for a release webhook.
@@ -19456,6 +20257,10 @@ export class Team extends Request {
   public projects(variables?: Omit<L.Team_ProjectsQueryVariables, "id">) {
     return new Team_ProjectsQuery(this._request, this.id, variables).fetch(variables);
   }
+  /** Release pipelines associated with the team. */
+  public releasePipelines(variables?: Omit<L.Team_ReleasePipelinesQueryVariables, "id">) {
+    return new Team_ReleasePipelinesQuery(this._request, this.id, variables).fetch(variables);
+  }
   /** The states that define the workflow associated with the team. */
   public states(variables?: Omit<L.Team_StatesQueryVariables, "id">) {
     return new Team_StatesQuery(this._request, this.id, variables).fetch(variables);
@@ -19883,6 +20688,7 @@ export class Template extends Request {
   private _creator?: L.TemplateFragment["creator"];
   private _inheritedFrom?: L.TemplateFragment["inheritedFrom"];
   private _lastUpdatedBy?: L.TemplateFragment["lastUpdatedBy"];
+  private _pipeline?: L.TemplateFragment["pipeline"];
   private _team?: L.TemplateFragment["team"];
 
   public constructor(request: LinearRequest, data: L.TemplateFragment) {
@@ -19902,6 +20708,7 @@ export class Template extends Request {
     this._creator = data.creator ?? undefined;
     this._inheritedFrom = data.inheritedFrom ?? undefined;
     this._lastUpdatedBy = data.lastUpdatedBy ?? undefined;
+    this._pipeline = data.pipeline ?? undefined;
     this._team = data.team ?? undefined;
   }
 
@@ -19959,6 +20766,14 @@ export class Template extends Request {
   /** The workspace that owns this template. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
+  }
+  /** The release pipeline this template is bound to. Required when the template type is 'releaseNote' and forbidden otherwise. The pipeline owns at most one release note template, which defines the format AI follows when generating release notes. */
+  public get pipeline(): LinearFetch<ReleasePipeline> | undefined {
+    return this._pipeline?.id ? new ReleasePipelineQuery(this._request).fetch(this._pipeline?.id) : undefined;
+  }
+  /** The ID of release pipeline this template is bound to. required when the template type is 'releasenote' and forbidden otherwise. the pipeline owns at most one release note template, which defines the format ai follows when generating release notes. */
+  public get pipelineId(): string | undefined {
+    return this._pipeline?.id;
   }
   /** The team that the template is associated with. If null, the template is global to the workspace. */
   public get team(): LinearFetch<Team> | undefined {
@@ -21123,6 +21938,24 @@ export class ViewPreferences extends Request {
   }
 }
 /**
+ * A label group column configuration for the initiative list view.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ViewPreferencesInitiativeLabelGroupColumnFragment response data
+ */
+export class ViewPreferencesInitiativeLabelGroupColumn extends Request {
+  public constructor(request: LinearRequest, data: L.ViewPreferencesInitiativeLabelGroupColumnFragment) {
+    super(request);
+    this.active = data.active;
+    this.id = data.id;
+  }
+
+  /** Whether the label group column is active. */
+  public active: boolean;
+  /** The identifier of the label group. */
+  public id: string;
+}
+/**
  * The result of a view preferences mutation.
  *
  * @param request - function to call the graphql client
@@ -22136,6 +22969,72 @@ export class WelcomeMessageNotification extends Request {
   /** The ID of recipient user of this notification. */
   public get userId(): string | undefined {
     return this._user?.id;
+  }
+}
+/**
+ * A time-triggered automation workflow definition that executes on a recurring schedule. Cron job definitions are scoped to a team and contain a set of activities (actions) that run automatically according to the configured cron schedule, such as periodically assigning issues or sending notifications.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.WorkflowCronJobDefinitionFragment response data
+ */
+export class WorkflowCronJobDefinition extends Request {
+  private _creator: L.WorkflowCronJobDefinitionFragment["creator"];
+  private _team: L.WorkflowCronJobDefinitionFragment["team"];
+
+  public constructor(request: LinearRequest, data: L.WorkflowCronJobDefinitionFragment) {
+    super(request);
+    this.activities = data.activities;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.description = data.description ?? undefined;
+    this.enabled = data.enabled;
+    this.id = data.id;
+    this.name = data.name;
+    this.schedule = data.schedule;
+    this.sortOrder = data.sortOrder;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._creator = data.creator;
+    this._team = data.team;
+  }
+
+  /** An array of activities that will be executed as part of the workflow cron job. */
+  public activities: L.Scalars["JSONObject"];
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The description of the workflow cron job. */
+  public description?: string | null;
+  /** Whether the workflow cron job is enabled and will execute on its schedule. */
+  public enabled: boolean;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The name of the workflow cron job. */
+  public name: string;
+  /** Recurring schedule which is used to execute the workflow cron job. */
+  public schedule: L.Scalars["JSONObject"];
+  /** The sort order of the workflow cron job definition within its siblings. */
+  public sortOrder: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The user who created the workflow cron job. */
+  public get creator(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._creator.id);
+  }
+  /** The ID of user who created the workflow cron job. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
+  /** The team associated with the workflow cron job. */
+  public get team(): LinearFetch<Team> | undefined {
+    return new TeamQuery(this._request).fetch(this._team.id);
+  }
+  /** The ID of team associated with the workflow cron job. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
   }
 }
 /**
@@ -24680,6 +25579,72 @@ export class IssueTitleSuggestionFromCustomerRequestQuery extends Request {
 }
 
 /**
+ * A fetchable IssueToRelease Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueToReleaseQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueToRelease query and return a IssueToRelease
+   *
+   * @param id - required id to pass to issueToRelease
+   * @returns parsed response from IssueToReleaseQuery
+   */
+  public async fetch(id: string): LinearFetch<IssueToRelease> {
+    const response = await this._request<L.IssueToReleaseQuery, L.IssueToReleaseQueryVariables>(
+      L.IssueToReleaseDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.issueToRelease;
+
+    return new IssueToRelease(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IssueToReleases Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueToReleasesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueToReleases query and return a IssueToReleaseConnection
+   *
+   * @param variables - variables to pass into the IssueToReleasesQuery
+   * @returns parsed response from IssueToReleasesQuery
+   */
+  public async fetch(variables?: L.IssueToReleasesQueryVariables): LinearFetch<IssueToReleaseConnection> {
+    const response = await this._request<L.IssueToReleasesQuery, L.IssueToReleasesQueryVariables>(
+      L.IssueToReleasesDocument.toString(),
+      variables
+    );
+    const data = response.issueToReleases;
+
+    return new IssueToReleaseConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable IssueVcsBranchSearch Query
  *
  * @param request - function to call the graphql client
@@ -24739,6 +25704,32 @@ export class IssuesQuery extends Request {
         ),
       data
     );
+  }
+}
+
+/**
+ * A fetchable LatestReleaseByAccessKey Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class LatestReleaseByAccessKeyQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the LatestReleaseByAccessKey query and return a Release
+   *
+   * @returns parsed response from LatestReleaseByAccessKeyQuery
+   */
+  public async fetch(): LinearFetch<Release | undefined> {
+    const response = await this._request<L.LatestReleaseByAccessKeyQuery, L.LatestReleaseByAccessKeyQueryVariables>(
+      L.LatestReleaseByAccessKeyDocument.toString(),
+      {}
+    );
+    const data = response.latestReleaseByAccessKey;
+
+    return data ? new Release(this._request, data) : undefined;
   }
 }
 
@@ -25550,6 +26541,322 @@ export class RateLimitStatusQuery extends Request {
     const data = response.rateLimitStatus;
 
     return new RateLimitPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable Release Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ReleaseQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Release query and return a Release
+   *
+   * @param id - required id to pass to release
+   * @returns parsed response from ReleaseQuery
+   */
+  public async fetch(id: string): LinearFetch<Release> {
+    const response = await this._request<L.ReleaseQuery, L.ReleaseQueryVariables>(L.ReleaseDocument.toString(), {
+      id,
+    });
+    const data = response.release;
+
+    return new Release(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ReleaseNote Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ReleaseNoteQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ReleaseNote query and return a ReleaseNote
+   *
+   * @param id - required id to pass to releaseNote
+   * @returns parsed response from ReleaseNoteQuery
+   */
+  public async fetch(id: string): LinearFetch<ReleaseNote> {
+    const response = await this._request<L.ReleaseNoteQuery, L.ReleaseNoteQueryVariables>(
+      L.ReleaseNoteDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.releaseNote;
+
+    return new ReleaseNote(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ReleaseNotes Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ReleaseNotesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ReleaseNotes query and return a ReleaseNoteConnection
+   *
+   * @param variables - variables to pass into the ReleaseNotesQuery
+   * @returns parsed response from ReleaseNotesQuery
+   */
+  public async fetch(variables?: L.ReleaseNotesQueryVariables): LinearFetch<ReleaseNoteConnection> {
+    const response = await this._request<L.ReleaseNotesQuery, L.ReleaseNotesQueryVariables>(
+      L.ReleaseNotesDocument.toString(),
+      variables
+    );
+    const data = response.releaseNotes;
+
+    return new ReleaseNoteConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable ReleasePipeline Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ReleasePipelineQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ReleasePipeline query and return a ReleasePipeline
+   *
+   * @param id - required id to pass to releasePipeline
+   * @returns parsed response from ReleasePipelineQuery
+   */
+  public async fetch(id: string): LinearFetch<ReleasePipeline> {
+    const response = await this._request<L.ReleasePipelineQuery, L.ReleasePipelineQueryVariables>(
+      L.ReleasePipelineDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.releasePipeline;
+
+    return new ReleasePipeline(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ReleasePipelineByAccessKey Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ReleasePipelineByAccessKeyQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ReleasePipelineByAccessKey query and return a ReleasePipeline
+   *
+   * @returns parsed response from ReleasePipelineByAccessKeyQuery
+   */
+  public async fetch(): LinearFetch<ReleasePipeline> {
+    const response = await this._request<L.ReleasePipelineByAccessKeyQuery, L.ReleasePipelineByAccessKeyQueryVariables>(
+      L.ReleasePipelineByAccessKeyDocument.toString(),
+      {}
+    );
+    const data = response.releasePipelineByAccessKey;
+
+    return new ReleasePipeline(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ReleasePipelines Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ReleasePipelinesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ReleasePipelines query and return a ReleasePipelineConnection
+   *
+   * @param variables - variables to pass into the ReleasePipelinesQuery
+   * @returns parsed response from ReleasePipelinesQuery
+   */
+  public async fetch(variables?: L.ReleasePipelinesQueryVariables): LinearFetch<ReleasePipelineConnection> {
+    const response = await this._request<L.ReleasePipelinesQuery, L.ReleasePipelinesQueryVariables>(
+      L.ReleasePipelinesDocument.toString(),
+      variables
+    );
+    const data = response.releasePipelines;
+
+    return new ReleasePipelineConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable ReleaseSearch Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ReleaseSearchQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ReleaseSearch query and return a Release list
+   *
+   * @param variables - variables to pass into the ReleaseSearchQuery
+   * @returns parsed response from ReleaseSearchQuery
+   */
+  public async fetch(variables?: L.ReleaseSearchQueryVariables): LinearFetch<Release[]> {
+    const response = await this._request<L.ReleaseSearchQuery, L.ReleaseSearchQueryVariables>(
+      L.ReleaseSearchDocument.toString(),
+      variables
+    );
+    const data = response.releaseSearch;
+
+    return data.map(node => {
+      return new Release(this._request, node);
+    });
+  }
+}
+
+/**
+ * A fetchable ReleaseStage Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ReleaseStageQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ReleaseStage query and return a ReleaseStage
+   *
+   * @param id - required id to pass to releaseStage
+   * @returns parsed response from ReleaseStageQuery
+   */
+  public async fetch(id: string): LinearFetch<ReleaseStage> {
+    const response = await this._request<L.ReleaseStageQuery, L.ReleaseStageQueryVariables>(
+      L.ReleaseStageDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.releaseStage;
+
+    return new ReleaseStage(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ReleaseStages Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ReleaseStagesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ReleaseStages query and return a ReleaseStageConnection
+   *
+   * @param variables - variables to pass into the ReleaseStagesQuery
+   * @returns parsed response from ReleaseStagesQuery
+   */
+  public async fetch(variables?: L.ReleaseStagesQueryVariables): LinearFetch<ReleaseStageConnection> {
+    const response = await this._request<L.ReleaseStagesQuery, L.ReleaseStagesQueryVariables>(
+      L.ReleaseStagesDocument.toString(),
+      variables
+    );
+    const data = response.releaseStages;
+
+    return new ReleaseStageConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Releases Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ReleasesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Releases query and return a ReleaseConnection
+   *
+   * @param variables - variables to pass into the ReleasesQuery
+   * @returns parsed response from ReleasesQuery
+   */
+  public async fetch(variables?: L.ReleasesQueryVariables): LinearFetch<ReleaseConnection> {
+    const response = await this._request<L.ReleasesQuery, L.ReleasesQueryVariables>(
+      L.ReleasesDocument.toString(),
+      variables
+    );
+    const data = response.releases;
+
+    return new ReleaseConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -30046,15 +31353,21 @@ export class IntegrationGitlabConnectMutation extends Request {
    *
    * @param accessToken - required accessToken to pass to integrationGitlabConnect
    * @param gitlabUrl - required gitlabUrl to pass to integrationGitlabConnect
+   * @param variables - variables without 'accessToken', 'gitlabUrl' to pass into the IntegrationGitlabConnectMutation
    * @returns parsed response from IntegrationGitlabConnectMutation
    */
-  public async fetch(accessToken: string, gitlabUrl: string): LinearFetch<GitLabIntegrationCreatePayload> {
+  public async fetch(
+    accessToken: string,
+    gitlabUrl: string,
+    variables?: Omit<L.IntegrationGitlabConnectMutationVariables, "accessToken" | "gitlabUrl">
+  ): LinearFetch<GitLabIntegrationCreatePayload> {
     const response = await this._request<
       L.IntegrationGitlabConnectMutation,
       L.IntegrationGitlabConnectMutationVariables
     >(L.IntegrationGitlabConnectDocument.toString(), {
       accessToken,
       gitlabUrl,
+      ...variables,
     });
     const data = response.integrationGitlabConnect;
 
@@ -30401,15 +31714,22 @@ export class IntegrationSalesforceMutation extends Request {
    * Call the IntegrationSalesforce mutation and return a IntegrationPayload
    *
    * @param code - required code to pass to integrationSalesforce
+   * @param codeVerifier - required codeVerifier to pass to integrationSalesforce
    * @param redirectUri - required redirectUri to pass to integrationSalesforce
    * @param subdomain - required subdomain to pass to integrationSalesforce
    * @returns parsed response from IntegrationSalesforceMutation
    */
-  public async fetch(code: string, redirectUri: string, subdomain: string): LinearFetch<IntegrationPayload> {
+  public async fetch(
+    code: string,
+    codeVerifier: string,
+    redirectUri: string,
+    subdomain: string
+  ): LinearFetch<IntegrationPayload> {
     const response = await this._request<L.IntegrationSalesforceMutation, L.IntegrationSalesforceMutationVariables>(
       L.IntegrationSalesforceDocument.toString(),
       {
         code,
+        codeVerifier,
         redirectUri,
         subdomain,
       }
@@ -31778,6 +33098,95 @@ export class IssueSubscribeMutation extends Request {
     const data = response.issueSubscribe;
 
     return new IssuePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable CreateIssueToRelease Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class CreateIssueToReleaseMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CreateIssueToRelease mutation and return a IssueToReleasePayload
+   *
+   * @param input - required input to pass to createIssueToRelease
+   * @returns parsed response from CreateIssueToReleaseMutation
+   */
+  public async fetch(input: L.IssueToReleaseCreateInput): LinearFetch<IssueToReleasePayload> {
+    const response = await this._request<L.CreateIssueToReleaseMutation, L.CreateIssueToReleaseMutationVariables>(
+      L.CreateIssueToReleaseDocument.toString(),
+      {
+        input,
+      }
+    );
+    const data = response.issueToReleaseCreate;
+
+    return new IssueToReleasePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable DeleteIssueToRelease Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class DeleteIssueToReleaseMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DeleteIssueToRelease mutation and return a DeletePayload
+   *
+   * @param id - required id to pass to deleteIssueToRelease
+   * @returns parsed response from DeleteIssueToReleaseMutation
+   */
+  public async fetch(id: string): LinearFetch<DeletePayload> {
+    const response = await this._request<L.DeleteIssueToReleaseMutation, L.DeleteIssueToReleaseMutationVariables>(
+      L.DeleteIssueToReleaseDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.issueToReleaseDelete;
+
+    return new DeletePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IssueToReleaseDeleteByIssueAndRelease Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueToReleaseDeleteByIssueAndReleaseMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueToReleaseDeleteByIssueAndRelease mutation and return a DeletePayload
+   *
+   * @param issueId - required issueId to pass to issueToReleaseDeleteByIssueAndRelease
+   * @param releaseId - required releaseId to pass to issueToReleaseDeleteByIssueAndRelease
+   * @returns parsed response from IssueToReleaseDeleteByIssueAndReleaseMutation
+   */
+  public async fetch(issueId: string, releaseId: string): LinearFetch<DeletePayload> {
+    const response = await this._request<
+      L.IssueToReleaseDeleteByIssueAndReleaseMutation,
+      L.IssueToReleaseDeleteByIssueAndReleaseMutationVariables
+    >(L.IssueToReleaseDeleteByIssueAndReleaseDocument.toString(), {
+      issueId,
+      releaseId,
+    });
+    const data = response.issueToReleaseDeleteByIssueAndRelease;
+
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -33627,6 +35036,681 @@ export class RefreshGoogleSheetsDataMutation extends Request {
     const data = response.refreshGoogleSheetsData;
 
     return new IntegrationPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ArchiveRelease Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class ArchiveReleaseMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ArchiveRelease mutation and return a ReleaseArchivePayload
+   *
+   * @param id - required id to pass to archiveRelease
+   * @returns parsed response from ArchiveReleaseMutation
+   */
+  public async fetch(id: string): LinearFetch<ReleaseArchivePayload> {
+    const response = await this._request<L.ArchiveReleaseMutation, L.ArchiveReleaseMutationVariables>(
+      L.ArchiveReleaseDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.releaseArchive;
+
+    return new ReleaseArchivePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ReleaseComplete Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class ReleaseCompleteMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ReleaseComplete mutation and return a ReleasePayload
+   *
+   * @param input - required input to pass to releaseComplete
+   * @returns parsed response from ReleaseCompleteMutation
+   */
+  public async fetch(input: L.ReleaseCompleteInput): LinearFetch<ReleasePayload> {
+    const response = await this._request<L.ReleaseCompleteMutation, L.ReleaseCompleteMutationVariables>(
+      L.ReleaseCompleteDocument.toString(),
+      {
+        input,
+      }
+    );
+    const data = response.releaseComplete;
+
+    return new ReleasePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ReleaseCompleteByAccessKey Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class ReleaseCompleteByAccessKeyMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ReleaseCompleteByAccessKey mutation and return a ReleasePayload
+   *
+   * @param input - required input to pass to releaseCompleteByAccessKey
+   * @returns parsed response from ReleaseCompleteByAccessKeyMutation
+   */
+  public async fetch(input: L.ReleaseCompleteInputBase): LinearFetch<ReleasePayload> {
+    const response = await this._request<
+      L.ReleaseCompleteByAccessKeyMutation,
+      L.ReleaseCompleteByAccessKeyMutationVariables
+    >(L.ReleaseCompleteByAccessKeyDocument.toString(), {
+      input,
+    });
+    const data = response.releaseCompleteByAccessKey;
+
+    return new ReleasePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable CreateRelease Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class CreateReleaseMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CreateRelease mutation and return a ReleasePayload
+   *
+   * @param input - required input to pass to createRelease
+   * @returns parsed response from CreateReleaseMutation
+   */
+  public async fetch(input: L.ReleaseCreateInput): LinearFetch<ReleasePayload> {
+    const response = await this._request<L.CreateReleaseMutation, L.CreateReleaseMutationVariables>(
+      L.CreateReleaseDocument.toString(),
+      {
+        input,
+      }
+    );
+    const data = response.releaseCreate;
+
+    return new ReleasePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable DeleteRelease Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class DeleteReleaseMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DeleteRelease mutation and return a ReleaseArchivePayload
+   *
+   * @param id - required id to pass to deleteRelease
+   * @returns parsed response from DeleteReleaseMutation
+   */
+  public async fetch(id: string): LinearFetch<ReleaseArchivePayload> {
+    const response = await this._request<L.DeleteReleaseMutation, L.DeleteReleaseMutationVariables>(
+      L.DeleteReleaseDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.releaseDelete;
+
+    return new ReleaseArchivePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable CreateReleaseNote Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class CreateReleaseNoteMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CreateReleaseNote mutation and return a ReleaseNotePayload
+   *
+   * @param input - required input to pass to createReleaseNote
+   * @returns parsed response from CreateReleaseNoteMutation
+   */
+  public async fetch(input: L.ReleaseNoteCreateInput): LinearFetch<ReleaseNotePayload> {
+    const response = await this._request<L.CreateReleaseNoteMutation, L.CreateReleaseNoteMutationVariables>(
+      L.CreateReleaseNoteDocument.toString(),
+      {
+        input,
+      }
+    );
+    const data = response.releaseNoteCreate;
+
+    return new ReleaseNotePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable DeleteReleaseNote Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class DeleteReleaseNoteMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DeleteReleaseNote mutation and return a DeletePayload
+   *
+   * @param id - required id to pass to deleteReleaseNote
+   * @returns parsed response from DeleteReleaseNoteMutation
+   */
+  public async fetch(id: string): LinearFetch<DeletePayload> {
+    const response = await this._request<L.DeleteReleaseNoteMutation, L.DeleteReleaseNoteMutationVariables>(
+      L.DeleteReleaseNoteDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.releaseNoteDelete;
+
+    return new DeletePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UpdateReleaseNote Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UpdateReleaseNoteMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UpdateReleaseNote mutation and return a ReleaseNotePayload
+   *
+   * @param id - required id to pass to updateReleaseNote
+   * @param input - required input to pass to updateReleaseNote
+   * @returns parsed response from UpdateReleaseNoteMutation
+   */
+  public async fetch(id: string, input: L.ReleaseNoteUpdateInput): LinearFetch<ReleaseNotePayload> {
+    const response = await this._request<L.UpdateReleaseNoteMutation, L.UpdateReleaseNoteMutationVariables>(
+      L.UpdateReleaseNoteDocument.toString(),
+      {
+        id,
+        input,
+      }
+    );
+    const data = response.releaseNoteUpdate;
+
+    return new ReleaseNotePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ArchiveReleasePipeline Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class ArchiveReleasePipelineMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ArchiveReleasePipeline mutation and return a ReleasePipelineArchivePayload
+   *
+   * @param id - required id to pass to archiveReleasePipeline
+   * @returns parsed response from ArchiveReleasePipelineMutation
+   */
+  public async fetch(id: string): LinearFetch<ReleasePipelineArchivePayload> {
+    const response = await this._request<L.ArchiveReleasePipelineMutation, L.ArchiveReleasePipelineMutationVariables>(
+      L.ArchiveReleasePipelineDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.releasePipelineArchive;
+
+    return new ReleasePipelineArchivePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable CreateReleasePipeline Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class CreateReleasePipelineMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CreateReleasePipeline mutation and return a ReleasePipelinePayload
+   *
+   * @param input - required input to pass to createReleasePipeline
+   * @returns parsed response from CreateReleasePipelineMutation
+   */
+  public async fetch(input: L.ReleasePipelineCreateInput): LinearFetch<ReleasePipelinePayload> {
+    const response = await this._request<L.CreateReleasePipelineMutation, L.CreateReleasePipelineMutationVariables>(
+      L.CreateReleasePipelineDocument.toString(),
+      {
+        input,
+      }
+    );
+    const data = response.releasePipelineCreate;
+
+    return new ReleasePipelinePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable DeleteReleasePipeline Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class DeleteReleasePipelineMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DeleteReleasePipeline mutation and return a DeletePayload
+   *
+   * @param id - required id to pass to deleteReleasePipeline
+   * @returns parsed response from DeleteReleasePipelineMutation
+   */
+  public async fetch(id: string): LinearFetch<DeletePayload> {
+    const response = await this._request<L.DeleteReleasePipelineMutation, L.DeleteReleasePipelineMutationVariables>(
+      L.DeleteReleasePipelineDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.releasePipelineDelete;
+
+    return new DeletePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UnarchiveReleasePipeline Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UnarchiveReleasePipelineMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UnarchiveReleasePipeline mutation and return a ReleasePipelineArchivePayload
+   *
+   * @param id - required id to pass to unarchiveReleasePipeline
+   * @returns parsed response from UnarchiveReleasePipelineMutation
+   */
+  public async fetch(id: string): LinearFetch<ReleasePipelineArchivePayload> {
+    const response = await this._request<
+      L.UnarchiveReleasePipelineMutation,
+      L.UnarchiveReleasePipelineMutationVariables
+    >(L.UnarchiveReleasePipelineDocument.toString(), {
+      id,
+    });
+    const data = response.releasePipelineUnarchive;
+
+    return new ReleasePipelineArchivePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UpdateReleasePipeline Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UpdateReleasePipelineMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UpdateReleasePipeline mutation and return a ReleasePipelinePayload
+   *
+   * @param id - required id to pass to updateReleasePipeline
+   * @param input - required input to pass to updateReleasePipeline
+   * @returns parsed response from UpdateReleasePipelineMutation
+   */
+  public async fetch(id: string, input: L.ReleasePipelineUpdateInput): LinearFetch<ReleasePipelinePayload> {
+    const response = await this._request<L.UpdateReleasePipelineMutation, L.UpdateReleasePipelineMutationVariables>(
+      L.UpdateReleasePipelineDocument.toString(),
+      {
+        id,
+        input,
+      }
+    );
+    const data = response.releasePipelineUpdate;
+
+    return new ReleasePipelinePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ArchiveReleaseStage Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class ArchiveReleaseStageMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ArchiveReleaseStage mutation and return a ReleaseStageArchivePayload
+   *
+   * @param id - required id to pass to archiveReleaseStage
+   * @returns parsed response from ArchiveReleaseStageMutation
+   */
+  public async fetch(id: string): LinearFetch<ReleaseStageArchivePayload> {
+    const response = await this._request<L.ArchiveReleaseStageMutation, L.ArchiveReleaseStageMutationVariables>(
+      L.ArchiveReleaseStageDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.releaseStageArchive;
+
+    return new ReleaseStageArchivePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable CreateReleaseStage Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class CreateReleaseStageMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CreateReleaseStage mutation and return a ReleaseStagePayload
+   *
+   * @param input - required input to pass to createReleaseStage
+   * @returns parsed response from CreateReleaseStageMutation
+   */
+  public async fetch(input: L.ReleaseStageCreateInput): LinearFetch<ReleaseStagePayload> {
+    const response = await this._request<L.CreateReleaseStageMutation, L.CreateReleaseStageMutationVariables>(
+      L.CreateReleaseStageDocument.toString(),
+      {
+        input,
+      }
+    );
+    const data = response.releaseStageCreate;
+
+    return new ReleaseStagePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UnarchiveReleaseStage Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UnarchiveReleaseStageMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UnarchiveReleaseStage mutation and return a ReleaseStageArchivePayload
+   *
+   * @param id - required id to pass to unarchiveReleaseStage
+   * @returns parsed response from UnarchiveReleaseStageMutation
+   */
+  public async fetch(id: string): LinearFetch<ReleaseStageArchivePayload> {
+    const response = await this._request<L.UnarchiveReleaseStageMutation, L.UnarchiveReleaseStageMutationVariables>(
+      L.UnarchiveReleaseStageDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.releaseStageUnarchive;
+
+    return new ReleaseStageArchivePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UpdateReleaseStage Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UpdateReleaseStageMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UpdateReleaseStage mutation and return a ReleaseStagePayload
+   *
+   * @param id - required id to pass to updateReleaseStage
+   * @param input - required input to pass to updateReleaseStage
+   * @returns parsed response from UpdateReleaseStageMutation
+   */
+  public async fetch(id: string, input: L.ReleaseStageUpdateInput): LinearFetch<ReleaseStagePayload> {
+    const response = await this._request<L.UpdateReleaseStageMutation, L.UpdateReleaseStageMutationVariables>(
+      L.UpdateReleaseStageDocument.toString(),
+      {
+        id,
+        input,
+      }
+    );
+    const data = response.releaseStageUpdate;
+
+    return new ReleaseStagePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ReleaseSync Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class ReleaseSyncMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ReleaseSync mutation and return a ReleasePayload
+   *
+   * @param input - required input to pass to releaseSync
+   * @returns parsed response from ReleaseSyncMutation
+   */
+  public async fetch(input: L.ReleaseSyncInput): LinearFetch<ReleasePayload> {
+    const response = await this._request<L.ReleaseSyncMutation, L.ReleaseSyncMutationVariables>(
+      L.ReleaseSyncDocument.toString(),
+      {
+        input,
+      }
+    );
+    const data = response.releaseSync;
+
+    return new ReleasePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ReleaseSyncByAccessKey Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class ReleaseSyncByAccessKeyMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ReleaseSyncByAccessKey mutation and return a ReleasePayload
+   *
+   * @param input - required input to pass to releaseSyncByAccessKey
+   * @returns parsed response from ReleaseSyncByAccessKeyMutation
+   */
+  public async fetch(input: L.ReleaseSyncInputBase): LinearFetch<ReleasePayload> {
+    const response = await this._request<L.ReleaseSyncByAccessKeyMutation, L.ReleaseSyncByAccessKeyMutationVariables>(
+      L.ReleaseSyncByAccessKeyDocument.toString(),
+      {
+        input,
+      }
+    );
+    const data = response.releaseSyncByAccessKey;
+
+    return new ReleasePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UnarchiveRelease Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UnarchiveReleaseMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UnarchiveRelease mutation and return a ReleaseArchivePayload
+   *
+   * @param id - required id to pass to unarchiveRelease
+   * @returns parsed response from UnarchiveReleaseMutation
+   */
+  public async fetch(id: string): LinearFetch<ReleaseArchivePayload> {
+    const response = await this._request<L.UnarchiveReleaseMutation, L.UnarchiveReleaseMutationVariables>(
+      L.UnarchiveReleaseDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.releaseUnarchive;
+
+    return new ReleaseArchivePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UpdateRelease Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UpdateReleaseMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UpdateRelease mutation and return a ReleasePayload
+   *
+   * @param id - required id to pass to updateRelease
+   * @param input - required input to pass to updateRelease
+   * @returns parsed response from UpdateReleaseMutation
+   */
+  public async fetch(id: string, input: L.ReleaseUpdateInput): LinearFetch<ReleasePayload> {
+    const response = await this._request<L.UpdateReleaseMutation, L.UpdateReleaseMutationVariables>(
+      L.UpdateReleaseDocument.toString(),
+      {
+        id,
+        input,
+      }
+    );
+    const data = response.releaseUpdate;
+
+    return new ReleasePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ReleaseUpdateByPipeline Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class ReleaseUpdateByPipelineMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ReleaseUpdateByPipeline mutation and return a ReleasePayload
+   *
+   * @param input - required input to pass to releaseUpdateByPipeline
+   * @returns parsed response from ReleaseUpdateByPipelineMutation
+   */
+  public async fetch(input: L.ReleaseUpdateByPipelineInput): LinearFetch<ReleasePayload> {
+    const response = await this._request<L.ReleaseUpdateByPipelineMutation, L.ReleaseUpdateByPipelineMutationVariables>(
+      L.ReleaseUpdateByPipelineDocument.toString(),
+      {
+        input,
+      }
+    );
+    const data = response.releaseUpdateByPipeline;
+
+    return new ReleasePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ReleaseUpdateByPipelineByAccessKey Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class ReleaseUpdateByPipelineByAccessKeyMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ReleaseUpdateByPipelineByAccessKey mutation and return a ReleasePayload
+   *
+   * @param input - required input to pass to releaseUpdateByPipelineByAccessKey
+   * @returns parsed response from ReleaseUpdateByPipelineByAccessKeyMutation
+   */
+  public async fetch(input: L.ReleaseUpdateByPipelineInputBase): LinearFetch<ReleasePayload> {
+    const response = await this._request<
+      L.ReleaseUpdateByPipelineByAccessKeyMutation,
+      L.ReleaseUpdateByPipelineByAccessKeyMutationVariables
+    >(L.ReleaseUpdateByPipelineByAccessKeyDocument.toString(), {
+      input,
+    });
+    const data = response.releaseUpdateByPipelineByAccessKey;
+
+    return new ReleasePayload(this._request, data);
   }
 }
 
@@ -35945,6 +38029,59 @@ export class AttachmentIssue_RelationsQuery extends Request {
 }
 
 /**
+ * A fetchable AttachmentIssue_Releases Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to attachmentIssue
+ * @param variables - variables without 'id' to pass into the AttachmentIssue_ReleasesQuery
+ */
+export class AttachmentIssue_ReleasesQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.AttachmentIssue_ReleasesQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.AttachmentIssue_ReleasesQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the AttachmentIssue_Releases query and return a ReleaseConnection
+   *
+   * @param variables - variables without 'id' to pass into the AttachmentIssue_ReleasesQuery
+   * @returns parsed response from AttachmentIssue_ReleasesQuery
+   */
+  public async fetch(variables?: Omit<L.AttachmentIssue_ReleasesQueryVariables, "id">): LinearFetch<ReleaseConnection> {
+    const response = await this._request<L.AttachmentIssue_ReleasesQuery, L.AttachmentIssue_ReleasesQueryVariables>(
+      L.AttachmentIssue_ReleasesDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.attachmentIssue.releases;
+
+    return new ReleaseConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable AttachmentIssue_SharedAccess Query
  *
  * @param request - function to call the graphql client
@@ -37962,6 +40099,55 @@ export class Issue_RelationsQuery extends Request {
 }
 
 /**
+ * A fetchable Issue_Releases Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to issue
+ * @param variables - variables without 'id' to pass into the Issue_ReleasesQuery
+ */
+export class Issue_ReleasesQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Issue_ReleasesQueryVariables, "id">;
+
+  public constructor(request: LinearRequest, id: string, variables?: Omit<L.Issue_ReleasesQueryVariables, "id">) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Issue_Releases query and return a ReleaseConnection
+   *
+   * @param variables - variables without 'id' to pass into the Issue_ReleasesQuery
+   * @returns parsed response from Issue_ReleasesQuery
+   */
+  public async fetch(variables?: Omit<L.Issue_ReleasesQueryVariables, "id">): LinearFetch<ReleaseConnection> {
+    const response = await this._request<L.Issue_ReleasesQuery, L.Issue_ReleasesQueryVariables>(
+      L.Issue_ReleasesDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.issue.releases;
+
+    return new ReleaseConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable Issue_SharedAccess Query
  *
  * @param request - function to call the graphql client
@@ -38862,6 +41048,64 @@ export class IssueVcsBranchSearch_RelationsQuery extends Request {
 }
 
 /**
+ * A fetchable IssueVcsBranchSearch_Releases Query
+ *
+ * @param request - function to call the graphql client
+ * @param branchName - required branchName to pass to issueVcsBranchSearch
+ * @param variables - variables without 'branchName' to pass into the IssueVcsBranchSearch_ReleasesQuery
+ */
+export class IssueVcsBranchSearch_ReleasesQuery extends Request {
+  private _branchName: string;
+  private _variables?: Omit<L.IssueVcsBranchSearch_ReleasesQueryVariables, "branchName">;
+
+  public constructor(
+    request: LinearRequest,
+    branchName: string,
+    variables?: Omit<L.IssueVcsBranchSearch_ReleasesQueryVariables, "branchName">
+  ) {
+    super(request);
+    this._branchName = branchName;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the IssueVcsBranchSearch_Releases query and return a ReleaseConnection
+   *
+   * @param variables - variables without 'branchName' to pass into the IssueVcsBranchSearch_ReleasesQuery
+   * @returns parsed response from IssueVcsBranchSearch_ReleasesQuery
+   */
+  public async fetch(
+    variables?: Omit<L.IssueVcsBranchSearch_ReleasesQueryVariables, "branchName">
+  ): LinearFetch<ReleaseConnection | undefined> {
+    const response = await this._request<
+      L.IssueVcsBranchSearch_ReleasesQuery,
+      L.IssueVcsBranchSearch_ReleasesQueryVariables
+    >(L.IssueVcsBranchSearch_ReleasesDocument.toString(), {
+      branchName: this._branchName,
+      ...this._variables,
+      ...variables,
+    });
+    const data = response.issueVcsBranchSearch?.releases;
+    if (data) {
+      return new ReleaseConnection(
+        this._request,
+        connection =>
+          this.fetch(
+            defaultConnection({
+              ...this._variables,
+              ...variables,
+              ...connection,
+            })
+          ),
+        data
+      );
+    } else {
+      return undefined;
+    }
+  }
+}
+
+/**
  * A fetchable IssueVcsBranchSearch_SharedAccess Query
  *
  * @param request - function to call the graphql client
@@ -38992,6 +41236,198 @@ export class IssueVcsBranchSearch_SubscribersQuery extends Request {
     const data = response.issueVcsBranchSearch?.subscribers;
     if (data) {
       return new UserConnection(
+        this._request,
+        connection =>
+          this.fetch(
+            defaultConnection({
+              ...this._variables,
+              ...variables,
+              ...connection,
+            })
+          ),
+        data
+      );
+    } else {
+      return undefined;
+    }
+  }
+}
+
+/**
+ * A fetchable LatestReleaseByAccessKey_Documents Query
+ *
+ * @param request - function to call the graphql client
+ * @param variables - variables to pass into the LatestReleaseByAccessKey_DocumentsQuery
+ */
+export class LatestReleaseByAccessKey_DocumentsQuery extends Request {
+  private _variables?: L.LatestReleaseByAccessKey_DocumentsQueryVariables;
+
+  public constructor(request: LinearRequest, variables?: L.LatestReleaseByAccessKey_DocumentsQueryVariables) {
+    super(request);
+
+    this._variables = variables;
+  }
+
+  /**
+   * Call the LatestReleaseByAccessKey_Documents query and return a DocumentConnection
+   *
+   * @param variables - variables to pass into the LatestReleaseByAccessKey_DocumentsQuery
+   * @returns parsed response from LatestReleaseByAccessKey_DocumentsQuery
+   */
+  public async fetch(
+    variables?: L.LatestReleaseByAccessKey_DocumentsQueryVariables
+  ): LinearFetch<DocumentConnection | undefined> {
+    const response = await this._request<
+      L.LatestReleaseByAccessKey_DocumentsQuery,
+      L.LatestReleaseByAccessKey_DocumentsQueryVariables
+    >(L.LatestReleaseByAccessKey_DocumentsDocument.toString(), variables);
+    const data = response.latestReleaseByAccessKey?.documents;
+    if (data) {
+      return new DocumentConnection(
+        this._request,
+        connection =>
+          this.fetch(
+            defaultConnection({
+              ...this._variables,
+              ...variables,
+              ...connection,
+            })
+          ),
+        data
+      );
+    } else {
+      return undefined;
+    }
+  }
+}
+
+/**
+ * A fetchable LatestReleaseByAccessKey_History Query
+ *
+ * @param request - function to call the graphql client
+ * @param variables - variables to pass into the LatestReleaseByAccessKey_HistoryQuery
+ */
+export class LatestReleaseByAccessKey_HistoryQuery extends Request {
+  private _variables?: L.LatestReleaseByAccessKey_HistoryQueryVariables;
+
+  public constructor(request: LinearRequest, variables?: L.LatestReleaseByAccessKey_HistoryQueryVariables) {
+    super(request);
+
+    this._variables = variables;
+  }
+
+  /**
+   * Call the LatestReleaseByAccessKey_History query and return a ReleaseHistoryConnection
+   *
+   * @param variables - variables to pass into the LatestReleaseByAccessKey_HistoryQuery
+   * @returns parsed response from LatestReleaseByAccessKey_HistoryQuery
+   */
+  public async fetch(
+    variables?: L.LatestReleaseByAccessKey_HistoryQueryVariables
+  ): LinearFetch<ReleaseHistoryConnection | undefined> {
+    const response = await this._request<
+      L.LatestReleaseByAccessKey_HistoryQuery,
+      L.LatestReleaseByAccessKey_HistoryQueryVariables
+    >(L.LatestReleaseByAccessKey_HistoryDocument.toString(), variables);
+    const data = response.latestReleaseByAccessKey?.history;
+    if (data) {
+      return new ReleaseHistoryConnection(
+        this._request,
+        connection =>
+          this.fetch(
+            defaultConnection({
+              ...this._variables,
+              ...variables,
+              ...connection,
+            })
+          ),
+        data
+      );
+    } else {
+      return undefined;
+    }
+  }
+}
+
+/**
+ * A fetchable LatestReleaseByAccessKey_Issues Query
+ *
+ * @param request - function to call the graphql client
+ * @param variables - variables to pass into the LatestReleaseByAccessKey_IssuesQuery
+ */
+export class LatestReleaseByAccessKey_IssuesQuery extends Request {
+  private _variables?: L.LatestReleaseByAccessKey_IssuesQueryVariables;
+
+  public constructor(request: LinearRequest, variables?: L.LatestReleaseByAccessKey_IssuesQueryVariables) {
+    super(request);
+
+    this._variables = variables;
+  }
+
+  /**
+   * Call the LatestReleaseByAccessKey_Issues query and return a IssueConnection
+   *
+   * @param variables - variables to pass into the LatestReleaseByAccessKey_IssuesQuery
+   * @returns parsed response from LatestReleaseByAccessKey_IssuesQuery
+   */
+  public async fetch(
+    variables?: L.LatestReleaseByAccessKey_IssuesQueryVariables
+  ): LinearFetch<IssueConnection | undefined> {
+    const response = await this._request<
+      L.LatestReleaseByAccessKey_IssuesQuery,
+      L.LatestReleaseByAccessKey_IssuesQueryVariables
+    >(L.LatestReleaseByAccessKey_IssuesDocument.toString(), variables);
+    const data = response.latestReleaseByAccessKey?.issues;
+    if (data) {
+      return new IssueConnection(
+        this._request,
+        connection =>
+          this.fetch(
+            defaultConnection({
+              ...this._variables,
+              ...variables,
+              ...connection,
+            })
+          ),
+        data
+      );
+    } else {
+      return undefined;
+    }
+  }
+}
+
+/**
+ * A fetchable LatestReleaseByAccessKey_Links Query
+ *
+ * @param request - function to call the graphql client
+ * @param variables - variables to pass into the LatestReleaseByAccessKey_LinksQuery
+ */
+export class LatestReleaseByAccessKey_LinksQuery extends Request {
+  private _variables?: L.LatestReleaseByAccessKey_LinksQueryVariables;
+
+  public constructor(request: LinearRequest, variables?: L.LatestReleaseByAccessKey_LinksQueryVariables) {
+    super(request);
+
+    this._variables = variables;
+  }
+
+  /**
+   * Call the LatestReleaseByAccessKey_Links query and return a EntityExternalLinkConnection
+   *
+   * @param variables - variables to pass into the LatestReleaseByAccessKey_LinksQuery
+   * @returns parsed response from LatestReleaseByAccessKey_LinksQuery
+   */
+  public async fetch(
+    variables?: L.LatestReleaseByAccessKey_LinksQueryVariables
+  ): LinearFetch<EntityExternalLinkConnection | undefined> {
+    const response = await this._request<
+      L.LatestReleaseByAccessKey_LinksQuery,
+      L.LatestReleaseByAccessKey_LinksQueryVariables
+    >(L.LatestReleaseByAccessKey_LinksDocument.toString(), variables);
+    const data = response.latestReleaseByAccessKey?.links;
+    if (data) {
+      return new EntityExternalLinkConnection(
         this._request,
         connection =>
           this.fetch(
@@ -40518,6 +42954,643 @@ export class ProjectUpdate_CommentsQuery extends Request {
 }
 
 /**
+ * A fetchable Release_Documents Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to release
+ * @param variables - variables without 'id' to pass into the Release_DocumentsQuery
+ */
+export class Release_DocumentsQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Release_DocumentsQueryVariables, "id">;
+
+  public constructor(request: LinearRequest, id: string, variables?: Omit<L.Release_DocumentsQueryVariables, "id">) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Release_Documents query and return a DocumentConnection
+   *
+   * @param variables - variables without 'id' to pass into the Release_DocumentsQuery
+   * @returns parsed response from Release_DocumentsQuery
+   */
+  public async fetch(variables?: Omit<L.Release_DocumentsQueryVariables, "id">): LinearFetch<DocumentConnection> {
+    const response = await this._request<L.Release_DocumentsQuery, L.Release_DocumentsQueryVariables>(
+      L.Release_DocumentsDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.release.documents;
+
+    return new DocumentConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Release_History Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to release
+ * @param variables - variables without 'id' to pass into the Release_HistoryQuery
+ */
+export class Release_HistoryQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Release_HistoryQueryVariables, "id">;
+
+  public constructor(request: LinearRequest, id: string, variables?: Omit<L.Release_HistoryQueryVariables, "id">) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Release_History query and return a ReleaseHistoryConnection
+   *
+   * @param variables - variables without 'id' to pass into the Release_HistoryQuery
+   * @returns parsed response from Release_HistoryQuery
+   */
+  public async fetch(variables?: Omit<L.Release_HistoryQueryVariables, "id">): LinearFetch<ReleaseHistoryConnection> {
+    const response = await this._request<L.Release_HistoryQuery, L.Release_HistoryQueryVariables>(
+      L.Release_HistoryDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.release.history;
+
+    return new ReleaseHistoryConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Release_Issues Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to release
+ * @param variables - variables without 'id' to pass into the Release_IssuesQuery
+ */
+export class Release_IssuesQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Release_IssuesQueryVariables, "id">;
+
+  public constructor(request: LinearRequest, id: string, variables?: Omit<L.Release_IssuesQueryVariables, "id">) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Release_Issues query and return a IssueConnection
+   *
+   * @param variables - variables without 'id' to pass into the Release_IssuesQuery
+   * @returns parsed response from Release_IssuesQuery
+   */
+  public async fetch(variables?: Omit<L.Release_IssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
+    const response = await this._request<L.Release_IssuesQuery, L.Release_IssuesQueryVariables>(
+      L.Release_IssuesDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.release.issues;
+
+    return new IssueConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Release_Links Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to release
+ * @param variables - variables without 'id' to pass into the Release_LinksQuery
+ */
+export class Release_LinksQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Release_LinksQueryVariables, "id">;
+
+  public constructor(request: LinearRequest, id: string, variables?: Omit<L.Release_LinksQueryVariables, "id">) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Release_Links query and return a EntityExternalLinkConnection
+   *
+   * @param variables - variables without 'id' to pass into the Release_LinksQuery
+   * @returns parsed response from Release_LinksQuery
+   */
+  public async fetch(variables?: Omit<L.Release_LinksQueryVariables, "id">): LinearFetch<EntityExternalLinkConnection> {
+    const response = await this._request<L.Release_LinksQuery, L.Release_LinksQueryVariables>(
+      L.Release_LinksDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.release.links;
+
+    return new EntityExternalLinkConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable ReleaseNote_DocumentContent Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to releaseNote
+ */
+export class ReleaseNote_DocumentContentQuery extends Request {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the ReleaseNote_DocumentContent query and return a DocumentContent
+   *
+   * @returns parsed response from ReleaseNote_DocumentContentQuery
+   */
+  public async fetch(): LinearFetch<DocumentContent | undefined> {
+    const response = await this._request<
+      L.ReleaseNote_DocumentContentQuery,
+      L.ReleaseNote_DocumentContentQueryVariables
+    >(L.ReleaseNote_DocumentContentDocument.toString(), {
+      id: this._id,
+    });
+    const data = response.releaseNote.documentContent;
+
+    return data ? new DocumentContent(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable ReleaseNote_DocumentContent_AiPromptRules Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to releaseNote_documentContent
+ */
+export class ReleaseNote_DocumentContent_AiPromptRulesQuery extends Request {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the ReleaseNote_DocumentContent_AiPromptRules query and return a AiPromptRules
+   *
+   * @returns parsed response from ReleaseNote_DocumentContent_AiPromptRulesQuery
+   */
+  public async fetch(): LinearFetch<AiPromptRules | undefined> {
+    const response = await this._request<
+      L.ReleaseNote_DocumentContent_AiPromptRulesQuery,
+      L.ReleaseNote_DocumentContent_AiPromptRulesQueryVariables
+    >(L.ReleaseNote_DocumentContent_AiPromptRulesDocument.toString(), {
+      id: this._id,
+    });
+    const data = response.releaseNote.documentContent?.aiPromptRules;
+
+    return data ? new AiPromptRules(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable ReleaseNote_DocumentContent_WelcomeMessage Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to releaseNote_documentContent
+ */
+export class ReleaseNote_DocumentContent_WelcomeMessageQuery extends Request {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the ReleaseNote_DocumentContent_WelcomeMessage query and return a WelcomeMessage
+   *
+   * @returns parsed response from ReleaseNote_DocumentContent_WelcomeMessageQuery
+   */
+  public async fetch(): LinearFetch<WelcomeMessage | undefined> {
+    const response = await this._request<
+      L.ReleaseNote_DocumentContent_WelcomeMessageQuery,
+      L.ReleaseNote_DocumentContent_WelcomeMessageQueryVariables
+    >(L.ReleaseNote_DocumentContent_WelcomeMessageDocument.toString(), {
+      id: this._id,
+    });
+    const data = response.releaseNote.documentContent?.welcomeMessage;
+
+    return data ? new WelcomeMessage(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable ReleasePipeline_Releases Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to releasePipeline
+ * @param variables - variables without 'id' to pass into the ReleasePipeline_ReleasesQuery
+ */
+export class ReleasePipeline_ReleasesQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.ReleasePipeline_ReleasesQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.ReleasePipeline_ReleasesQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the ReleasePipeline_Releases query and return a ReleaseConnection
+   *
+   * @param variables - variables without 'id' to pass into the ReleasePipeline_ReleasesQuery
+   * @returns parsed response from ReleasePipeline_ReleasesQuery
+   */
+  public async fetch(variables?: Omit<L.ReleasePipeline_ReleasesQueryVariables, "id">): LinearFetch<ReleaseConnection> {
+    const response = await this._request<L.ReleasePipeline_ReleasesQuery, L.ReleasePipeline_ReleasesQueryVariables>(
+      L.ReleasePipeline_ReleasesDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.releasePipeline.releases;
+
+    return new ReleaseConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable ReleasePipeline_Stages Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to releasePipeline
+ * @param variables - variables without 'id' to pass into the ReleasePipeline_StagesQuery
+ */
+export class ReleasePipeline_StagesQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.ReleasePipeline_StagesQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.ReleasePipeline_StagesQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the ReleasePipeline_Stages query and return a ReleaseStageConnection
+   *
+   * @param variables - variables without 'id' to pass into the ReleasePipeline_StagesQuery
+   * @returns parsed response from ReleasePipeline_StagesQuery
+   */
+  public async fetch(
+    variables?: Omit<L.ReleasePipeline_StagesQueryVariables, "id">
+  ): LinearFetch<ReleaseStageConnection> {
+    const response = await this._request<L.ReleasePipeline_StagesQuery, L.ReleasePipeline_StagesQueryVariables>(
+      L.ReleasePipeline_StagesDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.releasePipeline.stages;
+
+    return new ReleaseStageConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable ReleasePipeline_Teams Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to releasePipeline
+ * @param variables - variables without 'id' to pass into the ReleasePipeline_TeamsQuery
+ */
+export class ReleasePipeline_TeamsQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.ReleasePipeline_TeamsQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.ReleasePipeline_TeamsQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the ReleasePipeline_Teams query and return a TeamConnection
+   *
+   * @param variables - variables without 'id' to pass into the ReleasePipeline_TeamsQuery
+   * @returns parsed response from ReleasePipeline_TeamsQuery
+   */
+  public async fetch(variables?: Omit<L.ReleasePipeline_TeamsQueryVariables, "id">): LinearFetch<TeamConnection> {
+    const response = await this._request<L.ReleasePipeline_TeamsQuery, L.ReleasePipeline_TeamsQueryVariables>(
+      L.ReleasePipeline_TeamsDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.releasePipeline.teams;
+
+    return new TeamConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable ReleasePipelineByAccessKey_Releases Query
+ *
+ * @param request - function to call the graphql client
+ * @param variables - variables to pass into the ReleasePipelineByAccessKey_ReleasesQuery
+ */
+export class ReleasePipelineByAccessKey_ReleasesQuery extends Request {
+  private _variables?: L.ReleasePipelineByAccessKey_ReleasesQueryVariables;
+
+  public constructor(request: LinearRequest, variables?: L.ReleasePipelineByAccessKey_ReleasesQueryVariables) {
+    super(request);
+
+    this._variables = variables;
+  }
+
+  /**
+   * Call the ReleasePipelineByAccessKey_Releases query and return a ReleaseConnection
+   *
+   * @param variables - variables to pass into the ReleasePipelineByAccessKey_ReleasesQuery
+   * @returns parsed response from ReleasePipelineByAccessKey_ReleasesQuery
+   */
+  public async fetch(variables?: L.ReleasePipelineByAccessKey_ReleasesQueryVariables): LinearFetch<ReleaseConnection> {
+    const response = await this._request<
+      L.ReleasePipelineByAccessKey_ReleasesQuery,
+      L.ReleasePipelineByAccessKey_ReleasesQueryVariables
+    >(L.ReleasePipelineByAccessKey_ReleasesDocument.toString(), variables);
+    const data = response.releasePipelineByAccessKey.releases;
+
+    return new ReleaseConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable ReleasePipelineByAccessKey_Stages Query
+ *
+ * @param request - function to call the graphql client
+ * @param variables - variables to pass into the ReleasePipelineByAccessKey_StagesQuery
+ */
+export class ReleasePipelineByAccessKey_StagesQuery extends Request {
+  private _variables?: L.ReleasePipelineByAccessKey_StagesQueryVariables;
+
+  public constructor(request: LinearRequest, variables?: L.ReleasePipelineByAccessKey_StagesQueryVariables) {
+    super(request);
+
+    this._variables = variables;
+  }
+
+  /**
+   * Call the ReleasePipelineByAccessKey_Stages query and return a ReleaseStageConnection
+   *
+   * @param variables - variables to pass into the ReleasePipelineByAccessKey_StagesQuery
+   * @returns parsed response from ReleasePipelineByAccessKey_StagesQuery
+   */
+  public async fetch(
+    variables?: L.ReleasePipelineByAccessKey_StagesQueryVariables
+  ): LinearFetch<ReleaseStageConnection> {
+    const response = await this._request<
+      L.ReleasePipelineByAccessKey_StagesQuery,
+      L.ReleasePipelineByAccessKey_StagesQueryVariables
+    >(L.ReleasePipelineByAccessKey_StagesDocument.toString(), variables);
+    const data = response.releasePipelineByAccessKey.stages;
+
+    return new ReleaseStageConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable ReleasePipelineByAccessKey_Teams Query
+ *
+ * @param request - function to call the graphql client
+ * @param variables - variables to pass into the ReleasePipelineByAccessKey_TeamsQuery
+ */
+export class ReleasePipelineByAccessKey_TeamsQuery extends Request {
+  private _variables?: L.ReleasePipelineByAccessKey_TeamsQueryVariables;
+
+  public constructor(request: LinearRequest, variables?: L.ReleasePipelineByAccessKey_TeamsQueryVariables) {
+    super(request);
+
+    this._variables = variables;
+  }
+
+  /**
+   * Call the ReleasePipelineByAccessKey_Teams query and return a TeamConnection
+   *
+   * @param variables - variables to pass into the ReleasePipelineByAccessKey_TeamsQuery
+   * @returns parsed response from ReleasePipelineByAccessKey_TeamsQuery
+   */
+  public async fetch(variables?: L.ReleasePipelineByAccessKey_TeamsQueryVariables): LinearFetch<TeamConnection> {
+    const response = await this._request<
+      L.ReleasePipelineByAccessKey_TeamsQuery,
+      L.ReleasePipelineByAccessKey_TeamsQueryVariables
+    >(L.ReleasePipelineByAccessKey_TeamsDocument.toString(), variables);
+    const data = response.releasePipelineByAccessKey.teams;
+
+    return new TeamConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable ReleaseStage_Releases Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to releaseStage
+ * @param variables - variables without 'id' to pass into the ReleaseStage_ReleasesQuery
+ */
+export class ReleaseStage_ReleasesQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.ReleaseStage_ReleasesQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.ReleaseStage_ReleasesQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the ReleaseStage_Releases query and return a ReleaseConnection
+   *
+   * @param variables - variables without 'id' to pass into the ReleaseStage_ReleasesQuery
+   * @returns parsed response from ReleaseStage_ReleasesQuery
+   */
+  public async fetch(variables?: Omit<L.ReleaseStage_ReleasesQueryVariables, "id">): LinearFetch<ReleaseConnection> {
+    const response = await this._request<L.ReleaseStage_ReleasesQuery, L.ReleaseStage_ReleasesQueryVariables>(
+      L.ReleaseStage_ReleasesDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.releaseStage.releases;
+
+    return new ReleaseConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable Roadmap_Projects Query
  *
  * @param request - function to call the graphql client
@@ -41033,6 +44106,61 @@ export class Team_ProjectsQuery extends Request {
     const data = response.team.projects;
 
     return new ProjectConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Team_ReleasePipelines Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to team
+ * @param variables - variables without 'id' to pass into the Team_ReleasePipelinesQuery
+ */
+export class Team_ReleasePipelinesQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Team_ReleasePipelinesQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.Team_ReleasePipelinesQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Team_ReleasePipelines query and return a ReleasePipelineConnection
+   *
+   * @param variables - variables without 'id' to pass into the Team_ReleasePipelinesQuery
+   * @returns parsed response from Team_ReleasePipelinesQuery
+   */
+  public async fetch(
+    variables?: Omit<L.Team_ReleasePipelinesQueryVariables, "id">
+  ): LinearFetch<ReleasePipelineConnection> {
+    const response = await this._request<L.Team_ReleasePipelinesQuery, L.Team_ReleasePipelinesQueryVariables>(
+      L.Team_ReleasePipelinesDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.team.releasePipelines;
+
+    return new ReleasePipelineConnection(
       this._request,
       connection =>
         this.fetch(
@@ -43291,6 +46419,24 @@ export class LinearSdk extends Request {
     return new IssueTitleSuggestionFromCustomerRequestQuery(this._request).fetch(request);
   }
   /**
+   * One specific issue-to-release association, looked up by its unique identifier.
+   *
+   * @param id - required id to pass to issueToRelease
+   * @returns IssueToRelease
+   */
+  public issueToRelease(id: string): LinearFetch<IssueToRelease> {
+    return new IssueToReleaseQuery(this._request).fetch(id);
+  }
+  /**
+   * All issue-to-release associations. Returns a paginated list of all issue-to-release links visible to the authenticated user.
+   *
+   * @param variables - variables to pass into the IssueToReleasesQuery
+   * @returns IssueToReleaseConnection
+   */
+  public issueToReleases(variables?: L.IssueToReleasesQueryVariables): LinearFetch<IssueToReleaseConnection> {
+    return new IssueToReleasesQuery(this._request).fetch(variables);
+  }
+  /**
    * Find issue based on the VCS branch name.
    *
    * @param branchName - required branchName to pass to issueVcsBranchSearch
@@ -43307,6 +46453,14 @@ export class LinearSdk extends Request {
    */
   public issues(variables?: L.IssuesQueryVariables): LinearFetch<IssueConnection> {
     return new IssuesQuery(this._request).fetch(variables);
+  }
+  /**
+   * Returns the latest release for the pipeline associated with the access key.
+   *
+   * @returns Release
+   */
+  public get latestReleaseByAccessKey(): LinearFetch<Release | undefined> {
+    return new LatestReleaseByAccessKeyQuery(this._request).fetch();
   }
   /**
    * A specific notification by ID.
@@ -43548,6 +46702,95 @@ export class LinearSdk extends Request {
    */
   public get rateLimitStatus(): LinearFetch<RateLimitPayload> {
     return new RateLimitStatusQuery(this._request).fetch();
+  }
+  /**
+   * Fetch a single release by its UUID or slug identifier.
+   *
+   * @param id - required id to pass to release
+   * @returns Release
+   */
+  public release(id: string): LinearFetch<Release> {
+    return new ReleaseQuery(this._request).fetch(id);
+  }
+  /**
+   * Fetch a release note by its UUID or slug identifier.
+   *
+   * @param id - required id to pass to releaseNote
+   * @returns ReleaseNote
+   */
+  public releaseNote(id: string): LinearFetch<ReleaseNote> {
+    return new ReleaseNoteQuery(this._request).fetch(id);
+  }
+  /**
+   * Release notes in the workspace.
+   *
+   * @param variables - variables to pass into the ReleaseNotesQuery
+   * @returns ReleaseNoteConnection
+   */
+  public releaseNotes(variables?: L.ReleaseNotesQueryVariables): LinearFetch<ReleaseNoteConnection> {
+    return new ReleaseNotesQuery(this._request).fetch(variables);
+  }
+  /**
+   * Fetch a single release pipeline by its UUID or slug identifier.
+   *
+   * @param id - required id to pass to releasePipeline
+   * @returns ReleasePipeline
+   */
+  public releasePipeline(id: string): LinearFetch<ReleasePipeline> {
+    return new ReleasePipelineQuery(this._request).fetch(id);
+  }
+  /**
+   * Returns a release pipeline by ID. Requires the access key to have access to the pipeline.
+   *
+   * @returns ReleasePipeline
+   */
+  public get releasePipelineByAccessKey(): LinearFetch<ReleasePipeline> {
+    return new ReleasePipelineByAccessKeyQuery(this._request).fetch();
+  }
+  /**
+   * All release pipelines in the workspace, with optional filtering and sorting.
+   *
+   * @param variables - variables to pass into the ReleasePipelinesQuery
+   * @returns ReleasePipelineConnection
+   */
+  public releasePipelines(variables?: L.ReleasePipelinesQueryVariables): LinearFetch<ReleasePipelineConnection> {
+    return new ReleasePipelinesQuery(this._request).fetch(variables);
+  }
+  /**
+   * Search releases with optional text matching against name, version, and pipeline name. When no search term is provided, returns releases ordered by stage priority (started > planned > completed > canceled).
+   *
+   * @param variables - variables to pass into the ReleaseSearchQuery
+   * @returns Release[]
+   */
+  public releaseSearch(variables?: L.ReleaseSearchQueryVariables): LinearFetch<Release[]> {
+    return new ReleaseSearchQuery(this._request).fetch(variables);
+  }
+  /**
+   * Fetch a single release stage by its UUID.
+   *
+   * @param id - required id to pass to releaseStage
+   * @returns ReleaseStage
+   */
+  public releaseStage(id: string): LinearFetch<ReleaseStage> {
+    return new ReleaseStageQuery(this._request).fetch(id);
+  }
+  /**
+   * All release stages in the workspace, with optional filtering.
+   *
+   * @param variables - variables to pass into the ReleaseStagesQuery
+   * @returns ReleaseStageConnection
+   */
+  public releaseStages(variables?: L.ReleaseStagesQueryVariables): LinearFetch<ReleaseStageConnection> {
+    return new ReleaseStagesQuery(this._request).fetch(variables);
+  }
+  /**
+   * All releases in the workspace, with optional filtering and sorting.
+   *
+   * @param variables - variables to pass into the ReleasesQuery
+   * @returns ReleaseConnection
+   */
+  public releases(variables?: L.ReleasesQueryVariables): LinearFetch<ReleaseConnection> {
+    return new ReleasesQuery(this._request).fetch(variables);
   }
   /**
    * [Deprecated] Returns a single roadmap by its identifier. Use initiatives instead.
@@ -45075,10 +48318,15 @@ export class LinearSdk extends Request {
    *
    * @param accessToken - required accessToken to pass to integrationGitlabConnect
    * @param gitlabUrl - required gitlabUrl to pass to integrationGitlabConnect
+   * @param variables - variables without 'accessToken', 'gitlabUrl' to pass into the IntegrationGitlabConnectMutation
    * @returns GitLabIntegrationCreatePayload
    */
-  public integrationGitlabConnect(accessToken: string, gitlabUrl: string): LinearFetch<GitLabIntegrationCreatePayload> {
-    return new IntegrationGitlabConnectMutation(this._request).fetch(accessToken, gitlabUrl);
+  public integrationGitlabConnect(
+    accessToken: string,
+    gitlabUrl: string,
+    variables?: Omit<L.IntegrationGitlabConnectMutationVariables, "accessToken" | "gitlabUrl">
+  ): LinearFetch<GitLabIntegrationCreatePayload> {
+    return new IntegrationGitlabConnectMutation(this._request).fetch(accessToken, gitlabUrl, variables);
   }
   /**
    * Tests connectivity to a self-hosted GitLab instance and clears auth errors if successful.
@@ -45192,12 +48440,18 @@ export class LinearSdk extends Request {
    * Integrates the workspace with Salesforce.
    *
    * @param code - required code to pass to integrationSalesforce
+   * @param codeVerifier - required codeVerifier to pass to integrationSalesforce
    * @param redirectUri - required redirectUri to pass to integrationSalesforce
    * @param subdomain - required subdomain to pass to integrationSalesforce
    * @returns IntegrationPayload
    */
-  public integrationSalesforce(code: string, redirectUri: string, subdomain: string): LinearFetch<IntegrationPayload> {
-    return new IntegrationSalesforceMutation(this._request).fetch(code, redirectUri, subdomain);
+  public integrationSalesforce(
+    code: string,
+    codeVerifier: string,
+    redirectUri: string,
+    subdomain: string
+  ): LinearFetch<IntegrationPayload> {
+    return new IntegrationSalesforceMutation(this._request).fetch(code, codeVerifier, redirectUri, subdomain);
   }
   /**
    * Integrates the workspace with Sentry.
@@ -45709,6 +48963,34 @@ export class LinearSdk extends Request {
     variables?: Omit<L.IssueSubscribeMutationVariables, "id">
   ): LinearFetch<IssuePayload> {
     return new IssueSubscribeMutation(this._request).fetch(id, variables);
+  }
+  /**
+   * Creates a new association between an issue and a release, linking the issue to the release for tracking purposes.
+   *
+   * @param input - required input to pass to createIssueToRelease
+   * @returns IssueToReleasePayload
+   */
+  public createIssueToRelease(input: L.IssueToReleaseCreateInput): LinearFetch<IssueToReleasePayload> {
+    return new CreateIssueToReleaseMutation(this._request).fetch(input);
+  }
+  /**
+   * Deletes an issue-to-release association by its identifier, removing the issue from the release.
+   *
+   * @param id - required id to pass to deleteIssueToRelease
+   * @returns DeletePayload
+   */
+  public deleteIssueToRelease(id: string): LinearFetch<DeletePayload> {
+    return new DeleteIssueToReleaseMutation(this._request).fetch(id);
+  }
+  /**
+   * Deletes an issue-to-release association by looking up the issue and release identifiers, removing the issue from the release.
+   *
+   * @param issueId - required issueId to pass to issueToReleaseDeleteByIssueAndRelease
+   * @param releaseId - required releaseId to pass to issueToReleaseDeleteByIssueAndRelease
+   * @returns DeletePayload
+   */
+  public issueToReleaseDeleteByIssueAndRelease(issueId: string, releaseId: string): LinearFetch<DeletePayload> {
+    return new IssueToReleaseDeleteByIssueAndReleaseMutation(this._request).fetch(issueId, releaseId);
   }
   /**
    * Unarchives an issue.
@@ -46324,6 +49606,217 @@ export class LinearSdk extends Request {
     variables?: Omit<L.RefreshGoogleSheetsDataMutationVariables, "id">
   ): LinearFetch<IntegrationPayload> {
     return new RefreshGoogleSheetsDataMutation(this._request).fetch(id, variables);
+  }
+  /**
+   * Archives a release.
+   *
+   * @param id - required id to pass to archiveRelease
+   * @returns ReleaseArchivePayload
+   */
+  public archiveRelease(id: string): LinearFetch<ReleaseArchivePayload> {
+    return new ArchiveReleaseMutation(this._request).fetch(id);
+  }
+  /**
+   * Marks a release as completed. If version is provided, completes that specific release; otherwise completes the most recent started release.
+   *
+   * @param input - required input to pass to releaseComplete
+   * @returns ReleasePayload
+   */
+  public releaseComplete(input: L.ReleaseCompleteInput): LinearFetch<ReleasePayload> {
+    return new ReleaseCompleteMutation(this._request).fetch(input);
+  }
+  /**
+   * Marks a release as completed using an access key. If version is provided, completes that specific release; otherwise completes the most recent started release. The pipeline is inferred from the access key.
+   *
+   * @param input - required input to pass to releaseCompleteByAccessKey
+   * @returns ReleasePayload
+   */
+  public releaseCompleteByAccessKey(input: L.ReleaseCompleteInputBase): LinearFetch<ReleasePayload> {
+    return new ReleaseCompleteByAccessKeyMutation(this._request).fetch(input);
+  }
+  /**
+   * Creates a new release in a pipeline. If no stage is specified, defaults to the first completed stage for continuous pipelines or the first started stage for scheduled pipelines.
+   *
+   * @param input - required input to pass to createRelease
+   * @returns ReleasePayload
+   */
+  public createRelease(input: L.ReleaseCreateInput): LinearFetch<ReleasePayload> {
+    return new CreateReleaseMutation(this._request).fetch(input);
+  }
+  /**
+   * Moves a release to the trash bin. Trashed releases are archived and will be permanently deleted after a retention period. If the release is already archived, it is marked as trashed with a fresh archive timestamp.
+   *
+   * @param id - required id to pass to deleteRelease
+   * @returns ReleaseArchivePayload
+   */
+  public deleteRelease(id: string): LinearFetch<ReleaseArchivePayload> {
+    return new DeleteReleaseMutation(this._request).fetch(id);
+  }
+  /**
+   * Creates a release note.
+   *
+   * @param input - required input to pass to createReleaseNote
+   * @returns ReleaseNotePayload
+   */
+  public createReleaseNote(input: L.ReleaseNoteCreateInput): LinearFetch<ReleaseNotePayload> {
+    return new CreateReleaseNoteMutation(this._request).fetch(input);
+  }
+  /**
+   * Deletes a release note.
+   *
+   * @param id - required id to pass to deleteReleaseNote
+   * @returns DeletePayload
+   */
+  public deleteReleaseNote(id: string): LinearFetch<DeletePayload> {
+    return new DeleteReleaseNoteMutation(this._request).fetch(id);
+  }
+  /**
+   * Updates a release note.
+   *
+   * @param id - required id to pass to updateReleaseNote
+   * @param input - required input to pass to updateReleaseNote
+   * @returns ReleaseNotePayload
+   */
+  public updateReleaseNote(id: string, input: L.ReleaseNoteUpdateInput): LinearFetch<ReleaseNotePayload> {
+    return new UpdateReleaseNoteMutation(this._request).fetch(id, input);
+  }
+  /**
+   * Archives a release pipeline.
+   *
+   * @param id - required id to pass to archiveReleasePipeline
+   * @returns ReleasePipelineArchivePayload
+   */
+  public archiveReleasePipeline(id: string): LinearFetch<ReleasePipelineArchivePayload> {
+    return new ArchiveReleasePipelineMutation(this._request).fetch(id);
+  }
+  /**
+   * Creates a new release pipeline with default stages. Subject to plan entitlement and quota limits.
+   *
+   * @param input - required input to pass to createReleasePipeline
+   * @returns ReleasePipelinePayload
+   */
+  public createReleasePipeline(input: L.ReleasePipelineCreateInput): LinearFetch<ReleasePipelinePayload> {
+    return new CreateReleasePipelineMutation(this._request).fetch(input);
+  }
+  /**
+   * Permanently deletes a release pipeline and all associated stages and releases.
+   *
+   * @param id - required id to pass to deleteReleasePipeline
+   * @returns DeletePayload
+   */
+  public deleteReleasePipeline(id: string): LinearFetch<DeletePayload> {
+    return new DeleteReleasePipelineMutation(this._request).fetch(id);
+  }
+  /**
+   * Unarchives a release pipeline.
+   *
+   * @param id - required id to pass to unarchiveReleasePipeline
+   * @returns ReleasePipelineArchivePayload
+   */
+  public unarchiveReleasePipeline(id: string): LinearFetch<ReleasePipelineArchivePayload> {
+    return new UnarchiveReleasePipelineMutation(this._request).fetch(id);
+  }
+  /**
+   * Updates an existing release pipeline. Supports updating name, slug, type, production flag, path patterns, and team associations. Private teams that the current user cannot access are preserved in the team list.
+   *
+   * @param id - required id to pass to updateReleasePipeline
+   * @param input - required input to pass to updateReleasePipeline
+   * @returns ReleasePipelinePayload
+   */
+  public updateReleasePipeline(id: string, input: L.ReleasePipelineUpdateInput): LinearFetch<ReleasePipelinePayload> {
+    return new UpdateReleasePipelineMutation(this._request).fetch(id, input);
+  }
+  /**
+   * Archives a release stage. Only started-type stages can be archived, and only if they have no active releases and at least one other stage of the same type remains. Cannot archive the last non-frozen started stage.
+   *
+   * @param id - required id to pass to archiveReleaseStage
+   * @returns ReleaseStageArchivePayload
+   */
+  public archiveReleaseStage(id: string): LinearFetch<ReleaseStageArchivePayload> {
+    return new ArchiveReleaseStageMutation(this._request).fetch(id);
+  }
+  /**
+   * Creates a new release stage in a pipeline. Non-started stages must use default names and colors, and only one stage of each non-started type is allowed per pipeline. Started stages can optionally be frozen, but at least one non-frozen started stage must remain.
+   *
+   * @param input - required input to pass to createReleaseStage
+   * @returns ReleaseStagePayload
+   */
+  public createReleaseStage(input: L.ReleaseStageCreateInput): LinearFetch<ReleaseStagePayload> {
+    return new CreateReleaseStageMutation(this._request).fetch(input);
+  }
+  /**
+   * Unarchives a release stage.
+   *
+   * @param id - required id to pass to unarchiveReleaseStage
+   * @returns ReleaseStageArchivePayload
+   */
+  public unarchiveReleaseStage(id: string): LinearFetch<ReleaseStageArchivePayload> {
+    return new UnarchiveReleaseStageMutation(this._request).fetch(id);
+  }
+  /**
+   * Updates an existing release stage. Only started-type stages can be edited. Supports updating name, color, position, and frozen status.
+   *
+   * @param id - required id to pass to updateReleaseStage
+   * @param input - required input to pass to updateReleaseStage
+   * @returns ReleaseStagePayload
+   */
+  public updateReleaseStage(id: string, input: L.ReleaseStageUpdateInput): LinearFetch<ReleaseStagePayload> {
+    return new UpdateReleaseStageMutation(this._request).fetch(id, input);
+  }
+  /**
+   * Syncs release data by resolving issue and pull request references and associating them with a release. For continuous pipelines, creates a new completed release. For scheduled pipelines, finds or creates a started release and accumulates issues into it.
+   *
+   * @param input - required input to pass to releaseSync
+   * @returns ReleasePayload
+   */
+  public releaseSync(input: L.ReleaseSyncInput): LinearFetch<ReleasePayload> {
+    return new ReleaseSyncMutation(this._request).fetch(input);
+  }
+  /**
+   * Syncs release data using an access key for CI/CD integration. The pipeline is automatically inferred from the access key's configured resources, so no pipeline ID is needed in the input.
+   *
+   * @param input - required input to pass to releaseSyncByAccessKey
+   * @returns ReleasePayload
+   */
+  public releaseSyncByAccessKey(input: L.ReleaseSyncInputBase): LinearFetch<ReleasePayload> {
+    return new ReleaseSyncByAccessKeyMutation(this._request).fetch(input);
+  }
+  /**
+   * Unarchives a release.
+   *
+   * @param id - required id to pass to unarchiveRelease
+   * @returns ReleaseArchivePayload
+   */
+  public unarchiveRelease(id: string): LinearFetch<ReleaseArchivePayload> {
+    return new UnarchiveReleaseMutation(this._request).fetch(id);
+  }
+  /**
+   * Updates an existing release by ID. Supports updating name, description, version, commit SHA, pipeline, stage, and dates.
+   *
+   * @param id - required id to pass to updateRelease
+   * @param input - required input to pass to updateRelease
+   * @returns ReleasePayload
+   */
+  public updateRelease(id: string, input: L.ReleaseUpdateInput): LinearFetch<ReleasePayload> {
+    return new UpdateReleaseMutation(this._request).fetch(id, input);
+  }
+  /**
+   * Updates a release by pipeline identifier. Finds the release by version or latest started/planned release, and optionally transitions it to a new stage by name.
+   *
+   * @param input - required input to pass to releaseUpdateByPipeline
+   * @returns ReleasePayload
+   */
+  public releaseUpdateByPipeline(input: L.ReleaseUpdateByPipelineInput): LinearFetch<ReleasePayload> {
+    return new ReleaseUpdateByPipelineMutation(this._request).fetch(input);
+  }
+  /**
+   * Updates a release by pipeline using an access key.
+   *
+   * @param input - required input to pass to releaseUpdateByPipelineByAccessKey
+   * @returns ReleasePayload
+   */
+  public releaseUpdateByPipelineByAccessKey(input: L.ReleaseUpdateByPipelineInputBase): LinearFetch<ReleasePayload> {
+    return new ReleaseUpdateByPipelineByAccessKeyMutation(this._request).fetch(input);
   }
   /**
    * Re-sends a workspace invitation email for the specified invite ID.
