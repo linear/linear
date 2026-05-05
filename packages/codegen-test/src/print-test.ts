@@ -412,8 +412,7 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
                         field.type,
                         operation.print.list
                       )} = await _${itemField}.${field.name}`,
-                      /** When the field itself returns a list (e.g. ReleaseNote.releases: [Release]),
-                       * iterate the items for the instanceof check — `instanceof Foo[]` is not valid TS. */
+                      /** `instanceof Foo[]` is not valid TS; iterate items when the field returns a list. */
                       field.type.endsWith("[]")
                         ? `${itemField}_${field.name}?.map(node => expect(node instanceof ${field.type.slice(0, -2)}))`
                         : operation.print.list

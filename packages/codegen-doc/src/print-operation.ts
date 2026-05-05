@@ -149,9 +149,6 @@ export function printOperations(
       /** Find an object matching the type of this query */
       const object = findObject(context, lastField);
 
-      /** Names of input args already declared by the existing chain — used to detect collisions
-       * with a child field's args, which would produce duplicate variable declarations
-       * (e.g. releaseSearch's $filter clashing with its child documents' $filter). */
       const existingArgNames = new Set(fields.flatMap(f => (f.arguments ?? []).map(a => a.name.value)));
 
       const fieldOperations = object?.fields?.map(field => {
