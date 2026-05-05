@@ -879,6 +879,10 @@ fragment ProjectUpdateArchivePayload on ProjectUpdateArchivePayload {
 # A generic payload return from entity archive mutations.
 fragment ReleaseArchivePayload on ReleaseArchivePayload {
   __typename
+  # The archived/unarchived entity. Null if entity was deleted.
+  entity {
+    id
+  }
   # The identifier of the last sync operation.
   lastSyncId
   # Whether the operation was successful.
@@ -888,6 +892,10 @@ fragment ReleaseArchivePayload on ReleaseArchivePayload {
 # A generic payload return from entity archive mutations.
 fragment ReleasePipelineArchivePayload on ReleasePipelineArchivePayload {
   __typename
+  # The archived/unarchived entity. Null if entity was deleted.
+  entity {
+    id
+  }
   # The identifier of the last sync operation.
   lastSyncId
   # Whether the operation was successful.
@@ -897,6 +905,10 @@ fragment ReleasePipelineArchivePayload on ReleasePipelineArchivePayload {
 # A generic payload return from entity archive mutations.
 fragment ReleaseStageArchivePayload on ReleaseStageArchivePayload {
   __typename
+  # The archived/unarchived entity. Null if entity was deleted.
+  entity {
+    id
+  }
   # The identifier of the last sync operation.
   lastSyncId
   # Whether the operation was successful.
@@ -1072,6 +1084,31 @@ fragment InitiativeHistory on InitiativeHistory {
   id
 }
 
+# A join entity linking an issue to a release for release tracking. Each record represents an
+# association between a single issue and a single release, along with metadata about the source of the
+# link (e.g., which pull requests connected the issue to the release). Creating or deleting these
+# associations automatically records the change in issue history.
+fragment IssueToRelease on IssueToRelease {
+  __typename
+  # The issue that is linked to the release.
+  issue {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The release that the issue is linked to.
+  release {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+}
+
 # A join entity that defines a user's membership in a team. Each membership record links a user to a
 # team and tracks whether the user is a team owner. Users can be members of multiple teams, and their
 # memberships determine which teams' issues and resources they can access.
@@ -1098,6 +1135,15 @@ fragment TeamMembership on TeamMembership {
   }
   # Whether the user is an owner of the team. Team owners have elevated permissions for managing team settings, members, and resources.
   owner
+}
+
+# A label group column configuration for the initiative list view.
+fragment ViewPreferencesInitiativeLabelGroupColumn on ViewPreferencesInitiativeLabelGroupColumn {
+  __typename
+  # The identifier of the label group.
+  id
+  # Whether the label group column is active.
+  active
 }
 
 # A label group column configuration for the project list view.
@@ -2651,6 +2697,10 @@ fragment IssueHistory on IssueHistory {
   addedLabelIds
   # ID's of labels that were removed.
   removedLabelIds
+  # ID's of releases that the issue was added to.
+  addedToReleaseIds
+  # ID's of releases that the issue was removed from.
+  removedFromReleaseIds
   # Identifier of the attachment that was linked to or unlinked from the issue. Can be used to query the attachment directly. Null if no attachment change occurred.
   attachmentId
   # Identifier of the new cycle of the issue. Can be used to query the cycle directly. Null if the cycle was not changed or the issue was removed from a cycle.
@@ -2900,6 +2950,158 @@ fragment IssueRelation on IssueRelation {
   id
 }
 
+# A release history record containing a batch of chronologically ordered change events for a release.
+# Each record holds up to 30 entries, and new records are created once the current record is full and
+# a time window has elapsed. Tracks changes to name, description, version, stage, dates, pipeline, and
+# archive status.
+fragment ReleaseHistory on ReleaseHistory {
+  __typename
+  # The events that happened while recording that history.
+  entries
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The release that this history record tracks changes for.
+  release {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+}
+
+# A release note. The note body is stored in related document content, and the releases it covers are
+# tracked in releaseIds.
+fragment ReleaseNote on ReleaseNote {
+  __typename
+  # Document content backing the release note body.
+  documentContent {
+    ...DocumentContent
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The most recent release covered by this note.
+  lastRelease {
+    id
+  }
+  # The release note's unique URL slug, used to construct human-readable URLs for the note.
+  slugId
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # User-supplied title for the release note.
+  title
+}
+
+# A release pipeline that defines a release workflow with ordered stages. Pipelines can be continuous
+# (each sync creates a completed release) or scheduled (issues accumulate in a started release that is
+# explicitly completed). Pipelines are associated with teams and can filter commits by file path
+# patterns.
+fragment ReleasePipeline on ReleasePipeline {
+  __typename
+  # Glob patterns to filter commits by file path. When non-empty, only commits that modify files matching at least one pattern will be included in release syncs. An empty array means all commits are included regardless of file paths.
+  includePathPatterns
+  # The URL to the release pipeline's releases list in the Linear app.
+  url
+  # The approximate number of non-archived releases in this pipeline. This is a denormalized count that is updated when releases are created or archived, and may not reflect the exact count at all times.
+  approximateReleaseCount
+  # The document template used to define the release notes format for this pipeline. AI-generated release notes follow the structure and tone of this template. Null if no template has been configured.
+  releaseNoteTemplate {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The name of the pipeline.
+  name
+  # The pipeline's unique slug identifier, used in URLs and for lookup by human-readable identifier instead of UUID.
+  slugId
+  # The release note in this pipeline whose covered range ends with the most recent release.
+  latestReleaseNote {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The type of the pipeline, which determines how releases are created and managed. Continuous pipelines create a completed release per sync, while scheduled pipelines accumulate issues in a started release.
+  type
+  # The unique identifier of the entity.
+  id
+  # Whether this pipeline targets a production environment. Defaults to true. Used to distinguish production pipelines from staging or development pipelines.
+  isProduction
+}
+
+# A release that bundles issues together for a software deployment or version. Releases belong to a
+# release pipeline and progress through stages (e.g., planned, started, completed, canceled). Issues
+# are associated with releases via the IssueToRelease join entity, and the release tracks lifecycle
+# timestamps such as when it was started, completed, or canceled.
+fragment Release on Release {
+  __typename
+  # A flag that indicates whether the release is in the trash bin. Trashed releases are archived and will be permanently deleted after a retention period. Null when the release is not trashed.
+  trashed
+  # Number of issues associated with the release.
+  issueCount
+  # Release notes for the release.
+  releaseNotes {
+    ...ReleaseNote
+  }
+  # The Git commit SHA associated with this release. Used for SHA-based idempotency when completing releases and for linking releases to specific points in the repository history. Null if the release was created without a commit reference.
+  commitSha
+  # The URL to the release page in the Linear app.
+  url
+  # The current progress summary for the release, including counts of issues by workflow state type (e.g., completed, in progress, unstarted).
+  currentProgress
+  # The current stage of the release within its pipeline (e.g., Planned, In Progress, Completed, Canceled). Changing the stage triggers lifecycle timestamp updates and may move non-closed issues to a new release when completing a scheduled pipeline release.
+  stage {
+    id
+  }
+  # The description of the release in plain text or markdown. Null if no description has been set.
+  description
+  # The estimated completion date of the release. This is a date-only value without a time component. Null if no target date has been specified.
+  targetDate
+  # The estimated start date of the release. This is a date-only value without a time component. Automatically set to today when the release moves to a started stage if not already set. Null if no start date has been specified.
+  startDate
+  # The historical progress snapshots for the release, tracking how issue completion has evolved over time.
+  progressHistory
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The name of the release.
+  name
+  # The release pipeline that this release belongs to. A release always belongs to exactly one pipeline.
+  pipeline {
+    id
+  }
+  # The release's unique URL slug, used to construct human-readable URLs for the release.
+  slugId
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the release first entered a started stage. Null if the release has not yet been started.
+  startedAt
+  # The time at which the release was canceled. Set automatically when the release moves to a canceled stage. Reset to null if the release moves back to a non-canceled stage.
+  canceledAt
+  # The time at which the release was completed. Set automatically when the release moves to a completed stage. Reset to null if the release moves back to a non-completed stage.
+  completedAt
+  # The unique identifier of the entity.
+  id
+  # The user who created the release. Null if the release was created by a non-user context such as an access key or automation.
+  creator {
+    id
+  }
+  # The version identifier for this release (e.g., 'v1.2.3' or a short commit hash). Must be unique within the pipeline. Null if no version has been assigned.
+  version
+}
+
 # A request to install an OAuth client application on a workspace, along with the admin's approval or
 # denial response. When a user attempts to install an OAuth application that requires admin approval,
 # an approval record is created. A workspace admin can then approve or deny the request, optionally
@@ -2956,6 +3158,10 @@ fragment Template on Template {
   name
   # The parent team template this template was inherited from. Null for original (non-inherited) templates.
   inheritedFrom {
+    id
+  }
+  # The release pipeline this template is bound to. Required when the template type is 'releaseNote' and forbidden otherwise. The pipeline owns at most one release note template, which defines the format AI follows when generating release notes.
+  pipeline {
     id
   }
   # The sort order of the template within the templates list.
@@ -3018,6 +3224,10 @@ fragment Document on Document {
   updatedAt
   # The project that the document is associated with. Null if the document belongs to a different parent entity type.
   project {
+    id
+  }
+  # The release that the document is associated with. Null if the document belongs to a different parent entity type.
+  release {
     id
   }
   # The sort order of the document in its parent entity's resources list. This order is shared with other resource types such as external links.
@@ -3126,6 +3336,37 @@ fragment TimeScheduleEntry on TimeScheduleEntry {
   endsAt
   # The start time of the schedule entry in ISO 8601 date-time format.
   startsAt
+}
+
+# A stage within a release pipeline that represents a phase in the release lifecycle (e.g., Planned,
+# In Progress, Completed, Canceled). Releases progress through stages as they move toward production.
+# Started-type stages can be frozen to prevent new issues from being automatically synced into
+# releases at that stage.
+fragment ReleaseStage on ReleaseStage {
+  __typename
+  # The display color of the stage as a HEX string (e.g., '#0f783c'), used for visual representation in the UI.
+  color
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The lifecycle type of the stage (planned, started, completed, or canceled). The type determines what lifecycle timestamps are set on a release when it enters this stage.
+  type
+  # The name of the stage.
+  name
+  # The position of the stage within its pipeline, used for ordering stages in the UI. Lower values appear first.
+  position
+  # The release pipeline that this stage belongs to. A stage always belongs to exactly one pipeline.
+  pipeline {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # Whether this stage is frozen. Only applicable to started-type stages. When a stage is frozen, automated release syncs will not target releases in this stage, and new issues will not be automatically added. At least one started stage in the pipeline must remain non-frozen.
+  frozen
 }
 
 # A state in a team's workflow, representing an issue status such as Triage, Backlog, Todo, In
@@ -3919,6 +4160,14 @@ fragment Favorite on Favorite {
   project {
     id
   }
+  # The favorited release pipeline.
+  releasePipeline {
+    id
+  }
+  # The favorited release.
+  release {
+    id
+  }
   # The favorited team.
   team {
     id
@@ -4345,6 +4594,8 @@ fragment Organization on Organization {
   scimEnabled
   # Whether issue descriptions should be included in the Git integration linkback messages posted to pull requests.
   gitLinkbackDescriptionsEnabled
+  # Whether release management is enabled for the workspace.
+  releasesEnabled
   # Whether the Customers feature is enabled and accessible for the workspace based on the current plan.
   customersEnabled
   # Whether the Git integration linkback messages should be posted as comments on pull requests in private repositories.
@@ -9002,6 +9253,23 @@ fragment ReleasePayload on ReleasePayload {
   __typename
   # The identifier of the last sync operation.
   lastSyncId
+  # The release that was created or updated.
+  release {
+    id
+  }
+  # Whether the operation was successful.
+  success
+}
+
+# The result of a release note mutation.
+fragment ReleaseNotePayload on ReleaseNotePayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The release note that was created or updated.
+  releaseNote {
+    id
+  }
   # Whether the operation was successful.
   success
 }
@@ -9011,6 +9279,10 @@ fragment ReleasePipelinePayload on ReleasePipelinePayload {
   __typename
   # The identifier of the last sync operation.
   lastSyncId
+  # The release pipeline that was created or updated.
+  releasePipeline {
+    id
+  }
   # Whether the operation was successful.
   success
 }
@@ -9020,6 +9292,10 @@ fragment ReleaseStagePayload on ReleaseStagePayload {
   __typename
   # The identifier of the last sync operation.
   lastSyncId
+  # The release stage that was created or updated.
+  releaseStage {
+    id
+  }
   # Whether the operation was successful.
   success
 }
@@ -9326,6 +9602,20 @@ fragment IssueRelationPayload on IssueRelationPayload {
   lastSyncId
   # The issue relation that was created or updated.
   issueRelation {
+    id
+  }
+  # Whether the operation was successful.
+  success
+}
+
+# The result of an issue-to-release mutation, containing the created or updated association and a
+# success indicator.
+fragment IssueToReleasePayload on IssueToReleasePayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The issueToRelease that was created or updated.
+  issueToRelease {
     id
   }
   # Whether the operation was successful.
@@ -10787,6 +11077,10 @@ fragment DocumentSearchResult on DocumentSearchResult {
   project {
     id
   }
+  # The release that the document is associated with. Null if the document belongs to a different parent entity type.
+  release {
+    id
+  }
   # The sort order of the document in its parent entity's resources list. This order is shared with other resource types such as external links.
   sortOrder
   # The time at which the document was hidden from the default view. Null if the document has not been hidden.
@@ -10941,6 +11235,8 @@ fragment GitLabIntegrationCreatePayload on GitLabIntegrationCreatePayload {
   __typename
   # Error message if the connection failed.
   error
+  # Method and post-encoding upstream URI of the failed request, for debugging proxy allowlist rules (e.g. `GET /api/v4/projects/aire%2Fagents`).
+  errorRequest
   # Response body from GitLab for debugging.
   errorResponseBody
   # Response headers from GitLab for debugging (JSON stringified).
@@ -10961,6 +11257,8 @@ fragment GitLabTestConnectionPayload on GitLabTestConnectionPayload {
   __typename
   # Error message if the connection test failed.
   error
+  # Method and post-encoding upstream URI of the failed request, for debugging proxy allowlist rules (e.g. `GET /api/v4/projects/aire%2Fagents`).
+  errorRequest
   # Response body from GitLab for debugging.
   errorResponseBody
   # Response headers from GitLab for debugging (JSON stringified).
@@ -11352,6 +11650,16 @@ fragment IssueStateSpanConnection on IssueStateSpanConnection {
   }
 }
 
+fragment IssueToReleaseConnection on IssueToReleaseConnection {
+  __typename
+  nodes {
+    ...IssueToRelease
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
 fragment JiraFetchProjectStatusesPayload on JiraFetchProjectStatusesPayload {
   __typename
   # The fetched Jira issue statuses (non-Epic).
@@ -11735,6 +12043,56 @@ fragment ProjectUpdateConnection on ProjectUpdateConnection {
   __typename
   nodes {
     ...ProjectUpdate
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment ReleaseConnection on ReleaseConnection {
+  __typename
+  nodes {
+    ...Release
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment ReleaseHistoryConnection on ReleaseHistoryConnection {
+  __typename
+  nodes {
+    ...ReleaseHistory
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment ReleaseNoteConnection on ReleaseNoteConnection {
+  __typename
+  nodes {
+    ...ReleaseNote
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment ReleasePipelineConnection on ReleasePipelineConnection {
+  __typename
+  nodes {
+    ...ReleasePipeline
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment ReleaseStageConnection on ReleaseStageConnection {
+  __typename
+  nodes {
+    ...ReleaseStage
   }
   pageInfo {
     ...PageInfo
@@ -12699,6 +13057,39 @@ query attachmentIssue_relations(
     }
   }
 }
+# Releases associated with the issue.
+query attachmentIssue_releases(
+  # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned releases.
+  $filter: ReleaseFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  attachmentIssue(id: $id) {
+    releases(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...ReleaseConnection
+    }
+  }
+}
 # Shared access metadata for this issue.
 query attachmentIssue_sharedAccess(
   # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
@@ -13619,6 +14010,8 @@ query documents(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned documents.
+  $sort: [DocumentSortInput!]
 ) {
   documents(
     after: $after
@@ -13628,6 +14021,7 @@ query documents(
     includeArchived: $includeArchived
     last: $last
     orderBy: $orderBy
+    sort: $sort
   ) {
     ...DocumentConnection
   }
@@ -14646,6 +15040,39 @@ query issue_relations(
     }
   }
 }
+# Releases associated with the issue.
+query issue_releases(
+  # The identifier of the issue to retrieve.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned releases.
+  $filter: ReleaseFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issue(id: $id) {
+    releases(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...ReleaseConnection
+    }
+  }
+}
 # Shared access metadata for this issue.
 query issue_sharedAccess(
   # The identifier of the issue to retrieve.
@@ -15002,6 +15429,42 @@ query issueTitleSuggestionFromCustomerRequest(
 ) {
   issueTitleSuggestionFromCustomerRequest(request: $request) {
     ...IssueTitleSuggestionFromCustomerRequestPayload
+  }
+}
+# One specific issue-to-release association, looked up by its unique identifier.
+query issueToRelease(
+  # The identifier of the issue-to-release association to retrieve.
+  $id: String!
+) {
+  issueToRelease(id: $id) {
+    ...IssueToRelease
+  }
+}
+# All issue-to-release associations. Returns a paginated list of all issue-to-release links visible to
+# the authenticated user.
+query issueToReleases(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issueToReleases(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...IssueToReleaseConnection
   }
 }
 # Find issue based on the VCS branch name.
@@ -15378,6 +15841,39 @@ query issueVcsBranchSearch_relations(
     }
   }
 }
+# Releases associated with the issue.
+query issueVcsBranchSearch_releases(
+  # The VCS branch name to search for.
+  $branchName: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned releases.
+  $filter: ReleaseFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issueVcsBranchSearch(branchName: $branchName) {
+    releases(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...ReleaseConnection
+    }
+  }
+}
 # Shared access metadata for this issue.
 query issueVcsBranchSearch_sharedAccess(
   # The VCS branch name to search for.
@@ -15475,6 +15971,130 @@ query issues(
     sort: $sort
   ) {
     ...IssueConnection
+  }
+}
+# Returns the latest release for the pipeline associated with the access key.
+query latestReleaseByAccessKey {
+  latestReleaseByAccessKey {
+    ...Release
+  }
+}
+# Documents associated with the release.
+query latestReleaseByAccessKey_documents(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned documents.
+  $filter: DocumentFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  latestReleaseByAccessKey {
+    documents(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...DocumentConnection
+    }
+  }
+}
+# History entries associated with the release.
+query latestReleaseByAccessKey_history(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  latestReleaseByAccessKey {
+    history(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...ReleaseHistoryConnection
+    }
+  }
+}
+# Issues associated with the release.
+query latestReleaseByAccessKey_issues(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned issues.
+  $filter: IssueFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  latestReleaseByAccessKey {
+    issues(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueConnection
+    }
+  }
+}
+# Links associated with the release.
+query latestReleaseByAccessKey_links(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  latestReleaseByAccessKey {
+    links(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...EntityExternalLinkConnection
+    }
   }
 }
 # A specific notification by ID.
@@ -16719,6 +17339,528 @@ query rateLimitStatus {
     ...RateLimitPayload
   }
 }
+# Fetch a single release by its UUID or slug identifier.
+query release($id: String!) {
+  release(id: $id) {
+    ...Release
+  }
+}
+# Documents associated with the release.
+query release_documents(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned documents.
+  $filter: DocumentFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  release(id: $id) {
+    documents(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...DocumentConnection
+    }
+  }
+}
+# History entries associated with the release.
+query release_history(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  release(id: $id) {
+    history(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...ReleaseHistoryConnection
+    }
+  }
+}
+# Issues associated with the release.
+query release_issues(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned issues.
+  $filter: IssueFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  release(id: $id) {
+    issues(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueConnection
+    }
+  }
+}
+# Links associated with the release.
+query release_links(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  release(id: $id) {
+    links(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...EntityExternalLinkConnection
+    }
+  }
+}
+# Fetch a release note by its UUID or slug identifier.
+query releaseNote($id: String!) {
+  releaseNote(id: $id) {
+    ...ReleaseNote
+  }
+}
+# Document content backing the release note body.
+query releaseNote_documentContent($id: String!) {
+  releaseNote(id: $id) {
+    documentContent {
+      ...DocumentContent
+    }
+  }
+}
+# The AI prompt rules that the content is associated with. Null if the content belongs to a different
+# parent entity type.
+query releaseNote_documentContent_aiPromptRules($id: String!) {
+  releaseNote(id: $id) {
+    documentContent {
+      aiPromptRules {
+        ...AiPromptRules
+      }
+    }
+  }
+}
+# The welcome message that the content is associated with. Null if the content belongs to a different
+# parent entity type.
+query releaseNote_documentContent_welcomeMessage($id: String!) {
+  releaseNote(id: $id) {
+    documentContent {
+      welcomeMessage {
+        ...WelcomeMessage
+      }
+    }
+  }
+}
+# Release notes in the workspace.
+query releaseNotes(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  releaseNotes(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...ReleaseNoteConnection
+  }
+}
+# Fetch a single release pipeline by its UUID or slug identifier.
+query releasePipeline($id: String!) {
+  releasePipeline(id: $id) {
+    ...ReleasePipeline
+  }
+}
+# Releases associated with this pipeline.
+query releasePipeline_releases(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+  # Sort returned releases.
+  $sort: [ReleaseSortInput!]
+) {
+  releasePipeline(id: $id) {
+    releases(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+      sort: $sort
+    ) {
+      ...ReleaseConnection
+    }
+  }
+}
+# Stages associated with this pipeline.
+query releasePipeline_stages(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  releasePipeline(id: $id) {
+    stages(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...ReleaseStageConnection
+    }
+  }
+}
+# Teams associated with this pipeline.
+query releasePipeline_teams(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  releasePipeline(id: $id) {
+    teams(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...TeamConnection
+    }
+  }
+}
+# Returns a release pipeline by ID. Requires the access key to have access to the pipeline.
+query releasePipelineByAccessKey {
+  releasePipelineByAccessKey {
+    ...ReleasePipeline
+  }
+}
+# Releases associated with this pipeline.
+query releasePipelineByAccessKey_releases(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+  # Sort returned releases.
+  $sort: [ReleaseSortInput!]
+) {
+  releasePipelineByAccessKey {
+    releases(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+      sort: $sort
+    ) {
+      ...ReleaseConnection
+    }
+  }
+}
+# Stages associated with this pipeline.
+query releasePipelineByAccessKey_stages(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  releasePipelineByAccessKey {
+    stages(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...ReleaseStageConnection
+    }
+  }
+}
+# Teams associated with this pipeline.
+query releasePipelineByAccessKey_teams(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  releasePipelineByAccessKey {
+    teams(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...TeamConnection
+    }
+  }
+}
+# All release pipelines in the workspace, with optional filtering and sorting.
+query releasePipelines(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned release pipelines.
+  $filter: ReleasePipelineFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+  # Sort returned release pipelines.
+  $sort: [ReleasePipelineSortInput!]
+) {
+  releasePipelines(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+    sort: $sort
+  ) {
+    ...ReleasePipelineConnection
+  }
+}
+# Search releases with optional text matching against name, version, and pipeline name. When no search
+# term is provided, returns releases ordered by stage priority (started > planned > completed >
+# canceled).
+query releaseSearch(
+  # Filter to apply to the release results.
+  $filter: ReleaseFilter
+  # Maximum results. Capped at 50.
+  $first: Int
+  # Search term to match against release name, version, and pipeline name. When omitted, returns releases ordered by stage priority.
+  $term: String
+) {
+  releaseSearch(filter: $filter, first: $first, term: $term) {
+    ...Release
+  }
+}
+# Fetch a single release stage by its UUID.
+query releaseStage($id: String!) {
+  releaseStage(id: $id) {
+    ...ReleaseStage
+  }
+}
+# Releases associated with this stage.
+query releaseStage_releases(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  releaseStage(id: $id) {
+    releases(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...ReleaseConnection
+    }
+  }
+}
+# All release stages in the workspace, with optional filtering.
+query releaseStages(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned release stages.
+  $filter: ReleaseStageFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  releaseStages(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...ReleaseStageConnection
+  }
+}
+# All releases in the workspace, with optional filtering and sorting.
+query releases(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned releases.
+  $filter: ReleaseFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+  # Sort returned releases.
+  $sort: [ReleaseSortInput!]
+) {
+  releases(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+    sort: $sort
+  ) {
+    ...ReleaseConnection
+  }
+}
 # [Deprecated] Returns a single roadmap by its identifier. Use initiatives instead.
 query roadmap($id: String!) {
   roadmap(id: $id) {
@@ -17334,6 +18476,39 @@ query team_projects(
       sort: $sort
     ) {
       ...ProjectConnection
+    }
+  }
+}
+# Release pipelines associated with the team.
+query team_releasePipelines(
+  # The identifier of the team to retrieve.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned release pipelines.
+  $filter: ReleasePipelineFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  team(id: $id) {
+    releasePipelines(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...ReleasePipelineConnection
     }
   }
 }
@@ -19871,10 +21046,22 @@ mutation integrationGithubRemoveCodeAccess(
 mutation integrationGitlabConnect(
   # The GitLab Access Token to connect with.
   $accessToken: String!
+  # ISO timestamp when the access token expires. Used as a fallback when `validationProjectPath` is set and `personal_access_tokens/self` is unreachable.
+  $expiresAt: String
   # The URL of the GitLab installation.
   $gitlabUrl: String!
+  # Whether the access token is limited to a read-only scope. Used as a fallback when `validationProjectPath` is set and `personal_access_tokens/self` is unreachable.
+  $readonly: Boolean
+  # Optional path or numeric ID of a project to use for the setup health check. Set this when the GitLab tenant blocks non-project API endpoints.
+  $validationProjectPath: String
 ) {
-  integrationGitlabConnect(accessToken: $accessToken, gitlabUrl: $gitlabUrl) {
+  integrationGitlabConnect(
+    accessToken: $accessToken
+    expiresAt: $expiresAt
+    gitlabUrl: $gitlabUrl
+    readonly: $readonly
+    validationProjectPath: $validationProjectPath
+  ) {
     ...GitLabIntegrationCreatePayload
   }
 }
@@ -19987,12 +21174,14 @@ mutation integrationRequest(
 mutation integrationSalesforce(
   # The Salesforce OAuth code.
   $code: String!
+  # The PKCE code verifier matching the code_challenge sent on authorization.
+  $codeVerifier: String!
   # The Salesforce OAuth redirect URI.
   $redirectUri: String!
   # The Salesforce installation subdomain.
   $subdomain: String!
 ) {
-  integrationSalesforce(code: $code, redirectUri: $redirectUri, subdomain: $subdomain) {
+  integrationSalesforce(code: $code, codeVerifier: $codeVerifier, redirectUri: $redirectUri, subdomain: $subdomain) {
     ...IntegrationPayload
   }
 }
@@ -20552,6 +21741,37 @@ mutation issueSubscribe(
 ) {
   issueSubscribe(id: $id, userEmail: $userEmail, userId: $userId) {
     ...IssuePayload
+  }
+}
+# Creates a new association between an issue and a release, linking the issue to the release for
+# tracking purposes.
+mutation createIssueToRelease(
+  # The properties of the issueToRelease to create.
+  $input: IssueToReleaseCreateInput!
+) {
+  issueToReleaseCreate(input: $input) {
+    ...IssueToReleasePayload
+  }
+}
+# Deletes an issue-to-release association by its identifier, removing the issue from the release.
+mutation deleteIssueToRelease(
+  # The identifier of the issue-to-release association to delete.
+  $id: String!
+) {
+  issueToReleaseDelete(id: $id) {
+    ...DeletePayload
+  }
+}
+# Deletes an issue-to-release association by looking up the issue and release identifiers, removing
+# the issue from the release.
+mutation issueToReleaseDeleteByIssueAndRelease(
+  # The identifier of the issue. Can be a UUID or issue identifier (e.g., 'LIN-123').
+  $issueId: String!
+  # The identifier of the release.
+  $releaseId: String!
+) {
+  issueToReleaseDeleteByIssueAndRelease(issueId: $issueId, releaseId: $releaseId) {
+    ...DeletePayload
   }
 }
 # Unarchives an issue.
@@ -21158,6 +22378,239 @@ mutation refreshGoogleSheetsData(
 ) {
   refreshGoogleSheetsData(id: $id, type: $type) {
     ...IntegrationPayload
+  }
+}
+# Archives a release.
+mutation archiveRelease(
+  # The identifier of the release to archive.
+  $id: String!
+) {
+  releaseArchive(id: $id) {
+    ...ReleaseArchivePayload
+  }
+}
+# Marks a release as completed. If version is provided, completes that specific release; otherwise
+# completes the most recent started release.
+mutation releaseComplete(
+  # The input containing the pipeline ID and optional version.
+  $input: ReleaseCompleteInput!
+) {
+  releaseComplete(input: $input) {
+    ...ReleasePayload
+  }
+}
+# Marks a release as completed using an access key. If version is provided, completes that specific
+# release; otherwise completes the most recent started release. The pipeline is inferred from the
+# access key.
+mutation releaseCompleteByAccessKey(
+  # The input containing the optional version.
+  $input: ReleaseCompleteInputBase!
+) {
+  releaseCompleteByAccessKey(input: $input) {
+    ...ReleasePayload
+  }
+}
+# Creates a new release in a pipeline. If no stage is specified, defaults to the first completed stage
+# for continuous pipelines or the first started stage for scheduled pipelines.
+mutation createRelease(
+  # The release to create.
+  $input: ReleaseCreateInput!
+) {
+  releaseCreate(input: $input) {
+    ...ReleasePayload
+  }
+}
+# Moves a release to the trash bin. Trashed releases are archived and will be permanently deleted
+# after a retention period. If the release is already archived, it is marked as trashed with a fresh
+# archive timestamp.
+mutation deleteRelease(
+  # The identifier of the release to delete.
+  $id: String!
+) {
+  releaseDelete(id: $id) {
+    ...ReleaseArchivePayload
+  }
+}
+# Creates a release note.
+mutation createReleaseNote(
+  # The release note fields.
+  $input: ReleaseNoteCreateInput!
+) {
+  releaseNoteCreate(input: $input) {
+    ...ReleaseNotePayload
+  }
+}
+# Deletes a release note.
+mutation deleteReleaseNote(
+  # The identifier of the release note to delete.
+  $id: String!
+) {
+  releaseNoteDelete(id: $id) {
+    ...DeletePayload
+  }
+}
+# Updates a release note.
+mutation updateReleaseNote(
+  # The identifier of the release note to update.
+  $id: String!
+  # The fields to update.
+  $input: ReleaseNoteUpdateInput!
+) {
+  releaseNoteUpdate(id: $id, input: $input) {
+    ...ReleaseNotePayload
+  }
+}
+# Archives a release pipeline.
+mutation archiveReleasePipeline(
+  # The identifier of the release pipeline to archive.
+  $id: String!
+) {
+  releasePipelineArchive(id: $id) {
+    ...ReleasePipelineArchivePayload
+  }
+}
+# Creates a new release pipeline with default stages. Subject to plan entitlement and quota limits.
+mutation createReleasePipeline(
+  # The ReleasePipeline object to create.
+  $input: ReleasePipelineCreateInput!
+) {
+  releasePipelineCreate(input: $input) {
+    ...ReleasePipelinePayload
+  }
+}
+# Permanently deletes a release pipeline and all associated stages and releases.
+mutation deleteReleasePipeline(
+  # The identifier of the release pipeline to delete.
+  $id: String!
+) {
+  releasePipelineDelete(id: $id) {
+    ...DeletePayload
+  }
+}
+# Unarchives a release pipeline.
+mutation unarchiveReleasePipeline(
+  # The identifier of the release pipeline to unarchive.
+  $id: String!
+) {
+  releasePipelineUnarchive(id: $id) {
+    ...ReleasePipelineArchivePayload
+  }
+}
+# Updates an existing release pipeline. Supports updating name, slug, type, production flag, path
+# patterns, and team associations. Private teams that the current user cannot access are preserved in
+# the team list.
+mutation updateReleasePipeline(
+  # The identifier of the release pipeline to update.
+  $id: String!
+  # A partial ReleasePipeline object to update the ReleasePipeline with.
+  $input: ReleasePipelineUpdateInput!
+) {
+  releasePipelineUpdate(id: $id, input: $input) {
+    ...ReleasePipelinePayload
+  }
+}
+# Archives a release stage. Only started-type stages can be archived, and only if they have no active
+# releases and at least one other stage of the same type remains. Cannot archive the last non-frozen
+# started stage.
+mutation archiveReleaseStage(
+  # The identifier of the release stage to archive.
+  $id: String!
+) {
+  releaseStageArchive(id: $id) {
+    ...ReleaseStageArchivePayload
+  }
+}
+# Creates a new release stage in a pipeline. Non-started stages must use default names and colors, and
+# only one stage of each non-started type is allowed per pipeline. Started stages can optionally be
+# frozen, but at least one non-frozen started stage must remain.
+mutation createReleaseStage(
+  # The ReleaseStage object to create.
+  $input: ReleaseStageCreateInput!
+) {
+  releaseStageCreate(input: $input) {
+    ...ReleaseStagePayload
+  }
+}
+# Unarchives a release stage.
+mutation unarchiveReleaseStage(
+  # The identifier of the release stage to unarchive.
+  $id: String!
+) {
+  releaseStageUnarchive(id: $id) {
+    ...ReleaseStageArchivePayload
+  }
+}
+# Updates an existing release stage. Only started-type stages can be edited. Supports updating name,
+# color, position, and frozen status.
+mutation updateReleaseStage(
+  # The identifier of the release stage to update.
+  $id: String!
+  # A partial ReleaseStage object to update the ReleaseStage with.
+  $input: ReleaseStageUpdateInput!
+) {
+  releaseStageUpdate(id: $id, input: $input) {
+    ...ReleaseStagePayload
+  }
+}
+# Syncs release data by resolving issue and pull request references and associating them with a
+# release. For continuous pipelines, creates a new completed release. For scheduled pipelines, finds
+# or creates a started release and accumulates issues into it.
+mutation releaseSync(
+  # The release data to sync.
+  $input: ReleaseSyncInput!
+) {
+  releaseSync(input: $input) {
+    ...ReleasePayload
+  }
+}
+# Syncs release data using an access key for CI/CD integration. The pipeline is automatically inferred
+# from the access key's configured resources, so no pipeline ID is needed in the input.
+mutation releaseSyncByAccessKey(
+  # The release data to sync.
+  $input: ReleaseSyncInputBase!
+) {
+  releaseSyncByAccessKey(input: $input) {
+    ...ReleasePayload
+  }
+}
+# Unarchives a release.
+mutation unarchiveRelease(
+  # The identifier of the release to unarchive.
+  $id: String!
+) {
+  releaseUnarchive(id: $id) {
+    ...ReleaseArchivePayload
+  }
+}
+# Updates an existing release by ID. Supports updating name, description, version, commit SHA,
+# pipeline, stage, and dates.
+mutation updateRelease(
+  # The identifier of the release to update.
+  $id: String!
+  # A partial Release object to update the Release with.
+  $input: ReleaseUpdateInput!
+) {
+  releaseUpdate(id: $id, input: $input) {
+    ...ReleasePayload
+  }
+}
+# Updates a release by pipeline identifier. Finds the release by version or latest started/planned
+# release, and optionally transitions it to a new stage by name.
+mutation releaseUpdateByPipeline(
+  # The input containing the pipeline ID, optional version, and optional stage name.
+  $input: ReleaseUpdateByPipelineInput!
+) {
+  releaseUpdateByPipeline(input: $input) {
+    ...ReleasePayload
+  }
+}
+# Updates a release by pipeline using an access key.
+mutation releaseUpdateByPipelineByAccessKey(
+  # The input containing the optional version and optional stage name.
+  $input: ReleaseUpdateByPipelineInputBase!
+) {
+  releaseUpdateByPipelineByAccessKey(input: $input) {
+    ...ReleasePayload
   }
 }
 # Re-sends a workspace invitation email for the specified invite ID.
