@@ -3623,7 +3623,7 @@ fragment Team on Team {
   autoArchivePeriod
   # Period after which issues are automatically closed in months. Null/undefined means disabled.
   autoClosePeriod
-  # Security settings for the team, including role-based restrictions for issue sharing, label management, member management, and template management.
+  # Security settings for the team, including role-based restrictions for issue sharing, label management, member management, template management, and agent skills.
   securitySettings
   # Settings for all integrations associated with that team.
   integrationsSettings {
