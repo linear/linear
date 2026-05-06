@@ -20066,7 +20066,7 @@ export class Team extends Request {
   public scimGroupName?: string | null;
   /** Whether the team is managed by a SCIM integration. SCIM-managed teams have their membership controlled by the identity provider. */
   public scimManaged: boolean;
-  /** Security settings for the team, including role-based restrictions for issue sharing, label management, member management, and template management. */
+  /** Security settings for the team, including role-based restrictions for issue sharing, label management, member management, template management, and agent skills. */
   public securitySettings: L.Scalars["JSONObject"];
   /** Where to move issues when changing state. */
   public setIssueSortOrderOnStateChange: string;

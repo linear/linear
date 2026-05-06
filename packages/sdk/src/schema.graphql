@@ -142,6 +142,14 @@ type AgentActivity implements Node {
   """
   id: ID!
   """
+  [Internal] Whether this activity is queued for later processing. Queued activities are not sent to the agent until the session reaches a terminal state.
+  """
+  queued: Boolean!
+  """
+  [Internal] The time at which the prompt actually entered the conversation. Only set when the prompt did not enter the conversation immediately (i.e., it was queued and later dequeued). Null for prompts that were sent directly and for non-prompt activities.
+  """
+  sentAt: DateTime
+  """
   An optional modifier that provides additional instructions on how the activity should be interpreted.
   """
   signal: AgentActivitySignal
@@ -266,6 +274,10 @@ input AgentActivityCreatePromptInput {
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
+  """
+  [Internal] If true, the activity is queued and will be sent to the agent when it finishes its current task.
+  """
+  queued: Boolean
   """
   An optional modifier that provides additional instructions on how the activity should be interpreted.
   """
@@ -7236,6 +7248,72 @@ type CustomerWebhookPayload {
   The URL of the customer.
   """
   url: String!
+}
+
+"""
+[Internal] Configuration for the customer attributes data source.
+"""
+input CustomersAttributesDataSourceConfigurationInput {
+  """
+  [Internal] Whether to allow manual edits to customer attributes when no source is configured.
+  """
+  allowManualEdits: Boolean
+  """
+  [Internal] Errors encountered while syncing customer attributes (set by sync workers).
+  """
+  attributesErrors: JSONObject
+  """
+  [Internal] Mapping from customer attribute keys (owner, revenue, size, status, tier, externalId) to external field IDs.
+  """
+  attributesMapping: JSONObject
+  """
+  [Internal] Integration details (when sourceType is 'integration').
+  """
+  integration: CustomersAttributesDataSourceIntegrationInput
+  """
+  [Internal] How customer attribute values are sourced: 'manual' or 'integration'.
+  """
+  sourceType: String!
+}
+
+"""
+[Internal] Integration providing customer attribute data.
+"""
+input CustomersAttributesDataSourceIntegrationInput {
+  """
+  [Internal] The integration service that manages customer attributes.
+  """
+  service: IntegrationService!
+}
+
+"""
+[Internal] Input for updating workspace Customers feature configuration.
+"""
+input CustomersConfigurationInput {
+  """
+  [Internal] Configuration for the customer attributes data source.
+  """
+  attributesDataSourceConfiguration: CustomersAttributesDataSourceConfigurationInput
+  """
+  [Internal] The team to use to create default issues for new request items.
+  """
+  defaultTeamId: String
+  """
+  [Internal] Domains or email addresses excluded entirely from the Customers feature.
+  """
+  excludeList: [String!]
+  """
+  [Internal] Domains or email addresses ignored when matching to a customer.
+  """
+  ignoreList: [String!]
+  """
+  [Internal] The currency code used for customer revenue.
+  """
+  revenueCurrencyCode: String
+  """
+  [Internal] How customer revenue should be displayed.
+  """
+  revenueDisplay: String
 }
 
 """
@@ -20431,6 +20509,24 @@ type Mutation {
     input: AgentActivityCreatePromptInput!
   ): AgentActivityPayload!
   """
+  [Internal] Deletes a queued prompt activity, removing it from the queue.
+  """
+  agentActivityDeleteQueued(
+    """
+    The ID of the queued agent activity to delete.
+    """
+    id: String!
+  ): AgentActivityPayload!
+  """
+  [Internal] Immediately sends a queued prompt activity to the agent, bypassing the queue.
+  """
+  agentActivitySendQueued(
+    """
+    The ID of the queued agent activity to send.
+    """
+    id: String!
+  ): AgentActivityPayload!
+  """
   [Internal] Creates a new agent session on behalf of the current user
   """
   agentSessionCreate(
@@ -28173,6 +28269,20 @@ type OrganizationStartTrialPayload {
 }
 
 """
+[Internal] Input for updating workspace theme settings.
+"""
+input OrganizationThemeSettingsInput {
+  """
+  [ALPHA] Dark theme palette: CSS custom property name (`--name`) to color or length value.
+  """
+  darkTheme: JSONObject
+  """
+  [ALPHA] Light theme palette: CSS custom property name (`--name`) to color or length value.
+  """
+  lightTheme: JSONObject
+}
+
+"""
 Input for updating the workspace.
 """
 input OrganizationUpdateInput {
@@ -28227,7 +28337,7 @@ input OrganizationUpdateInput {
   """
   [INTERNAL] Configuration settings for the Customers feature.
   """
-  customersConfiguration: JSONObject
+  customersConfiguration: CustomersConfigurationInput
   """
   [INTERNAL] Whether the workspace is using customers.
   """
@@ -28359,7 +28469,7 @@ input OrganizationUpdateInput {
   """
   [ALPHA] Theme settings for the workspace.
   """
-  themeSettings: JSONObject
+  themeSettings: OrganizationThemeSettingsInput
   """
   The URL key of the workspace.
   """
@@ -40952,7 +41062,7 @@ type Team implements Node {
   """
   scimManaged: Boolean!
   """
-  Security settings for the team, including role-based restrictions for issue sharing, label management, member management, and template management.
+  Security settings for the team, including role-based restrictions for issue sharing, label management, member management, template management, and agent skills.
   """
   securitySettings: JSONObject!
   """
@@ -41653,6 +41763,10 @@ enum TeamRoleType {
 }
 
 input TeamSecuritySettingsInput {
+  """
+  The minimum team role required to manage agent skills in the team.
+  """
+  agentSkillsManagement: TeamRoleType
   """
   The minimum team role required to share issues with non-team-members.
   """
