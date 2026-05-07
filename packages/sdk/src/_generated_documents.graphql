@@ -97,6 +97,10 @@ fragment AiConversationBasePart on AiConversationBasePart {
   # The type of the part.
   type
 
+  ... on AiConversationErrorPart {
+    ...AiConversationErrorPart
+  }
+
   ... on AiConversationEventPart {
     ...AiConversationEventPart
   }
@@ -2493,6 +2497,10 @@ fragment Project on Project {
   integrationsSettings {
     id
   }
+  # The ID of the Microsoft Teams channel connected to the project, if any.
+  microsoftTeamsChannelId
+  # The ID of the Slack channel connected to the project, if any.
+  slackChannelId
   # The IDs of the project labels associated with this project.
   labelIds
   # The content of the project description.
@@ -3623,7 +3631,7 @@ fragment Team on Team {
   autoArchivePeriod
   # Period after which issues are automatically closed in months. Null/undefined means disabled.
   autoClosePeriod
-  # Security settings for the team, including role-based restrictions for issue sharing, label management, member management, and template management.
+  # Security settings for the team, including role-based restrictions for issue sharing, label management, member management, template management, and agent skills.
   securitySettings
   # Settings for all integrations associated with that team.
   integrationsSettings {
@@ -3955,6 +3963,38 @@ fragment WorkflowCronJobDefinition on WorkflowCronJobDefinition {
   }
   # Whether the workflow cron job is enabled and will execute on its schedule.
   enabled
+}
+
+# A titled section on a team home that groups pinned resources (documents and external links).
+# Sections are specific to the team home and do not change where resources live in their source team
+# or project.
+fragment TeamResourceSection on TeamResourceSection {
+  __typename
+  # Sort order of this section among other sections on the same team home.
+  sortOrder
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The section title shown on the team home.
+  title
+  # The team whose home page owns this section.
+  team {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who created the section. Null if the creator was deleted.
+  creator {
+    id
+  }
+  # The user who last updated the section. Null if the user was deleted.
+  updatedBy {
+    id
+  }
 }
 
 # A tool call part in an AI conversation.
@@ -5120,6 +5160,21 @@ fragment Reaction on Reaction {
   }
 }
 
+# An error part in an AI conversation.
+fragment AiConversationErrorPart on AiConversationErrorPart {
+  __typename
+  # The ID of the part.
+  id
+  # The metadata of the part.
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  # The type of the part.
+  type
+  # The user-facing error message for the failed AI response.
+  message
+}
+
 # An error that occurred during triage rule execution, such as a conflicting label assignment or an
 # invalid property value. Contains the error type and optionally the property that caused the failure.
 fragment IssueHistoryTriageRuleError on IssueHistoryTriageRuleError {
@@ -5189,6 +5244,10 @@ fragment EntityExternalLink on EntityExternalLink {
   url
   # The link's label.
   label
+  # The project that the link is associated with.
+  project {
+    id
+  }
   # The sort order of this link within the parent entity's resources list. Links are sorted together with documents and other resources attached to the entity.
   sortOrder
   # The time at which the entity was archived. Null if the entity has not been archived.
@@ -8137,6 +8196,47 @@ fragment Application on Application {
   clientId
   # URL of the developer's website, homepage, or documentation.
   developerUrl
+}
+
+# References a document or external link pinned to a team home for quick access. Pinning does not move
+# the underlying resource; the same resource may be pinned on multiple teams.
+fragment TeamPinnedResource on TeamPinnedResource {
+  __typename
+  # Sort order of this pin among pins with the same team and section (including pins without a section).
+  sortOrder
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The pinned document, when the pin targets a document.
+  document {
+    id
+  }
+  # The pinned external link, when the pin targets a link.
+  entityExternalLink {
+    id
+  }
+  # The section this pin is grouped under on the team home. Null if the pin is not inside a section.
+  section {
+    ...TeamResourceSection
+  }
+  # The team home where this pin appears.
+  team {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who created the pin. Null if the user was deleted.
+  creator {
+    id
+  }
+  # The user who last updated the pin. Null if the user was deleted.
+  updatedBy {
+    id
+  }
 }
 
 # Represents a file upload destination with a pre-signed upload URL, asset URL, and required request
@@ -11943,6 +12043,10 @@ fragment ProjectSearchResult on ProjectSearchResult {
   integrationsSettings {
     id
   }
+  # The ID of the Microsoft Teams channel connected to the project, if any.
+  microsoftTeamsChannelId
+  # The ID of the Slack channel connected to the project, if any.
+  slackChannelId
   # The IDs of the project labels associated with this project.
   labelIds
   # The content of the project description.
@@ -12314,6 +12418,10 @@ fragment Subscription on Subscription {
   }
   # Triggered when a project is updated
   projectUpdated {
+    id
+  }
+  # Triggered when a project update is archived
+  projectUpdateArchived {
     id
   }
   # Triggered when a project update is created

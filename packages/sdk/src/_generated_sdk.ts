@@ -1175,6 +1175,30 @@ export class AiConversationEntityListWidgetArgsEntities extends Request {
   public note?: string | null;
 }
 /**
+ * An error part in an AI conversation.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationErrorPartFragment response data
+ */
+export class AiConversationErrorPart extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationErrorPartFragment) {
+    super(request);
+    this.id = data.id;
+    this.message = data.message;
+    this.metadata = new AiConversationPartMetadata(request, data.metadata);
+    this.type = data.type;
+  }
+
+  /** The ID of the part. */
+  public id: string;
+  /** The user-facing error message for the failed AI response. */
+  public message: string;
+  /** The metadata of the part. */
+  public metadata: AiConversationPartMetadata;
+  /** The type of the part. */
+  public type: L.AiConversationPartType;
+}
+/**
  * An event part in an AI conversation.
  *
  * @param request - function to call the graphql client
@@ -7038,6 +7062,7 @@ export class Entity extends Request {
 export class EntityExternalLink extends Request {
   private _creator: L.EntityExternalLinkFragment["creator"];
   private _initiative?: L.EntityExternalLinkFragment["initiative"];
+  private _project?: L.EntityExternalLinkFragment["project"];
 
   public constructor(request: LinearRequest, data: L.EntityExternalLinkFragment) {
     super(request);
@@ -7050,6 +7075,7 @@ export class EntityExternalLink extends Request {
     this.url = data.url;
     this._creator = data.creator;
     this._initiative = data.initiative ?? undefined;
+    this._project = data.project ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -7084,6 +7110,14 @@ export class EntityExternalLink extends Request {
   /** The ID of initiative that the link is associated with. */
   public get initiativeId(): string | undefined {
     return this._initiative?.id;
+  }
+  /** The project that the link is associated with. */
+  public get project(): LinearFetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The ID of project that the link is associated with. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
   }
 
   /** Creates a new external link on an initiative, project, team, release, or cycle. */
@@ -15083,6 +15117,7 @@ export class Project extends Request {
     this.inProgressScopeHistory = data.inProgressScopeHistory;
     this.issueCountHistory = data.issueCountHistory;
     this.labelIds = data.labelIds;
+    this.microsoftTeamsChannelId = data.microsoftTeamsChannelId ?? undefined;
     this.name = data.name;
     this.priority = data.priority;
     this.priorityLabel = data.priorityLabel;
@@ -15091,6 +15126,7 @@ export class Project extends Request {
     this.projectUpdateRemindersPausedUntilAt = parseDate(data.projectUpdateRemindersPausedUntilAt) ?? undefined;
     this.scope = data.scope;
     this.scopeHistory = data.scopeHistory;
+    this.slackChannelId = data.slackChannelId ?? undefined;
     this.slackIssueComments = data.slackIssueComments;
     this.slackIssueStatuses = data.slackIssueStatuses;
     this.slackNewIssue = data.slackNewIssue;
@@ -15155,6 +15191,8 @@ export class Project extends Request {
   public issueCountHistory: number[];
   /** The IDs of the project labels associated with this project. */
   public labelIds: string[];
+  /** The ID of the Microsoft Teams channel connected to the project, if any. */
+  public microsoftTeamsChannelId?: string | null;
   /** The name of the project. */
   public name: string;
   /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
@@ -15171,6 +15209,8 @@ export class Project extends Request {
   public scope: number;
   /** The total scope (estimation points) of the project at the end of each week since project creation. Each entry represents one week. */
   public scopeHistory: number[];
+  /** The ID of the Slack channel connected to the project, if any. */
+  public slackChannelId?: string | null;
   /** Whether to send new issue comment notifications to Slack. */
   public slackIssueComments: boolean;
   /** Whether to send new issue status updates to Slack. */
@@ -16489,6 +16529,7 @@ export class ProjectSearchResult extends Request {
     this.issueCountHistory = data.issueCountHistory;
     this.labelIds = data.labelIds;
     this.metadata = data.metadata;
+    this.microsoftTeamsChannelId = data.microsoftTeamsChannelId ?? undefined;
     this.name = data.name;
     this.priority = data.priority;
     this.priorityLabel = data.priorityLabel;
@@ -16497,6 +16538,7 @@ export class ProjectSearchResult extends Request {
     this.projectUpdateRemindersPausedUntilAt = parseDate(data.projectUpdateRemindersPausedUntilAt) ?? undefined;
     this.scope = data.scope;
     this.scopeHistory = data.scopeHistory;
+    this.slackChannelId = data.slackChannelId ?? undefined;
     this.slackIssueComments = data.slackIssueComments;
     this.slackIssueStatuses = data.slackIssueStatuses;
     this.slackNewIssue = data.slackNewIssue;
@@ -16563,6 +16605,8 @@ export class ProjectSearchResult extends Request {
   public labelIds: string[];
   /** Metadata related to search result. */
   public metadata: L.Scalars["JSONObject"];
+  /** The ID of the Microsoft Teams channel connected to the project, if any. */
+  public microsoftTeamsChannelId?: string | null;
   /** The name of the project. */
   public name: string;
   /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
@@ -16579,6 +16623,8 @@ export class ProjectSearchResult extends Request {
   public scope: number;
   /** The total scope (estimation points) of the project at the end of each week since project creation. Each entry represents one week. */
   public scopeHistory: number[];
+  /** The ID of the Slack channel connected to the project, if any. */
+  public slackChannelId?: string | null;
   /** Whether to send new issue comment notifications to Slack. */
   public slackIssueComments: boolean;
   /** Whether to send new issue status updates to Slack. */
@@ -19244,6 +19290,7 @@ export class Subscription extends Request {
   private _projectArchived: L.SubscriptionFragment["projectArchived"];
   private _projectCreated: L.SubscriptionFragment["projectCreated"];
   private _projectUnarchived: L.SubscriptionFragment["projectUnarchived"];
+  private _projectUpdateArchived: L.SubscriptionFragment["projectUpdateArchived"];
   private _projectUpdateCreated: L.SubscriptionFragment["projectUpdateCreated"];
   private _projectUpdateDeleted: L.SubscriptionFragment["projectUpdateDeleted"];
   private _projectUpdateUpdated: L.SubscriptionFragment["projectUpdateUpdated"];
@@ -19310,6 +19357,7 @@ export class Subscription extends Request {
     this._projectArchived = data.projectArchived;
     this._projectCreated = data.projectCreated;
     this._projectUnarchived = data.projectUnarchived;
+    this._projectUpdateArchived = data.projectUpdateArchived;
     this._projectUpdateCreated = data.projectUpdateCreated;
     this._projectUpdateDeleted = data.projectUpdateDeleted;
     this._projectUpdateUpdated = data.projectUpdateUpdated;
@@ -19633,6 +19681,14 @@ export class Subscription extends Request {
   /** The ID of triggered when a a project is unarchived */
   public get projectUnarchivedId(): string | undefined {
     return this._projectUnarchived?.id;
+  }
+  /** Triggered when a project update is archived */
+  public get projectUpdateArchived(): LinearFetch<ProjectUpdate> | undefined {
+    return new ProjectUpdateQuery(this._request).fetch(this._projectUpdateArchived.id);
+  }
+  /** The ID of triggered when a project update is archived */
+  public get projectUpdateArchivedId(): string | undefined {
+    return this._projectUpdateArchived?.id;
   }
   /** Triggered when a project update is created */
   public get projectUpdateCreated(): LinearFetch<ProjectUpdate> | undefined {
@@ -20066,7 +20122,7 @@ export class Team extends Request {
   public scimGroupName?: string | null;
   /** Whether the team is managed by a SCIM integration. SCIM-managed teams have their membership controlled by the identity provider. */
   public scimManaged: boolean;
-  /** Security settings for the team, including role-based restrictions for issue sharing, label management, member management, and template management. */
+  /** Security settings for the team, including role-based restrictions for issue sharing, label management, member management, template management, and agent skills. */
   public securitySettings: L.Scalars["JSONObject"];
   /** Where to move issues when changing state. */
   public setIssueSortOrderOnStateChange: string;
@@ -20651,6 +20707,156 @@ export class TeamPayload extends Request {
   /** The ID of team that was created or updated. */
   public get teamId(): string | undefined {
     return this._team?.id;
+  }
+}
+/**
+ * References a document or external link pinned to a team home for quick access. Pinning does not move the underlying resource; the same resource may be pinned on multiple teams.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.TeamPinnedResourceFragment response data
+ */
+export class TeamPinnedResource extends Request {
+  private _creator?: L.TeamPinnedResourceFragment["creator"];
+  private _document?: L.TeamPinnedResourceFragment["document"];
+  private _entityExternalLink?: L.TeamPinnedResourceFragment["entityExternalLink"];
+  private _team: L.TeamPinnedResourceFragment["team"];
+  private _updatedBy?: L.TeamPinnedResourceFragment["updatedBy"];
+
+  public constructor(request: LinearRequest, data: L.TeamPinnedResourceFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.sortOrder = data.sortOrder;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.section = data.section ? new TeamResourceSection(request, data.section) : undefined;
+    this._creator = data.creator ?? undefined;
+    this._document = data.document ?? undefined;
+    this._entityExternalLink = data.entityExternalLink ?? undefined;
+    this._team = data.team;
+    this._updatedBy = data.updatedBy ?? undefined;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** Sort order of this pin among pins with the same team and section (including pins without a section). */
+  public sortOrder: number;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The section this pin is grouped under on the team home. Null if the pin is not inside a section. */
+  public section?: TeamResourceSection | null;
+  /** The user who created the pin. Null if the user was deleted. */
+  public get creator(): LinearFetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+  }
+  /** The ID of user who created the pin. null if the user was deleted. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
+  /** The pinned document, when the pin targets a document. */
+  public get document(): LinearFetch<Document> | undefined {
+    return this._document?.id ? new DocumentQuery(this._request).fetch(this._document?.id) : undefined;
+  }
+  /** The ID of pinned document, when the pin targets a document. */
+  public get documentId(): string | undefined {
+    return this._document?.id;
+  }
+  /** The pinned external link, when the pin targets a link. */
+  public get entityExternalLink(): LinearFetch<EntityExternalLink> | undefined {
+    return this._entityExternalLink?.id
+      ? new EntityExternalLinkQuery(this._request).fetch(this._entityExternalLink?.id)
+      : undefined;
+  }
+  /** The ID of pinned external link, when the pin targets a link. */
+  public get entityExternalLinkId(): string | undefined {
+    return this._entityExternalLink?.id;
+  }
+  /** The team home where this pin appears. */
+  public get team(): LinearFetch<Team> | undefined {
+    return new TeamQuery(this._request).fetch(this._team.id);
+  }
+  /** The ID of team home where this pin appears. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
+  }
+  /** The user who last updated the pin. Null if the user was deleted. */
+  public get updatedBy(): LinearFetch<User> | undefined {
+    return this._updatedBy?.id ? new UserQuery(this._request).fetch(this._updatedBy?.id) : undefined;
+  }
+  /** The ID of user who last updated the pin. null if the user was deleted. */
+  public get updatedById(): string | undefined {
+    return this._updatedBy?.id;
+  }
+}
+/**
+ * A titled section on a team home that groups pinned resources (documents and external links). Sections are specific to the team home and do not change where resources live in their source team or project.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.TeamResourceSectionFragment response data
+ */
+export class TeamResourceSection extends Request {
+  private _creator?: L.TeamResourceSectionFragment["creator"];
+  private _team: L.TeamResourceSectionFragment["team"];
+  private _updatedBy?: L.TeamResourceSectionFragment["updatedBy"];
+
+  public constructor(request: LinearRequest, data: L.TeamResourceSectionFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.sortOrder = data.sortOrder;
+    this.title = data.title;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._creator = data.creator ?? undefined;
+    this._team = data.team;
+    this._updatedBy = data.updatedBy ?? undefined;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** Sort order of this section among other sections on the same team home. */
+  public sortOrder: number;
+  /** The section title shown on the team home. */
+  public title: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The user who created the section. Null if the creator was deleted. */
+  public get creator(): LinearFetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+  }
+  /** The ID of user who created the section. null if the creator was deleted. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
+  /** The team whose home page owns this section. */
+  public get team(): LinearFetch<Team> | undefined {
+    return new TeamQuery(this._request).fetch(this._team.id);
+  }
+  /** The ID of team whose home page owns this section. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
+  }
+  /** The user who last updated the section. Null if the user was deleted. */
+  public get updatedBy(): LinearFetch<User> | undefined {
+    return this._updatedBy?.id ? new UserQuery(this._request).fetch(this._updatedBy?.id) : undefined;
+  }
+  /** The ID of user who last updated the section. null if the user was deleted. */
+  public get updatedById(): string | undefined {
+    return this._updatedBy?.id;
   }
 }
 /**

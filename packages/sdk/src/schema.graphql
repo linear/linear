@@ -142,6 +142,14 @@ type AgentActivity implements Node {
   """
   id: ID!
   """
+  [Internal] Whether this activity is queued for later processing. Queued activities are not sent to the agent until the session reaches a terminal state.
+  """
+  queued: Boolean!
+  """
+  [Internal] The time at which the prompt actually entered the conversation. Only set when the prompt did not enter the conversation immediately (i.e., it was queued and later dequeued). Null for prompts that were sent directly and for non-prompt activities.
+  """
+  sentAt: DateTime
+  """
   An optional modifier that provides additional instructions on how the activity should be interpreted.
   """
   signal: AgentActivitySignal
@@ -266,6 +274,10 @@ input AgentActivityCreatePromptInput {
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
+  """
+  [Internal] If true, the activity is queued and will be sent to the agent when it finishes its current task.
+  """
+  queued: Boolean
   """
   An optional modifier that provides additional instructions on how the activity should be interpreted.
   """
@@ -1116,7 +1128,7 @@ type AiConversation implements Node {
   """
   iterationId: String
   """
-  The ordered sequence of conversation parts (prompts, text responses, reasoning steps, tool calls, and widgets) that make up this conversation's visible history.
+  The ordered sequence of conversation parts (prompts, text responses, reasoning steps, tool calls, errors, and widgets) that make up this conversation's visible history.
   """
   parts: [AiConversationPart!]
   """
@@ -1434,6 +1446,28 @@ enum AiConversationEntityListWidgetArgsEntitiesType {
 }
 
 """
+An error part in an AI conversation.
+"""
+type AiConversationErrorPart implements AiConversationBasePart {
+  """
+  The ID of the part.
+  """
+  id: String!
+  """
+  The user-facing error message for the failed AI response.
+  """
+  message: String!
+  """
+  The metadata of the part.
+  """
+  metadata: AiConversationPartMetadata!
+  """
+  The type of the part.
+  """
+  type: AiConversationPartType!
+}
+
+"""
 An event part in an AI conversation.
 """
 type AiConversationEventPart implements AiConversationBasePart {
@@ -1685,6 +1719,7 @@ type AiConversationNavigateToPageToolCallResult {
 A part in an AI conversation.
 """
 union AiConversationPart =
+  | AiConversationErrorPart
   | AiConversationEventPart
   | AiConversationPromptPart
   | AiConversationReasoningPart
@@ -1734,6 +1769,7 @@ enum AiConversationPartPhase {
 The type of a part in an AI conversation.
 """
 enum AiConversationPartType {
+  error
   event
   prompt
   reasoning
@@ -7239,6 +7275,72 @@ type CustomerWebhookPayload {
 }
 
 """
+[Internal] Configuration for the customer attributes data source.
+"""
+input CustomersAttributesDataSourceConfigurationInput {
+  """
+  [Internal] Whether to allow manual edits to customer attributes when no source is configured.
+  """
+  allowManualEdits: Boolean
+  """
+  [Internal] Errors encountered while syncing customer attributes (set by sync workers).
+  """
+  attributesErrors: JSONObject
+  """
+  [Internal] Mapping from customer attribute keys (owner, revenue, size, status, tier, externalId) to external field IDs.
+  """
+  attributesMapping: JSONObject
+  """
+  [Internal] Integration details (when sourceType is 'integration').
+  """
+  integration: CustomersAttributesDataSourceIntegrationInput
+  """
+  [Internal] How customer attribute values are sourced: 'manual' or 'integration'.
+  """
+  sourceType: String!
+}
+
+"""
+[Internal] Integration providing customer attribute data.
+"""
+input CustomersAttributesDataSourceIntegrationInput {
+  """
+  [Internal] The integration service that manages customer attributes.
+  """
+  service: IntegrationService!
+}
+
+"""
+[Internal] Input for updating workspace Customers feature configuration.
+"""
+input CustomersConfigurationInput {
+  """
+  [Internal] Configuration for the customer attributes data source.
+  """
+  attributesDataSourceConfiguration: CustomersAttributesDataSourceConfigurationInput
+  """
+  [Internal] The team to use to create default issues for new request items.
+  """
+  defaultTeamId: String
+  """
+  [Internal] Domains or email addresses excluded entirely from the Customers feature.
+  """
+  excludeList: [String!]
+  """
+  [Internal] Domains or email addresses ignored when matching to a customer.
+  """
+  ignoreList: [String!]
+  """
+  [Internal] The currency code used for customer revenue.
+  """
+  revenueCurrencyCode: String
+  """
+  [Internal] How customer revenue should be displayed.
+  """
+  revenueDisplay: String
+}
+
+"""
 A time-boxed iteration (similar to a sprint) used for planning and tracking work. Cycles belong to a team and have defined start and end dates. Issues are assigned to cycles for time-based planning, and progress is tracked via completed, in-progress, and total scope. Cycles are automatically completed when their end date passes, and uncompleted issues can be carried over to the next cycle.
 """
 type Cycle implements Node {
@@ -9793,6 +9895,10 @@ type EntityExternalLink implements Node {
   The link's label.
   """
   label: String!
+  """
+  The project that the link is associated with.
+  """
+  project: Project
   """
   The sort order of this link within the parent entity's resources list. Links are sorted together with documents and other resources attached to the entity.
   """
@@ -20431,6 +20537,24 @@ type Mutation {
     input: AgentActivityCreatePromptInput!
   ): AgentActivityPayload!
   """
+  [Internal] Deletes a queued prompt activity, removing it from the queue.
+  """
+  agentActivityDeleteQueued(
+    """
+    The ID of the queued agent activity to delete.
+    """
+    id: String!
+  ): AgentActivityPayload!
+  """
+  [Internal] Immediately sends a queued prompt activity to the agent, bypassing the queue.
+  """
+  agentActivitySendQueued(
+    """
+    The ID of the queued agent activity to send.
+    """
+    id: String!
+  ): AgentActivityPayload!
+  """
   [Internal] Creates a new agent session on behalf of the current user
   """
   agentSessionCreate(
@@ -28173,6 +28297,20 @@ type OrganizationStartTrialPayload {
 }
 
 """
+[Internal] Input for updating workspace theme settings.
+"""
+input OrganizationThemeSettingsInput {
+  """
+  [ALPHA] Dark theme palette: CSS custom property name (`--name`) to color or length value.
+  """
+  darkTheme: JSONObject
+  """
+  [ALPHA] Light theme palette: CSS custom property name (`--name`) to color or length value.
+  """
+  lightTheme: JSONObject
+}
+
+"""
 Input for updating the workspace.
 """
 input OrganizationUpdateInput {
@@ -28227,7 +28365,7 @@ input OrganizationUpdateInput {
   """
   [INTERNAL] Configuration settings for the Customers feature.
   """
-  customersConfiguration: JSONObject
+  customersConfiguration: CustomersConfigurationInput
   """
   [INTERNAL] Whether the workspace is using customers.
   """
@@ -28359,7 +28497,7 @@ input OrganizationUpdateInput {
   """
   [ALPHA] Theme settings for the workspace.
   """
-  themeSettings: JSONObject
+  themeSettings: OrganizationThemeSettingsInput
   """
   The URL key of the workspace.
   """
@@ -29432,6 +29570,10 @@ type Project implements Node {
     orderBy: PaginationOrderBy
   ): UserConnection!
   """
+  The ID of the Microsoft Teams channel connected to the project, if any.
+  """
+  microsoftTeamsChannelId: String
+  """
   The name of the project.
   """
   name: String!
@@ -29591,6 +29733,10 @@ type Project implements Node {
   The total scope (estimation points) of the project at the end of each week since project creation. Each entry represents one week.
   """
   scopeHistory: [Float!]!
+  """
+  The ID of the Slack channel connected to the project, if any.
+  """
+  slackChannelId: String
   """
   Whether to send new issue comment notifications to Slack.
   """
@@ -32116,6 +32262,10 @@ type ProjectSearchResult implements Node {
   """
   metadata: JSONObject!
   """
+  The ID of the Microsoft Teams channel connected to the project, if any.
+  """
+  microsoftTeamsChannelId: String
+  """
   The name of the project.
   """
   name: String!
@@ -32275,6 +32425,10 @@ type ProjectSearchResult implements Node {
   The total scope (estimation points) of the project at the end of each week since project creation. Each entry represents one week.
   """
   scopeHistory: [Float!]!
+  """
+  The ID of the Slack channel connected to the project, if any.
+  """
+  slackChannelId: String
   """
   Whether to send new issue comment notifications to Slack.
   """
@@ -33578,9 +33732,17 @@ type PullRequest implements Node {
   """
   mergeSettings: PullRequestMergeSettings
   """
+  The current merge status of the pull request, synced from the hosting provider.
+  """
+  mergeStatus: String!
+  """
   The pull request number as assigned by the hosting provider (e.g., #123 on GitHub). Unique within a repository.
   """
   number: Float!
+  """
+  The time at which the pull request was opened.
+  """
+  openedAt: DateTime!
   """
   The pull request's unique URL slug, used to construct human-readable URLs within the Linear app.
   """
@@ -37213,6 +37375,10 @@ input ReleaseCompleteInput {
   """
   commitSha: String
   """
+  Optional release name to apply when completing the release.
+  """
+  name: String
+  """
   The identifier of the pipeline to mark a release as completed.
   """
   pipelineId: String!
@@ -37230,6 +37396,10 @@ input ReleaseCompleteInputBase {
   The commit SHA associated with this completion. If a completed release with this SHA already exists, it will be returned instead of completing a new release.
   """
   commitSha: String
+  """
+  Optional release name to apply when completing the release.
+  """
+  name: String
   """
   The version of the release to complete. If not provided, the latest started release will be completed.
   """
@@ -38385,6 +38555,10 @@ Input for updating a release by pipeline identifier. Extends the base update inp
 """
 input ReleaseUpdateByPipelineInput {
   """
+  Optional release name to apply when updating the release.
+  """
+  name: String
+  """
   The identifier of the pipeline.
   """
   pipelineId: String!
@@ -38402,6 +38576,10 @@ input ReleaseUpdateByPipelineInput {
 Base input for updating a release by pipeline. Contains optional version and stage name. The pipeline ID is provided separately or inferred from the access key.
 """
 input ReleaseUpdateByPipelineInputBase {
+  """
+  Optional release name to apply when updating the release.
+  """
+  name: String
   """
   The stage name to set. First tries exact match, then falls back to case-insensitive matching with dashes/underscores treated as spaces.
   """
@@ -38569,7 +38747,7 @@ input RepositoryDataInput {
   """
   owner: String!
   """
-  The VCS provider hosting the repository (e.g., 'github', 'gitlab').
+  The VCS provider hosting the repository (e.g., 'github', 'gitlab', 'bitbucket').
   """
   provider: String!
   """
@@ -40213,6 +40391,10 @@ type Subscription {
   """
   projectUnarchived: Project!
   """
+  Triggered when a project update is archived
+  """
+  projectUpdateArchived: ProjectUpdate!
+  """
   Triggered when a project update is created
   """
   projectUpdateCreated: ProjectUpdate!
@@ -40846,6 +41028,10 @@ type Team implements Node {
   """
   parent: Team
   """
+  [Internal] Documents and external links pinned to the team home, optionally grouped under sections.
+  """
+  pinnedResources: [TeamPinnedResource!]!
+  """
   [Internal] Posts associated with the team.
   """
   posts: [Post!]!
@@ -40936,6 +41122,10 @@ type Team implements Node {
   """
   requirePriorityToLeaveTriage: Boolean!
   """
+  [Internal] Sections shown on the team home that group pinned resources.
+  """
+  resourceSections: [TeamResourceSection!]!
+  """
   The time at which the team was retired. Retired teams no longer accept new issues or members. Null if the team has not been retired.
   """
   retiredAt: DateTime
@@ -40952,7 +41142,7 @@ type Team implements Node {
   """
   scimManaged: Boolean!
   """
-  Security settings for the team, including role-based restrictions for issue sharing, label management, member management, and template management.
+  Security settings for the team, including role-based restrictions for issue sharing, label management, member management, template management, and agent skills.
   """
   securitySettings: JSONObject!
   """
@@ -41637,6 +41827,100 @@ type TeamPayload {
 }
 
 """
+References a document or external link pinned to a team home for quick access. Pinning does not move the underlying resource; the same resource may be pinned on multiple teams.
+"""
+type TeamPinnedResource implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who created the pin. Null if the user was deleted.
+  """
+  creator: User
+  """
+  The pinned document, when the pin targets a document.
+  """
+  document: Document
+  """
+  The pinned external link, when the pin targets a link.
+  """
+  entityExternalLink: EntityExternalLink
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The section this pin is grouped under on the team home. Null if the pin is not inside a section.
+  """
+  section: TeamResourceSection
+  """
+  Sort order of this pin among pins with the same team and section (including pins without a section).
+  """
+  sortOrder: Float!
+  """
+  The team home where this pin appears.
+  """
+  team: Team!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The user who last updated the pin. Null if the user was deleted.
+  """
+  updatedBy: User
+}
+
+"""
+A titled section on a team home that groups pinned resources (documents and external links). Sections are specific to the team home and do not change where resources live in their source team or project.
+"""
+type TeamResourceSection implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who created the section. Null if the creator was deleted.
+  """
+  creator: User
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  Sort order of this section among other sections on the same team home.
+  """
+  sortOrder: Float!
+  """
+  The team whose home page owns this section.
+  """
+  team: Team!
+  """
+  The section title shown on the team home.
+  """
+  title: String!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The user who last updated the section. Null if the user was deleted.
+  """
+  updatedBy: User
+}
+
+"""
 [Internal] How to handle sub-teams when retiring a parent team.
 """
 enum TeamRetirementSubTeamHandling {
@@ -41653,6 +41937,10 @@ enum TeamRoleType {
 }
 
 input TeamSecuritySettingsInput {
+  """
+  The minimum team role required to manage agent skills in the team.
+  """
+  agentSkillsManagement: TeamRoleType
   """
   The minimum team role required to share issues with non-team-members.
   """
