@@ -62,7 +62,7 @@ jobs:
         run: npx @arethetypeswrong/cli@0.18.2 --pack packages/sdk
 
       - name: Compare schema for changes
-        uses: kamilkisiela/graphql-inspector@master
+        uses: graphql-hive/graphql-inspector@e198fcf208b30d4e3337094262583280c7bf93e7 # @graphql-inspector/action@5.0.20
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           schema: "master:packages/sdk/src/schema.graphql"
@@ -72,7 +72,7 @@ jobs:
         run: git update-index --refresh && git diff-index HEAD
 
       - name: Create Release Pull Request or Publish to npm
-        uses: changesets/action@master
+        uses: changesets/action@63a615b9cd06ba9a3e6d13796c7fbcb080a60a0b # v1.8.0
         with:
           commit: "chore(release): version packages"
           title: "chore(release): version packages"

@@ -54,7 +54,7 @@ jobs:
         run: npx @arethetypeswrong/cli@0.18.2 --pack packages/sdk
 
       - name: Compare schema for changes
-        uses: kamilkisiela/graphql-inspector@master
+        uses: graphql-hive/graphql-inspector@e198fcf208b30d4e3337094262583280c7bf93e7 # @graphql-inspector/action@5.0.20
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           schema: "master:packages/sdk/src/schema.graphql"
