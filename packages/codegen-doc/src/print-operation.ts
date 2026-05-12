@@ -151,32 +151,39 @@ export function printOperations(
 
       const existingArgNames = new Set(fields.flatMap(f => (f.arguments ?? []).map(a => a.name.value)));
 
-      const fieldOperations = object?.fields?.map(field => {
-        if (
-          /** No need to go further than scalar fields */
-          isScalarField(context, field) ||
-          /** No need to go further if the field is within a connection */
-          Doc.CONNECTION_FIELDS.includes(field.name.value) ||
-          /** No need to go further if this returns a list */
-          reduceListType(field.type) ||
-          /** No need to go further if we can get this field from a root query */
-          findQuery(context, field) ||
-          /** Skip connection fields on nested types that aren't directly fetchable via a root query. Connection methods
-           * require re-querying the parent by ID (e.g. issue_comments calls issue(id) { comments }), which isn't
-           * currently possible for types like DocumentContent that are only accessible as nested fields. */
-          (fields.length > 1 && reduceTypeName(field.type)?.endsWith("Connection")) ||
-          /** Skip when the child's args would collide with the chain's existing args. The generated
-           * operation flattens args from every step in the chain into a single variable list, so any
-           * shared arg name (e.g. `filter`, `first`) on both the parent and child produces invalid
-           * GraphQL with duplicate variable declarations. */
-          (field.arguments ?? []).some(arg => existingArgNames.has(arg.name.value))
-        ) {
-          return undefined;
-        } else {
-          /** For any objects create a new query for each nested field */
-          return printOperations(context, type, [...fields, field]);
-        }
-      });
+      /** Skip nested operations if any ancestor in the chain returns a list. The generated fetch path
+       * (e.g. `response.release.documents`) is invalid when an ancestor is an array, so don't emit
+       * nested per-field queries beneath a list-returning parent. */
+      const chainHasList = fields.some(f => reduceListType(f.type));
+
+      const fieldOperations = chainHasList
+        ? []
+        : object?.fields?.map(field => {
+            if (
+              /** No need to go further than scalar fields */
+              isScalarField(context, field) ||
+              /** No need to go further if the field is within a connection */
+              Doc.CONNECTION_FIELDS.includes(field.name.value) ||
+              /** No need to go further if this returns a list */
+              reduceListType(field.type) ||
+              /** No need to go further if we can get this field from a root query */
+              findQuery(context, field) ||
+              /** Skip connection fields on nested types that aren't directly fetchable via a root query. Connection methods
+               * require re-querying the parent by ID (e.g. issue_comments calls issue(id) { comments }), which isn't
+               * currently possible for types like DocumentContent that are only accessible as nested fields. */
+              (fields.length > 1 && reduceTypeName(field.type)?.endsWith("Connection")) ||
+              /** Skip when the child's args would collide with the chain's existing args. The generated
+               * operation flattens args from every step in the chain into a single variable list, so any
+               * shared arg name (e.g. `filter`, `first`) on both the parent and child produces invalid
+               * GraphQL with duplicate variable declarations. */
+              (field.arguments ?? []).some(arg => existingArgNames.has(arg.name.value))
+            ) {
+              return undefined;
+            } else {
+              /** For any objects create a new query for each nested field */
+              return printOperations(context, type, [...fields, field]);
+            }
+          });
 
       /** Return operation for this node as well as any nested field operations */
       return printLines([nodeOperation, ...(fieldOperations ?? [])]);
