@@ -4,7 +4,7 @@ import getPort from "get-port";
 import http from "http";
 import { v4 as uuidv4 } from "uuid";
 import { describe, expect, it } from "vitest";
-import { LINEAR_WEBHOOK_SIGNATURE_HEADER, LinearWebhookClient } from "../webhooks/index.js";
+import { LINEAR_WEBHOOK_SIGNATURE_HEADER, LINEAR_WEBHOOK_TS_HEADER, LinearWebhookClient } from "../webhooks/index.js";
 
 export interface SignedBody {
   body: Buffer;
@@ -161,6 +161,72 @@ describe("webhooks handlers", () => {
 
       const expectedIds = [issueIds.actorId, commentIds.actorId].sort();
       expect(receivedActorIds.sort()).toEqual(expectedIds);
+    } finally {
+      server.close();
+      handler.removeAllListeners();
+    }
+  });
+
+  it("rejects a stale signed body even when a fresh linear-timestamp header is supplied (fetch-style)", async () => {
+    const secret = "SECRET";
+    const client = new LinearWebhookClient(secret);
+    const handler = client.createHandler();
+
+    let invoked = 0;
+    handler.on("*", () => {
+      invoked += 1;
+    });
+
+    const staleTimestamp = Date.now() - 10 * 60 * 1000;
+    const { payload } = generateIssuePayload({ timestamp: staleTimestamp });
+    const { body, signature } = createSignedBody(secret, payload);
+
+    const headers = new Map<string, string>([
+      [LINEAR_WEBHOOK_SIGNATURE_HEADER, signature],
+      [LINEAR_WEBHOOK_TS_HEADER, String(Date.now())],
+      ["content-type", "application/json"],
+    ]);
+    const req = {
+      method: "POST",
+      headers: { get: (key: string) => headers.get(key.toLowerCase()) ?? null },
+      arrayBuffer: async () => body,
+    } as unknown as Request;
+
+    const res = await handler(req);
+    expect(res.status).toBe(400);
+    expect(invoked).toBe(0);
+  });
+
+  it("rejects a stale signed body even when a fresh linear-timestamp header is supplied (express server)", async () => {
+    const secret = "SECRET";
+    const client = new LinearWebhookClient(secret);
+    const handler = client.createHandler();
+    const app = express();
+    const port = await getPort();
+    let invoked = 0;
+    handler.on("*", () => {
+      invoked += 1;
+    });
+    app.post("/", (req, res) => {
+      void handler(req, res);
+    });
+    const server = app.listen(port);
+    try {
+      const staleTimestamp = Date.now() - 10 * 60 * 1000;
+      const { payload } = generateIssuePayload({ timestamp: staleTimestamp });
+      const { body, signature } = createSignedBody(secret, payload);
+
+      const result = await httpPost(
+        port,
+        "/",
+        {
+          [LINEAR_WEBHOOK_SIGNATURE_HEADER]: signature,
+          [LINEAR_WEBHOOK_TS_HEADER]: String(Date.now()),
+        },
+        body
+      );
+      expect(result.status).toBe(400);
+      expect(invoked).toBe(0);
     } finally {
       server.close();
       handler.removeAllListeners();

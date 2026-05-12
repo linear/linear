@@ -208,7 +208,7 @@ export class LinearWebhookClient {
    *
    * @param rawBody - Raw request body as a Buffer
    * @param signature - The value of the `linear-signature` header
-   * @param timestampHeader - The value of the `linear-timestamp` header (preferred over body field)
+   * @param timestampHeader - The value of the `linear-timestamp` header (used only when the signed body has no timestamp)
    * @returns The verified and parsed webhook payload
    */
   private parseVerifiedPayload(
@@ -217,7 +217,7 @@ export class LinearWebhookClient {
     timestampHeader: string | null
   ): LinearWebhookPayload {
     const parsedBody = this.parseBodyAsWebhookPayload(rawBody);
-    const timestamp = timestampHeader ?? parsedBody.webhookTimestamp;
+    const timestamp = parsedBody.webhookTimestamp ?? timestampHeader;
 
     const verified = this.verify(rawBody, signature, timestamp);
     if (!verified) {
