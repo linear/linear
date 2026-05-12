@@ -5,20 +5,22 @@ on:
     - cron: "0 0 * * *"
   workflow_dispatch:
 
-permissions:
-  contents: write
-  checks: write
-  pull-requests: write
+permissions: {}
 
 jobs:
   schema:
     name: Schema
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      checks: write
+      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Install pnpm
         uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
@@ -77,6 +79,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [schema]
+    permissions:
+      actions: read
+      contents: read
     if: ${{ always() && github.ref_name == 'master' && contains(needs.*.result, 'failure') }}
     steps:
       - uses: ravsamhq/notify-slack-action@bca2d7f5660b833a27bda4f6b8bef389ebfefd25 # 2.3.0
