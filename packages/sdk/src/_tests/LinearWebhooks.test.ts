@@ -30,6 +30,17 @@ describe("webhooks", () => {
     parsedBody = JSON.parse(rawBody.toString());
   });
 
+  describe("constructor", () => {
+    it("should throw if the secret is an empty string", () => {
+      expect(() => new LinearWebhookClient("")).toThrowError(/non-empty string/);
+    });
+
+    it("should throw if the secret is not a string", () => {
+      expect(() => new LinearWebhookClient(undefined as unknown as string)).toThrowError(/non-empty string/);
+      expect(() => new LinearWebhookClient(null as unknown as string)).toThrowError(/non-empty string/);
+    });
+  });
+
   describe("verify", () => {
     it("incorrect signature, should fail verification", async () => {
       const webhook = new LinearWebhookClient("SECRET");

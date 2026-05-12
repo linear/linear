@@ -38,7 +38,11 @@ export class LinearWebhookClient {
    * Creates a new LinearWebhookClient instance
    * @param secret The webhook signing secret. See https://linear.app/developers/webhooks#securing-webhooks.
    */
-  public constructor(private secret: string) {}
+  public constructor(private secret: string) {
+    if (typeof secret !== "string" || secret.length === 0) {
+      throw new TypeError("LinearWebhookClient: secret must be a non-empty string");
+    }
+  }
 
   /**
    * Creates a webhook handler function that can process Linear webhook requests
