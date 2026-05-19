@@ -20,11 +20,11 @@
     "dist"
   ],
   "scripts": {
-    "cli": "ts-node src/cli",
-    "cli:local": "NODE_TLS_REJECT_UNAUTHORIZED=0 ts-node src/cli --apiUrl https://local.linear.dev:8090/graphql",
-    "dev:import": "NODE_ENV=development pnpm run build:import",
+    "cli": "TS_NODE_TRANSPILE_ONLY=true node --loader ts-node/esm src/cli.ts",
+    "cli:local": "NODE_TLS_REJECT_UNAUTHORIZED=0 TS_NODE_TRANSPILE_ONLY=true node --loader ts-node/esm src/cli.ts --apiUrl https://local.linear.dev:8090/graphql",
     "build:import": "tsdown --clean --format cjs src/cli.ts",
-    "build:types": "tsc --noEmit"
+    "build:types": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
+    "test": "vitest"
   },
   "dependencies": {
     "@linear/sdk": "workspace:*",
@@ -45,7 +45,8 @@
     "@types/node-fetch": "^2.5.7",
     "tsdown": "catalog:",
     "ts-node": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "^4.0.15"
   },
   "publishConfig": {
     "access": "public"
