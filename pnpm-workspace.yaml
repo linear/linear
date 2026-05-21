@@ -30,4 +30,5 @@ minimumReleaseAge: 1440
 
 overrides:
   graphql: "catalog:"
+  immutable@<3.8.3: 5.1.5
   node-fetch@^2: 2.6.7
