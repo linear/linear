@@ -94,5 +94,5 @@
       }
     }
   },
-  "packageManager": "pnpm@10.25.0"
+  "packageManager": "pnpm@11.1.3"
 }
