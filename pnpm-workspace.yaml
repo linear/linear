@@ -36,3 +36,4 @@ overrides:
   minimatch@>=4.0.0 <4.2.5: 4.2.5
   moment@<2.29.4: 2.30.1
   node-fetch@^2: 2.6.7
+  tmp@<=0.2.3: 0.2.5
