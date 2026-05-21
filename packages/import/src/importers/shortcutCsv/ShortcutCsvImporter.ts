@@ -2,6 +2,7 @@
 /* eslint-disable eqeqeq */
 import csv from "csvtojson";
 import type { Importer, ImportResult } from "../../types.ts";
+import { appendImageUrlSuffix } from "../../utils/appendImageUrlSuffix.ts";
 import { safeParseInt } from "../../utils/parseInt.ts";
 
 type ShortcutStoryType = "feature" | "bug" | "chore";
@@ -101,7 +102,9 @@ export class ShortcutCsvImporter implements Importer {
       labels: {},
       users: {},
       statuses: {},
-      resourceURLSuffix: "?token=" + this.apiToken,
+      // Skip the client-side pre-upload of images. Linear's API will fetch the
+      // token-bearing URLs server-side.
+      skipImageReplacement: true,
     };
 
     const assignees = Array.from(new Set(data.map(row => row.owners).flat()));
@@ -113,6 +116,12 @@ export class ShortcutCsvImporter implements Importer {
       };
     }
 
+    const tokenSuffix = "?token=" + this.apiToken;
+    // Only hosts that we know are auth-gated by the Shortcut API token. Restricting the
+    // allowlist prevents the token from leaking to unrelated third-party hosts that may
+    // appear in story descriptions.
+    const shortcutHostSuffixes = ["clubhouse.io", "shortcut.com"];
+
     for (const row of data) {
       const title = row.name;
       if (!title) {
@@ -120,13 +129,21 @@ export class ShortcutCsvImporter implements Importer {
       }
 
       const url = this.shortcutBaseURL + "/story/" + row.id;
+      // Rewrite the legacy Clubhouse media host to its current Shortcut equivalent.
+      // The legacy host 301-redirects, but Linear's image downloader does not follow
+      // redirects, which would otherwise cause the upload to fail.
+      const rewrittenDescription = (row.description ?? "").replaceAll("media.clubhouse.io", "media.app.shortcut.com");
       const descriptionParts = [
-        row.description,
+        rewrittenDescription,
         row.tasks.map(t => `- ${t}`).join("\n"),
         row.external_tickets.map(externalUrl => `* **External Link:** ${externalUrl}`).join("\n"),
         `[View original issue in Shortcut](${url})`,
       ];
-      const description = descriptionParts.filter(s => s.length > 0).join("\n\n");
+      // Embed the token in image URLs so Linear's API can fetch them; the API rewrites
+      // these to Linear-hosted URLs before persisting, so the token never lands in stored content.
+      const description = appendImageUrlSuffix(descriptionParts.filter(s => s.length > 0).join("\n\n"), tokenSuffix, {
+        allowedHostSuffixes: shortcutHostSuffixes,
+      });
 
       const tags = row.labels;
       tags.push(row.type);

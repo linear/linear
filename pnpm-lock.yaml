@@ -293,6 +293,9 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
+      vitest:
+        specifier: ^4.0.15
+        version: 4.0.15(@types/node@24.10.2)(jiti@1.17.1)(jsdom@16.7.0)(terser@5.44.1)(yaml@2.8.2)
 
   packages/sdk:
     dependencies:
