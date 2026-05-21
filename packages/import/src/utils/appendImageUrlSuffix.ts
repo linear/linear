@@ -1,5 +1,42 @@
 const IMAGE_TAG_REGEX = /(<img[^>]*?src=")(https?:\/\/[^"]+)(")/g;
 
+function isBackslashEscaped(text: string, index: number): boolean {
+  let count = 0;
+  for (let i = index - 1; i >= 0 && text[i] === "\\"; i--) {
+    count++;
+  }
+  return count % 2 === 1;
+}
+
+function findCodeRanges(text: string): [number, number][] {
+  const ranges: [number, number][] = [];
+
+  // Fenced code blocks: 3+ backticks or tildes at line start (0-3 spaces of indent).
+  // Unclosed fences extend to end of input.
+  const fence = /(?:^|\n)[ \t]{0,3}(`{3,}|~{3,})[^\n]*(?:\n[\s\S]*?(?:\n[ \t]{0,3}\1[ \t]*(?=\n|$)|$)|$)/g;
+  let m: RegExpExecArray | null;
+  while ((m = fence.exec(text)) !== null) {
+    const start = m[0].startsWith("\n") ? m.index + 1 : m.index;
+    ranges.push([start, m.index + m[0].length]);
+  }
+
+  // Inline code spans: matching runs of backticks on the same line.
+  const inline = /`+[^`\n]+?`+/g;
+  while ((m = inline.exec(text)) !== null) {
+    const idx = m.index;
+    if (ranges.some(([s, e]) => idx >= s && idx < e)) {
+      continue;
+    }
+    ranges.push([idx, idx + m[0].length]);
+  }
+
+  return ranges;
+}
+
+function inCodeRange(index: number, ranges: [number, number][]): boolean {
+  return ranges.some(([s, e]) => index >= s && index < e);
+}
+
 function mergeQuery(url: string, suffix: string): string {
   const fragmentStart = url.indexOf("#");
   const urlWithoutFragment = fragmentStart === -1 ? url : url.slice(0, fragmentStart);
@@ -115,7 +152,11 @@ function findMarkdownImageTitleEnd(text: string, start: number): number {
   return -1;
 }
 
-function appendMarkdownImageUrlSuffix(text: string, apply: (url: string) => string): string {
+function appendMarkdownImageUrlSuffix(
+  text: string,
+  apply: (url: string) => string,
+  codeRanges: [number, number][]
+): string {
   let result = "";
   let cursor = 0;
 
@@ -124,6 +165,13 @@ function appendMarkdownImageUrlSuffix(text: string, apply: (url: string) => stri
     if (imageStart === -1) {
       result += text.slice(cursor);
       break;
+    }
+
+    // Skip escaped markers (\![…]) and markers inside code spans/blocks — they don't render as images.
+    if (isBackslashEscaped(text, imageStart) || inCodeRange(imageStart, codeRanges)) {
+      result += text.slice(cursor, imageStart + 1);
+      cursor = imageStart + 1;
+      continue;
     }
 
     const urlStart = text.indexOf("](", imageStart + 2);
@@ -158,6 +206,11 @@ function appendMarkdownImageUrlSuffix(text: string, apply: (url: string) => stri
  * Append a query suffix to every external image URL in a markdown string.
  *
  * Handles both markdown images (`![alt](https://…)`) and HTML `<img src="https://…">` tags.
+ * Skips markers that would not render as images, so the suffix is not embedded into
+ * literal text the server-side image pipeline won't rewrite away:
+ * - Backslash-escaped markdown image markers (`\![…](…)`), respecting `\\` → literal backslash.
+ * - URLs inside inline code spans (`` `…` ``) and fenced code blocks (```` ```…``` ````).
+ *
  * When the source URL already contains a query string and the suffix starts with `?`,
  * the suffix is joined with `&` so the resulting URL stays well-formed.
  *
@@ -180,8 +233,13 @@ export function appendImageUrlSuffix(
     }
     return mergeQuery(url, suffix);
   };
-  return appendMarkdownImageUrlSuffix(text, apply).replace(
-    IMAGE_TAG_REGEX,
-    (_match, pre: string, url: string, post: string) => `${pre}${apply(url)}${post}`
-  );
+  const codeRangesInput = findCodeRanges(text);
+  const afterMarkdown = appendMarkdownImageUrlSuffix(text, apply, codeRangesInput);
+  const codeRangesAfter = findCodeRanges(afterMarkdown);
+  return afterMarkdown.replace(IMAGE_TAG_REGEX, (match, pre: string, url: string, post: string, offset: number) => {
+    if (isBackslashEscaped(afterMarkdown, offset) || inCodeRange(offset, codeRangesAfter)) {
+      return match;
+    }
+    return `${pre}${apply(url)}${post}`;
+  });
 }

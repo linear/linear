@@ -47,4 +47,41 @@ describe("appendImageUrlSuffix", () => {
       '<img src="https://media.app.shortcut.com/a.png?token=t">'
     );
   });
+
+  it("does not append the suffix to backslash-escaped image markers", () => {
+    expect(appendImageUrlSuffix("\\![literal](https://media.app.shortcut.com/a.png)", "?token=t", options)).toBe(
+      "\\![literal](https://media.app.shortcut.com/a.png)"
+    );
+  });
+
+  it("treats a doubly-escaped backslash as a literal backslash, so the image IS rewritten", () => {
+    expect(appendImageUrlSuffix("\\\\![alt](https://media.app.shortcut.com/a.png)", "?token=t", options)).toBe(
+      "\\\\![alt](https://media.app.shortcut.com/a.png?token=t)"
+    );
+  });
+
+  it("does not append the suffix to images inside inline code spans", () => {
+    expect(
+      appendImageUrlSuffix("see `![alt](https://media.app.shortcut.com/a.png)` for syntax", "?token=t", options)
+    ).toBe("see `![alt](https://media.app.shortcut.com/a.png)` for syntax");
+  });
+
+  it("does not append the suffix to images inside fenced code blocks", () => {
+    const input = "```\n![alt](https://media.app.shortcut.com/a.png)\n```";
+    expect(appendImageUrlSuffix(input, "?token=t", options)).toBe(input);
+  });
+
+  it("does not append the suffix to HTML img tags inside inline code spans", () => {
+    expect(appendImageUrlSuffix('`<img src="https://media.app.shortcut.com/a.png">`', "?token=t", options)).toBe(
+      '`<img src="https://media.app.shortcut.com/a.png">`'
+    );
+  });
+
+  it("still rewrites images that sit outside a code block in the same document", () => {
+    const input =
+      "![one](https://media.app.shortcut.com/a.png)\n\n```\n![two](https://media.app.shortcut.com/b.png)\n```\n\n![three](https://media.app.shortcut.com/c.png)";
+    expect(appendImageUrlSuffix(input, "?token=t", options)).toBe(
+      "![one](https://media.app.shortcut.com/a.png?token=t)\n\n```\n![two](https://media.app.shortcut.com/b.png)\n```\n\n![three](https://media.app.shortcut.com/c.png?token=t)"
+    );
+  });
 });
