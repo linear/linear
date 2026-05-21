@@ -29,5 +29,6 @@ onlyBuiltDependencies:
 minimumReleaseAge: 1440
 
 overrides:
+  "@tootallnate/once@<3.0.1": 3.0.1
   graphql: "catalog:"
   node-fetch@^2: 2.6.7
