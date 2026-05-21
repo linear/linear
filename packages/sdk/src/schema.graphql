@@ -2851,6 +2851,10 @@ type AsksChannelConnectPayload {
   """
   addBot: Boolean!
   """
+  GitHub-specific details for the operation. Populated by GitHub-related mutations only.
+  """
+  gitHub: GitHubIntegrationConnectDetails
+  """
   The integration that was created or updated.
   """
   integration: Integration
@@ -3488,6 +3492,10 @@ type AuthOrganization {
   """
   authSettings: JSONObject!
   """
+  The cell the organization is hosted in.
+  """
+  cell: String!
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
@@ -3626,6 +3634,10 @@ type AuthUser {
   The user's full name.
   """
   name: String!
+  """
+  The ID of the OAuth client that created the user.
+  """
+  oauthClientId: String
   """
   Organization the user belongs to.
   """
@@ -4037,11 +4049,11 @@ type Comment implements Node {
   """
   id: ID!
   """
-  [Internal] The initiative that the comment is associated with. Null if the comment belongs to a different parent entity type.
+  The initiative that the comment is associated with. Null if the comment belongs to a different parent entity type.
   """
   initiative: Initiative
   """
-  [Internal] The ID of the initiative that the comment is associated with. Null if the comment belongs to a different parent entity type.
+  The ID of the initiative that the comment is associated with. Null if the comment belongs to a different parent entity type.
   """
   initiativeId: String
   """
@@ -4081,11 +4093,11 @@ type Comment implements Node {
   """
   post: Post
   """
-  [Internal] The project that the comment is associated with. Used for project-level discussion threads. Null if the comment belongs to a different parent entity type.
+  The project that the comment is associated with. Used for project-level discussion threads. Null if the comment belongs to a different parent entity type.
   """
   project: Project
   """
-  [Internal] The ID of the project that the comment is associated with. Null if the comment belongs to a different parent entity type.
+  The ID of the project that the comment is associated with. Null if the comment belongs to a different parent entity type.
   """
   projectId: String
   """
@@ -4343,7 +4355,7 @@ input CommentCreateInput {
   """
   id: String
   """
-  [Internal] The initiative to associate the comment with.
+  The initiative to associate the comment with.
   """
   initiativeId: String
   """
@@ -4363,7 +4375,7 @@ input CommentCreateInput {
   """
   postId: String
   """
-  [Internal] The project to associate the comment with.
+  The project to associate the comment with.
   """
   projectId: String
   """
@@ -5785,6 +5797,10 @@ type CustomerNeed implements Node {
   An optional comment providing additional context for this need. Null if the need was not created from or associated with a specific comment.
   """
   comment: Comment
+  """
+  The effective Markdown content shown for this customer need. Returns the manually stored body when present, otherwise falls back to content extracted from the source attachment. Null if no content is available.
+  """
+  content: String
   """
   The time at which the entity was created.
   """
@@ -8118,6 +8134,7 @@ union DataWebhookPayload =
   | ProjectUpdateWebhookPayload
   | ProjectWebhookPayload
   | ReactionWebhookPayload
+  | ReleaseNoteWebhookPayload
   | ReleaseWebhookPayload
   | UserWebhookPayload
 
@@ -8429,7 +8446,7 @@ type DocumentConnection {
 }
 
 """
-The rich-text content body of a document, issue, project, initiative, project milestone, pull request, release note, AI prompt rules, or welcome message. Content is stored as a base64-encoded Yjs state and can be converted to Markdown or ProseMirror JSON. Each DocumentContent belongs to exactly one parent entity and supports real-time collaborative editing.
+The rich-text content body of a document, issue, project, initiative, project milestone, pull request, release note, automation prompt, AI prompt rules, or welcome message. Content is stored as a base64-encoded Yjs state and can be converted to Markdown or ProseMirror JSON. Each DocumentContent belongs to exactly one parent entity and supports real-time collaborative editing.
 """
 type DocumentContent implements Node {
   """
@@ -10503,6 +10520,10 @@ type Favorite implements Node {
   """
   parent: Favorite
   """
+  The targeted tab of the release pipeline.
+  """
+  pipelineTab: PipelineTab
+  """
   The team of the favorited predefined view.
   """
   predefinedViewTeam: Team
@@ -10534,6 +10555,10 @@ type Favorite implements Node {
   The favorited release.
   """
   release: Release
+  """
+  The favorited release note.
+  """
+  releaseNote: ReleaseNote
   """
   The favorited release pipeline.
   """
@@ -10632,6 +10657,10 @@ input FavoriteCreateInput {
   """
   parentId: String
   """
+  The tab of the release pipeline to favorite.
+  """
+  pipelineTab: PipelineTab
+  """
   The identifier of team for the predefined view to favorite.
   """
   predefinedViewTeamId: String
@@ -10659,6 +10688,10 @@ input FavoriteCreateInput {
   The identifier of the release to favorite.
   """
   releaseId: String
+  """
+  The identifier of the release note to favorite.
+  """
+  releaseNoteId: String
   """
   The identifier of the release pipeline to favorite.
   """
@@ -11185,6 +11218,10 @@ input GitAutomationTargetBranchUpdateInput {
 
 type GitHubCommitIntegrationPayload {
   """
+  GitHub-specific details for the operation. Populated by GitHub-related mutations only.
+  """
+  gitHub: GitHubIntegrationConnectDetails
+  """
   The integration that was created or updated.
   """
   integration: Integration
@@ -11210,6 +11247,10 @@ type GitHubEnterpriseServerInstallVerificationPayload {
 }
 
 type GitHubEnterpriseServerPayload {
+  """
+  GitHub-specific details for the operation. Populated by GitHub-related mutations only.
+  """
+  gitHub: GitHubIntegrationConnectDetails
   """
   The app install address.
   """
@@ -11257,6 +11298,16 @@ input GitHubImportSettingsInput {
   The names of the repositories connected for the GitHub integration.
   """
   repositories: [GitHubRepoInput!]!
+}
+
+"""
+GitHub-specific details that some integration mutations may return alongside the standard payload. Populated only by GitHub-related mutations.
+"""
+type GitHubIntegrationConnectDetails {
+  """
+  Full names ('owner/repo') of repositories whose existing GitHub Issues sync mappings would become inaccessible if the new GitHub App installation replaces the existing one. When non-empty the connect was halted; the client should surface the impact and re-call the mutation with `confirmReplace: true` to commit, or do nothing to leave the integration unchanged. Capped at a small constant; longer lists are truncated.
+  """
+  lostRepositoryNames: [String!]
 }
 
 input GitHubPersonalSettingsInput {
@@ -11374,6 +11425,10 @@ type GitLabIntegrationCreatePayload {
   """
   errorResponseHeaders: String
   """
+  GitHub-specific details for the operation. Populated by GitHub-related mutations only.
+  """
+  gitHub: GitHubIntegrationConnectDetails
+  """
   The integration that was created or updated.
   """
   integration: Integration
@@ -11431,6 +11486,10 @@ type GitLabTestConnectionPayload {
   Response headers from GitLab for debugging (JSON stringified).
   """
   errorResponseHeaders: String
+  """
+  GitHub-specific details for the operation. Populated by GitHub-related mutations only.
+  """
+  gitHub: GitHubIntegrationConnectDetails
   """
   The integration that was created or updated.
   """
@@ -14095,6 +14154,10 @@ type IntegrationHasScopesPayload {
 
 type IntegrationPayload {
   """
+  GitHub-specific details for the operation. Populated by GitHub-related mutations only.
+  """
+  gitHub: GitHubIntegrationConnectDetails
+  """
   The integration that was created or updated.
   """
   integration: Integration
@@ -14317,6 +14380,10 @@ input IntegrationUpdateInput {
   The settings to update.
   """
   settings: IntegrationSettingsInput
+  """
+  The ID of the workflow definition draft that this integration should be assigned to.
+  """
+  workflowDefinitionDraftId: String
 }
 
 """
@@ -19433,6 +19500,14 @@ type IssueSuggestionMetadata {
   """
   evalLogId: String
   """
+  [Internal] Identifier of the automation rule that attempted to apply this suggestion. Null if no rule attempted to apply it or if the rule applied successfully.
+  """
+  failedAutomationRuleId: String
+  """
+  [Internal] Reason why an automation rule could not apply this suggestion. Null if no rule attempted to apply it or if the rule applied successfully.
+  """
+  failedAutomationRuleReason: String
+  """
   [Internal] The rank of this suggestion relative to other suggestions of the same type. Lower values indicate higher priority. Null if not ranked.
   """
   rank: Float
@@ -20101,6 +20176,10 @@ input JiraFetchProjectStatusesInput {
 }
 
 type JiraFetchProjectStatusesPayload {
+  """
+  GitHub-specific details for the operation. Populated by GitHub-related mutations only.
+  """
+  gitHub: GitHubIntegrationConnectDetails
   """
   The integration that was created or updated.
   """
@@ -21098,6 +21177,10 @@ type Mutation {
     IDs of private teams to include in the export. If null, only data from public teams is exported.
     """
     includePrivateTeamIds: [String!]
+    """
+    IDs of protected teams to include in the export. If null, protected team data is omitted.
+    """
+    includeProtectedTeamIds: [String!]
   ): CreateCsvExportReportPayload!
   """
   Create a notification to remind a user about an initiative update.
@@ -22041,6 +22124,10 @@ type Mutation {
     """
     codeAccess: Boolean = false
     """
+    Set to true to force-replace the existing GitHub App installation (e.g. to ignore repository access conflicts).
+    """
+    confirmReplace: Boolean = false
+    """
     The GitHub Enterprise Cloud host (e.g., 'linear-development.ghe.com'). When provided, this creates a GEC integration.
     """
     githubHost: String
@@ -22253,6 +22340,10 @@ type Mutation {
     The ID of the team to connect the MCP server to.
     """
     teamId: String
+    """
+    The ID of the workflow definition draft to connect the MCP server to.
+    """
+    workflowDefinitionDraftId: String
     """
     The ID of the workflow definition to connect the MCP server to.
     """
@@ -24936,6 +25027,7 @@ The categories of notifications a user can subscribe to.
 enum NotificationCategory {
   appsAndIntegrations
   assignments
+  billing
   commentsAndReplies
   customers
   documentChanges
@@ -24963,6 +25055,10 @@ type NotificationCategoryPreferences {
   The preferences for notifications about assignments.
   """
   assignments: NotificationChannelPreferences!
+  """
+  The preferences for billing notifications.
+  """
+  billing: NotificationChannelPreferences!
   """
   The preferences for notifications about comments and replies.
   """
@@ -25026,6 +25122,10 @@ input NotificationCategoryPreferencesInput {
   The preferences for notifications about assignments.
   """
   assignments: PartialNotificationChannelPreferencesInput
+  """
+  The preferences for billing notifications.
+  """
+  billing: PartialNotificationChannelPreferencesInput
   """
   The preferences for notifications about comments and replies.
   """
@@ -25856,6 +25956,10 @@ input NullableDocumentContentFilter {
   """
   id: IDComparator
   """
+  Filters that the document content initiative must satisfy.
+  """
+  initiative: InitiativeFilter
+  """
   Filter based on the existence of the relation.
   """
   null: Boolean
@@ -25867,6 +25971,10 @@ input NullableDocumentContentFilter {
   Filters that the document content project must satisfy.
   """
   project: ProjectFilter
+  """
+  Filters that the document content project milestone must satisfy.
+  """
+  projectMilestone: ProjectMilestoneFilter
   """
   Comparator for the updated at date.
   """
@@ -27250,6 +27358,10 @@ type Organization implements Node {
   [INTERNAL] Configure per-modality AI host providers and model families.
   """
   aiProviderConfiguration: JSONObject
+  """
+  [INTERNAL] Whether the workspace has opted in to AI telemetry.
+  """
+  aiTelemetryEnabled: Boolean!
   """
   Whether the workspace has enabled resolved thread AI summaries.
   """
@@ -28854,6 +28966,14 @@ type PasskeyLoginStartResponse {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+
+"""
+Different tabs available inside a release pipeline.
+"""
+enum PipelineTab {
+  releaseNotes
+  releases
 }
 
 """
@@ -35970,6 +36090,15 @@ type Query {
   """
   rateLimitStatus: RateLimitPayload!
   """
+  Returns recent in-progress and completed releases for the pipeline associated with the access key, ordered with in-progress first then most recently completed. Used by `linear-release` to walk candidates and pick the one whose `commitSha` is an ancestor of the current build commit, which disambiguates concurrent release trains on the same pipeline.
+  """
+  recentReleasesByAccessKey(
+    """
+    Maximum number of releases to return. Defaults to 20 and is capped at 100.
+    """
+    limit: Int
+  ): [Release!]!
+  """
   Fetch a single release by its UUID or slug identifier.
   """
   release(id: String!): Release!
@@ -37608,6 +37737,14 @@ type ReleaseNote implements Node {
   """
   documentContent: DocumentContent
   """
+  The earliest release covered by this note.
+  """
+  firstRelease: Release
+  """
+  Generation status when these release notes are being auto-generated: `pending` while the LLM call is running, `completed` once it lands. `null` means the release notes were written by a user and never went through auto-generation.
+  """
+  generationStatus: ReleaseNoteGenerationStatus
+  """
   The unique identifier of the entity.
   """
   id: ID!
@@ -37615,6 +37752,10 @@ type ReleaseNote implements Node {
   The most recent release covered by this note.
   """
   lastRelease: Release
+  """
+  The number of releases covered by this note.
+  """
+  releaseCount: Int!
   """
   Releases included in the note.
   """
@@ -37683,6 +37824,14 @@ type ReleaseNoteEdge {
 }
 
 """
+The generation status of a release note's body content.
+"""
+enum ReleaseNoteGenerationStatus {
+  completed
+  pending
+}
+
+"""
 The result of a release note mutation.
 """
 type ReleaseNotePayload {
@@ -37727,6 +37876,64 @@ input ReleaseNoteUpdateInput {
 }
 
 """
+Payload for a release note webhook.
+"""
+type ReleaseNoteWebhookPayload {
+  """
+  The time at which the entity was archived.
+  """
+  archivedAt: String
+  """
+  The release note's body as markdown.
+  """
+  content: String
+  """
+  The time at which the entity was created.
+  """
+  createdAt: String!
+  """
+  The ID of the user who created the release note.
+  """
+  creatorId: String
+  """
+  The ID of the entity.
+  """
+  id: String!
+  """
+  The ID of the most recent release covered by this note.
+  """
+  lastReleaseId: String
+  """
+  The pipeline this release note belongs to.
+  """
+  pipeline: ReleasePipelineChildWebhookPayload
+  """
+  The ID of the pipeline this release note belongs to.
+  """
+  pipelineId: String!
+  """
+  IDs of the releases included in the note.
+  """
+  releaseIds: [String!]!
+  """
+  The release note's unique URL slug.
+  """
+  slugId: String!
+  """
+  User-supplied title for the release note.
+  """
+  title: String
+  """
+  The time at which the entity was updated.
+  """
+  updatedAt: String!
+  """
+  The URL of the release note.
+  """
+  url: String!
+}
+
+"""
 The result of a release mutation, containing the release that was created or updated and a success indicator.
 """
 type ReleasePayload {
@@ -37756,6 +37963,10 @@ type ReleasePipeline implements Node {
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
+  """
+  Whether to automatically generate a release note when a release is completed. Only applies to scheduled pipelines; ignored for continuous pipelines.
+  """
+  autoGenerateReleaseNotesOnCompletion: Boolean!
   """
   The time at which the entity was created.
   """
@@ -37999,6 +38210,10 @@ Input for creating a new release pipeline.
 """
 input ReleasePipelineCreateInput {
   """
+  Whether to automatically generate a release note when a release is completed. Only applies to scheduled pipelines; ignored for continuous pipelines. Defaults to false.
+  """
+  autoGenerateReleaseNotesOnCompletion: Boolean
+  """
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
@@ -38128,6 +38343,10 @@ enum ReleasePipelineType {
 Input for updating an existing release pipeline.
 """
 input ReleasePipelineUpdateInput {
+  """
+  Whether to automatically generate a release note when a release is completed. Only applies to scheduled pipelines; ignored for continuous pipelines.
+  """
+  autoGenerateReleaseNotesOnCompletion: Boolean
   """
   Glob patterns to include commits affecting matching file paths.
   """
@@ -38610,10 +38829,6 @@ input ReleaseUpdateInput {
   The name of the release.
   """
   name: String
-  """
-  The identifier of the pipeline this release belongs to.
-  """
-  pipelineId: String
   """
   The current stage of the release.
   """
@@ -39624,6 +39839,10 @@ type SlackChannelConnectPayload {
   """
   addBot: Boolean!
   """
+  GitHub-specific details for the operation. Populated by GitHub-related mutations only.
+  """
+  gitHub: GitHubIntegrationConnectDetails
+  """
   The integration that was created or updated.
   """
   integration: Integration
@@ -40588,7 +40807,7 @@ input TargetDateSort {
 }
 
 """
-A team is the primary organizational unit in Linear. Issues belong to teams, and each team has its own workflow states, cycles, labels, and settings. Teams can be public (visible to all workspace members) or private (visible only to team members). Teams can also have sub-teams that inherit settings from their parent.
+A team is the primary organizational unit in Linear. Issues belong to teams, and each team has its own workflow states, cycles, labels, and settings. Teams can be public (visible to all workspace members), private (visible only to team members), or protected (visible only within an enclosing private-team boundary). Teams can also have sub-teams that inherit settings from their parent.
 """
 type Team implements Node {
   """
@@ -41038,7 +41257,7 @@ type Team implements Node {
   """
   Whether the team is private. Private teams are only visible to their members and require an explicit invitation to join.
   """
-  private: Boolean!
+  private: Boolean! @deprecated(reason: "Use `Team.visibility` instead.")
   """
   [Internal] The progress history of the team.
   """
@@ -41084,6 +41303,10 @@ type Team implements Node {
     """
     sort: [ProjectSortInput!]
   ): ProjectConnection!
+  """
+  [Internal] Whether this team is protected.
+  """
+  protected: Boolean!
   """
   Release pipelines associated with the team.
   """
@@ -41260,6 +41483,10 @@ type Team implements Node {
       been updated after creation.
   """
   updatedAt: DateTime!
+  """
+  The visibility of the team. Returns public for teams visible to all workspace members, private for teams visible only to members, and protected for non-private teams inside a private-team boundary.
+  """
+  visibility: TeamVisibility!
   """
   Webhooks associated with the team.
   """
@@ -42197,6 +42424,15 @@ input TeamUpdateInput {
 }
 
 """
+The visibility of a team. A team can be public, private, or protected within an enclosing private-team boundary.
+"""
+enum TeamVisibility {
+  private
+  protected
+  public
+}
+
+"""
 Team properties including parent information for guidance rules.
 """
 type TeamWithParentWebhookPayload {
@@ -42905,6 +43141,160 @@ type UploadPayload {
 }
 
 """
+A usage alert triggered when a workspace crosses a billing or consumption threshold.
+"""
+type UsageAlert implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  Type-specific metadata captured when the alert was triggered.
+  """
+  metadata: JSONObject!
+  """
+  The kind of usage alert that was triggered.
+  """
+  type: String!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+"""
+A notification related to a usage alert, sent to workspace billing admins.
+"""
+type UsageAlertNotification implements Entity & Node & Notification {
+  """
+  The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event.
+  """
+  actor: User
+  """
+  [Internal] Notification actor initials if avatar is not available.
+  """
+  actorAvatarColor: String!
+  """
+  [Internal] Notification avatar URL.
+  """
+  actorAvatarUrl: String
+  """
+  [Internal] Notification actor initials if avatar is not available.
+  """
+  actorInitials: String
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The bot that caused the notification.
+  """
+  botActor: ActorBot
+  """
+  The category of the notification.
+  """
+  category: NotificationCategory!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent.
+  """
+  emailedAt: DateTime
+  """
+  The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member.
+  """
+  externalUserActor: ExternalUser
+  """
+  [Internal] Notifications with the same grouping key will be grouped together in the UI.
+  """
+  groupingKey: String!
+  """
+  [Internal] Priority of the notification with the same grouping key. Higher number means higher priority. If priority is the same, notifications should be sorted by `createdAt`.
+  """
+  groupingPriority: Float!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  [Internal] Inbox URL for the notification.
+  """
+  inboxUrl: String!
+  """
+  [Internal] Initiative update health for new updates.
+  """
+  initiativeUpdateHealth: String
+  """
+  [Internal] If notification actor was Linear.
+  """
+  isLinearActor: Boolean!
+  """
+  [Internal] Issue's status type for issue notifications.
+  """
+  issueStatusType: String
+  """
+  [Internal] Project update health for new updates.
+  """
+  projectUpdateHealth: String
+  """
+  The time at which the user marked the notification as read. Null if the notification is unread.
+  """
+  readAt: DateTime
+  """
+  The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed.
+  """
+  snoozedUntilAt: DateTime
+  """
+  [Internal] Notification subtitle.
+  """
+  subtitle: String!
+  """
+  [Internal] Notification title.
+  """
+  title: String!
+  """
+  Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated.
+  """
+  type: String!
+  """
+  The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed.
+  """
+  unsnoozedAt: DateTime
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  [Internal] URL to the target of the notification.
+  """
+  url: String!
+  """
+  The usage alert related to the notification.
+  """
+  usageAlert: UsageAlert!
+  """
+  Related usage alert.
+  """
+  usageAlertId: String!
+  """
+  The recipient user of this notification.
+  """
+  user: User!
+}
+
+"""
 A user that belongs to a workspace. Users can have different roles (admin, member, guest, or app) that determine their level of access. Users can be members of multiple teams, and can be active or deactivated. Guest users have limited access scoped to specific teams they are invited to.
 """
 type User implements Node {
@@ -43553,6 +43943,8 @@ input UserFilter {
 The types of flags that the user can have.
 """
 enum UserFlagType {
+  agentCodeIntelligencePromoDismissed
+  agentCodeIntelligenceSplashAnimationSeen
   agentExamplesDismissed
   agentHomeHeadlineSeen
   agentHomePageNotice
@@ -43595,6 +43987,8 @@ enum UserFlagType {
   slackAgentPromoFromCreateNewIssueShown
   slackBotWelcomeMessageShown
   slackCommentReactionTipShown
+  slackProjectChannelsPromoDismissed
+  slackProjectChannelsPromoShown
   teamsBotWelcomeMessageShown
   teamsPageIntroductionDismissed
   threadedCommentsNudgeIsSeen
@@ -44573,6 +44967,10 @@ type ViewPreferencesValues {
   List of row model IDs which should be hidden on a board.
   """
   hiddenRows: [String!]
+  """
+  The inbox view grouping.
+  """
+  inboxViewGrouping: String
   """
   The inbox view ordering.
   """
@@ -45660,7 +46058,7 @@ type WorkflowCronJobDefinition implements Node {
   """
   The team associated with the workflow cron job.
   """
-  team: Team!
+  team: Team
   """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -45744,6 +46142,14 @@ type WorkflowDefinition implements Node {
   The contextual project view associated with the workflow.
   """
   project: Project
+  """
+  Whether the workflow should only execute once per entity. When true, the workflow is excluded from matching automations for an entity if it has already been executed for that entity.
+  """
+  runOnce: Boolean!
+  """
+  Recurring schedule which is used to execute the workflow.
+  """
+  schedule: JSONObject
   """
   The workflow definition's unique URL slug.
   """
