@@ -18,12 +18,11 @@ catalog:
   tsdown: ^0.17.2
   typescript: ^5.9
 
-onlyBuiltDependencies:
-  - es5-ext
-  - esbuild
-  - husky
-  - jss
-  - spawn-sync
+allowBuilds:
+  esbuild: true
+  es5-ext: false
+  jss: false
+  spawn-sync: false
 
 # 1 day in minutes
 minimumReleaseAge: 1440
