@@ -938,6 +938,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the comment.initiative query for L.Initiative */
+    it("comment.initiative", async () => {
+      if (_comment) {
+        const comment_initiative: L.Initiative | undefined | null = await _comment.initiative;
+        expect(comment_initiative instanceof L.Initiative);
+      } else {
+        console.warn("codegen-doc:print: No Comment found - cannot test comment.initiative query");
+      }
+    });
+
     /** Test the comment.initiativeUpdate query for L.InitiativeUpdate */
     it("comment.initiativeUpdate", async () => {
       if (_comment) {
@@ -965,6 +975,16 @@ describe("generated", () => {
         expect(comment_parent instanceof L.Comment);
       } else {
         console.warn("codegen-doc:print: No Comment found - cannot test comment.parent query");
+      }
+    });
+
+    /** Test the comment.project query for L.Project */
+    it("comment.project", async () => {
+      if (_comment) {
+        const comment_project: L.Project | undefined | null = await _comment.project;
+        expect(comment_project instanceof L.Project);
+      } else {
+        console.warn("codegen-doc:print: No Comment found - cannot test comment.project query");
       }
     });
 
@@ -1872,6 +1892,16 @@ describe("generated", () => {
         expect(favorite_release instanceof L.Release);
       } else {
         console.warn("codegen-doc:print: No Favorite found - cannot test favorite.release query");
+      }
+    });
+
+    /** Test the favorite.releaseNote query for L.ReleaseNote */
+    it("favorite.releaseNote", async () => {
+      if (_favorite) {
+        const favorite_releaseNote: L.ReleaseNote | undefined | null = await _favorite.releaseNote;
+        expect(favorite_releaseNote instanceof L.ReleaseNote);
+      } else {
+        console.warn("codegen-doc:print: No Favorite found - cannot test favorite.releaseNote query");
       }
     });
 
@@ -4177,6 +4207,7 @@ describe("generated", () => {
       | L.PostNotification
       | L.ProjectNotification
       | L.PullRequestNotification
+      | L.UsageAlertNotification
       | L.WelcomeMessageNotification
       | undefined
       | null;
@@ -4204,6 +4235,7 @@ describe("generated", () => {
           | L.PostNotification
           | L.ProjectNotification
           | L.PullRequestNotification
+          | L.UsageAlertNotification
           | L.WelcomeMessageNotification
           | undefined
           | null = await client.notification(_notification_id);
@@ -5057,6 +5089,15 @@ describe("generated", () => {
     });
   });
 
+  /** Test RecentReleasesByAccessKey query */
+  describe("RecentReleasesByAccessKey", () => {
+    /** Test the root model query for RecentReleasesByAccessKey */
+    it("recentReleasesByAccessKey", async () => {
+      const recentReleasesByAccessKey: L.Release[] | undefined | null = await client.recentReleasesByAccessKey();
+      recentReleasesByAccessKey?.map(node => expect(node instanceof L.Release));
+    });
+  });
+
   /** Test all ReleaseNote queries */
   describe("ReleaseNotes", () => {
     let _releaseNote: L.ReleaseNote | undefined | null;
@@ -5111,6 +5152,16 @@ describe("generated", () => {
         expect(welcomeMessage instanceof L.WelcomeMessage);
       } else {
         console.warn("codegen-doc:print: No documentContent found - cannot test _documentContent.welcomeMessage query");
+      }
+    });
+
+    /** Test the releaseNote.firstRelease query for L.Release */
+    it("releaseNote.firstRelease", async () => {
+      if (_releaseNote) {
+        const releaseNote_firstRelease: L.Release | undefined | null = await _releaseNote.firstRelease;
+        expect(releaseNote_firstRelease instanceof L.Release);
+      } else {
+        console.warn("codegen-doc:print: No ReleaseNote found - cannot test releaseNote.firstRelease query");
       }
     });
 
@@ -6138,6 +6189,18 @@ describe("generated", () => {
       } else {
         console.warn(
           "codegen-doc:print: No notificationCategoryPreferences found - cannot test _notificationCategoryPreferences.assignments query"
+        );
+      }
+    });
+
+    /** Test the userSettings_notificationCategoryPreferences model query for UserSettings_NotificationCategoryPreferences_Billing */
+    it("userSettings_notificationCategoryPreferences.billing", async () => {
+      if (_notificationCategoryPreferences) {
+        const billing: L.NotificationChannelPreferences | undefined | null = _notificationCategoryPreferences.billing;
+        expect(billing instanceof L.NotificationChannelPreferences);
+      } else {
+        console.warn(
+          "codegen-doc:print: No notificationCategoryPreferences found - cannot test _notificationCategoryPreferences.billing query"
         );
       }
     });

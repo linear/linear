@@ -2710,6 +2710,7 @@ export class AsksChannelConnectPayload extends Request {
     this.addBot = data.addBot;
     this.lastSyncId = data.lastSyncId;
     this.success = data.success;
+    this.gitHub = data.gitHub ? new GitHubIntegrationConnectDetails(request, data.gitHub) : undefined;
     this.mapping = new SlackChannelNameMapping(request, data.mapping);
     this._integration = data.integration ?? undefined;
   }
@@ -2720,6 +2721,8 @@ export class AsksChannelConnectPayload extends Request {
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
+  /** GitHub-specific details for the operation. Populated by GitHub-related mutations only. */
+  public gitHub?: GitHubIntegrationConnectDetails | null;
   /** The new Asks Slack channel mapping for the connected channel. */
   public mapping: SlackChannelNameMapping;
   /** The integration that was created or updated. */
@@ -3159,6 +3162,7 @@ export class AuthOrganization extends Request {
     this.allowedAuthServices = data.allowedAuthServices;
     this.approximateUserCount = data.approximateUserCount;
     this.authSettings = data.authSettings;
+    this.cell = data.cell;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.deletionRequestedAt = parseDate(data.deletionRequestedAt) ?? undefined;
     this.enabled = data.enabled;
@@ -3182,6 +3186,8 @@ export class AuthOrganization extends Request {
   public approximateUserCount: number;
   /** Authentication settings for the organization. */
   public authSettings: L.Scalars["JSONObject"];
+  /** The cell the organization is hosted in. */
+  public cell: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The time at which deletion of the organization was requested. */
@@ -3274,6 +3280,7 @@ export class AuthUser extends Request {
     this.email = data.email;
     this.id = data.id;
     this.name = data.name;
+    this.oauthClientId = data.oauthClientId ?? undefined;
     this.userAccountId = data.userAccountId;
     this.organization = new AuthOrganization(request, data.organization);
     this.role = data.role;
@@ -3292,6 +3299,8 @@ export class AuthUser extends Request {
   public id: string;
   /** The user's full name. */
   public name: string;
+  /** The ID of the OAuth client that created the user. */
+  public oauthClientId?: string | null;
   /** User account ID the user belongs to. */
   public userAccountId: string;
   /** Organization the user belongs to. */
@@ -3401,9 +3410,11 @@ export class BaseWebhookPayload {
 export class Comment extends Request {
   private _agentSession?: L.CommentFragment["agentSession"];
   private _externalUser?: L.CommentFragment["externalUser"];
+  private _initiative?: L.CommentFragment["initiative"];
   private _initiativeUpdate?: L.CommentFragment["initiativeUpdate"];
   private _issue?: L.CommentFragment["issue"];
   private _parent?: L.CommentFragment["parent"];
+  private _project?: L.CommentFragment["project"];
   private _projectUpdate?: L.CommentFragment["projectUpdate"];
   private _resolvingComment?: L.CommentFragment["resolvingComment"];
   private _resolvingUser?: L.CommentFragment["resolvingUser"];
@@ -3417,9 +3428,11 @@ export class Comment extends Request {
     this.documentContentId = data.documentContentId ?? undefined;
     this.editedAt = parseDate(data.editedAt) ?? undefined;
     this.id = data.id;
+    this.initiativeId = data.initiativeId ?? undefined;
     this.initiativeUpdateId = data.initiativeUpdateId ?? undefined;
     this.issueId = data.issueId ?? undefined;
     this.parentId = data.parentId ?? undefined;
+    this.projectId = data.projectId ?? undefined;
     this.projectUpdateId = data.projectUpdateId ?? undefined;
     this.quotedText = data.quotedText ?? undefined;
     this.reactionData = data.reactionData;
@@ -3434,9 +3447,11 @@ export class Comment extends Request {
     this.syncedWith = data.syncedWith ? data.syncedWith.map(node => new ExternalEntityInfo(request, node)) : undefined;
     this._agentSession = data.agentSession ?? undefined;
     this._externalUser = data.externalUser ?? undefined;
+    this._initiative = data.initiative ?? undefined;
     this._initiativeUpdate = data.initiativeUpdate ?? undefined;
     this._issue = data.issue ?? undefined;
     this._parent = data.parent ?? undefined;
+    this._project = data.project ?? undefined;
     this._projectUpdate = data.projectUpdate ?? undefined;
     this._resolvingComment = data.resolvingComment ?? undefined;
     this._resolvingUser = data.resolvingUser ?? undefined;
@@ -3455,12 +3470,16 @@ export class Comment extends Request {
   public editedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
+  /** The ID of the initiative that the comment is associated with. Null if the comment belongs to a different parent entity type. */
+  public initiativeId?: string | null;
   /** The ID of the initiative update that the comment is associated with. Null if the comment belongs to a different parent entity type. */
   public initiativeUpdateId?: string | null;
   /** The ID of the issue that the comment is associated with. Null if the comment belongs to a different parent entity type. */
   public issueId?: string | null;
   /** The ID of the parent comment under which the current comment is nested. Null for top-level comments. */
   public parentId?: string | null;
+  /** The ID of the project that the comment is associated with. Null if the comment belongs to a different parent entity type. */
+  public projectId?: string | null;
   /** The ID of the project update that the comment is associated with. Null if the comment belongs to a different parent entity type. */
   public projectUpdateId?: string | null;
   /** The text that this comment references, used for inline comments on documents or issue descriptions. Null for standard comments that do not quote specific text. */
@@ -3504,6 +3523,10 @@ export class Comment extends Request {
   public get externalUserId(): string | undefined {
     return this._externalUser?.id;
   }
+  /** The initiative that the comment is associated with. Null if the comment belongs to a different parent entity type. */
+  public get initiative(): LinearFetch<Initiative> | undefined {
+    return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
+  }
   /** The initiative update that the comment is associated with. Null if the comment belongs to a different parent entity type. */
   public get initiativeUpdate(): LinearFetch<InitiativeUpdate> | undefined {
     return this._initiativeUpdate?.id
@@ -3517,6 +3540,10 @@ export class Comment extends Request {
   /** The parent comment under which the current comment is nested. Null for top-level comments that are not replies. */
   public get parent(): LinearFetch<Comment> | undefined {
     return this._parent?.id ? new CommentQuery(this._request).fetch({ id: this._parent?.id }) : undefined;
+  }
+  /** The project that the comment is associated with. Used for project-level discussion threads. Null if the comment belongs to a different parent entity type. */
+  public get project(): LinearFetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
   /** The project update that the comment is associated with. Null if the comment belongs to a different parent entity type. */
   public get projectUpdate(): LinearFetch<ProjectUpdate> | undefined {
@@ -4344,6 +4371,7 @@ export class CustomerNeed extends Request {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.body = data.body ?? undefined;
+    this.content = data.content ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
     this.priority = data.priority;
@@ -4365,6 +4393,8 @@ export class CustomerNeed extends Request {
   public archivedAt?: Date | null;
   /** The body content of the need in Markdown format. Used to capture manual input about needs that cannot be directly tied to an attachment. Null if the need's content comes from an attached source. */
   public body?: string | null;
+  /** The effective Markdown content shown for this customer need. Returns the manually stored body when present, otherwise falls back to content extracted from the source attachment. Null if no content is available. */
+  public content?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -6029,7 +6059,7 @@ export class DocumentConnection extends Connection<Document> {
   }
 }
 /**
- * The rich-text content body of a document, issue, project, initiative, project milestone, pull request, release note, AI prompt rules, or welcome message. Content is stored as a base64-encoded Yjs state and can be converted to Markdown or ProseMirror JSON. Each DocumentContent belongs to exactly one parent entity and supports real-time collaborative editing.
+ * The rich-text content body of a document, issue, project, initiative, project milestone, pull request, release note, automation prompt, AI prompt rules, or welcome message. Content is stored as a base64-encoded Yjs state and can be converted to Markdown or ProseMirror JSON. Each DocumentContent belongs to exactly one parent entity and supports real-time collaborative editing.
  *
  * @param request - function to call the graphql client
  * @param data - L.DocumentContentFragment response data
@@ -7539,6 +7569,7 @@ export class Favorite extends Request {
   private _projectLabel?: L.FavoriteFragment["projectLabel"];
   private _projectTeam?: L.FavoriteFragment["projectTeam"];
   private _release?: L.FavoriteFragment["release"];
+  private _releaseNote?: L.FavoriteFragment["releaseNote"];
   private _releasePipeline?: L.FavoriteFragment["releasePipeline"];
   private _team?: L.FavoriteFragment["team"];
   private _user?: L.FavoriteFragment["user"];
@@ -7555,6 +7586,7 @@ export class Favorite extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url ?? undefined;
     this.initiativeTab = data.initiativeTab ?? undefined;
+    this.pipelineTab = data.pipelineTab ?? undefined;
     this.projectTab = data.projectTab ?? undefined;
     this._customView = data.customView ?? undefined;
     this._customer = data.customer ?? undefined;
@@ -7570,6 +7602,7 @@ export class Favorite extends Request {
     this._projectLabel = data.projectLabel ?? undefined;
     this._projectTeam = data.projectTeam ?? undefined;
     this._release = data.release ?? undefined;
+    this._releaseNote = data.releaseNote ?? undefined;
     this._releasePipeline = data.releasePipeline ?? undefined;
     this._team = data.team ?? undefined;
     this._user = data.user ?? undefined;
@@ -7598,6 +7631,8 @@ export class Favorite extends Request {
   public url?: string | null;
   /** The targeted tab of the initiative. */
   public initiativeTab?: L.InitiativeTab | null;
+  /** The targeted tab of the release pipeline. */
+  public pipelineTab?: L.PipelineTab | null;
   /** The targeted tab of the project. */
   public projectTab?: L.ProjectTab | null;
   /** The favorited custom view. */
@@ -7711,6 +7746,14 @@ export class Favorite extends Request {
   /** The ID of favorited release. */
   public get releaseId(): string | undefined {
     return this._release?.id;
+  }
+  /** The favorited release note. */
+  public get releaseNote(): LinearFetch<ReleaseNote> | undefined {
+    return this._releaseNote?.id ? new ReleaseNoteQuery(this._request).fetch(this._releaseNote?.id) : undefined;
+  }
+  /** The ID of favorited release note. */
+  public get releaseNoteId(): string | undefined {
+    return this._releaseNote?.id;
   }
   /** The favorited release pipeline. */
   public get releasePipeline(): LinearFetch<ReleasePipeline> | undefined {
@@ -8077,6 +8120,7 @@ export class GitHubCommitIntegrationPayload extends Request {
     this.lastSyncId = data.lastSyncId;
     this.success = data.success;
     this.webhookSecret = data.webhookSecret;
+    this.gitHub = data.gitHub ? new GitHubIntegrationConnectDetails(request, data.gitHub) : undefined;
     this._integration = data.integration ?? undefined;
   }
 
@@ -8086,6 +8130,8 @@ export class GitHubCommitIntegrationPayload extends Request {
   public success: boolean;
   /** The webhook secret to provide to GitHub. */
   public webhookSecret: string;
+  /** GitHub-specific details for the operation. Populated by GitHub-related mutations only. */
+  public gitHub?: GitHubIntegrationConnectDetails | null;
   /** The integration that was created or updated. */
   public get integration(): LinearFetch<Integration> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
@@ -8126,6 +8172,7 @@ export class GitHubEnterpriseServerPayload extends Request {
     this.setupUrl = data.setupUrl;
     this.success = data.success;
     this.webhookSecret = data.webhookSecret;
+    this.gitHub = data.gitHub ? new GitHubIntegrationConnectDetails(request, data.gitHub) : undefined;
     this._integration = data.integration ?? undefined;
   }
 
@@ -8139,6 +8186,8 @@ export class GitHubEnterpriseServerPayload extends Request {
   public success: boolean;
   /** The webhook secret to provide to GitHub. */
   public webhookSecret: string;
+  /** GitHub-specific details for the operation. Populated by GitHub-related mutations only. */
+  public gitHub?: GitHubIntegrationConnectDetails | null;
   /** The integration that was created or updated. */
   public get integration(): LinearFetch<Integration> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
@@ -8147,6 +8196,21 @@ export class GitHubEnterpriseServerPayload extends Request {
   public get integrationId(): string | undefined {
     return this._integration?.id;
   }
+}
+/**
+ * GitHub-specific details that some integration mutations may return alongside the standard payload. Populated only by GitHub-related mutations.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.GitHubIntegrationConnectDetailsFragment response data
+ */
+export class GitHubIntegrationConnectDetails extends Request {
+  public constructor(request: LinearRequest, data: L.GitHubIntegrationConnectDetailsFragment) {
+    super(request);
+    this.lostRepositoryNames = data.lostRepositoryNames ?? undefined;
+  }
+
+  /** Full names ('owner/repo') of repositories whose existing GitHub Issues sync mappings would become inaccessible if the new GitHub App installation replaces the existing one. When non-empty the connect was halted; the client should surface the impact and re-call the mutation with `confirmReplace: true` to commit, or do nothing to leave the integration unchanged. Capped at a small constant; longer lists are truncated. */
+  public lostRepositoryNames?: string[] | null;
 }
 /**
  * GitLabIntegrationCreatePayload model
@@ -8166,6 +8230,7 @@ export class GitLabIntegrationCreatePayload extends Request {
     this.lastSyncId = data.lastSyncId;
     this.success = data.success;
     this.webhookSecret = data.webhookSecret;
+    this.gitHub = data.gitHub ? new GitHubIntegrationConnectDetails(request, data.gitHub) : undefined;
     this._integration = data.integration ?? undefined;
   }
 
@@ -8183,6 +8248,8 @@ export class GitLabIntegrationCreatePayload extends Request {
   public success: boolean;
   /** The webhook secret to provide to GitLab. */
   public webhookSecret: string;
+  /** GitHub-specific details for the operation. Populated by GitHub-related mutations only. */
+  public gitHub?: GitHubIntegrationConnectDetails | null;
   /** The integration that was created or updated. */
   public get integration(): LinearFetch<Integration> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
@@ -8209,6 +8276,7 @@ export class GitLabTestConnectionPayload extends Request {
     this.errorResponseHeaders = data.errorResponseHeaders ?? undefined;
     this.lastSyncId = data.lastSyncId;
     this.success = data.success;
+    this.gitHub = data.gitHub ? new GitHubIntegrationConnectDetails(request, data.gitHub) : undefined;
     this._integration = data.integration ?? undefined;
   }
 
@@ -8224,6 +8292,8 @@ export class GitLabTestConnectionPayload extends Request {
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
+  /** GitHub-specific details for the operation. Populated by GitHub-related mutations only. */
+  public gitHub?: GitHubIntegrationConnectDetails | null;
   /** The integration that was created or updated. */
   public get integration(): LinearFetch<Integration> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
@@ -9907,6 +9977,7 @@ export class IntegrationPayload extends Request {
     super(request);
     this.lastSyncId = data.lastSyncId;
     this.success = data.success;
+    this.gitHub = data.gitHub ? new GitHubIntegrationConnectDetails(request, data.gitHub) : undefined;
     this._integration = data.integration ?? undefined;
   }
 
@@ -9914,6 +9985,8 @@ export class IntegrationPayload extends Request {
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
+  /** GitHub-specific details for the operation. Populated by GitHub-related mutations only. */
+  public gitHub?: GitHubIntegrationConnectDetails | null;
   /** The integration that was created or updated. */
   public get integration(): LinearFetch<Integration> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
@@ -11161,7 +11234,7 @@ export class IssueHistory extends Request {
   }
   /** The releases that the issue was added to. */
   public get addedToReleases(): LinearFetch<Release[]> {
-    return new ReleaseSearchQuery(this._request).fetch();
+    return new RecentReleasesByAccessKeyQuery(this._request).fetch();
   }
   /** The linked attachment. */
   public get attachment(): LinearFetch<Attachment> | undefined {
@@ -11219,7 +11292,7 @@ export class IssueHistory extends Request {
   }
   /** The releases that the issue was removed from. */
   public get removedFromReleases(): LinearFetch<Release[]> {
-    return new ReleaseSearchQuery(this._request).fetch();
+    return new RecentReleasesByAccessKeyQuery(this._request).fetch();
   }
   /** The user that was assigned to the issue. */
   public get toAssignee(): LinearFetch<User> | undefined {
@@ -13121,6 +13194,7 @@ export class JiraFetchProjectStatusesPayload extends Request {
     this.lastSyncId = data.lastSyncId;
     this.projectStatuses = data.projectStatuses;
     this.success = data.success;
+    this.gitHub = data.gitHub ? new GitHubIntegrationConnectDetails(request, data.gitHub) : undefined;
     this._integration = data.integration ?? undefined;
   }
 
@@ -13132,6 +13206,8 @@ export class JiraFetchProjectStatusesPayload extends Request {
   public projectStatuses: string[];
   /** Whether the operation was successful. */
   public success: boolean;
+  /** GitHub-specific details for the operation. Populated by GitHub-related mutations only. */
+  public gitHub?: GitHubIntegrationConnectDetails | null;
   /** The integration that was created or updated. */
   public get integration(): LinearFetch<Integration> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
@@ -13505,6 +13581,7 @@ export class NotificationCategoryPreferences extends Request {
     super(request);
     this.appsAndIntegrations = new NotificationChannelPreferences(request, data.appsAndIntegrations);
     this.assignments = new NotificationChannelPreferences(request, data.assignments);
+    this.billing = new NotificationChannelPreferences(request, data.billing);
     this.commentsAndReplies = new NotificationChannelPreferences(request, data.commentsAndReplies);
     this.customers = new NotificationChannelPreferences(request, data.customers);
     this.documentChanges = new NotificationChannelPreferences(request, data.documentChanges);
@@ -13524,6 +13601,8 @@ export class NotificationCategoryPreferences extends Request {
   public appsAndIntegrations: NotificationChannelPreferences;
   /** The preferences for notifications about assignments. */
   public assignments: NotificationChannelPreferences;
+  /** The preferences for billing notifications. */
+  public billing: NotificationChannelPreferences;
   /** The preferences for notifications about comments and replies. */
   public commentsAndReplies: NotificationChannelPreferences;
   /** The preferences for customer notifications. */
@@ -13592,6 +13671,7 @@ export class NotificationConnection extends Connection<
   | PostNotification
   | ProjectNotification
   | PullRequestNotification
+  | UsageAlertNotification
   | WelcomeMessageNotification
   | Notification
 > {
@@ -13610,6 +13690,7 @@ export class NotificationConnection extends Connection<
           | PostNotification
           | ProjectNotification
           | PullRequestNotification
+          | UsageAlertNotification
           | WelcomeMessageNotification
           | Notification
         >
@@ -13640,6 +13721,8 @@ export class NotificationConnection extends Connection<
             return new ProjectNotification(request, node as L.ProjectNotificationFragment);
           case "PullRequestNotification":
             return new PullRequestNotification(request, node as L.PullRequestNotificationFragment);
+          case "UsageAlertNotification":
+            return new UsageAlertNotification(request, node as L.UsageAlertNotificationFragment);
           case "WelcomeMessageNotification":
             return new WelcomeMessageNotification(request, node as L.WelcomeMessageNotificationFragment);
 
@@ -18014,6 +18097,7 @@ export class ReleaseHistoryConnection extends Connection<ReleaseHistory> {
  * @param data - L.ReleaseNoteFragment response data
  */
 export class ReleaseNote extends Request {
+  private _firstRelease?: L.ReleaseNoteFragment["firstRelease"];
   private _lastRelease?: L.ReleaseNoteFragment["lastRelease"];
 
   public constructor(request: LinearRequest, data: L.ReleaseNoteFragment) {
@@ -18021,10 +18105,13 @@ export class ReleaseNote extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
+    this.releaseCount = data.releaseCount;
     this.slugId = data.slugId;
     this.title = data.title ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.documentContent = data.documentContent ? new DocumentContent(request, data.documentContent) : undefined;
+    this.generationStatus = data.generationStatus ?? undefined;
+    this._firstRelease = data.firstRelease ?? undefined;
     this._lastRelease = data.lastRelease ?? undefined;
   }
 
@@ -18034,6 +18121,8 @@ export class ReleaseNote extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
+  /** The number of releases covered by this note. */
+  public releaseCount: number;
   /** The release note's unique URL slug, used to construct human-readable URLs for the note. */
   public slugId: string;
   /** User-supplied title for the release note. */
@@ -18045,6 +18134,16 @@ export class ReleaseNote extends Request {
   public updatedAt: Date;
   /** Document content backing the release note body. */
   public documentContent?: DocumentContent | null;
+  /** Generation status when these release notes are being auto-generated: `pending` while the LLM call is running, `completed` once it lands. `null` means the release notes were written by a user and never went through auto-generation. */
+  public generationStatus?: L.ReleaseNoteGenerationStatus | null;
+  /** The earliest release covered by this note. */
+  public get firstRelease(): LinearFetch<Release> | undefined {
+    return this._firstRelease?.id ? new ReleaseQuery(this._request).fetch(this._firstRelease?.id) : undefined;
+  }
+  /** The ID of earliest release covered by this note. */
+  public get firstReleaseId(): string | undefined {
+    return this._firstRelease?.id;
+  }
   /** The most recent release covered by this note. */
   public get lastRelease(): LinearFetch<Release> | undefined {
     return this._lastRelease?.id ? new ReleaseQuery(this._request).fetch(this._lastRelease?.id) : undefined;
@@ -18055,7 +18154,7 @@ export class ReleaseNote extends Request {
   }
   /** Releases included in the note. */
   public get releases(): LinearFetch<Release[]> {
-    return new ReleaseSearchQuery(this._request).fetch();
+    return new RecentReleasesByAccessKeyQuery(this._request).fetch();
   }
 
   /** Creates a release note. */
@@ -18122,6 +18221,55 @@ export class ReleaseNotePayload extends Request {
   }
 }
 /**
+ * Payload for a release note webhook.
+ *
+ * @param data - L.ReleaseNoteWebhookPayloadFragment response data
+ */
+export class ReleaseNoteWebhookPayload {
+  public constructor(data: L.ReleaseNoteWebhookPayloadFragment) {
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.content = data.content ?? undefined;
+    this.createdAt = data.createdAt;
+    this.creatorId = data.creatorId ?? undefined;
+    this.id = data.id;
+    this.lastReleaseId = data.lastReleaseId ?? undefined;
+    this.pipelineId = data.pipelineId;
+    this.releaseIds = data.releaseIds;
+    this.slugId = data.slugId;
+    this.title = data.title ?? undefined;
+    this.updatedAt = data.updatedAt;
+    this.url = data.url;
+    this.pipeline = data.pipeline ? new ReleasePipelineChildWebhookPayload(data.pipeline) : undefined;
+  }
+
+  /** The time at which the entity was archived. */
+  public archivedAt?: string | null;
+  /** The release note's body as markdown. */
+  public content?: string | null;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The ID of the user who created the release note. */
+  public creatorId?: string | null;
+  /** The ID of the entity. */
+  public id: string;
+  /** The ID of the most recent release covered by this note. */
+  public lastReleaseId?: string | null;
+  /** The ID of the pipeline this release note belongs to. */
+  public pipelineId: string;
+  /** IDs of the releases included in the note. */
+  public releaseIds: string[];
+  /** The release note's unique URL slug. */
+  public slugId: string;
+  /** User-supplied title for the release note. */
+  public title?: string | null;
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+  /** The URL of the release note. */
+  public url: string;
+  /** The pipeline this release note belongs to. */
+  public pipeline?: ReleasePipelineChildWebhookPayload | null;
+}
+/**
  * The result of a release mutation, containing the release that was created or updated and a success indicator.
  *
  * @param request - function to call the graphql client
@@ -18164,6 +18312,7 @@ export class ReleasePipeline extends Request {
     super(request);
     this.approximateReleaseCount = data.approximateReleaseCount;
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.autoGenerateReleaseNotesOnCompletion = data.autoGenerateReleaseNotesOnCompletion;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
     this.includePathPatterns = data.includePathPatterns;
@@ -18181,6 +18330,8 @@ export class ReleasePipeline extends Request {
   public approximateReleaseCount: number;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
+  /** Whether to automatically generate a release note when a release is completed. Only applies to scheduled pipelines; ignored for continuous pipelines. */
+  public autoGenerateReleaseNotesOnCompletion: boolean;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -19154,6 +19305,7 @@ export class SlackChannelConnectPayload extends Request {
     this.nudgeToConnectMainSlackIntegration = data.nudgeToConnectMainSlackIntegration ?? undefined;
     this.nudgeToUpdateMainSlackIntegration = data.nudgeToUpdateMainSlackIntegration ?? undefined;
     this.success = data.success;
+    this.gitHub = data.gitHub ? new GitHubIntegrationConnectDetails(request, data.gitHub) : undefined;
     this._integration = data.integration ?? undefined;
   }
 
@@ -19167,6 +19319,8 @@ export class SlackChannelConnectPayload extends Request {
   public nudgeToUpdateMainSlackIntegration?: boolean | null;
   /** Whether the operation was successful. */
   public success: boolean;
+  /** GitHub-specific details for the operation. Populated by GitHub-related mutations only. */
+  public gitHub?: GitHubIntegrationConnectDetails | null;
   /** The integration that was created or updated. */
   public get integration(): LinearFetch<Integration> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
@@ -19943,7 +20097,7 @@ export class SyncedExternalThread extends Request {
   public url?: string | null;
 }
 /**
- * A team is the primary organizational unit in Linear. Issues belong to teams, and each team has its own workflow states, cycles, labels, and settings. Teams can be public (visible to all workspace members) or private (visible only to team members). Teams can also have sub-teams that inherit settings from their parent.
+ * A team is the primary organizational unit in Linear. Issues belong to teams, and each team has its own workflow states, cycles, labels, and settings. Teams can be public (visible to all workspace members), private (visible only to team members), or protected (visible only within an enclosing private-team boundary). Teams can also have sub-teams that inherit settings from their parent.
  *
  * @param request - function to call the graphql client
  * @param data - L.TeamFragment response data
@@ -20019,6 +20173,7 @@ export class Team extends Request {
     this.triageEnabled = data.triageEnabled;
     this.upcomingCycleCount = data.upcomingCycleCount;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.visibility = data.visibility;
     this._activeCycle = data.activeCycle ?? undefined;
     this._defaultIssueState = data.defaultIssueState ?? undefined;
     this._defaultProjectTemplate = data.defaultProjectTemplate ?? undefined;
@@ -20143,6 +20298,8 @@ export class Team extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The visibility of the team. Returns public for teams visible to all workspace members, private for teams visible only to members, and protected for non-private teams inside a private-team boundary. */
+  public visibility: L.TeamVisibility;
   /** Team's currently active cycle. */
   public get activeCycle(): LinearFetch<Cycle> | undefined {
     return this._activeCycle?.id ? new CycleQuery(this._request).fetch(this._activeCycle?.id) : undefined;
@@ -21411,6 +21568,126 @@ export class UploadPayload extends Request {
   public uploadFile?: UploadFile | null;
 }
 /**
+ * A usage alert triggered when a workspace crosses a billing or consumption threshold.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.UsageAlertFragment response data
+ */
+export class UsageAlert extends Request {
+  public constructor(request: LinearRequest, data: L.UsageAlertFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.metadata = data.metadata;
+    this.type = data.type;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** Type-specific metadata captured when the alert was triggered. */
+  public metadata: L.Scalars["JSONObject"];
+  /** The kind of usage alert that was triggered. */
+  public type: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+}
+/**
+ * A notification related to a usage alert, sent to workspace billing admins.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.UsageAlertNotificationFragment response data
+ */
+export class UsageAlertNotification extends Request {
+  private _actor?: L.UsageAlertNotificationFragment["actor"];
+  private _externalUserActor?: L.UsageAlertNotificationFragment["externalUserActor"];
+  private _user: L.UsageAlertNotificationFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.UsageAlertNotificationFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.emailedAt = parseDate(data.emailedAt) ?? undefined;
+    this.id = data.id;
+    this.readAt = parseDate(data.readAt) ?? undefined;
+    this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
+    this.type = data.type;
+    this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.usageAlertId = data.usageAlertId;
+    this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.usageAlert = new UsageAlert(request, data.usageAlert);
+    this.category = data.category;
+    this._actor = data.actor ?? undefined;
+    this._externalUserActor = data.externalUserActor ?? undefined;
+    this._user = data.user;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent. */
+  public emailedAt?: Date | null;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The time at which the user marked the notification as read. Null if the notification is unread. */
+  public readAt?: Date | null;
+  /** The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed. */
+  public snoozedUntilAt?: Date | null;
+  /** Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated. */
+  public type: string;
+  /** The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed. */
+  public unsnoozedAt?: Date | null;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** Related usage alert. */
+  public usageAlertId: string;
+  /** The bot that caused the notification. */
+  public botActor?: ActorBot | null;
+  /** The usage alert related to the notification. */
+  public usageAlert: UsageAlert;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
+  /** The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
+  public get actor(): LinearFetch<User> | undefined {
+    return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
+  }
+  /** The ID of user that caused the notification. null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
+  public get actorId(): string | undefined {
+    return this._actor?.id;
+  }
+  /** The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member. */
+  public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
+    return this._externalUserActor?.id
+      ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
+      : undefined;
+  }
+  /** The ID of external user that caused the notification. populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like slack or github) rather than a linear workspace member. */
+  public get externalUserActorId(): string | undefined {
+    return this._externalUserActor?.id;
+  }
+  /** The recipient user of this notification. */
+  public get user(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._user.id);
+  }
+  /** The ID of recipient user of this notification. */
+  public get userId(): string | undefined {
+    return this._user?.id;
+  }
+}
+/**
  * A user that belongs to a workspace. Users can have different roles (admin, member, guest, or app) that determine their level of access. Users can be members of multiple teams, and can be active or deactivated. Guest users have limited access scoped to specific teams they are invited to.
  *
  * @param request - function to call the graphql client
@@ -22275,6 +22552,7 @@ export class ViewPreferencesValues extends Request {
     this.hiddenColumns = data.hiddenColumns ?? undefined;
     this.hiddenGroupsList = data.hiddenGroupsList ?? undefined;
     this.hiddenRows = data.hiddenRows ?? undefined;
+    this.inboxViewGrouping = data.inboxViewGrouping ?? undefined;
     this.inboxViewOrdering = data.inboxViewOrdering ?? undefined;
     this.initiativeFieldActivity = data.initiativeFieldActivity ?? undefined;
     this.initiativeFieldDateCompleted = data.initiativeFieldDateCompleted ?? undefined;
@@ -22557,6 +22835,8 @@ export class ViewPreferencesValues extends Request {
   public hiddenGroupsList?: string[] | null;
   /** List of row model IDs which should be hidden on a board. */
   public hiddenRows?: string[] | null;
+  /** The inbox view grouping. */
+  public inboxViewGrouping?: string | null;
   /** The inbox view ordering. */
   public inboxViewOrdering?: string | null;
   /** Whether to show the initiative activity field. */
@@ -23185,7 +23465,7 @@ export class WelcomeMessageNotification extends Request {
  */
 export class WorkflowCronJobDefinition extends Request {
   private _creator: L.WorkflowCronJobDefinitionFragment["creator"];
-  private _team: L.WorkflowCronJobDefinitionFragment["team"];
+  private _team?: L.WorkflowCronJobDefinitionFragment["team"];
 
   public constructor(request: LinearRequest, data: L.WorkflowCronJobDefinitionFragment) {
     super(request);
@@ -23200,7 +23480,7 @@ export class WorkflowCronJobDefinition extends Request {
     this.sortOrder = data.sortOrder;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._creator = data.creator;
-    this._team = data.team;
+    this._team = data.team ?? undefined;
   }
 
   /** An array of activities that will be executed as part of the workflow cron job. */
@@ -23236,7 +23516,7 @@ export class WorkflowCronJobDefinition extends Request {
   }
   /** The team associated with the workflow cron job. */
   public get team(): LinearFetch<Team> | undefined {
-    return new TeamQuery(this._request).fetch(this._team.id);
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The ID of team associated with the workflow cron job. */
   public get teamId(): string | undefined {
@@ -23272,6 +23552,8 @@ export class WorkflowDefinition extends Request {
     this.id = data.id;
     this.lastExecutedAt = parseDate(data.lastExecutedAt) ?? undefined;
     this.name = data.name;
+    this.runOnce = data.runOnce;
+    this.schedule = data.schedule ?? undefined;
     this.slugId = data.slugId;
     this.sortOrder = data.sortOrder;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
@@ -23311,6 +23593,10 @@ export class WorkflowDefinition extends Request {
   public lastExecutedAt?: Date | null;
   /** The name of the workflow. */
   public name: string;
+  /** Whether the workflow should only execute once per entity. When true, the workflow is excluded from matching automations for an entity if it has already been executed for that entity. */
+  public runOnce: boolean;
+  /** Recurring schedule which is used to execute the workflow. */
+  public schedule?: L.Scalars["JSONObject"] | null;
   /** The workflow definition's unique URL slug. */
   public slugId: string;
   /** The sort order of the workflow definition within its siblings. */
@@ -25967,6 +26253,7 @@ export class NotificationQuery extends Request {
     | PostNotification
     | ProjectNotification
     | PullRequestNotification
+    | UsageAlertNotification
     | WelcomeMessageNotification
     | Notification
   > {
@@ -25997,6 +26284,8 @@ export class NotificationQuery extends Request {
         return new ProjectNotification(this._request, data as L.ProjectNotificationFragment);
       case "PullRequestNotification":
         return new PullRequestNotification(this._request, data as L.PullRequestNotificationFragment);
+      case "UsageAlertNotification":
+        return new UsageAlertNotification(this._request, data as L.UsageAlertNotificationFragment);
       case "WelcomeMessageNotification":
         return new WelcomeMessageNotification(this._request, data as L.WelcomeMessageNotificationFragment);
 
@@ -26747,6 +27036,35 @@ export class RateLimitStatusQuery extends Request {
     const data = response.rateLimitStatus;
 
     return new RateLimitPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable RecentReleasesByAccessKey Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class RecentReleasesByAccessKeyQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the RecentReleasesByAccessKey query and return a Release list
+   *
+   * @param variables - variables to pass into the RecentReleasesByAccessKeyQuery
+   * @returns parsed response from RecentReleasesByAccessKeyQuery
+   */
+  public async fetch(variables?: L.RecentReleasesByAccessKeyQueryVariables): LinearFetch<Release[]> {
+    const response = await this._request<L.RecentReleasesByAccessKeyQuery, L.RecentReleasesByAccessKeyQueryVariables>(
+      L.RecentReleasesByAccessKeyDocument.toString(),
+      variables
+    );
+    const data = response.recentReleasesByAccessKey;
+
+    return data.map(node => {
+      return new Release(this._request, node);
+    });
   }
 }
 
@@ -45019,6 +45337,32 @@ export class UserSettings_NotificationCategoryPreferences_AssignmentsQuery exten
 }
 
 /**
+ * A fetchable UserSettings_NotificationCategoryPreferences_Billing Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationCategoryPreferences_BillingQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationCategoryPreferences_Billing query and return a NotificationChannelPreferences
+   *
+   * @returns parsed response from UserSettings_NotificationCategoryPreferences_BillingQuery
+   */
+  public async fetch(): LinearFetch<NotificationChannelPreferences> {
+    const response = await this._request<
+      L.UserSettings_NotificationCategoryPreferences_BillingQuery,
+      L.UserSettings_NotificationCategoryPreferences_BillingQueryVariables
+    >(L.UserSettings_NotificationCategoryPreferences_BillingDocument.toString(), {});
+    const data = response.userSettings.notificationCategoryPreferences.billing;
+
+    return new NotificationChannelPreferences(this._request, data);
+  }
+}
+
+/**
  * A fetchable UserSettings_NotificationCategoryPreferences_CommentsAndReplies Query
  *
  * @param request - function to call the graphql client
@@ -46686,6 +47030,7 @@ export class LinearSdk extends Request {
     | PostNotification
     | ProjectNotification
     | PullRequestNotification
+    | UsageAlertNotification
     | WelcomeMessageNotification
     | Notification
   > {
@@ -46908,6 +47253,15 @@ export class LinearSdk extends Request {
    */
   public get rateLimitStatus(): LinearFetch<RateLimitPayload> {
     return new RateLimitStatusQuery(this._request).fetch();
+  }
+  /**
+   * Returns recent in-progress and completed releases for the pipeline associated with the access key, ordered with in-progress first then most recently completed. Used by `linear-release` to walk candidates and pick the one whose `commitSha` is an ancestor of the current build commit, which disambiguates concurrent release trains on the same pipeline.
+   *
+   * @param variables - variables to pass into the RecentReleasesByAccessKeyQuery
+   * @returns Release[]
+   */
+  public recentReleasesByAccessKey(variables?: L.RecentReleasesByAccessKeyQueryVariables): LinearFetch<Release[]> {
+    return new RecentReleasesByAccessKeyQuery(this._request).fetch(variables);
   }
   /**
    * Fetch a single release by its UUID or slug identifier.
@@ -50622,6 +50976,7 @@ export {
   PaginationNulls,
   PaginationOrderBy,
   PaginationSortOrder,
+  PipelineTab,
   PostType,
   ProductIntelligenceScope,
   ProjectMilestoneStatus,
@@ -50635,6 +50990,7 @@ export {
   PullRequestStatus,
   PushSubscriptionType,
   ReleaseChannel,
+  ReleaseNoteGenerationStatus,
   ReleasePipelineType,
   ReleaseStageType,
   SLADayCountType,
@@ -50645,6 +51001,7 @@ export {
   SummaryGenerationStatus,
   TeamRetirementSubTeamHandling,
   TeamRoleType,
+  TeamVisibility,
   TriageResponsibilityAction,
   TriageRuleErrorType,
   UserContextViewType,

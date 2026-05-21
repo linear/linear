@@ -181,12 +181,16 @@ fragment Comment on Comment {
   resolvingCommentId
   # The ID of the document content that the comment is associated with. Null if the comment belongs to a different parent entity type.
   documentContentId
+  # The ID of the initiative that the comment is associated with. Null if the comment belongs to a different parent entity type.
+  initiativeId
   # The ID of the initiative update that the comment is associated with. Null if the comment belongs to a different parent entity type.
   initiativeUpdateId
   # The ID of the issue that the comment is associated with. Null if the comment belongs to a different parent entity type.
   issueId
   # The ID of the parent comment under which the current comment is nested. Null for top-level comments.
   parentId
+  # The ID of the project that the comment is associated with. Null if the comment belongs to a different parent entity type.
+  projectId
   # The ID of the project update that the comment is associated with. Null if the comment belongs to a different parent entity type.
   projectUpdateId
   # The bot that created the comment.
@@ -215,6 +219,10 @@ fragment Comment on Comment {
   externalUser {
     id
   }
+  # The initiative that the comment is associated with. Null if the comment belongs to a different parent entity type.
+  initiative {
+    id
+  }
   # The initiative update that the comment is associated with. Null if the comment belongs to a different parent entity type.
   initiativeUpdate {
     id
@@ -228,6 +236,10 @@ fragment Comment on Comment {
   updatedAt
   # The parent comment under which the current comment is nested. Null for top-level comments that are not replies.
   parent {
+    id
+  }
+  # The project that the comment is associated with. Used for project-level discussion threads. Null if the comment belongs to a different parent entity type.
+  project {
     id
   }
   # The project update that the comment is associated with. Null if the comment belongs to a different parent entity type.
@@ -466,6 +478,8 @@ fragment CustomerNeed on CustomerNeed {
   customer {
     id
   }
+  # The effective Markdown content shown for this customer need. Returns the manually stored body when present, otherwise falls back to content extracted from the source attachment. Null if no content is available.
+  content
   # The issue attachment linked to this need. Populated when the need originates from an intake source (e.g., Slack, Intercom) or when a URL is manually provided. Provides a link back to the original source of the customer feedback. Mutually exclusive with projectAttachment.
   attachment {
     id
@@ -1421,6 +1435,10 @@ fragment Notification on Notification {
     ...PullRequestNotification
   }
 
+  ... on UsageAlertNotification {
+    ...UsageAlertNotification
+  }
+
   ... on WelcomeMessageNotification {
     ...WelcomeMessageNotification
   }
@@ -1748,6 +1766,54 @@ fragment PullRequestNotification on PullRequestNotification {
   snoozedUntilAt
   # The unique identifier of the entity.
   id
+  # The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event.
+  actor {
+    id
+  }
+}
+
+# A notification related to a usage alert, sent to workspace billing admins.
+fragment UsageAlertNotification on UsageAlertNotification {
+  __typename
+  # Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated.
+  type
+  # Related usage alert.
+  usageAlertId
+  # The bot that caused the notification.
+  botActor {
+    ...ActorBot
+  }
+  # The category of the notification.
+  category
+  # The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member.
+  externalUserActor {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The recipient user of this notification.
+  user {
+    id
+  }
+  # The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed.
+  unsnoozedAt
+  # The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent.
+  emailedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the user marked the notification as read. Null if the notification is unread.
+  readAt
+  # The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed.
+  snoozedUntilAt
+  # The unique identifier of the entity.
+  id
+  # The usage alert related to the notification.
+  usageAlert {
+    ...UsageAlert
+  }
   # The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event.
   actor {
     id
@@ -2989,6 +3055,12 @@ fragment ReleaseNote on ReleaseNote {
   documentContent {
     ...DocumentContent
   }
+  # Generation status when these release notes are being auto-generated: `pending` while the LLM call is running, `completed` once it lands. `null` means the release notes were written by a user and never went through auto-generation.
+  generationStatus
+  # The earliest release covered by this note.
+  firstRelease {
+    id
+  }
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
@@ -2996,6 +3068,8 @@ fragment ReleaseNote on ReleaseNote {
   lastRelease {
     id
   }
+  # The number of releases covered by this note.
+  releaseCount
   # The release note's unique URL slug, used to construct human-readable URLs for the note.
   slugId
   # The time at which the entity was archived. Null if the entity has not been archived.
@@ -3045,6 +3119,8 @@ fragment ReleasePipeline on ReleasePipeline {
   id
   # Whether this pipeline targets a production environment. Defaults to true. Used to distinguish production pipelines from staging or development pipelines.
   isProduction
+  # Whether to automatically generate a release note when a release is completed. Only applies to scheduled pipelines; ignored for continuous pipelines.
+  autoGenerateReleaseNotesOnCompletion
 }
 
 # A release that bundles issues together for a software deployment or version. Releases belong to a
@@ -3613,8 +3689,8 @@ fragment GitAutomationTargetBranch on GitAutomationTargetBranch {
 
 # A team is the primary organizational unit in Linear. Issues belong to teams, and each team has its
 # own workflow states, cycles, labels, and settings. Teams can be public (visible to all workspace
-# members) or private (visible only to team members). Teams can also have sub-teams that inherit
-# settings from their parent.
+# members), private (visible only to team members), or protected (visible only within an enclosing
+# private-team boundary). Teams can also have sub-teams that inherit settings from their parent.
 fragment Team on Team {
   __typename
   # Auto assign completed issues to current cycle.
@@ -3708,6 +3784,8 @@ fragment Team on Team {
   issueCount
   # The unique identifier of the entity.
   id
+  # The visibility of the team. Returns public for teams visible to all workspace members, private for teams visible only to members, and protected for non-private teams inside a private-team boundary.
+  visibility
   # The workflow state into which issues are moved when a PR has been merged.
   mergeWorkflowState {
     id
@@ -4094,6 +4172,24 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
   type
 }
 
+# A usage alert triggered when a workspace crosses a billing or consumption threshold.
+fragment UsageAlert on UsageAlert {
+  __typename
+  # The kind of usage alert that was triggered.
+  type
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # Type-specific metadata captured when the alert was triggered.
+  metadata
+}
+
 # A user that belongs to a workspace. Users can have different roles (admin, member, guest, or app)
 # that determine their level of access. Users can be members of multiple teams, and can be active or
 # deactivated. Guest users have limited access scoped to specific teams they are invited to.
@@ -4177,6 +4273,8 @@ fragment AuthUser on AuthUser {
   organization {
     ...AuthOrganization
   }
+  # The ID of the OAuth client that created the user.
+  oauthClientId
   # The time at which the entity was created.
   createdAt
   # The user's display (nick) name. Unique within each organization.
@@ -4237,6 +4335,10 @@ fragment Favorite on Favorite {
   project {
     id
   }
+  # The favorited release note.
+  releaseNote {
+    id
+  }
   # The favorited release pipeline.
   releasePipeline {
     id
@@ -4268,6 +4370,8 @@ fragment Favorite on Favorite {
   initiativeTab
   # The targeted tab of the project.
   projectTab
+  # The targeted tab of the release pipeline.
+  pipelineTab
   # The team of the favorited predefined view.
   predefinedViewTeam {
     id
@@ -4298,6 +4402,10 @@ fragment Favorite on Favorite {
 # indicating whether mobile, desktop, email, and Slack delivery are enabled.
 fragment NotificationCategoryPreferences on NotificationCategoryPreferences {
   __typename
+  # The preferences for billing notifications.
+  billing {
+    ...NotificationChannelPreferences
+  }
   # The preferences for customer notifications.
   customers {
     ...NotificationChannelPreferences
@@ -4979,6 +5087,8 @@ fragment Attachment on Attachment {
 # actions taken, such as updating issue properties, sending notifications, or posting to Slack.
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
+  # Recurring schedule which is used to execute the workflow.
+  schedule
   # The context custom view associated with the workflow.
   customView {
     id
@@ -5052,6 +5162,8 @@ fragment WorkflowDefinition on WorkflowDefinition {
   slugId
   # Whether the workflow is enabled and will execute when its trigger conditions are met.
   enabled
+  # Whether the workflow should only execute once per entity. When true, the workflow is excluded from matching automations for an entity if it has already been executed for that entity.
+  runOnce
 }
 
 # An email address that creates Linear issues when emails are sent to it. Email intake addresses can
@@ -5658,6 +5770,8 @@ fragment AuthOrganization on AuthOrganization {
   authSettings
   # Previously used URL keys for the organization (last 3 are kept and redirected).
   previousUrlKeys
+  # The cell the organization is hosted in.
+  cell
   # The email domain or URL key for the organization.
   serviceId
   # The feature release channel the organization belongs to.
@@ -6318,6 +6432,14 @@ fragment OtherNotificationWebhookPayload on OtherNotificationWebhookPayload {
   updatedAt
   # The type of the notification.
   type
+}
+
+# GitHub-specific details that some integration mutations may return alongside the standard payload.
+# Populated only by GitHub-related mutations.
+fragment GitHubIntegrationConnectDetails on GitHubIntegrationConnectDetails {
+  __typename
+  # Full names ('owner/repo') of repositories whose existing GitHub Issues sync mappings would become inaccessible if the new GitHub App installation replaces the existing one. When non-empty the connect was halted; the client should surface the impact and re-call the mutation with `confirmReplace: true` to commit, or do nothing to leave the integration unchanged. Capped at a small constant; longer lists are truncated.
+  lostRepositoryNames
 }
 
 # Information about an active authentication session, including the device, location, and timestamps
@@ -7109,6 +7231,39 @@ fragment ReactionWebhookPayload on ReactionWebhookPayload {
   user {
     ...UserChildWebhookPayload
   }
+}
+
+# Payload for a release note webhook.
+fragment ReleaseNoteWebhookPayload on ReleaseNoteWebhookPayload {
+  __typename
+  # IDs of the releases included in the note.
+  releaseIds
+  # The ID of the entity.
+  id
+  # The ID of the most recent release covered by this note.
+  lastReleaseId
+  # The ID of the pipeline this release note belongs to.
+  pipelineId
+  # The ID of the user who created the release note.
+  creatorId
+  # The URL of the release note.
+  url
+  # The pipeline this release note belongs to.
+  pipeline {
+    ...ReleasePipelineChildWebhookPayload
+  }
+  # The release note's body as markdown.
+  content
+  # The release note's unique URL slug.
+  slugId
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # User-supplied title for the release note.
+  title
 }
 
 # Payload for a release webhook.
@@ -8563,6 +8718,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   focusViewOrderingDirection
   # The focus view ordering.
   focusViewOrdering
+  # The inbox view grouping.
+  inboxViewGrouping
   # The inbox view ordering.
   inboxViewOrdering
   # The initiative grouping.
@@ -9801,9 +9958,9 @@ fragment IssueImportJqlCheckPayload on IssueImportJqlCheckPayload {
 }
 
 # The rich-text content body of a document, issue, project, initiative, project milestone, pull
-# request, release note, AI prompt rules, or welcome message. Content is stored as a base64-encoded
-# Yjs state and can be converted to Markdown or ProseMirror JSON. Each DocumentContent belongs to
-# exactly one parent entity and supports real-time collaborative editing.
+# request, release note, automation prompt, AI prompt rules, or welcome message. Content is stored as
+# a base64-encoded Yjs state and can be converted to Markdown or ProseMirror JSON. Each
+# DocumentContent belongs to exactly one parent entity and supports real-time collaborative editing.
 fragment DocumentContent on DocumentContent {
   __typename
   # The AI prompt rules that the content is associated with. Null if the content belongs to a different parent entity type.
@@ -10981,6 +11138,10 @@ fragment AiConversationWidgetDisplayInfo on AiConversationWidgetDisplayInfo {
 
 fragment AsksChannelConnectPayload on AsksChannelConnectPayload {
   __typename
+  # GitHub-specific details for the operation. Populated by GitHub-related mutations only.
+  gitHub {
+    ...GitHubIntegrationConnectDetails
+  }
   # The identifier of the last sync operation.
   lastSyncId
   # The integration that was created or updated.
@@ -11332,6 +11493,10 @@ fragment GitAutomationStateConnection on GitAutomationStateConnection {
 
 fragment GitHubCommitIntegrationPayload on GitHubCommitIntegrationPayload {
   __typename
+  # GitHub-specific details for the operation. Populated by GitHub-related mutations only.
+  gitHub {
+    ...GitHubIntegrationConnectDetails
+  }
   # The identifier of the last sync operation.
   lastSyncId
   # The integration that was created or updated.
@@ -11352,6 +11517,10 @@ fragment GitHubEnterpriseServerInstallVerificationPayload on GitHubEnterpriseSer
 
 fragment GitHubEnterpriseServerPayload on GitHubEnterpriseServerPayload {
   __typename
+  # GitHub-specific details for the operation. Populated by GitHub-related mutations only.
+  gitHub {
+    ...GitHubIntegrationConnectDetails
+  }
   # The app install address.
   installUrl
   # The identifier of the last sync operation.
@@ -11372,6 +11541,10 @@ fragment GitLabIntegrationCreatePayload on GitLabIntegrationCreatePayload {
   __typename
   # Error message if the connection failed.
   error
+  # GitHub-specific details for the operation. Populated by GitHub-related mutations only.
+  gitHub {
+    ...GitHubIntegrationConnectDetails
+  }
   # Method and post-encoding upstream URI of the failed request, for debugging proxy allowlist rules (e.g. `GET /api/v4/projects/aire%2Fagents`).
   errorRequest
   # Response body from GitLab for debugging.
@@ -11394,6 +11567,10 @@ fragment GitLabTestConnectionPayload on GitLabTestConnectionPayload {
   __typename
   # Error message if the connection test failed.
   error
+  # GitHub-specific details for the operation. Populated by GitHub-related mutations only.
+  gitHub {
+    ...GitHubIntegrationConnectDetails
+  }
   # Method and post-encoding upstream URI of the failed request, for debugging proxy allowlist rules (e.g. `GET /api/v4/projects/aire%2Fagents`).
   errorRequest
   # Response body from GitLab for debugging.
@@ -11508,6 +11685,10 @@ fragment IntegrationHasScopesPayload on IntegrationHasScopesPayload {
 
 fragment IntegrationPayload on IntegrationPayload {
   __typename
+  # GitHub-specific details for the operation. Populated by GitHub-related mutations only.
+  gitHub {
+    ...GitHubIntegrationConnectDetails
+  }
   # The identifier of the last sync operation.
   lastSyncId
   # The integration that was created or updated.
@@ -11799,6 +11980,10 @@ fragment IssueToReleaseConnection on IssueToReleaseConnection {
 
 fragment JiraFetchProjectStatusesPayload on JiraFetchProjectStatusesPayload {
   __typename
+  # GitHub-specific details for the operation. Populated by GitHub-related mutations only.
+  gitHub {
+    ...GitHubIntegrationConnectDetails
+  }
   # The fetched Jira issue statuses (non-Epic).
   issueStatuses
   # The fetched Jira project statuses (Epic).
@@ -12262,6 +12447,10 @@ fragment RoadmapToProjectConnection on RoadmapToProjectConnection {
 
 fragment SlackChannelConnectPayload on SlackChannelConnectPayload {
   __typename
+  # GitHub-specific details for the operation. Populated by GitHub-related mutations only.
+  gitHub {
+    ...GitHubIntegrationConnectDetails
+  }
   # The identifier of the last sync operation.
   lastSyncId
   # The integration that was created or updated.
@@ -17484,6 +17673,18 @@ query rateLimitStatus {
     ...RateLimitPayload
   }
 }
+# Returns recent in-progress and completed releases for the pipeline associated with the access key,
+# ordered with in-progress first then most recently completed. Used by `linear-release` to walk
+# candidates and pick the one whose `commitSha` is an ancestor of the current build commit, which
+# disambiguates concurrent release trains on the same pipeline.
+query recentReleasesByAccessKey(
+  # Maximum number of releases to return. Defaults to 20 and is capped at 100.
+  $limit: Int
+) {
+  recentReleasesByAccessKey(limit: $limit) {
+    ...Release
+  }
+}
 # Fetch a single release by its UUID or slug identifier.
 query release($id: String!) {
   release(id: $id) {
@@ -19170,6 +19371,16 @@ query userSettings_notificationCategoryPreferences_assignments {
     }
   }
 }
+# The preferences for billing notifications.
+query userSettings_notificationCategoryPreferences_billing {
+  userSettings {
+    notificationCategoryPreferences {
+      billing {
+        ...NotificationChannelPreferences
+      }
+    }
+  }
+}
 # The preferences for notifications about comments and replies.
 query userSettings_notificationCategoryPreferences_commentsAndReplies {
   userSettings {
@@ -20313,8 +20524,13 @@ mutation createContact(
 mutation createCsvExportReport(
   # IDs of private teams to include in the export. If null, only data from public teams is exported.
   $includePrivateTeamIds: [String!]
+  # IDs of protected teams to include in the export. If null, protected team data is omitted.
+  $includeProtectedTeamIds: [String!]
 ) {
-  createCsvExportReport(includePrivateTeamIds: $includePrivateTeamIds) {
+  createCsvExportReport(
+    includePrivateTeamIds: $includePrivateTeamIds
+    includeProtectedTeamIds: $includeProtectedTeamIds
+  ) {
     ...CreateCsvExportReportPayload
   }
 }
@@ -21144,6 +21360,8 @@ mutation integrationGithubConnect(
   $code: String!
   # Whether the integration should have code access
   $codeAccess: Boolean
+  # Set to true to force-replace the existing GitHub App installation (e.g. to ignore repository access conflicts).
+  $confirmReplace: Boolean
   # The GitHub Enterprise Cloud host (e.g., 'linear-development.ghe.com'). When provided, this creates a GEC integration.
   $githubHost: String
   # The GitHub data to connect with.
@@ -21152,6 +21370,7 @@ mutation integrationGithubConnect(
   integrationGithubConnect(
     code: $code
     codeAccess: $codeAccess
+    confirmReplace: $confirmReplace
     githubHost: $githubHost
     installationId: $installationId
   ) {
