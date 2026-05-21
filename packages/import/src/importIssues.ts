@@ -261,9 +261,20 @@ export const importIssues = async (
   const labelMapping = await handleLabels(client, importData, teamId, [...allTeamLabels, ...allWorkspaceLabels]);
 
   const existingStateMap = {} as { [name: string]: string };
+  const canceledStateId = workflowStates?.nodes?.find(state => state.type === "canceled")?.id;
   for (const state of workflowStates?.nodes ?? []) {
     const stateName = state.name?.toLowerCase();
-    if (stateName && state.id && !existingStateMap[stateName]) {
+    if (!stateName || !state.id) {
+      continue;
+    }
+    if (state.type === "duplicate") {
+      // duplicate-type states are rejected by createIssue; route incoming statuses with this name to canceled instead
+      if (canceledStateId && !existingStateMap[stateName]) {
+        existingStateMap[stateName] = canceledStateId;
+      }
+      continue;
+    }
+    if (!existingStateMap[stateName]) {
       existingStateMap[stateName] = state.id;
     }
   }
