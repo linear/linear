@@ -1,5 +1,15 @@
 # Change Log
 
+## 3.1.7
+
+### Patch Changes
+
+- 66bce60: fix(import): route CSV statuses that match a workflow state of type `duplicate` to the team's canceled state instead of passing the duplicate-type state id to `createIssue`, which the server rejects with `Cannot create an issue in a duplicate state`
+- Updated dependencies [fb1f69d]
+- Updated dependencies [7f440a4]
+- Updated dependencies [fcfb698]
+  - @linear/sdk@85.0.0
+
 ## 3.1.6
 
 ### Patch Changes
