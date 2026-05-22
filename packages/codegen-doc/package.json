@@ -12,7 +12,8 @@
   },
   "scripts": {
     "build:codegen-doc": "tsdown --clean --exports --dts",
-    "build:types": "tsc --noEmit"
+    "build:types": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
+    "test": "vitest"
   },
   "dependencies": {
     "@graphql-codegen/plugin-helpers": "catalog:",
@@ -25,7 +26,8 @@
   },
   "devDependencies": {
     "tsdown": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "^4.0.15"
   },
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
