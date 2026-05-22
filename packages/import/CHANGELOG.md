@@ -1,5 +1,16 @@
 # Change Log
 
+## 3.2.0
+
+### Minor Changes
+
+- cac3f6d: fix(import): stop pre-uploading images via `imageUploadFromUrl` in the Shortcut CSV importer.
+
+### Patch Changes
+
+- Updated dependencies [bd88158]
+  - @linear/sdk@86.0.0
+
 ## 3.1.7
 
 ### Patch Changes

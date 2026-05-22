@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.3.3
+
+### Patch Changes
+
+- 88ea685: defends against JSDoc comment injection in the SDK codegen
+
 ## 3.3.2
 
 ### Patch Changes

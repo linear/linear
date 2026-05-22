@@ -1,5 +1,12 @@
 # Change Log
 
+## 4.0.3
+
+### Patch Changes
+
+- Updated dependencies [88ea685]
+  - @linear/codegen-doc@3.3.3
+
 ## 4.0.2
 
 ### Patch Changes
