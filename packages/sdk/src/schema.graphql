@@ -9899,7 +9899,7 @@ type EntityExternalLink implements Node {
   """
   The user who created the link.
   """
-  creator: User!
+  creator: User
   """
   The unique identifier of the entity.
   """
@@ -15713,6 +15713,10 @@ input IssueCollectionFilter {
   """
   every: IssueFilter
   """
+  [Internal] Comparator for filtering issues bucketed as having active agent sessions, no closed agent pull requests, and no merged agent pull requests.
+  """
+  hasActiveAgentSessions: RelationExistsComparator
+  """
   Comparator for filtering issues which are blocked.
   """
   hasBlockedByRelations: RelationExistsComparator
@@ -15721,9 +15725,17 @@ input IssueCollectionFilter {
   """
   hasBlockingRelations: RelationExistsComparator
   """
+  [Internal] Comparator for filtering issues bucketed as having all agent sessions dismissed or closed, and no merged agent pull requests.
+  """
+  hasDismissedAgentSessions: RelationExistsComparator
+  """
   Comparator for filtering issues which are duplicates.
   """
   hasDuplicateRelations: RelationExistsComparator
+  """
+  [Internal] Comparator for filtering issues which have agent-session-linked pull requests that were merged.
+  """
+  hasMergedAgentPullRequests: RelationExistsComparator
   """
   Comparator for filtering issues with relations.
   """
@@ -16501,6 +16513,10 @@ input IssueFilter {
   """
   estimate: EstimateComparator
   """
+  [Internal] Comparator for filtering issues bucketed as having active agent sessions, no closed agent pull requests, and no merged agent pull requests.
+  """
+  hasActiveAgentSessions: RelationExistsComparator
+  """
   Comparator for filtering issues which are blocked.
   """
   hasBlockedByRelations: RelationExistsComparator
@@ -16509,9 +16525,17 @@ input IssueFilter {
   """
   hasBlockingRelations: RelationExistsComparator
   """
+  [Internal] Comparator for filtering issues bucketed as having all agent sessions dismissed or closed, and no merged agent pull requests.
+  """
+  hasDismissedAgentSessions: RelationExistsComparator
+  """
   Comparator for filtering issues which are duplicates.
   """
   hasDuplicateRelations: RelationExistsComparator
+  """
+  [Internal] Comparator for filtering issues which have agent-session-linked pull requests that were merged.
+  """
+  hasMergedAgentPullRequests: RelationExistsComparator
   """
   Comparator for filtering issues with relations.
   """
@@ -23501,6 +23525,55 @@ type Mutation {
     input: NotificationUpdateInput!
   ): NotificationPayload!
   """
+  [ALPHA] Archives an OAuth application created by the calling OAuth application.
+  """
+  oauthApplicationArchive(
+    """
+    The identifier of the OAuth application to archive.
+    """
+    id: String!
+  ): OAuthApplicationArchivePayload!
+  """
+  [ALPHA] Creates an OAuth application owned by the calling OAuth application.
+  """
+  oauthApplicationCreate(
+    """
+    The OAuth application object to create.
+    """
+    input: OAuthApplicationCreateInput!
+  ): OAuthApplicationCreatePayload!
+  """
+  [ALPHA] Rotates the client secret for an OAuth application created by the calling OAuth application.
+  """
+  oauthApplicationRotateSecret(
+    """
+    The identifier of the OAuth application for which to rotate the secret.
+    """
+    id: String!
+  ): OAuthApplicationRotateSecretPayload!
+  """
+  [ALPHA] Rotates the webhook signing secret for an OAuth application created by the calling OAuth application.
+  """
+  oauthApplicationRotateWebhookSecret(
+    """
+    The identifier of the OAuth application for which to rotate the webhook secret.
+    """
+    id: String!
+  ): OAuthApplicationRotateWebhookSecretPayload!
+  """
+  [ALPHA] Updates an OAuth application created by the calling OAuth application.
+  """
+  oauthApplicationUpdate(
+    """
+    The identifier of the OAuth application to update.
+    """
+    id: String!
+    """
+    A partial OAuth application object to update.
+    """
+    input: OAuthApplicationUpdateInput!
+  ): OAuthApplicationPayload!
+  """
   Cancels a previously requested workspace deletion, if the workspace has not yet been fully deleted.
   """
   organizationCancelDelete: OrganizationCancelDeletePayload!
@@ -26218,6 +26291,10 @@ input NullableIssueFilter {
   """
   estimate: EstimateComparator
   """
+  [Internal] Comparator for filtering issues bucketed as having active agent sessions, no closed agent pull requests, and no merged agent pull requests.
+  """
+  hasActiveAgentSessions: RelationExistsComparator
+  """
   Comparator for filtering issues which are blocked.
   """
   hasBlockedByRelations: RelationExistsComparator
@@ -26226,9 +26303,17 @@ input NullableIssueFilter {
   """
   hasBlockingRelations: RelationExistsComparator
   """
+  [Internal] Comparator for filtering issues bucketed as having all agent sessions dismissed or closed, and no merged agent pull requests.
+  """
+  hasDismissedAgentSessions: RelationExistsComparator
+  """
   Comparator for filtering issues which are duplicates.
   """
   hasDuplicateRelations: RelationExistsComparator
+  """
+  [Internal] Comparator for filtering issues which have agent-session-linked pull requests that were merged.
+  """
+  hasMergedAgentPullRequests: RelationExistsComparator
   """
   Comparator for filtering issues with relations.
   """
@@ -27055,6 +27140,234 @@ type OAuthAppWebhookPayload {
   Unix timestamp in milliseconds when the webhook was sent.
   """
   webhookTimestamp: Float!
+}
+
+"""
+Public API representation of an OAuth application managed by the calling OAuth application. Secrets are only returned by create and rotation mutations.
+"""
+type OAuthApplication {
+  """
+  The public client ID used during OAuth authorization flows.
+  """
+  clientId: String!
+  """
+  The time at which the OAuth application was created.
+  """
+  createdAt: DateTime!
+  """
+  User-facing description of the OAuth application. Null if not set.
+  """
+  description: String
+  """
+  Name of the developer or company that built the OAuth application.
+  """
+  developer: String!
+  """
+  URL of the developer's website, homepage, or documentation.
+  """
+  developerUrl: String!
+  """
+  Distribution setting for the OAuth application. Private applications are only installable by the owning workspace.
+  """
+  distribution: OAuthApplicationDistribution!
+  """
+  The unique identifier of the OAuth application.
+  """
+  id: String!
+  """
+  URL of the OAuth application's icon. Null if not set.
+  """
+  imageUrl: String
+  """
+  The human-readable name of the OAuth application.
+  """
+  name: String!
+  """
+  Allowed redirect URIs for OAuth authorization flows.
+  """
+  redirectUris: [String!]!
+  """
+  The time at which the OAuth application was last updated.
+  """
+  updatedAt: DateTime!
+  """
+  Whether webhook delivery is enabled for this OAuth application.
+  """
+  webhookEnabled: Boolean!
+  """
+  Resource types the OAuth application's webhooks subscribe to.
+  """
+  webhookResourceTypes: [String!]!
+  """
+  Webhook URL used for delivering webhook payloads. Null if not set.
+  """
+  webhookUrl: String
+}
+
+"""
+The result of archiving an OAuth application.
+"""
+type OAuthApplicationArchivePayload {
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
+Input for creating an OAuth application through the public API.
+"""
+input OAuthApplicationCreateInput {
+  """
+  User-facing description of the OAuth application.
+  """
+  description: String
+  """
+  Name of the developer or company that built the OAuth application.
+  """
+  developer: String!
+  """
+  URL of the developer's website, homepage, or documentation.
+  """
+  developerUrl: String!
+  """
+  Optional client-supplied idempotency key. Reusing the same key with the same managing OAuth application returns the existing OAuth application instead of creating a duplicate.
+  """
+  idempotencyKey: String
+  """
+  URL of the OAuth application's icon.
+  """
+  imageUrl: String
+  """
+  The OAuth application's name.
+  """
+  name: String!
+  """
+  Allowed redirect URIs for OAuth authorization flows.
+  """
+  redirectUris: [String!]!
+  """
+  Resource types the OAuth application's webhooks subscribe to.
+  """
+  webhookResourceTypes: [String!]
+  """
+  Webhook URL used for delivering webhook payloads.
+  """
+  webhookUrl: String
+}
+
+"""
+The result of creating an OAuth application.
+"""
+type OAuthApplicationCreatePayload {
+  """
+  The OAuth application that was created or updated.
+  """
+  application: OAuthApplication!
+  """
+  The client secret. Store this value securely because it cannot be retrieved later. Null when returning an existing OAuth application for an idempotency key.
+  """
+  clientSecret: String
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+  """
+  The webhook signing secret. Null if the OAuth application does not have a webhook configured or an existing OAuth application is returned for an idempotency key.
+  """
+  webhookSecret: String
+}
+
+"""
+Distribution setting for an OAuth application.
+"""
+enum OAuthApplicationDistribution {
+  private
+  public
+}
+
+"""
+The result of an OAuth application mutation.
+"""
+type OAuthApplicationPayload {
+  """
+  The OAuth application that was created or updated.
+  """
+  application: OAuthApplication!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
+The result of rotating an OAuth application's client secret.
+"""
+type OAuthApplicationRotateSecretPayload {
+  """
+  The new client secret. Store this value securely because it cannot be retrieved later.
+  """
+  clientSecret: String!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
+The result of rotating an OAuth application's webhook signing secret.
+"""
+type OAuthApplicationRotateWebhookSecretPayload {
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+  """
+  The new webhook signing secret.
+  """
+  webhookSecret: String!
+}
+
+"""
+Input for updating an OAuth application through the public API.
+"""
+input OAuthApplicationUpdateInput {
+  """
+  User-facing description of the OAuth application.
+  """
+  description: String
+  """
+  Name of the developer or company that built the OAuth application.
+  """
+  developer: String
+  """
+  URL of the developer's website, homepage, or documentation.
+  """
+  developerUrl: String
+  """
+  URL of the OAuth application's icon.
+  """
+  imageUrl: String
+  """
+  The OAuth application's name.
+  """
+  name: String
+  """
+  Allowed redirect URIs for OAuth authorization flows.
+  """
+  redirectUris: [String!]
+  """
+  Whether webhook delivery is enabled for this OAuth application.
+  """
+  webhookEnabled: Boolean
+  """
+  Resource types the OAuth application's webhooks subscribe to.
+  """
+  webhookResourceTypes: [String!]
+  """
+  Webhook URL used for delivering webhook payloads.
+  """
+  webhookUrl: String
 }
 
 """
@@ -35753,6 +36066,19 @@ type Query {
   """
   notificationsUnreadCount: Int!
   """
+  [ALPHA] A specific OAuth application created by the calling OAuth application through the public API.
+  """
+  oauthApplication(
+    """
+    The identifier of the OAuth application to retrieve.
+    """
+    id: String!
+  ): OAuthApplication!
+  """
+  [ALPHA] OAuth applications created by the calling OAuth application through the public API.
+  """
+  oauthApplications: [OAuthApplication!]!
+  """
   The authenticated user's workspace.
   """
   organization: Organization!
@@ -37504,6 +37830,10 @@ input ReleaseCompleteInput {
   """
   commitSha: String
   """
+  External links to attach to the completed release.
+  """
+  links: [ReleaseLinkInput!]
+  """
   Optional release name to apply when completing the release.
   """
   name: String
@@ -37525,6 +37855,10 @@ input ReleaseCompleteInputBase {
   The commit SHA associated with this completion. If a completed release with this SHA already exists, it will be returned instead of completing a new release.
   """
   commitSha: String
+  """
+  External links to attach to the completed release.
+  """
+  links: [ReleaseLinkInput!]
   """
   Optional release name to apply when completing the release.
   """
@@ -37718,6 +38052,20 @@ type ReleaseHistoryEdge {
   """
   cursor: String!
   node: ReleaseHistory!
+}
+
+"""
+An external link to attach to the release.
+"""
+input ReleaseLinkInput {
+  """
+  Optional label for the link. If omitted, the API derives one from the URL.
+  """
+  label: String
+  """
+  The URL of the link.
+  """
+  url: String!
 }
 
 """
@@ -38706,6 +39054,10 @@ input ReleaseSyncInput {
   """
   issueReferences: [IssueReferenceInput!]
   """
+  External links to attach to the release.
+  """
+  links: [ReleaseLinkInput!]
+  """
   The name of the release.
   """
   name: String
@@ -38748,6 +39100,10 @@ input ReleaseSyncInputBase {
   """
   issueReferences: [IssueReferenceInput!]
   """
+  External links to attach to the release.
+  """
+  links: [ReleaseLinkInput!]
+  """
   The name of the release.
   """
   name: String
@@ -38774,6 +39130,10 @@ Input for updating a release by pipeline identifier. Extends the base update inp
 """
 input ReleaseUpdateByPipelineInput {
   """
+  External links to attach to the updated release.
+  """
+  links: [ReleaseLinkInput!]
+  """
   Optional release name to apply when updating the release.
   """
   name: String
@@ -38795,6 +39155,10 @@ input ReleaseUpdateByPipelineInput {
 Base input for updating a release by pipeline. Contains optional version and stage name. The pipeline ID is provided separately or inferred from the access key.
 """
 input ReleaseUpdateByPipelineInputBase {
+  """
+  External links to attach to the updated release.
+  """
+  links: [ReleaseLinkInput!]
   """
   Optional release name to apply when updating the release.
   """
@@ -41187,6 +41551,10 @@ type Team implements Node {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
+    """
+    [INTERNAL] Sort returned users.
+    """
+    sort: [UserSortInput!]
   ): UserConnection!
   """
   [ALPHA] The membership of the given user in the team.

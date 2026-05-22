@@ -8332,6 +8332,40 @@ fragment UserSettings on UserSettings {
   showFullUserNames
 }
 
+# Public API representation of an OAuth application managed by the calling OAuth application. Secrets
+# are only returned by create and rotation mutations.
+fragment OAuthApplication on OAuthApplication {
+  __typename
+  # Allowed redirect URIs for OAuth authorization flows.
+  redirectUris
+  # Distribution setting for the OAuth application. Private applications are only installable by the owning workspace.
+  distribution
+  # Name of the developer or company that built the OAuth application.
+  developer
+  # Resource types the OAuth application's webhooks subscribe to.
+  webhookResourceTypes
+  # The human-readable name of the OAuth application.
+  name
+  # The public client ID used during OAuth authorization flows.
+  clientId
+  # The time at which the OAuth application was created.
+  createdAt
+  # The time at which the OAuth application was last updated.
+  updatedAt
+  # The unique identifier of the OAuth application.
+  id
+  # URL of the OAuth application's icon. Null if not set.
+  imageUrl
+  # URL of the developer's website, homepage, or documentation.
+  developerUrl
+  # User-facing description of the OAuth application. Null if not set.
+  description
+  # Webhook URL used for delivering webhook payloads. Null if not set.
+  webhookUrl
+  # Whether webhook delivery is enabled for this OAuth application.
+  webhookEnabled
+}
+
 # Public-facing information about an OAuth application. Contains only the fields that are safe to
 # display to users during the authorization flow, excluding sensitive data like client secrets and
 # internal configuration.
@@ -9728,6 +9762,17 @@ fragment IssueFilterSuggestionPayload on IssueFilterSuggestionPayload {
   logId
 }
 
+# The result of an OAuth application mutation.
+fragment OAuthApplicationPayload on OAuthApplicationPayload {
+  __typename
+  # The OAuth application that was created or updated.
+  application {
+    id
+  }
+  # Whether the operation was successful.
+  success
+}
+
 # The result of an agent activity mutation.
 fragment AgentActivityPayload on AgentActivityPayload {
   __typename
@@ -9916,6 +9961,13 @@ fragment IssueToReleasePayload on IssueToReleasePayload {
   success
 }
 
+# The result of archiving an OAuth application.
+fragment OAuthApplicationArchivePayload on OAuthApplicationArchivePayload {
+  __typename
+  # Whether the operation was successful.
+  success
+}
+
 # The result of checking whether an import from an external service can proceed.
 fragment IssueImportCheckPayload on IssueImportCheckPayload {
   __typename
@@ -9933,6 +9985,21 @@ fragment IssueImportSyncCheckPayload on IssueImportSyncCheckPayload {
   canSync
 }
 
+# The result of creating an OAuth application.
+fragment OAuthApplicationCreatePayload on OAuthApplicationCreatePayload {
+  __typename
+  # The OAuth application that was created or updated.
+  application {
+    id
+  }
+  # The client secret. Store this value securely because it cannot be retrieved later. Null when returning an existing OAuth application for an idempotency key.
+  clientSecret
+  # The webhook signing secret. Null if the OAuth application does not have a webhook configured or an existing OAuth application is returned for an idempotency key.
+  webhookSecret
+  # Whether the operation was successful.
+  success
+}
+
 # The result of deleting an issue import, containing the deleted import job and a success indicator.
 fragment IssueImportDeletePayload on IssueImportDeletePayload {
   __typename
@@ -9942,6 +10009,24 @@ fragment IssueImportDeletePayload on IssueImportDeletePayload {
   issueImport {
     ...IssueImport
   }
+  # Whether the operation was successful.
+  success
+}
+
+# The result of rotating an OAuth application's client secret.
+fragment OAuthApplicationRotateSecretPayload on OAuthApplicationRotateSecretPayload {
+  __typename
+  # The new client secret. Store this value securely because it cannot be retrieved later.
+  clientSecret
+  # Whether the operation was successful.
+  success
+}
+
+# The result of rotating an OAuth application's webhook signing secret.
+fragment OAuthApplicationRotateWebhookSecretPayload on OAuthApplicationRotateWebhookSecretPayload {
+  __typename
+  # The new webhook signing secret.
+  webhookSecret
   # Whether the operation was successful.
   success
 }
@@ -18740,6 +18825,8 @@ query team_members(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned users.
+  $sort: [UserSortInput!]
 ) {
   team(id: $id) {
     members(
@@ -18751,6 +18838,7 @@ query team_members(
       includeDisabled: $includeDisabled
       last: $last
       orderBy: $orderBy
+      sort: $sort
     ) {
       ...UserConnection
     }

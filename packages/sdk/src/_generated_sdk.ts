@@ -7090,7 +7090,7 @@ export class Entity extends Request {
  * @param data - L.EntityExternalLinkFragment response data
  */
 export class EntityExternalLink extends Request {
-  private _creator: L.EntityExternalLinkFragment["creator"];
+  private _creator?: L.EntityExternalLinkFragment["creator"];
   private _initiative?: L.EntityExternalLinkFragment["initiative"];
   private _project?: L.EntityExternalLinkFragment["project"];
 
@@ -7103,7 +7103,7 @@ export class EntityExternalLink extends Request {
     this.sortOrder = data.sortOrder;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
-    this._creator = data.creator;
+    this._creator = data.creator ?? undefined;
     this._initiative = data.initiative ?? undefined;
     this._project = data.project ?? undefined;
   }
@@ -7127,7 +7127,7 @@ export class EntityExternalLink extends Request {
   public url: string;
   /** The user who created the link. */
   public get creator(): LinearFetch<User> | undefined {
-    return new UserQuery(this._request).fetch(this._creator.id);
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The ID of user who created the link. */
   public get creatorId(): string | undefined {
@@ -14101,6 +14101,147 @@ export class OAuthAppWebhookPayload {
   public webhookId: string;
   /** Unix timestamp in milliseconds when the webhook was sent. */
   public webhookTimestamp: number;
+}
+/**
+ * Public API representation of an OAuth application managed by the calling OAuth application. Secrets are only returned by create and rotation mutations.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OAuthApplicationFragment response data
+ */
+export class OAuthApplication extends Request {
+  public constructor(request: LinearRequest, data: L.OAuthApplicationFragment) {
+    super(request);
+    this.clientId = data.clientId;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.description = data.description ?? undefined;
+    this.developer = data.developer;
+    this.developerUrl = data.developerUrl;
+    this.id = data.id;
+    this.imageUrl = data.imageUrl ?? undefined;
+    this.name = data.name;
+    this.redirectUris = data.redirectUris;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.webhookEnabled = data.webhookEnabled;
+    this.webhookResourceTypes = data.webhookResourceTypes;
+    this.webhookUrl = data.webhookUrl ?? undefined;
+    this.distribution = data.distribution;
+  }
+
+  /** The public client ID used during OAuth authorization flows. */
+  public clientId: string;
+  /** The time at which the OAuth application was created. */
+  public createdAt: Date;
+  /** User-facing description of the OAuth application. Null if not set. */
+  public description?: string | null;
+  /** Name of the developer or company that built the OAuth application. */
+  public developer: string;
+  /** URL of the developer's website, homepage, or documentation. */
+  public developerUrl: string;
+  /** The unique identifier of the OAuth application. */
+  public id: string;
+  /** URL of the OAuth application's icon. Null if not set. */
+  public imageUrl?: string | null;
+  /** The human-readable name of the OAuth application. */
+  public name: string;
+  /** Allowed redirect URIs for OAuth authorization flows. */
+  public redirectUris: string[];
+  /** The time at which the OAuth application was last updated. */
+  public updatedAt: Date;
+  /** Whether webhook delivery is enabled for this OAuth application. */
+  public webhookEnabled: boolean;
+  /** Resource types the OAuth application's webhooks subscribe to. */
+  public webhookResourceTypes: string[];
+  /** Webhook URL used for delivering webhook payloads. Null if not set. */
+  public webhookUrl?: string | null;
+  /** Distribution setting for the OAuth application. Private applications are only installable by the owning workspace. */
+  public distribution: L.OAuthApplicationDistribution;
+}
+/**
+ * The result of archiving an OAuth application.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OAuthApplicationArchivePayloadFragment response data
+ */
+export class OAuthApplicationArchivePayload extends Request {
+  public constructor(request: LinearRequest, data: L.OAuthApplicationArchivePayloadFragment) {
+    super(request);
+    this.success = data.success;
+  }
+
+  /** Whether the operation was successful. */
+  public success: boolean;
+}
+/**
+ * The result of creating an OAuth application.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OAuthApplicationCreatePayloadFragment response data
+ */
+export class OAuthApplicationCreatePayload extends Request {
+  public constructor(request: LinearRequest, data: L.OAuthApplicationCreatePayloadFragment) {
+    super(request);
+    this.clientSecret = data.clientSecret ?? undefined;
+    this.success = data.success;
+    this.webhookSecret = data.webhookSecret ?? undefined;
+  }
+
+  /** The client secret. Store this value securely because it cannot be retrieved later. Null when returning an existing OAuth application for an idempotency key. */
+  public clientSecret?: string | null;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The webhook signing secret. Null if the OAuth application does not have a webhook configured or an existing OAuth application is returned for an idempotency key. */
+  public webhookSecret?: string | null;
+}
+/**
+ * The result of an OAuth application mutation.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OAuthApplicationPayloadFragment response data
+ */
+export class OAuthApplicationPayload extends Request {
+  public constructor(request: LinearRequest, data: L.OAuthApplicationPayloadFragment) {
+    super(request);
+    this.success = data.success;
+  }
+
+  /** Whether the operation was successful. */
+  public success: boolean;
+}
+/**
+ * The result of rotating an OAuth application's client secret.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OAuthApplicationRotateSecretPayloadFragment response data
+ */
+export class OAuthApplicationRotateSecretPayload extends Request {
+  public constructor(request: LinearRequest, data: L.OAuthApplicationRotateSecretPayloadFragment) {
+    super(request);
+    this.clientSecret = data.clientSecret;
+    this.success = data.success;
+  }
+
+  /** The new client secret. Store this value securely because it cannot be retrieved later. */
+  public clientSecret: string;
+  /** Whether the operation was successful. */
+  public success: boolean;
+}
+/**
+ * The result of rotating an OAuth application's webhook signing secret.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OAuthApplicationRotateWebhookSecretPayloadFragment response data
+ */
+export class OAuthApplicationRotateWebhookSecretPayload extends Request {
+  public constructor(request: LinearRequest, data: L.OAuthApplicationRotateWebhookSecretPayloadFragment) {
+    super(request);
+    this.success = data.success;
+    this.webhookSecret = data.webhookSecret;
+  }
+
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The new webhook signing secret. */
+  public webhookSecret: string;
 }
 /**
  * Payload for OAuth authorization webhook events.
@@ -50969,6 +51110,7 @@ export {
   IssueSuggestionType,
   NotificationCategory,
   NotificationChannel,
+  OAuthApplicationDistribution,
   OAuthClientApprovalStatus,
   OrganizationDomainAuthType,
   OrganizationInviteStatus,
