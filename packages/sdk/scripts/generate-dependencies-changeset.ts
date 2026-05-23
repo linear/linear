@@ -1,9 +1,12 @@
-import { logger, printLines } from "@linear/codegen-doc";
 import { writeFile } from "fs";
 import path from "path";
 import { promisify } from "util";
 
 const filename = path.resolve(`../../.changeset/_generated_dependencies.md`);
+
+function printLines(lines: (string | undefined)[]): string {
+  return lines.filter(Boolean).join("\n");
+}
 
 const changeset = printLines([
   "---",
@@ -24,10 +27,9 @@ async function generateChangeset() {
 
 generateChangeset()
   .then(() => {
-    logger.info("script:generate-dependencies-changeset: Generated changeset for dependencies");
+    process.stdout.write("script:generate-dependencies-changeset: Generated changeset for dependencies\n");
   })
   .catch(error => {
-    logger.error("script:generate-dependencies-changeset: Generating changeset for dependencies");
-    logger.fatal(error);
+    process.stderr.write("script:generate-dependencies-changeset: Generating changeset for dependencies\n");
     throw error;
   });
