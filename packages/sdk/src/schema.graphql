@@ -1215,6 +1215,30 @@ interface AiConversationBaseWidget {
   rawArgs: JSON
 }
 
+type AiConversationBashToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationBashToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationBashToolCallArgs {
+  command: String!
+}
+
 """
 The client platform from which an AI conversation was initiated.
 """
@@ -1271,6 +1295,30 @@ type AiConversationCreateEntityToolCall implements AiConversationBaseToolCall {
 type AiConversationCreateEntityToolCallArgs {
   count: Float
   type: String!
+}
+
+type AiConversationCreateSandboxToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationCreateSandboxToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationCreateSandboxToolCallArgs {
+  repository: String!
 }
 
 type AiConversationDeleteEntityToolCall implements AiConversationBaseToolCall {
@@ -1900,6 +1948,30 @@ type AiConversationQueryViewToolCallArgsView {
   type: String!
 }
 
+type AiConversationReadSandboxFileToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationReadSandboxFileToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationReadSandboxFileToolCallArgs {
+  path: String!
+}
+
 """
 A reasoning part in an AI conversation.
 """
@@ -2142,6 +2214,22 @@ enum AiConversationSubscribeToEventToolCallArgsType {
   recurring
 }
 
+type AiConversationSuggestRepositoryToolCall implements AiConversationBaseToolCall {
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
 type AiConversationSuggestValuesToolCall implements AiConversationBaseToolCall {
   """
   The arguments to the tool call.
@@ -2197,8 +2285,10 @@ type AiConversationTextPart implements AiConversationBasePart {
 The name of a tool that was called in an AI conversation.
 """
 enum AiConversationTool {
+  Bash
   CodeIntelligence
   CreateEntity
+  CreateSandbox
   DeleteEntity
   GetMicrosoftTeamsConversationHistory
   GetPullRequestCheckLogs
@@ -2211,6 +2301,7 @@ enum AiConversationTool {
   QueryActivity
   QueryUpdates
   QueryView
+  ReadSandboxFile
   Research
   RestoreEntity
   RetrieveEntities
@@ -2218,6 +2309,7 @@ enum AiConversationTool {
   SearchDocumentation
   SearchEntities
   SubscribeToEvent
+  SuggestRepository
   SuggestValues
   TranscribeMedia
   TranscribeVideo
@@ -2230,8 +2322,10 @@ enum AiConversationTool {
 The tool call.
 """
 union AiConversationToolCall =
+  | AiConversationBashToolCall
   | AiConversationCodeIntelligenceToolCall
   | AiConversationCreateEntityToolCall
+  | AiConversationCreateSandboxToolCall
   | AiConversationDeleteEntityToolCall
   | AiConversationGetMicrosoftTeamsConversationHistoryToolCall
   | AiConversationGetPullRequestCheckLogsToolCall
@@ -2244,6 +2338,7 @@ union AiConversationToolCall =
   | AiConversationQueryActivityToolCall
   | AiConversationQueryUpdatesToolCall
   | AiConversationQueryViewToolCall
+  | AiConversationReadSandboxFileToolCall
   | AiConversationResearchToolCall
   | AiConversationRestoreEntityToolCall
   | AiConversationRetrieveEntitiesToolCall
@@ -2251,6 +2346,7 @@ union AiConversationToolCall =
   | AiConversationSearchDocumentationToolCall
   | AiConversationSearchEntitiesToolCall
   | AiConversationSubscribeToEventToolCall
+  | AiConversationSuggestRepositoryToolCall
   | AiConversationSuggestValuesToolCall
   | AiConversationTranscribeMediaToolCall
   | AiConversationTranscribeVideoToolCall
@@ -11331,6 +11427,10 @@ input GitHubRepoInput {
   """
   archived: Boolean
   """
+  The repository's GitHub description, if any.
+  """
+  description: String
+  """
   The external identifier (GitHub node ID) for the repository.
   """
   externalId: String
@@ -13451,7 +13551,7 @@ type InitiativeUpdate implements Node {
   """
   initiative: Initiative!
   """
-  Whether the diff between this update and the previous one should be hidden in the UI.
+  Whether the diff between this update and the previous one should be hidden in the UI. Only used for legacy updates. Not settable in the UI.
   """
   isDiffHidden: Boolean!
   """
@@ -13738,10 +13838,6 @@ input InitiativeUpdateUpdateInput {
   The health of the initiative at the time of the update.
   """
   health: InitiativeUpdateHealthType
-  """
-  Whether the diff between the current update and the previous one should be hidden.
-  """
-  isDiffHidden: Boolean
 }
 
 """
@@ -20479,6 +20575,14 @@ input LaunchDarklySettingsInput {
 }
 
 """
+How workspace MCP server access is restricted for Linear Agent.
+"""
+enum LinearAgentMcpServersMode {
+  all
+  allowlist
+}
+
+"""
 [ALPHA] Issue link count sorting options.
 """
 input LinkCountSort {
@@ -22357,6 +22461,10 @@ type Mutation {
     """
     customHeaders: [McpServerCustomHeaderInput!]
     """
+    The workspace-approved MCP server definition used to start this connection.
+    """
+    mcpServerDefinitionId: String
+    """
     The URL of the MCP server to connect with.
     """
     serverUrl: String!
@@ -22381,6 +22489,10 @@ type Mutation {
     Optional additional HTTP headers to include with requests to this MCP server.
     """
     customHeaders: [McpServerCustomHeaderInput!]
+    """
+    The workspace-approved MCP server definition used to start this connection.
+    """
+    mcpServerDefinitionId: String
     """
     The URL of the MCP server to connect with.
     """
@@ -24201,14 +24313,14 @@ type Mutation {
     input: ReleasePipelineCreateInput!
   ): ReleasePipelinePayload!
   """
-  Permanently deletes a release pipeline and all associated stages and releases.
+  Moves a release pipeline to the trash bin. Trashed pipelines are archived and will be permanently deleted after a retention period, along with all their releases. If the pipeline is already archived, it is marked as trashed with a fresh archive timestamp.
   """
   releasePipelineDelete(
     """
     The identifier of the release pipeline to delete.
     """
     id: String!
-  ): DeletePayload!
+  ): ReleasePipelineArchivePayload!
   """
   Unarchives a release pipeline.
   """
@@ -26033,6 +26145,10 @@ input NullableDocumentContentFilter {
   """
   initiative: InitiativeFilter
   """
+  Filters that the document content issue must satisfy.
+  """
+  issue: IssueFilter
+  """
   Filter based on the existence of the relation.
   """
   null: Boolean
@@ -26879,6 +26995,10 @@ input NullableTeamFilter {
   """
   key: StringComparator
   """
+  Filters that the team's members must satisfy.
+  """
+  members: UserCollectionFilter
+  """
   Comparator for the team name.
   """
   name: StringComparator
@@ -27143,11 +27263,11 @@ type OAuthAppWebhookPayload {
 }
 
 """
-Public API representation of an OAuth application managed by the calling OAuth application. Secrets are only returned by create and rotation mutations.
+An OAuth application that can be managed by the calling OAuth application.
 """
 type OAuthApplication {
   """
-  The public client ID used during OAuth authorization flows.
+  The client ID used during OAuth authorization flows.
   """
   clientId: String!
   """
@@ -27231,7 +27351,7 @@ input OAuthApplicationCreateInput {
   """
   developerUrl: String!
   """
-  Optional client-supplied idempotency key. Reusing the same key with the same managing OAuth application returns the existing OAuth application instead of creating a duplicate.
+  Optional client-supplied idempotency key. Reusing the same key with the same managing OAuth application returns the existing OAuth application instead of creating a duplicate. The key does not apply to archived applications.
   """
   idempotencyKey: String
   """
@@ -28604,13 +28724,17 @@ input OrganizationLinearAgentMcpServerAllowlistEntryInput {
 """
 input OrganizationLinearAgentSettingsInput {
   """
-  [Internal] The MCP server allowlist for Linear Agent. When unset, all MCP servers are allowed.
+  [Internal] Legacy MCP server allowlist for Linear Agent.
   """
   mcpServersAllowlist: [OrganizationLinearAgentMcpServerAllowlistEntryInput!]
   """
   [Internal] Whether the workspace has enabled MCP servers for Linear Agent.
   """
   mcpServersEnabled: Boolean
+  """
+  [Internal] Whether all MCP servers or only approved MCP servers are allowed for Linear Agent.
+  """
+  mcpServersMode: LinearAgentMcpServersMode
   """
   [Internal] Whether the workspace has enabled web search for Linear Agent.
   """
@@ -33768,10 +33892,6 @@ input ProjectUpdateUpdateInput {
   The health of the project at the time of the update.
   """
   health: ProjectUpdateHealthType
-  """
-  Whether the diff between the current update and the previous one should be hidden.
-  """
-  isDiffHidden: Boolean
 }
 
 """
@@ -34291,6 +34411,10 @@ type PullRequestCommit {
   The full commit message.
   """
   message: String!
+  """
+  The parent commit SHAs in provider-reported order. The first parent is used for merge-commit review ranges when available.
+  """
+  parentShas: [String!]
   """
   The Git commit SHA.
   """
@@ -37830,6 +37954,10 @@ input ReleaseCompleteInput {
   """
   commitSha: String
   """
+  Documents to attach to the completed release. Existing documents with the same title are updated.
+  """
+  documents: [ReleaseDocumentInput!]
+  """
   External links to attach to the completed release.
   """
   links: [ReleaseLinkInput!]
@@ -37841,6 +37969,10 @@ input ReleaseCompleteInput {
   The identifier of the pipeline to mark a release as completed.
   """
   pipelineId: String!
+  """
+  Release notes covering the completed release.
+  """
+  releaseNotes: ReleaseNoteInput
   """
   The version of the release to complete. If not provided, the latest started release will be completed.
   """
@@ -37856,6 +37988,10 @@ input ReleaseCompleteInputBase {
   """
   commitSha: String
   """
+  Documents to attach to the completed release. Existing documents with the same title are updated.
+  """
+  documents: [ReleaseDocumentInput!]
+  """
   External links to attach to the completed release.
   """
   links: [ReleaseLinkInput!]
@@ -37863,6 +37999,10 @@ input ReleaseCompleteInputBase {
   Optional release name to apply when completing the release.
   """
   name: String
+  """
+  Release notes covering the completed release.
+  """
+  releaseNotes: ReleaseNoteInput
   """
   The version of the release to complete. If not provided, the latest started release will be completed.
   """
@@ -37938,6 +38078,10 @@ input ReleaseDebugSinkInput {
   """
   includePaths: [String!]
   """
+  Regex used to filter commit subjects during scanning.
+  """
+  includeSubjects: [String!]
+  """
   List of commit SHAs that were inspected.
   """
   inspectedShas: [String!]!
@@ -37953,6 +38097,20 @@ input ReleaseDebugSinkInput {
   Map of reverted issue identifiers to their source information.
   """
   revertedIssues: JSONObject
+}
+
+"""
+A document to attach to the release. Existing documents on the release with the same title are updated in place. Bad rows (empty title, oversized title/body) are skipped with a warning rather than failing the release command.
+"""
+input ReleaseDocumentInput {
+  """
+  The document body as markdown.
+  """
+  content: String!
+  """
+  The title of the document. Used to match existing documents on the release for upsert.
+  """
+  title: String!
 }
 
 type ReleaseEdge {
@@ -38177,6 +38335,20 @@ The generation status of a release note's body content.
 enum ReleaseNoteGenerationStatus {
   completed
   pending
+}
+
+"""
+Release notes to attach to the release. Upserts the existing release notes that cover only this release. Bad input (empty title, oversized title/body) is skipped with a warning rather than failing the release command.
+"""
+input ReleaseNoteInput {
+  """
+  The release notes body as markdown.
+  """
+  content: String!
+  """
+  Optional title. If omitted, the UI derives one from the release range.
+  """
+  title: String
 }
 
 """
@@ -38438,6 +38610,10 @@ type ReleasePipeline implements Node {
     """
     orderBy: PaginationOrderBy
   ): TeamConnection!
+  """
+  A flag that indicates whether the pipeline is in the trash bin. Trashed pipelines are archived and will be permanently deleted after a retention period. Null when the pipeline is not trashed.
+  """
+  trashed: Boolean
   """
   The type of the pipeline, which determines how releases are created and managed. Continuous pipelines create a completed release per sync, while scheduled pipelines accumulate issues in a started release.
   """
@@ -39050,6 +39226,10 @@ input ReleaseSyncInput {
   """
   debugSink: ReleaseDebugSinkInput
   """
+  Documents to attach to the release. Existing documents on the release with the same title are updated.
+  """
+  documents: [ReleaseDocumentInput!]
+  """
   Issue references (e.g. ENG-123) to associate with this release.
   """
   issueReferences: [IssueReferenceInput!]
@@ -39069,6 +39249,10 @@ input ReleaseSyncInput {
   Pull request references to look up. Issues linked to found PRs will be associated with this release.
   """
   pullRequestReferences: [PullRequestReferenceInput!]
+  """
+  Release notes covering this release. Upserts the existing release notes that cover only this release.
+  """
+  releaseNotes: ReleaseNoteInput
   """
   Information about the source repository.
   """
@@ -39096,6 +39280,10 @@ input ReleaseSyncInputBase {
   """
   debugSink: ReleaseDebugSinkInput
   """
+  Documents to attach to the release. Existing documents on the release with the same title are updated.
+  """
+  documents: [ReleaseDocumentInput!]
+  """
   Issue references (e.g. ENG-123) to associate with this release.
   """
   issueReferences: [IssueReferenceInput!]
@@ -39111,6 +39299,10 @@ input ReleaseSyncInputBase {
   Pull request references to look up. Issues linked to found PRs will be associated with this release.
   """
   pullRequestReferences: [PullRequestReferenceInput!]
+  """
+  Release notes covering this release. Upserts the existing release notes that cover only this release.
+  """
+  releaseNotes: ReleaseNoteInput
   """
   Information about the source repository.
   """
@@ -39130,6 +39322,10 @@ Input for updating a release by pipeline identifier. Extends the base update inp
 """
 input ReleaseUpdateByPipelineInput {
   """
+  Documents to attach to the updated release. Existing documents with the same title are updated.
+  """
+  documents: [ReleaseDocumentInput!]
+  """
   External links to attach to the updated release.
   """
   links: [ReleaseLinkInput!]
@@ -39141,6 +39337,10 @@ input ReleaseUpdateByPipelineInput {
   The identifier of the pipeline.
   """
   pipelineId: String!
+  """
+  Release notes covering the updated release.
+  """
+  releaseNotes: ReleaseNoteInput
   """
   The stage name to set. First tries exact match, then falls back to case-insensitive matching with dashes/underscores treated as spaces.
   """
@@ -39156,6 +39356,10 @@ Base input for updating a release by pipeline. Contains optional version and sta
 """
 input ReleaseUpdateByPipelineInputBase {
   """
+  Documents to attach to the updated release. Existing documents with the same title are updated.
+  """
+  documents: [ReleaseDocumentInput!]
+  """
   External links to attach to the updated release.
   """
   links: [ReleaseLinkInput!]
@@ -39163,6 +39367,10 @@ input ReleaseUpdateByPipelineInputBase {
   Optional release name to apply when updating the release.
   """
   name: String
+  """
+  Release notes covering the updated release.
+  """
+  releaseNotes: ReleaseNoteInput
   """
   The stage name to set. First tries exact match, then falls back to case-insensitive matching with dashes/underscores treated as spaces.
   """
@@ -42174,6 +42382,10 @@ input TeamFilter {
   """
   key: StringComparator
   """
+  Filters that the team's members must satisfy.
+  """
+  members: UserCollectionFilter
+  """
   Comparator for the team name.
   """
   name: StringComparator
@@ -43887,6 +44099,10 @@ type User implements Node {
   Whether the user is a guest in the workspace and limited to accessing a subset of teams.
   """
   guest: Boolean!
+  """
+  [Internal] Whether this user can access GitHub source code through Linear. True when the workspace has connected GitHub code-access repositories and the user has an active personal GitHub code-access token for the same GitHub host. Always false when queried for a user other than the authenticated viewer.
+  """
+  hasGitHubCodeAccess: Boolean!
   """
   The unique identifier of the entity.
   """
@@ -45923,6 +46139,10 @@ type ViewPreferencesValues {
   Whether to show week numbers in timeline chronology bar.
   """
   timelineChronologyShowWeekNumbers: Boolean
+  """
+  Whether to show the projects aside panel on the timeline.
+  """
+  timelineShowProjectsAside: Boolean
   """
   The zoom scale for the timeline view.
   """
