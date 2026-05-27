@@ -946,6 +946,46 @@ export class AiConversationBaseWidget extends Request {
   public name: L.AiConversationWidgetName;
 }
 /**
+ * AiConversationBashToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationBashToolCallFragment response data
+ */
+export class AiConversationBashToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationBashToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationBashToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationBashToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationBashToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationBashToolCallArgsFragment response data
+ */
+export class AiConversationBashToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationBashToolCallArgsFragment) {
+    super(request);
+    this.command = data.command;
+  }
+
+  public command: string;
+}
+/**
  * AiConversationCodeIntelligenceToolCall model
  *
  * @param request - function to call the graphql client
@@ -1026,6 +1066,46 @@ export class AiConversationCreateEntityToolCallArgs extends Request {
 
   public count?: number | null;
   public type: string;
+}
+/**
+ * AiConversationCreateSandboxToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationCreateSandboxToolCallFragment response data
+ */
+export class AiConversationCreateSandboxToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationCreateSandboxToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationCreateSandboxToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationCreateSandboxToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationCreateSandboxToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationCreateSandboxToolCallArgsFragment response data
+ */
+export class AiConversationCreateSandboxToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationCreateSandboxToolCallArgsFragment) {
+    super(request);
+    this.repository = data.repository;
+  }
+
+  public repository: string;
 }
 /**
  * AiConversationDeleteEntityToolCall model
@@ -1811,6 +1891,46 @@ export class AiConversationQueryViewToolCallArgsView extends Request {
   public group?: AiConversationSearchEntitiesToolCallResultEntities | null;
 }
 /**
+ * AiConversationReadSandboxFileToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationReadSandboxFileToolCallFragment response data
+ */
+export class AiConversationReadSandboxFileToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationReadSandboxFileToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationReadSandboxFileToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationReadSandboxFileToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationReadSandboxFileToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationReadSandboxFileToolCallArgsFragment response data
+ */
+export class AiConversationReadSandboxFileToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationReadSandboxFileToolCallArgsFragment) {
+    super(request);
+    this.path = data.path;
+  }
+
+  public path: string;
+}
+/**
  * A reasoning part in an AI conversation.
  *
  * @param request - function to call the graphql client
@@ -2172,6 +2292,29 @@ export class AiConversationSubscribeToEventToolCallArgs extends Request {
   public subscriptionId?: string | null;
   public kind?: L.AiConversationSubscribeToEventToolCallArgsKind | null;
   public type: L.AiConversationSubscribeToEventToolCallArgsType;
+}
+/**
+ * AiConversationSuggestRepositoryToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSuggestRepositoryToolCallFragment response data
+ */
+export class AiConversationSuggestRepositoryToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSuggestRepositoryToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
 }
 /**
  * AiConversationSuggestValuesToolCall model
@@ -9454,7 +9597,7 @@ export class InitiativeUpdate extends Request {
   public editedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
-  /** Whether the diff between this update and the previous one should be hidden in the UI. */
+  /** Whether the diff between this update and the previous one should be hidden in the UI. Only used for legacy updates. Not settable in the UI. */
   public isDiffHidden: boolean;
   /** Whether the initiative update is stale. */
   public isStale: boolean;
@@ -14103,7 +14246,7 @@ export class OAuthAppWebhookPayload {
   public webhookTimestamp: number;
 }
 /**
- * Public API representation of an OAuth application managed by the calling OAuth application. Secrets are only returned by create and rotation mutations.
+ * An OAuth application that can be managed by the calling OAuth application.
  *
  * @param request - function to call the graphql client
  * @param data - L.OAuthApplicationFragment response data
@@ -14127,7 +14270,7 @@ export class OAuthApplication extends Request {
     this.distribution = data.distribution;
   }
 
-  /** The public client ID used during OAuth authorization flows. */
+  /** The client ID used during OAuth authorization flows. */
   public clientId: string;
   /** The time at which the OAuth application was created. */
   public createdAt: Date;
@@ -18460,6 +18603,7 @@ export class ReleasePipeline extends Request {
     this.isProduction = data.isProduction;
     this.name = data.name;
     this.slugId = data.slugId;
+    this.trashed = data.trashed ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this.type = data.type;
@@ -18485,6 +18629,8 @@ export class ReleasePipeline extends Request {
   public name: string;
   /** The pipeline's unique slug identifier, used in URLs and for lookup by human-readable identifier instead of UUID. */
   public slugId: string;
+  /** A flag that indicates whether the pipeline is in the trash bin. Trashed pipelines are archived and will be permanently deleted after a retention period. Null when the pipeline is not trashed. */
+  public trashed?: boolean | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -18534,7 +18680,7 @@ export class ReleasePipeline extends Request {
   public create(input: L.ReleasePipelineCreateInput) {
     return new CreateReleasePipelineMutation(this._request).fetch(input);
   }
-  /** Permanently deletes a release pipeline and all associated stages and releases. */
+  /** Moves a release pipeline to the trash bin. Trashed pipelines are archived and will be permanently deleted after a retention period, along with all their releases. If the pipeline is already archived, it is marked as trashed with a fresh archive timestamp. */
   public delete() {
     return new DeleteReleasePipelineMutation(this._request).fetch(this.id);
   }
@@ -22836,6 +22982,7 @@ export class ViewPreferencesValues extends Request {
     this.teamViewOrdering = data.teamViewOrdering ?? undefined;
     this.timelineChronologyShowCycleTeamIds = data.timelineChronologyShowCycleTeamIds ?? undefined;
     this.timelineChronologyShowWeekNumbers = data.timelineChronologyShowWeekNumbers ?? undefined;
+    this.timelineShowProjectsAside = data.timelineShowProjectsAside ?? undefined;
     this.timelineZoomScale = data.timelineZoomScale ?? undefined;
     this.triageViewOrdering = data.triageViewOrdering ?? undefined;
     this.viewOrdering = data.viewOrdering ?? undefined;
@@ -23262,6 +23409,8 @@ export class ViewPreferencesValues extends Request {
   public timelineChronologyShowCycleTeamIds?: string[] | null;
   /** Whether to show week numbers in timeline chronology bar. */
   public timelineChronologyShowWeekNumbers?: boolean | null;
+  /** Whether to show the projects aside panel on the timeline. */
+  public timelineShowProjectsAside?: boolean | null;
   /** The zoom scale for the timeline view. */
   public timelineZoomScale?: number | null;
   /** The triage view ordering. */
@@ -36007,12 +36156,12 @@ export class DeleteReleasePipelineMutation extends Request {
   }
 
   /**
-   * Call the DeleteReleasePipeline mutation and return a DeletePayload
+   * Call the DeleteReleasePipeline mutation and return a ReleasePipelineArchivePayload
    *
    * @param id - required id to pass to deleteReleasePipeline
    * @returns parsed response from DeleteReleasePipelineMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): LinearFetch<ReleasePipelineArchivePayload> {
     const response = await this._request<L.DeleteReleasePipelineMutation, L.DeleteReleasePipelineMutationVariables>(
       L.DeleteReleasePipelineDocument.toString(),
       {
@@ -36021,7 +36170,7 @@ export class DeleteReleasePipelineMutation extends Request {
     );
     const data = response.releasePipelineDelete;
 
-    return new DeletePayload(this._request, data);
+    return new ReleasePipelineArchivePayload(this._request, data);
   }
 }
 
@@ -50400,12 +50549,12 @@ export class LinearSdk extends Request {
     return new CreateReleasePipelineMutation(this._request).fetch(input);
   }
   /**
-   * Permanently deletes a release pipeline and all associated stages and releases.
+   * Moves a release pipeline to the trash bin. Trashed pipelines are archived and will be permanently deleted after a retention period, along with all their releases. If the pipeline is already archived, it is marked as trashed with a fresh archive timestamp.
    *
    * @param id - required id to pass to deleteReleasePipeline
-   * @returns DeletePayload
+   * @returns ReleasePipelineArchivePayload
    */
-  public deleteReleasePipeline(id: string): LinearFetch<DeletePayload> {
+  public deleteReleasePipeline(id: string): LinearFetch<ReleasePipelineArchivePayload> {
     return new DeleteReleasePipelineMutation(this._request).fetch(id);
   }
   /**
@@ -51108,6 +51257,7 @@ export {
   IssueSharingPolicy,
   IssueSuggestionState,
   IssueSuggestionType,
+  LinearAgentMcpServersMode,
   NotificationCategory,
   NotificationChannel,
   OAuthApplicationDistribution,

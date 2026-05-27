@@ -3088,6 +3088,8 @@ fragment ReleaseNote on ReleaseNote {
 # patterns.
 fragment ReleasePipeline on ReleasePipeline {
   __typename
+  # A flag that indicates whether the pipeline is in the trash bin. Trashed pipelines are archived and will be permanently deleted after a retention period. Null when the pipeline is not trashed.
+  trashed
   # Glob patterns to filter commits by file path. When non-empty, only commits that modify files matching at least one pattern will be included in release syncs. An empty array means all commits are included regardless of file paths.
   includePathPatterns
   # The URL to the release pipeline's releases list in the Linear app.
@@ -3584,7 +3586,7 @@ fragment InitiativeUpdate on InitiativeUpdate {
   user {
     id
   }
-  # Whether the diff between this update and the previous one should be hidden in the UI.
+  # Whether the diff between this update and the previous one should be hidden in the UI. Only used for legacy updates. Not settable in the UI.
   isDiffHidden
   # Whether the initiative update is stale.
   isStale
@@ -4086,11 +4088,17 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
   }
   # The tool call part.
   toolCall {
+    ... on AiConversationBashToolCall {
+      ...AiConversationBashToolCall
+    }
     ... on AiConversationCodeIntelligenceToolCall {
       ...AiConversationCodeIntelligenceToolCall
     }
     ... on AiConversationCreateEntityToolCall {
       ...AiConversationCreateEntityToolCall
+    }
+    ... on AiConversationCreateSandboxToolCall {
+      ...AiConversationCreateSandboxToolCall
     }
     ... on AiConversationDeleteEntityToolCall {
       ...AiConversationDeleteEntityToolCall
@@ -4128,6 +4136,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     ... on AiConversationQueryViewToolCall {
       ...AiConversationQueryViewToolCall
     }
+    ... on AiConversationReadSandboxFileToolCall {
+      ...AiConversationReadSandboxFileToolCall
+    }
     ... on AiConversationResearchToolCall {
       ...AiConversationResearchToolCall
     }
@@ -4148,6 +4159,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     }
     ... on AiConversationSubscribeToEventToolCall {
       ...AiConversationSubscribeToEventToolCall
+    }
+    ... on AiConversationSuggestRepositoryToolCall {
+      ...AiConversationSuggestRepositoryToolCall
     }
     ... on AiConversationSuggestValuesToolCall {
       ...AiConversationSuggestValuesToolCall
@@ -4922,6 +4936,39 @@ fragment Summary on Summary {
   generatedAt
   # The unique identifier of the entity.
   id
+}
+
+# An OAuth application that can be managed by the calling OAuth application.
+fragment OAuthApplication on OAuthApplication {
+  __typename
+  # Allowed redirect URIs for OAuth authorization flows.
+  redirectUris
+  # Distribution setting for the OAuth application. Private applications are only installable by the owning workspace.
+  distribution
+  # Name of the developer or company that built the OAuth application.
+  developer
+  # Resource types the OAuth application's webhooks subscribe to.
+  webhookResourceTypes
+  # The client ID used during OAuth authorization flows.
+  clientId
+  # The human-readable name of the OAuth application.
+  name
+  # The time at which the OAuth application was created.
+  createdAt
+  # The time at which the OAuth application was last updated.
+  updatedAt
+  # The unique identifier of the OAuth application.
+  id
+  # URL of the OAuth application's icon. Null if not set.
+  imageUrl
+  # URL of the developer's website, homepage, or documentation.
+  developerUrl
+  # User-facing description of the OAuth application. Null if not set.
+  description
+  # Webhook URL used for delivering webhook payloads. Null if not set.
+  webhookUrl
+  # Whether webhook delivery is enabled for this OAuth application.
+  webhookEnabled
 }
 
 # An active SLA rule that can apply to a team.
@@ -8332,40 +8379,6 @@ fragment UserSettings on UserSettings {
   showFullUserNames
 }
 
-# Public API representation of an OAuth application managed by the calling OAuth application. Secrets
-# are only returned by create and rotation mutations.
-fragment OAuthApplication on OAuthApplication {
-  __typename
-  # Allowed redirect URIs for OAuth authorization flows.
-  redirectUris
-  # Distribution setting for the OAuth application. Private applications are only installable by the owning workspace.
-  distribution
-  # Name of the developer or company that built the OAuth application.
-  developer
-  # Resource types the OAuth application's webhooks subscribe to.
-  webhookResourceTypes
-  # The human-readable name of the OAuth application.
-  name
-  # The public client ID used during OAuth authorization flows.
-  clientId
-  # The time at which the OAuth application was created.
-  createdAt
-  # The time at which the OAuth application was last updated.
-  updatedAt
-  # The unique identifier of the OAuth application.
-  id
-  # URL of the OAuth application's icon. Null if not set.
-  imageUrl
-  # URL of the developer's website, homepage, or documentation.
-  developerUrl
-  # User-facing description of the OAuth application. Null if not set.
-  description
-  # Webhook URL used for delivering webhook payloads. Null if not set.
-  webhookUrl
-  # Whether webhook delivery is enabled for this OAuth application.
-  webhookEnabled
-}
-
 # Public-facing information about an OAuth application. Contains only the fields that are safe to
 # display to users during the authorization flow, excluding sensitive data like client secrets and
 # internal configuration.
@@ -9072,6 +9085,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   # Whether to show the project updated date field.
   projectFieldDateUpdated
+  # Whether to show the projects aside panel on the timeline.
+  timelineShowProjectsAside
   # Whether to show the pull requests field.
   fieldPullRequests
   # Whether to show the release date field for continuous pipeline releases.
@@ -10346,12 +10361,20 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
     ...AiConversationToolDisplayInfo
   }
 
+  ... on AiConversationBashToolCall {
+    ...AiConversationBashToolCall
+  }
+
   ... on AiConversationCodeIntelligenceToolCall {
     ...AiConversationCodeIntelligenceToolCall
   }
 
   ... on AiConversationCreateEntityToolCall {
     ...AiConversationCreateEntityToolCall
+  }
+
+  ... on AiConversationCreateSandboxToolCall {
+    ...AiConversationCreateSandboxToolCall
   }
 
   ... on AiConversationDeleteEntityToolCall {
@@ -10402,6 +10425,10 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
     ...AiConversationQueryViewToolCall
   }
 
+  ... on AiConversationReadSandboxFileToolCall {
+    ...AiConversationReadSandboxFileToolCall
+  }
+
   ... on AiConversationResearchToolCall {
     ...AiConversationResearchToolCall
   }
@@ -10428,6 +10455,10 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
 
   ... on AiConversationSubscribeToEventToolCall {
     ...AiConversationSubscribeToEventToolCall
+  }
+
+  ... on AiConversationSuggestRepositoryToolCall {
+    ...AiConversationSuggestRepositoryToolCall
   }
 
   ... on AiConversationSuggestValuesToolCall {
@@ -10475,6 +10506,28 @@ fragment AiConversationBaseWidget on AiConversationBaseWidget {
   }
 }
 
+fragment AiConversationBashToolCall on AiConversationBashToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationBashToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationBashToolCallArgs on AiConversationBashToolCallArgs {
+  __typename
+  command
+}
+
 fragment AiConversationCodeIntelligenceToolCall on AiConversationCodeIntelligenceToolCall {
   __typename
   # The arguments of the tool call.
@@ -10518,6 +10571,28 @@ fragment AiConversationCreateEntityToolCallArgs on AiConversationCreateEntityToo
   __typename
   count
   type
+}
+
+fragment AiConversationCreateSandboxToolCall on AiConversationCreateSandboxToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationCreateSandboxToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationCreateSandboxToolCallArgs on AiConversationCreateSandboxToolCallArgs {
+  __typename
+  repository
 }
 
 fragment AiConversationDeleteEntityToolCall on AiConversationDeleteEntityToolCall {
@@ -10894,6 +10969,28 @@ fragment AiConversationQueryViewToolCallArgsView on AiConversationQueryViewToolC
   type
 }
 
+fragment AiConversationReadSandboxFileToolCall on AiConversationReadSandboxFileToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationReadSandboxFileToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationReadSandboxFileToolCallArgs on AiConversationReadSandboxFileToolCallArgs {
+  __typename
+  path
+}
+
 fragment AiConversationResearchToolCall on AiConversationResearchToolCall {
   __typename
   # The arguments of the tool call.
@@ -11080,6 +11177,19 @@ fragment AiConversationSubscribeToEventToolCallArgs on AiConversationSubscribeTo
   message
   subscriptionId
   type
+}
+
+fragment AiConversationSuggestRepositoryToolCall on AiConversationSuggestRepositoryToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
 }
 
 fragment AiConversationSuggestValuesToolCall on AiConversationSuggestValuesToolCall {
@@ -22930,13 +23040,15 @@ mutation createReleasePipeline(
     ...ReleasePipelinePayload
   }
 }
-# Permanently deletes a release pipeline and all associated stages and releases.
+# Moves a release pipeline to the trash bin. Trashed pipelines are archived and will be permanently
+# deleted after a retention period, along with all their releases. If the pipeline is already
+# archived, it is marked as trashed with a fresh archive timestamp.
 mutation deleteReleasePipeline(
   # The identifier of the release pipeline to delete.
   $id: String!
 ) {
   releasePipelineDelete(id: $id) {
-    ...DeletePayload
+    ...ReleasePipelineArchivePayload
   }
 }
 # Unarchives a release pipeline.
