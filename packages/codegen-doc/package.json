@@ -27,7 +27,7 @@
   "devDependencies": {
     "tsdown": "catalog:",
     "typescript": "catalog:",
-    "vitest": "^4.0.15"
+    "vitest": "^4.1.0"
   },
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
