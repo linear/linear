@@ -2730,6 +2730,27 @@ fragment AiConversationReasoningPart on AiConversationReasoningPart {
   type
 }
 
+# A recently archived integration.
+fragment ArchivedIntegrationPayload on ArchivedIntegrationPayload {
+  __typename
+  # The avatar URL of the connected GitHub organization.
+  orgAvatarUrl
+  # The enterprise URL if this is a GitHub Enterprise Cloud integration.
+  enterpriseUrl
+  # The external identifier of the connected GitHub organization.
+  externalOrgId
+  # The integration service type.
+  service
+  # The login name of the connected GitHub organization.
+  orgLogin
+  # The time at which the integration was archived.
+  archivedAt
+  # The unique identifier of the integration.
+  id
+  # Whether the integration had full code access.
+  codeAccess
+}
+
 # A record of a failed webhook delivery attempt. Created when a webhook payload could not be
 # successfully delivered to the destination URL, either due to an HTTP error response or a network
 # failure. Each failure event captures the HTTP status code (if available), the response body or error
@@ -3808,10 +3829,6 @@ fragment Team on Team {
   reviewWorkflowState {
     id
   }
-  # The workflow state into which issues are moved when they are marked as a duplicate of another issue. Defaults to the first canceled state.
-  markedAsDuplicateWorkflowState {
-    id
-  }
   # The workflow state into which issues are set when they are opened by non-team members or integrations if triage is enabled.
   triageIssueState {
     id
@@ -3856,6 +3873,10 @@ fragment Team on Team {
   slackIssueStatuses
   # Whether triage mode is enabled for the team. When enabled, issues created by non-members or integrations are routed to a triage state for review before entering the normal workflow.
   triageEnabled
+  # [DEPRECATED] No longer in use. Duplicates are now system-managed via the native duplicate state.
+  markedAsDuplicateWorkflowState {
+    id
+  }
   # [DEPRECATED] Unique hash for the team to be used in invite URLs.
   inviteHash
   # [DEPRECATED] Whether issues without priority should be sorted first.
@@ -4124,8 +4145,14 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     ... on AiConversationInvokeMcpToolToolCall {
       ...AiConversationInvokeMcpToolToolCall
     }
+    ... on AiConversationListCodingSessionsToolCall {
+      ...AiConversationListCodingSessionsToolCall
+    }
     ... on AiConversationNavigateToPageToolCall {
       ...AiConversationNavigateToPageToolCall
+    }
+    ... on AiConversationPromptCodingSessionToolCall {
+      ...AiConversationPromptCodingSessionToolCall
     }
     ... on AiConversationQueryActivityToolCall {
       ...AiConversationQueryActivityToolCall
@@ -4156,6 +4183,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     }
     ... on AiConversationSearchEntitiesToolCall {
       ...AiConversationSearchEntitiesToolCall
+    }
+    ... on AiConversationStartCodingSessionToolCall {
+      ...AiConversationStartCodingSessionToolCall
     }
     ... on AiConversationSubscribeToEventToolCall {
       ...AiConversationSubscribeToEventToolCall
@@ -4805,6 +4835,8 @@ fragment Organization on Organization {
   feedEnabled
   # Whether the roadmap feature is enabled for the workspace.
   roadmapEnabled
+  # Whether the workspace generates AI Pull Request guides for new pull requests.
+  pullRequestTourEnabled
   # Whether the workspace has enabled AI discussion summaries for issues.
   aiDiscussionSummariesEnabled
   # Whether the workspace has enabled resolved thread AI summaries.
@@ -7688,6 +7720,8 @@ fragment InitiativeUpdateWebhookPayload on InitiativeUpdateWebhookPayload {
 # Payload for an initiative webhook.
 fragment InitiativeWebhookPayload on InitiativeWebhookPayload {
   __typename
+  # Previous identifiers of the initiative.
+  previousIdentifiers
   # The ID of the entity.
   id
   # The ID of the last update for this initiative.
@@ -7716,6 +7750,8 @@ fragment InitiativeWebhookPayload on InitiativeWebhookPayload {
   health
   # The hour of the day for update reminders.
   updateRemindersHour
+  # The human-readable identifier of the initiative.
+  identifier
   # The icon of the initiative.
   icon
   # The last update for this initiative.
@@ -8739,6 +8775,10 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   hiddenGroupsList
   # List of row model IDs which should be hidden on a board.
   hiddenRows
+  # No longer used. Previously controlled the review checks field.
+  reviewFieldChecks
+  # No longer used. Previously controlled the review preview links field.
+  reviewFieldPreviewLinks
   # Selected team IDs to show cycles for in timeline chronology bar.
   timelineChronologyShowCycleTeamIds
   # The continuous pipeline releases view grouping.
@@ -9103,12 +9143,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelineFieldReleases
   # Whether to show the review avatar field.
   reviewFieldAvatar
-  # Whether to show the review checks field.
-  reviewFieldChecks
   # Whether to show the review identifier field.
   reviewFieldIdentifier
-  # Whether to show the review preview links field.
-  reviewFieldPreviewLinks
   # Whether to show the review repository field.
   reviewFieldRepository
   # Whether to show the team creation date field.
@@ -10409,8 +10445,16 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
     ...AiConversationInvokeMcpToolToolCall
   }
 
+  ... on AiConversationListCodingSessionsToolCall {
+    ...AiConversationListCodingSessionsToolCall
+  }
+
   ... on AiConversationNavigateToPageToolCall {
     ...AiConversationNavigateToPageToolCall
+  }
+
+  ... on AiConversationPromptCodingSessionToolCall {
+    ...AiConversationPromptCodingSessionToolCall
   }
 
   ... on AiConversationQueryActivityToolCall {
@@ -10451,6 +10495,10 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
 
   ... on AiConversationSearchEntitiesToolCall {
     ...AiConversationSearchEntitiesToolCall
+  }
+
+  ... on AiConversationStartCodingSessionToolCall {
+    ...AiConversationStartCodingSessionToolCall
   }
 
   ... on AiConversationSubscribeToEventToolCall {
@@ -10846,6 +10894,51 @@ fragment AiConversationInvokeMcpToolToolCallArgsTool on AiConversationInvokeMcpT
   title
 }
 
+fragment AiConversationListCodingSessionsToolCall on AiConversationListCodingSessionsToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationListCodingSessionsToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  # The result of the tool call.
+  result {
+    ...AiConversationListCodingSessionsToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationListCodingSessionsToolCallArgs on AiConversationListCodingSessionsToolCallArgs {
+  __typename
+  includeDismissed
+}
+
+fragment AiConversationListCodingSessionsToolCallResult on AiConversationListCodingSessionsToolCallResult {
+  __typename
+  agentSessions {
+    ...AiConversationListCodingSessionsToolCallResultAgentSessions
+  }
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+
+fragment AiConversationListCodingSessionsToolCallResultAgentSessions on AiConversationListCodingSessionsToolCallResultAgentSessions {
+  __typename
+  id
+  pullRequests {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  type
+}
+
 fragment AiConversationNavigateToPageToolCall on AiConversationNavigateToPageToolCall {
   __typename
   # The arguments of the tool call.
@@ -10883,6 +10976,46 @@ fragment AiConversationNavigateToPageToolCallArgsEntities on AiConversationNavig
 fragment AiConversationNavigateToPageToolCallResult on AiConversationNavigateToPageToolCallResult {
   __typename
   urls
+}
+
+fragment AiConversationPromptCodingSessionToolCall on AiConversationPromptCodingSessionToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationPromptCodingSessionToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  # The result of the tool call.
+  result {
+    ...AiConversationPromptCodingSessionToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationPromptCodingSessionToolCallArgs on AiConversationPromptCodingSessionToolCallArgs {
+  __typename
+  agentSessionId
+  prompt
+}
+
+fragment AiConversationPromptCodingSessionToolCallResult on AiConversationPromptCodingSessionToolCallResult {
+  __typename
+  agentSession {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  pullRequests {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
 }
 
 fragment AiConversationQueryActivityToolCall on AiConversationQueryActivityToolCall {
@@ -11151,6 +11284,45 @@ fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSea
   __typename
   id
   type
+}
+
+fragment AiConversationStartCodingSessionToolCall on AiConversationStartCodingSessionToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationStartCodingSessionToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  # The result of the tool call.
+  result {
+    ...AiConversationStartCodingSessionToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationStartCodingSessionToolCallArgs on AiConversationStartCodingSessionToolCallArgs {
+  __typename
+  prompt
+}
+
+fragment AiConversationStartCodingSessionToolCallResult on AiConversationStartCodingSessionToolCallResult {
+  __typename
+  agentSession {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  entities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  pullRequests {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
 }
 
 fragment AiConversationSubscribeToEventToolCall on AiConversationSubscribeToEventToolCall {
@@ -13203,6 +13375,12 @@ query applicationInfo(
 ) {
   applicationInfo(clientId: $clientId) {
     ...Application
+  }
+}
+# Recently archived GitHub integrations. Returns integrations archived within the last 30 days.
+query archivedIntegrations {
+  archivedIntegrations {
+    ...ArchivedIntegrationPayload
   }
 }
 # One specific issue attachment.
@@ -22292,6 +22470,19 @@ mutation issueRemoveLabel(
     ...IssuePayload
   }
 }
+# Shares an issue with a user who would not otherwise be able to access it. The viewer must have
+# native access to the issue's full sub-issue tree and permission to share issues in the issue's team.
+# Issues that inherit sharing from a parent issue cannot be shared directly.
+mutation issueShare(
+  # The identifier of the issue to share.
+  $id: String!
+  # The identifier of the user to share the issue with.
+  $userId: String!
+) {
+  issueShare(id: $id, userId: $userId) {
+    ...IssuePayload
+  }
+}
 # Subscribes a user to an issue.
 mutation issueSubscribe(
   # The identifier of the issue to subscribe to.
@@ -22343,6 +22534,19 @@ mutation unarchiveIssue(
 ) {
   issueUnarchive(id: $id) {
     ...IssueArchivePayload
+  }
+}
+# Stops sharing an issue with a user. The viewer must have native access to the issue's full sub-issue
+# tree and permission to share issues in the issue's team. Issues that inherit sharing from a parent
+# issue cannot be unshared directly.
+mutation issueUnshare(
+  # The identifier of the issue to stop sharing.
+  $id: String!
+  # The identifier of the user to remove from the issue share.
+  $userId: String!
+) {
+  issueUnshare(id: $id, userId: $userId) {
+    ...IssuePayload
   }
 }
 # Unsubscribes a user from an issue.

@@ -1401,6 +1401,7 @@ enum AiConversationEntityCardWidgetArgsType {
   CustomerNeed
   Dashboard
   Document
+  Draft
   Initiative
   InitiativeUpdate
   Issue
@@ -1409,6 +1410,7 @@ enum AiConversationEntityCardWidgetArgsType {
   ProjectUpdate
   PullRequest
   Release
+  ReleaseNote
   ReleasePipeline
   Team
   Template
@@ -1487,6 +1489,7 @@ enum AiConversationEntityListWidgetArgsEntitiesType {
   ProjectUpdate
   PullRequest
   Release
+  ReleaseNote
   ReleasePipeline
   Team
   Template
@@ -1726,6 +1729,45 @@ type AiConversationInvokeMcpToolToolCallArgsTool {
   title: String
 }
 
+type AiConversationListCodingSessionsToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationListCodingSessionsToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+  """
+  The result of the tool call.
+  """
+  result: AiConversationListCodingSessionsToolCallResult
+}
+
+type AiConversationListCodingSessionsToolCallArgs {
+  includeDismissed: Boolean
+}
+
+type AiConversationListCodingSessionsToolCallResult {
+  agentSessions: [AiConversationListCodingSessionsToolCallResultAgentSessions!]!
+  entities: [AiConversationSearchEntitiesToolCallResultEntities!]
+}
+
+type AiConversationListCodingSessionsToolCallResultAgentSessions {
+  id: String!
+  pullRequests: [AiConversationSearchEntitiesToolCallResultEntities!]
+  type: String!
+}
+
 type AiConversationNavigateToPageToolCall implements AiConversationBaseToolCall {
   """
   The arguments to the tool call.
@@ -1825,6 +1867,41 @@ enum AiConversationPartType {
   toolCall
   widget
   widgetPlaceholder
+}
+
+type AiConversationPromptCodingSessionToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationPromptCodingSessionToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+  """
+  The result of the tool call.
+  """
+  result: AiConversationPromptCodingSessionToolCallResult
+}
+
+type AiConversationPromptCodingSessionToolCallArgs {
+  agentSessionId: String!
+  prompt: String!
+}
+
+type AiConversationPromptCodingSessionToolCallResult {
+  agentSession: AiConversationSearchEntitiesToolCallResultEntities!
+  entities: [AiConversationSearchEntitiesToolCallResultEntities!]
+  pullRequests: [AiConversationSearchEntitiesToolCallResultEntities!]
 }
 
 """
@@ -2164,6 +2241,40 @@ type AiConversationSearchEntitiesToolCallResultEntities {
   type: String!
 }
 
+type AiConversationStartCodingSessionToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationStartCodingSessionToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+  """
+  The result of the tool call.
+  """
+  result: AiConversationStartCodingSessionToolCallResult
+}
+
+type AiConversationStartCodingSessionToolCallArgs {
+  prompt: String!
+}
+
+type AiConversationStartCodingSessionToolCallResult {
+  agentSession: AiConversationSearchEntitiesToolCallResultEntities!
+  entities: [AiConversationSearchEntitiesToolCallResultEntities!]
+  pullRequests: [AiConversationSearchEntitiesToolCallResultEntities!]
+}
+
 """
 The status of an AI conversation.
 """
@@ -2297,7 +2408,9 @@ enum AiConversationTool {
   GetSlackConversationHistory
   HandoffToCodingSession
   InvokeMcpTool
+  ListCodingSessions
   NavigateToPage
+  PromptCodingSession
   QueryActivity
   QueryUpdates
   QueryView
@@ -2308,6 +2421,7 @@ enum AiConversationTool {
   RetryPullRequestCheck
   SearchDocumentation
   SearchEntities
+  StartCodingSession
   SubscribeToEvent
   SuggestRepository
   SuggestValues
@@ -2334,7 +2448,9 @@ union AiConversationToolCall =
   | AiConversationGetSlackConversationHistoryToolCall
   | AiConversationHandoffToCodingSessionToolCall
   | AiConversationInvokeMcpToolToolCall
+  | AiConversationListCodingSessionsToolCall
   | AiConversationNavigateToPageToolCall
+  | AiConversationPromptCodingSessionToolCall
   | AiConversationQueryActivityToolCall
   | AiConversationQueryUpdatesToolCall
   | AiConversationQueryViewToolCall
@@ -2345,6 +2461,7 @@ union AiConversationToolCall =
   | AiConversationRetryPullRequestCheckToolCall
   | AiConversationSearchDocumentationToolCall
   | AiConversationSearchEntitiesToolCall
+  | AiConversationStartCodingSessionToolCall
   | AiConversationSubscribeToEventToolCall
   | AiConversationSuggestRepositoryToolCall
   | AiConversationSuggestValuesToolCall
@@ -2939,6 +3056,44 @@ type ArchiveResponse {
   The total number of entities in the archive.
   """
   totalCount: Float!
+}
+
+"""
+A recently archived integration.
+"""
+type ArchivedIntegrationPayload {
+  """
+  The time at which the integration was archived.
+  """
+  archivedAt: DateTime!
+  """
+  Whether the integration had full code access.
+  """
+  codeAccess: Boolean
+  """
+  The enterprise URL if this is a GitHub Enterprise Cloud integration.
+  """
+  enterpriseUrl: String
+  """
+  The external identifier of the connected GitHub organization.
+  """
+  externalOrgId: String
+  """
+  The unique identifier of the integration.
+  """
+  id: String!
+  """
+  The avatar URL of the connected GitHub organization.
+  """
+  orgAvatarUrl: String
+  """
+  The login name of the connected GitHub organization.
+  """
+  orgLogin: String
+  """
+  The integration service type.
+  """
+  service: String!
 }
 
 type AsksChannelConnectPayload {
@@ -4830,6 +4985,14 @@ input ContactSalesCreateInput {
   The page URL from which the sales inquiry was submitted, for attribution tracking.
   """
   url: String
+  """
+  JSON serialized last-touch UTM parameters captured from the `utm` cookie at form submission.
+  """
+  utm: String
+  """
+  JSON serialized first-touch UTM parameters captured from the `utm_first` cookie at form submission.
+  """
+  utmFirstTouch: String
 }
 
 """
@@ -4899,6 +5062,10 @@ input CreateOrganizationInput {
   JSON serialized UTM parameters associated with the creation of the workspace.
   """
   utm: String
+  """
+  JSON serialized UTM parameters captured on the user's first visit to the marketing site (first-touch attribution).
+  """
+  utmFirstTouch: String
 }
 
 """
@@ -11998,6 +12165,10 @@ type Initiative implements Node {
   """
   id: ID!
   """
+  [Internal] The human-readable identifier of the initiative. Returns the custom identifier override when set, otherwise the workspace default `<prefix>-<number>`. Null for legacy initiatives that have not been backfilled.
+  """
+  identifier: String
+  """
   Initiative updates associated with the initiative.
   """
   initiativeUpdates(
@@ -12153,6 +12324,10 @@ type Initiative implements Node {
     """
     sort: [InitiativeSortInput!]
   ): InitiativeConnection!
+  """
+  [Internal] Identifiers (default and custom) that this initiative has previously held. Used to resolve URLs that referenced an older identifier.
+  """
+  previousIdentifiers: [String!]!
   """
   Projects associated with the initiative.
   """
@@ -13729,6 +13904,10 @@ input InitiativeUpdateInput {
   """
   content: String
   """
+  [Internal] Sets or clears the custom identifier override for the initiative. Pass null to revert to the workspace default.
+  """
+  customIdentifier: String
+  """
   The description of the initiative.
   """
   description: String
@@ -14041,6 +14220,10 @@ type InitiativeWebhookPayload {
   """
   id: String!
   """
+  The human-readable identifier of the initiative.
+  """
+  identifier: String
+  """
   The last update for this initiative.
   """
   lastUpdate: InitiativeUpdateChildWebhookPayload
@@ -14072,6 +14255,10 @@ type InitiativeWebhookPayload {
   The parent initiatives associated with the initiative.
   """
   parentInitiatives: [InitiativeChildWebhookPayload!]
+  """
+  Previous identifiers of the initiative.
+  """
+  previousIdentifiers: [String!]
   """
   The projects associated with the initiative.
   """
@@ -15829,6 +16016,10 @@ input IssueCollectionFilter {
   """
   hasDuplicateRelations: RelationExistsComparator
   """
+  [Internal] Comparator for filtering issues bucketed as having an errored agent session, no active sessions, and no merged agent pull requests.
+  """
+  hasErroredAgentSessions: RelationExistsComparator
+  """
   [Internal] Comparator for filtering issues which have agent-session-linked pull requests that were merged.
   """
   hasMergedAgentPullRequests: RelationExistsComparator
@@ -16628,6 +16819,10 @@ input IssueFilter {
   Comparator for filtering issues which are duplicates.
   """
   hasDuplicateRelations: RelationExistsComparator
+  """
+  [Internal] Comparator for filtering issues bucketed as having an errored agent session, no active sessions, and no merged agent pull requests.
+  """
+  hasErroredAgentSessions: RelationExistsComparator
   """
   [Internal] Comparator for filtering issues which have agent-session-linked pull requests that were merged.
   """
@@ -23351,6 +23546,19 @@ type Mutation {
     labelId: String!
   ): IssuePayload!
   """
+  Shares an issue with a user who would not otherwise be able to access it. The viewer must have native access to the issue's full sub-issue tree and permission to share issues in the issue's team. Issues that inherit sharing from a parent issue cannot be shared directly.
+  """
+  issueShare(
+    """
+    The identifier of the issue to share.
+    """
+    id: String!
+    """
+    The identifier of the user to share the issue with.
+    """
+    userId: String!
+  ): IssuePayload!
+  """
   Subscribes a user to an issue.
   """
   issueSubscribe(
@@ -23407,6 +23615,19 @@ type Mutation {
     """
     id: String!
   ): IssueArchivePayload!
+  """
+  Stops sharing an issue with a user. The viewer must have native access to the issue's full sub-issue tree and permission to share issues in the issue's team. Issues that inherit sharing from a parent issue cannot be unshared directly.
+  """
+  issueUnshare(
+    """
+    The identifier of the issue to stop sharing.
+    """
+    id: String!
+    """
+    The identifier of the user to remove from the issue share.
+    """
+    userId: String!
+  ): IssuePayload!
   """
   Unsubscribes a user from an issue.
   """
@@ -26427,6 +26648,10 @@ input NullableIssueFilter {
   """
   hasDuplicateRelations: RelationExistsComparator
   """
+  [Internal] Comparator for filtering issues bucketed as having an errored agent session, no active sessions, and no merged agent pull requests.
+  """
+  hasErroredAgentSessions: RelationExistsComparator
+  """
   [Internal] Comparator for filtering issues which have agent-session-linked pull requests that were merged.
   """
   hasMergedAgentPullRequests: RelationExistsComparator
@@ -27832,11 +28057,11 @@ type Organization implements Node {
   """
   codeIntelligenceRepository: String
   """
-  [INTERNAL] Whether the workspace has enabled the Coding Agent.
+  [INTERNAL] Whether the workspace has enabled Coding Sessions.
   """
   codingAgentEnabled: Boolean!
   """
-  [Internal] Settings for Coding Agent features.
+  [Internal] Settings for Coding Sessions features.
   """
   codingAgentSettings: JSONObject!
   """
@@ -28067,6 +28292,10 @@ type Organization implements Node {
   """
   projectUpdatesReminderFrequency: ProjectUpdateReminderFrequency!
     @deprecated(reason: "Use organization.projectUpdatesReminderFrequencyInWeeks instead")
+  """
+  Whether the workspace generates AI Pull Request guides for new pull requests.
+  """
+  pullRequestTourEnabled: Boolean!
   """
   The feature release channel the workspace belongs to, which controls access to pre-release features.
   """
@@ -28305,11 +28534,11 @@ type OrganizationCancelDeletePayload {
 }
 
 """
-[Internal] Input for updating Coding Agent settings for the workspace.
+[Internal] Input for updating Coding Sessions settings for the workspace.
 """
 input OrganizationCodingAgentSettingsInput {
   """
-  [Internal] The model preference used for Coding Agent sessions.
+  [Internal] The model preference used for Coding Sessions sessions.
   """
   model: String
 }
@@ -28904,11 +29133,11 @@ input OrganizationUpdateInput {
   """
   codeIntelligenceRepository: String
   """
-  [INTERNAL] Whether the workspace has enabled the Coding Agent.
+  [INTERNAL] Whether the workspace has enabled Coding Sessions.
   """
   codingAgentEnabled: Boolean
   """
-  [Internal] Settings for Coding Agent features.
+  [Internal] Settings for Coding Sessions features.
   """
   codingAgentSettings: OrganizationCodingAgentSettingsInput
   """
@@ -29007,6 +29236,10 @@ input OrganizationUpdateInput {
   The hour at which project updates are sent.
   """
   projectUpdateRemindersHour: Float
+  """
+  Whether the workspace generates AI Pull Request guides for new pull requests.
+  """
+  pullRequestTourEnabled: Boolean
   """
   Whether the workspace has opted for reduced customer support attachment information.
   """
@@ -34839,6 +35072,10 @@ type Query {
     clientId: String!
   ): Application!
   """
+  Recently archived GitHub integrations. Returns integrations archived within the last 30 days.
+  """
+  archivedIntegrations: [ArchivedIntegrationPayload!]!
+  """
   [Internal] All archived teams of the workspace.
   """
   archivedTeams: [Team!]!
@@ -37908,6 +38145,10 @@ input ReleaseCollectionFilter {
   """
   every: ReleaseFilter
   """
+  Comparator for whether the release is covered by any (non-archived) release note. Filter with `{ eq: false }` to retrieve releases that do not yet have release notes attached.
+  """
+  hasReleaseNotes: BooleanComparator
+  """
   Comparator for the identifier.
   """
   id: IDComparator
@@ -38137,6 +38378,10 @@ input ReleaseFilter {
   Comparator for the created at date.
   """
   createdAt: DateComparator
+  """
+  Comparator for whether the release is covered by any (non-archived) release note. Filter with `{ eq: false }` to retrieve releases that do not yet have release notes attached.
+  """
+  hasReleaseNotes: BooleanComparator
   """
   Comparator for the identifier.
   """
@@ -41720,9 +41965,10 @@ type Team implements Node {
     orderBy: PaginationOrderBy
   ): IssueLabelConnection!
   """
-  The workflow state into which issues are moved when they are marked as a duplicate of another issue. Defaults to the first canceled state.
+  [DEPRECATED] No longer in use. Duplicates are now system-managed via the native duplicate state.
   """
   markedAsDuplicateWorkflowState: WorkflowState
+    @deprecated(reason: "Duplicates are now system-managed via the native duplicate state.")
   """
   Users who are members of this team. Supports filtering and pagination.
   """
@@ -41883,6 +42129,10 @@ type Team implements Node {
   [Internal] Whether this team is protected.
   """
   protected: Boolean!
+  """
+  [Internal] For protected teams, the enclosing private team that forms the visibility boundary. Null for public and private teams.
+  """
+  protectedBy: Team
   """
   Release pipelines associated with the team.
   """
@@ -42295,10 +42545,6 @@ input TeamCreateInput {
   The key of the team. If not given, the key will be generated based on the name of the team.
   """
   key: String
-  """
-  The workflow state into which issues are moved when they are marked as a duplicate of another issue.
-  """
-  markedAsDuplicateWorkflowStateId: String
   """
   The name of the team.
   """
@@ -42929,10 +43175,6 @@ input TeamUpdateInput {
   The key of the team.
   """
   key: String
-  """
-  The workflow state into which issues are moved when they are marked as a duplicate of another issue.
-  """
-  markedAsDuplicateWorkflowStateId: String
   """
   The name of the team.
   """
@@ -44532,6 +44774,8 @@ enum UserFlagType {
   agentExamplesDismissed
   agentHomeHeadlineSeen
   agentHomePageNotice
+  agentSharedSkillsPromoDismissed
+  agentSharedSkillsSplashAnimationSeen
   all
   analyticsWelcomeDismissed
   canPlaySnake
@@ -44567,6 +44811,7 @@ enum UserFlagType {
   projectUpdatesWelcomeDismissed
   projectWelcomeDismissed
   pulseWelcomeDismissed
+  reviewsPromptToConnectGithubDismissed
   rewindBannerDismissed
   slackAgentPromoFromCreateNewIssueShown
   slackBotWelcomeMessageShown
@@ -45940,7 +46185,7 @@ type ViewPreferencesValues {
   """
   reviewFieldAvatar: Boolean
   """
-  Whether to show the review checks field.
+  No longer used. Previously controlled the review checks field.
   """
   reviewFieldChecks: Boolean
   """
@@ -45948,7 +46193,7 @@ type ViewPreferencesValues {
   """
   reviewFieldIdentifier: Boolean
   """
-  Whether to show the review preview links field.
+  No longer used. Previously controlled the review preview links field.
   """
   reviewFieldPreviewLinks: Boolean
   """

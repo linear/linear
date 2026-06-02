@@ -477,6 +477,15 @@ describe("generated", () => {
     });
   });
 
+  /** Test ArchivedIntegrations query */
+  describe("ArchivedIntegrations", () => {
+    /** Test the root model query for ArchivedIntegrations */
+    it("archivedIntegrations", async () => {
+      const archivedIntegrations: L.ArchivedIntegrationPayload[] | undefined | null = await client.archivedIntegrations;
+      archivedIntegrations?.map(node => expect(node instanceof L.ArchivedIntegrationPayload));
+    });
+  });
+
   /** Test AttachmentIssue query */
   describe("AttachmentIssue", () => {
     let _attachmentIssue: L.Issue | undefined | null;
