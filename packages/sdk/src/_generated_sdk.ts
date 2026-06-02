@@ -1602,6 +1602,92 @@ export class AiConversationInvokeMcpToolToolCallArgsTool extends Request {
   public title?: string | null;
 }
 /**
+ * AiConversationListCodingSessionsToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationListCodingSessionsToolCallFragment response data
+ */
+export class AiConversationListCodingSessionsToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationListCodingSessionsToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationListCodingSessionsToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.result = data.result ? new AiConversationListCodingSessionsToolCallResult(request, data.result) : undefined;
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationListCodingSessionsToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The result of the tool call. */
+  public result?: AiConversationListCodingSessionsToolCallResult | null;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationListCodingSessionsToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationListCodingSessionsToolCallArgsFragment response data
+ */
+export class AiConversationListCodingSessionsToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationListCodingSessionsToolCallArgsFragment) {
+    super(request);
+    this.includeDismissed = data.includeDismissed ?? undefined;
+  }
+
+  public includeDismissed?: boolean | null;
+}
+/**
+ * AiConversationListCodingSessionsToolCallResult model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationListCodingSessionsToolCallResultFragment response data
+ */
+export class AiConversationListCodingSessionsToolCallResult extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationListCodingSessionsToolCallResultFragment) {
+    super(request);
+    this.agentSessions = data.agentSessions.map(
+      node => new AiConversationListCodingSessionsToolCallResultAgentSessions(request, node)
+    );
+    this.entities = data.entities
+      ? data.entities.map(node => new AiConversationSearchEntitiesToolCallResultEntities(request, node))
+      : undefined;
+  }
+
+  public agentSessions: AiConversationListCodingSessionsToolCallResultAgentSessions[];
+  public entities?: AiConversationSearchEntitiesToolCallResultEntities[] | null;
+}
+/**
+ * AiConversationListCodingSessionsToolCallResultAgentSessions model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationListCodingSessionsToolCallResultAgentSessionsFragment response data
+ */
+export class AiConversationListCodingSessionsToolCallResultAgentSessions extends Request {
+  public constructor(
+    request: LinearRequest,
+    data: L.AiConversationListCodingSessionsToolCallResultAgentSessionsFragment
+  ) {
+    super(request);
+    this.id = data.id;
+    this.type = data.type;
+    this.pullRequests = data.pullRequests
+      ? data.pullRequests.map(node => new AiConversationSearchEntitiesToolCallResultEntities(request, node))
+      : undefined;
+  }
+
+  public id: string;
+  public type: string;
+  public pullRequests?: AiConversationSearchEntitiesToolCallResultEntities[] | null;
+}
+/**
  * AiConversationNavigateToPageToolCall model
  *
  * @param request - function to call the graphql client
@@ -1703,6 +1789,73 @@ export class AiConversationPartMetadata extends Request {
   public turnId: string;
   /** The phase during which the part was generated. */
   public phase?: L.AiConversationPartPhase | null;
+}
+/**
+ * AiConversationPromptCodingSessionToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationPromptCodingSessionToolCallFragment response data
+ */
+export class AiConversationPromptCodingSessionToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationPromptCodingSessionToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationPromptCodingSessionToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.result = data.result ? new AiConversationPromptCodingSessionToolCallResult(request, data.result) : undefined;
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationPromptCodingSessionToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The result of the tool call. */
+  public result?: AiConversationPromptCodingSessionToolCallResult | null;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationPromptCodingSessionToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationPromptCodingSessionToolCallArgsFragment response data
+ */
+export class AiConversationPromptCodingSessionToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationPromptCodingSessionToolCallArgsFragment) {
+    super(request);
+    this.agentSessionId = data.agentSessionId;
+    this.prompt = data.prompt;
+  }
+
+  public agentSessionId: string;
+  public prompt: string;
+}
+/**
+ * AiConversationPromptCodingSessionToolCallResult model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationPromptCodingSessionToolCallResultFragment response data
+ */
+export class AiConversationPromptCodingSessionToolCallResult extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationPromptCodingSessionToolCallResultFragment) {
+    super(request);
+    this.agentSession = new AiConversationSearchEntitiesToolCallResultEntities(request, data.agentSession);
+    this.entities = data.entities
+      ? data.entities.map(node => new AiConversationSearchEntitiesToolCallResultEntities(request, node))
+      : undefined;
+    this.pullRequests = data.pullRequests
+      ? data.pullRequests.map(node => new AiConversationSearchEntitiesToolCallResultEntities(request, node))
+      : undefined;
+  }
+
+  public entities?: AiConversationSearchEntitiesToolCallResultEntities[] | null;
+  public pullRequests?: AiConversationSearchEntitiesToolCallResultEntities[] | null;
+  public agentSession: AiConversationSearchEntitiesToolCallResultEntities;
 }
 /**
  * A prompt part in an AI conversation.
@@ -2244,6 +2397,71 @@ export class AiConversationSearchEntitiesToolCallResultEntities extends Request 
 
   public id: string;
   public type: string;
+}
+/**
+ * AiConversationStartCodingSessionToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationStartCodingSessionToolCallFragment response data
+ */
+export class AiConversationStartCodingSessionToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationStartCodingSessionToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationStartCodingSessionToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.result = data.result ? new AiConversationStartCodingSessionToolCallResult(request, data.result) : undefined;
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationStartCodingSessionToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The result of the tool call. */
+  public result?: AiConversationStartCodingSessionToolCallResult | null;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationStartCodingSessionToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationStartCodingSessionToolCallArgsFragment response data
+ */
+export class AiConversationStartCodingSessionToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationStartCodingSessionToolCallArgsFragment) {
+    super(request);
+    this.prompt = data.prompt;
+  }
+
+  public prompt: string;
+}
+/**
+ * AiConversationStartCodingSessionToolCallResult model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationStartCodingSessionToolCallResultFragment response data
+ */
+export class AiConversationStartCodingSessionToolCallResult extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationStartCodingSessionToolCallResultFragment) {
+    super(request);
+    this.agentSession = new AiConversationSearchEntitiesToolCallResultEntities(request, data.agentSession);
+    this.entities = data.entities
+      ? data.entities.map(node => new AiConversationSearchEntitiesToolCallResultEntities(request, node))
+      : undefined;
+    this.pullRequests = data.pullRequests
+      ? data.pullRequests.map(node => new AiConversationSearchEntitiesToolCallResultEntities(request, node))
+      : undefined;
+  }
+
+  public entities?: AiConversationSearchEntitiesToolCallResultEntities[] | null;
+  public pullRequests?: AiConversationSearchEntitiesToolCallResultEntities[] | null;
+  public agentSession: AiConversationSearchEntitiesToolCallResultEntities;
 }
 /**
  * AiConversationSubscribeToEventToolCall model
@@ -2838,6 +3056,42 @@ export class ArchiveResponse extends Request {
   public includesDependencies: string[];
   /** The total number of entities in the archive. */
   public totalCount: number;
+}
+/**
+ * A recently archived integration.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ArchivedIntegrationPayloadFragment response data
+ */
+export class ArchivedIntegrationPayload extends Request {
+  public constructor(request: LinearRequest, data: L.ArchivedIntegrationPayloadFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? new Date();
+    this.codeAccess = data.codeAccess ?? undefined;
+    this.enterpriseUrl = data.enterpriseUrl ?? undefined;
+    this.externalOrgId = data.externalOrgId ?? undefined;
+    this.id = data.id;
+    this.orgAvatarUrl = data.orgAvatarUrl ?? undefined;
+    this.orgLogin = data.orgLogin ?? undefined;
+    this.service = data.service;
+  }
+
+  /** The time at which the integration was archived. */
+  public archivedAt: Date;
+  /** Whether the integration had full code access. */
+  public codeAccess?: boolean | null;
+  /** The enterprise URL if this is a GitHub Enterprise Cloud integration. */
+  public enterpriseUrl?: string | null;
+  /** The external identifier of the connected GitHub organization. */
+  public externalOrgId?: string | null;
+  /** The unique identifier of the integration. */
+  public id: string;
+  /** The avatar URL of the connected GitHub organization. */
+  public orgAvatarUrl?: string | null;
+  /** The login name of the connected GitHub organization. */
+  public orgLogin?: string | null;
+  /** The integration service type. */
+  public service: string;
 }
 /**
  * AsksChannelConnectPayload model
@@ -9848,10 +10102,12 @@ export class InitiativeWebhookPayload {
     this.healthUpdatedAt = data.healthUpdatedAt ?? undefined;
     this.icon = data.icon ?? undefined;
     this.id = data.id;
+    this.identifier = data.identifier ?? undefined;
     this.lastUpdateId = data.lastUpdateId ?? undefined;
     this.name = data.name;
     this.organizationId = data.organizationId;
     this.ownerId = data.ownerId ?? undefined;
+    this.previousIdentifiers = data.previousIdentifiers ?? undefined;
     this.slugId = data.slugId;
     this.sortOrder = data.sortOrder;
     this.startedAt = data.startedAt ?? undefined;
@@ -9902,6 +10158,8 @@ export class InitiativeWebhookPayload {
   public icon?: string | null;
   /** The ID of the entity. */
   public id: string;
+  /** The human-readable identifier of the initiative. */
+  public identifier?: string | null;
   /** The ID of the last update for this initiative. */
   public lastUpdateId?: string | null;
   /** The name of the initiative. */
@@ -9910,6 +10168,8 @@ export class InitiativeWebhookPayload {
   public organizationId: string;
   /** The ID of the user who owns the initiative. */
   public ownerId?: string | null;
+  /** Previous identifiers of the initiative. */
+  public previousIdentifiers?: string[] | null;
   /** The unique slug identifier of the initiative. */
   public slugId: string;
   /** The sort order of the initiative within the organization. */
@@ -14643,6 +14903,7 @@ export class Organization extends Request {
     this.previousUrlKeys = data.previousUrlKeys;
     this.projectUpdateReminderFrequencyInWeeks = data.projectUpdateReminderFrequencyInWeeks ?? undefined;
     this.projectUpdateRemindersHour = data.projectUpdateRemindersHour;
+    this.pullRequestTourEnabled = data.pullRequestTourEnabled;
     this.releasesEnabled = data.releasesEnabled;
     this.restrictLabelManagementToAdmins = data.restrictLabelManagementToAdmins ?? undefined;
     this.restrictTeamCreationToAdmins = data.restrictTeamCreationToAdmins ?? undefined;
@@ -14727,6 +14988,8 @@ export class Organization extends Request {
   public projectUpdateReminderFrequencyInWeeks?: number | null;
   /** The hour of the day (0-23) at which project update reminders are sent. */
   public projectUpdateRemindersHour: number;
+  /** Whether the workspace generates AI Pull Request guides for new pull requests. */
+  public pullRequestTourEnabled: boolean;
   /** Whether release management is enabled for the workspace. */
   public releasesEnabled: boolean;
   /** [DEPRECATED] Whether workspace label creation, update, and deletion is restricted to admins. */
@@ -20647,13 +20910,13 @@ export class Team extends Request {
   public get integrationsSettingsId(): string | undefined {
     return this._integrationsSettings?.id;
   }
-  /** The workflow state into which issues are moved when they are marked as a duplicate of another issue. Defaults to the first canceled state. */
+  /** [DEPRECATED] No longer in use. Duplicates are now system-managed via the native duplicate state. */
   public get markedAsDuplicateWorkflowState(): LinearFetch<WorkflowState> | undefined {
     return this._markedAsDuplicateWorkflowState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._markedAsDuplicateWorkflowState?.id)
       : undefined;
   }
-  /** The ID of workflow state into which issues are moved when they are marked as a duplicate of another issue. defaults to the first canceled state. */
+  /** The ID of [deprecated] no longer in use. duplicates are now system-managed via the native duplicate state. */
   public get markedAsDuplicateWorkflowStateId(): string | undefined {
     return this._markedAsDuplicateWorkflowState?.id;
   }
@@ -23309,11 +23572,11 @@ export class ViewPreferencesValues extends Request {
   public releasePipelinesViewOrdering?: string | null;
   /** Whether to show the review avatar field. */
   public reviewFieldAvatar?: boolean | null;
-  /** Whether to show the review checks field. */
+  /** No longer used. Previously controlled the review checks field. */
   public reviewFieldChecks?: boolean | null;
   /** Whether to show the review identifier field. */
   public reviewFieldIdentifier?: boolean | null;
-  /** Whether to show the review preview links field. */
+  /** No longer used. Previously controlled the review preview links field. */
   public reviewFieldPreviewLinks?: boolean | null;
   /** Whether to show the review repository field. */
   public reviewFieldRepository?: boolean | null;
@@ -24354,6 +24617,34 @@ export class ApplicationInfoQuery extends Request {
     const data = response.applicationInfo;
 
     return new Application(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ArchivedIntegrations Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ArchivedIntegrationsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ArchivedIntegrations query and return a ArchivedIntegrationPayload list
+   *
+   * @returns parsed response from ArchivedIntegrationsQuery
+   */
+  public async fetch(): LinearFetch<ArchivedIntegrationPayload[]> {
+    const response = await this._request<L.ArchivedIntegrationsQuery, L.ArchivedIntegrationsQueryVariables>(
+      L.ArchivedIntegrationsDocument.toString(),
+      {}
+    );
+    const data = response.archivedIntegrations;
+
+    return data.map(node => {
+      return new ArchivedIntegrationPayload(this._request, node);
+    });
   }
 }
 
@@ -33885,6 +34176,37 @@ export class IssueRemoveLabelMutation extends Request {
 }
 
 /**
+ * A fetchable IssueShare Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueShareMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueShare mutation and return a IssuePayload
+   *
+   * @param id - required id to pass to issueShare
+   * @param userId - required userId to pass to issueShare
+   * @returns parsed response from IssueShareMutation
+   */
+  public async fetch(id: string, userId: string): LinearFetch<IssuePayload> {
+    const response = await this._request<L.IssueShareMutation, L.IssueShareMutationVariables>(
+      L.IssueShareDocument.toString(),
+      {
+        id,
+        userId,
+      }
+    );
+    const data = response.issueShare;
+
+    return new IssuePayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable IssueSubscribe Mutation
  *
  * @param request - function to call the graphql client
@@ -34030,6 +34352,37 @@ export class UnarchiveIssueMutation extends Request {
     const data = response.issueUnarchive;
 
     return new IssueArchivePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IssueUnshare Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueUnshareMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueUnshare mutation and return a IssuePayload
+   *
+   * @param id - required id to pass to issueUnshare
+   * @param userId - required userId to pass to issueUnshare
+   * @returns parsed response from IssueUnshareMutation
+   */
+  public async fetch(id: string, userId: string): LinearFetch<IssuePayload> {
+    const response = await this._request<L.IssueUnshareMutation, L.IssueUnshareMutationVariables>(
+      L.IssueUnshareDocument.toString(),
+      {
+        id,
+        userId,
+      }
+    );
+    const data = response.issueUnshare;
+
+    return new IssuePayload(this._request, data);
   }
 }
 
@@ -46664,6 +47017,14 @@ export class LinearSdk extends Request {
     return new ApplicationInfoQuery(this._request).fetch(clientId);
   }
   /**
+   * Recently archived GitHub integrations. Returns integrations archived within the last 30 days.
+   *
+   * @returns ArchivedIntegrationPayload[]
+   */
+  public get archivedIntegrations(): LinearFetch<ArchivedIntegrationPayload[]> {
+    return new ArchivedIntegrationsQuery(this._request).fetch();
+  }
+  /**
    * One specific issue attachment.
    * [Deprecated] 'url' can no longer be used as the 'id' parameter. Use 'attachmentsForUrl' instead
    *
@@ -49802,6 +50163,16 @@ export class LinearSdk extends Request {
     return new IssueRemoveLabelMutation(this._request).fetch(id, labelId);
   }
   /**
+   * Shares an issue with a user who would not otherwise be able to access it. The viewer must have native access to the issue's full sub-issue tree and permission to share issues in the issue's team. Issues that inherit sharing from a parent issue cannot be shared directly.
+   *
+   * @param id - required id to pass to issueShare
+   * @param userId - required userId to pass to issueShare
+   * @returns IssuePayload
+   */
+  public issueShare(id: string, userId: string): LinearFetch<IssuePayload> {
+    return new IssueShareMutation(this._request).fetch(id, userId);
+  }
+  /**
    * Subscribes a user to an issue.
    *
    * @param id - required id to pass to issueSubscribe
@@ -49850,6 +50221,16 @@ export class LinearSdk extends Request {
    */
   public unarchiveIssue(id: string): LinearFetch<IssueArchivePayload> {
     return new UnarchiveIssueMutation(this._request).fetch(id);
+  }
+  /**
+   * Stops sharing an issue with a user. The viewer must have native access to the issue's full sub-issue tree and permission to share issues in the issue's team. Issues that inherit sharing from a parent issue cannot be unshared directly.
+   *
+   * @param id - required id to pass to issueUnshare
+   * @param userId - required userId to pass to issueUnshare
+   * @returns IssuePayload
+   */
+  public issueUnshare(id: string, userId: string): LinearFetch<IssuePayload> {
+    return new IssueUnshareMutation(this._request).fetch(id, userId);
   }
   /**
    * Unsubscribes a user from an issue.
