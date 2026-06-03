@@ -6642,6 +6642,7 @@ export class DocumentContentHistoryType extends Request {
     this.actorIds = data.actorIds ?? undefined;
     this.contentDataSnapshotAt = parseDate(data.contentDataSnapshotAt) ?? new Date();
     this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.documentContentId = data.documentContentId;
     this.id = data.id;
     this.metadata = parseJson(data.metadata) ?? undefined;
   }
@@ -6652,6 +6653,8 @@ export class DocumentContentHistoryType extends Request {
   public contentDataSnapshotAt: Date;
   /** The date when this document content history entry record was created. */
   public createdAt: Date;
+  /** The identifier of the document content that this history entry snapshots. */
+  public documentContentId: string;
   /** The unique identifier of the document content history entry. */
   public id: string;
   /** Metadata associated with the history entry, including content diffs and AI-generated change summaries. */
@@ -18397,6 +18400,7 @@ export class Release extends Request {
   public constructor(request: LinearRequest, data: L.ReleaseFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.autoArchivedAt = parseDate(data.autoArchivedAt) ?? undefined;
     this.canceledAt = parseDate(data.canceledAt) ?? undefined;
     this.commitSha = data.commitSha ?? undefined;
     this.completedAt = parseDate(data.completedAt) ?? undefined;
@@ -18423,6 +18427,8 @@ export class Release extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
+  /** The time at which the release was automatically archived by the auto pruning process. */
+  public autoArchivedAt?: Date | null;
   /** The time at which the release was canceled. Set automatically when the release moves to a canceled stage. Reset to null if the release moves back to a non-canceled stage. */
   public canceledAt?: Date | null;
   /** The Git commit SHA associated with this release. Used for SHA-based idempotency when completing releases and for linking releases to specific points in the repository history. Null if the release was created without a commit reference. */
@@ -20647,7 +20653,7 @@ export class SyncedExternalThread extends Request {
   public url?: string | null;
 }
 /**
- * A team is the primary organizational unit in Linear. Issues belong to teams, and each team has its own workflow states, cycles, labels, and settings. Teams can be public (visible to all workspace members), private (visible only to team members), or protected (visible only within an enclosing private-team boundary). Teams can also have sub-teams that inherit settings from their parent.
+ * A team is the primary organizational unit in Linear. Issues belong to teams, and each team has its own workflow states, cycles, labels, and settings. Teams can be public (visible to all workspace members), private (visible only to team members), or restricted (visible only within an enclosing private-team boundary). Teams can also have sub-teams that inherit settings from their parent.
  *
  * @param request - function to call the graphql client
  * @param data - L.TeamFragment response data
@@ -20848,7 +20854,7 @@ export class Team extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The visibility of the team. Returns public for teams visible to all workspace members, private for teams visible only to members, and protected for non-private teams inside a private-team boundary. */
+  /** The visibility of the team. Returns public for teams visible to all workspace members, private for teams visible only to members, and restricted for non-private teams inside a private-team boundary. */
   public visibility: L.TeamVisibility;
   /** Team's currently active cycle. */
   public get activeCycle(): LinearFetch<Cycle> | undefined {
@@ -51619,6 +51625,7 @@ export {
   CyclePeriod,
   DateResolutionType,
   Day,
+  DocumentContentAgentCheckpointMode,
   EmailIntakeAddressType,
   ExternalSyncService,
   FacetPageSource,
