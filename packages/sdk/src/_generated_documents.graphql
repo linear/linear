@@ -3195,6 +3195,8 @@ fragment Release on Release {
   createdAt
   # The time at which the release first entered a started stage. Null if the release has not yet been started.
   startedAt
+  # The time at which the release was automatically archived by the auto pruning process.
+  autoArchivedAt
   # The time at which the release was canceled. Set automatically when the release moves to a canceled stage. Reset to null if the release moves back to a non-canceled stage.
   canceledAt
   # The time at which the release was completed. Set automatically when the release moves to a completed stage. Reset to null if the release moves back to a non-completed stage.
@@ -3712,7 +3714,7 @@ fragment GitAutomationTargetBranch on GitAutomationTargetBranch {
 
 # A team is the primary organizational unit in Linear. Issues belong to teams, and each team has its
 # own workflow states, cycles, labels, and settings. Teams can be public (visible to all workspace
-# members), private (visible only to team members), or protected (visible only within an enclosing
+# members), private (visible only to team members), or restricted (visible only within an enclosing
 # private-team boundary). Teams can also have sub-teams that inherit settings from their parent.
 fragment Team on Team {
   __typename
@@ -3807,7 +3809,7 @@ fragment Team on Team {
   issueCount
   # The unique identifier of the entity.
   id
-  # The visibility of the team. Returns public for teams visible to all workspace members, private for teams visible only to members, and protected for non-private teams inside a private-team boundary.
+  # The visibility of the team. Returns public for teams visible to all workspace members, private for teams visible only to members, and restricted for non-private teams inside a private-team boundary.
   visibility
   # The workflow state into which issues are moved when a PR has been merged.
   mergeWorkflowState {
@@ -11683,6 +11685,8 @@ fragment DocumentContentHistoryType on DocumentContentHistoryType {
   metadata
   # The date when this document content history entry record was created.
   createdAt
+  # The identifier of the document content that this history entry snapshots.
+  documentContentId
   # The timestamp of the document content state when this snapshot was captured. This can differ from createdAt because the content is captured from its state at the previously known updatedAt timestamp in the case of an update. On document creation, these timestamps can be identical.
   contentDataSnapshotAt
   # The unique identifier of the document content history entry.
