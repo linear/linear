@@ -12,6 +12,10 @@
     "linear-import": "bin/linear-import.cjs"
   },
   "repository": "https://github.com/linear/linear",
+  "homepage": "https://github.com/linear/linear/tree/master/packages/import#readme",
+  "bugs": {
+    "url": "https://github.com/linear/linear/issues"
+  },
   "engines": {
     "node": ">=18.x"
   },
