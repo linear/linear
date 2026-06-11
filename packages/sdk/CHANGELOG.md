@@ -1,5 +1,455 @@
 # Change Log
 
+## 87.0.0
+
+### Major Changes
+
+- 4741cf9: feat(schema): [breaking] Input field 'isDiffHidden' was removed from input object type 'InitiativeUpdateUpdateInput' (InitiativeUpdateUpdateInput.isDiffHidden)
+
+  feat(schema): [breaking] Field 'Mutation.releasePipelineDelete' changed type from 'DeletePayload!' to 'ReleasePipelineArchivePayload!' (Mutation.releasePipelineDelete)
+
+  feat(schema): [breaking] Input field 'isDiffHidden' was removed from input object type 'ProjectUpdateUpdateInput' (ProjectUpdateUpdateInput.isDiffHidden)
+
+  feat(schema): [dangerous] Enum value 'Bash' was added to enum 'AiConversationTool' (AiConversationTool.Bash)
+
+  feat(schema): [dangerous] Enum value 'CreateSandbox' was added to enum 'AiConversationTool' (AiConversationTool.CreateSandbox)
+
+  feat(schema): [dangerous] Enum value 'ReadSandboxFile' was added to enum 'AiConversationTool' (AiConversationTool.ReadSandboxFile)
+
+  feat(schema): [dangerous] Enum value 'SuggestRepository' was added to enum 'AiConversationTool' (AiConversationTool.SuggestRepository)
+
+  feat(schema): [dangerous] Member 'AiConversationBashToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Member 'AiConversationCreateSandboxToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Member 'AiConversationReadSandboxFileToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Member 'AiConversationSuggestRepositoryToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Input field 'description' was added to input object type 'GitHubRepoInput' (GitHubRepoInput.description)
+
+  feat(schema): [dangerous] Argument 'mcpServerDefinitionId: String' added to field 'Mutation.integrationMcpServerConnect' (Mutation.integrationMcpServerConnect.mcpServerDefinitionId)
+
+  feat(schema): [dangerous] Argument 'mcpServerDefinitionId: String' added to field 'Mutation.integrationMcpServerPersonalConnect' (Mutation.integrationMcpServerPersonalConnect.mcpServerDefinitionId)
+
+  feat(schema): [dangerous] Input field 'issue' was added to input object type 'NullableDocumentContentFilter' (NullableDocumentContentFilter.issue)
+
+  feat(schema): [dangerous] Input field 'members' was added to input object type 'NullableTeamFilter' (NullableTeamFilter.members)
+
+  feat(schema): [dangerous] Input field 'mcpServersMode' was added to input object type 'OrganizationLinearAgentSettingsInput' (OrganizationLinearAgentSettingsInput.mcpServersMode)
+
+  feat(schema): [dangerous] Input field 'documents' was added to input object type 'ReleaseCompleteInput' (ReleaseCompleteInput.documents)
+
+  feat(schema): [dangerous] Input field 'releaseNotes' was added to input object type 'ReleaseCompleteInput' (ReleaseCompleteInput.releaseNotes)
+
+  feat(schema): [dangerous] Input field 'documents' was added to input object type 'ReleaseCompleteInputBase' (ReleaseCompleteInputBase.documents)
+
+  feat(schema): [dangerous] Input field 'releaseNotes' was added to input object type 'ReleaseCompleteInputBase' (ReleaseCompleteInputBase.releaseNotes)
+
+  feat(schema): [dangerous] Input field 'includeSubjects' was added to input object type 'ReleaseDebugSinkInput' (ReleaseDebugSinkInput.includeSubjects)
+
+  feat(schema): [dangerous] Input field 'documents' was added to input object type 'ReleaseSyncInput' (ReleaseSyncInput.documents)
+
+  feat(schema): [dangerous] Input field 'releaseNotes' was added to input object type 'ReleaseSyncInput' (ReleaseSyncInput.releaseNotes)
+
+  feat(schema): [dangerous] Input field 'documents' was added to input object type 'ReleaseSyncInputBase' (ReleaseSyncInputBase.documents)
+
+  feat(schema): [dangerous] Input field 'releaseNotes' was added to input object type 'ReleaseSyncInputBase' (ReleaseSyncInputBase.releaseNotes)
+
+  feat(schema): [dangerous] Input field 'documents' was added to input object type 'ReleaseUpdateByPipelineInput' (ReleaseUpdateByPipelineInput.documents)
+
+  feat(schema): [dangerous] Input field 'releaseNotes' was added to input object type 'ReleaseUpdateByPipelineInput' (ReleaseUpdateByPipelineInput.releaseNotes)
+
+  feat(schema): [dangerous] Input field 'documents' was added to input object type 'ReleaseUpdateByPipelineInputBase' (ReleaseUpdateByPipelineInputBase.documents)
+
+  feat(schema): [dangerous] Input field 'releaseNotes' was added to input object type 'ReleaseUpdateByPipelineInputBase' (ReleaseUpdateByPipelineInputBase.releaseNotes)
+
+  feat(schema): [dangerous] Input field 'members' was added to input object type 'TeamFilter' (TeamFilter.members)
+
+  feat(schema): [non_breaking] Type 'AiConversationBashToolCall' was added (AiConversationBashToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationBashToolCallArgs' was added (AiConversationBashToolCallArgs)
+
+  feat(schema): [non_breaking] Type 'AiConversationCreateSandboxToolCall' was added (AiConversationCreateSandboxToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationCreateSandboxToolCallArgs' was added (AiConversationCreateSandboxToolCallArgs)
+
+  feat(schema): [non_breaking] Type 'AiConversationReadSandboxFileToolCall' was added (AiConversationReadSandboxFileToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationReadSandboxFileToolCallArgs' was added (AiConversationReadSandboxFileToolCallArgs)
+
+  feat(schema): [non_breaking] Type 'AiConversationSuggestRepositoryToolCall' was added (AiConversationSuggestRepositoryToolCall)
+
+  feat(schema): [non_breaking] Type 'LinearAgentMcpServersMode' was added (LinearAgentMcpServersMode)
+
+  feat(schema): [non_breaking] Type 'ReleaseDocumentInput' was added (ReleaseDocumentInput)
+
+  feat(schema): [non_breaking] Type 'ReleaseNoteInput' was added (ReleaseNoteInput)
+
+  feat(schema): [non_breaking] Field 'InitiativeUpdate.isDiffHidden' description changed from 'Whether the diff between this update and the previous one should be hidden in the UI.' to 'Whether the diff between this update and the previous one should be hidden in the UI. Only used for legacy updates. Not settable in the UI.' (InitiativeUpdate.isDiffHidden)
+
+  feat(schema): [non_breaking] Field 'Mutation.releasePipelineDelete' description changed from 'Permanently deletes a release pipeline and all associated stages and releases.' to 'Moves a release pipeline to the trash bin. Trashed pipelines are archived and will be permanently deleted after a retention period, along with all their releases. If the pipeline is already archived, it is marked as trashed with a fresh archive timestamp.' (Mutation.releasePipelineDelete)
+
+  feat(schema): [non_breaking] Field 'OAuthApplication.clientId' description changed from 'The public client ID used during OAuth authorization flows.' to 'The client ID used during OAuth authorization flows.' (OAuthApplication.clientId)
+
+  feat(schema): [non_breaking] Description 'Public API representation of an OAuth application managed by the calling OAuth application. Secrets are only returned by create and rotation mutations.' on type 'OAuthApplication' has changed to 'An OAuth application that can be managed by the calling OAuth application.' (OAuthApplication)
+
+  feat(schema): [non_breaking] Input field 'OAuthApplicationCreateInput.idempotencyKey' description changed from 'Optional client-supplied idempotency key. Reusing the same key with the same managing OAuth application returns the existing OAuth application instead of creating a duplicate.' to 'Optional client-supplied idempotency key. Reusing the same key with the same managing OAuth application returns the existing OAuth application instead of creating a duplicate. The key does not apply to archived applications.' (OAuthApplicationCreateInput.idempotencyKey)
+
+  feat(schema): [non_breaking] Input field 'OrganizationLinearAgentSettingsInput.mcpServersAllowlist' description changed from '[Internal] The MCP server allowlist for Linear Agent. When unset, all MCP servers are allowed.' to '[Internal] Legacy MCP server allowlist for Linear Agent.' (OrganizationLinearAgentSettingsInput.mcpServersAllowlist)
+
+  feat(schema): [non_breaking] Field 'parentShas' was added to object type 'PullRequestCommit' (PullRequestCommit.parentShas)
+
+  feat(schema): [non_breaking] Field 'trashed' was added to object type 'ReleasePipeline' (ReleasePipeline.trashed)
+
+  feat(schema): [non_breaking] Field 'hasGitHubCodeAccess' was added to object type 'User' (User.hasGitHubCodeAccess)
+
+  feat(schema): [non_breaking] Field 'timelineShowProjectsAside' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.timelineShowProjectsAside)
+
+- df20561: feat(schema): [breaking] Argument 'includeProtectedTeamIds: [String!]' was removed from field 'Mutation.createCsvExportReport' (Mutation.createCsvExportReport.includeProtectedTeamIds)
+
+  feat(schema): [breaking] Input field 'allowedAuthServices' was removed from input object type 'OrganizationUpdateInput' (OrganizationUpdateInput.allowedAuthServices)
+
+  feat(schema): [breaking] Input field 'hideNonPrimaryOrganizations' was removed from input object type 'OrganizationUpdateInput' (OrganizationUpdateInput.hideNonPrimaryOrganizations)
+
+  feat(schema): [dangerous] Enum value 'AgentSession' was added to enum 'AiConversationEntityCardWidgetArgsType' (AiConversationEntityCardWidgetArgsType.AgentSession)
+
+  feat(schema): [dangerous] Enum value 'onboarding' was added to enum 'AiConversationInitialSource' (AiConversationInitialSource.onboarding)
+
+  feat(schema): [dangerous] Member 'AiConversationElicitationPart' was added to Union type 'AiConversationPart' (AiConversationPart)
+
+  feat(schema): [dangerous] Enum value 'elicitation' was added to enum 'AiConversationPartType' (AiConversationPartType.elicitation)
+
+  feat(schema): [dangerous] Input field 'canceledAt' was added to input object type 'InitiativeCollectionFilter' (InitiativeCollectionFilter.canceledAt)
+
+  feat(schema): [dangerous] Input field 'priority' was added to input object type 'InitiativeCollectionFilter' (InitiativeCollectionFilter.priority)
+
+  feat(schema): [dangerous] Input field 'priority' was added to input object type 'InitiativeCreateInput' (InitiativeCreateInput.priority)
+
+  feat(schema): [dangerous] Input field 'prioritySortOrder' was added to input object type 'InitiativeCreateInput' (InitiativeCreateInput.prioritySortOrder)
+
+  feat(schema): [dangerous] Input field 'canceledAt' was added to input object type 'InitiativeFilter' (InitiativeFilter.canceledAt)
+
+  feat(schema): [dangerous] Input field 'priority' was added to input object type 'InitiativeFilter' (InitiativeFilter.priority)
+
+  feat(schema): [dangerous] Input field 'priority' was added to input object type 'InitiativeSortInput' (InitiativeSortInput.priority)
+
+  feat(schema): [dangerous] Enum value 'Canceled' was added to enum 'InitiativeStatus' (InitiativeStatus.Canceled)
+
+  feat(schema): [dangerous] Enum value 'Proposed' was added to enum 'InitiativeStatus' (InitiativeStatus.Proposed)
+
+  feat(schema): [dangerous] Input field 'priority' was added to input object type 'InitiativeUpdateInput' (InitiativeUpdateInput.priority)
+
+  feat(schema): [dangerous] Input field 'prioritySortOrder' was added to input object type 'InitiativeUpdateInput' (InitiativeUpdateInput.prioritySortOrder)
+
+  feat(schema): [dangerous] Input field 'trusted' was added to input object type 'IssueUpdateInput' (IssueUpdateInput.trusted)
+
+  feat(schema): [dangerous] Argument 'includeRestrictedTeamIds: [String!]' added to field 'Mutation.createCsvExportReport' (Mutation.createCsvExportReport.includeRestrictedTeamIds)
+
+  feat(schema): [dangerous] Argument 'requestedScopes: [String!]' added to field 'Mutation.integrationSlack' (Mutation.integrationSlack.requestedScopes)
+
+  feat(schema): [dangerous] Argument 'requestedScopes: [String!]' added to field 'Mutation.integrationSlackAsks' (Mutation.integrationSlackAsks.requestedScopes)
+
+  feat(schema): [dangerous] Argument 'requestedScopes: [String!]' added to field 'Mutation.updateIntegrationSlackScopes' (Mutation.updateIntegrationSlackScopes.requestedScopes)
+
+  feat(schema): [dangerous] Input field 'canceledAt' was added to input object type 'NullableInitiativeFilter' (NullableInitiativeFilter.canceledAt)
+
+  feat(schema): [dangerous] Input field 'priority' was added to input object type 'NullableInitiativeFilter' (NullableInitiativeFilter.priority)
+
+  feat(schema): [dangerous] Input field 'restrictedBy' was added to input object type 'NullableTeamFilter' (NullableTeamFilter.restrictedBy)
+
+  feat(schema): [dangerous] Input field 'visibility' was added to input object type 'NullableTeamFilter' (NullableTeamFilter.visibility)
+
+  feat(schema): [dangerous] Input field 'grantTypes' was added to input object type 'OAuthApplicationCreateInput' (OAuthApplicationCreateInput.grantTypes)
+
+  feat(schema): [dangerous] Input field 'grantTypes' was added to input object type 'OAuthApplicationUpdateInput' (OAuthApplicationUpdateInput.grantTypes)
+
+  feat(schema): [dangerous] Input field 'effort' was added to input object type 'OrganizationCodingAgentSettingsInput' (OrganizationCodingAgentSettingsInput.effort)
+
+  feat(schema): [dangerous] Input field 'restrictedBy' was added to input object type 'TeamFilter' (TeamFilter.restrictedBy)
+
+  feat(schema): [dangerous] Input field 'visibility' was added to input object type 'TeamFilter' (TeamFilter.visibility)
+
+  feat(schema): [dangerous] Enum value 'initiativesCanceled' was added to enum 'ViewType' (ViewType.initiativesCanceled)
+
+  feat(schema): [dangerous] Enum value 'initiativesProposed' was added to enum 'ViewType' (ViewType.initiativesProposed)
+
+  feat(schema): [non_breaking] Type 'AgentSkill' was added (AgentSkill)
+
+  feat(schema): [non_breaking] Type 'AgentSkillConnection' was added (AgentSkillConnection)
+
+  feat(schema): [non_breaking] Type 'AgentSkillCreateInput' was added (AgentSkillCreateInput)
+
+  feat(schema): [non_breaking] Type 'AgentSkillEdge' was added (AgentSkillEdge)
+
+  feat(schema): [non_breaking] Type 'AgentSkillFilter' was added (AgentSkillFilter)
+
+  feat(schema): [non_breaking] Type 'AgentSkillPayload' was added (AgentSkillPayload)
+
+  feat(schema): [non_breaking] Type 'AgentSkillUpdateInput' was added (AgentSkillUpdateInput)
+
+  feat(schema): [non_breaking] Type 'AiConversationElicitationKind' was added (AiConversationElicitationKind)
+
+  feat(schema): [non_breaking] Type 'AiConversationElicitationOption' was added (AiConversationElicitationOption)
+
+  feat(schema): [non_breaking] Type 'AiConversationElicitationPart' was added (AiConversationElicitationPart)
+
+  feat(schema): [non_breaking] Type 'AiConversationErrorType' was added (AiConversationErrorType)
+
+  feat(schema): [non_breaking] Type 'EmailIntakeAddressRefreshSesDomainStatusPayload' was added (EmailIntakeAddressRefreshSesDomainStatusPayload)
+
+  feat(schema): [non_breaking] Type 'InitiativePrioritySort' was added (InitiativePrioritySort)
+
+  feat(schema): [non_breaking] Type 'OAuthApplicationGrantType' was added (OAuthApplicationGrantType)
+
+  feat(schema): [non_breaking] Type 'TeamVisibilityComparator' was added (TeamVisibilityComparator)
+
+  feat(schema): [non_breaking] Field 'reasonCode' was added to object type 'AgentActivityErrorContent' (AgentActivityErrorContent.reasonCode)
+
+  feat(schema): [non_breaking] Field 'codingHarnessModelLabel' was added to object type 'AgentSession' (AgentSession.codingHarnessModelLabel)
+
+  feat(schema): [non_breaking] Field 'actionSummary' was added to object type 'AiConversationEntityCardWidgetArgs' (AiConversationEntityCardWidgetArgs.actionSummary)
+
+  feat(schema): [non_breaking] Field 'snapshot' was added to object type 'AiConversationEntityCardWidgetArgs' (AiConversationEntityCardWidgetArgs.snapshot)
+
+  feat(schema): [non_breaking] Field 'snapshot' was added to object type 'AiConversationEntityListWidgetArgsEntities' (AiConversationEntityListWidgetArgsEntities.snapshot)
+
+  feat(schema): [non_breaking] Field 'errorType' was added to object type 'AiConversationErrorPart' (AiConversationErrorPart.errorType)
+
+  feat(schema): [non_breaking] Field 'invokedByUserId' was added to object type 'DocumentContentHistoryCheckpointType' (DocumentContentHistoryCheckpointType.invokedByUserId)
+
+  feat(schema): [non_breaking] Field 'isActive' was added to object type 'DocumentContentHistoryCheckpointType' (DocumentContentHistoryCheckpointType.isActive)
+
+  feat(schema): [non_breaking] Field 'canceledAt' was added to object type 'Initiative' (Initiative.canceledAt)
+
+  feat(schema): [non_breaking] Field 'priority' was added to object type 'Initiative' (Initiative.priority)
+
+  feat(schema): [non_breaking] Field 'prioritySortOrder' was added to object type 'Initiative' (Initiative.prioritySortOrder)
+
+  feat(schema): [non_breaking] Field 'Initiative.status' description changed from 'The lifecycle status of the initiative. One of Planned, Active, Completed.' to 'The lifecycle status of the initiative. One of Proposed, Planned, Active, Completed, Canceled.' (Initiative.status)
+
+  feat(schema): [non_breaking] Input field 'InitiativeCollectionFilter.status' description changed from 'Comparator for the initiative status: Planned, Active, Completed' to 'Comparator for the initiative status: Proposed, Planned, Active, Completed, Canceled' (InitiativeCollectionFilter.status)
+
+  feat(schema): [non_breaking] Input field 'InitiativeFilter.status' description changed from 'Comparator for the initiative status: Planned, Active, Completed' to 'Comparator for the initiative status: Proposed, Planned, Active, Completed, Canceled' (InitiativeFilter.status)
+
+  feat(schema): [non_breaking] Field 'canceledAt' was added to object type 'InitiativeWebhookPayload' (InitiativeWebhookPayload.canceledAt)
+
+  feat(schema): [non_breaking] Field 'agentSessions' was added to object type 'Issue' (Issue.agentSessions)
+
+  feat(schema): [non_breaking] Field 'trusted' was added to object type 'Issue' (Issue.trusted)
+
+  feat(schema): [non_breaking] Field 'agentSessions' was added to object type 'IssueSearchResult' (IssueSearchResult.agentSessions)
+
+  feat(schema): [non_breaking] Field 'trusted' was added to object type 'IssueSearchResult' (IssueSearchResult.trusted)
+
+  feat(schema): [non_breaking] Field 'agentSkillCreate' was added to object type 'Mutation' (Mutation.agentSkillCreate)
+
+  feat(schema): [non_breaking] Field 'agentSkillDelete' was added to object type 'Mutation' (Mutation.agentSkillDelete)
+
+  feat(schema): [non_breaking] Field 'agentSkillUpdate' was added to object type 'Mutation' (Mutation.agentSkillUpdate)
+
+  feat(schema): [non_breaking] Field 'emailIntakeAddressRefreshSesDomainStatus' was added to object type 'Mutation' (Mutation.emailIntakeAddressRefreshSesDomainStatus)
+
+  feat(schema): [non_breaking] Input field 'NullableInitiativeFilter.status' description changed from 'Comparator for the initiative status: Planned, Active, Completed' to 'Comparator for the initiative status: Proposed, Planned, Active, Completed, Canceled' (NullableInitiativeFilter.status)
+
+  feat(schema): [non_breaking] Input field 'NullableProjectFilter.priority' description changed from 'Comparator for the projects priority.' to 'Comparator for the project priority.' (NullableProjectFilter.priority)
+
+  feat(schema): [non_breaking] Input field 'NullableProjectFilter.status' description changed from 'Filters that the project's status must satisfy.' to 'Filters that the project status must satisfy.' (NullableProjectFilter.status)
+
+  feat(schema): [non_breaking] Input field 'NullableTeamFilter.issues' description changed from 'Filters that the teams issues must satisfy.' to 'Filters that the team's issues must satisfy.' (NullableTeamFilter.issues)
+
+  feat(schema): [non_breaking] Input field 'NullableTeamFilter.parent' description changed from 'Filters that the teams parent must satisfy.' to 'Filters that the team's parent must satisfy.' (NullableTeamFilter.parent)
+
+  feat(schema): [non_breaking] Input field 'NullableTeamFilter.private' description changed from 'Comparator for the team privacy.' to '[DEPRECATED] Comparator for the team privacy.' (NullableTeamFilter.private)
+
+  feat(schema): [non_breaking] Field 'grantTypes' was added to object type 'OAuthApplication' (OAuthApplication.grantTypes)
+
+  feat(schema): [non_breaking] Input field 'OAuthApplicationCreateInput.developerUrl' changed type from 'String!' to 'String' (OAuthApplicationCreateInput.developerUrl)
+
+  feat(schema): [non_breaking] Input field 'OrganizationCodingAgentSettingsInput.model' description changed from '[Internal] The model preference used for Coding Sessions sessions.' to '[Internal] The model preference used for Coding Sessions.' (OrganizationCodingAgentSettingsInput.model)
+
+  feat(schema): [non_breaking] Input field 'ProjectCollectionFilter.priority' description changed from 'Comparator for the projects priority.' to 'Comparator for the project priority.' (ProjectCollectionFilter.priority)
+
+  feat(schema): [non_breaking] Input field 'ProjectCollectionFilter.status' description changed from 'Filters that the project's status must satisfy.' to 'Filters that the project status must satisfy.' (ProjectCollectionFilter.status)
+
+  feat(schema): [non_breaking] Input field 'ProjectFilter.priority' description changed from 'Comparator for the projects priority.' to 'Comparator for the project priority.' (ProjectFilter.priority)
+
+  feat(schema): [non_breaking] Input field 'ProjectFilter.status' description changed from 'Filters that the project's status must satisfy.' to 'Filters that the project status must satisfy.' (ProjectFilter.status)
+
+  feat(schema): [non_breaking] Field 'agentSkill' was added to object type 'Query' (Query.agentSkill)
+
+  feat(schema): [non_breaking] Field 'agentSkills' was added to object type 'Query' (Query.agentSkills)
+
+  feat(schema): [non_breaking] Field 'pipeline' was added to object type 'ReleaseNote' (ReleaseNote.pipeline)
+
+  feat(schema): [non_breaking] Field 'ReleasePipeline.autoGenerateReleaseNotesOnCompletion' description changed from 'Whether to automatically generate a release note when a release is completed. Only applies to scheduled pipelines; ignored for continuous pipelines.' to 'Whether to automatically generate a release note when a release is completed.' (ReleasePipeline.autoGenerateReleaseNotesOnCompletion)
+
+  feat(schema): [non_breaking] Input field 'ReleasePipelineCreateInput.autoGenerateReleaseNotesOnCompletion' description changed from 'Whether to automatically generate a release note when a release is completed. Only applies to scheduled pipelines; ignored for continuous pipelines. Defaults to false.' to 'Whether to automatically generate a release note when a release is completed. Defaults to false.' (ReleasePipelineCreateInput.autoGenerateReleaseNotesOnCompletion)
+
+  feat(schema): [non_breaking] Input field 'ReleasePipelineUpdateInput.autoGenerateReleaseNotesOnCompletion' description changed from 'Whether to automatically generate a release note when a release is completed. Only applies to scheduled pipelines; ignored for continuous pipelines.' to 'Whether to automatically generate a release note when a release is completed.' (ReleasePipelineUpdateInput.autoGenerateReleaseNotesOnCompletion)
+
+  feat(schema): [non_breaking] Field 'protectedById' was added to object type 'Team' (Team.protectedById)
+
+  feat(schema): [non_breaking] Field 'Team.protectedBy' description changed from '[Internal] For protected teams, the enclosing private team that forms the visibility boundary. Null for public and private teams.' to '[Internal] For restricted teams, the enclosing private team that forms the visibility boundary.' (Team.protectedBy)
+
+  feat(schema): [non_breaking] Field 'Team.protectedBy' is deprecated (Team.protectedBy)
+
+  feat(schema): [non_breaking] Field 'Team.protectedBy' has deprecation reason 'Use restrictedBy instead.' (Team.protectedBy)
+
+  feat(schema): [non_breaking] Field 'Team.restrictedBy' description changed from '[Internal] For restricted teams, the enclosing private team that forms the visibility boundary. Alias for protectedBy.' to '[Internal] For restricted teams, the enclosing private team that forms the visibility boundary. Null for public and private teams.' (Team.restrictedBy)
+
+  feat(schema): [non_breaking] Input field 'TeamFilter.issues' description changed from 'Filters that the teams issues must satisfy.' to 'Filters that the team's issues must satisfy.' (TeamFilter.issues)
+
+  feat(schema): [non_breaking] Input field 'TeamFilter.parent' description changed from 'Filters that the teams parent must satisfy.' to 'Filters that the team's parent must satisfy.' (TeamFilter.parent)
+
+  feat(schema): [non_breaking] Input field 'TeamFilter.private' description changed from 'Comparator for the team privacy.' to '[DEPRECATED] Comparator for the team privacy.' (TeamFilter.private)
+
+  feat(schema): [non_breaking] Description 'The visibility of a team. A team can be public, private, or restricted within an enclosing private-team boundary. The protected enum value remains as a legacy alias for compatibility.' on type 'TeamVisibility' has changed to 'The visibility of a team. A team can be public, private, or restricted within an enclosing private-team boundary.' (TeamVisibility)
+
+  feat(schema): [non_breaking] Field 'initiativeFieldPriority' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.initiativeFieldPriority)
+
+  feat(schema): [non_breaking] Field 'reviewFieldGithubTeam' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.reviewFieldGithubTeam)
+
+  feat(schema): [non_breaking] Field 'stats' was added to object type 'WorkflowDefinition' (WorkflowDefinition.stats)
+
+- 296beb5: feat(schema): [breaking] Input field 'markedAsDuplicateWorkflowStateId' was removed from input object type 'TeamCreateInput' (TeamCreateInput.markedAsDuplicateWorkflowStateId)
+
+  feat(schema): [breaking] Input field 'markedAsDuplicateWorkflowStateId' was removed from input object type 'TeamUpdateInput' (TeamUpdateInput.markedAsDuplicateWorkflowStateId)
+
+  feat(schema): [dangerous] Enum value 'Draft' was added to enum 'AiConversationEntityCardWidgetArgsType' (AiConversationEntityCardWidgetArgsType.Draft)
+
+  feat(schema): [dangerous] Enum value 'ReleaseNote' was added to enum 'AiConversationEntityCardWidgetArgsType' (AiConversationEntityCardWidgetArgsType.ReleaseNote)
+
+  feat(schema): [dangerous] Enum value 'ReleaseNote' was added to enum 'AiConversationEntityListWidgetArgsEntitiesType' (AiConversationEntityListWidgetArgsEntitiesType.ReleaseNote)
+
+  feat(schema): [dangerous] Enum value 'ListCodingSessions' was added to enum 'AiConversationTool' (AiConversationTool.ListCodingSessions)
+
+  feat(schema): [dangerous] Enum value 'PromptCodingSession' was added to enum 'AiConversationTool' (AiConversationTool.PromptCodingSession)
+
+  feat(schema): [dangerous] Enum value 'StartCodingSession' was added to enum 'AiConversationTool' (AiConversationTool.StartCodingSession)
+
+  feat(schema): [dangerous] Member 'AiConversationListCodingSessionsToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Member 'AiConversationPromptCodingSessionToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Member 'AiConversationStartCodingSessionToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Input field 'utm' was added to input object type 'ContactSalesCreateInput' (ContactSalesCreateInput.utm)
+
+  feat(schema): [dangerous] Input field 'utmFirstTouch' was added to input object type 'ContactSalesCreateInput' (ContactSalesCreateInput.utmFirstTouch)
+
+  feat(schema): [dangerous] Input field 'utmFirstTouch' was added to input object type 'CreateOrganizationInput' (CreateOrganizationInput.utmFirstTouch)
+
+  feat(schema): [dangerous] Input field 'customIdentifier' was added to input object type 'InitiativeUpdateInput' (InitiativeUpdateInput.customIdentifier)
+
+  feat(schema): [dangerous] Input field 'hasErroredAgentSessions' was added to input object type 'IssueCollectionFilter' (IssueCollectionFilter.hasErroredAgentSessions)
+
+  feat(schema): [dangerous] Input field 'hasErroredAgentSessions' was added to input object type 'IssueFilter' (IssueFilter.hasErroredAgentSessions)
+
+  feat(schema): [dangerous] Input field 'hasErroredAgentSessions' was added to input object type 'NullableIssueFilter' (NullableIssueFilter.hasErroredAgentSessions)
+
+  feat(schema): [dangerous] Input field 'pullRequestTourEnabled' was added to input object type 'OrganizationUpdateInput' (OrganizationUpdateInput.pullRequestTourEnabled)
+
+  feat(schema): [dangerous] Input field 'hasReleaseNotes' was added to input object type 'ReleaseCollectionFilter' (ReleaseCollectionFilter.hasReleaseNotes)
+
+  feat(schema): [dangerous] Input field 'hasReleaseNotes' was added to input object type 'ReleaseFilter' (ReleaseFilter.hasReleaseNotes)
+
+  feat(schema): [dangerous] Enum value 'agentSharedSkillsPromoDismissed' was added to enum 'UserFlagType' (UserFlagType.agentSharedSkillsPromoDismissed)
+
+  feat(schema): [dangerous] Enum value 'agentSharedSkillsSplashAnimationSeen' was added to enum 'UserFlagType' (UserFlagType.agentSharedSkillsSplashAnimationSeen)
+
+  feat(schema): [dangerous] Enum value 'reviewsPromptToConnectGithubDismissed' was added to enum 'UserFlagType' (UserFlagType.reviewsPromptToConnectGithubDismissed)
+
+  feat(schema): [non_breaking] Type 'AiConversationListCodingSessionsToolCall' was added (AiConversationListCodingSessionsToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationListCodingSessionsToolCallArgs' was added (AiConversationListCodingSessionsToolCallArgs)
+
+  feat(schema): [non_breaking] Type 'AiConversationListCodingSessionsToolCallResult' was added (AiConversationListCodingSessionsToolCallResult)
+
+  feat(schema): [non_breaking] Type 'AiConversationListCodingSessionsToolCallResultAgentSessions' was added (AiConversationListCodingSessionsToolCallResultAgentSessions)
+
+  feat(schema): [non_breaking] Type 'AiConversationPromptCodingSessionToolCall' was added (AiConversationPromptCodingSessionToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationPromptCodingSessionToolCallArgs' was added (AiConversationPromptCodingSessionToolCallArgs)
+
+  feat(schema): [non_breaking] Type 'AiConversationPromptCodingSessionToolCallResult' was added (AiConversationPromptCodingSessionToolCallResult)
+
+  feat(schema): [non_breaking] Type 'AiConversationStartCodingSessionToolCall' was added (AiConversationStartCodingSessionToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationStartCodingSessionToolCallArgs' was added (AiConversationStartCodingSessionToolCallArgs)
+
+  feat(schema): [non_breaking] Type 'AiConversationStartCodingSessionToolCallResult' was added (AiConversationStartCodingSessionToolCallResult)
+
+  feat(schema): [non_breaking] Type 'ArchivedIntegrationPayload' was added (ArchivedIntegrationPayload)
+
+  feat(schema): [non_breaking] Field 'identifier' was added to object type 'Initiative' (Initiative.identifier)
+
+  feat(schema): [non_breaking] Field 'previousIdentifiers' was added to object type 'Initiative' (Initiative.previousIdentifiers)
+
+  feat(schema): [non_breaking] Field 'identifier' was added to object type 'InitiativeWebhookPayload' (InitiativeWebhookPayload.identifier)
+
+  feat(schema): [non_breaking] Field 'previousIdentifiers' was added to object type 'InitiativeWebhookPayload' (InitiativeWebhookPayload.previousIdentifiers)
+
+  feat(schema): [non_breaking] Field 'issueShare' was added to object type 'Mutation' (Mutation.issueShare)
+
+  feat(schema): [non_breaking] Field 'issueUnshare' was added to object type 'Mutation' (Mutation.issueUnshare)
+
+  feat(schema): [non_breaking] Field 'pullRequestTourEnabled' was added to object type 'Organization' (Organization.pullRequestTourEnabled)
+
+  feat(schema): [non_breaking] Field 'Organization.codingAgentEnabled' description changed from '[INTERNAL] Whether the workspace has enabled the Coding Agent.' to '[INTERNAL] Whether the workspace has enabled Coding Sessions.' (Organization.codingAgentEnabled)
+
+  feat(schema): [non_breaking] Field 'Organization.codingAgentSettings' description changed from '[Internal] Settings for Coding Agent features.' to '[Internal] Settings for Coding Sessions features.' (Organization.codingAgentSettings)
+
+  feat(schema): [non_breaking] Input field 'OrganizationCodingAgentSettingsInput.model' description changed from '[Internal] The model preference used for Coding Agent sessions.' to '[Internal] The model preference used for Coding Sessions sessions.' (OrganizationCodingAgentSettingsInput.model)
+
+  feat(schema): [non_breaking] Description '[Internal] Input for updating Coding Agent settings for the workspace.' on type 'OrganizationCodingAgentSettingsInput' has changed to '[Internal] Input for updating Coding Sessions settings for the workspace.' (OrganizationCodingAgentSettingsInput)
+
+  feat(schema): [non_breaking] Input field 'OrganizationUpdateInput.codingAgentEnabled' description changed from '[INTERNAL] Whether the workspace has enabled the Coding Agent.' to '[INTERNAL] Whether the workspace has enabled Coding Sessions.' (OrganizationUpdateInput.codingAgentEnabled)
+
+  feat(schema): [non_breaking] Input field 'OrganizationUpdateInput.codingAgentSettings' description changed from '[Internal] Settings for Coding Agent features.' to '[Internal] Settings for Coding Sessions features.' (OrganizationUpdateInput.codingAgentSettings)
+
+  feat(schema): [non_breaking] Field 'archivedIntegrations' was added to object type 'Query' (Query.archivedIntegrations)
+
+  feat(schema): [non_breaking] Field 'protectedBy' was added to object type 'Team' (Team.protectedBy)
+
+  feat(schema): [non_breaking] Field 'Team.markedAsDuplicateWorkflowState' description changed from 'The workflow state into which issues are moved when they are marked as a duplicate of another issue. Defaults to the first canceled state.' to '[DEPRECATED] No longer in use. Duplicates are now system-managed via the native duplicate state.' (Team.markedAsDuplicateWorkflowState)
+
+  feat(schema): [non_breaking] Field 'Team.markedAsDuplicateWorkflowState' is deprecated (Team.markedAsDuplicateWorkflowState)
+
+  feat(schema): [non_breaking] Field 'Team.markedAsDuplicateWorkflowState' has deprecation reason 'Duplicates are now system-managed via the native duplicate state.' (Team.markedAsDuplicateWorkflowState)
+
+  feat(schema): [non_breaking] Field 'ViewPreferencesValues.reviewFieldChecks' description changed from 'Whether to show the review checks field.' to 'No longer used. Previously controlled the review checks field.' (ViewPreferencesValues.reviewFieldChecks)
+
+  feat(schema): [non_breaking] Field 'ViewPreferencesValues.reviewFieldPreviewLinks' description changed from 'Whether to show the review preview links field.' to 'No longer used. Previously controlled the review preview links field.' (ViewPreferencesValues.reviewFieldPreviewLinks)
+
+- c128bbb: feat(schema): [breaking] Field 'protected' was removed from object type 'Team' (Team.protected)
+
+  feat(schema): [breaking] Enum value 'protected' was removed from enum 'TeamVisibility' (TeamVisibility.protected)
+
+  feat(schema): [dangerous] Enum value 'restricted' was added to enum 'TeamVisibility' (TeamVisibility.restricted)
+
+  feat(schema): [non_breaking] Type 'DocumentContentAgentCheckpointMode' was added (DocumentContentAgentCheckpointMode)
+
+  feat(schema): [non_breaking] Type 'DocumentContentHistoryCheckpointType' was added (DocumentContentHistoryCheckpointType)
+
+  feat(schema): [non_breaking] Type 'DocumentContentHistoryTimelinePayload' was added (DocumentContentHistoryTimelinePayload)
+
+  feat(schema): [non_breaking] Field 'documentContentId' was added to object type 'DocumentContentHistoryType' (DocumentContentHistoryType.documentContentId)
+
+  feat(schema): [non_breaking] Field 'documentContentHistoryTimeline' was added to object type 'Query' (Query.documentContentHistoryTimeline)
+
+  feat(schema): [non_breaking] Field 'autoArchivedAt' was added to object type 'Release' (Release.autoArchivedAt)
+
+  feat(schema): [non_breaking] Field 'restrictedBy' was added to object type 'Team' (Team.restrictedBy)
+
+  feat(schema): [non_breaking] Field 'restrictedById' was added to object type 'Team' (Team.restrictedById)
+
+  feat(schema): [non_breaking] Field 'Team.visibility' description changed from 'The visibility of the team. Returns public for teams visible to all workspace members, private for teams visible only to members, and protected for non-private teams inside a private-team boundary.' to 'The visibility of the team. Returns public for teams visible to all workspace members, private for teams visible only to members, and restricted for non-private teams inside a private-team boundary.' (Team.visibility)
+
+  feat(schema): [non_breaking] Description 'A team is the primary organizational unit in Linear. Issues belong to teams, and each team has its own workflow states, cycles, labels, and settings. Teams can be public (visible to all workspace members), private (visible only to team members), or protected (visible only within an enclosing private-team boundary). Teams can also have sub-teams that inherit settings from their parent.' on type 'Team' has changed to 'A team is the primary organizational unit in Linear. Issues belong to teams, and each team has its own workflow states, cycles, labels, and settings. Teams can be public (visible to all workspace members), private (visible only to team members), or restricted (visible only within an enclosing private-team boundary). Teams can also have sub-teams that inherit settings from their parent.' (Team)
+
+  feat(schema): [non_breaking] Description 'The visibility of a team. A team can be public, private, or protected within an enclosing private-team boundary.' on type 'TeamVisibility' has changed to 'The visibility of a team. A team can be public, private, or restricted within an enclosing private-team boundary. The protected enum value remains as a legacy alias for compatibility.' (TeamVisibility)
+
 ## 86.0.0
 
 ### Major Changes
