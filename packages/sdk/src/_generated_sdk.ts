@@ -358,11 +358,14 @@ export class AgentActivityErrorContent extends Request {
   public constructor(request: LinearRequest, data: L.AgentActivityErrorContentFragment) {
     super(request);
     this.body = data.body;
+    this.reasonCode = data.reasonCode ?? undefined;
     this.type = data.type;
   }
 
   /** The error message in Markdown format. */
   public body: string;
+  /** A stable reason code for specialized error handling. */
+  public reasonCode?: string | null;
   /** The type of activity. */
   public type: L.AgentActivityType;
 }
@@ -881,6 +884,157 @@ export class AgentSessionWebhookPayload {
   public issue?: IssueWithDescriptionChildWebhookPayload | null;
 }
 /**
+ * A user-defined skill that can be saved and reused in conversations with the Linear Agent. Skills can be private to a user or shared with a team.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentSkillFragment response data
+ */
+export class AgentSkill extends Request {
+  private _creator: L.AgentSkillFragment["creator"];
+  private _lastUpdatedBy?: L.AgentSkillFragment["lastUpdatedBy"];
+  private _owner: L.AgentSkillFragment["owner"];
+
+  public constructor(request: LinearRequest, data: L.AgentSkillFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.body = data.body;
+    this.color = data.color ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.description = data.description ?? undefined;
+    this.icon = data.icon ?? undefined;
+    this.id = data.id;
+    this.lastUsedAt = parseDate(data.lastUsedAt) ?? undefined;
+    this.recentUsageCount = data.recentUsageCount;
+    this.shared = data.shared;
+    this.slugId = data.slugId;
+    this.teamId = data.teamId ?? undefined;
+    this.title = data.title;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._creator = data.creator;
+    this._lastUpdatedBy = data.lastUpdatedBy ?? undefined;
+    this._owner = data.owner;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The skill instructions in markdown format. */
+  public body: string;
+  /** The skill's color. Null if no color is set. */
+  public color?: string | null;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The skill's description. Null if no description has been generated. */
+  public description?: string | null;
+  /** The icon of the skill. Null if no icon is set. */
+  public icon?: string | null;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The time the skill was last used by anyone in the workspace. Null if it has never been used. */
+  public lastUsedAt?: Date | null;
+  /** The number of times the skill was used by anyone in the workspace in the last 30 days. */
+  public recentUsageCount: number;
+  /** Whether the skill is shared with everyone in the workspace. When false, only the owner can use the skill. */
+  public shared: boolean;
+  /** The skill's unique URL slug. */
+  public slugId: string;
+  /** The identifier of the team this skill is shared with. */
+  public teamId?: string | null;
+  /** The skill's title. */
+  public title: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The user who created the skill. */
+  public get creator(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._creator.id);
+  }
+  /** The ID of user who created the skill. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
+  /** The user who last updated the skill. Null if unknown. */
+  public get lastUpdatedBy(): LinearFetch<User> | undefined {
+    return this._lastUpdatedBy?.id ? new UserQuery(this._request).fetch(this._lastUpdatedBy?.id) : undefined;
+  }
+  /** The ID of user who last updated the skill. null if unknown. */
+  public get lastUpdatedById(): string | undefined {
+    return this._lastUpdatedBy?.id;
+  }
+  /** The user who owns the skill. */
+  public get owner(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._owner.id);
+  }
+  /** The ID of user who owns the skill. */
+  public get ownerId(): string | undefined {
+    return this._owner?.id;
+  }
+
+  /** Creates an agent skill. */
+  public create(input: L.AgentSkillCreateInput) {
+    return new CreateAgentSkillMutation(this._request).fetch(input);
+  }
+  /** Deletes an agent skill. */
+  public delete() {
+    return new DeleteAgentSkillMutation(this._request).fetch(this.id);
+  }
+  /** Updates an agent skill. */
+  public update(input: L.AgentSkillUpdateInput) {
+    return new UpdateAgentSkillMutation(this._request).fetch(this.id, input);
+  }
+}
+/**
+ * AgentSkillConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this AgentSkillConnection model
+ * @param data - AgentSkillConnection response data
+ */
+export class AgentSkillConnection extends Connection<AgentSkill> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<AgentSkill> | undefined>,
+    data: L.AgentSkillConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new AgentSkill(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
+ * The result of an agent skill mutation.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentSkillPayloadFragment response data
+ */
+export class AgentSkillPayload extends Request {
+  private _agentSkill: L.AgentSkillPayloadFragment["agentSkill"];
+
+  public constructor(request: LinearRequest, data: L.AgentSkillPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._agentSkill = data.agentSkill;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The agent skill that was created or updated. */
+  public get agentSkill(): LinearFetch<AgentSkill> | undefined {
+    return new AgentSkillQuery(this._request).fetch(this._agentSkill.id);
+  }
+  /** The ID of agent skill that was created or updated. */
+  public get agentSkillId(): string | undefined {
+    return this._agentSkill?.id;
+  }
+}
+/**
  * A base part in an AI conversation.
  *
  * @param request - function to call the graphql client
@@ -1148,6 +1302,54 @@ export class AiConversationDeleteEntityToolCallArgs extends Request {
   public entity: AiConversationSearchEntitiesToolCallResultEntities;
 }
 /**
+ * A selectable option shown in an AI conversation elicitation.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationElicitationOptionFragment response data
+ */
+export class AiConversationElicitationOption extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationElicitationOptionFragment) {
+    super(request);
+    this.label = data.label;
+    this.prompt = data.prompt;
+  }
+
+  /** The short label shown for the option. */
+  public label: string;
+  /** The prompt sent as a normal user reply when selected. */
+  public prompt: string;
+}
+/**
+ * A lightweight question or choice prompt shown with an AI conversation.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationElicitationPartFragment response data
+ */
+export class AiConversationElicitationPart extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationElicitationPartFragment) {
+    super(request);
+    this.id = data.id;
+    this.title = data.title ?? undefined;
+    this.metadata = new AiConversationPartMetadata(request, data.metadata);
+    this.options = data.options.map(node => new AiConversationElicitationOption(request, node));
+    this.kind = data.kind;
+    this.type = data.type;
+  }
+
+  /** The ID of the part. */
+  public id: string;
+  /** The title shown above the elicitation choices. */
+  public title?: string | null;
+  /** Selectable prompt options for multiple-choice elicitations. */
+  public options: AiConversationElicitationOption[];
+  /** The metadata of the part. */
+  public metadata: AiConversationPartMetadata;
+  /** The kind of input this elicitation asks for. */
+  public kind: L.AiConversationElicitationKind;
+  /** The type of the part. */
+  public type: L.AiConversationPartType;
+}
+/**
  * AiConversationEntityCardWidget model
  *
  * @param request - function to call the graphql client
@@ -1180,11 +1382,14 @@ export class AiConversationEntityCardWidget extends Request {
 export class AiConversationEntityCardWidgetArgs extends Request {
   public constructor(request: LinearRequest, data: L.AiConversationEntityCardWidgetArgsFragment) {
     super(request);
+    this.actionSummary = data.actionSummary ?? undefined;
     this.id = data.id;
     this.note = data.note ?? undefined;
     this.action = data.action ?? undefined;
   }
 
+  /** A concise summary shown on specialized entity cards. Leave empty unless specifically instructed. */
+  public actionSummary?: string | null;
   /** The UUID of the entity to display */
   public id: string;
   /** @deprecated Optional note to display about the entity */
@@ -1266,6 +1471,7 @@ export class AiConversationErrorPart extends Request {
     this.id = data.id;
     this.message = data.message;
     this.metadata = new AiConversationPartMetadata(request, data.metadata);
+    this.errorType = data.errorType ?? undefined;
     this.type = data.type;
   }
 
@@ -1275,6 +1481,8 @@ export class AiConversationErrorPart extends Request {
   public message: string;
   /** The metadata of the part. */
   public metadata: AiConversationPartMetadata;
+  /** The category of the error. Absent for errors without a specific category, which default to unknown. */
+  public errorType?: L.AiConversationErrorType | null;
   /** The type of the part. */
   public type: L.AiConversationPartType;
 }
@@ -7314,6 +7522,21 @@ export class EmailIntakeAddressPayload extends Request {
   }
 }
 /**
+ * The result of requesting an on-demand SES domain status refresh.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.EmailIntakeAddressRefreshSesDomainStatusPayloadFragment response data
+ */
+export class EmailIntakeAddressRefreshSesDomainStatusPayload extends Request {
+  public constructor(request: LinearRequest, data: L.EmailIntakeAddressRefreshSesDomainStatusPayloadFragment) {
+    super(request);
+    this.success = data.success;
+  }
+
+  /** Whether an on-demand status check was requested. */
+  public success: boolean;
+}
+/**
  * The result of an email unsubscribe mutation.
  *
  * @param request - function to call the graphql client
@@ -8897,7 +9120,7 @@ export class Initiative extends Request {
   public frequencyResolution: L.FrequencyResolutionType;
   /** The overall health of the initiative, derived from the most recent initiative update. Possible values are onTrack, atRisk, or offTrack. Null if no health has been reported. */
   public health?: L.InitiativeUpdateHealthType | null;
-  /** The lifecycle status of the initiative. One of Planned, Active, Completed. */
+  /** The lifecycle status of the initiative. One of Proposed, Planned, Active, Completed, Canceled. */
   public status: L.InitiativeStatus;
   /** The resolution of the initiative's estimated completion date, indicating whether it refers to a specific day, week, month, quarter, or year. */
   public targetDateResolution?: L.DateResolutionType | null;
@@ -10095,6 +10318,7 @@ export class InitiativeUpdateWebhookPayload {
 export class InitiativeWebhookPayload {
   public constructor(data: L.InitiativeWebhookPayloadFragment) {
     this.archivedAt = data.archivedAt ?? undefined;
+    this.canceledAt = data.canceledAt ?? undefined;
     this.color = data.color ?? undefined;
     this.completedAt = data.completedAt ?? undefined;
     this.createdAt = data.createdAt;
@@ -10141,6 +10365,8 @@ export class InitiativeWebhookPayload {
 
   /** The time at which the entity was archived. */
   public archivedAt?: string | null;
+  /** When the initiative was canceled. */
+  public canceledAt?: string | null;
   /** The color of the initiative. */
   public color?: string | null;
   /** When the initiative was completed. */
@@ -14530,6 +14756,7 @@ export class OAuthApplication extends Request {
     this.webhookEnabled = data.webhookEnabled;
     this.webhookResourceTypes = data.webhookResourceTypes;
     this.webhookUrl = data.webhookUrl ?? undefined;
+    this.grantTypes = data.grantTypes;
     this.distribution = data.distribution;
   }
 
@@ -14559,6 +14786,8 @@ export class OAuthApplication extends Request {
   public webhookResourceTypes: string[];
   /** Webhook URL used for delivering webhook payloads. Null if not set. */
   public webhookUrl?: string | null;
+  /** OAuth grant types supported by this application. authorization_code is always included. */
+  public grantTypes: L.OAuthApplicationGrantType[];
   /** Distribution setting for the OAuth application. Private applications are only installable by the owning workspace. */
   public distribution: L.OAuthApplicationDistribution;
 }
@@ -18652,6 +18881,7 @@ export class ReleaseHistoryConnection extends Connection<ReleaseHistory> {
 export class ReleaseNote extends Request {
   private _firstRelease?: L.ReleaseNoteFragment["firstRelease"];
   private _lastRelease?: L.ReleaseNoteFragment["lastRelease"];
+  private _pipeline: L.ReleaseNoteFragment["pipeline"];
 
   public constructor(request: LinearRequest, data: L.ReleaseNoteFragment) {
     super(request);
@@ -18666,6 +18896,7 @@ export class ReleaseNote extends Request {
     this.generationStatus = data.generationStatus ?? undefined;
     this._firstRelease = data.firstRelease ?? undefined;
     this._lastRelease = data.lastRelease ?? undefined;
+    this._pipeline = data.pipeline;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -18704,6 +18935,14 @@ export class ReleaseNote extends Request {
   /** The ID of most recent release covered by this note. */
   public get lastReleaseId(): string | undefined {
     return this._lastRelease?.id;
+  }
+  /** The release pipeline that this note belongs to. A note always belongs to exactly one pipeline. */
+  public get pipeline(): LinearFetch<ReleasePipeline> | undefined {
+    return new ReleasePipelineQuery(this._request).fetch(this._pipeline.id);
+  }
+  /** The ID of release pipeline that this note belongs to. a note always belongs to exactly one pipeline. */
+  public get pipelineId(): string | undefined {
+    return this._pipeline?.id;
   }
   /** Releases included in the note. */
   public get releases(): LinearFetch<Release[]> {
@@ -18884,7 +19123,7 @@ export class ReleasePipeline extends Request {
   public approximateReleaseCount: number;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
-  /** Whether to automatically generate a release note when a release is completed. Only applies to scheduled pipelines; ignored for continuous pipelines. */
+  /** Whether to automatically generate a release note when a release is completed. */
   public autoGenerateReleaseNotesOnCompletion: boolean;
   /** The time at which the entity was created. */
   public createdAt: Date;
@@ -23202,6 +23441,7 @@ export class ViewPreferencesValues extends Request {
     this.releasePipelinesViewOrdering = data.releasePipelinesViewOrdering ?? undefined;
     this.reviewFieldAvatar = data.reviewFieldAvatar ?? undefined;
     this.reviewFieldChecks = data.reviewFieldChecks ?? undefined;
+    this.reviewFieldGithubTeam = data.reviewFieldGithubTeam ?? undefined;
     this.reviewFieldIdentifier = data.reviewFieldIdentifier ?? undefined;
     this.reviewFieldPreviewLinks = data.reviewFieldPreviewLinks ?? undefined;
     this.reviewFieldRepository = data.reviewFieldRepository ?? undefined;
@@ -23580,6 +23820,8 @@ export class ViewPreferencesValues extends Request {
   public reviewFieldAvatar?: boolean | null;
   /** No longer used. Previously controlled the review checks field. */
   public reviewFieldChecks?: boolean | null;
+  /** Whether to show the review GitHub team field. */
+  public reviewFieldGithubTeam?: boolean | null;
   /** Whether to show the review identifier field. */
   public reviewFieldIdentifier?: boolean | null;
   /** No longer used. Previously controlled the review preview links field. */
@@ -24115,6 +24357,7 @@ export class WorkflowDefinition extends Request {
     this.schedule = data.schedule ?? undefined;
     this.slugId = data.slugId;
     this.sortOrder = data.sortOrder;
+    this.stats = data.stats ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.contextViewType = data.contextViewType ?? undefined;
     this.trigger = data.trigger;
@@ -24160,6 +24403,8 @@ export class WorkflowDefinition extends Request {
   public slugId: string;
   /** The sort order of the workflow definition within its siblings. */
   public sortOrder: string;
+  /** Aggregated usage stats for this automation workflow definition. */
+  public stats?: L.Scalars["JSONObject"] | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -24584,6 +24829,72 @@ export class AgentSessionsQuery extends Request {
     const data = response.agentSessions;
 
     return new AgentSessionConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable AgentSkill Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AgentSkillQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AgentSkill query and return a AgentSkill
+   *
+   * @param id - required id to pass to agentSkill
+   * @returns parsed response from AgentSkillQuery
+   */
+  public async fetch(id: string): LinearFetch<AgentSkill> {
+    const response = await this._request<L.AgentSkillQuery, L.AgentSkillQueryVariables>(
+      L.AgentSkillDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.agentSkill;
+
+    return new AgentSkill(this._request, data);
+  }
+}
+
+/**
+ * A fetchable AgentSkills Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AgentSkillsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AgentSkills query and return a AgentSkillConnection
+   *
+   * @param variables - variables to pass into the AgentSkillsQuery
+   * @returns parsed response from AgentSkillsQuery
+   */
+  public async fetch(variables?: L.AgentSkillsQueryVariables): LinearFetch<AgentSkillConnection> {
+    const response = await this._request<L.AgentSkillsQuery, L.AgentSkillsQueryVariables>(
+      L.AgentSkillsDocument.toString(),
+      variables
+    );
+    const data = response.agentSkills;
+
+    return new AgentSkillConnection(
       this._request,
       connection =>
         this.fetch(
@@ -29095,6 +29406,95 @@ export class AgentSessionUpdateExternalUrlMutation extends Request {
 }
 
 /**
+ * A fetchable CreateAgentSkill Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class CreateAgentSkillMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CreateAgentSkill mutation and return a AgentSkillPayload
+   *
+   * @param input - required input to pass to createAgentSkill
+   * @returns parsed response from CreateAgentSkillMutation
+   */
+  public async fetch(input: L.AgentSkillCreateInput): LinearFetch<AgentSkillPayload> {
+    const response = await this._request<L.CreateAgentSkillMutation, L.CreateAgentSkillMutationVariables>(
+      L.CreateAgentSkillDocument.toString(),
+      {
+        input,
+      }
+    );
+    const data = response.agentSkillCreate;
+
+    return new AgentSkillPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable DeleteAgentSkill Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class DeleteAgentSkillMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DeleteAgentSkill mutation and return a DeletePayload
+   *
+   * @param id - required id to pass to deleteAgentSkill
+   * @returns parsed response from DeleteAgentSkillMutation
+   */
+  public async fetch(id: string): LinearFetch<DeletePayload> {
+    const response = await this._request<L.DeleteAgentSkillMutation, L.DeleteAgentSkillMutationVariables>(
+      L.DeleteAgentSkillDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.agentSkillDelete;
+
+    return new DeletePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UpdateAgentSkill Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UpdateAgentSkillMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UpdateAgentSkill mutation and return a AgentSkillPayload
+   *
+   * @param id - required id to pass to updateAgentSkill
+   * @param input - required input to pass to updateAgentSkill
+   * @returns parsed response from UpdateAgentSkillMutation
+   */
+  public async fetch(id: string, input: L.AgentSkillUpdateInput): LinearFetch<AgentSkillPayload> {
+    const response = await this._request<L.UpdateAgentSkillMutation, L.UpdateAgentSkillMutationVariables>(
+      L.UpdateAgentSkillDocument.toString(),
+      {
+        id,
+        input,
+      }
+    );
+    const data = response.agentSkillUpdate;
+
+    return new AgentSkillPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable AirbyteIntegrationConnect Mutation
  *
  * @param request - function to call the graphql client
@@ -30897,6 +31297,35 @@ export class DeleteEmailIntakeAddressMutation extends Request {
     const data = response.emailIntakeAddressDelete;
 
     return new DeletePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable EmailIntakeAddressRefreshSesDomainStatus Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class EmailIntakeAddressRefreshSesDomainStatusMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the EmailIntakeAddressRefreshSesDomainStatus mutation and return a EmailIntakeAddressRefreshSesDomainStatusPayload
+   *
+   * @param id - required id to pass to emailIntakeAddressRefreshSesDomainStatus
+   * @returns parsed response from EmailIntakeAddressRefreshSesDomainStatusMutation
+   */
+  public async fetch(id: string): LinearFetch<EmailIntakeAddressRefreshSesDomainStatusPayload> {
+    const response = await this._request<
+      L.EmailIntakeAddressRefreshSesDomainStatusMutation,
+      L.EmailIntakeAddressRefreshSesDomainStatusMutationVariables
+    >(L.EmailIntakeAddressRefreshSesDomainStatusDocument.toString(), {
+      id,
+    });
+    const data = response.emailIntakeAddressRefreshSesDomainStatus;
+
+    return new EmailIntakeAddressRefreshSesDomainStatusPayload(this._request, data);
   }
 }
 
@@ -32936,14 +33365,20 @@ export class IntegrationSlackAsksMutation extends Request {
    *
    * @param code - required code to pass to integrationSlackAsks
    * @param redirectUri - required redirectUri to pass to integrationSlackAsks
+   * @param variables - variables without 'code', 'redirectUri' to pass into the IntegrationSlackAsksMutation
    * @returns parsed response from IntegrationSlackAsksMutation
    */
-  public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+  public async fetch(
+    code: string,
+    redirectUri: string,
+    variables?: Omit<L.IntegrationSlackAsksMutationVariables, "code" | "redirectUri">
+  ): LinearFetch<IntegrationPayload> {
     const response = await this._request<L.IntegrationSlackAsksMutation, L.IntegrationSlackAsksMutationVariables>(
       L.IntegrationSlackAsksDocument.toString(),
       {
         code,
         redirectUri,
+        ...variables,
       }
     );
     const data = response.integrationSlackAsks;
@@ -47014,6 +47449,24 @@ export class LinearSdk extends Request {
     return new AgentSessionsQuery(this._request).fetch(variables);
   }
   /**
+   * A specific agent skill.
+   *
+   * @param id - required id to pass to agentSkill
+   * @returns AgentSkill
+   */
+  public agentSkill(id: string): LinearFetch<AgentSkill> {
+    return new AgentSkillQuery(this._request).fetch(id);
+  }
+  /**
+   * All agent skills.
+   *
+   * @param variables - variables to pass into the AgentSkillsQuery
+   * @returns AgentSkillConnection
+   */
+  public agentSkills(variables?: L.AgentSkillsQueryVariables): LinearFetch<AgentSkillConnection> {
+    return new AgentSkillsQuery(this._request).fetch(variables);
+  }
+  /**
    * Retrieves public information about an OAuth application by its client ID. Used during the authorization flow to display application details to the user.
    *
    * @param clientId - required clientId to pass to applicationInfo
@@ -48362,6 +48815,34 @@ export class LinearSdk extends Request {
     return new AgentSessionUpdateExternalUrlMutation(this._request).fetch(id, input);
   }
   /**
+   * Creates an agent skill.
+   *
+   * @param input - required input to pass to createAgentSkill
+   * @returns AgentSkillPayload
+   */
+  public createAgentSkill(input: L.AgentSkillCreateInput): LinearFetch<AgentSkillPayload> {
+    return new CreateAgentSkillMutation(this._request).fetch(input);
+  }
+  /**
+   * Deletes an agent skill.
+   *
+   * @param id - required id to pass to deleteAgentSkill
+   * @returns DeletePayload
+   */
+  public deleteAgentSkill(id: string): LinearFetch<DeletePayload> {
+    return new DeleteAgentSkillMutation(this._request).fetch(id);
+  }
+  /**
+   * Updates an agent skill.
+   *
+   * @param id - required id to pass to updateAgentSkill
+   * @param input - required input to pass to updateAgentSkill
+   * @returns AgentSkillPayload
+   */
+  public updateAgentSkill(id: string, input: L.AgentSkillUpdateInput): LinearFetch<AgentSkillPayload> {
+    return new UpdateAgentSkillMutation(this._request).fetch(id, input);
+  }
+  /**
    * Creates an integration api key for Airbyte to connect with Linear.
    *
    * @param input - required input to pass to airbyteIntegrationConnect
@@ -48996,6 +49477,17 @@ export class LinearSdk extends Request {
    */
   public deleteEmailIntakeAddress(id: string): LinearFetch<DeletePayload> {
     return new DeleteEmailIntakeAddressMutation(this._request).fetch(id);
+  }
+  /**
+   * Requests an immediate, on-demand SES domain verification status check for an email intake address and keeps it in the frequent (per-minute) check lane for a short window. Use when a user is actively configuring their custom sending domain so authorization converges quickly instead of waiting for the once-a-day lane.
+   *
+   * @param id - required id to pass to emailIntakeAddressRefreshSesDomainStatus
+   * @returns EmailIntakeAddressRefreshSesDomainStatusPayload
+   */
+  public emailIntakeAddressRefreshSesDomainStatus(
+    id: string
+  ): LinearFetch<EmailIntakeAddressRefreshSesDomainStatusPayload> {
+    return new EmailIntakeAddressRefreshSesDomainStatusMutation(this._request).fetch(id);
   }
   /**
    * Rotates an existing email intake address.
@@ -49705,10 +50197,15 @@ export class LinearSdk extends Request {
    *
    * @param code - required code to pass to integrationSlackAsks
    * @param redirectUri - required redirectUri to pass to integrationSlackAsks
+   * @param variables - variables without 'code', 'redirectUri' to pass into the IntegrationSlackAsksMutation
    * @returns IntegrationPayload
    */
-  public integrationSlackAsks(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
-    return new IntegrationSlackAsksMutation(this._request).fetch(code, redirectUri);
+  public integrationSlackAsks(
+    code: string,
+    redirectUri: string,
+    variables?: Omit<L.IntegrationSlackAsksMutationVariables, "code" | "redirectUri">
+  ): LinearFetch<IntegrationPayload> {
+    return new IntegrationSlackAsksMutation(this._request).fetch(code, redirectUri, variables);
   }
   /**
    * Slack integration for custom view notifications.
@@ -51602,10 +52099,12 @@ export {
   AgentSessionStatus,
   AgentSessionType,
   AiConversationClientPlatform,
+  AiConversationElicitationKind,
   AiConversationEntityCardWidgetArgsAction,
   AiConversationEntityCardWidgetArgsType,
   AiConversationEntityListWidgetArgsAction,
   AiConversationEntityListWidgetArgsEntitiesType,
+  AiConversationErrorType,
   AiConversationInitialSource,
   AiConversationPartPhase,
   AiConversationPartType,
@@ -51649,6 +52148,7 @@ export {
   NotificationCategory,
   NotificationChannel,
   OAuthApplicationDistribution,
+  OAuthApplicationGrantType,
   OAuthClientApprovalStatus,
   OrganizationDomainAuthType,
   OrganizationInviteStatus,

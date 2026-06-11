@@ -97,6 +97,10 @@ fragment AiConversationBasePart on AiConversationBasePart {
   # The type of the part.
   type
 
+  ... on AiConversationElicitationPart {
+    ...AiConversationElicitationPart
+  }
+
   ... on AiConversationErrorPart {
     ...AiConversationErrorPart
   }
@@ -1243,6 +1247,27 @@ fragment ProjectLabel on ProjectLabel {
   }
   # Whether the label is a group. When true, this label acts as a container for child labels and cannot be directly applied to issues or projects. When false, the label can be directly applied.
   isGroup
+}
+
+# A lightweight question or choice prompt shown with an AI conversation.
+fragment AiConversationElicitationPart on AiConversationElicitationPart {
+  __typename
+  # Selectable prompt options for multiple-choice elicitations.
+  options {
+    ...AiConversationElicitationOption
+  }
+  # The ID of the part.
+  id
+  # The kind of input this elicitation asks for.
+  kind
+  # The metadata of the part.
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  # The title shown above the elicitation choices.
+  title
+  # The type of the part.
+  type
 }
 
 # A link between an agent session and a pull request created or associated during that session. This
@@ -3093,6 +3118,10 @@ fragment ReleaseNote on ReleaseNote {
   releaseCount
   # The release note's unique URL slug, used to construct human-readable URLs for the note.
   slugId
+  # The release pipeline that this note belongs to. A note always belongs to exactly one pipeline.
+  pipeline {
+    id
+  }
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
@@ -3142,7 +3171,7 @@ fragment ReleasePipeline on ReleasePipeline {
   id
   # Whether this pipeline targets a production environment. Defaults to true. Used to distinguish production pipelines from staging or development pipelines.
   isProduction
-  # Whether to automatically generate a release note when a release is completed. Only applies to scheduled pipelines; ignored for continuous pipelines.
+  # Whether to automatically generate a release note when a release is completed.
   autoGenerateReleaseNotesOnCompletion
 }
 
@@ -3359,6 +3388,15 @@ fragment Document on Document {
   updatedBy {
     id
   }
+}
+
+# A selectable option shown in an AI conversation elicitation.
+fragment AiConversationElicitationOption on AiConversationElicitationOption {
+  __typename
+  # The prompt sent as a normal user reply when selected.
+  prompt
+  # The short label shown for the option.
+  label
 }
 
 # A session representing an AI coding agent's work on an issue or conversation. Agent sessions track
@@ -4584,6 +4622,53 @@ fragment NotificationDeliveryPreferencesSchedule on NotificationDeliveryPreferen
   disabled
 }
 
+# A user-defined skill that can be saved and reused in conversations with the Linear Agent. Skills can
+# be private to a user or shared with a team.
+fragment AgentSkill on AgentSkill {
+  __typename
+  # The icon of the skill. Null if no icon is set.
+  icon
+  # The identifier of the team this skill is shared with.
+  teamId
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The number of times the skill was used by anyone in the workspace in the last 30 days.
+  recentUsageCount
+  # The skill instructions in markdown format.
+  body
+  # The skill's color. Null if no color is set.
+  color
+  # The skill's description. Null if no description has been generated.
+  description
+  # The skill's title.
+  title
+  # The skill's unique URL slug.
+  slugId
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time the skill was last used by anyone in the workspace. Null if it has never been used.
+  lastUsedAt
+  # The unique identifier of the entity.
+  id
+  # The user who created the skill.
+  creator {
+    id
+  }
+  # The user who last updated the skill. Null if unknown.
+  lastUpdatedBy {
+    id
+  }
+  # The user who owns the skill.
+  owner {
+    id
+  }
+  # Whether the skill is shared with everyone in the workspace. When false, only the owner can use the skill.
+  shared
+}
+
 # A verified Amazon SES domain identity that enables sending emails from a custom domain.
 # Organizations configure SES domain identities to send issue notification replies and Asks
 # auto-replies from their own domain instead of the default Linear domain. Full verification requires
@@ -4981,6 +5066,8 @@ fragment OAuthApplication on OAuthApplication {
   distribution
   # Name of the developer or company that built the OAuth application.
   developer
+  # OAuth grant types supported by this application. authorization_code is always included.
+  grantTypes
   # Resource types the OAuth application's webhooks subscribe to.
   webhookResourceTypes
   # The client ID used during OAuth authorization flows.
@@ -5168,6 +5255,8 @@ fragment Attachment on Attachment {
 # actions taken, such as updating issue properties, sending notifications, or posting to Slack.
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
+  # Aggregated usage stats for this automation workflow definition.
+  stats
   # Recurring schedule which is used to execute the workflow.
   schedule
   # The context custom view associated with the workflow.
@@ -5358,6 +5447,8 @@ fragment AiConversationErrorPart on AiConversationErrorPart {
   __typename
   # The ID of the part.
   id
+  # The category of the error. Absent for errors without a specific category, which default to unknown.
+  errorType
   # The metadata of the part.
   metadata {
     ...AiConversationPartMetadata
@@ -5595,7 +5686,7 @@ fragment Initiative on Initiative {
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
-  # The lifecycle status of the initiative. One of Planned, Active, Completed.
+  # The lifecycle status of the initiative. One of Proposed, Planned, Active, Completed, Canceled.
   status
   # The most recent status update posted for this initiative. Null if no updates have been posted.
   lastUpdate {
@@ -6386,6 +6477,8 @@ fragment AgentActivityElicitationContent on AgentActivityElicitationContent {
 # Content for an error activity.
 fragment AgentActivityErrorContent on AgentActivityErrorContent {
   __typename
+  # A stable reason code for specialized error handling.
+  reasonCode
   # The error message in Markdown format.
   body
   # The type of activity.
@@ -7804,6 +7897,8 @@ fragment InitiativeWebhookPayload on InitiativeWebhookPayload {
   }
   # When the health status was last updated.
   healthUpdatedAt
+  # When the initiative was canceled.
+  canceledAt
   # When the initiative was completed.
   completedAt
   # When the initiative was started.
@@ -9143,6 +9238,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   scheduledPipelineReleaseFieldReleaseNote
   # Whether to show the releases field for release pipelines.
   releasePipelineFieldReleases
+  # Whether to show the review GitHub team field.
+  reviewFieldGithubTeam
   # Whether to show the review avatar field.
   reviewFieldAvatar
   # Whether to show the review identifier field.
@@ -9839,6 +9936,19 @@ fragment AgentActivityPayload on AgentActivityPayload {
   success
 }
 
+# The result of an agent skill mutation.
+fragment AgentSkillPayload on AgentSkillPayload {
+  __typename
+  # The agent skill that was created or updated.
+  agentSkill {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
 # The result of an attachment mutation.
 fragment AttachmentPayload on AttachmentPayload {
   __typename
@@ -10063,6 +10173,13 @@ fragment IssueImportDeletePayload on IssueImportDeletePayload {
     ...IssueImport
   }
   # Whether the operation was successful.
+  success
+}
+
+# The result of requesting an on-demand SES domain status refresh.
+fragment EmailIntakeAddressRefreshSesDomainStatusPayload on EmailIntakeAddressRefreshSesDomainStatusPayload {
+  __typename
+  # Whether an on-demand status check was requested.
   success
 }
 
@@ -10387,6 +10504,16 @@ fragment AgentSessionToPullRequestConnection on AgentSessionToPullRequestConnect
   }
 }
 
+fragment AgentSkillConnection on AgentSkillConnection {
+  __typename
+  nodes {
+    ...AgentSkill
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
 fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
   __typename
   # The arguments of the tool call.
@@ -10689,6 +10816,8 @@ fragment AiConversationEntityCardWidgetArgs on AiConversationEntityCardWidgetArg
   __typename
   # @deprecated Optional note to display about the entity
   note
+  # A concise summary shown on specialized entity cards. Leave empty unless specifically instructed.
+  actionSummary
   # The UUID of the entity to display
   id
   # The action performed on the entity (leave empty if just found)
@@ -13369,6 +13498,44 @@ query agentSessions(
     orderBy: $orderBy
   ) {
     ...AgentSessionConnection
+  }
+}
+# A specific agent skill.
+query agentSkill(
+  # The identifier of the agent skill to retrieve.
+  $id: String!
+) {
+  agentSkill(id: $id) {
+    ...AgentSkill
+  }
+}
+# All agent skills.
+query agentSkills(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned skills
+  $filter: AgentSkillFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  agentSkills(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...AgentSkillConnection
   }
 }
 # Retrieves public information about an OAuth application by its client ID. Used during the
@@ -20462,6 +20629,35 @@ mutation agentSessionUpdateExternalUrl(
     ...AgentSessionPayload
   }
 }
+# Creates an agent skill.
+mutation createAgentSkill(
+  # The agent skill object to create.
+  $input: AgentSkillCreateInput!
+) {
+  agentSkillCreate(input: $input) {
+    ...AgentSkillPayload
+  }
+}
+# Deletes an agent skill.
+mutation deleteAgentSkill(
+  # The identifier of the agent skill to delete.
+  $id: String!
+) {
+  agentSkillDelete(id: $id) {
+    ...DeletePayload
+  }
+}
+# Updates an agent skill.
+mutation updateAgentSkill(
+  # The identifier of the agent skill to update.
+  $id: String!
+  # Data to update the agent skill with.
+  $input: AgentSkillUpdateInput!
+) {
+  agentSkillUpdate(id: $id, input: $input) {
+    ...AgentSkillPayload
+  }
+}
 # Creates an integration api key for Airbyte to connect with Linear.
 mutation airbyteIntegrationConnect(
   # Airbyte integration settings.
@@ -20904,12 +21100,12 @@ mutation createContact(
 mutation createCsvExportReport(
   # IDs of private teams to include in the export. If null, only data from public teams is exported.
   $includePrivateTeamIds: [String!]
-  # IDs of protected teams to include in the export. If null, protected team data is omitted.
-  $includeProtectedTeamIds: [String!]
+  # IDs of restricted teams to include in the export. If null, restricted team data is omitted.
+  $includeRestrictedTeamIds: [String!]
 ) {
   createCsvExportReport(
     includePrivateTeamIds: $includePrivateTeamIds
-    includeProtectedTeamIds: $includeProtectedTeamIds
+    includeRestrictedTeamIds: $includeRestrictedTeamIds
   ) {
     ...CreateCsvExportReportPayload
   }
@@ -21252,6 +21448,18 @@ mutation deleteEmailIntakeAddress(
 ) {
   emailIntakeAddressDelete(id: $id) {
     ...DeletePayload
+  }
+}
+# Requests an immediate, on-demand SES domain verification status check for an email intake address
+# and keeps it in the frequent (per-minute) check lane for a short window. Use when a user is actively
+# configuring their custom sending domain so authorization converges quickly instead of waiting for
+# the once-a-day lane.
+mutation emailIntakeAddressRefreshSesDomainStatus(
+  # The identifier of the email intake address to refresh the domain status for.
+  $id: String!
+) {
+  emailIntakeAddressRefreshSesDomainStatus(id: $id) {
+    ...EmailIntakeAddressRefreshSesDomainStatusPayload
   }
 }
 # Rotates an existing email intake address.
@@ -21948,10 +22156,17 @@ mutation integrationSlack(
   $code: String!
   # The Slack OAuth redirect URI.
   $redirectUri: String!
+  # The Slack OAuth scopes the client requested. Used to warn when Slack grants fewer scopes than requested.
+  $requestedScopes: [String!]
   # [DEPRECATED] Whether or not v2 of Slack OAuth should be used. No longer used.
   $shouldUseV2Auth: Boolean
 ) {
-  integrationSlack(code: $code, redirectUri: $redirectUri, shouldUseV2Auth: $shouldUseV2Auth) {
+  integrationSlack(
+    code: $code
+    redirectUri: $redirectUri
+    requestedScopes: $requestedScopes
+    shouldUseV2Auth: $shouldUseV2Auth
+  ) {
     ...IntegrationPayload
   }
 }
@@ -21961,8 +22176,10 @@ mutation integrationSlackAsks(
   $code: String!
   # The Slack OAuth redirect URI.
   $redirectUri: String!
+  # The Slack OAuth scopes the client requested. Used to warn when Slack grants fewer scopes than requested.
+  $requestedScopes: [String!]
 ) {
-  integrationSlackAsks(code: $code, redirectUri: $redirectUri) {
+  integrationSlackAsks(code: $code, redirectUri: $redirectUri, requestedScopes: $requestedScopes) {
     ...IntegrationPayload
   }
 }

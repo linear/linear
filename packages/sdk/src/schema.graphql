@@ -331,6 +331,10 @@ type AgentActivityErrorContent {
   """
   bodyData: JSONObject!
   """
+  A stable reason code for specialized error handling.
+  """
+  reasonCode: String
+  """
   The type of activity.
   """
   type: AgentActivityType!
@@ -581,6 +585,10 @@ type AgentSession implements Node {
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
+  """
+  [Internal] Compact display label for the coding harness model used by this session, derived from the latest associated sandbox.
+  """
+  codingHarnessModelLabel: String
   """
   The comment this agent session is associated with.
   """
@@ -1092,6 +1100,207 @@ type AgentSessionWebhookPayload {
 }
 
 """
+A user-defined skill that can be saved and reused in conversations with the Linear Agent. Skills can be private to a user or shared with a team.
+"""
+type AgentSkill implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The skill instructions in markdown format.
+  """
+  body: String!
+  """
+  The skill's color. Null if no color is set.
+  """
+  color: String
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who created the skill.
+  """
+  creator: User!
+  """
+  The skill's description. Null if no description has been generated.
+  """
+  description: String
+  """
+  The icon of the skill. Null if no icon is set.
+  """
+  icon: String
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The user who last updated the skill. Null if unknown.
+  """
+  lastUpdatedBy: User
+  """
+  The time the skill was last used by anyone in the workspace. Null if it has never been used.
+  """
+  lastUsedAt: DateTime
+  """
+  The user who owns the skill.
+  """
+  owner: User!
+  """
+  The number of times the skill was used by anyone in the workspace in the last 30 days.
+  """
+  recentUsageCount: Float!
+  """
+  Whether the skill is shared with everyone in the workspace. When false, only the owner can use the skill.
+  """
+  shared: Boolean!
+  """
+  The skill's unique URL slug.
+  """
+  slugId: String!
+  """
+  The identifier of the team this skill is shared with.
+  """
+  teamId: String
+  """
+  The skill's title.
+  """
+  title: String!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type AgentSkillConnection {
+  edges: [AgentSkillEdge!]!
+  nodes: [AgentSkill!]!
+  pageInfo: PageInfo!
+}
+
+"""
+Input for creating an agent skill.
+"""
+input AgentSkillCreateInput {
+  """
+  The skill instructions in markdown format.
+  """
+  body: String!
+  """
+  The color of the skill icon.
+  """
+  color: String
+  """
+  The icon of the skill.
+  """
+  icon: String
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  The team to associate the skill with.
+  """
+  teamId: String
+  """
+  The title of the skill.
+  """
+  title: String
+}
+
+type AgentSkillEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: AgentSkill!
+}
+
+"""
+Agent skill filtering options.
+"""
+input AgentSkillFilter {
+  """
+  Compound filters, all of which need to be matched by the agent skill.
+  """
+  and: [AgentSkillFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Compound filters, one of which need to be matched by the agent skill.
+  """
+  or: [AgentSkillFilter!]
+  """
+  Comparator for the skill owner's user ID.
+  """
+  ownerId: IDComparator
+  """
+  Comparator for whether the skill is shared with the workspace.
+  """
+  shared: BooleanComparator
+  """
+  Filters that the skill's team must satisfy.
+  """
+  team: NullableTeamFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
+"""
+The result of an agent skill mutation.
+"""
+type AgentSkillPayload {
+  """
+  The agent skill that was created or updated.
+  """
+  agentSkill: AgentSkill!
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
+Input for updating an agent skill.
+"""
+input AgentSkillUpdateInput {
+  """
+  The skill instructions in markdown format.
+  """
+  body: String
+  """
+  The color of the skill icon.
+  """
+  color: String
+  """
+  The icon of the skill.
+  """
+  icon: String
+  """
+  The team to associate the skill with.
+  """
+  teamId: String
+  """
+  The title of the skill.
+  """
+  title: String
+}
+
+"""
 [Internal] A conversation between a user and the Linear AI assistant. Each conversation tracks the full thread state, context references (issues, projects, documents, etc.), and conversation parts (prompts, text responses, tool calls, widgets). Conversations can originate from direct chat, issue comments, Slack threads, Microsoft Teams, or automated workflows.
 """
 type AiConversation implements Node {
@@ -1345,6 +1554,57 @@ type AiConversationDeleteEntityToolCallArgs {
   entity: AiConversationSearchEntitiesToolCallResultEntities!
 }
 
+"""
+The kind of input an AI conversation elicitation asks for.
+"""
+enum AiConversationElicitationKind {
+  multipleChoice
+}
+
+"""
+A selectable option shown in an AI conversation elicitation.
+"""
+type AiConversationElicitationOption {
+  """
+  The short label shown for the option.
+  """
+  label: String!
+  """
+  The prompt sent as a normal user reply when selected.
+  """
+  prompt: String!
+}
+
+"""
+A lightweight question or choice prompt shown with an AI conversation.
+"""
+type AiConversationElicitationPart implements AiConversationBasePart {
+  """
+  The ID of the part.
+  """
+  id: String!
+  """
+  The kind of input this elicitation asks for.
+  """
+  kind: AiConversationElicitationKind!
+  """
+  The metadata of the part.
+  """
+  metadata: AiConversationPartMetadata!
+  """
+  Selectable prompt options for multiple-choice elicitations.
+  """
+  options: [AiConversationElicitationOption!]!
+  """
+  The title shown above the elicitation choices.
+  """
+  title: String
+  """
+  The type of the part.
+  """
+  type: AiConversationPartType!
+}
+
 type AiConversationEntityCardWidget implements AiConversationBaseWidget {
   """
   The arguments to the widget.
@@ -1370,6 +1630,10 @@ type AiConversationEntityCardWidgetArgs {
   """
   action: AiConversationEntityCardWidgetArgsAction
   """
+  A concise summary shown on specialized entity cards. Leave empty unless specifically instructed.
+  """
+  actionSummary: String
+  """
   The UUID of the entity to display
   """
   id: String!
@@ -1377,6 +1641,10 @@ type AiConversationEntityCardWidgetArgs {
   @deprecated Optional note to display about the entity
   """
   note: String @deprecated(reason: "Optional note to display about the entity")
+  """
+  [Internal] Snapshot data for the widget.
+  """
+  snapshot: JSONObject
   """
   [Internal] The entity type
   """
@@ -1395,6 +1663,7 @@ enum AiConversationEntityCardWidgetArgsAction {
 [Internal] The entity type
 """
 enum AiConversationEntityCardWidgetArgsType {
+  AgentSession
   AiPrompt
   CustomView
   Customer
@@ -1466,6 +1735,10 @@ type AiConversationEntityListWidgetArgsEntities {
   """
   note: String @deprecated(reason: "Optional note to display about the entity")
   """
+  [Internal] Snapshot data for the widget.
+  """
+  snapshot: JSONObject
+  """
   [Internal] The entity type
   """
   type: AiConversationEntityListWidgetArgsEntitiesType!
@@ -1501,6 +1774,10 @@ An error part in an AI conversation.
 """
 type AiConversationErrorPart implements AiConversationBasePart {
   """
+  The category of the error. Absent for errors without a specific category, which default to unknown.
+  """
+  errorType: AiConversationErrorType
+  """
   The ID of the part.
   """
   id: String!
@@ -1516,6 +1793,15 @@ type AiConversationErrorPart implements AiConversationBasePart {
   The type of the part.
   """
   type: AiConversationPartType!
+}
+
+"""
+The category of an error part in an AI conversation.
+"""
+enum AiConversationErrorType {
+  billing
+  unknown
+  untrustedSources
 }
 
 """
@@ -1688,6 +1974,7 @@ enum AiConversationInitialSource {
   directChat
   mcp
   microsoftTeams
+  onboarding
   pullRequestComment
   slack
   workflow
@@ -1809,6 +2096,7 @@ type AiConversationNavigateToPageToolCallResult {
 A part in an AI conversation.
 """
 union AiConversationPart =
+  | AiConversationElicitationPart
   | AiConversationErrorPart
   | AiConversationEventPart
   | AiConversationPromptPart
@@ -1859,6 +2147,7 @@ enum AiConversationPartPhase {
 The type of a part in an AI conversation.
 """
 enum AiConversationPartType {
+  elicitation
   error
   event
   prompt
@@ -8865,6 +9154,14 @@ type DocumentContentHistoryCheckpointType {
   """
   id: String!
   """
+  The identifier of the user who invoked the AI checkpoint.
+  """
+  invokedByUserId: String
+  """
+  Whether this checkpoint is the active head for its conversation branch and mode.
+  """
+  isActive: Boolean!
+  """
   Whether this checkpoint belongs to draft-only or live document content.
   """
   mode: DocumentContentAgentCheckpointMode!
@@ -9937,6 +10234,16 @@ type EmailIntakeAddressPayload {
   lastSyncId: Float!
   """
   Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
+The result of requesting an on-demand SES domain status refresh.
+"""
+type EmailIntakeAddressRefreshSesDomainStatusPayload {
+  """
+  Whether an on-demand status check was requested.
   """
   success: Boolean!
 }
@@ -12115,6 +12422,10 @@ type Initiative implements Node {
   """
   archivedAt: DateTime
   """
+  [Internal] The time at which the initiative was moved into Canceled status. Null if the initiative has not been canceled.
+  """
+  canceledAt: DateTime
+  """
   The initiative's color.
   """
   color: String
@@ -12393,6 +12704,14 @@ type Initiative implements Node {
   """
   previousIdentifiers: [String!]!
   """
+  [Internal] The priority of the initiative. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
+  """
+  priority: Int!
+  """
+  [Internal] The sort order of the initiative within the workspace when ordered by priority.
+  """
+  prioritySortOrder: Float!
+  """
   Projects associated with the initiative.
   """
   projects(
@@ -12446,7 +12765,7 @@ type Initiative implements Node {
   """
   startedAt: DateTime
   """
-  The lifecycle status of the initiative. One of Planned, Active, Completed.
+  The lifecycle status of the initiative. One of Proposed, Planned, Active, Completed, Canceled.
   """
   status: InitiativeStatus!
   """
@@ -12578,6 +12897,10 @@ input InitiativeCollectionFilter {
   """
   and: [InitiativeCollectionFilter!]
   """
+  [Internal] Comparator for the initiative canceled at date.
+  """
+  canceledAt: NullableDateComparator
+  """
   Comparator for the initiative completed at date.
   """
   completedAt: NullableDateComparator
@@ -12630,6 +12953,10 @@ input InitiativeCollectionFilter {
   """
   owner: NullableUserFilter
   """
+  [Internal] Comparator for the initiative priority.
+  """
+  priority: NullableNumberComparator
+  """
   Comparator for the initiative slug ID.
   """
   slugId: StringComparator
@@ -12642,7 +12969,7 @@ input InitiativeCollectionFilter {
   """
   startedAt: NullableDateComparator
   """
-  Comparator for the initiative status: Planned, Active, Completed
+  Comparator for the initiative status: Proposed, Planned, Active, Completed, Canceled
   """
   status: StringComparator
   """
@@ -12702,6 +13029,14 @@ input InitiativeCreateInput {
   """
   ownerId: String
   """
+  [Internal] The priority of the initiative. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
+  """
+  priority: Int
+  """
+  [Internal] The sort order of the initiative within the workspace, when ordered by priority.
+  """
+  prioritySortOrder: Float
+  """
   The sort order of the initiative within the workspace.
   """
   sortOrder: Float
@@ -12758,6 +13093,10 @@ input InitiativeFilter {
   """
   and: [InitiativeFilter!]
   """
+  [Internal] Comparator for the initiative canceled at date.
+  """
+  canceledAt: NullableDateComparator
+  """
   Comparator for the initiative completed at date.
   """
   completedAt: NullableDateComparator
@@ -12802,6 +13141,10 @@ input InitiativeFilter {
   """
   owner: NullableUserFilter
   """
+  [Internal] Comparator for the initiative priority.
+  """
+  priority: NullableNumberComparator
+  """
   Comparator for the initiative slug ID.
   """
   slugId: StringComparator
@@ -12810,7 +13153,7 @@ input InitiativeFilter {
   """
   startedAt: NullableDateComparator
   """
-  Comparator for the initiative status: Planned, Active, Completed
+  Comparator for the initiative status: Proposed, Planned, Active, Completed, Canceled
   """
   status: StringComparator
   """
@@ -13436,6 +13779,24 @@ type InitiativePayload {
 }
 
 """
+Initiative priority sorting options.
+"""
+input InitiativePrioritySort {
+  """
+  Whether to consider no priority as the highest or lowest priority
+  """
+  noPriorityFirst: Boolean = false
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
+}
+
+"""
 A parent-child relation between two initiatives, forming a hierarchy. The initiative field is the parent and relatedInitiative is the child. Cycles and excessive nesting depth are prevented.
 """
 type InitiativeRelation implements Node {
@@ -13567,6 +13928,10 @@ input InitiativeSortInput {
   """
   owner: InitiativeOwnerSort
   """
+  Sort by initiative priority.
+  """
+  priority: InitiativePrioritySort
+  """
   Sort by initiative target date.
   """
   targetDate: InitiativeTargetDateSort
@@ -13578,8 +13943,10 @@ input InitiativeSortInput {
 
 enum InitiativeStatus {
   Active
+  Canceled
   Completed
   Planned
+  Proposed
 }
 
 """
@@ -13996,6 +14363,14 @@ input InitiativeUpdateInput {
   """
   ownerId: String
   """
+  [Internal] The priority of the initiative. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
+  """
+  priority: Int
+  """
+  [Internal] The sort order of the initiative within the workspace, when ordered by priority.
+  """
+  prioritySortOrder: Float
+  """
   The sort order of the initiative within the workspace.
   """
   sortOrder: Float
@@ -14239,6 +14614,10 @@ type InitiativeWebhookPayload {
   The time at which the entity was archived.
   """
   archivedAt: String
+  """
+  When the initiative was canceled.
+  """
+  canceledAt: String
   """
   The color of the initiative.
   """
@@ -15033,6 +15412,35 @@ type Issue implements Node {
   """
   addedToTeamAt: DateTime
   """
+  [Internal] Agent sessions associated with the issue.
+  """
+  agentSessions(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): AgentSessionConnection!
+  """
   [Internal] AI prompt progresses associated with this issue.
   """
   aiPromptProgresses(
@@ -15809,6 +16217,10 @@ type Issue implements Node {
   The time at which the issue left triage.
   """
   triagedAt: DateTime
+  """
+  [Internal] Whether this issue has been explicitly marked as trusted.
+  """
+  trusted: Boolean
   """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -18540,6 +18952,35 @@ type IssueSearchResult implements Node {
   """
   addedToTeamAt: DateTime
   """
+  [Internal] Agent sessions associated with the issue.
+  """
+  agentSessions(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): AgentSessionConnection!
+  """
   [Internal] AI prompt progresses associated with this issue.
   """
   aiPromptProgresses(
@@ -19320,6 +19761,10 @@ type IssueSearchResult implements Node {
   The time at which the issue left triage.
   """
   triagedAt: DateTime
+  """
+  [Internal] Whether this issue has been explicitly marked as trusted.
+  """
+  trusted: Boolean
   """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -20216,6 +20661,10 @@ input IssueUpdateInput {
   Whether the issue has been trashed.
   """
   trashed: Boolean
+  """
+  [Internal] Whether this issue has been explicitly marked as trusted.
+  """
+  trusted: Boolean
 }
 
 """
@@ -21078,6 +21527,37 @@ type Mutation {
     input: AgentSessionUpdateExternalUrlInput!
   ): AgentSessionPayload!
   """
+  Creates an agent skill.
+  """
+  agentSkillCreate(
+    """
+    The agent skill object to create.
+    """
+    input: AgentSkillCreateInput!
+  ): AgentSkillPayload!
+  """
+  Deletes an agent skill.
+  """
+  agentSkillDelete(
+    """
+    The identifier of the agent skill to delete.
+    """
+    id: String!
+  ): DeletePayload!
+  """
+  Updates an agent skill.
+  """
+  agentSkillUpdate(
+    """
+    The identifier of the agent skill to update.
+    """
+    id: String!
+    """
+    Data to update the agent skill with.
+    """
+    input: AgentSkillUpdateInput!
+  ): AgentSkillPayload!
+  """
   Creates an integration api key for Airbyte to connect with Linear.
   """
   airbyteIntegrationConnect(
@@ -21565,9 +22045,9 @@ type Mutation {
     """
     includePrivateTeamIds: [String!]
     """
-    IDs of protected teams to include in the export. If null, protected team data is omitted.
+    IDs of restricted teams to include in the export. If null, restricted team data is omitted.
     """
-    includeProtectedTeamIds: [String!]
+    includeRestrictedTeamIds: [String!]
   ): CreateCsvExportReportPayload!
   """
   Create a notification to remind a user about an initiative update.
@@ -21940,6 +22420,15 @@ type Mutation {
     """
     id: String!
   ): DeletePayload!
+  """
+  Requests an immediate, on-demand SES domain verification status check for an email intake address and keeps it in the frequent (per-minute) check lane for a short window. Use when a user is actively configuring their custom sending domain so authorization converges quickly instead of waiting for the once-a-day lane.
+  """
+  emailIntakeAddressRefreshSesDomainStatus(
+    """
+    The identifier of the email intake address to refresh the domain status for.
+    """
+    id: String!
+  ): EmailIntakeAddressRefreshSesDomainStatusPayload!
   """
   Rotates an existing email intake address.
   """
@@ -22924,6 +23413,10 @@ type Mutation {
     """
     redirectUri: String!
     """
+    The Slack OAuth scopes the client requested. Used to warn when Slack grants fewer scopes than requested.
+    """
+    requestedScopes: [String!]
+    """
     [DEPRECATED] Whether or not v2 of Slack OAuth should be used. No longer used.
     """
     shouldUseV2Auth: Boolean
@@ -22940,6 +23433,10 @@ type Mutation {
     The Slack OAuth redirect URI.
     """
     redirectUri: String!
+    """
+    The Slack OAuth scopes the client requested. Used to warn when Slack grants fewer scopes than requested.
+    """
+    requestedScopes: [String!]
   ): IntegrationPayload!
   """
   Slack integration for custom view notifications.
@@ -25074,6 +25571,10 @@ type Mutation {
     The Slack OAuth redirect URI.
     """
     redirectUri: String!
+    """
+    The Slack OAuth scopes the client requested. Used to warn when Slack grants fewer scopes than requested.
+    """
+    requestedScopes: [String!]
   ): IntegrationPayload!
   """
   Changes the workspace role of a user. The requesting user must have a role equal to or higher than the target role. Requires workspace admin permissions.
@@ -26514,6 +27015,10 @@ input NullableInitiativeFilter {
   """
   and: [NullableInitiativeFilter!]
   """
+  [Internal] Comparator for the initiative canceled at date.
+  """
+  canceledAt: NullableDateComparator
+  """
   Comparator for the initiative completed at date.
   """
   completedAt: NullableDateComparator
@@ -26562,6 +27067,10 @@ input NullableInitiativeFilter {
   """
   owner: NullableUserFilter
   """
+  [Internal] Comparator for the initiative priority.
+  """
+  priority: NullableNumberComparator
+  """
   Comparator for the initiative slug ID.
   """
   slugId: StringComparator
@@ -26570,7 +27079,7 @@ input NullableInitiativeFilter {
   """
   startedAt: NullableDateComparator
   """
-  Comparator for the initiative status: Planned, Active, Completed
+  Comparator for the initiative status: Proposed, Planned, Active, Completed, Canceled
   """
   status: StringComparator
   """
@@ -27044,7 +27553,7 @@ input NullableProjectFilter {
   """
   or: [NullableProjectFilter!]
   """
-  Comparator for the projects priority.
+  Comparator for the project priority.
   """
   priority: NullableNumberComparator
   """
@@ -27080,7 +27589,7 @@ input NullableProjectFilter {
   """
   state: StringComparator
   """
-  Filters that the project's status must satisfy.
+  Filters that the project status must satisfy.
   """
   status: ProjectStatusFilter
   """
@@ -27276,7 +27785,7 @@ input NullableTeamFilter {
   """
   id: IDComparator
   """
-  Filters that the teams issues must satisfy.
+  Filters that the team's issues must satisfy.
   """
   issues: IssueCollectionFilter
   """
@@ -27300,17 +27809,21 @@ input NullableTeamFilter {
   """
   or: [NullableTeamFilter!]
   """
-  Filters that the teams parent must satisfy.
+  Filters that the team's parent must satisfy.
   """
   parent: NullableTeamFilter
   """
-  Comparator for the team privacy.
+  [DEPRECATED] Comparator for the team privacy.
   """
   private: BooleanComparator
   """
   Filters that the team's release pipelines must satisfy.
   """
   releasePipelines: ReleasePipelineCollectionFilter
+  """
+  [Internal] Filters that the private team forming this team's visibility boundary must satisfy. Only relevant for non-public teams.
+  """
+  restrictedBy: NullableTeamFilter
   """
   Comparator for the time at which the team was retired.
   """
@@ -27319,6 +27832,10 @@ input NullableTeamFilter {
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
+  """
+  Comparator for the team visibility.
+  """
+  visibility: TeamVisibilityComparator
 }
 
 """
@@ -27580,6 +28097,10 @@ type OAuthApplication {
   """
   distribution: OAuthApplicationDistribution!
   """
+  OAuth grant types supported by this application. authorization_code is always included.
+  """
+  grantTypes: [OAuthApplicationGrantType!]!
+  """
   The unique identifier of the OAuth application.
   """
   id: String!
@@ -27638,7 +28159,11 @@ input OAuthApplicationCreateInput {
   """
   URL of the developer's website, homepage, or documentation.
   """
-  developerUrl: String!
+  developerUrl: String
+  """
+  OAuth grant capabilities the app may use. authorization_code is required. Defaults to authorization_code.
+  """
+  grantTypes: [OAuthApplicationGrantType!]
   """
   Optional client-supplied idempotency key. Reusing the same key with the same managing OAuth application returns the existing OAuth application instead of creating a duplicate. The key does not apply to archived applications.
   """
@@ -27693,6 +28218,14 @@ Distribution setting for an OAuth application.
 enum OAuthApplicationDistribution {
   private
   public
+}
+
+"""
+OAuth grant type supported by an OAuth application.
+"""
+enum OAuthApplicationGrantType {
+  authorization_code
+  client_credentials
 }
 
 """
@@ -27753,6 +28286,10 @@ input OAuthApplicationUpdateInput {
   URL of the developer's website, homepage, or documentation.
   """
   developerUrl: String
+  """
+  OAuth grant capabilities the app may use. authorization_code is required. Omit to keep the existing grant types.
+  """
+  grantTypes: [OAuthApplicationGrantType!]
   """
   URL of the OAuth application's icon.
   """
@@ -28602,7 +29139,11 @@ type OrganizationCancelDeletePayload {
 """
 input OrganizationCodingAgentSettingsInput {
   """
-  [Internal] The model preference used for Coding Sessions sessions.
+  [Internal] The provider-agnostic reasoning effort level used for Coding Sessions. Clamped to the selected model's provider when the session runs.
+  """
+  effort: String
+  """
+  [Internal] The model preference used for Coding Sessions.
   """
   model: String
 }
@@ -29177,10 +29718,6 @@ input OrganizationUpdateInput {
   """
   aiThreadSummariesEnabled: Boolean
   """
-  List of services that are allowed to be used for login.
-  """
-  allowedAuthServices: [String!]
-  """
   Allowed file upload content types.
   """
   allowedFileUploadContentTypes: [String!]
@@ -29244,10 +29781,6 @@ input OrganizationUpdateInput {
   Whether the Git integration linkback messages should be sent for public repositories.
   """
   gitPublicLinkbackMessagesEnabled: Boolean
-  """
-  Whether to hide other workspaces for new users signing up with email domains claimed by this organization.
-  """
-  hideNonPrimaryOrganizations: Boolean
   """
   Whether HIPAA compliance is enabled for the workspace.
   """
@@ -30937,7 +31470,7 @@ input ProjectCollectionFilter {
   """
   or: [ProjectCollectionFilter!]
   """
-  Comparator for the projects priority.
+  Comparator for the project priority.
   """
   priority: NullableNumberComparator
   """
@@ -30977,7 +31510,7 @@ input ProjectCollectionFilter {
   """
   state: StringComparator
   """
-  Filters that the project's status must satisfy.
+  Filters that the project status must satisfy.
   """
   status: ProjectStatusFilter
   """
@@ -31233,7 +31766,7 @@ input ProjectFilter {
   """
   or: [ProjectFilter!]
   """
-  Comparator for the projects priority.
+  Comparator for the project priority.
   """
   priority: NullableNumberComparator
   """
@@ -31269,7 +31802,7 @@ input ProjectFilter {
   """
   state: StringComparator
   """
-  Filters that the project's status must satisfy.
+  Filters that the project status must satisfy.
   """
   status: ProjectStatusFilter
   """
@@ -35127,6 +35660,48 @@ type Query {
     orderBy: PaginationOrderBy
   ): AgentSessionConnection!
   """
+  A specific agent skill.
+  """
+  agentSkill(
+    """
+    The identifier of the agent skill to retrieve.
+    """
+    id: String!
+  ): AgentSkill!
+  """
+  All agent skills.
+  """
+  agentSkills(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned skills
+    """
+    filter: AgentSkillFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): AgentSkillConnection!
+  """
   Retrieves public information about an OAuth application by its client ID. Used during the authorization flow to display application details to the user.
   """
   applicationInfo(
@@ -38581,6 +39156,10 @@ type ReleaseNote implements Node {
   """
   lastRelease: Release
   """
+  The release pipeline that this note belongs to. A note always belongs to exactly one pipeline.
+  """
+  pipeline: ReleasePipeline!
+  """
   The number of releases covered by this note.
   """
   releaseCount: Int!
@@ -38806,7 +39385,7 @@ type ReleasePipeline implements Node {
   """
   archivedAt: DateTime
   """
-  Whether to automatically generate a release note when a release is completed. Only applies to scheduled pipelines; ignored for continuous pipelines.
+  Whether to automatically generate a release note when a release is completed.
   """
   autoGenerateReleaseNotesOnCompletion: Boolean!
   """
@@ -39056,7 +39635,7 @@ Input for creating a new release pipeline.
 """
 input ReleasePipelineCreateInput {
   """
-  Whether to automatically generate a release note when a release is completed. Only applies to scheduled pipelines; ignored for continuous pipelines. Defaults to false.
+  Whether to automatically generate a release note when a release is completed. Defaults to false.
   """
   autoGenerateReleaseNotesOnCompletion: Boolean
   """
@@ -39190,7 +39769,7 @@ Input for updating an existing release pipeline.
 """
 input ReleasePipelineUpdateInput {
   """
-  Whether to automatically generate a release note when a release is completed. Only applies to scheduled pipelines; ignored for continuous pipelines.
+  Whether to automatically generate a release note when a release is completed.
   """
   autoGenerateReleaseNotesOnCompletion: Boolean
   """
@@ -42203,9 +42782,13 @@ type Team implements Node {
     sort: [ProjectSortInput!]
   ): ProjectConnection!
   """
-  [Internal] For protected teams, the enclosing private team that forms the visibility boundary. Null for public and private teams.
+  [Internal] For restricted teams, the enclosing private team that forms the visibility boundary.
   """
-  protectedBy: Team
+  protectedBy: Team @deprecated(reason: "Use restrictedBy instead.")
+  """
+  [Internal] The identifier of the enclosing private team that forms the visibility boundary for restricted teams.
+  """
+  protectedById: String @deprecated(reason: "Use restrictedById instead.")
   """
   Release pipelines associated with the team.
   """
@@ -42248,7 +42831,7 @@ type Team implements Node {
   """
   resourceSections: [TeamResourceSection!]!
   """
-  [Internal] For restricted teams, the enclosing private team that forms the visibility boundary. Alias for protectedBy.
+  [Internal] For restricted teams, the enclosing private team that forms the visibility boundary. Null for public and private teams.
   """
   restrictedBy: Team
   """
@@ -42701,7 +43284,7 @@ input TeamFilter {
   """
   id: IDComparator
   """
-  Filters that the teams issues must satisfy.
+  Filters that the team's issues must satisfy.
   """
   issues: IssueCollectionFilter
   """
@@ -42721,17 +43304,21 @@ input TeamFilter {
   """
   or: [TeamFilter!]
   """
-  Filters that the teams parent must satisfy.
+  Filters that the team's parent must satisfy.
   """
   parent: NullableTeamFilter
   """
-  Comparator for the team privacy.
+  [DEPRECATED] Comparator for the team privacy.
   """
   private: BooleanComparator
   """
   Filters that the team's release pipelines must satisfy.
   """
   releasePipelines: ReleasePipelineCollectionFilter
+  """
+  [Internal] Filters that the private team forming this team's visibility boundary must satisfy. Only relevant for non-public teams.
+  """
+  restrictedBy: NullableTeamFilter
   """
   Comparator for the time at which the team was retired.
   """
@@ -42740,6 +43327,10 @@ input TeamFilter {
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
+  """
+  Comparator for the team visibility.
+  """
+  visibility: TeamVisibilityComparator
 }
 
 """
@@ -43327,12 +43918,34 @@ input TeamUpdateInput {
 }
 
 """
-The visibility of a team. A team can be public, private, or restricted within an enclosing private-team boundary. The protected enum value remains as a legacy alias for compatibility.
+The visibility of a team. A team can be public, private, or restricted within an enclosing private-team boundary.
 """
 enum TeamVisibility {
   private
   public
   restricted
+}
+
+"""
+Comparator for team visibility.
+"""
+input TeamVisibilityComparator {
+  """
+  Equals constraint.
+  """
+  eq: TeamVisibility
+  """
+  In-array constraint.
+  """
+  in: [TeamVisibility!]
+  """
+  Not-equals constraint.
+  """
+  neq: TeamVisibility
+  """
+  Not-in-array constraint.
+  """
+  nin: [TeamVisibility!]
 }
 
 """
@@ -45922,6 +46535,10 @@ type ViewPreferencesValues {
   """
   initiativeFieldOwner: Boolean
   """
+  [Internal] Whether to show the initiative priority field.
+  """
+  initiativeFieldPriority: Boolean
+  """
   Whether to show the initiative projects field.
   """
   initiativeFieldProjects: Boolean
@@ -46270,6 +46887,10 @@ type ViewPreferencesValues {
   """
   reviewFieldChecks: Boolean
   """
+  Whether to show the review GitHub team field.
+  """
+  reviewFieldGithubTeam: Boolean
+  """
   Whether to show the review identifier field.
   """
   reviewFieldIdentifier: Boolean
@@ -46521,8 +47142,10 @@ enum ViewType {
   initiativeOverview
   initiativeOverviewSubInitiatives
   initiatives
+  initiativesCanceled
   initiativesCompleted
   initiativesPlanned
+  initiativesProposed
   issueIdentifiers
   label
   myIssues
@@ -47072,6 +47695,10 @@ type WorkflowDefinition implements Node {
   The sort order of the workflow definition within its siblings.
   """
   sortOrder: String!
+  """
+  Aggregated usage stats for this automation workflow definition.
+  """
+  stats: JSONObject
   """
   The team associated with the workflow. If not set, the workflow is associated with the entire workspace.
   """

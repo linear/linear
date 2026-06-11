@@ -468,6 +468,61 @@ describe("generated", () => {
     });
   });
 
+  /** Test all AgentSkill queries */
+  describe("AgentSkills", () => {
+    let _agentSkill: L.AgentSkill | undefined | null;
+    let _agentSkill_id: string | undefined | null;
+
+    /** Test the root connection query for the AgentSkill */
+    it("agentSkills", async () => {
+      const agentSkills: L.AgentSkillConnection | undefined | null = await client.agentSkills();
+      const agentSkill = agentSkills?.nodes?.[0];
+      _agentSkill_id = agentSkill?.id;
+      expect(agentSkills instanceof L.AgentSkillConnection);
+    });
+
+    /** Test the root query for a single AgentSkill */
+    it("agentSkill", async () => {
+      if (_agentSkill_id) {
+        const agentSkill: L.AgentSkill | undefined | null = await client.agentSkill(_agentSkill_id);
+        _agentSkill = agentSkill;
+        expect(agentSkill instanceof L.AgentSkill);
+      } else {
+        console.warn("codegen-doc:print: No first AgentSkill found in connection - cannot test agentSkill query");
+      }
+    });
+
+    /** Test the agentSkill.creator query for L.User */
+    it("agentSkill.creator", async () => {
+      if (_agentSkill) {
+        const agentSkill_creator: L.User | undefined | null = await _agentSkill.creator;
+        expect(agentSkill_creator instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No AgentSkill found - cannot test agentSkill.creator query");
+      }
+    });
+
+    /** Test the agentSkill.lastUpdatedBy query for L.User */
+    it("agentSkill.lastUpdatedBy", async () => {
+      if (_agentSkill) {
+        const agentSkill_lastUpdatedBy: L.User | undefined | null = await _agentSkill.lastUpdatedBy;
+        expect(agentSkill_lastUpdatedBy instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No AgentSkill found - cannot test agentSkill.lastUpdatedBy query");
+      }
+    });
+
+    /** Test the agentSkill.owner query for L.User */
+    it("agentSkill.owner", async () => {
+      if (_agentSkill) {
+        const agentSkill_owner: L.User | undefined | null = await _agentSkill.owner;
+        expect(agentSkill_owner instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No AgentSkill found - cannot test agentSkill.owner query");
+      }
+    });
+  });
+
   /** Test ApplicationInfo query */
   describe("ApplicationInfo", () => {
     /** Test the root model query for ApplicationInfo */
@@ -5181,6 +5236,16 @@ describe("generated", () => {
         expect(releaseNote_lastRelease instanceof L.Release);
       } else {
         console.warn("codegen-doc:print: No ReleaseNote found - cannot test releaseNote.lastRelease query");
+      }
+    });
+
+    /** Test the releaseNote.pipeline query for L.ReleasePipeline */
+    it("releaseNote.pipeline", async () => {
+      if (_releaseNote) {
+        const releaseNote_pipeline: L.ReleasePipeline | undefined | null = await _releaseNote.pipeline;
+        expect(releaseNote_pipeline instanceof L.ReleasePipeline);
+      } else {
+        console.warn("codegen-doc:print: No ReleaseNote found - cannot test releaseNote.pipeline query");
       }
     });
 
