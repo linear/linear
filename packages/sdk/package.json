@@ -5,6 +5,10 @@
   "author": "Linear Orbit, Inc",
   "license": "MIT",
   "repository": "https://github.com/linear/linear",
+  "homepage": "https://linear.app/developers/sdk",
+  "bugs": {
+    "url": "https://github.com/linear/linear/issues"
+  },
   "type": "module",
   "engines": {
     "node": ">=18.x"
