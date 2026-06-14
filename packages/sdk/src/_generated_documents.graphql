@@ -1452,6 +1452,10 @@ fragment Notification on Notification {
     ...PostNotification
   }
 
+  ... on ProductAnnouncementNotification {
+    ...ProductAnnouncementNotification
+  }
+
   ... on ProjectNotification {
     ...ProjectNotification
   }
@@ -1651,6 +1655,54 @@ fragment PostNotification on PostNotification {
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The recipient user of this notification.
+  user {
+    id
+  }
+  # The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed.
+  unsnoozedAt
+  # The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent.
+  emailedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the user marked the notification as read. Null if the notification is unread.
+  readAt
+  # The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed.
+  snoozedUntilAt
+  # The unique identifier of the entity.
+  id
+  # The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event.
+  actor {
+    id
+  }
+}
+
+# A notification related to a product announcement sent by Linear.
+fragment ProductAnnouncementNotification on ProductAnnouncementNotification {
+  __typename
+  # Identifier of the associated product announcement.
+  productAnnouncementId
+  # Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated.
+  type
+  # The bot that caused the notification.
+  botActor {
+    ...ActorBot
+  }
+  # The category of the notification.
+  category
+  # The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member.
+  externalUserActor {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The product announcement related to the notification.
+  productAnnouncement {
+    ...ProductAnnouncement
+  }
   # The recipient user of this notification.
   user {
     id
@@ -2573,6 +2625,31 @@ fragment OrganizationInvite on OrganizationInvite {
   role
   # Whether the invite was sent to an email address outside the workspace's verified domains.
   external
+}
+
+# A product announcement shown in targeted workspace inbox notifications. Product announcements store
+# reusable launch copy and are sent to specific recipients through related notifications.
+fragment ProductAnnouncement on ProductAnnouncement {
+  __typename
+  # Body copy shown in the product announcement detail view.
+  description
+  # Headline shown at the top of the product announcement detail view.
+  headline
+  # Renderer identifier for this announcement. Unknown values should fall back to generic title, headline, and description rendering.
+  kind
+  # Short title shown in the inbox notification list and push notification.
+  title
+  # Stable campaign identifier used to deduplicate product announcement notifications.
+  campaignId
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
 }
 
 # A project is a collection of issues working toward a shared goal. Projects have start and target

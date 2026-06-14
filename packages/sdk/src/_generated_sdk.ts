@@ -14301,6 +14301,7 @@ export class NotificationConnection extends Connection<
   | IssueNotification
   | OauthClientApprovalNotification
   | PostNotification
+  | ProductAnnouncementNotification
   | ProjectNotification
   | PullRequestNotification
   | UsageAlertNotification
@@ -14320,6 +14321,7 @@ export class NotificationConnection extends Connection<
           | IssueNotification
           | OauthClientApprovalNotification
           | PostNotification
+          | ProductAnnouncementNotification
           | ProjectNotification
           | PullRequestNotification
           | UsageAlertNotification
@@ -14349,6 +14351,8 @@ export class NotificationConnection extends Connection<
             return new OauthClientApprovalNotification(request, node as L.OauthClientApprovalNotificationFragment);
           case "PostNotification":
             return new PostNotification(request, node as L.PostNotificationFragment);
+          case "ProductAnnouncementNotification":
+            return new ProductAnnouncementNotification(request, node as L.ProductAnnouncementNotificationFragment);
           case "ProjectNotification":
             return new ProjectNotification(request, node as L.ProjectNotificationFragment);
           case "PullRequestNotification":
@@ -15916,6 +15920,135 @@ export class PostNotification extends Request {
   public updatedAt: Date;
   /** The bot that caused the notification. */
   public botActor?: ActorBot | null;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
+  /** The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
+  public get actor(): LinearFetch<User> | undefined {
+    return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
+  }
+  /** The ID of user that caused the notification. null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
+  public get actorId(): string | undefined {
+    return this._actor?.id;
+  }
+  /** The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member. */
+  public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
+    return this._externalUserActor?.id
+      ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
+      : undefined;
+  }
+  /** The ID of external user that caused the notification. populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like slack or github) rather than a linear workspace member. */
+  public get externalUserActorId(): string | undefined {
+    return this._externalUserActor?.id;
+  }
+  /** The recipient user of this notification. */
+  public get user(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._user.id);
+  }
+  /** The ID of recipient user of this notification. */
+  public get userId(): string | undefined {
+    return this._user?.id;
+  }
+}
+/**
+ * A product announcement shown in targeted workspace inbox notifications. Product announcements store reusable launch copy and are sent to specific recipients through related notifications.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ProductAnnouncementFragment response data
+ */
+export class ProductAnnouncement extends Request {
+  public constructor(request: LinearRequest, data: L.ProductAnnouncementFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.campaignId = data.campaignId;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.description = data.description;
+    this.headline = data.headline;
+    this.id = data.id;
+    this.kind = data.kind;
+    this.title = data.title;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** Stable campaign identifier used to deduplicate product announcement notifications. */
+  public campaignId: string;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** Body copy shown in the product announcement detail view. */
+  public description: string;
+  /** Headline shown at the top of the product announcement detail view. */
+  public headline: string;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** Renderer identifier for this announcement. Unknown values should fall back to generic title, headline, and description rendering. */
+  public kind: string;
+  /** Short title shown in the inbox notification list and push notification. */
+  public title: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+}
+/**
+ * A notification related to a product announcement sent by Linear.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ProductAnnouncementNotificationFragment response data
+ */
+export class ProductAnnouncementNotification extends Request {
+  private _actor?: L.ProductAnnouncementNotificationFragment["actor"];
+  private _externalUserActor?: L.ProductAnnouncementNotificationFragment["externalUserActor"];
+  private _user: L.ProductAnnouncementNotificationFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.ProductAnnouncementNotificationFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.emailedAt = parseDate(data.emailedAt) ?? undefined;
+    this.id = data.id;
+    this.productAnnouncementId = data.productAnnouncementId;
+    this.readAt = parseDate(data.readAt) ?? undefined;
+    this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
+    this.type = data.type;
+    this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.productAnnouncement = new ProductAnnouncement(request, data.productAnnouncement);
+    this.category = data.category;
+    this._actor = data.actor ?? undefined;
+    this._externalUserActor = data.externalUserActor ?? undefined;
+    this._user = data.user;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent. */
+  public emailedAt?: Date | null;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** Identifier of the associated product announcement. */
+  public productAnnouncementId: string;
+  /** The time at which the user marked the notification as read. Null if the notification is unread. */
+  public readAt?: Date | null;
+  /** The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed. */
+  public snoozedUntilAt?: Date | null;
+  /** Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated. */
+  public type: string;
+  /** The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed. */
+  public unsnoozedAt?: Date | null;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The bot that caused the notification. */
+  public botActor?: ActorBot | null;
+  /** The product announcement related to the notification. */
+  public productAnnouncement: ProductAnnouncement;
   /** The category of the notification. */
   public category: L.NotificationCategory;
   /** The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
@@ -27149,6 +27282,7 @@ export class NotificationQuery extends Request {
     | IssueNotification
     | OauthClientApprovalNotification
     | PostNotification
+    | ProductAnnouncementNotification
     | ProjectNotification
     | PullRequestNotification
     | UsageAlertNotification
@@ -27178,6 +27312,8 @@ export class NotificationQuery extends Request {
         return new OauthClientApprovalNotification(this._request, data as L.OauthClientApprovalNotificationFragment);
       case "PostNotification":
         return new PostNotification(this._request, data as L.PostNotificationFragment);
+      case "ProductAnnouncementNotification":
+        return new ProductAnnouncementNotification(this._request, data as L.ProductAnnouncementNotificationFragment);
       case "ProjectNotification":
         return new ProjectNotification(this._request, data as L.ProjectNotificationFragment);
       case "PullRequestNotification":
@@ -48138,6 +48274,7 @@ export class LinearSdk extends Request {
     | IssueNotification
     | OauthClientApprovalNotification
     | PostNotification
+    | ProductAnnouncementNotification
     | ProjectNotification
     | PullRequestNotification
     | UsageAlertNotification
@@ -52145,6 +52282,7 @@ export {
   IssueSuggestionState,
   IssueSuggestionType,
   LinearAgentMcpServersMode,
+  LinearAgentTrustedSourcesMode,
   NotificationCategory,
   NotificationChannel,
   OAuthApplicationDistribution,
