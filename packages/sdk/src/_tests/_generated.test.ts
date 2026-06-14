@@ -4269,6 +4269,7 @@ describe("generated", () => {
       | L.IssueNotification
       | L.OauthClientApprovalNotification
       | L.PostNotification
+      | L.ProductAnnouncementNotification
       | L.ProjectNotification
       | L.PullRequestNotification
       | L.UsageAlertNotification
@@ -4297,6 +4298,7 @@ describe("generated", () => {
           | L.IssueNotification
           | L.OauthClientApprovalNotification
           | L.PostNotification
+          | L.ProductAnnouncementNotification
           | L.ProjectNotification
           | L.PullRequestNotification
           | L.UsageAlertNotification

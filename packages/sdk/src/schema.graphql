@@ -3875,6 +3875,18 @@ input AuditEntryFilter {
   """
   createdAt: DateComparator
   """
+  Comparator for the audited entity ID stored in metadata.
+  """
+  entityId: StringComparator
+  """
+  Comparator for the audited entity identifier stored in metadata.
+  """
+  entityIdentifier: StringComparator
+  """
+  Comparator for the audited entity type stored in metadata.
+  """
+  entityType: StringComparator
+  """
   Comparator for the identifier.
   """
   id: IDComparator
@@ -21291,6 +21303,14 @@ enum LinearAgentMcpServersMode {
 }
 
 """
+How workspace trusted source access is restricted for agent automations.
+"""
+enum LinearAgentTrustedSourcesMode {
+  allowlist
+  none
+}
+
+"""
 [ALPHA] Issue link count sorting options.
 """
 input LinkCountSort {
@@ -29570,9 +29590,27 @@ input OrganizationLinearAgentSettingsInput {
   """
   mcpServersMode: LinearAgentMcpServersMode
   """
+  [Internal] Trusted-source allowlist for Linear Agent automations.
+  """
+  trustedSourcesAllowlist: [OrganizationLinearAgentTrustedSourcesAllowlistEntryInput!]
+  """
+  [Internal] Whether external trusted sources are disabled or restricted to approved sources for agent automations.
+  """
+  trustedSourcesMode: LinearAgentTrustedSourcesMode
+  """
   [Internal] Whether the workspace has enabled web search for Linear Agent.
   """
   webSearchEnabled: Boolean
+}
+
+"""
+[Internal] A trusted-source entry for the Linear Agent automation allowlist.
+"""
+input OrganizationLinearAgentTrustedSourcesAllowlistEntryInput {
+  """
+  [Internal] The trusted-source key that Linear Agent automations are allowed to use.
+  """
+  key: String!
 }
 
 """
@@ -30481,6 +30519,172 @@ input PrioritySort {
   The order for the individual sort
   """
   order: PaginationSortOrder
+}
+
+"""
+A product announcement shown in targeted workspace inbox notifications. Product announcements store reusable launch copy and are sent to specific recipients through related notifications.
+"""
+type ProductAnnouncement implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  Stable campaign identifier used to deduplicate product announcement notifications.
+  """
+  campaignId: String!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  Body copy shown in the product announcement detail view.
+  """
+  description: String!
+  """
+  Headline shown at the top of the product announcement detail view.
+  """
+  headline: String!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  Renderer identifier for this announcement. Unknown values should fall back to generic title, headline, and description rendering.
+  """
+  kind: String!
+  """
+  Short title shown in the inbox notification list and push notification.
+  """
+  title: String!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+"""
+A notification related to a product announcement sent by Linear.
+"""
+type ProductAnnouncementNotification implements Entity & Node & Notification {
+  """
+  The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event.
+  """
+  actor: User
+  """
+  [Internal] Notification actor initials if avatar is not available.
+  """
+  actorAvatarColor: String!
+  """
+  [Internal] Notification avatar URL.
+  """
+  actorAvatarUrl: String
+  """
+  [Internal] Notification actor initials if avatar is not available.
+  """
+  actorInitials: String
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The bot that caused the notification.
+  """
+  botActor: ActorBot
+  """
+  The category of the notification.
+  """
+  category: NotificationCategory!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent.
+  """
+  emailedAt: DateTime
+  """
+  The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member.
+  """
+  externalUserActor: ExternalUser
+  """
+  [Internal] Notifications with the same grouping key will be grouped together in the UI.
+  """
+  groupingKey: String!
+  """
+  [Internal] Priority of the notification with the same grouping key. Higher number means higher priority. If priority is the same, notifications should be sorted by `createdAt`.
+  """
+  groupingPriority: Float!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  [Internal] Inbox URL for the notification.
+  """
+  inboxUrl: String!
+  """
+  [Internal] Initiative update health for new updates.
+  """
+  initiativeUpdateHealth: String
+  """
+  [Internal] If notification actor was Linear.
+  """
+  isLinearActor: Boolean!
+  """
+  [Internal] Issue's status type for issue notifications.
+  """
+  issueStatusType: String
+  """
+  The product announcement related to the notification.
+  """
+  productAnnouncement: ProductAnnouncement!
+  """
+  Identifier of the associated product announcement.
+  """
+  productAnnouncementId: String!
+  """
+  [Internal] Project update health for new updates.
+  """
+  projectUpdateHealth: String
+  """
+  The time at which the user marked the notification as read. Null if the notification is unread.
+  """
+  readAt: DateTime
+  """
+  The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed.
+  """
+  snoozedUntilAt: DateTime
+  """
+  [Internal] Notification subtitle.
+  """
+  subtitle: String!
+  """
+  [Internal] Notification title.
+  """
+  title: String!
+  """
+  Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated.
+  """
+  type: String!
+  """
+  The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed.
+  """
+  unsnoozedAt: DateTime
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  [Internal] URL to the target of the notification.
+  """
+  url: String!
+  """
+  The recipient user of this notification.
+  """
+  user: User!
 }
 
 """
@@ -38704,6 +38908,10 @@ type Release implements Node {
   """
   progressHistory: JSONObject!
   """
+  [Internal] The primary release note covering this release. Null if no release note covers it.
+  """
+  releaseNote: ReleaseNote
+  """
   Release notes for the release.
   """
   releaseNotes: [ReleaseNote!]!
@@ -43190,6 +43398,10 @@ input TeamCreateInput {
   """
   inheritWorkflowStatuses: Boolean
   """
+  [ALPHA] Whether initiatives are shown in the team's sidebar.
+  """
+  initiativesEnabled: Boolean
+  """
   Whether to allow zeros in issues estimates.
   """
   issueEstimationAllowZero: Boolean
@@ -43823,6 +44035,10 @@ input TeamUpdateInput {
   [Internal] Whether the team should inherit workflow statuses from its parent.
   """
   inheritWorkflowStatuses: Boolean
+  """
+  [ALPHA] Whether initiatives are shown in the team's sidebar.
+  """
+  initiativesEnabled: Boolean
   """
   Whether to allow zeros in issues estimates.
   """
@@ -45463,8 +45679,6 @@ input UserFilter {
 The types of flags that the user can have.
 """
 enum UserFlagType {
-  agentCodeIntelligencePromoDismissed
-  agentCodeIntelligenceSplashAnimationSeen
   agentExamplesDismissed
   agentHomeHeadlineSeen
   agentHomePageNotice
@@ -47034,6 +47248,10 @@ type ViewPreferencesValues {
   Whether to show supervised issues.
   """
   showSupervisedIssues: Boolean
+  """
+  [ALPHA] Whether to show team-level initiatives in the workspace.
+  """
+  showTeamInitiatives: Boolean
   """
   Whether to show triage issues.
   """
