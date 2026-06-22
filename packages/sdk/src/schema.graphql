@@ -2185,6 +2185,7 @@ type AiConversationPromptCodingSessionToolCall implements AiConversationBaseTool
 type AiConversationPromptCodingSessionToolCallArgs {
   agentSessionId: String!
   prompt: String!
+  queued: Boolean
 }
 
 type AiConversationPromptCodingSessionToolCallResult {
@@ -3874,6 +3875,18 @@ input AuditEntryFilter {
   Comparator for the created at date.
   """
   createdAt: DateComparator
+  """
+  Comparator for the audited entity ID stored in metadata.
+  """
+  entityId: StringComparator
+  """
+  Comparator for the audited entity identifier stored in metadata.
+  """
+  entityIdentifier: StringComparator
+  """
+  Comparator for the audited entity type stored in metadata.
+  """
+  entityType: StringComparator
   """
   Comparator for the identifier.
   """
@@ -10514,6 +10527,7 @@ interface Entity implements Node {
 Union type for webhook actor payloads
 """
 union EntityActorWebhookPayload =
+  | ExternalUserActorWebhookPayload
   | IntegrationActorWebhookPayload
   | OauthClientActorWebhookPayload
   | UserActorWebhookPayload
@@ -10938,6 +10952,28 @@ type ExternalUser implements Node {
 }
 
 """
+External user actor payload for webhooks.
+"""
+type ExternalUserActorWebhookPayload {
+  """
+  The email of the external user.
+  """
+  email: String!
+  """
+  The ID of the external user.
+  """
+  id: String!
+  """
+  The name of the external user.
+  """
+  name: String!
+  """
+  The type of actor.
+  """
+  type: String!
+}
+
+"""
 Certain properties of an external user.
 """
 type ExternalUserChildWebhookPayload {
@@ -11040,6 +11076,7 @@ type FacetEdge {
 
 enum FacetPageSource {
   feed
+  initiatives
   projects
   teamIssues
 }
@@ -12618,6 +12655,10 @@ type Initiative implements Node {
   """
   lastUpdate: InitiativeUpdate
   """
+  [ALPHA] The team that leads the initiative. Null if no lead team is assigned.
+  """
+  leadTeam: Team
+  """
   Links associated with the initiative.
   """
   links(
@@ -12937,6 +12978,10 @@ input InitiativeCollectionFilter {
   """
   labels: InitiativeLabelCollectionFilter
   """
+  [ALPHA] Filters that the initiative lead team must satisfy.
+  """
+  leadTeam: NullableTeamFilter
+  """
   Comparator for the collection length.
   """
   length: NumberComparator
@@ -13020,6 +13065,10 @@ input InitiativeCreateInput {
   [Internal] The identifiers of the initiative labels associated with this initiative.
   """
   labelIds: [String!]
+  """
+  [ALPHA] The team that leads the initiative.
+  """
+  leadTeamId: String
   """
   The name of the initiative.
   """
@@ -13128,6 +13177,10 @@ input InitiativeFilter {
   [Internal] Filters that the initiative labels must satisfy.
   """
   labels: InitiativeLabelCollectionFilter
+  """
+  [ALPHA] Filters that the initiative lead team must satisfy.
+  """
+  leadTeam: NullableTeamFilter
   """
   Comparator for the initiative name.
   """
@@ -14355,6 +14408,10 @@ input InitiativeUpdateInput {
   """
   labelIds: [String!]
   """
+  [ALPHA] The team that leads the initiative. Set to null to clear.
+  """
+  leadTeamId: String
+  """
   The name of the initiative.
   """
   name: String
@@ -15381,6 +15438,10 @@ input IntercomSettingsInput {
   Whether Linear Agent should be enabled for this integration.
   """
   enableAiIntake: Boolean
+  """
+  Whether Linear Agent should process supported attachments from Intercom conversations during AI intake. When false, attachments are omitted from the prompt.
+  """
+  enableAiIntakeAttachmentProcessing: Boolean
   """
   Whether an internal message should be added when someone comments on an issue.
   """
@@ -21291,6 +21352,14 @@ enum LinearAgentMcpServersMode {
 }
 
 """
+How workspace trusted source access is restricted for agent automations.
+"""
+enum LinearAgentTrustedSourcesMode {
+  allowlist
+  none
+}
+
+"""
 [ALPHA] Issue link count sorting options.
 """
 input LinkCountSort {
@@ -27051,6 +27120,10 @@ input NullableInitiativeFilter {
   """
   labels: InitiativeLabelCollectionFilter
   """
+  [ALPHA] Filters that the initiative lead team must satisfy.
+  """
+  leadTeam: NullableTeamFilter
+  """
   Comparator for the initiative name.
   """
   name: StringComparator
@@ -28127,7 +28200,7 @@ type OAuthApplication {
   """
   Resource types the OAuth application's webhooks subscribe to.
   """
-  webhookResourceTypes: [String!]!
+  webhookResourceTypes: [WebhookResourceType!]!
   """
   Webhook URL used for delivering webhook payloads. Null if not set.
   """
@@ -28183,7 +28256,7 @@ input OAuthApplicationCreateInput {
   """
   Resource types the OAuth application's webhooks subscribe to.
   """
-  webhookResourceTypes: [String!]
+  webhookResourceTypes: [WebhookResourceType!]
   """
   Webhook URL used for delivering webhook payloads.
   """
@@ -28309,7 +28382,7 @@ input OAuthApplicationUpdateInput {
   """
   Resource types the OAuth application's webhooks subscribe to.
   """
-  webhookResourceTypes: [String!]
+  webhookResourceTypes: [WebhookResourceType!]
   """
   Webhook URL used for delivering webhook payloads.
   """
@@ -29570,9 +29643,27 @@ input OrganizationLinearAgentSettingsInput {
   """
   mcpServersMode: LinearAgentMcpServersMode
   """
+  [Internal] Trusted-source allowlist for Linear Agent automations.
+  """
+  trustedSourcesAllowlist: [OrganizationLinearAgentTrustedSourcesAllowlistEntryInput!]
+  """
+  [Internal] Whether external trusted sources are disabled or restricted to approved sources for agent automations.
+  """
+  trustedSourcesMode: LinearAgentTrustedSourcesMode
+  """
   [Internal] Whether the workspace has enabled web search for Linear Agent.
   """
   webSearchEnabled: Boolean
+}
+
+"""
+[Internal] A trusted-source entry for the Linear Agent automation allowlist.
+"""
+input OrganizationLinearAgentTrustedSourcesAllowlistEntryInput {
+  """
+  [Internal] The trusted-source key that Linear Agent automations are allowed to use.
+  """
+  key: String!
 }
 
 """
@@ -29629,6 +29720,10 @@ input OrganizationSecuritySettingsInput {
   The minimum role required to manage API settings.
   """
   apiSettingsRole: UserRoleType
+  """
+  The minimum role required to manage workspace automations.
+  """
+  automationManagementRole: UserRoleType
   """
   The minimum role required to import data.
   """
@@ -30481,6 +30576,172 @@ input PrioritySort {
   The order for the individual sort
   """
   order: PaginationSortOrder
+}
+
+"""
+A product announcement shown in targeted workspace inbox notifications. Product announcements store reusable launch copy and are sent to specific recipients through related notifications.
+"""
+type ProductAnnouncement implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  Stable campaign identifier used to deduplicate product announcement notifications.
+  """
+  campaignId: String!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  Body copy shown in the product announcement detail view.
+  """
+  description: String!
+  """
+  Headline shown at the top of the product announcement detail view.
+  """
+  headline: String!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  Renderer identifier for this announcement. Unknown values should fall back to generic title, headline, and description rendering.
+  """
+  kind: String!
+  """
+  Short title shown in the inbox notification list and push notification.
+  """
+  title: String!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+"""
+A notification related to a product announcement sent by Linear.
+"""
+type ProductAnnouncementNotification implements Entity & Node & Notification {
+  """
+  The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event.
+  """
+  actor: User
+  """
+  [Internal] Notification actor initials if avatar is not available.
+  """
+  actorAvatarColor: String!
+  """
+  [Internal] Notification avatar URL.
+  """
+  actorAvatarUrl: String
+  """
+  [Internal] Notification actor initials if avatar is not available.
+  """
+  actorInitials: String
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The bot that caused the notification.
+  """
+  botActor: ActorBot
+  """
+  The category of the notification.
+  """
+  category: NotificationCategory!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent.
+  """
+  emailedAt: DateTime
+  """
+  The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member.
+  """
+  externalUserActor: ExternalUser
+  """
+  [Internal] Notifications with the same grouping key will be grouped together in the UI.
+  """
+  groupingKey: String!
+  """
+  [Internal] Priority of the notification with the same grouping key. Higher number means higher priority. If priority is the same, notifications should be sorted by `createdAt`.
+  """
+  groupingPriority: Float!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  [Internal] Inbox URL for the notification.
+  """
+  inboxUrl: String!
+  """
+  [Internal] Initiative update health for new updates.
+  """
+  initiativeUpdateHealth: String
+  """
+  [Internal] If notification actor was Linear.
+  """
+  isLinearActor: Boolean!
+  """
+  [Internal] Issue's status type for issue notifications.
+  """
+  issueStatusType: String
+  """
+  The product announcement related to the notification.
+  """
+  productAnnouncement: ProductAnnouncement!
+  """
+  Identifier of the associated product announcement.
+  """
+  productAnnouncementId: String!
+  """
+  [Internal] Project update health for new updates.
+  """
+  projectUpdateHealth: String
+  """
+  The time at which the user marked the notification as read. Null if the notification is unread.
+  """
+  readAt: DateTime
+  """
+  The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed.
+  """
+  snoozedUntilAt: DateTime
+  """
+  [Internal] Notification subtitle.
+  """
+  subtitle: String!
+  """
+  [Internal] Notification title.
+  """
+  title: String!
+  """
+  Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated.
+  """
+  type: String!
+  """
+  The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed.
+  """
+  unsnoozedAt: DateTime
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  [Internal] URL to the target of the notification.
+  """
+  url: String!
+  """
+  The recipient user of this notification.
+  """
+  user: User!
 }
 
 """
@@ -38704,6 +38965,10 @@ type Release implements Node {
   """
   progressHistory: JSONObject!
   """
+  [Internal] The primary release note covering this release. Null if no release note covers it.
+  """
+  releaseNote: ReleaseNote
+  """
   Release notes for the release.
   """
   releaseNotes: [ReleaseNote!]!
@@ -39124,7 +39389,7 @@ input ReleaseLinkInput {
 }
 
 """
-A release note. The note body is stored in related document content, and the releases it covers are tracked in releaseIds.
+A note documenting one or more releases. The note body is stored in related document content.
 """
 type ReleaseNote implements Node {
   """
@@ -43190,6 +43455,10 @@ input TeamCreateInput {
   """
   inheritWorkflowStatuses: Boolean
   """
+  [ALPHA] Whether initiatives are shown in the team's sidebar.
+  """
+  initiativesEnabled: Boolean
+  """
   Whether to allow zeros in issues estimates.
   """
   issueEstimationAllowZero: Boolean
@@ -43667,6 +43936,10 @@ input TeamSecuritySettingsInput {
   """
   agentSkillsManagement: TeamRoleType
   """
+  The minimum team role required to manage automations in the team.
+  """
+  automationManagement: TeamRoleType
+  """
   The minimum team role required to share issues with non-team-members.
   """
   issueSharing: TeamRoleType
@@ -43823,6 +44096,10 @@ input TeamUpdateInput {
   [Internal] Whether the team should inherit workflow statuses from its parent.
   """
   inheritWorkflowStatuses: Boolean
+  """
+  [ALPHA] Whether initiatives are shown in the team's sidebar.
+  """
+  initiativesEnabled: Boolean
   """
   Whether to allow zeros in issues estimates.
   """
@@ -45463,8 +45740,6 @@ input UserFilter {
 The types of flags that the user can have.
 """
 enum UserFlagType {
-  agentCodeIntelligencePromoDismissed
-  agentCodeIntelligenceSplashAnimationSeen
   agentExamplesDismissed
   agentHomeHeadlineSeen
   agentHomePageNotice
@@ -46231,6 +46506,38 @@ The computed view preferences values for a view, containing all display settings
 """
 type ViewPreferencesValues {
   """
+  Whether to show the automation last executed field.
+  """
+  automationFieldLastExecuted: Boolean
+  """
+  Whether to show the automation status field.
+  """
+  automationFieldStats: Boolean
+  """
+  Whether to show the automation team field.
+  """
+  automationFieldTeam: Boolean
+  """
+  Whether to show the automation trigger field.
+  """
+  automationFieldTrigger: Boolean
+  """
+  The automation grouping.
+  """
+  automationGrouping: String
+  """
+  The automation ordering.
+  """
+  automationOrdering: String
+  """
+  Whether to show sub-team automations.
+  """
+  automationShowDescendants: Boolean
+  """
+  The automation stats period.
+  """
+  automationStatsPeriod: String
+  """
   Whether issues in closed columns should be ordered by recency.
   """
   closedIssuesOrderedByRecency: Boolean
@@ -46530,6 +46837,10 @@ type ViewPreferencesValues {
   [Internal] Whether to show the initiative labels field.
   """
   initiativeFieldLabels: Boolean
+  """
+  Whether to show the initiative lead team field.
+  """
+  initiativeFieldLeadTeam: Boolean
   """
   Whether to show the initiative owner field.
   """
@@ -47120,6 +47431,7 @@ enum ViewType {
   agents
   allIssues
   archive
+  automations
   backlog
   board
   completedCycle
@@ -47138,10 +47450,13 @@ enum ViewType {
   feedPopular
   focus
   inbox
+  inboxOther
+  inboxPriority
   initiative
   initiativeOverview
   initiativeOverviewSubInitiatives
   initiatives
+  initiativesAll
   initiativesCanceled
   initiativesCompleted
   initiativesPlanned
@@ -47348,6 +47663,34 @@ type WebhookPayload {
   The webhook entity being mutated.
   """
   webhook: Webhook!
+}
+
+"""
+A webhook event stream resource type that an OAuth application can subscribe to.
+"""
+enum WebhookResourceType {
+  AgentSessionEvent
+  AppUserNotification
+  Attachment
+  Comment
+  Customer
+  CustomerNeed
+  Cycle
+  Document
+  Initiative
+  InitiativeUpdate
+  Issue
+  IssueLabel
+  IssueSLA
+  OAuthAuthorization
+  PermissionChange
+  Project
+  ProjectLabel
+  ProjectUpdate
+  Reaction
+  Release
+  ReleaseNote
+  User
 }
 
 """
@@ -47616,6 +47959,10 @@ type WorkflowDefinition implements Node {
   """
   archivedAt: DateTime
   """
+  The color of the workflow as a HEX string. Used in the UI to visually identify the workflow.
+  """
+  color: String
+  """
   The filter conditions that must match for the workflow to execute. When null, the workflow triggers on all matching events.
   """
   conditions: JSONObject
@@ -47651,6 +47998,10 @@ type WorkflowDefinition implements Node {
   The name of the group that the workflow belongs to.
   """
   groupName: String
+  """
+  The icon of the workflow. Can be an emoji or a decorative icon type.
+  """
+  icon: String
   """
   The unique identifier of the entity.
   """
@@ -48071,6 +48422,10 @@ input ZendeskSettingsInput {
   Whether Linear Agent should be enabled for this integration.
   """
   enableAiIntake: Boolean
+  """
+  Whether Linear Agent should process supported attachments from Zendesk tickets during AI intake. When false, attachments are omitted from the prompt.
+  """
+  enableAiIntakeAttachmentProcessing: Boolean
   """
   The host mappings from Zendesk brands.
   """

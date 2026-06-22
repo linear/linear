@@ -2038,10 +2038,12 @@ export class AiConversationPromptCodingSessionToolCallArgs extends Request {
     super(request);
     this.agentSessionId = data.agentSessionId;
     this.prompt = data.prompt;
+    this.queued = data.queued ?? undefined;
   }
 
   public agentSessionId: string;
   public prompt: string;
+  public queued?: boolean | null;
 }
 /**
  * AiConversationPromptCodingSessionToolCallResult model
@@ -8017,6 +8019,28 @@ export class ExternalUser extends Request {
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
+}
+/**
+ * External user actor payload for webhooks.
+ *
+ * @param data - L.ExternalUserActorWebhookPayloadFragment response data
+ */
+export class ExternalUserActorWebhookPayload {
+  public constructor(data: L.ExternalUserActorWebhookPayloadFragment) {
+    this.email = data.email;
+    this.id = data.id;
+    this.name = data.name;
+    this.type = data.type;
+  }
+
+  /** The email of the external user. */
+  public email: string;
+  /** The ID of the external user. */
+  public id: string;
+  /** The name of the external user. */
+  public name: string;
+  /** The type of actor. */
+  public type: string;
 }
 /**
  * Certain properties of an external user.
@@ -14301,6 +14325,7 @@ export class NotificationConnection extends Connection<
   | IssueNotification
   | OauthClientApprovalNotification
   | PostNotification
+  | ProductAnnouncementNotification
   | ProjectNotification
   | PullRequestNotification
   | UsageAlertNotification
@@ -14320,6 +14345,7 @@ export class NotificationConnection extends Connection<
           | IssueNotification
           | OauthClientApprovalNotification
           | PostNotification
+          | ProductAnnouncementNotification
           | ProjectNotification
           | PullRequestNotification
           | UsageAlertNotification
@@ -14349,6 +14375,8 @@ export class NotificationConnection extends Connection<
             return new OauthClientApprovalNotification(request, node as L.OauthClientApprovalNotificationFragment);
           case "PostNotification":
             return new PostNotification(request, node as L.PostNotificationFragment);
+          case "ProductAnnouncementNotification":
+            return new ProductAnnouncementNotification(request, node as L.ProductAnnouncementNotificationFragment);
           case "ProjectNotification":
             return new ProjectNotification(request, node as L.ProjectNotificationFragment);
           case "PullRequestNotification":
@@ -14754,9 +14782,9 @@ export class OAuthApplication extends Request {
     this.redirectUris = data.redirectUris;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.webhookEnabled = data.webhookEnabled;
-    this.webhookResourceTypes = data.webhookResourceTypes;
     this.webhookUrl = data.webhookUrl ?? undefined;
     this.grantTypes = data.grantTypes;
+    this.webhookResourceTypes = data.webhookResourceTypes;
     this.distribution = data.distribution;
   }
 
@@ -14782,12 +14810,12 @@ export class OAuthApplication extends Request {
   public updatedAt: Date;
   /** Whether webhook delivery is enabled for this OAuth application. */
   public webhookEnabled: boolean;
-  /** Resource types the OAuth application's webhooks subscribe to. */
-  public webhookResourceTypes: string[];
   /** Webhook URL used for delivering webhook payloads. Null if not set. */
   public webhookUrl?: string | null;
   /** OAuth grant types supported by this application. authorization_code is always included. */
   public grantTypes: L.OAuthApplicationGrantType[];
+  /** Resource types the OAuth application's webhooks subscribe to. */
+  public webhookResourceTypes: L.WebhookResourceType[];
   /** Distribution setting for the OAuth application. Private applications are only installable by the owning workspace. */
   public distribution: L.OAuthApplicationDistribution;
 }
@@ -15916,6 +15944,135 @@ export class PostNotification extends Request {
   public updatedAt: Date;
   /** The bot that caused the notification. */
   public botActor?: ActorBot | null;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
+  /** The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
+  public get actor(): LinearFetch<User> | undefined {
+    return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
+  }
+  /** The ID of user that caused the notification. null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
+  public get actorId(): string | undefined {
+    return this._actor?.id;
+  }
+  /** The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member. */
+  public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
+    return this._externalUserActor?.id
+      ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
+      : undefined;
+  }
+  /** The ID of external user that caused the notification. populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like slack or github) rather than a linear workspace member. */
+  public get externalUserActorId(): string | undefined {
+    return this._externalUserActor?.id;
+  }
+  /** The recipient user of this notification. */
+  public get user(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._user.id);
+  }
+  /** The ID of recipient user of this notification. */
+  public get userId(): string | undefined {
+    return this._user?.id;
+  }
+}
+/**
+ * A product announcement shown in targeted workspace inbox notifications. Product announcements store reusable launch copy and are sent to specific recipients through related notifications.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ProductAnnouncementFragment response data
+ */
+export class ProductAnnouncement extends Request {
+  public constructor(request: LinearRequest, data: L.ProductAnnouncementFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.campaignId = data.campaignId;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.description = data.description;
+    this.headline = data.headline;
+    this.id = data.id;
+    this.kind = data.kind;
+    this.title = data.title;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** Stable campaign identifier used to deduplicate product announcement notifications. */
+  public campaignId: string;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** Body copy shown in the product announcement detail view. */
+  public description: string;
+  /** Headline shown at the top of the product announcement detail view. */
+  public headline: string;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** Renderer identifier for this announcement. Unknown values should fall back to generic title, headline, and description rendering. */
+  public kind: string;
+  /** Short title shown in the inbox notification list and push notification. */
+  public title: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+}
+/**
+ * A notification related to a product announcement sent by Linear.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ProductAnnouncementNotificationFragment response data
+ */
+export class ProductAnnouncementNotification extends Request {
+  private _actor?: L.ProductAnnouncementNotificationFragment["actor"];
+  private _externalUserActor?: L.ProductAnnouncementNotificationFragment["externalUserActor"];
+  private _user: L.ProductAnnouncementNotificationFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.ProductAnnouncementNotificationFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.emailedAt = parseDate(data.emailedAt) ?? undefined;
+    this.id = data.id;
+    this.productAnnouncementId = data.productAnnouncementId;
+    this.readAt = parseDate(data.readAt) ?? undefined;
+    this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
+    this.type = data.type;
+    this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.productAnnouncement = new ProductAnnouncement(request, data.productAnnouncement);
+    this.category = data.category;
+    this._actor = data.actor ?? undefined;
+    this._externalUserActor = data.externalUserActor ?? undefined;
+    this._user = data.user;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent. */
+  public emailedAt?: Date | null;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** Identifier of the associated product announcement. */
+  public productAnnouncementId: string;
+  /** The time at which the user marked the notification as read. Null if the notification is unread. */
+  public readAt?: Date | null;
+  /** The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed. */
+  public snoozedUntilAt?: Date | null;
+  /** Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated. */
+  public type: string;
+  /** The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed. */
+  public unsnoozedAt?: Date | null;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The bot that caused the notification. */
+  public botActor?: ActorBot | null;
+  /** The product announcement related to the notification. */
+  public productAnnouncement: ProductAnnouncement;
   /** The category of the notification. */
   public category: L.NotificationCategory;
   /** The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
@@ -18873,7 +19030,7 @@ export class ReleaseHistoryConnection extends Connection<ReleaseHistory> {
   }
 }
 /**
- * A release note. The note body is stored in related document content, and the releases it covers are tracked in releaseIds.
+ * A note documenting one or more releases. The note body is stored in related document content.
  *
  * @param request - function to call the graphql client
  * @param data - L.ReleaseNoteFragment response data
@@ -23281,6 +23438,14 @@ export class ViewPreferencesProjectLabelGroupColumn extends Request {
 export class ViewPreferencesValues extends Request {
   public constructor(request: LinearRequest, data: L.ViewPreferencesValuesFragment) {
     super(request);
+    this.automationFieldLastExecuted = data.automationFieldLastExecuted ?? undefined;
+    this.automationFieldStats = data.automationFieldStats ?? undefined;
+    this.automationFieldTeam = data.automationFieldTeam ?? undefined;
+    this.automationFieldTrigger = data.automationFieldTrigger ?? undefined;
+    this.automationGrouping = data.automationGrouping ?? undefined;
+    this.automationOrdering = data.automationOrdering ?? undefined;
+    this.automationShowDescendants = data.automationShowDescendants ?? undefined;
+    this.automationStatsPeriod = data.automationStatsPeriod ?? undefined;
     this.closedIssuesOrderedByRecency = data.closedIssuesOrderedByRecency ?? undefined;
     this.columnOrderBoard = data.columnOrderBoard ?? undefined;
     this.columnOrderList = data.columnOrderList ?? undefined;
@@ -23356,6 +23521,7 @@ export class ViewPreferencesValues extends Request {
     this.initiativeFieldDescription = data.initiativeFieldDescription ?? undefined;
     this.initiativeFieldHealth = data.initiativeFieldHealth ?? undefined;
     this.initiativeFieldInitiativeHealth = data.initiativeFieldInitiativeHealth ?? undefined;
+    this.initiativeFieldLeadTeam = data.initiativeFieldLeadTeam ?? undefined;
     this.initiativeFieldOwner = data.initiativeFieldOwner ?? undefined;
     this.initiativeFieldProjects = data.initiativeFieldProjects ?? undefined;
     this.initiativeFieldStartDate = data.initiativeFieldStartDate ?? undefined;
@@ -23502,6 +23668,22 @@ export class ViewPreferencesValues extends Request {
       : undefined;
   }
 
+  /** Whether to show the automation last executed field. */
+  public automationFieldLastExecuted?: boolean | null;
+  /** Whether to show the automation status field. */
+  public automationFieldStats?: boolean | null;
+  /** Whether to show the automation team field. */
+  public automationFieldTeam?: boolean | null;
+  /** Whether to show the automation trigger field. */
+  public automationFieldTrigger?: boolean | null;
+  /** The automation grouping. */
+  public automationGrouping?: string | null;
+  /** The automation ordering. */
+  public automationOrdering?: string | null;
+  /** Whether to show sub-team automations. */
+  public automationShowDescendants?: boolean | null;
+  /** The automation stats period. */
+  public automationStatsPeriod?: string | null;
   /** Whether issues in closed columns should be ordered by recency. */
   public closedIssuesOrderedByRecency?: boolean | null;
   /** Custom ordering of groups on the board layout. */
@@ -23650,6 +23832,8 @@ export class ViewPreferencesValues extends Request {
   public initiativeFieldHealth?: boolean | null;
   /** Whether to show the initiative health field. */
   public initiativeFieldInitiativeHealth?: boolean | null;
+  /** Whether to show the initiative lead team field. */
+  public initiativeFieldLeadTeam?: boolean | null;
   /** Whether to show the initiative owner field. */
   public initiativeFieldOwner?: boolean | null;
   /** Whether to show the initiative projects field. */
@@ -24345,11 +24529,13 @@ export class WorkflowDefinition extends Request {
     super(request);
     this.activities = data.activities;
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.color = data.color ?? undefined;
     this.conditions = data.conditions ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.description = data.description ?? undefined;
     this.enabled = data.enabled;
     this.groupName = data.groupName ?? undefined;
+    this.icon = data.icon ?? undefined;
     this.id = data.id;
     this.lastExecutedAt = parseDate(data.lastExecutedAt) ?? undefined;
     this.name = data.name;
@@ -24379,6 +24565,8 @@ export class WorkflowDefinition extends Request {
   public activities: L.Scalars["JSONObject"];
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
+  /** The color of the workflow as a HEX string. Used in the UI to visually identify the workflow. */
+  public color?: string | null;
   /** The filter conditions that must match for the workflow to execute. When null, the workflow triggers on all matching events. */
   public conditions?: L.Scalars["JSONObject"] | null;
   /** The time at which the entity was created. */
@@ -24389,6 +24577,8 @@ export class WorkflowDefinition extends Request {
   public enabled: boolean;
   /** The name of the group that the workflow belongs to. */
   public groupName?: string | null;
+  /** The icon of the workflow. Can be an emoji or a decorative icon type. */
+  public icon?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** The date and time when the workflow was last triggered and executed. Null if the workflow has never been executed. */
@@ -27149,6 +27339,7 @@ export class NotificationQuery extends Request {
     | IssueNotification
     | OauthClientApprovalNotification
     | PostNotification
+    | ProductAnnouncementNotification
     | ProjectNotification
     | PullRequestNotification
     | UsageAlertNotification
@@ -27178,6 +27369,8 @@ export class NotificationQuery extends Request {
         return new OauthClientApprovalNotification(this._request, data as L.OauthClientApprovalNotificationFragment);
       case "PostNotification":
         return new PostNotification(this._request, data as L.PostNotificationFragment);
+      case "ProductAnnouncementNotification":
+        return new ProductAnnouncementNotification(this._request, data as L.ProductAnnouncementNotificationFragment);
       case "ProjectNotification":
         return new ProjectNotification(this._request, data as L.ProjectNotificationFragment);
       case "PullRequestNotification":
@@ -48138,6 +48331,7 @@ export class LinearSdk extends Request {
     | IssueNotification
     | OauthClientApprovalNotification
     | PostNotification
+    | ProductAnnouncementNotification
     | ProjectNotification
     | PullRequestNotification
     | UsageAlertNotification
@@ -52145,6 +52339,7 @@ export {
   IssueSuggestionState,
   IssueSuggestionType,
   LinearAgentMcpServersMode,
+  LinearAgentTrustedSourcesMode,
   NotificationCategory,
   NotificationChannel,
   OAuthApplicationDistribution,
@@ -52193,6 +52388,7 @@ export {
   UserSettingsThemePreset,
   ViewPreferencesType,
   ViewType,
+  WebhookResourceType,
   WorkflowTrigger,
   WorkflowTriggerType,
   WorkflowType,
