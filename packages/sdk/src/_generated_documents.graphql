@@ -1336,6 +1336,44 @@ fragment ProjectMilestone on ProjectMilestone {
   id
 }
 
+# A note documenting one or more releases. The note body is stored in related document content.
+fragment ReleaseNote on ReleaseNote {
+  __typename
+  # Document content backing the release note body.
+  documentContent {
+    ...DocumentContent
+  }
+  # Generation status when these release notes are being auto-generated: `pending` while the LLM call is running, `completed` once it lands. `null` means the release notes were written by a user and never went through auto-generation.
+  generationStatus
+  # The earliest release covered by this note.
+  firstRelease {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The most recent release covered by this note.
+  lastRelease {
+    id
+  }
+  # The number of releases covered by this note.
+  releaseCount
+  # The release note's unique URL slug, used to construct human-readable URLs for the note.
+  slugId
+  # The release pipeline that this note belongs to. A note always belongs to exactly one pipeline.
+  pipeline {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # User-supplied title for the release note.
+  title
+}
+
 # A notification containing a workspace welcome message, sent to newly joined users.
 fragment WelcomeMessageNotification on WelcomeMessageNotification {
   __typename
@@ -1450,6 +1488,10 @@ fragment Notification on Notification {
 
   ... on PostNotification {
     ...PostNotification
+  }
+
+  ... on ProductAnnouncementNotification {
+    ...ProductAnnouncementNotification
   }
 
   ... on ProjectNotification {
@@ -1651,6 +1693,54 @@ fragment PostNotification on PostNotification {
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The recipient user of this notification.
+  user {
+    id
+  }
+  # The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed.
+  unsnoozedAt
+  # The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent.
+  emailedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the user marked the notification as read. Null if the notification is unread.
+  readAt
+  # The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed.
+  snoozedUntilAt
+  # The unique identifier of the entity.
+  id
+  # The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event.
+  actor {
+    id
+  }
+}
+
+# A notification related to a product announcement sent by Linear.
+fragment ProductAnnouncementNotification on ProductAnnouncementNotification {
+  __typename
+  # Identifier of the associated product announcement.
+  productAnnouncementId
+  # Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated.
+  type
+  # The bot that caused the notification.
+  botActor {
+    ...ActorBot
+  }
+  # The category of the notification.
+  category
+  # The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member.
+  externalUserActor {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The product announcement related to the notification.
+  productAnnouncement {
+    ...ProductAnnouncement
+  }
   # The recipient user of this notification.
   user {
     id
@@ -2575,6 +2665,31 @@ fragment OrganizationInvite on OrganizationInvite {
   external
 }
 
+# A product announcement shown in targeted workspace inbox notifications. Product announcements store
+# reusable launch copy and are sent to specific recipients through related notifications.
+fragment ProductAnnouncement on ProductAnnouncement {
+  __typename
+  # Body copy shown in the product announcement detail view.
+  description
+  # Headline shown at the top of the product announcement detail view.
+  headline
+  # Renderer identifier for this announcement. Unknown values should fall back to generic title, headline, and description rendering.
+  kind
+  # Short title shown in the inbox notification list and push notification.
+  title
+  # Stable campaign identifier used to deduplicate product announcement notifications.
+  campaignId
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+}
+
 # A project is a collection of issues working toward a shared goal. Projects have start and target
 # dates, milestones, status tracking, and progress metrics. They can span multiple teams and be
 # grouped under initiatives.
@@ -3091,45 +3206,6 @@ fragment ReleaseHistory on ReleaseHistory {
   createdAt
   # The unique identifier of the entity.
   id
-}
-
-# A release note. The note body is stored in related document content, and the releases it covers are
-# tracked in releaseIds.
-fragment ReleaseNote on ReleaseNote {
-  __typename
-  # Document content backing the release note body.
-  documentContent {
-    ...DocumentContent
-  }
-  # Generation status when these release notes are being auto-generated: `pending` while the LLM call is running, `completed` once it lands. `null` means the release notes were written by a user and never went through auto-generation.
-  generationStatus
-  # The earliest release covered by this note.
-  firstRelease {
-    id
-  }
-  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-  #     been updated after creation.
-  updatedAt
-  # The most recent release covered by this note.
-  lastRelease {
-    id
-  }
-  # The number of releases covered by this note.
-  releaseCount
-  # The release note's unique URL slug, used to construct human-readable URLs for the note.
-  slugId
-  # The release pipeline that this note belongs to. A note always belongs to exactly one pipeline.
-  pipeline {
-    id
-  }
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The time at which the entity was created.
-  createdAt
-  # The unique identifier of the entity.
-  id
-  # User-supplied title for the release note.
-  title
 }
 
 # A release pipeline that defines a release workflow with ordered stages. Pipelines can be continuous
@@ -5259,6 +5335,8 @@ fragment WorkflowDefinition on WorkflowDefinition {
   stats
   # Recurring schedule which is used to execute the workflow.
   schedule
+  # The color of the workflow as a HEX string. Used in the UI to visually identify the workflow.
+  color
   # The context custom view associated with the workflow.
   customView {
     id
@@ -5293,6 +5371,8 @@ fragment WorkflowDefinition on WorkflowDefinition {
   trigger
   # The filter conditions that must match for the workflow to execute. When null, the workflow triggers on all matching events.
   conditions
+  # The icon of the workflow. Can be an emoji or a decorative icon type.
+  icon
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
@@ -6543,6 +6623,19 @@ fragment NotificationDeliveryPreferencesChannel on NotificationDeliveryPreferenc
   }
   # [DEPRECATED] Whether notifications are enabled for this channel. Use notificationChannelPreferences instead.
   notificationsDisabled
+}
+
+# External user actor payload for webhooks.
+fragment ExternalUserActorWebhookPayload on ExternalUserActorWebhookPayload {
+  __typename
+  # The ID of the external user.
+  id
+  # The email of the external user.
+  email
+  # The name of the external user.
+  name
+  # The type of actor.
+  type
 }
 
 # Generic notification payload.
@@ -8878,6 +8971,12 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   reviewFieldPreviewLinks
   # Selected team IDs to show cycles for in timeline chronology bar.
   timelineChronologyShowCycleTeamIds
+  # The automation grouping.
+  automationGrouping
+  # The automation ordering.
+  automationOrdering
+  # The automation stats period.
+  automationStatsPeriod
   # The continuous pipeline releases view grouping.
   continuousPipelineReleasesViewGrouping
   # The custom views ordering.
@@ -9024,6 +9123,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showNestedInitiatives
   # Whether to show sub-issues.
   showSubIssues
+  # Whether to show sub-team automations.
+  automationShowDescendants
   # Whether to show sub-team issues.
   showSubTeamIssues
   # Whether to show sub-team projects.
@@ -9034,6 +9135,14 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldSla
   # Whether to show the Sentry issues field.
   fieldSentryIssues
+  # Whether to show the automation last executed field.
+  automationFieldLastExecuted
+  # Whether to show the automation status field.
+  automationFieldStats
+  # Whether to show the automation team field.
+  automationFieldTeam
+  # Whether to show the automation trigger field.
+  automationFieldTrigger
   # Whether to show the completion field for scheduled pipeline releases.
   scheduledPipelineReleaseFieldCompletion
   # Whether to show the custom view creation date field.
@@ -9088,6 +9197,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDescription
   # Whether to show the initiative health field.
   initiativeFieldInitiativeHealth
+  # Whether to show the initiative lead team field.
+  initiativeFieldLeadTeam
   # Whether to show the initiative owner field.
   initiativeFieldOwner
   # Whether to show the initiative projects field.
@@ -11134,6 +11245,7 @@ fragment AiConversationPromptCodingSessionToolCallArgs on AiConversationPromptCo
   __typename
   agentSessionId
   prompt
+  queued
 }
 
 fragment AiConversationPromptCodingSessionToolCallResult on AiConversationPromptCodingSessionToolCallResult {
