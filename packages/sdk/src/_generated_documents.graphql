@@ -4279,6 +4279,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     ... on AiConversationQueryViewToolCall {
       ...AiConversationQueryViewToolCall
     }
+    ... on AiConversationReadFileToolCall {
+      ...AiConversationReadFileToolCall
+    }
     ... on AiConversationReadSandboxFileToolCall {
       ...AiConversationReadSandboxFileToolCall
     }
@@ -5412,6 +5415,8 @@ fragment WorkflowDefinition on WorkflowDefinition {
   slugId
   # Whether the workflow is enabled and will execute when its trigger conditions are met.
   enabled
+  # Whether the workflow should apply to sub teams.
+  applyToSubTeams
   # Whether the workflow should only execute once per entity. When true, the workflow is excluded from matching automations for an entity if it has already been executed for that entity.
   runOnce
 }
@@ -6842,6 +6847,17 @@ fragment TriageResponsibilityManualSelection on TriageResponsibilityManualSelect
   userIds
 }
 
+# Metadata about a loop that made changes to an issue. Links the issue history entry back to the
+# workflow definition that triggered the change, and optionally to any AI conversation involved in the
+# loop.
+fragment IssueHistoryWorkflowMetadata on IssueHistoryWorkflowMetadata {
+  __typename
+  # The workflow definition that triggered the issue update.
+  workflowDefinition {
+    ...WorkflowDefinition
+  }
+}
+
 # Metadata about a part in an AI conversation.
 fragment AiConversationPartMetadata on AiConversationPartMetadata {
   __typename
@@ -6870,17 +6886,6 @@ fragment IssueHistoryTriageRuleMetadata on IssueHistoryTriageRuleMetadata {
   }
   # The triage rule that triggered the issue update.
   updatedByTriageRule {
-    ...WorkflowDefinition
-  }
-}
-
-# Metadata about a workflow automation that made changes to an issue. Links the issue history entry
-# back to the workflow definition that triggered the change, and optionally to any AI conversation
-# involved in the automation.
-fragment IssueHistoryWorkflowMetadata on IssueHistoryWorkflowMetadata {
-  __typename
-  # The workflow definition that triggered the issue update.
-  workflowDefinition {
     ...WorkflowDefinition
   }
 }
@@ -8971,12 +8976,6 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   reviewFieldPreviewLinks
   # Selected team IDs to show cycles for in timeline chronology bar.
   timelineChronologyShowCycleTeamIds
-  # The automation grouping.
-  automationGrouping
-  # The automation ordering.
-  automationOrdering
-  # The automation stats period.
-  automationStatsPeriod
   # The continuous pipeline releases view grouping.
   continuousPipelineReleasesViewGrouping
   # The custom views ordering.
@@ -9025,6 +9024,12 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectGroupingLabelGroupId
   # The label group ID used for project sub-grouping.
   projectSubGroupingLabelGroupId
+  # The loop grouping.
+  automationGrouping
+  # The loop ordering.
+  automationOrdering
+  # The loop stats period.
+  automationStatsPeriod
   # The ordering mode for groups. Supersedes projectGroupOrdering.
   groupOrderingMode
   # The ordering of project groups.
@@ -9081,6 +9086,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showCompletedReviews
   # Whether issues in closed columns should be ordered by recency.
   closedIssuesOrderedByRecency
+  # Whether team reviews are shown in the reviews list.
+  showTeamReviews
   # Whether to show archived items.
   showArchivedItems
   # Whether to show completed issues and projects in the customer page.
@@ -9123,10 +9130,10 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showNestedInitiatives
   # Whether to show sub-issues.
   showSubIssues
-  # Whether to show sub-team automations.
-  automationShowDescendants
   # Whether to show sub-team issues.
   showSubTeamIssues
+  # Whether to show sub-team loops.
+  automationShowDescendants
   # Whether to show sub-team projects.
   showSubTeamProjects
   # Whether to show supervised issues.
@@ -9135,14 +9142,6 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldSla
   # Whether to show the Sentry issues field.
   fieldSentryIssues
-  # Whether to show the automation last executed field.
-  automationFieldLastExecuted
-  # Whether to show the automation status field.
-  automationFieldStats
-  # Whether to show the automation team field.
-  automationFieldTeam
-  # Whether to show the automation trigger field.
-  automationFieldTrigger
   # Whether to show the completion field for scheduled pipeline releases.
   scheduledPipelineReleaseFieldCompletion
   # Whether to show the custom view creation date field.
@@ -9245,6 +9244,14 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelineFieldLatestRelease
   # Whether to show the link count field.
   fieldLinkCount
+  # Whether to show the loop last executed field.
+  automationFieldLastExecuted
+  # Whether to show the loop status field.
+  automationFieldStats
+  # Whether to show the loop team field.
+  automationFieldTeam
+  # Whether to show the loop trigger field.
+  automationFieldTrigger
   # Whether to show the member joined date field.
   memberFieldJoined
   # Whether to show the member status field.
@@ -10709,6 +10716,10 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
     ...AiConversationQueryViewToolCall
   }
 
+  ... on AiConversationReadFileToolCall {
+    ...AiConversationReadFileToolCall
+  }
+
   ... on AiConversationReadSandboxFileToolCall {
     ...AiConversationReadSandboxFileToolCall
   }
@@ -11243,7 +11254,6 @@ fragment AiConversationPromptCodingSessionToolCall on AiConversationPromptCoding
 
 fragment AiConversationPromptCodingSessionToolCallArgs on AiConversationPromptCodingSessionToolCallArgs {
   __typename
-  agentSessionId
   prompt
   queued
 }
@@ -11343,6 +11353,31 @@ fragment AiConversationQueryViewToolCallArgsView on AiConversationQueryViewToolC
   }
   predefinedView
   type
+}
+
+fragment AiConversationReadFileToolCall on AiConversationReadFileToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationReadFileToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationReadFileToolCallArgs on AiConversationReadFileToolCallArgs {
+  __typename
+  assetUrl
+  mode
+  name
+  query
 }
 
 fragment AiConversationReadSandboxFileToolCall on AiConversationReadSandboxFileToolCall {

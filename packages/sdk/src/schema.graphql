@@ -1321,6 +1321,10 @@ type AiConversation implements Node {
   """
   createdAt: DateTime!
   """
+  [Internal] The document this shared conversation is attached to. Null if the conversation is private.
+  """
+  document: Document
+  """
   [Internal] The log ID of the AI response.
   """
   evalLogId: String
@@ -2183,7 +2187,6 @@ type AiConversationPromptCodingSessionToolCall implements AiConversationBaseTool
 }
 
 type AiConversationPromptCodingSessionToolCallArgs {
-  agentSessionId: String!
   prompt: String!
   queued: Boolean
 }
@@ -2313,6 +2316,38 @@ type AiConversationQueryViewToolCallArgsView {
   group: AiConversationSearchEntitiesToolCallResultEntities
   predefinedView: String
   type: String!
+}
+
+type AiConversationReadFileToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationReadFileToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationReadFileToolCallArgs {
+  assetUrl: String
+  mode: AiConversationReadFileToolCallArgsMode
+  name: String
+  query: String
+}
+
+enum AiConversationReadFileToolCallArgsMode {
+  read
+  search
 }
 
 type AiConversationReadSandboxFileToolCall implements AiConversationBaseToolCall {
@@ -2704,6 +2739,7 @@ enum AiConversationTool {
   QueryActivity
   QueryUpdates
   QueryView
+  ReadFile
   ReadSandboxFile
   Research
   RestoreEntity
@@ -2744,6 +2780,7 @@ union AiConversationToolCall =
   | AiConversationQueryActivityToolCall
   | AiConversationQueryUpdatesToolCall
   | AiConversationQueryViewToolCall
+  | AiConversationReadFileToolCall
   | AiConversationReadSandboxFileToolCall
   | AiConversationResearchToolCall
   | AiConversationRestoreEntityToolCall
@@ -11171,6 +11208,10 @@ type Favorite implements Node {
   """
   initiative: Initiative
   """
+  [INTERNAL] The favorited initiative label.
+  """
+  initiativeLabel: InitiativeLabel
+  """
   The targeted tab of the initiative.
   """
   initiativeTab: InitiativeTab
@@ -11311,6 +11352,10 @@ input FavoriteCreateInput {
   [INTERNAL] The identifier of the initiative to favorite.
   """
   initiativeId: String
+  """
+  [INTERNAL] The identifier of the initiative label to favorite.
+  """
+  initiativeLabelId: String
   """
   The tab of the initiative to favorite.
   """
@@ -13542,6 +13587,28 @@ type InitiativeLabelWebhookPayload {
 }
 
 """
+[Internal] Impact summary for changing an initiative's lead team.
+"""
+type InitiativeLeadTeamChangeImpact {
+  """
+  The number of editable sub-initiatives whose lead team would change if the update is applied to descendants.
+  """
+  affectedDescendantCount: Int!
+  """
+  Whether the changed initiatives may gain or lose access restrictions because the current or next lead team is not public.
+  """
+  visibilityMayChange: Boolean!
+}
+
+"""
+[Internal] Determines how a lead team change is applied to an initiative hierarchy.
+"""
+enum InitiativeLeadTeamChangeMode {
+  includeDescendants
+  selectedOnly
+}
+
+"""
 Initiative manual sorting options.
 """
 input InitiativeManualSort {
@@ -15167,6 +15234,10 @@ input IntegrationUpdateInput {
   The ID of the workflow definition draft that this integration should be assigned to.
   """
   workflowDefinitionDraftId: String
+  """
+  The ID of the workflow definition that this integration should be assigned to.
+  """
+  workflowDefinitionId: String
 }
 
 """
@@ -15431,6 +15502,10 @@ input IntercomSettingsInput {
   """
   automateTicketReopeningOnProjectCompletion: Boolean
   """
+  [INTERNAL] An optional destination team ID for issues created by automatic Intercom conversation intake.
+  """
+  automaticConversationIntakeTeamId: String
+  """
   [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue.
   """
   disableCustomerRequestsAutoCreation: Boolean
@@ -15442,6 +15517,10 @@ input IntercomSettingsInput {
   Whether Linear Agent should process supported attachments from Intercom conversations during AI intake. When false, attachments are omitted from the prompt.
   """
   enableAiIntakeAttachmentProcessing: Boolean
+  """
+  [INTERNAL] Whether new Intercom conversations should automatically create Linear issues with Linear Agent.
+  """
+  enableAutomaticConversationIntake: Boolean
   """
   Whether an internal message should be added when someone comments on an issue.
   """
@@ -17919,7 +17998,7 @@ type IssueHistoryTriageRuleMetadata {
 }
 
 """
-Metadata about a workflow automation that made changes to an issue. Links the issue history entry back to the workflow definition that triggered the change, and optionally to any AI conversation involved in the automation.
+Metadata about a loop that made changes to an issue. Links the issue history entry back to the workflow definition that triggered the change, and optionally to any AI conversation involved in the loop.
 """
 type IssueHistoryWorkflowMetadata {
   """
@@ -21352,7 +21431,7 @@ enum LinearAgentMcpServersMode {
 }
 
 """
-How workspace trusted source access is restricted for agent automations.
+How workspace trusted source access is restricted for agent loops.
 """
 enum LinearAgentTrustedSourcesMode {
   allowlist
@@ -22802,6 +22881,23 @@ type Mutation {
     """
     id: String!
   ): DeletePayload!
+  """
+  [Internal] Updates an initiative's lead team, optionally applying it to affected editable sub-initiatives.
+  """
+  initiativeLeadTeamUpdate(
+    """
+    The identifier of the initiative whose lead team should change.
+    """
+    id: String!
+    """
+    The identifier of the new lead team. Pass null to clear the lead team.
+    """
+    leadTeamId: String
+    """
+    Whether to update only the selected initiative or also affected editable sub-initiatives.
+    """
+    mode: InitiativeLeadTeamChangeMode = selectedOnly
+  ): InitiativePayload!
   """
   Creates a new parent-child relation between two initiatives. The relation cannot create cycles or exceed maximum nesting depth.
   """
@@ -29643,11 +29739,11 @@ input OrganizationLinearAgentSettingsInput {
   """
   mcpServersMode: LinearAgentMcpServersMode
   """
-  [Internal] Trusted-source allowlist for Linear Agent automations.
+  [Internal] Trusted-source allowlist for Linear Agent loops.
   """
   trustedSourcesAllowlist: [OrganizationLinearAgentTrustedSourcesAllowlistEntryInput!]
   """
-  [Internal] Whether external trusted sources are disabled or restricted to approved sources for agent automations.
+  [Internal] Whether external trusted sources are disabled or restricted to approved sources for agent loops.
   """
   trustedSourcesMode: LinearAgentTrustedSourcesMode
   """
@@ -29657,11 +29753,11 @@ input OrganizationLinearAgentSettingsInput {
 }
 
 """
-[Internal] A trusted-source entry for the Linear Agent automation allowlist.
+[Internal] A trusted-source entry for the Linear Agent loop allowlist.
 """
 input OrganizationLinearAgentTrustedSourcesAllowlistEntryInput {
   """
-  [Internal] The trusted-source key that Linear Agent automations are allowed to use.
+  [Internal] The trusted-source key that Linear Agent loops are allowed to use.
   """
   key: String!
 }
@@ -29721,7 +29817,7 @@ input OrganizationSecuritySettingsInput {
   """
   apiSettingsRole: UserRoleType
   """
-  The minimum role required to manage workspace automations.
+  The minimum role required to manage workspace loops.
   """
   automationManagementRole: UserRoleType
   """
@@ -29793,7 +29889,7 @@ Input for updating the workspace.
 """
 input OrganizationUpdateInput {
   """
-  [INTERNAL] Whether the workspace has enabled agent automation.
+  [INTERNAL] Whether the workspace has enabled agent loops.
   """
   agentAutomationEnabled: Boolean
   """
@@ -36664,6 +36760,19 @@ type Query {
   """
   initiative(id: String!): Initiative!
   """
+  [Internal] Returns the impact of changing an initiative's lead team before applying the update.
+  """
+  initiativeLeadTeamChangeImpact(
+    """
+    The identifier of the initiative whose lead team would change.
+    """
+    id: String!
+    """
+    The identifier of the new lead team. Pass null to clear the lead team.
+    """
+    leadTeamId: String
+  ): InitiativeLeadTeamChangeImpact!
+  """
   Returns a single initiative relation by its identifier.
   """
   initiativeRelation(id: String!): InitiativeRelation!
@@ -42771,6 +42880,10 @@ type Team implements Node {
   """
   inheritWorkflowStatuses: Boolean!
   """
+  [ALPHA] Whether initiatives are shown in the team's sidebar.
+  """
+  initiativesEnabled: Boolean!
+  """
   Settings for all integrations associated with that team.
   """
   integrationsSettings: IntegrationsSettings
@@ -43936,7 +44049,7 @@ input TeamSecuritySettingsInput {
   """
   agentSkillsManagement: TeamRoleType
   """
-  The minimum team role required to manage automations in the team.
+  The minimum team role required to manage loops in the team.
   """
   automationManagement: TeamRoleType
   """
@@ -46392,6 +46505,10 @@ input ViewPreferencesCreateInput {
   """
   initiativeId: String
   """
+  The initiative label these view preferences are associated with.
+  """
+  initiativeLabelId: String
+  """
   The default parameters for the insight on that view.
   """
   insights: JSONObject
@@ -46506,35 +46623,35 @@ The computed view preferences values for a view, containing all display settings
 """
 type ViewPreferencesValues {
   """
-  Whether to show the automation last executed field.
+  Whether to show the loop last executed field.
   """
   automationFieldLastExecuted: Boolean
   """
-  Whether to show the automation status field.
+  Whether to show the loop status field.
   """
   automationFieldStats: Boolean
   """
-  Whether to show the automation team field.
+  Whether to show the loop team field.
   """
   automationFieldTeam: Boolean
   """
-  Whether to show the automation trigger field.
+  Whether to show the loop trigger field.
   """
   automationFieldTrigger: Boolean
   """
-  The automation grouping.
+  The loop grouping.
   """
   automationGrouping: String
   """
-  The automation ordering.
+  The loop ordering.
   """
   automationOrdering: String
   """
-  Whether to show sub-team automations.
+  Whether to show sub-team loops.
   """
   automationShowDescendants: Boolean
   """
-  The automation stats period.
+  The loop stats period.
   """
   automationStatsPeriod: String
   """
@@ -47346,6 +47463,10 @@ type ViewPreferencesValues {
   """
   showSupervisedIssues: Boolean
   """
+  Whether team reviews are shown in the reviews list.
+  """
+  showTeamReviews: Boolean
+  """
   Whether to show triage issues.
   """
   showTriageIssues: Boolean
@@ -47453,6 +47574,7 @@ enum ViewType {
   inboxOther
   inboxPriority
   initiative
+  initiativeLabel
   initiativeOverview
   initiativeOverviewSubInitiatives
   initiatives
@@ -47954,6 +48076,10 @@ type WorkflowDefinition implements Node {
   The ordered list of activities (actions) that are executed when the workflow triggers, such as updating issue properties, sending notifications, or calling webhooks.
   """
   activities: JSONObject!
+  """
+  Whether the workflow should apply to sub teams.
+  """
+  applyToSubTeams: Boolean!
   """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
