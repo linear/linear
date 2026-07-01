@@ -9436,6 +9436,7 @@ export class InitiativeHistoryConnection extends Connection<InitiativeHistory> {
  */
 export class InitiativeLabel extends Request {
   private _creator?: L.InitiativeLabelFragment["creator"];
+  private _parent?: L.InitiativeLabelFragment["parent"];
   private _retiredBy?: L.InitiativeLabelFragment["retiredBy"];
 
   public constructor(request: LinearRequest, data: L.InitiativeLabelFragment) {
@@ -9450,6 +9451,7 @@ export class InitiativeLabel extends Request {
     this.name = data.name;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._creator = data.creator ?? undefined;
+    this._parent = data.parent ?? undefined;
     this._retiredBy = data.retiredBy ?? undefined;
   }
 
@@ -9486,6 +9488,14 @@ export class InitiativeLabel extends Request {
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
+  /** The parent label group. If set, this label is a child within a group. Only one child label from each group can be applied to an initiative at a time. */
+  public get parent(): LinearFetch<InitiativeLabel> | undefined {
+    return this._parent?.id ? new InitiativeLabelQuery(this._request).fetch(this._parent?.id) : undefined;
+  }
+  /** The ID of parent label group. if set, this label is a child within a group. only one child label from each group can be applied to an initiative at a time. */
+  public get parentId(): string | undefined {
+    return this._parent?.id;
+  }
   /** The user who retired the label. Retired labels cannot be applied to new initiatives but remain on existing ones. Null if the label is active. */
   public get retiredBy(): LinearFetch<User> | undefined {
     return this._retiredBy?.id ? new UserQuery(this._request).fetch(this._retiredBy?.id) : undefined;
@@ -9493,6 +9503,26 @@ export class InitiativeLabel extends Request {
   /** The ID of user who retired the label. retired labels cannot be applied to new initiatives but remain on existing ones. null if the label is active. */
   public get retiredById(): string | undefined {
     return this._retiredBy?.id;
+  }
+  /** Children of the label. */
+  public children(variables?: Omit<L.InitiativeLabel_ChildrenQueryVariables, "id">) {
+    return new InitiativeLabel_ChildrenQuery(this._request, this.id, variables).fetch(variables);
+  }
+  /** Initiatives associated with the label. */
+  public initiatives(variables?: Omit<L.InitiativeLabel_InitiativesQueryVariables, "id">) {
+    return new InitiativeLabel_InitiativesQuery(this._request, this.id, variables).fetch(variables);
+  }
+  /** Creates a new initiative label. */
+  public create(input: L.InitiativeLabelCreateInput) {
+    return new CreateInitiativeLabelMutation(this._request).fetch(input);
+  }
+  /** Deletes an initiative label. */
+  public delete() {
+    return new DeleteInitiativeLabelMutation(this._request).fetch(this.id);
+  }
+  /** Updates an initiative label. */
+  public update(input: L.InitiativeLabelUpdateInput) {
+    return new UpdateInitiativeLabelMutation(this._request).fetch(this.id, input);
   }
 }
 /**
@@ -9536,6 +9566,35 @@ export class InitiativeLabelConnection extends Connection<InitiativeLabel> {
       data.nodes.map(node => new InitiativeLabel(request, node)),
       new PageInfo(request, data.pageInfo)
     );
+  }
+}
+/**
+ * The result of an initiative label mutation.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.InitiativeLabelPayloadFragment response data
+ */
+export class InitiativeLabelPayload extends Request {
+  private _initiativeLabel: L.InitiativeLabelPayloadFragment["initiativeLabel"];
+
+  public constructor(request: LinearRequest, data: L.InitiativeLabelPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._initiativeLabel = data.initiativeLabel;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The label that was created or updated. */
+  public get initiativeLabel(): LinearFetch<InitiativeLabel> | undefined {
+    return new InitiativeLabelQuery(this._request).fetch(this._initiativeLabel.id);
+  }
+  /** The ID of label that was created or updated. */
+  public get initiativeLabelId(): string | undefined {
+    return this._initiativeLabel?.id;
   }
 }
 /**
@@ -26330,6 +26389,72 @@ export class InitiativeQuery extends Request {
 }
 
 /**
+ * A fetchable InitiativeLabel Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class InitiativeLabelQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the InitiativeLabel query and return a InitiativeLabel
+   *
+   * @param id - required id to pass to initiativeLabel
+   * @returns parsed response from InitiativeLabelQuery
+   */
+  public async fetch(id: string): LinearFetch<InitiativeLabel> {
+    const response = await this._request<L.InitiativeLabelQuery, L.InitiativeLabelQueryVariables>(
+      L.InitiativeLabelDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.initiativeLabel;
+
+    return new InitiativeLabel(this._request, data);
+  }
+}
+
+/**
+ * A fetchable InitiativeLabels Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class InitiativeLabelsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the InitiativeLabels query and return a InitiativeLabelConnection
+   *
+   * @param variables - variables to pass into the InitiativeLabelsQuery
+   * @returns parsed response from InitiativeLabelsQuery
+   */
+  public async fetch(variables?: L.InitiativeLabelsQueryVariables): LinearFetch<InitiativeLabelConnection> {
+    const response = await this._request<L.InitiativeLabelsQuery, L.InitiativeLabelsQueryVariables>(
+      L.InitiativeLabelsDocument.toString(),
+      variables
+    );
+    const data = response.initiativeLabels;
+
+    return new InitiativeLabelConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable InitiativeRelation Query
  *
  * @param request - function to call the graphql client
@@ -32377,6 +32502,153 @@ export class DeleteInitiativeMutation extends Request {
     const data = response.initiativeDelete;
 
     return new DeletePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable CreateInitiativeLabel Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class CreateInitiativeLabelMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CreateInitiativeLabel mutation and return a InitiativeLabelPayload
+   *
+   * @param input - required input to pass to createInitiativeLabel
+   * @returns parsed response from CreateInitiativeLabelMutation
+   */
+  public async fetch(input: L.InitiativeLabelCreateInput): LinearFetch<InitiativeLabelPayload> {
+    const response = await this._request<L.CreateInitiativeLabelMutation, L.CreateInitiativeLabelMutationVariables>(
+      L.CreateInitiativeLabelDocument.toString(),
+      {
+        input,
+      }
+    );
+    const data = response.initiativeLabelCreate;
+
+    return new InitiativeLabelPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable DeleteInitiativeLabel Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class DeleteInitiativeLabelMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DeleteInitiativeLabel mutation and return a DeletePayload
+   *
+   * @param id - required id to pass to deleteInitiativeLabel
+   * @returns parsed response from DeleteInitiativeLabelMutation
+   */
+  public async fetch(id: string): LinearFetch<DeletePayload> {
+    const response = await this._request<L.DeleteInitiativeLabelMutation, L.DeleteInitiativeLabelMutationVariables>(
+      L.DeleteInitiativeLabelDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.initiativeLabelDelete;
+
+    return new DeletePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable InitiativeLabelRestore Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class InitiativeLabelRestoreMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the InitiativeLabelRestore mutation and return a InitiativeLabelPayload
+   *
+   * @param id - required id to pass to initiativeLabelRestore
+   * @returns parsed response from InitiativeLabelRestoreMutation
+   */
+  public async fetch(id: string): LinearFetch<InitiativeLabelPayload> {
+    const response = await this._request<L.InitiativeLabelRestoreMutation, L.InitiativeLabelRestoreMutationVariables>(
+      L.InitiativeLabelRestoreDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.initiativeLabelRestore;
+
+    return new InitiativeLabelPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable InitiativeLabelRetire Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class InitiativeLabelRetireMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the InitiativeLabelRetire mutation and return a InitiativeLabelPayload
+   *
+   * @param id - required id to pass to initiativeLabelRetire
+   * @returns parsed response from InitiativeLabelRetireMutation
+   */
+  public async fetch(id: string): LinearFetch<InitiativeLabelPayload> {
+    const response = await this._request<L.InitiativeLabelRetireMutation, L.InitiativeLabelRetireMutationVariables>(
+      L.InitiativeLabelRetireDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.initiativeLabelRetire;
+
+    return new InitiativeLabelPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UpdateInitiativeLabel Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UpdateInitiativeLabelMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UpdateInitiativeLabel mutation and return a InitiativeLabelPayload
+   *
+   * @param id - required id to pass to updateInitiativeLabel
+   * @param input - required input to pass to updateInitiativeLabel
+   * @returns parsed response from UpdateInitiativeLabelMutation
+   */
+  public async fetch(id: string, input: L.InitiativeLabelUpdateInput): LinearFetch<InitiativeLabelPayload> {
+    const response = await this._request<L.UpdateInitiativeLabelMutation, L.UpdateInitiativeLabelMutationVariables>(
+      L.UpdateInitiativeLabelDocument.toString(),
+      {
+        id,
+        input,
+      }
+    );
+    const data = response.initiativeLabelUpdate;
+
+    return new InitiativeLabelPayload(this._request, data);
   }
 }
 
@@ -41331,6 +41603,116 @@ export class Initiative_DocumentContent_WelcomeMessageQuery extends Request {
 }
 
 /**
+ * A fetchable InitiativeLabel_Children Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to initiativeLabel
+ * @param variables - variables without 'id' to pass into the InitiativeLabel_ChildrenQuery
+ */
+export class InitiativeLabel_ChildrenQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.InitiativeLabel_ChildrenQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.InitiativeLabel_ChildrenQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the InitiativeLabel_Children query and return a InitiativeLabelConnection
+   *
+   * @param variables - variables without 'id' to pass into the InitiativeLabel_ChildrenQuery
+   * @returns parsed response from InitiativeLabel_ChildrenQuery
+   */
+  public async fetch(
+    variables?: Omit<L.InitiativeLabel_ChildrenQueryVariables, "id">
+  ): LinearFetch<InitiativeLabelConnection> {
+    const response = await this._request<L.InitiativeLabel_ChildrenQuery, L.InitiativeLabel_ChildrenQueryVariables>(
+      L.InitiativeLabel_ChildrenDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.initiativeLabel.children;
+
+    return new InitiativeLabelConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable InitiativeLabel_Initiatives Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to initiativeLabel
+ * @param variables - variables without 'id' to pass into the InitiativeLabel_InitiativesQuery
+ */
+export class InitiativeLabel_InitiativesQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.InitiativeLabel_InitiativesQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.InitiativeLabel_InitiativesQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the InitiativeLabel_Initiatives query and return a InitiativeConnection
+   *
+   * @param variables - variables without 'id' to pass into the InitiativeLabel_InitiativesQuery
+   * @returns parsed response from InitiativeLabel_InitiativesQuery
+   */
+  public async fetch(
+    variables?: Omit<L.InitiativeLabel_InitiativesQueryVariables, "id">
+  ): LinearFetch<InitiativeConnection> {
+    const response = await this._request<
+      L.InitiativeLabel_InitiativesQuery,
+      L.InitiativeLabel_InitiativesQueryVariables
+    >(L.InitiativeLabel_InitiativesDocument.toString(), {
+      id: this._id,
+      ...this._variables,
+      ...variables,
+    });
+    const data = response.initiativeLabel.initiatives;
+
+    return new InitiativeConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable InitiativeUpdate_Comments Query
  *
  * @param request - function to call the graphql client
@@ -48065,6 +48447,24 @@ export class LinearSdk extends Request {
     return new InitiativeQuery(this._request).fetch(id);
   }
   /**
+   * Returns a single initiative label by its identifier.
+   *
+   * @param id - required id to pass to initiativeLabel
+   * @returns InitiativeLabel
+   */
+  public initiativeLabel(id: string): LinearFetch<InitiativeLabel> {
+    return new InitiativeLabelQuery(this._request).fetch(id);
+  }
+  /**
+   * Returns all initiative labels in the workspace, with optional filtering.
+   *
+   * @param variables - variables to pass into the InitiativeLabelsQuery
+   * @returns InitiativeLabelConnection
+   */
+  public initiativeLabels(variables?: L.InitiativeLabelsQueryVariables): LinearFetch<InitiativeLabelConnection> {
+    return new InitiativeLabelsQuery(this._request).fetch(variables);
+  }
+  /**
    * Returns a single initiative relation by its identifier.
    *
    * @param id - required id to pass to initiativeRelation
@@ -50022,6 +50422,52 @@ export class LinearSdk extends Request {
    */
   public deleteInitiative(id: string): LinearFetch<DeletePayload> {
     return new DeleteInitiativeMutation(this._request).fetch(id);
+  }
+  /**
+   * Creates a new initiative label.
+   *
+   * @param input - required input to pass to createInitiativeLabel
+   * @returns InitiativeLabelPayload
+   */
+  public createInitiativeLabel(input: L.InitiativeLabelCreateInput): LinearFetch<InitiativeLabelPayload> {
+    return new CreateInitiativeLabelMutation(this._request).fetch(input);
+  }
+  /**
+   * Deletes an initiative label.
+   *
+   * @param id - required id to pass to deleteInitiativeLabel
+   * @returns DeletePayload
+   */
+  public deleteInitiativeLabel(id: string): LinearFetch<DeletePayload> {
+    return new DeleteInitiativeLabelMutation(this._request).fetch(id);
+  }
+  /**
+   * Restores a previously retired initiative label, making it available for use on new initiatives.
+   *
+   * @param id - required id to pass to initiativeLabelRestore
+   * @returns InitiativeLabelPayload
+   */
+  public initiativeLabelRestore(id: string): LinearFetch<InitiativeLabelPayload> {
+    return new InitiativeLabelRestoreMutation(this._request).fetch(id);
+  }
+  /**
+   * Retires an initiative label. Retired labels remain on existing initiatives but cannot be applied to new ones.
+   *
+   * @param id - required id to pass to initiativeLabelRetire
+   * @returns InitiativeLabelPayload
+   */
+  public initiativeLabelRetire(id: string): LinearFetch<InitiativeLabelPayload> {
+    return new InitiativeLabelRetireMutation(this._request).fetch(id);
+  }
+  /**
+   * Updates an initiative label.
+   *
+   * @param id - required id to pass to updateInitiativeLabel
+   * @param input - required input to pass to updateInitiativeLabel
+   * @returns InitiativeLabelPayload
+   */
+  public updateInitiativeLabel(id: string, input: L.InitiativeLabelUpdateInput): LinearFetch<InitiativeLabelPayload> {
+    return new UpdateInitiativeLabelMutation(this._request).fetch(id, input);
   }
   /**
    * Creates a new parent-child relation between two initiatives. The relation cannot create cycles or exceed maximum nesting depth.

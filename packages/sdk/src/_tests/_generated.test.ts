@@ -2010,6 +2010,93 @@ describe("generated", () => {
     });
   });
 
+  /** Test all InitiativeLabel queries */
+  describe("InitiativeLabels", () => {
+    let _initiativeLabel: L.InitiativeLabel | undefined | null;
+    let _initiativeLabel_id: string | undefined | null;
+
+    /** Test the root connection query for the InitiativeLabel */
+    it("initiativeLabels", async () => {
+      const initiativeLabels: L.InitiativeLabelConnection | undefined | null = await client.initiativeLabels();
+      const initiativeLabel = initiativeLabels?.nodes?.[0];
+      _initiativeLabel_id = initiativeLabel?.id;
+      expect(initiativeLabels instanceof L.InitiativeLabelConnection);
+    });
+
+    /** Test the root query for a single InitiativeLabel */
+    it("initiativeLabel", async () => {
+      if (_initiativeLabel_id) {
+        const initiativeLabel: L.InitiativeLabel | undefined | null = await client.initiativeLabel(_initiativeLabel_id);
+        _initiativeLabel = initiativeLabel;
+        expect(initiativeLabel instanceof L.InitiativeLabel);
+      } else {
+        console.warn(
+          "codegen-doc:print: No first InitiativeLabel found in connection - cannot test initiativeLabel query"
+        );
+      }
+    });
+
+    /** Test the initiativeLabel connection query for the InitiativeLabel */
+    it("initiativeLabel.children", async () => {
+      if (_initiativeLabel) {
+        const children: L.InitiativeLabelConnection | undefined | null = await _initiativeLabel.children();
+        expect(children instanceof L.InitiativeLabelConnection);
+      } else {
+        console.warn("codegen-doc:print: No initiativeLabel found - cannot test _initiativeLabel.children query");
+      }
+    });
+
+    /** Test the initiativeLabel connection query for the Initiative */
+    it("initiativeLabel.initiatives", async () => {
+      if (_initiativeLabel) {
+        const initiatives: L.InitiativeConnection | undefined | null = await _initiativeLabel.initiatives();
+        expect(initiatives instanceof L.InitiativeConnection);
+      } else {
+        console.warn("codegen-doc:print: No initiativeLabel found - cannot test _initiativeLabel.initiatives query");
+      }
+    });
+
+    /** Test the initiativeLabel.creator query for L.User */
+    it("initiativeLabel.creator", async () => {
+      if (_initiativeLabel) {
+        const initiativeLabel_creator: L.User | undefined | null = await _initiativeLabel.creator;
+        expect(initiativeLabel_creator instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No InitiativeLabel found - cannot test initiativeLabel.creator query");
+      }
+    });
+
+    /** Test the initiativeLabel.organization query for L.Organization */
+    it("initiativeLabel.organization", async () => {
+      if (_initiativeLabel) {
+        const initiativeLabel_organization: L.Organization | undefined | null = await _initiativeLabel.organization;
+        expect(initiativeLabel_organization instanceof L.Organization);
+      } else {
+        console.warn("codegen-doc:print: No InitiativeLabel found - cannot test initiativeLabel.organization query");
+      }
+    });
+
+    /** Test the initiativeLabel.parent query for L.InitiativeLabel */
+    it("initiativeLabel.parent", async () => {
+      if (_initiativeLabel) {
+        const initiativeLabel_parent: L.InitiativeLabel | undefined | null = await _initiativeLabel.parent;
+        expect(initiativeLabel_parent instanceof L.InitiativeLabel);
+      } else {
+        console.warn("codegen-doc:print: No InitiativeLabel found - cannot test initiativeLabel.parent query");
+      }
+    });
+
+    /** Test the initiativeLabel.retiredBy query for L.User */
+    it("initiativeLabel.retiredBy", async () => {
+      if (_initiativeLabel) {
+        const initiativeLabel_retiredBy: L.User | undefined | null = await _initiativeLabel.retiredBy;
+        expect(initiativeLabel_retiredBy instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No InitiativeLabel found - cannot test initiativeLabel.retiredBy query");
+      }
+    });
+  });
+
   /** Test all InitiativeRelation queries */
   describe("InitiativeRelations", () => {
     let _initiativeRelation: L.InitiativeRelation | undefined | null;
