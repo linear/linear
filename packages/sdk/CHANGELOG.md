@@ -1,5 +1,167 @@
 # Change Log
 
+## 88.0.0
+
+### Major Changes
+
+- 934b32b: feat(schema): [breaking] Field 'Mutation.initiativeLeadTeamUpdate' changed type from 'InitiativePayload!' to 'InitiativeLeadTeamUpdatePayload!' (Mutation.initiativeLeadTeamUpdate)
+
+  feat(schema): [dangerous] Enum value 'agentConversationMention' was added to enum 'OtherNotificationType' (OtherNotificationType.agentConversationMention)
+
+  feat(schema): [non_breaking] Type 'InitiativeLabelCreateInput' was added (InitiativeLabelCreateInput)
+
+  feat(schema): [non_breaking] Type 'InitiativeLabelPayload' was added (InitiativeLabelPayload)
+
+  feat(schema): [non_breaking] Type 'InitiativeLabelUpdateInput' was added (InitiativeLabelUpdateInput)
+
+  feat(schema): [non_breaking] Type 'InitiativeLeadTeamUpdatePayload' was added (InitiativeLeadTeamUpdatePayload)
+
+  feat(schema): [non_breaking] Field 'project' was added to object type 'AiConversation' (AiConversation.project)
+
+  feat(schema): [non_breaking] Field 'children' was added to object type 'InitiativeLabel' (InitiativeLabel.children)
+
+  feat(schema): [non_breaking] Field 'initiatives' was added to object type 'InitiativeLabel' (InitiativeLabel.initiatives)
+
+  feat(schema): [non_breaking] Field 'initiativeLabelCreate' was added to object type 'Mutation' (Mutation.initiativeLabelCreate)
+
+  feat(schema): [non_breaking] Field 'initiativeLabelDelete' was added to object type 'Mutation' (Mutation.initiativeLabelDelete)
+
+  feat(schema): [non_breaking] Field 'initiativeLabelRestore' was added to object type 'Mutation' (Mutation.initiativeLabelRestore)
+
+  feat(schema): [non_breaking] Field 'initiativeLabelRetire' was added to object type 'Mutation' (Mutation.initiativeLabelRetire)
+
+  feat(schema): [non_breaking] Field 'initiativeLabelUpdate' was added to object type 'Mutation' (Mutation.initiativeLabelUpdate)
+
+  feat(schema): [non_breaking] Field 'initiativeLabel' was added to object type 'Query' (Query.initiativeLabel)
+
+  feat(schema): [non_breaking] Field 'initiativeLabels' was added to object type 'Query' (Query.initiativeLabels)
+
+- d4b9532: feat(schema): [breaking] Field 'agentSessionId' was removed from object type 'AiConversationPromptCodingSessionToolCallArgs' (AiConversationPromptCodingSessionToolCallArgs.agentSessionId)
+
+  feat(schema): [dangerous] Enum value 'ReadFile' was added to enum 'AiConversationTool' (AiConversationTool.ReadFile)
+
+  feat(schema): [dangerous] Member 'AiConversationReadFileToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Input field 'initiativeLabelId' was added to input object type 'FavoriteCreateInput' (FavoriteCreateInput.initiativeLabelId)
+
+  feat(schema): [dangerous] Input field 'workflowDefinitionId' was added to input object type 'IntegrationUpdateInput' (IntegrationUpdateInput.workflowDefinitionId)
+
+  feat(schema): [dangerous] Input field 'automaticConversationIntakeTeamId' was added to input object type 'IntercomSettingsInput' (IntercomSettingsInput.automaticConversationIntakeTeamId)
+
+  feat(schema): [dangerous] Input field 'enableAutomaticConversationIntake' was added to input object type 'IntercomSettingsInput' (IntercomSettingsInput.enableAutomaticConversationIntake)
+
+  feat(schema): [dangerous] Input field 'initiativeLabelId' was added to input object type 'ViewPreferencesCreateInput' (ViewPreferencesCreateInput.initiativeLabelId)
+
+  feat(schema): [dangerous] Enum value 'initiativeLabel' was added to enum 'ViewType' (ViewType.initiativeLabel)
+
+  feat(schema): [non_breaking] Type 'AiConversationReadFileToolCall' was added (AiConversationReadFileToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationReadFileToolCallArgs' was added (AiConversationReadFileToolCallArgs)
+
+  feat(schema): [non_breaking] Type 'AiConversationReadFileToolCallArgsMode' was added (AiConversationReadFileToolCallArgsMode)
+
+  feat(schema): [non_breaking] Type 'InitiativeLeadTeamChangeImpact' was added (InitiativeLeadTeamChangeImpact)
+
+  feat(schema): [non_breaking] Type 'InitiativeLeadTeamChangeMode' was added (InitiativeLeadTeamChangeMode)
+
+  feat(schema): [non_breaking] Field 'document' was added to object type 'AiConversation' (AiConversation.document)
+
+  feat(schema): [non_breaking] Field 'initiativeLabel' was added to object type 'Favorite' (Favorite.initiativeLabel)
+
+  feat(schema): [non_breaking] Description 'Metadata about a workflow automation that made changes to an issue. Links the issue history entry back to the workflow definition that triggered the change, and optionally to any AI conversation involved in the automation.' on type 'IssueHistoryWorkflowMetadata' has changed to 'Metadata about a loop that made changes to an issue. Links the issue history entry back to the workflow definition that triggered the change, and optionally to any AI conversation involved in the loop.' (IssueHistoryWorkflowMetadata)
+
+  feat(schema): [non_breaking] Description 'How workspace trusted source access is restricted for agent automations.' on type 'LinearAgentTrustedSourcesMode' has changed to 'How workspace trusted source access is restricted for agent loops.' (LinearAgentTrustedSourcesMode)
+
+  feat(schema): [non_breaking] Field 'initiativeLeadTeamUpdate' was added to object type 'Mutation' (Mutation.initiativeLeadTeamUpdate)
+
+  feat(schema): [non_breaking] Input field 'OrganizationLinearAgentSettingsInput.trustedSourcesAllowlist' description changed from '[Internal] Trusted-source allowlist for Linear Agent automations.' to '[Internal] Trusted-source allowlist for Linear Agent loops.' (OrganizationLinearAgentSettingsInput.trustedSourcesAllowlist)
+
+  feat(schema): [non_breaking] Input field 'OrganizationLinearAgentSettingsInput.trustedSourcesMode' description changed from '[Internal] Whether external trusted sources are disabled or restricted to approved sources for agent automations.' to '[Internal] Whether external trusted sources are disabled or restricted to approved sources for agent loops.' (OrganizationLinearAgentSettingsInput.trustedSourcesMode)
+
+  feat(schema): [non_breaking] Input field 'OrganizationLinearAgentTrustedSourcesAllowlistEntryInput.key' description changed from '[Internal] The trusted-source key that Linear Agent automations are allowed to use.' to '[Internal] The trusted-source key that Linear Agent loops are allowed to use.' (OrganizationLinearAgentTrustedSourcesAllowlistEntryInput.key)
+
+  feat(schema): [non_breaking] Description '[Internal] A trusted-source entry for the Linear Agent automation allowlist.' on type 'OrganizationLinearAgentTrustedSourcesAllowlistEntryInput' has changed to '[Internal] A trusted-source entry for the Linear Agent loop allowlist.' (OrganizationLinearAgentTrustedSourcesAllowlistEntryInput)
+
+  feat(schema): [non_breaking] Input field 'OrganizationSecuritySettingsInput.automationManagementRole' description changed from 'The minimum role required to manage workspace automations.' to 'The minimum role required to manage workspace loops.' (OrganizationSecuritySettingsInput.automationManagementRole)
+
+  feat(schema): [non_breaking] Input field 'OrganizationUpdateInput.agentAutomationEnabled' description changed from '[INTERNAL] Whether the workspace has enabled agent automation.' to '[INTERNAL] Whether the workspace has enabled agent loops.' (OrganizationUpdateInput.agentAutomationEnabled)
+
+  feat(schema): [non_breaking] Field 'initiativeLeadTeamChangeImpact' was added to object type 'Query' (Query.initiativeLeadTeamChangeImpact)
+
+  feat(schema): [non_breaking] Field 'initiativesEnabled' was added to object type 'Team' (Team.initiativesEnabled)
+
+  feat(schema): [non_breaking] Input field 'TeamSecuritySettingsInput.automationManagement' description changed from 'The minimum team role required to manage automations in the team.' to 'The minimum team role required to manage loops in the team.' (TeamSecuritySettingsInput.automationManagement)
+
+  feat(schema): [non_breaking] Field 'showTeamReviews' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.showTeamReviews)
+
+  feat(schema): [non_breaking] Field 'ViewPreferencesValues.automationFieldLastExecuted' description changed from 'Whether to show the automation last executed field.' to 'Whether to show the loop last executed field.' (ViewPreferencesValues.automationFieldLastExecuted)
+
+  feat(schema): [non_breaking] Field 'ViewPreferencesValues.automationFieldStats' description changed from 'Whether to show the automation status field.' to 'Whether to show the loop status field.' (ViewPreferencesValues.automationFieldStats)
+
+  feat(schema): [non_breaking] Field 'ViewPreferencesValues.automationFieldTeam' description changed from 'Whether to show the automation team field.' to 'Whether to show the loop team field.' (ViewPreferencesValues.automationFieldTeam)
+
+  feat(schema): [non_breaking] Field 'ViewPreferencesValues.automationFieldTrigger' description changed from 'Whether to show the automation trigger field.' to 'Whether to show the loop trigger field.' (ViewPreferencesValues.automationFieldTrigger)
+
+  feat(schema): [non_breaking] Field 'ViewPreferencesValues.automationGrouping' description changed from 'The automation grouping.' to 'The loop grouping.' (ViewPreferencesValues.automationGrouping)
+
+  feat(schema): [non_breaking] Field 'ViewPreferencesValues.automationOrdering' description changed from 'The automation ordering.' to 'The loop ordering.' (ViewPreferencesValues.automationOrdering)
+
+  feat(schema): [non_breaking] Field 'ViewPreferencesValues.automationShowDescendants' description changed from 'Whether to show sub-team automations.' to 'Whether to show sub-team loops.' (ViewPreferencesValues.automationShowDescendants)
+
+  feat(schema): [non_breaking] Field 'ViewPreferencesValues.automationStatsPeriod' description changed from 'The automation stats period.' to 'The loop stats period.' (ViewPreferencesValues.automationStatsPeriod)
+
+  feat(schema): [non_breaking] Field 'applyToSubTeams' was added to object type 'WorkflowDefinition' (WorkflowDefinition.applyToSubTeams)
+
+### Minor Changes
+
+- bf170e4: feat(schema): [dangerous] Input field 'commitSigningEnabled' was added to input object type 'OrganizationCodingAgentSettingsInput' (OrganizationCodingAgentSettingsInput.commitSigningEnabled)
+
+  feat(schema): [dangerous] Input field 'usePrioritySortOrderTiebreaker' was added to input object type 'PrioritySort' (PrioritySort.usePrioritySortOrderTiebreaker)
+
+  feat(schema): [dangerous] Argument 'filter: ReleaseNoteFilter' added to field 'Query.releaseNotes' (Query.releaseNotes.filter)
+
+  feat(schema): [dangerous] Input field 'type' was added to input object type 'ReleasePipelineCollectionFilter' (ReleasePipelineCollectionFilter.type)
+
+  feat(schema): [dangerous] Input field 'type' was added to input object type 'ReleasePipelineFilter' (ReleasePipelineFilter.type)
+
+  feat(schema): [non_breaking] Type 'InitiativeVisibility' was added (InitiativeVisibility)
+
+  feat(schema): [non_breaking] Type 'ReleaseNoteFilter' was added (ReleaseNoteFilter)
+
+  feat(schema): [non_breaking] Type 'ReleasePipelineTypeComparator' was added (ReleasePipelineTypeComparator)
+
+  feat(schema): [non_breaking] Field 'inheritedFrom' was added to object type 'AgentSkill' (AgentSkill.inheritedFrom)
+
+  feat(schema): [non_breaking] Input field 'GitHubRepoMappingInput.bidirectional' description changed from 'Whether the sync for this mapping is bidirectional.' to 'Whether Linear-created issues matching this mapping will create GitHub issues.' (GitHubRepoMappingInput.bidirectional)
+
+  feat(schema): [non_breaking] Input field 'GitHubRepoMappingInput.default' description changed from 'Whether this mapping is the default one for issue creation.' to 'Whether this mapping is the default destination for Linear-created issues that do not match a label-filtered mapping.' (GitHubRepoMappingInput.default)
+
+  feat(schema): [non_breaking] Input field 'GitHubRepoMappingInput.gitHubLabels' description changed from 'Labels to filter incoming GitHub issue creation by.' to 'Label names used as a creation filter. When set, only issues matching one of these labels will create a synced issue for this mapping.' (GitHubRepoMappingInput.gitHubLabels)
+
+  feat(schema): [non_breaking] Input field 'GitHubRepoMappingInput.linearTeamId' description changed from 'The Linear team id to map to the given project.' to 'The Linear team id to map to the GitHub repository.' (GitHubRepoMappingInput.linearTeamId)
+
+  feat(schema): [non_breaking] Field 'visibility' was added to object type 'Initiative' (Initiative.visibility)
+
+  feat(schema): [non_breaking] Field 'InitiativeLeadTeamChangeImpact.affectedDescendantCount' description changed from 'The number of editable sub-initiatives whose lead team would change if the update is applied to descendants.' to 'The number of editable matching sub-initiatives whose lead team would change if the update is applied to descendants. Matching sub-initiatives currently have the same lead team as the selected initiative had before the change.' (InitiativeLeadTeamChangeImpact.affectedDescendantCount)
+
+  feat(schema): [non_breaking] Field 'leadTeamId' was added to object type 'InitiativeWebhookPayload' (InitiativeWebhookPayload.leadTeamId)
+
+  feat(schema): [non_breaking] Field 'Mutation.initiativeLeadTeamUpdate' description changed from '[Internal] Updates an initiative's lead team, optionally applying it to affected editable sub-initiatives.' to '[Internal] Updates an initiative's lead team, optionally applying it to matching editable sub-initiatives.' (Mutation.initiativeLeadTeamUpdate)
+
+  feat(schema): [non_breaking] Description for argument 'mode' on field 'Mutation.initiativeLeadTeamUpdate' changed from 'Whether to update only the selected initiative or also affected editable sub-initiatives.' to 'Whether to update only the selected initiative or also matching editable sub-initiatives. Matching sub-initiatives currently have the same lead team as the selected initiative had before the change.' (Mutation.initiativeLeadTeamUpdate.mode)
+
+  feat(schema): [non_breaking] Field 'Query.initiativeLeadTeamChangeImpact' description changed from '[Internal] Returns the impact of changing an initiative's lead team before applying the update.' to '[Internal] Returns the impact of changing an initiative's lead team before applying the update to matching sub-initiatives.' (Query.initiativeLeadTeamChangeImpact)
+
+  feat(schema): [non_breaking] Field 'url' was added to object type 'ReleaseNote' (ReleaseNote.url)
+
+  feat(schema): [non_breaking] Field 'ledInitiativeCount' was added to object type 'Team' (Team.ledInitiativeCount)
+
+  feat(schema): [non_breaking] Field 'User.isAssignable' description changed from 'Whether the user can be assigned to issues. Regular users are always assignable; app users are assignable only if they have the app:assignable scope.' to 'Whether the user can be assigned to issues. Regular users are always assignable; app users are assignable only if they have the app:assignable scope. The Linear agent also requires coding sessions to be enabled.' (User.isAssignable)
+
+  feat(schema): [non_breaking] Field 'showTeamInitiatives' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.showTeamInitiatives)
+
+  feat(schema): [non_breaking] Field 'teamInitiativesShowContributing' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.teamInitiativesShowContributing)
+
 ## 87.0.0
 
 ### Major Changes
