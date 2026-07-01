@@ -1193,6 +1193,10 @@ fragment InitiativeLabel on InitiativeLabel {
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The parent label group. If set, this label is a child within a group. Only one child label from each group can be applied to an initiative at a time.
+  parent {
+    id
+  }
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
@@ -10130,6 +10134,19 @@ fragment EntityExternalLinkPayload on EntityExternalLinkPayload {
   success
 }
 
+# The result of an initiative label mutation.
+fragment InitiativeLabelPayload on InitiativeLabelPayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The label that was created or updated.
+  initiativeLabel {
+    id
+  }
+  # Whether the operation was successful.
+  success
+}
+
 # The result of an initiative relation mutation.
 fragment InitiativeRelationPayload on InitiativeRelationPayload {
   __typename
@@ -15442,6 +15459,108 @@ query initiative_subInitiatives(
     ) {
       ...InitiativeConnection
     }
+  }
+}
+# Returns a single initiative label by its identifier.
+query initiativeLabel($id: String!) {
+  initiativeLabel(id: $id) {
+    ...InitiativeLabel
+  }
+}
+# Children of the label.
+query initiativeLabel_children(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned initiative labels.
+  $filter: InitiativeLabelFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  initiativeLabel(id: $id) {
+    children(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...InitiativeLabelConnection
+    }
+  }
+}
+# Initiatives associated with the label.
+query initiativeLabel_initiatives(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned initiatives.
+  $filter: InitiativeFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned initiatives.
+  $sort: [InitiativeSortInput!]
+) {
+  initiativeLabel(id: $id) {
+    initiatives(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+      sort: $sort
+    ) {
+      ...InitiativeConnection
+    }
+  }
+}
+# Returns all initiative labels in the workspace, with optional filtering.
+query initiativeLabels(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned initiative labels.
+  $filter: InitiativeLabelFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  initiativeLabels(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...InitiativeLabelConnection
   }
 }
 # Returns a single initiative relation by its identifier.
@@ -21889,6 +22008,54 @@ mutation deleteInitiative(
 ) {
   initiativeDelete(id: $id) {
     ...DeletePayload
+  }
+}
+# Creates a new initiative label.
+mutation createInitiativeLabel(
+  # The initiative label to create.
+  $input: InitiativeLabelCreateInput!
+) {
+  initiativeLabelCreate(input: $input) {
+    ...InitiativeLabelPayload
+  }
+}
+# Deletes an initiative label.
+mutation deleteInitiativeLabel(
+  # The identifier of the label to delete.
+  $id: String!
+) {
+  initiativeLabelDelete(id: $id) {
+    ...DeletePayload
+  }
+}
+# Restores a previously retired initiative label, making it available for use on new initiatives.
+mutation initiativeLabelRestore(
+  # The identifier of the label to restore.
+  $id: String!
+) {
+  initiativeLabelRestore(id: $id) {
+    ...InitiativeLabelPayload
+  }
+}
+# Retires an initiative label. Retired labels remain on existing initiatives but cannot be applied to
+# new ones.
+mutation initiativeLabelRetire(
+  # The identifier of the label to retire.
+  $id: String!
+) {
+  initiativeLabelRetire(id: $id) {
+    ...InitiativeLabelPayload
+  }
+}
+# Updates an initiative label.
+mutation updateInitiativeLabel(
+  # The identifier of the label to update.
+  $id: String!
+  # A partial label object to update.
+  $input: InitiativeLabelUpdateInput!
+) {
+  initiativeLabelUpdate(id: $id, input: $input) {
+    ...InitiativeLabelPayload
   }
 }
 # Creates a new parent-child relation between two initiatives. The relation cannot create cycles or

@@ -1349,6 +1349,10 @@ type AiConversation implements Node {
   """
   parts: [AiConversationPart!]
   """
+  [Internal] The project this shared conversation is attached to. Null if the conversation is private.
+  """
+  project: Project
+  """
   The time when the user marked the conversation as read. Null if the user hasn't read the conversation.
   """
   readAt: DateTime
@@ -13358,6 +13362,39 @@ type InitiativeLabel implements Node {
   """
   archivedAt: DateTime
   """
+  Children of the label.
+  """
+  children(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned initiative labels.
+    """
+    filter: InitiativeLabelFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): InitiativeLabelConnection!
+  """
   The label's color as a HEX string (e.g., '#EB5757'). Used for visual identification of the label in the UI.
   """
   color: String!
@@ -13377,6 +13414,43 @@ type InitiativeLabel implements Node {
   The unique identifier of the entity.
   """
   id: ID!
+  """
+  Initiatives associated with the label.
+  """
+  initiatives(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned initiatives.
+    """
+    filter: InitiativeFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+    """
+    [INTERNAL] Sort returned initiatives.
+    """
+    sort: [InitiativeSortInput!]
+  ): InitiativeConnection!
   """
   Whether the label is a group. When true, this label acts as a container for child labels and cannot be directly applied to issues or projects. When false, the label can be directly applied.
   """
@@ -13498,6 +13572,40 @@ type InitiativeLabelConnection {
   pageInfo: PageInfo!
 }
 
+"""
+Input for creating a new initiative label. A name is required. The label is created as a workspace-level label available to all initiatives.
+"""
+input InitiativeLabelCreateInput {
+  """
+  The color of the label.
+  """
+  color: String
+  """
+  The description of the label.
+  """
+  description: String
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  Whether the label is a group.
+  """
+  isGroup: Boolean
+  """
+  The name of the label.
+  """
+  name: String!
+  """
+  The identifier of the parent label.
+  """
+  parentId: String
+  """
+  The time at which the label was retired. Set to null to restore a retired label.
+  """
+  retiredAt: DateTime
+}
+
 type InitiativeLabelEdge {
   """
   Used in `before` and `after` args
@@ -13546,6 +13654,54 @@ input InitiativeLabelFilter {
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
+}
+
+"""
+The result of an initiative label mutation.
+"""
+type InitiativeLabelPayload {
+  """
+  The label that was created or updated.
+  """
+  initiativeLabel: InitiativeLabel!
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
+Input for updating an existing initiative label. All fields are optional; only provided fields will be updated.
+"""
+input InitiativeLabelUpdateInput {
+  """
+  The color of the label.
+  """
+  color: String
+  """
+  The description of the label.
+  """
+  description: String
+  """
+  Whether the label is a group.
+  """
+  isGroup: Boolean
+  """
+  The name of the label.
+  """
+  name: String
+  """
+  The identifier of the parent label.
+  """
+  parentId: String
+  """
+  The time at which the label was retired. Set to null to restore a retired label.
+  """
+  retiredAt: DateTime
 }
 
 """
@@ -13614,6 +13770,28 @@ type InitiativeLeadTeamChangeImpact {
 enum InitiativeLeadTeamChangeMode {
   includeDescendants
   selectedOnly
+}
+
+"""
+[Internal] The payload returned by the initiative lead team update mutation.
+"""
+type InitiativeLeadTeamUpdatePayload {
+  """
+  [Internal] The matching sub-initiatives whose lead team was also changed.
+  """
+  affectedDescendants: [Initiative!]!
+  """
+  The initiative that was created or updated.
+  """
+  initiative: Initiative!
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
 }
 
 """
@@ -22903,6 +23081,55 @@ type Mutation {
     id: String!
   ): DeletePayload!
   """
+  Creates a new initiative label.
+  """
+  initiativeLabelCreate(
+    """
+    The initiative label to create.
+    """
+    input: InitiativeLabelCreateInput!
+  ): InitiativeLabelPayload!
+  """
+  Deletes an initiative label.
+  """
+  initiativeLabelDelete(
+    """
+    The identifier of the label to delete.
+    """
+    id: String!
+  ): DeletePayload!
+  """
+  Restores a previously retired initiative label, making it available for use on new initiatives.
+  """
+  initiativeLabelRestore(
+    """
+    The identifier of the label to restore.
+    """
+    id: String!
+  ): InitiativeLabelPayload!
+  """
+  Retires an initiative label. Retired labels remain on existing initiatives but cannot be applied to new ones.
+  """
+  initiativeLabelRetire(
+    """
+    The identifier of the label to retire.
+    """
+    id: String!
+  ): InitiativeLabelPayload!
+  """
+  Updates an initiative label.
+  """
+  initiativeLabelUpdate(
+    """
+    The identifier of the label to update.
+    """
+    id: String!
+    """
+    A partial label object to update.
+    """
+    input: InitiativeLabelUpdateInput!
+  ): InitiativeLabelPayload!
+  """
   [Internal] Updates an initiative's lead team, optionally applying it to matching editable sub-initiatives.
   """
   initiativeLeadTeamUpdate(
@@ -22918,7 +23145,7 @@ type Mutation {
     Whether to update only the selected initiative or also matching editable sub-initiatives. Matching sub-initiatives currently have the same lead team as the selected initiative had before the change.
     """
     mode: InitiativeLeadTeamChangeMode = selectedOnly
-  ): InitiativePayload!
+  ): InitiativeLeadTeamUpdatePayload!
   """
   Creates a new parent-child relation between two initiatives. The relation cannot create cycles or exceed maximum nesting depth.
   """
@@ -30107,6 +30334,7 @@ input OrganizationUpdateInput {
 A generic type of notification.
 """
 enum OtherNotificationType {
+  agentConversationMention
   customerAddedAsOwner
   customerNeedCreated
   customerNeedMarkedAsImportant
@@ -36788,6 +37016,43 @@ type Query {
   Returns a single initiative by its identifier or URL slug.
   """
   initiative(id: String!): Initiative!
+  """
+  Returns a single initiative label by its identifier.
+  """
+  initiativeLabel(id: String!): InitiativeLabel!
+  """
+  Returns all initiative labels in the workspace, with optional filtering.
+  """
+  initiativeLabels(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned initiative labels.
+    """
+    filter: InitiativeLabelFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): InitiativeLabelConnection!
   """
   [Internal] Returns the impact of changing an initiative's lead team before applying the update to matching sub-initiatives.
   """
