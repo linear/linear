@@ -1345,6 +1345,8 @@ fragment ReleaseNote on ReleaseNote {
   }
   # Generation status when these release notes are being auto-generated: `pending` while the LLM call is running, `completed` once it lands. `null` means the release notes were written by a user and never went through auto-generation.
   generationStatus
+  # The URL to the release note page in the Linear app.
+  url
   # The earliest release covered by this note.
   firstRelease {
     id
@@ -3899,6 +3901,8 @@ fragment Team on Team {
   updatedAt
   # The name of the team including its parent team name if it has one.
   displayName
+  # The number of initiatives led by this team that would be deleted along with it. Requires team owner or workspace admin permissions, as it counts initiatives the caller may not otherwise have access to.
+  ledInitiativeCount
   # The team's color.
   color
   # The team's description.
@@ -4403,7 +4407,7 @@ fragment User on User {
   url
   # Whether the user account is active or disabled (suspended).
   active
-  # Whether the user can be assigned to issues. Regular users are always assignable; app users are assignable only if they have the app:assignable scope.
+  # Whether the user can be assigned to issues. Regular users are always assignable; app users are assignable only if they have the app:assignable scope. The Linear agent also requires coding sessions to be enabled.
   isAssignable
   # Whether the user is a guest in the workspace and limited to accessing a subset of teams.
   guest
@@ -4714,6 +4718,10 @@ fragment AgentSkill on AgentSkill {
   updatedAt
   # The number of times the skill was used by anyone in the workspace in the last 30 days.
   recentUsageCount
+  # The parent-team skill this skill was inherited from. Null if the skill is not inherited.
+  inheritedFrom {
+    id
+  }
   # The skill instructions in markdown format.
   body
   # The skill's color. Null if no color is set.
@@ -7921,6 +7929,8 @@ fragment InitiativeWebhookPayload on InitiativeWebhookPayload {
   lastUpdateId
   # The ID of the organization this initiative belongs to.
   organizationId
+  # The ID of the team that leads the initiative.
+  leadTeamId
   # The ID of the user who created the initiative.
   creatorId
   # The ID of the user who owns the initiative.
@@ -18546,6 +18556,8 @@ query releaseNotes(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # Filter returned release notes.
+  $filter: ReleaseNoteFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -18558,6 +18570,7 @@ query releaseNotes(
   releaseNotes(
     after: $after
     before: $before
+    filter: $filter
     first: $first
     includeArchived: $includeArchived
     last: $last

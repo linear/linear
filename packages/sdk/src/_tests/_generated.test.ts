@@ -502,6 +502,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the agentSkill.inheritedFrom query for L.AgentSkill */
+    it("agentSkill.inheritedFrom", async () => {
+      if (_agentSkill) {
+        const agentSkill_inheritedFrom: L.AgentSkill | undefined | null = await _agentSkill.inheritedFrom;
+        expect(agentSkill_inheritedFrom instanceof L.AgentSkill);
+      } else {
+        console.warn("codegen-doc:print: No AgentSkill found - cannot test agentSkill.inheritedFrom query");
+      }
+    });
+
     /** Test the agentSkill.lastUpdatedBy query for L.User */
     it("agentSkill.lastUpdatedBy", async () => {
       if (_agentSkill) {
