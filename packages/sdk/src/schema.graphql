@@ -1136,6 +1136,10 @@ type AgentSkill implements Node {
   """
   id: ID!
   """
+  The parent-team skill this skill was inherited from. Null if the skill is not inherited.
+  """
+  inheritedFrom: AgentSkill
+  """
   The user who last updated the skill. Null if unknown.
   """
   lastUpdatedBy: User
@@ -12066,15 +12070,15 @@ input GitHubRepoInput {
 
 input GitHubRepoMappingInput {
   """
-  Whether the sync for this mapping is bidirectional.
+  Whether Linear-created issues matching this mapping will create GitHub issues.
   """
   bidirectional: Boolean
   """
-  Whether this mapping is the default one for issue creation.
+  Whether this mapping is the default destination for Linear-created issues that do not match a label-filtered mapping.
   """
   default: Boolean
   """
-  Labels to filter incoming GitHub issue creation by.
+  Label names used as a creation filter. When set, only issues matching one of these labels will create a synced issue for this mapping.
   """
   gitHubLabels: [String!]
   """
@@ -12086,7 +12090,7 @@ input GitHubRepoMappingInput {
   """
   id: String!
   """
-  The Linear team id to map to the given project.
+  The Linear team id to map to the GitHub repository.
   """
   linearTeamId: String!
 }
@@ -12928,6 +12932,10 @@ type Initiative implements Node {
   Initiative URL.
   """
   url: String!
+  """
+  [ALPHA] The visibility of the initiative, derived from its lead team. Public when no lead team is assigned.
+  """
+  visibility: InitiativeVisibility!
 }
 
 """
@@ -13591,7 +13599,7 @@ type InitiativeLabelWebhookPayload {
 """
 type InitiativeLeadTeamChangeImpact {
   """
-  The number of editable sub-initiatives whose lead team would change if the update is applied to descendants.
+  The number of editable matching sub-initiatives whose lead team would change if the update is applied to descendants. Matching sub-initiatives currently have the same lead team as the selected initiative had before the change.
   """
   affectedDescendantCount: Int!
   """
@@ -14731,6 +14739,15 @@ input InitiativeUpdatesFilter {
 }
 
 """
+The visibility of an initiative. Derived from its lead team; public when no lead team is assigned.
+"""
+enum InitiativeVisibility {
+  private
+  public
+  restricted
+}
+
+"""
 Payload for an initiative webhook.
 """
 type InitiativeWebhookPayload {
@@ -14798,6 +14815,10 @@ type InitiativeWebhookPayload {
   The ID of the last update for this initiative.
   """
   lastUpdateId: String
+  """
+  The ID of the team that leads the initiative.
+  """
+  leadTeamId: String
   """
   The name of the initiative.
   """
@@ -22882,7 +22903,7 @@ type Mutation {
     id: String!
   ): DeletePayload!
   """
-  [Internal] Updates an initiative's lead team, optionally applying it to affected editable sub-initiatives.
+  [Internal] Updates an initiative's lead team, optionally applying it to matching editable sub-initiatives.
   """
   initiativeLeadTeamUpdate(
     """
@@ -22894,7 +22915,7 @@ type Mutation {
     """
     leadTeamId: String
     """
-    Whether to update only the selected initiative or also affected editable sub-initiatives.
+    Whether to update only the selected initiative or also matching editable sub-initiatives. Matching sub-initiatives currently have the same lead team as the selected initiative had before the change.
     """
     mode: InitiativeLeadTeamChangeMode = selectedOnly
   ): InitiativePayload!
@@ -29308,6 +29329,10 @@ type OrganizationCancelDeletePayload {
 """
 input OrganizationCodingAgentSettingsInput {
   """
+  [Internal] Whether Coding Sessions require uploaded user commit signing keys.
+  """
+  commitSigningEnabled: Boolean
+  """
   [Internal] The provider-agnostic reasoning effort level used for Coding Sessions. Clamped to the selected model's provider when the session runs.
   """
   effort: String
@@ -30672,6 +30697,10 @@ input PrioritySort {
   The order for the individual sort
   """
   order: PaginationSortOrder
+  """
+  Whether to tiebreak issues sharing a priority by their priority sort order
+  """
+  usePrioritySortOrderTiebreaker: Boolean = true
 }
 
 """
@@ -36760,7 +36789,7 @@ type Query {
   """
   initiative(id: String!): Initiative!
   """
-  [Internal] Returns the impact of changing an initiative's lead team before applying the update.
+  [Internal] Returns the impact of changing an initiative's lead team before applying the update to matching sub-initiatives.
   """
   initiativeLeadTeamChangeImpact(
     """
@@ -37823,6 +37852,10 @@ type Query {
     A cursor to be used with last for backward pagination.
     """
     before: String
+    """
+    Filter returned release notes.
+    """
+    filter: ReleaseNoteFilter
     """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
@@ -39554,6 +39587,10 @@ type ReleaseNote implements Node {
       been updated after creation.
   """
   updatedAt: DateTime!
+  """
+  The URL to the release note page in the Linear app.
+  """
+  url: String!
 }
 
 type ReleaseNoteConnection {
@@ -39602,6 +39639,48 @@ type ReleaseNoteEdge {
   """
   cursor: String!
   node: ReleaseNote!
+}
+
+"""
+Release note filtering options.
+"""
+input ReleaseNoteFilter {
+  """
+  Compound filters, all of which need to be matched by the release note.
+  """
+  and: [ReleaseNoteFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Compound filters, one of which need to be matched by the release note.
+  """
+  or: [ReleaseNoteFilter!]
+  """
+  Filters that the release note's pipeline must satisfy.
+  """
+  pipeline: ReleasePipelineFilter
+  """
+  Filters that a release covered by the release note must satisfy.
+  """
+  release: ReleaseFilter
+  """
+  Comparator for the release note slug ID.
+  """
+  slugId: StringComparator
+  """
+  Comparator for the release note title.
+  """
+  title: StringComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 """
@@ -39993,6 +40072,10 @@ input ReleasePipelineCollectionFilter {
   """
   teams: TeamCollectionFilter
   """
+  Comparator for the pipeline type.
+  """
+  type: ReleasePipelineTypeComparator
+  """
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
@@ -40083,6 +40166,10 @@ input ReleasePipelineFilter {
   """
   teams: TeamCollectionFilter
   """
+  Comparator for the pipeline type.
+  """
+  type: ReleasePipelineTypeComparator
+  """
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
@@ -40136,6 +40223,32 @@ The type of a release pipeline, which determines how releases are created and ma
 enum ReleasePipelineType {
   continuous
   scheduled
+}
+
+"""
+Comparator for release pipeline type.
+"""
+input ReleasePipelineTypeComparator {
+  """
+  Equals constraint.
+  """
+  eq: ReleasePipelineType
+  """
+  In-array constraint.
+  """
+  in: [ReleasePipelineType!]
+  """
+  Not-equals constraint.
+  """
+  neq: ReleasePipelineType
+  """
+  Not-in-array constraint.
+  """
+  nin: [ReleasePipelineType!]
+  """
+  Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.
+  """
+  null: Boolean
 }
 
 """
@@ -42999,6 +43112,10 @@ type Team implements Node {
     orderBy: PaginationOrderBy
   ): IssueLabelConnection!
   """
+  The number of initiatives led by this team that would be deleted along with it. Requires team owner or workspace admin permissions, as it counts initiatives the caller may not otherwise have access to.
+  """
+  ledInitiativeCount: Int!
+  """
   [DEPRECATED] No longer in use. Duplicates are now system-managed via the native duplicate state.
   """
   markedAsDuplicateWorkflowState: WorkflowState
@@ -45446,7 +45563,7 @@ type User implements Node {
   """
   inviteHash: String! @deprecated(reason: "This hash is not in use anymore, this value will always be empty.")
   """
-  Whether the user can be assigned to issues. Regular users are always assignable; app users are assignable only if they have the app:assignable scope.
+  Whether the user can be assigned to issues. Regular users are always assignable; app users are assignable only if they have the app:assignable scope. The Linear agent also requires coding sessions to be enabled.
   """
   isAssignable: Boolean!
   """
@@ -47463,6 +47580,10 @@ type ViewPreferencesValues {
   """
   showSupervisedIssues: Boolean
   """
+  [ALPHA] Whether to show team-level initiatives in the workspace.
+  """
+  showTeamInitiatives: Boolean
+  """
   Whether team reviews are shown in the reviews list.
   """
   showTeamReviews: Boolean
@@ -47506,6 +47627,10 @@ type ViewPreferencesValues {
   Whether to show the team projects field.
   """
   teamFieldProjects: Boolean
+  """
+  [Internal] On the team initiatives page, whether sub-initiatives the team only contributes to are shown.
+  """
+  teamInitiativesShowContributing: Boolean
   """
   The team view ordering.
   """

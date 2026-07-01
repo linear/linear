@@ -891,6 +891,7 @@ export class AgentSessionWebhookPayload {
  */
 export class AgentSkill extends Request {
   private _creator: L.AgentSkillFragment["creator"];
+  private _inheritedFrom?: L.AgentSkillFragment["inheritedFrom"];
   private _lastUpdatedBy?: L.AgentSkillFragment["lastUpdatedBy"];
   private _owner: L.AgentSkillFragment["owner"];
 
@@ -911,6 +912,7 @@ export class AgentSkill extends Request {
     this.title = data.title;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._creator = data.creator;
+    this._inheritedFrom = data.inheritedFrom ?? undefined;
     this._lastUpdatedBy = data.lastUpdatedBy ?? undefined;
     this._owner = data.owner;
   }
@@ -953,6 +955,14 @@ export class AgentSkill extends Request {
   /** The ID of user who created the skill. */
   public get creatorId(): string | undefined {
     return this._creator?.id;
+  }
+  /** The parent-team skill this skill was inherited from. Null if the skill is not inherited. */
+  public get inheritedFrom(): LinearFetch<AgentSkill> | undefined {
+    return this._inheritedFrom?.id ? new AgentSkillQuery(this._request).fetch(this._inheritedFrom?.id) : undefined;
+  }
+  /** The ID of parent-team skill this skill was inherited from. null if the skill is not inherited. */
+  public get inheritedFromId(): string | undefined {
+    return this._inheritedFrom?.id;
   }
   /** The user who last updated the skill. Null if unknown. */
   public get lastUpdatedBy(): LinearFetch<User> | undefined {
@@ -10399,6 +10409,7 @@ export class InitiativeWebhookPayload {
     this.id = data.id;
     this.identifier = data.identifier ?? undefined;
     this.lastUpdateId = data.lastUpdateId ?? undefined;
+    this.leadTeamId = data.leadTeamId ?? undefined;
     this.name = data.name;
     this.organizationId = data.organizationId;
     this.ownerId = data.ownerId ?? undefined;
@@ -10459,6 +10470,8 @@ export class InitiativeWebhookPayload {
   public identifier?: string | null;
   /** The ID of the last update for this initiative. */
   public lastUpdateId?: string | null;
+  /** The ID of the team that leads the initiative. */
+  public leadTeamId?: string | null;
   /** The name of the initiative. */
   public name: string;
   /** The ID of the organization this initiative belongs to. */
@@ -19093,6 +19106,7 @@ export class ReleaseNote extends Request {
     this.slugId = data.slugId;
     this.title = data.title ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.url = data.url;
     this.documentContent = data.documentContent ? new DocumentContent(request, data.documentContent) : undefined;
     this.generationStatus = data.generationStatus ?? undefined;
     this._firstRelease = data.firstRelease ?? undefined;
@@ -19117,6 +19131,8 @@ export class ReleaseNote extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The URL to the release note page in the Linear app. */
+  public url: string;
   /** Document content backing the release note body. */
   public documentContent?: DocumentContent | null;
   /** Generation status when these release notes are being auto-generated: `pending` while the LLM call is running, `completed` once it lands. `null` means the release notes were written by a user and never went through auto-generation. */
@@ -21154,6 +21170,7 @@ export class Team extends Request {
     this.issueOrderingNoPriorityFirst = data.issueOrderingNoPriorityFirst;
     this.issueSortOrderDefaultToBottom = data.issueSortOrderDefaultToBottom;
     this.key = data.key;
+    this.ledInitiativeCount = data.ledInitiativeCount;
     this.name = data.name;
     this.private = data.private;
     this.requirePriorityToLeaveTriage = data.requirePriorityToLeaveTriage;
@@ -21261,6 +21278,8 @@ export class Team extends Request {
   public issueSortOrderDefaultToBottom: boolean;
   /** The team's unique key, used as a prefix in issue identifiers (e.g., 'ENG' in 'ENG-123') and in URLs. */
   public key: string;
+  /** The number of initiatives led by this team that would be deleted along with it. Requires team owner or workspace admin permissions, as it counts initiatives the caller may not otherwise have access to. */
+  public ledInitiativeCount: number;
   /** The team's name. */
   public name: string;
   /** Whether the team is private. Private teams are only visible to their members and require an explicit invitation to join. */
@@ -22765,7 +22784,7 @@ export class User extends Request {
   public initials: string;
   /** [DEPRECATED] Unique hash for the user to be used in invite URLs. */
   public inviteHash: string;
-  /** Whether the user can be assigned to issues. Regular users are always assignable; app users are assignable only if they have the app:assignable scope. */
+  /** Whether the user can be assigned to issues. Regular users are always assignable; app users are assignable only if they have the app:assignable scope. The Linear agent also requires coding sessions to be enabled. */
   public isAssignable: boolean;
   /** Whether the user is the currently authenticated user. */
   public isMe: boolean;
@@ -52384,6 +52403,7 @@ export {
   InitiativeStatus,
   InitiativeTab,
   InitiativeUpdateHealthType,
+  InitiativeVisibility,
   IntegrationService,
   IssueRelationType,
   IssueSharedAccessDisallowedField,
