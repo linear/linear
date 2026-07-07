@@ -97,6 +97,10 @@ fragment AiConversationBasePart on AiConversationBasePart {
   # The type of the part.
   type
 
+  ... on AiConversationAckPart {
+    ...AiConversationAckPart
+  }
+
   ... on AiConversationElicitationPart {
     ...AiConversationElicitationPart
   }
@@ -2671,6 +2675,34 @@ fragment OrganizationInvite on OrganizationInvite {
   external
 }
 
+# A pending revision of document content. Revisions are seeded from the live document state and stored
+# as base64-encoded Yjs state updates, allowing automation edits to accumulate without affecting the
+# published document until the changes are explicitly applied.
+fragment DocumentContentRevision on DocumentContentRevision {
+  __typename
+  # The document content that this revision is based on.
+  documentContent {
+    ...DocumentContent
+  }
+  # The identifier of the document content that this revision is based on.
+  documentContentId
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The live document content state this revision was last refreshed from, as a base64-encoded Yjs state update.
+  baseContentState
+  # The pending revision content state as a base64-encoded Yjs state update. This represents the revision that has not yet been applied to the live document.
+  contentState
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The workflow definitions that contributed edits to this revision.
+  contributorWorkflowDefinitionIds
+}
+
 # A product announcement shown in targeted workspace inbox notifications. Product announcements store
 # reusable launch copy and are sent to specific recipients through related notifications.
 fragment ProductAnnouncement on ProductAnnouncement {
@@ -3550,6 +3582,21 @@ fragment AgentSession on AgentSession {
   # URLs of external resources associated with this session.
   externalUrls
   # [DEPRECATED] The type of the agent session.
+  type
+}
+
+# A silent acknowledgement emitted by the agent in place of a generated reply.
+fragment AiConversationAckPart on AiConversationAckPart {
+  __typename
+  # The ID of the part.
+  id
+  # The kind of acknowledgement the agent expressed.
+  kind
+  # The metadata of the part.
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  # The type of the part.
   type
 }
 
@@ -8861,6 +8908,23 @@ fragment PushSubscriptionTestPayload on PushSubscriptionTestPayload {
   success
 }
 
+# Signature verification metadata for a Git commit associated with a pull request.
+fragment PullRequestCommitSignature on PullRequestCommitSignature {
+  __typename
+  # The hex-encoded ID of the GPG key that signed this commit. Null for non-GPG signatures.
+  keyId
+  # The hex-encoded fingerprint of the SSH key that signed this commit. Null for non-SSH signatures.
+  keyFingerprint
+  # The provider-specific verification state for the signature.
+  state
+  # The type of signature reported for this commit.
+  type
+  # Whether the commit was signed with the hosting provider's signing key.
+  wasSignedByProvider
+  # Whether the hosting provider considers the signature valid and verified.
+  isVerified
+}
+
 # Team membership operation response.
 fragment TeamMembershipPayload on TeamMembershipPayload {
   __typename
@@ -10033,6 +10097,15 @@ fragment WorkflowStatePayload on WorkflowStatePayload {
   }
   # Whether the operation was successful.
   success
+}
+
+# The result of an AI-generated initiative filter suggestion based on a text prompt.
+fragment InitiativeFilterSuggestionPayload on InitiativeFilterSuggestionPayload {
+  __typename
+  # The json filter that is suggested.
+  filter
+  # The log id of the prompt that created this filter.
+  logId
 }
 
 # The result of an AI-generated issue filter suggestion based on a text prompt.
@@ -13219,6 +13292,18 @@ fragment Subscription on Subscription {
   documentContentUpdated {
     ...DocumentContent
   }
+  # Triggered when a document content revision is created
+  documentContentRevisionCreated {
+    ...DocumentContentRevision
+  }
+  # Triggered when a document content revision is deleted
+  documentContentRevisionDeleted {
+    ...DocumentContentRevision
+  }
+  # Triggered when a document content revision is updated
+  documentContentRevisionUpdated {
+    ...DocumentContentRevision
+  }
   # Triggered when a document is archived
   documentArchived {
     id
@@ -13821,7 +13906,7 @@ query attachmentIssue_children(
     }
   }
 }
-# Comments associated with the issue.
+# Comments associated with the issue, including inline comments on the issue's description.
 query attachmentIssue_comments(
   # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
   $id: String!
@@ -15461,6 +15546,17 @@ query initiative_subInitiatives(
     }
   }
 }
+# Suggests filters for an initiative view based on a text prompt.
+query initiativeFilterSuggestion(
+  # The text prompt to generate a filter suggestion from.
+  $prompt: String!
+  # [Internal] The ID of the team if filtering a team view.
+  $teamId: String
+) {
+  initiativeFilterSuggestion(prompt: $prompt, teamId: $teamId) {
+    ...InitiativeFilterSuggestionPayload
+  }
+}
 # Returns a single initiative label by its identifier.
 query initiativeLabel($id: String!) {
   initiativeLabel(id: $id) {
@@ -15906,7 +16002,7 @@ query issue_children(
     }
   }
 }
-# Comments associated with the issue.
+# Comments associated with the issue, including inline comments on the issue's description.
 query issue_comments(
   # The identifier of the issue to retrieve.
   $id: String!
@@ -16707,7 +16803,7 @@ query issueVcsBranchSearch_children(
     }
   }
 }
-# Comments associated with the issue.
+# Comments associated with the issue, including inline comments on the issue's description.
 query issueVcsBranchSearch_comments(
   # The VCS branch name to search for.
   $branchName: String!
