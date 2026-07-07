@@ -2010,6 +2010,16 @@ describe("generated", () => {
     });
   });
 
+  /** Test InitiativeFilterSuggestion query */
+  describe("InitiativeFilterSuggestion", () => {
+    /** Test the root model query for InitiativeFilterSuggestion */
+    it("initiativeFilterSuggestion", async () => {
+      const initiativeFilterSuggestion: L.InitiativeFilterSuggestionPayload | undefined | null =
+        await client.initiativeFilterSuggestion("mock-prompt");
+      expect(initiativeFilterSuggestion instanceof L.InitiativeFilterSuggestionPayload);
+    });
+  });
+
   /** Test all InitiativeLabel queries */
   describe("InitiativeLabels", () => {
     let _initiativeLabel: L.InitiativeLabel | undefined | null;

@@ -1045,6 +1045,30 @@ export class AgentSkillPayload extends Request {
   }
 }
 /**
+ * A silent acknowledgement emitted by the agent in place of a generated reply.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationAckPartFragment response data
+ */
+export class AiConversationAckPart extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationAckPartFragment) {
+    super(request);
+    this.id = data.id;
+    this.metadata = new AiConversationPartMetadata(request, data.metadata);
+    this.kind = data.kind;
+    this.type = data.type;
+  }
+
+  /** The ID of the part. */
+  public id: string;
+  /** The metadata of the part. */
+  public metadata: AiConversationPartMetadata;
+  /** The kind of acknowledgement the agent expressed. */
+  public kind: L.AiConversationAckKind;
+  /** The type of the part. */
+  public type: L.AiConversationPartType;
+}
+/**
  * A base part in an AI conversation.
  *
  * @param request - function to call the graphql client
@@ -6925,6 +6949,48 @@ export class DocumentContentHistoryType extends Request {
   public metadata?: Record<string, unknown> | null;
 }
 /**
+ * A pending revision of document content. Revisions are seeded from the live document state and stored as base64-encoded Yjs state updates, allowing automation edits to accumulate without affecting the published document until the changes are explicitly applied.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.DocumentContentRevisionFragment response data
+ */
+export class DocumentContentRevision extends Request {
+  public constructor(request: LinearRequest, data: L.DocumentContentRevisionFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.baseContentState = data.baseContentState;
+    this.contentState = data.contentState;
+    this.contributorWorkflowDefinitionIds = data.contributorWorkflowDefinitionIds;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.documentContentId = data.documentContentId;
+    this.id = data.id;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.documentContent = new DocumentContent(request, data.documentContent);
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The live document content state this revision was last refreshed from, as a base64-encoded Yjs state update. */
+  public baseContentState: string;
+  /** The pending revision content state as a base64-encoded Yjs state update. This represents the revision that has not yet been applied to the live document. */
+  public contentState: string;
+  /** The workflow definitions that contributed edits to this revision. */
+  public contributorWorkflowDefinitionIds: string[];
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The identifier of the document content that this revision is based on. */
+  public documentContentId: string;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The document content that this revision is based on. */
+  public documentContent: DocumentContent;
+}
+/**
  * A notification related to a document, such as comments, mentions, content changes, or document lifecycle events.
  *
  * @param request - function to call the graphql client
@@ -9367,6 +9433,24 @@ export class InitiativeConnection extends Connection<Initiative> {
   }
 }
 /**
+ * The result of an AI-generated initiative filter suggestion based on a text prompt.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.InitiativeFilterSuggestionPayloadFragment response data
+ */
+export class InitiativeFilterSuggestionPayload extends Request {
+  public constructor(request: LinearRequest, data: L.InitiativeFilterSuggestionPayloadFragment) {
+    super(request);
+    this.filter = data.filter ?? undefined;
+    this.logId = data.logId ?? undefined;
+  }
+
+  /** The json filter that is suggested. */
+  public filter?: L.Scalars["JSONObject"] | null;
+  /** The log id of the prompt that created this filter. */
+  public logId?: string | null;
+}
+/**
  * A history record associated with an initiative. Tracks changes to initiative properties such as name, status, owner, target date, icon, color, and parent-child relationships over time.
  *
  * @param request - function to call the graphql client
@@ -11387,7 +11471,7 @@ export class Issue extends Request {
   public children(variables?: Omit<L.Issue_ChildrenQueryVariables, "id">) {
     return new Issue_ChildrenQuery(this._request, this.id, variables).fetch(variables);
   }
-  /** Comments associated with the issue. */
+  /** Comments associated with the issue, including inline comments on the issue's description. */
   public comments(variables?: Omit<L.Issue_CommentsQueryVariables, "id">) {
     return new Issue_CommentsQuery(this._request, this.id, variables).fetch(variables);
   }
@@ -18498,6 +18582,36 @@ export class ProjectWebhookPayload {
   public status?: ProjectStatusChildWebhookPayload | null;
 }
 /**
+ * Signature verification metadata for a Git commit associated with a pull request.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.PullRequestCommitSignatureFragment response data
+ */
+export class PullRequestCommitSignature extends Request {
+  public constructor(request: LinearRequest, data: L.PullRequestCommitSignatureFragment) {
+    super(request);
+    this.isVerified = data.isVerified;
+    this.keyFingerprint = data.keyFingerprint ?? undefined;
+    this.keyId = data.keyId ?? undefined;
+    this.state = data.state;
+    this.type = data.type;
+    this.wasSignedByProvider = data.wasSignedByProvider ?? undefined;
+  }
+
+  /** Whether the hosting provider considers the signature valid and verified. */
+  public isVerified: boolean;
+  /** The hex-encoded fingerprint of the SSH key that signed this commit. Null for non-SSH signatures. */
+  public keyFingerprint?: string | null;
+  /** The hex-encoded ID of the GPG key that signed this commit. Null for non-GPG signatures. */
+  public keyId?: string | null;
+  /** The provider-specific verification state for the signature. */
+  public state: string;
+  /** The type of signature reported for this commit. */
+  public type: string;
+  /** Whether the commit was signed with the hosting provider's signing key. */
+  public wasSignedByProvider?: boolean | null;
+}
+/**
  * A notification related to a pull request, such as review requests, approvals, comments, check failures, or merge queue events.
  *
  * @param request - function to call the graphql client
@@ -20541,6 +20655,9 @@ export class Subscription extends Request {
     this.documentContentDraftCreated = new DocumentContentDraft(request, data.documentContentDraftCreated);
     this.documentContentDraftDeleted = new DocumentContentDraft(request, data.documentContentDraftDeleted);
     this.documentContentDraftUpdated = new DocumentContentDraft(request, data.documentContentDraftUpdated);
+    this.documentContentRevisionCreated = new DocumentContentRevision(request, data.documentContentRevisionCreated);
+    this.documentContentRevisionDeleted = new DocumentContentRevision(request, data.documentContentRevisionDeleted);
+    this.documentContentRevisionUpdated = new DocumentContentRevision(request, data.documentContentRevisionUpdated);
     this.documentContentUpdated = new DocumentContent(request, data.documentContentUpdated);
     this.draftCreated = new Draft(request, data.draftCreated);
     this.draftDeleted = new Draft(request, data.draftDeleted);
@@ -20611,6 +20728,12 @@ export class Subscription extends Request {
   public documentContentDraftDeleted: DocumentContentDraft;
   /** Triggered when a document content draft is updated */
   public documentContentDraftUpdated: DocumentContentDraft;
+  /** Triggered when a document content revision is created */
+  public documentContentRevisionCreated: DocumentContentRevision;
+  /** Triggered when a document content revision is deleted */
+  public documentContentRevisionDeleted: DocumentContentRevision;
+  /** Triggered when a document content revision is updated */
+  public documentContentRevisionUpdated: DocumentContentRevision;
   /** Triggered when a document content is updated */
   public documentContentUpdated: DocumentContent;
   /** Triggered when a draft is created */
@@ -26385,6 +26508,40 @@ export class InitiativeQuery extends Request {
     const data = response.initiative;
 
     return new Initiative(this._request, data);
+  }
+}
+
+/**
+ * A fetchable InitiativeFilterSuggestion Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class InitiativeFilterSuggestionQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the InitiativeFilterSuggestion query and return a InitiativeFilterSuggestionPayload
+   *
+   * @param prompt - required prompt to pass to initiativeFilterSuggestion
+   * @param variables - variables without 'prompt' to pass into the InitiativeFilterSuggestionQuery
+   * @returns parsed response from InitiativeFilterSuggestionQuery
+   */
+  public async fetch(
+    prompt: string,
+    variables?: Omit<L.InitiativeFilterSuggestionQueryVariables, "prompt">
+  ): LinearFetch<InitiativeFilterSuggestionPayload> {
+    const response = await this._request<L.InitiativeFilterSuggestionQuery, L.InitiativeFilterSuggestionQueryVariables>(
+      L.InitiativeFilterSuggestionDocument.toString(),
+      {
+        prompt,
+        ...variables,
+      }
+    );
+    const data = response.initiativeFilterSuggestion;
+
+    return new InitiativeFilterSuggestionPayload(this._request, data);
   }
 }
 
@@ -48447,6 +48604,19 @@ export class LinearSdk extends Request {
     return new InitiativeQuery(this._request).fetch(id);
   }
   /**
+   * Suggests filters for an initiative view based on a text prompt.
+   *
+   * @param prompt - required prompt to pass to initiativeFilterSuggestion
+   * @param variables - variables without 'prompt' to pass into the InitiativeFilterSuggestionQuery
+   * @returns InitiativeFilterSuggestionPayload
+   */
+  public initiativeFilterSuggestion(
+    prompt: string,
+    variables?: Omit<L.InitiativeFilterSuggestionQueryVariables, "prompt">
+  ): LinearFetch<InitiativeFilterSuggestionPayload> {
+    return new InitiativeFilterSuggestionQuery(this._request).fetch(prompt, variables);
+  }
+  /**
    * Returns a single initiative label by its identifier.
    *
    * @param id - required id to pass to initiativeLabel
@@ -52807,6 +52977,7 @@ export {
   AgentActivityType,
   AgentSessionStatus,
   AgentSessionType,
+  AiConversationAckKind,
   AiConversationClientPlatform,
   AiConversationElicitationKind,
   AiConversationEntityCardWidgetArgsAction,

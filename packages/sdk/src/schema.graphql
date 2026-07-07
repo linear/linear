@@ -707,6 +707,19 @@ type AgentSession implements Node {
   The URL to the agent session page in the Linear app. Null for direct chat sessions without an associated issue.
   """
   url: String
+  """
+  [Internal] The coding agent's live working-tree diff metadata (changes not yet pushed to origin), reported by the sandbox. Per-file content is fetched on demand from the workspace-diff-blob route. Null when in sync.
+  """
+  workspaceDiff: JSON
+  """
+  [Internal] Per-file list of the agent's live working-tree diff at the given content hash. Served behind a repository-read-access gate (the synced summary carries only aggregate counts); null when the requester lacks repository access or there is no current diff.
+  """
+  workspaceDiffFiles(
+    """
+    The diff's content hash, from the session's `workspaceDiff`.
+    """
+    contentHash: String!
+  ): [AgentSessionWorkspaceDiffFile!]
 }
 
 type AgentSessionConnection {
@@ -1100,6 +1113,32 @@ type AgentSessionWebhookPayload {
 }
 
 """
+[Internal] One changed file in a coding agent's live working-tree diff.
+"""
+type AgentSessionWorkspaceDiffFile {
+  """
+  Lines added in this file.
+  """
+  additions: Int!
+  """
+  Lines removed in this file.
+  """
+  deletions: Int!
+  """
+  Previous path, when the file was renamed or copied.
+  """
+  oldPath: String
+  """
+  Path of the changed file (the new path, for renames).
+  """
+  path: String!
+  """
+  Kind of change: added, modified, deleted, renamed, copied, type_changed, unmerged, unknown.
+  """
+  state: String!
+}
+
+"""
 A user-defined skill that can be saved and reused in conversations with the Linear Agent. Skills can be private to a user or shared with a team.
 """
 type AgentSkill implements Node {
@@ -1341,6 +1380,10 @@ type AiConversation implements Node {
   """
   initialSource: AiConversationInitialSource!
   """
+  [Internal] The initiative this shared conversation is attached to. Null if the conversation is private.
+  """
+  initiative: Initiative
+  """
   The iteration ID when this conversation is part of an agentic workflow. Used to track multi-step workflow executions. Null for non-workflow conversations.
   """
   iterationId: String
@@ -1385,6 +1428,37 @@ type AiConversation implements Node {
   [Internal] The workflow definition that created this conversation.
   """
   workflowDefinition: WorkflowDefinition
+}
+
+"""
+The kind of acknowledgement the agent expresses when it has nothing meaningful to reply.
+"""
+enum AiConversationAckKind {
+  done
+  ignored
+  waiting
+}
+
+"""
+A silent acknowledgement emitted by the agent in place of a generated reply.
+"""
+type AiConversationAckPart implements AiConversationBasePart {
+  """
+  The ID of the part.
+  """
+  id: String!
+  """
+  The kind of acknowledgement the agent expressed.
+  """
+  kind: AiConversationAckKind!
+  """
+  The metadata of the part.
+  """
+  metadata: AiConversationPartMetadata!
+  """
+  The type of the part.
+  """
+  type: AiConversationPartType!
 }
 
 """
@@ -1688,6 +1762,7 @@ enum AiConversationEntityCardWidgetArgsType {
   Issue
   IssueDraft
   Project
+  ProjectDraft
   ProjectUpdate
   PullRequest
   Release
@@ -1771,6 +1846,7 @@ enum AiConversationEntityListWidgetArgsEntitiesType {
   Issue
   IssueDraft
   Project
+  ProjectDraft
   ProjectUpdate
   PullRequest
   Release
@@ -1984,6 +2060,7 @@ The initial source of an AI conversation.
 enum AiConversationInitialSource {
   comment
   directChat
+  entityChat
   mcp
   microsoftTeams
   onboarding
@@ -2108,6 +2185,7 @@ type AiConversationNavigateToPageToolCallResult {
 A part in an AI conversation.
 """
 union AiConversationPart =
+  | AiConversationAckPart
   | AiConversationElicitationPart
   | AiConversationErrorPart
   | AiConversationEventPart
@@ -2159,6 +2237,7 @@ enum AiConversationPartPhase {
 The type of a part in an AI conversation.
 """
 enum AiConversationPartType {
+  ack
   elicitation
   error
   event
@@ -9290,6 +9369,49 @@ type DocumentContentHistoryType {
 }
 
 """
+A pending revision of document content. Revisions are seeded from the live document state and stored as base64-encoded Yjs state updates, allowing automation edits to accumulate without affecting the published document until the changes are explicitly applied.
+"""
+type DocumentContentRevision implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The live document content state this revision was last refreshed from, as a base64-encoded Yjs state update.
+  """
+  baseContentState: String!
+  """
+  The pending revision content state as a base64-encoded Yjs state update. This represents the revision that has not yet been applied to the live document.
+  """
+  contentState: String!
+  """
+  The workflow definitions that contributed edits to this revision.
+  """
+  contributorWorkflowDefinitionIds: [String!]!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The document content that this revision is based on.
+  """
+  documentContent: DocumentContent!
+  """
+  The identifier of the document content that this revision is based on.
+  """
+  documentContentId: String!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+"""
 Input for creating a new document.
 """
 input DocumentCreateInput {
@@ -13281,6 +13403,20 @@ input InitiativeFilter {
 }
 
 """
+The result of an AI-generated initiative filter suggestion based on a text prompt.
+"""
+type InitiativeFilterSuggestionPayload {
+  """
+  The json filter that is suggested.
+  """
+  filter: JSONObject
+  """
+  The log id of the prompt that created this filter.
+  """
+  logId: String
+}
+
+"""
 Initiative health sorting options.
 """
 input InitiativeHealthSort {
@@ -15919,7 +16055,7 @@ type Issue implements Node {
     orderBy: PaginationOrderBy
   ): IssueConnection!
   """
-  Comments associated with the issue.
+  Comments associated with the issue, including inline comments on the issue's description.
   """
   comments(
     """
@@ -19459,7 +19595,7 @@ type IssueSearchResult implements Node {
     orderBy: PaginationOrderBy
   ): IssueConnection!
   """
-  Comments associated with the issue.
+  Comments associated with the issue, including inline comments on the issue's description.
   """
   comments(
     """
@@ -20997,7 +21133,7 @@ input IssueUpdateInput {
   """
   title: String
   """
-  Whether the issue has been trashed.
+  Whether the issue has been trashed. Set to true to trash, or null to restore.
   """
   trashed: Boolean
   """
@@ -28226,6 +28362,10 @@ input NullableTeamFilter {
   """
   or: [NullableTeamFilter!]
   """
+  Filters that the team's owners must satisfy.
+  """
+  owners: UserCollectionFilter
+  """
   Filters that the team's parent must satisfy.
   """
   parent: NullableTeamFilter
@@ -28249,6 +28389,10 @@ input NullableTeamFilter {
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
+  """
+  [Internal] Filters that the team's members must satisfy. Alias of `members` matching the filter shape produced by the app; prefer `members`.
+  """
+  users: UserCollectionFilter
   """
   Comparator for the team visibility.
   """
@@ -35863,6 +36007,40 @@ type PullRequestCommit {
   The Git commit SHA.
   """
   sha: String!
+  """
+  Signature verification metadata for this commit. Null if the hosting provider did not return signature information.
+  """
+  signature: PullRequestCommitSignature
+}
+
+"""
+Signature verification metadata for a Git commit associated with a pull request.
+"""
+type PullRequestCommitSignature {
+  """
+  Whether the hosting provider considers the signature valid and verified.
+  """
+  isVerified: Boolean!
+  """
+  The hex-encoded fingerprint of the SSH key that signed this commit. Null for non-SSH signatures.
+  """
+  keyFingerprint: String
+  """
+  The hex-encoded ID of the GPG key that signed this commit. Null for non-GPG signatures.
+  """
+  keyId: String
+  """
+  The provider-specific verification state for the signature.
+  """
+  state: String!
+  """
+  The type of signature reported for this commit.
+  """
+  type: String!
+  """
+  Whether the commit was signed with the hosting provider's signing key.
+  """
+  wasSignedByProvider: Boolean
 }
 
 """
@@ -37016,6 +37194,19 @@ type Query {
   Returns a single initiative by its identifier or URL slug.
   """
   initiative(id: String!): Initiative!
+  """
+  Suggests filters for an initiative view based on a text prompt.
+  """
+  initiativeFilterSuggestion(
+    """
+    The text prompt to generate a filter suggestion from.
+    """
+    prompt: String!
+    """
+    [Internal] The ID of the team if filtering a team view.
+    """
+    teamId: String
+  ): InitiativeFilterSuggestionPayload!
   """
   Returns a single initiative label by its identifier.
   """
@@ -41071,7 +41262,7 @@ input ReleaseUpdateInput {
   """
   targetDate: TimelessDate
   """
-  Whether the release has been trashed.
+  Whether the release has been trashed. Set to true to trash, or null to restore.
   """
   trashed: Boolean
   """
@@ -42677,6 +42868,18 @@ type Subscription {
   """
   documentContentDraftUpdated: DocumentContentDraft!
   """
+  Triggered when a document content revision is created
+  """
+  documentContentRevisionCreated: DocumentContentRevision!
+  """
+  Triggered when a document content revision is deleted
+  """
+  documentContentRevisionDeleted: DocumentContentRevision!
+  """
+  Triggered when a document content revision is updated
+  """
+  documentContentRevisionUpdated: DocumentContentRevision!
+  """
   Triggered when a document content is updated
   """
   documentContentUpdated: DocumentContent!
@@ -43258,7 +43461,7 @@ type Team implements Node {
   """
   inheritWorkflowStatuses: Boolean!
   """
-  [ALPHA] Whether initiatives are shown in the team's sidebar.
+  [ALPHA] Whether team initiatives are enabled and shown in the team's sidebar.
   """
   initiativesEnabled: Boolean!
   """
@@ -44068,6 +44271,10 @@ input TeamFilter {
   """
   or: [TeamFilter!]
   """
+  Filters that the team's owners must satisfy.
+  """
+  owners: UserCollectionFilter
+  """
   Filters that the team's parent must satisfy.
   """
   parent: NullableTeamFilter
@@ -44091,6 +44298,10 @@ input TeamFilter {
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
+  """
+  [Internal] Filters that the team's members must satisfy. Alias of `members` matching the filter shape produced by the app; prefer `members`.
+  """
+  users: UserCollectionFilter
   """
   Comparator for the team visibility.
   """
@@ -48886,10 +49097,13 @@ enum WorkflowTrigger {
 }
 
 enum WorkflowTriggerType {
+  document
+  initiative
   issue
   project
   release
   schedule
+  team
 }
 
 enum WorkflowType {
