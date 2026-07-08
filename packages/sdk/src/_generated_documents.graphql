@@ -3952,7 +3952,7 @@ fragment Team on Team {
   updatedAt
   # The name of the team including its parent team name if it has one.
   displayName
-  # The number of initiatives led by this team that would be deleted along with it. Requires team owner or workspace admin permissions, as it counts initiatives the caller may not otherwise have access to.
+  # The number of initiatives led by this team that would be deleted along with it. Counts every led initiative, including ones not otherwise visible to the caller, to mirror what deleting the team cascades.
   ledInitiativeCount
   # The team's color.
   color
