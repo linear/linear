@@ -21460,7 +21460,7 @@ export class Team extends Request {
   public issueSortOrderDefaultToBottom: boolean;
   /** The team's unique key, used as a prefix in issue identifiers (e.g., 'ENG' in 'ENG-123') and in URLs. */
   public key: string;
-  /** The number of initiatives led by this team that would be deleted along with it. Requires team owner or workspace admin permissions, as it counts initiatives the caller may not otherwise have access to. */
+  /** The number of initiatives led by this team that would be deleted along with it. Counts every led initiative, including ones not otherwise visible to the caller, to mirror what deleting the team cascades. */
   public ledInitiativeCount: number;
   /** The team's name. */
   public name: string;

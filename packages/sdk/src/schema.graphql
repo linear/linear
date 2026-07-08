@@ -1421,6 +1421,10 @@ type AiConversation implements Node {
   """
   user: User
   """
+  [Internal] User-specific state for the AI conversation, including per-user read state.
+  """
+  userState: [AiConversationUserState!]!
+  """
   [Internal] The cron workflow definition that created this conversation.
   """
   workflowCronJobDefinition: WorkflowCronJobDefinition
@@ -2995,6 +2999,20 @@ type AiConversationUpdateEntityToolCall implements AiConversationBaseToolCall {
 type AiConversationUpdateEntityToolCallArgs {
   entities: [AiConversationSearchEntitiesToolCallResultEntities!]
   entity: AiConversationSearchEntitiesToolCallResultEntities
+}
+
+"""
+[Internal] Per-user state for an AI conversation, tracking read status and other user-specific data.
+"""
+type AiConversationUserState {
+  """
+  The time at which the user most recently viewed the conversation.
+  """
+  lastReadAt: DateTime
+  """
+  The ID of the user this state belongs to.
+  """
+  userId: String!
 }
 
 type AiConversationWebSearchToolCall implements AiConversationBaseToolCall {
@@ -4940,6 +4958,10 @@ input CommentCollectionFilter {
   """
   initiative: NullableInitiativeFilter
   """
+  Filters that the comment's initiative update must satisfy.
+  """
+  initiativeUpdate: NullableInitiativeUpdateFilter
+  """
   Filters that the comment's issue must satisfy.
   """
   issue: NullableIssueFilter
@@ -5105,6 +5127,10 @@ input CommentFilter {
   [Internal] Filters that the comment's initiative must satisfy.
   """
   initiative: NullableInitiativeFilter
+  """
+  Filters that the comment's initiative update must satisfy.
+  """
+  initiativeUpdate: NullableInitiativeUpdateFilter
   """
   Filters that the comment's issue must satisfy.
   """
@@ -27212,6 +27238,10 @@ input NullableCommentFilter {
   """
   initiative: NullableInitiativeFilter
   """
+  Filters that the comment's initiative update must satisfy.
+  """
+  initiativeUpdate: NullableInitiativeUpdateFilter
+  """
   Filters that the comment's issue must satisfy.
   """
   issue: NullableIssueFilter
@@ -27647,6 +27677,48 @@ input NullableInitiativeFilter {
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
+}
+
+"""
+Nullable initiative update filtering options.
+"""
+input NullableInitiativeUpdateFilter {
+  """
+  Compound filters, all of which need to be matched by the initiative update.
+  """
+  and: [NullableInitiativeUpdateFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Filters that the initiative update initiative must satisfy.
+  """
+  initiative: InitiativeFilter
+  """
+  Filter based on the existence of the relation.
+  """
+  null: Boolean
+  """
+  Compound filters, one of which need to be matched by the initiative update.
+  """
+  or: [NullableInitiativeUpdateFilter!]
+  """
+  Filters that the initiative updates reactions must satisfy.
+  """
+  reactions: ReactionCollectionFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+  """
+  Filters that the initiative update creator must satisfy.
+  """
+  user: UserFilter
 }
 
 """
@@ -43580,7 +43652,7 @@ type Team implements Node {
     orderBy: PaginationOrderBy
   ): IssueLabelConnection!
   """
-  The number of initiatives led by this team that would be deleted along with it. Requires team owner or workspace admin permissions, as it counts initiatives the caller may not otherwise have access to.
+  The number of initiatives led by this team that would be deleted along with it. Counts every led initiative, including ones not otherwise visible to the caller, to mirror what deleting the team cascades.
   """
   ledInitiativeCount: Int!
   """
