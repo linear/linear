@@ -2367,6 +2367,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the initiative connection query for the InitiativeLabel */
+    it("initiative.labels", async () => {
+      if (_initiative) {
+        const labels: L.InitiativeLabelConnection | undefined | null = await _initiative.labels();
+        expect(labels instanceof L.InitiativeLabelConnection);
+      } else {
+        console.warn("codegen-doc:print: No initiative found - cannot test _initiative.labels query");
+      }
+    });
+
     /** Test the initiative connection query for the EntityExternalLink */
     it("initiative.links", async () => {
       if (_initiative) {
@@ -4381,6 +4391,7 @@ describe("generated", () => {
       | L.PullRequestNotification
       | L.UsageAlertNotification
       | L.WelcomeMessageNotification
+      | L.WorkflowDefinitionNotification
       | undefined
       | null;
     let _notification_id: string | undefined | null;
@@ -4410,6 +4421,7 @@ describe("generated", () => {
           | L.PullRequestNotification
           | L.UsageAlertNotification
           | L.WelcomeMessageNotification
+          | L.WorkflowDefinitionNotification
           | undefined
           | null = await client.notification(_notification_id);
         _notification = notification;

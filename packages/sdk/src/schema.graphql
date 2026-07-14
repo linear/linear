@@ -704,7 +704,7 @@ type AgentSession implements Node {
   """
   updatedAt: DateTime!
   """
-  The URL to the agent session page in the Linear app. Null for direct chat sessions without an associated issue.
+  The URL to the agent session page in the Linear app. Null when no issue is associated.
   """
   url: String
   """
@@ -737,7 +737,7 @@ input AgentSessionCreateInput {
   """
   appUserId: String!
   """
-  [Internal] Serialized JSON representing the page contexts this session is related to. Used for direct chat sessions to provide context about the current page (e.g., Issue, Project).
+  [Internal] No longer supported.
   """
   context: JSONObject
   """
@@ -10314,6 +10314,10 @@ type EmailIntakeAddress implements Node {
   """
   issueCreatedAutoReplyEnabled: Boolean!
   """
+  The last time an inbound email was successfully ingested for this address.
+  """
+  lastUsedAt: DateTime
+  """
   The workspace that the email address is associated with.
   """
   organization: Organization!
@@ -12815,11 +12819,11 @@ type Initiative implements Node {
   """
   integrationsSettings: IntegrationsSettings
   """
-  [Internal] The IDs of the initiative labels associated with this initiative.
+  The IDs of the initiative labels associated with this initiative.
   """
   labelIds: [String!]!
   """
-  [Internal] Labels associated with this initiative.
+  Labels associated with this initiative.
   """
   labels(
     """
@@ -12946,11 +12950,11 @@ type Initiative implements Node {
   """
   previousIdentifiers: [String!]!
   """
-  [Internal] The priority of the initiative. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
+  The priority of the initiative. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   """
   priority: Int!
   """
-  [Internal] The sort order of the initiative within the workspace when ordered by priority.
+  The sort order of the initiative within the workspace when ordered by priority.
   """
   prioritySortOrder: Float!
   """
@@ -13179,7 +13183,7 @@ input InitiativeCollectionFilter {
   """
   initiativeUpdates: InitiativeUpdatesCollectionFilter
   """
-  [Internal] Filters that the initiative labels must satisfy.
+  Filters that the initiative labels must satisfy.
   """
   labels: InitiativeLabelCollectionFilter
   """
@@ -13203,7 +13207,7 @@ input InitiativeCollectionFilter {
   """
   owner: NullableUserFilter
   """
-  [Internal] Comparator for the initiative priority.
+  Comparator for the initiative priority.
   """
   priority: NullableNumberComparator
   """
@@ -13267,7 +13271,7 @@ input InitiativeCreateInput {
   """
   id: String
   """
-  [Internal] The identifiers of the initiative labels associated with this initiative.
+  The identifiers of the initiative labels associated with this initiative.
   """
   labelIds: [String!]
   """
@@ -13283,11 +13287,11 @@ input InitiativeCreateInput {
   """
   ownerId: String
   """
-  [Internal] The priority of the initiative. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
+  The priority of the initiative. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   """
   priority: Int
   """
-  [Internal] The sort order of the initiative within the workspace, when ordered by priority.
+  The sort order of the initiative within the workspace, when ordered by priority.
   """
   prioritySortOrder: Float
   """
@@ -13379,7 +13383,7 @@ input InitiativeFilter {
   """
   initiativeUpdates: InitiativeUpdatesCollectionFilter
   """
-  [Internal] Filters that the initiative labels must satisfy.
+  Filters that the initiative labels must satisfy.
   """
   labels: InitiativeLabelCollectionFilter
   """
@@ -13399,7 +13403,7 @@ input InitiativeFilter {
   """
   owner: NullableUserFilter
   """
-  [Internal] Comparator for the initiative priority.
+  Comparator for the initiative priority.
   """
   priority: NullableNumberComparator
   """
@@ -14819,7 +14823,7 @@ input InitiativeUpdateInput {
   """
   icon: String
   """
-  [Internal] The identifiers of the initiative labels associated with this initiative.
+  The identifiers of the initiative labels associated with this initiative.
   """
   labelIds: [String!]
   """
@@ -14835,11 +14839,11 @@ input InitiativeUpdateInput {
   """
   ownerId: String
   """
-  [Internal] The priority of the initiative. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
+  The priority of the initiative. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   """
   priority: Int
   """
-  [Internal] The sort order of the initiative within the workspace, when ordered by priority.
+  The sort order of the initiative within the workspace, when ordered by priority.
   """
   prioritySortOrder: Float
   """
@@ -15148,6 +15152,10 @@ type InitiativeWebhookPayload {
   """
   identifier: String
   """
+  The IDs of the initiative labels associated with this initiative.
+  """
+  labelIds: [String!]!
+  """
   The last update for this initiative.
   """
   lastUpdate: InitiativeUpdateChildWebhookPayload
@@ -15187,6 +15195,10 @@ type InitiativeWebhookPayload {
   Previous identifiers of the initiative.
   """
   previousIdentifiers: [String!]
+  """
+  The priority of the initiative. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
+  """
+  priority: Float!
   """
   The projects associated with the initiative.
   """
@@ -23203,7 +23215,7 @@ type Mutation {
     size: Int!
   ): UploadPayload!
   """
-  [Internal]Adds a label to an initiative.
+  Adds a label to an initiative.
   """
   initiativeAddLabel(
     """
@@ -23340,7 +23352,7 @@ type Mutation {
     input: InitiativeRelationUpdateInput!
   ): InitiativeRelationPayload!
   """
-  [Internal]Removes a label from an initiative.
+  Removes a label from an initiative.
   """
   initiativeRemoveLabel(
     """
@@ -26963,6 +26975,10 @@ input NotificationFilter {
   """
   or: [NotificationFilter!]
   """
+  Comparator for the notification subscription type.
+  """
+  subscriptionType: NotificationSubscriptionTypeComparator
+  """
   Comparator for the notification type.
   """
   type: StringComparator
@@ -27149,6 +27165,46 @@ type NotificationSubscriptionPayload {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+
+"""
+The delivery target type that caused a notification to be sent.
+"""
+enum NotificationSubscriptionType {
+  customView
+  customer
+  cycle
+  document
+  initiative
+  issue
+  label
+  oauthClientApproval
+  project
+  pullRequest
+  team
+  user
+}
+
+"""
+Comparator for notification subscription type.
+"""
+input NotificationSubscriptionTypeComparator {
+  """
+  Equals constraint.
+  """
+  eq: NotificationSubscriptionType
+  """
+  In-array constraint.
+  """
+  in: [NotificationSubscriptionType!]
+  """
+  Not-equals constraint.
+  """
+  neq: NotificationSubscriptionType
+  """
+  Not-in-array constraint.
+  """
+  nin: [NotificationSubscriptionType!]
 }
 
 """
@@ -27626,7 +27682,7 @@ input NullableInitiativeFilter {
   """
   initiativeUpdates: InitiativeUpdatesCollectionFilter
   """
-  [Internal] Filters that the initiative labels must satisfy.
+  Filters that the initiative labels must satisfy.
   """
   labels: InitiativeLabelCollectionFilter
   """
@@ -27650,7 +27706,7 @@ input NullableInitiativeFilter {
   """
   owner: NullableUserFilter
   """
-  [Internal] Comparator for the initiative priority.
+  Comparator for the initiative priority.
   """
   priority: NullableNumberComparator
   """
@@ -29323,6 +29379,10 @@ type Organization implements Node {
   """
   defaultFeedSummarySchedule: FeedSummarySchedule
   """
+  The default home view for members of the workspace who have not chosen their own default.
+  """
+  defaultHomeView: String
+  """
   The time at which deletion of the workspace was requested. Null if no deletion has been requested.
   """
   deletionRequestedAt: DateTime
@@ -30412,6 +30472,10 @@ input OrganizationUpdateInput {
   Default schedule for how often feed summaries are generated.
   """
   defaultFeedSummarySchedule: FeedSummarySchedule
+  """
+  The default home view for members of the workspace who have not chosen their own default.
+  """
+  defaultHomeView: String
   """
   Whether the workspace has enabled the feed feature.
   """
@@ -32780,6 +32844,10 @@ type ProjectLabel implements Node {
   """
   id: ID!
   """
+  [Internal] The original workspace or parent-team label that this label was inherited from. Null if the label is not inherited.
+  """
+  inheritedFrom: ProjectLabel
+  """
   Whether the label is a group. When true, this label acts as a container for child labels and cannot be directly applied to issues or projects. When false, the label can be directly applied.
   """
   isGroup: Boolean!
@@ -32844,6 +32912,10 @@ type ProjectLabel implements Node {
   The user who retired the label. Retired labels cannot be applied to new projects but remain on existing ones. Null if the label is active.
   """
   retiredBy: User
+  """
+  [Internal] The team that the label is scoped to. If null, the label is a workspace-level label available to all teams in the workspace.
+  """
+  team: Team
   """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -32938,7 +33010,7 @@ type ProjectLabelConnection {
 }
 
 """
-Input for creating a new project label. A name is required. The label is created as a workspace-level label available to all projects.
+Input for creating a new project label. A name is required. If no team is specified, the label is created as a workspace-level label available to all teams.
 """
 input ProjectLabelCreateInput {
   """
@@ -32969,6 +33041,10 @@ input ProjectLabelCreateInput {
   The time at which the label was retired. Set to null to restore a retired label.
   """
   retiredAt: DateTime
+  """
+  [Internal] The team associated with the label. If not given, the label will be associated with the entire workspace.
+  """
+  teamId: String
 }
 
 type ProjectLabelEdge {
@@ -35956,6 +36032,10 @@ type PullRequest implements Node {
   The time at which the pull request was opened.
   """
   openedAt: DateTime!
+  """
+  Emoji reaction summary for this pull request, grouped by emoji type. Each entry contains the emoji name, count, and the IDs of users who reacted.
+  """
+  reactionData: JSONObject!
   """
   The pull request's unique URL slug, used to construct human-readable URLs within the Linear app.
   """
@@ -42506,6 +42586,10 @@ input SlackPostSettingsInput {
 
 input SlackSettingsInput {
   """
+  Whether Linear Agent may respond in private channels for this Slack integration.
+  """
+  allowAgentInPrivateChannels: Boolean
+  """
   Whether Linear Agent should be enabled for this Slack integration.
   """
   enableAgent: Boolean
@@ -42541,6 +42625,10 @@ input SlackSettingsInput {
   Whether to show unfurls in the default style instead of Work Objects in Slack
   """
   shouldUseDefaultUnfurl: Boolean
+  """
+  Whether Linear Agent should automatically sync threads in private channels for this Slack integration.
+  """
+  syncAgentThreadsInPrivateChannels: Boolean
   """
   Slack workspace id
   """
@@ -46521,6 +46609,7 @@ enum UserFlagType {
   agentExamplesDismissed
   agentHomeHeadlineSeen
   agentHomePageNotice
+  agentLoopsPromoShown
   agentSharedSkillsPromoDismissed
   agentSharedSkillsSplashAnimationSeen
   all
@@ -47616,7 +47705,7 @@ type ViewPreferencesValues {
   """
   initiativeFieldInitiativeHealth: Boolean
   """
-  [Internal] Whether to show the initiative labels field.
+  Whether to show the initiative labels field.
   """
   initiativeFieldLabels: Boolean
   """
@@ -47628,7 +47717,7 @@ type ViewPreferencesValues {
   """
   initiativeFieldOwner: Boolean
   """
-  [Internal] Whether to show the initiative priority field.
+  Whether to show the initiative priority field.
   """
   initiativeFieldPriority: Boolean
   """
@@ -47656,11 +47745,11 @@ type ViewPreferencesValues {
   """
   initiativeGrouping: String
   """
-  [Internal] The label group ID used for initiative grouping.
+  The label group ID used for initiative grouping.
   """
   initiativeGroupingLabelGroupId: String
   """
-  [Internal] The initiative label group columns configuration.
+  The initiative label group columns configuration.
   """
   initiativeLabelGroupColumns: [ViewPreferencesInitiativeLabelGroupColumn!]
   """
@@ -48826,6 +48915,10 @@ type WorkflowDefinition implements Node {
   """
   name: String!
   """
+  The user who owns the workflow. If not defined, it means the creator should be considered as the owner.
+  """
+  owner: User
+  """
   The contextual project view associated with the workflow.
   """
   project: Project
@@ -48878,6 +48971,129 @@ type WorkflowDefinition implements Node {
   The type of user view to which this workflow's context is associated with.
   """
   userContextViewType: UserContextViewType
+}
+
+"""
+A notification related to an automation workflow definition (loop), such as runs that failed to start.
+"""
+type WorkflowDefinitionNotification implements Entity & Node & Notification {
+  """
+  The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event.
+  """
+  actor: User
+  """
+  [Internal] Notification actor initials if avatar is not available.
+  """
+  actorAvatarColor: String!
+  """
+  [Internal] Notification avatar URL.
+  """
+  actorAvatarUrl: String
+  """
+  [Internal] Notification actor initials if avatar is not available.
+  """
+  actorInitials: String
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The bot that caused the notification.
+  """
+  botActor: ActorBot
+  """
+  The category of the notification.
+  """
+  category: NotificationCategory!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent.
+  """
+  emailedAt: DateTime
+  """
+  The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member.
+  """
+  externalUserActor: ExternalUser
+  """
+  [Internal] Notifications with the same grouping key will be grouped together in the UI.
+  """
+  groupingKey: String!
+  """
+  [Internal] Priority of the notification with the same grouping key. Higher number means higher priority. If priority is the same, notifications should be sorted by `createdAt`.
+  """
+  groupingPriority: Float!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  [Internal] Inbox URL for the notification.
+  """
+  inboxUrl: String!
+  """
+  [Internal] Initiative update health for new updates.
+  """
+  initiativeUpdateHealth: String
+  """
+  [Internal] If notification actor was Linear.
+  """
+  isLinearActor: Boolean!
+  """
+  [Internal] Issue's status type for issue notifications.
+  """
+  issueStatusType: String
+  """
+  [Internal] Project update health for new updates.
+  """
+  projectUpdateHealth: String
+  """
+  The time at which the user marked the notification as read. Null if the notification is unread.
+  """
+  readAt: DateTime
+  """
+  The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed.
+  """
+  snoozedUntilAt: DateTime
+  """
+  [Internal] Notification subtitle.
+  """
+  subtitle: String!
+  """
+  [Internal] Notification title.
+  """
+  title: String!
+  """
+  Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated.
+  """
+  type: String!
+  """
+  The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed.
+  """
+  unsnoozedAt: DateTime
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  [Internal] URL to the target of the notification.
+  """
+  url: String!
+  """
+  The recipient user of this notification.
+  """
+  user: User!
+  """
+  The workflow definition (loop) related to the notification.
+  """
+  workflowDefinition: WorkflowDefinition!
+  """
+  Identifier of the associated workflow definition (loop).
+  """
+  workflowDefinitionId: String!
 }
 
 """
