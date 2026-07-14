@@ -568,7 +568,7 @@ export class AgentSession extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The URL to the agent session page in the Linear app. Null for direct chat sessions without an associated issue. */
+  /** The URL to the agent session page in the Linear app. Null when no issue is associated. */
   public url?: string | null;
   /** External links associated with this session. */
   public externalLinks: AgentSessionExternalLink[];
@@ -7515,6 +7515,7 @@ export class EmailIntakeAddress extends Request {
     this.issueCompletedAutoReplyEnabled = data.issueCompletedAutoReplyEnabled;
     this.issueCreatedAutoReply = data.issueCreatedAutoReply ?? undefined;
     this.issueCreatedAutoReplyEnabled = data.issueCreatedAutoReplyEnabled;
+    this.lastUsedAt = parseDate(data.lastUsedAt) ?? undefined;
     this.reopenOnReply = data.reopenOnReply;
     this.repliesEnabled = data.repliesEnabled;
     this.senderName = data.senderName ?? undefined;
@@ -7555,6 +7556,8 @@ export class EmailIntakeAddress extends Request {
   public issueCreatedAutoReply?: string | null;
   /** Whether the auto-reply for issue created is enabled. */
   public issueCreatedAutoReplyEnabled: boolean;
+  /** The last time an inbound email was successfully ingested for this address. */
+  public lastUsedAt?: Date | null;
   /** Whether to reopen completed or canceled issues when a substantive email reply is received. */
   public reopenOnReply: boolean;
   /** Whether email replies are enabled. */
@@ -9191,7 +9194,10 @@ export class Initiative extends Request {
     this.healthUpdatedAt = parseDate(data.healthUpdatedAt) ?? undefined;
     this.icon = data.icon ?? undefined;
     this.id = data.id;
+    this.labelIds = data.labelIds;
     this.name = data.name;
+    this.priority = data.priority;
+    this.prioritySortOrder = data.prioritySortOrder;
     this.slugId = data.slugId;
     this.sortOrder = data.sortOrder;
     this.startedAt = parseDate(data.startedAt) ?? undefined;
@@ -9233,8 +9239,14 @@ export class Initiative extends Request {
   public icon?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
+  /** The IDs of the initiative labels associated with this initiative. */
+  public labelIds: string[];
   /** The name of the initiative. */
   public name: string;
+  /** The priority of the initiative. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
+  public priority: number;
+  /** The sort order of the initiative within the workspace when ordered by priority. */
+  public prioritySortOrder: number;
   /** The initiative's unique URL slug, used to construct human-readable URLs. */
   public slugId: string;
   /** The sort order of the initiative within the workspace. */
@@ -9329,6 +9341,10 @@ export class Initiative extends Request {
   /** Initiative updates associated with the initiative. */
   public initiativeUpdates(variables?: Omit<L.Initiative_InitiativeUpdatesQueryVariables, "id">) {
     return new Initiative_InitiativeUpdatesQuery(this._request, this.id, variables).fetch(variables);
+  }
+  /** Labels associated with this initiative. */
+  public labels(variables?: Omit<L.Initiative_LabelsQueryVariables, "id">) {
+    return new Initiative_LabelsQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Links associated with the initiative. */
   public links(variables?: Omit<L.Initiative_LinksQueryVariables, "id">) {
@@ -10551,12 +10567,14 @@ export class InitiativeWebhookPayload {
     this.icon = data.icon ?? undefined;
     this.id = data.id;
     this.identifier = data.identifier ?? undefined;
+    this.labelIds = data.labelIds;
     this.lastUpdateId = data.lastUpdateId ?? undefined;
     this.leadTeamId = data.leadTeamId ?? undefined;
     this.name = data.name;
     this.organizationId = data.organizationId;
     this.ownerId = data.ownerId ?? undefined;
     this.previousIdentifiers = data.previousIdentifiers ?? undefined;
+    this.priority = data.priority;
     this.slugId = data.slugId;
     this.sortOrder = data.sortOrder;
     this.startedAt = data.startedAt ?? undefined;
@@ -10611,6 +10629,8 @@ export class InitiativeWebhookPayload {
   public id: string;
   /** The human-readable identifier of the initiative. */
   public identifier?: string | null;
+  /** The IDs of the initiative labels associated with this initiative. */
+  public labelIds: string[];
   /** The ID of the last update for this initiative. */
   public lastUpdateId?: string | null;
   /** The ID of the team that leads the initiative. */
@@ -10623,6 +10643,8 @@ export class InitiativeWebhookPayload {
   public ownerId?: string | null;
   /** Previous identifiers of the initiative. */
   public previousIdentifiers?: string[] | null;
+  /** The priority of the initiative. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
+  public priority: number;
   /** The unique slug identifier of the initiative. */
   public slugId: string;
   /** The sort order of the initiative within the organization. */
@@ -14530,6 +14552,7 @@ export class NotificationConnection extends Connection<
   | PullRequestNotification
   | UsageAlertNotification
   | WelcomeMessageNotification
+  | WorkflowDefinitionNotification
   | Notification
 > {
   public constructor(
@@ -14550,6 +14573,7 @@ export class NotificationConnection extends Connection<
           | PullRequestNotification
           | UsageAlertNotification
           | WelcomeMessageNotification
+          | WorkflowDefinitionNotification
           | Notification
         >
       | undefined
@@ -14585,6 +14609,8 @@ export class NotificationConnection extends Connection<
             return new UsageAlertNotification(request, node as L.UsageAlertNotificationFragment);
           case "WelcomeMessageNotification":
             return new WelcomeMessageNotification(request, node as L.WelcomeMessageNotificationFragment);
+          case "WorkflowDefinitionNotification":
+            return new WorkflowDefinitionNotification(request, node as L.WorkflowDefinitionNotificationFragment);
 
           default:
             return new Notification(request, node);
@@ -15345,6 +15371,7 @@ export class Organization extends Request {
     this.customerCount = data.customerCount;
     this.customersConfiguration = data.customersConfiguration;
     this.customersEnabled = data.customersEnabled;
+    this.defaultHomeView = data.defaultHomeView ?? undefined;
     this.deletionRequestedAt = parseDate(data.deletionRequestedAt) ?? undefined;
     this.feedEnabled = data.feedEnabled;
     this.fiscalYearStartMonth = data.fiscalYearStartMonth;
@@ -15412,6 +15439,8 @@ export class Organization extends Request {
   public customersConfiguration: L.Scalars["JSONObject"];
   /** Whether the Customers feature is enabled and accessible for the workspace based on the current plan. */
   public customersEnabled: boolean;
+  /** The default home view for members of the workspace who have not chosen their own default. */
+  public defaultHomeView?: string | null;
   /** The time at which deletion of the workspace was requested. Null if no deletion has been requested. */
   public deletionRequestedAt?: Date | null;
   /** Whether the activity feed feature is enabled for the workspace. */
@@ -23766,14 +23795,17 @@ export class ViewPreferencesValues extends Request {
     this.initiativeFieldDescription = data.initiativeFieldDescription ?? undefined;
     this.initiativeFieldHealth = data.initiativeFieldHealth ?? undefined;
     this.initiativeFieldInitiativeHealth = data.initiativeFieldInitiativeHealth ?? undefined;
+    this.initiativeFieldLabels = data.initiativeFieldLabels ?? undefined;
     this.initiativeFieldLeadTeam = data.initiativeFieldLeadTeam ?? undefined;
     this.initiativeFieldOwner = data.initiativeFieldOwner ?? undefined;
+    this.initiativeFieldPriority = data.initiativeFieldPriority ?? undefined;
     this.initiativeFieldProjects = data.initiativeFieldProjects ?? undefined;
     this.initiativeFieldStartDate = data.initiativeFieldStartDate ?? undefined;
     this.initiativeFieldStatus = data.initiativeFieldStatus ?? undefined;
     this.initiativeFieldTargetDate = data.initiativeFieldTargetDate ?? undefined;
     this.initiativeFieldTeams = data.initiativeFieldTeams ?? undefined;
     this.initiativeGrouping = data.initiativeGrouping ?? undefined;
+    this.initiativeGroupingLabelGroupId = data.initiativeGroupingLabelGroupId ?? undefined;
     this.initiativesViewOrdering = data.initiativesViewOrdering ?? undefined;
     this.issueGrouping = data.issueGrouping ?? undefined;
     this.issueGroupingLabelGroupId = data.issueGroupingLabelGroupId ?? undefined;
@@ -23909,6 +23941,9 @@ export class ViewPreferencesValues extends Request {
     this.viewOrdering = data.viewOrdering ?? undefined;
     this.viewOrderingDirection = data.viewOrderingDirection ?? undefined;
     this.workspaceMembersViewOrdering = data.workspaceMembersViewOrdering ?? undefined;
+    this.initiativeLabelGroupColumns = data.initiativeLabelGroupColumns
+      ? data.initiativeLabelGroupColumns.map(node => new ViewPreferencesInitiativeLabelGroupColumn(request, node))
+      : undefined;
     this.projectLabelGroupColumns = data.projectLabelGroupColumns
       ? data.projectLabelGroupColumns.map(node => new ViewPreferencesProjectLabelGroupColumn(request, node))
       : undefined;
@@ -24078,10 +24113,14 @@ export class ViewPreferencesValues extends Request {
   public initiativeFieldHealth?: boolean | null;
   /** Whether to show the initiative health field. */
   public initiativeFieldInitiativeHealth?: boolean | null;
+  /** Whether to show the initiative labels field. */
+  public initiativeFieldLabels?: boolean | null;
   /** Whether to show the initiative lead team field. */
   public initiativeFieldLeadTeam?: boolean | null;
   /** Whether to show the initiative owner field. */
   public initiativeFieldOwner?: boolean | null;
+  /** Whether to show the initiative priority field. */
+  public initiativeFieldPriority?: boolean | null;
   /** Whether to show the initiative projects field. */
   public initiativeFieldProjects?: boolean | null;
   /** Whether to show the initiative start date field. */
@@ -24094,6 +24133,8 @@ export class ViewPreferencesValues extends Request {
   public initiativeFieldTeams?: boolean | null;
   /** The initiative grouping. */
   public initiativeGrouping?: string | null;
+  /** The label group ID used for initiative grouping. */
+  public initiativeGroupingLabelGroupId?: string | null;
   /** The initiative ordering. */
   public initiativesViewOrdering?: string | null;
   /** The issue grouping. */
@@ -24364,6 +24405,8 @@ export class ViewPreferencesValues extends Request {
   public viewOrderingDirection?: string | null;
   /** The workspace members view ordering. */
   public workspaceMembersViewOrdering?: string | null;
+  /** The initiative label group columns configuration. */
+  public initiativeLabelGroupColumns?: ViewPreferencesInitiativeLabelGroupColumn[] | null;
   /** The project label group columns configuration. */
   public projectLabelGroupColumns?: ViewPreferencesProjectLabelGroupColumn[] | null;
 }
@@ -24769,6 +24812,7 @@ export class WorkflowDefinition extends Request {
   private _initiative?: L.WorkflowDefinitionFragment["initiative"];
   private _label?: L.WorkflowDefinitionFragment["label"];
   private _lastUpdatedBy?: L.WorkflowDefinitionFragment["lastUpdatedBy"];
+  private _owner?: L.WorkflowDefinitionFragment["owner"];
   private _project?: L.WorkflowDefinitionFragment["project"];
   private _team?: L.WorkflowDefinitionFragment["team"];
   private _user?: L.WorkflowDefinitionFragment["user"];
@@ -24805,6 +24849,7 @@ export class WorkflowDefinition extends Request {
     this._initiative = data.initiative ?? undefined;
     this._label = data.label ?? undefined;
     this._lastUpdatedBy = data.lastUpdatedBy ?? undefined;
+    this._owner = data.owner ?? undefined;
     this._project = data.project ?? undefined;
     this._team = data.team ?? undefined;
     this._user = data.user ?? undefined;
@@ -24909,6 +24954,14 @@ export class WorkflowDefinition extends Request {
   public get lastUpdatedById(): string | undefined {
     return this._lastUpdatedBy?.id;
   }
+  /** The user who owns the workflow. If not defined, it means the creator should be considered as the owner. */
+  public get owner(): LinearFetch<User> | undefined {
+    return this._owner?.id ? new UserQuery(this._request).fetch(this._owner?.id) : undefined;
+  }
+  /** The ID of user who owns the workflow. if not defined, it means the creator should be considered as the owner. */
+  public get ownerId(): string | undefined {
+    return this._owner?.id;
+  }
   /** The contextual project view associated with the workflow. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
@@ -24930,6 +24983,93 @@ export class WorkflowDefinition extends Request {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
   /** The ID of contextual user view associated with the workflow. */
+  public get userId(): string | undefined {
+    return this._user?.id;
+  }
+}
+/**
+ * A notification related to an automation workflow definition (loop), such as runs that failed to start.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.WorkflowDefinitionNotificationFragment response data
+ */
+export class WorkflowDefinitionNotification extends Request {
+  private _actor?: L.WorkflowDefinitionNotificationFragment["actor"];
+  private _externalUserActor?: L.WorkflowDefinitionNotificationFragment["externalUserActor"];
+  private _user: L.WorkflowDefinitionNotificationFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.WorkflowDefinitionNotificationFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.emailedAt = parseDate(data.emailedAt) ?? undefined;
+    this.id = data.id;
+    this.readAt = parseDate(data.readAt) ?? undefined;
+    this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
+    this.type = data.type;
+    this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.workflowDefinitionId = data.workflowDefinitionId;
+    this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.workflowDefinition = new WorkflowDefinition(request, data.workflowDefinition);
+    this.category = data.category;
+    this._actor = data.actor ?? undefined;
+    this._externalUserActor = data.externalUserActor ?? undefined;
+    this._user = data.user;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent. */
+  public emailedAt?: Date | null;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The time at which the user marked the notification as read. Null if the notification is unread. */
+  public readAt?: Date | null;
+  /** The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed. */
+  public snoozedUntilAt?: Date | null;
+  /** Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated. */
+  public type: string;
+  /** The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed. */
+  public unsnoozedAt?: Date | null;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** Identifier of the associated workflow definition (loop). */
+  public workflowDefinitionId: string;
+  /** The bot that caused the notification. */
+  public botActor?: ActorBot | null;
+  /** The workflow definition (loop) related to the notification. */
+  public workflowDefinition: WorkflowDefinition;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
+  /** The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
+  public get actor(): LinearFetch<User> | undefined {
+    return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
+  }
+  /** The ID of user that caused the notification. null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
+  public get actorId(): string | undefined {
+    return this._actor?.id;
+  }
+  /** The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member. */
+  public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
+    return this._externalUserActor?.id
+      ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
+      : undefined;
+  }
+  /** The ID of external user that caused the notification. populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like slack or github) rather than a linear workspace member. */
+  public get externalUserActorId(): string | undefined {
+    return this._externalUserActor?.id;
+  }
+  /** The recipient user of this notification. */
+  public get user(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._user.id);
+  }
+  /** The ID of recipient user of this notification. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
@@ -27695,6 +27835,7 @@ export class NotificationQuery extends Request {
     | PullRequestNotification
     | UsageAlertNotification
     | WelcomeMessageNotification
+    | WorkflowDefinitionNotification
     | Notification
   > {
     const response = await this._request<L.NotificationQuery, L.NotificationQueryVariables>(
@@ -27730,6 +27871,8 @@ export class NotificationQuery extends Request {
         return new UsageAlertNotification(this._request, data as L.UsageAlertNotificationFragment);
       case "WelcomeMessageNotification":
         return new WelcomeMessageNotification(this._request, data as L.WelcomeMessageNotificationFragment);
+      case "WorkflowDefinitionNotification":
+        return new WorkflowDefinitionNotification(this._request, data as L.WorkflowDefinitionNotificationFragment);
 
       default:
         return new Notification(this._request, data);
@@ -32576,6 +32719,37 @@ export class ImportFileUploadMutation extends Request {
 }
 
 /**
+ * A fetchable InitiativeAddLabel Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class InitiativeAddLabelMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the InitiativeAddLabel mutation and return a InitiativePayload
+   *
+   * @param id - required id to pass to initiativeAddLabel
+   * @param labelId - required labelId to pass to initiativeAddLabel
+   * @returns parsed response from InitiativeAddLabelMutation
+   */
+  public async fetch(id: string, labelId: string): LinearFetch<InitiativePayload> {
+    const response = await this._request<L.InitiativeAddLabelMutation, L.InitiativeAddLabelMutationVariables>(
+      L.InitiativeAddLabelDocument.toString(),
+      {
+        id,
+        labelId,
+      }
+    );
+    const data = response.initiativeAddLabel;
+
+    return new InitiativePayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable ArchiveInitiative Mutation
  *
  * @param request - function to call the graphql client
@@ -32895,6 +33069,37 @@ export class UpdateInitiativeRelationMutation extends Request {
     const data = response.initiativeRelationUpdate;
 
     return new InitiativeRelationPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable InitiativeRemoveLabel Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class InitiativeRemoveLabelMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the InitiativeRemoveLabel mutation and return a InitiativePayload
+   *
+   * @param id - required id to pass to initiativeRemoveLabel
+   * @param labelId - required labelId to pass to initiativeRemoveLabel
+   * @returns parsed response from InitiativeRemoveLabelMutation
+   */
+  public async fetch(id: string, labelId: string): LinearFetch<InitiativePayload> {
+    const response = await this._request<L.InitiativeRemoveLabelMutation, L.InitiativeRemoveLabelMutationVariables>(
+      L.InitiativeRemoveLabelDocument.toString(),
+      {
+        id,
+        labelId,
+      }
+    );
+    const data = response.initiativeRemoveLabel;
+
+    return new InitiativePayload(this._request, data);
   }
 }
 
@@ -41541,6 +41746,57 @@ export class Initiative_InitiativeUpdatesQuery extends Request {
 }
 
 /**
+ * A fetchable Initiative_Labels Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to initiative
+ * @param variables - variables without 'id' to pass into the Initiative_LabelsQuery
+ */
+export class Initiative_LabelsQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Initiative_LabelsQueryVariables, "id">;
+
+  public constructor(request: LinearRequest, id: string, variables?: Omit<L.Initiative_LabelsQueryVariables, "id">) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Initiative_Labels query and return a InitiativeLabelConnection
+   *
+   * @param variables - variables without 'id' to pass into the Initiative_LabelsQuery
+   * @returns parsed response from Initiative_LabelsQuery
+   */
+  public async fetch(
+    variables?: Omit<L.Initiative_LabelsQueryVariables, "id">
+  ): LinearFetch<InitiativeLabelConnection> {
+    const response = await this._request<L.Initiative_LabelsQuery, L.Initiative_LabelsQueryVariables>(
+      L.Initiative_LabelsDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.initiative.labels;
+
+    return new InitiativeLabelConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable Initiative_Links Query
  *
  * @param request - function to call the graphql client
@@ -48975,6 +49231,7 @@ export class LinearSdk extends Request {
     | PullRequestNotification
     | UsageAlertNotification
     | WelcomeMessageNotification
+    | WorkflowDefinitionNotification
     | Notification
   > {
     return new NotificationQuery(this._request).fetch(id);
@@ -50567,6 +50824,16 @@ export class LinearSdk extends Request {
     return new ImportFileUploadMutation(this._request).fetch(contentType, filename, size, variables);
   }
   /**
+   * Adds a label to an initiative.
+   *
+   * @param id - required id to pass to initiativeAddLabel
+   * @param labelId - required labelId to pass to initiativeAddLabel
+   * @returns InitiativePayload
+   */
+  public initiativeAddLabel(id: string, labelId: string): LinearFetch<InitiativePayload> {
+    return new InitiativeAddLabelMutation(this._request).fetch(id, labelId);
+  }
+  /**
    * Archives an initiative.
    *
    * @param id - required id to pass to archiveInitiative
@@ -50669,6 +50936,16 @@ export class LinearSdk extends Request {
     input: L.InitiativeRelationUpdateInput
   ): LinearFetch<InitiativeRelationPayload> {
     return new UpdateInitiativeRelationMutation(this._request).fetch(id, input);
+  }
+  /**
+   * Removes a label from an initiative.
+   *
+   * @param id - required id to pass to initiativeRemoveLabel
+   * @param labelId - required labelId to pass to initiativeRemoveLabel
+   * @returns InitiativePayload
+   */
+  public initiativeRemoveLabel(id: string, labelId: string): LinearFetch<InitiativePayload> {
+    return new InitiativeRemoveLabelMutation(this._request).fetch(id, labelId);
   }
   /**
    * Associates a project with an initiative. A project can only appear once in an initiative hierarchy.
@@ -53031,6 +53308,7 @@ export {
   LinearAgentTrustedSourcesMode,
   NotificationCategory,
   NotificationChannel,
+  NotificationSubscriptionType,
   OAuthApplicationDistribution,
   OAuthApplicationGrantType,
   OAuthClientApprovalStatus,

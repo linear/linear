@@ -1519,6 +1519,10 @@ fragment Notification on Notification {
   ... on WelcomeMessageNotification {
     ...WelcomeMessageNotification
   }
+
+  ... on WorkflowDefinitionNotification {
+    ...WorkflowDefinitionNotification
+  }
 }
 
 # A notification related to a customer need (request), such as creation, resolution, or being marked
@@ -1991,6 +1995,55 @@ fragment OauthClientApprovalNotification on OauthClientApprovalNotification {
   # The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event.
   actor {
     id
+  }
+}
+
+# A notification related to an automation workflow definition (loop), such as runs that failed to
+# start.
+fragment WorkflowDefinitionNotification on WorkflowDefinitionNotification {
+  __typename
+  # Identifier of the associated workflow definition (loop).
+  workflowDefinitionId
+  # Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated.
+  type
+  # The bot that caused the notification.
+  botActor {
+    ...ActorBot
+  }
+  # The category of the notification.
+  category
+  # The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member.
+  externalUserActor {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The recipient user of this notification.
+  user {
+    id
+  }
+  # The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed.
+  unsnoozedAt
+  # The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent.
+  emailedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the user marked the notification as read. Null if the notification is unread.
+  readAt
+  # The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed.
+  snoozedUntilAt
+  # The unique identifier of the entity.
+  id
+  # The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event.
+  actor {
+    id
+  }
+  # The workflow definition (loop) related to the notification.
+  workflowDefinition {
+    ...WorkflowDefinition
   }
 }
 
@@ -3532,7 +3585,7 @@ fragment AgentSession on AgentSession {
   sourceMetadata
   # The URL of an external agent-hosted page associated with this session.
   externalLink
-  # The URL to the agent session page in the Linear app. Null for direct chat sessions without an associated issue.
+  # The URL to the agent session page in the Linear app. Null when no issue is associated.
   url
   # The agent session's unique URL slug.
   slugId
@@ -4993,6 +5046,8 @@ fragment Organization on Organization {
   initiativeUpdateRemindersDay
   # The day of the week on which project update reminders are sent.
   projectUpdateRemindersDay
+  # The default home view for members of the workspace who have not chosen their own default.
+  defaultHomeView
   # The feature release channel the workspace belongs to, which controls access to pre-release features.
   releaseChannel
   # The frequency in weeks at which to prompt for initiative updates. When null, initiative update reminders are disabled. Valid values range from 0 to 8.
@@ -5470,6 +5525,10 @@ fragment WorkflowDefinition on WorkflowDefinition {
   lastUpdatedBy {
     id
   }
+  # The user who owns the workflow. If not defined, it means the creator should be considered as the owner.
+  owner {
+    id
+  }
   # The workflow definition's unique URL slug.
   slugId
   # Whether the workflow is enabled and will execute when its trigger conditions are met.
@@ -5498,6 +5557,8 @@ fragment EmailIntakeAddress on EmailIntakeAddress {
   issueCreatedAutoReply
   # The email address used to forward emails to the intake address.
   forwardingEmailAddress
+  # The last time an inbound email was successfully ingested for this address.
+  lastUsedAt
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
@@ -5805,6 +5866,8 @@ fragment Initiative on Initiative {
   integrationsSettings {
     id
   }
+  # The IDs of the initiative labels associated with this initiative.
+  labelIds
   # The content of the initiative description.
   documentContent {
     ...DocumentContent
@@ -5842,10 +5905,14 @@ fragment Initiative on Initiative {
   name
   # The overall health of the initiative, derived from the most recent initiative update. Possible values are onTrack, atRisk, or offTrack. Null if no health has been reported.
   health
+  # The priority of the initiative. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
+  priority
   # The resolution of the initiative's estimated completion date, indicating whether it refers to a specific day, week, month, quarter, or year.
   targetDateResolution
   # The resolution of the reminder frequency.
   frequencyResolution
+  # The sort order of the initiative within the workspace when ordered by priority.
+  prioritySortOrder
   # The sort order of the initiative within the workspace.
   sortOrder
   # The time at which the entity was archived. Null if the entity has not been archived.
@@ -7986,6 +8053,8 @@ fragment InitiativeWebhookPayload on InitiativeWebhookPayload {
   creatorId
   # The ID of the user who owns the initiative.
   ownerId
+  # The IDs of the initiative labels associated with this initiative.
+  labelIds
   # The URL of the initiative.
   url
   # The color of the initiative.
@@ -8022,6 +8091,8 @@ fragment InitiativeWebhookPayload on InitiativeWebhookPayload {
   parentInitiatives {
     ...InitiativeChildWebhookPayload
   }
+  # The priority of the initiative. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
+  priority
   # The projects associated with the initiative.
   projects {
     ...ProjectChildWebhookPayload
@@ -9084,6 +9155,10 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   inboxViewOrdering
   # The initiative grouping.
   initiativeGrouping
+  # The initiative label group columns configuration.
+  initiativeLabelGroupColumns {
+    ...ViewPreferencesInitiativeLabelGroupColumn
+  }
   # The initiative ordering.
   initiativesViewOrdering
   # The issue grouping.
@@ -9094,6 +9169,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   viewOrdering
   # The issue sub-grouping.
   issueSubGrouping
+  # The label group ID used for initiative grouping.
+  initiativeGroupingLabelGroupId
   # The label group ID used for issue grouping.
   issueGroupingLabelGroupId
   # The label group ID used for issue sub-grouping.
@@ -9274,10 +9351,14 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDescription
   # Whether to show the initiative health field.
   initiativeFieldInitiativeHealth
+  # Whether to show the initiative labels field.
+  initiativeFieldLabels
   # Whether to show the initiative lead team field.
   initiativeFieldLeadTeam
   # Whether to show the initiative owner field.
   initiativeFieldOwner
+  # Whether to show the initiative priority field.
+  initiativeFieldPriority
   # Whether to show the initiative projects field.
   initiativeFieldProjects
   # Whether to show the initiative start date field.
@@ -15441,6 +15522,38 @@ query initiative_initiativeUpdates(
       orderBy: $orderBy
     ) {
       ...InitiativeUpdateConnection
+    }
+  }
+}
+# Labels associated with this initiative.
+query initiative_labels(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned initiative labels.
+  $filter: InitiativeLabelFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  initiative(id: $id) {
+    labels(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...InitiativeLabelConnection
     }
   }
 }
@@ -22079,6 +22192,17 @@ mutation importFileUpload(
     ...UploadPayload
   }
 }
+# Adds a label to an initiative.
+mutation initiativeAddLabel(
+  # The identifier of the initiative to add the label to.
+  $id: String!
+  # The identifier of the label to add.
+  $labelId: String!
+) {
+  initiativeAddLabel(id: $id, labelId: $labelId) {
+    ...InitiativePayload
+  }
+}
 # Archives an initiative.
 mutation archiveInitiative(
   # The identifier of the initiative to archive.
@@ -22182,6 +22306,17 @@ mutation updateInitiativeRelation(
 ) {
   initiativeRelationUpdate(id: $id, input: $input) {
     ...InitiativeRelationPayload
+  }
+}
+# Removes a label from an initiative.
+mutation initiativeRemoveLabel(
+  # The identifier of the initiative to remove the label from.
+  $id: String!
+  # The identifier of the label to remove.
+  $labelId: String!
+) {
+  initiativeRemoveLabel(id: $id, labelId: $labelId) {
+    ...InitiativePayload
   }
 }
 # Associates a project with an initiative. A project can only appear once in an initiative hierarchy.
