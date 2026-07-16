@@ -25313,6 +25313,15 @@ type Mutation {
     input: OrganizationUpdateInput!
   ): OrganizationPayload!
   """
+  [INTERNAL] Submits a Startup Program partner application from the website, creating a triage issue for the startup team.
+  """
+  partnerApplicationCreate(
+    """
+    The partner application to submit.
+    """
+    input: PartnerApplicationCreateInput!
+  ): ContactPayload!
+  """
   [INTERNAL] Finish passkey login process.
   """
   passkeyLoginFinish(
@@ -31091,6 +31100,80 @@ input PartialNotificationChannelPreferencesInput {
   slack: Boolean
 }
 
+"""
+[INTERNAL] Input for a Startup Program partner application submitted from the website.
+"""
+input PartnerApplicationCreateInput {
+  """
+  Number of cohorts run per year (accelerators and programs).
+  """
+  cohortsPerYear: String
+  """
+  Number of companies per cohort (accelerators and programs).
+  """
+  companiesPerCohort: String
+  """
+  Whether the applicant confirmed the distribution terms.
+  """
+  consent: Boolean!
+  """
+  One-line description of what the organization does.
+  """
+  description: String!
+  """
+  Channels the organization will use to distribute the offer.
+  """
+  distributionChannels: [String!]
+  """
+  Business email of the applicant.
+  """
+  email: String!
+  """
+  Full name of the applicant.
+  """
+  fullName: String!
+  """
+  Stages the firm primarily invests at (venture capital firms).
+  """
+  investmentStages: [String!]
+  """
+  Number of active members or startups in the network (communities).
+  """
+  networkSize: String
+  """
+  Whether the organization already offers software perks from other companies.
+  """
+  offersSoftwarePerks: String
+  """
+  Name of the partner organization.
+  """
+  organizationName: String!
+  """
+  Type of the partner organization (e.g., venture capital firm, accelerator).
+  """
+  organizationType: String!
+  """
+  Website of the partner organization.
+  """
+  organizationWebsite: String!
+  """
+  Which other software perks the organization offers, when applicable.
+  """
+  otherPerks: String
+  """
+  Number of active portfolio companies (venture capital firms).
+  """
+  portfolioCompanies: String
+  """
+  Primary countries or regions the organization operates in.
+  """
+  region: String!
+  """
+  The applicant's role or title at the organization.
+  """
+  role: String!
+}
+
 type PasskeyLoginStartResponse {
   """
   The passkey authentication options to pass to the WebAuthn API.
@@ -36263,7 +36346,7 @@ enum PullRequestCheckPresentation {
 """
 type PullRequestCommit {
   """
-  Number of additions in this commit.
+  Number of additions in this commit. 0 when the hosting provider did not report per-commit diff stats.
   """
   additions: Float!
   """
@@ -36283,7 +36366,7 @@ type PullRequestCommit {
   """
   committedAt: String!
   """
-  Number of deletions in this commit.
+  Number of deletions in this commit. 0 when the hosting provider did not report per-commit diff stats.
   """
   deletions: Float!
   """
