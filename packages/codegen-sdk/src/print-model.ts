@@ -233,9 +233,9 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
             const fieldQueryName = `${printPascal(field.query.name.value)}Query`;
             const allOptional = field.args.every(arg => arg.optional);
             const optionalIdArg = field.args.find(arg => arg.name === "id" && arg.optional);
-            const fieldQueryArgs = (allOptional && optionalIdArg ? [optionalIdArg] : field.args)?.map(
-              arg => `this._${field.name}${field.nonNull ? "" : "?"}.${arg.name}`
-            );
+            const fieldQueryArgs = (
+              allOptional && optionalIdArg ? [optionalIdArg] : field.args.filter(arg => !arg.optional)
+            ).map(arg => `this._${field.name}${field.nonNull ? "" : "?"}.${arg.name}`);
             const idGetterName = `${field.name}Id`;
             const skipIdGetter = publicFieldNames.has(idGetterName);
             const shouldGeneratePrivateField =

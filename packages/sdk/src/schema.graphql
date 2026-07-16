@@ -541,6 +541,28 @@ type AgentActivityWebhookPayload {
 }
 
 """
+The outcome of retrying a loop run blocked by its trusted-source policy.
+"""
+type AgentAutomationRetryResolution {
+  """
+  Identifier of the replacement AI conversation. Null when no replacement run was scheduled.
+  """
+  aiConversationId: String
+  """
+  Whether a replacement run was scheduled or the loop could no longer be retried.
+  """
+  status: AgentAutomationRetryResolutionStatus!
+}
+
+"""
+The outcome of reconsidering a loop run blocked by its trusted-source policy.
+"""
+enum AgentAutomationRetryResolutionStatus {
+  notScheduled
+  scheduled
+}
+
+"""
 A session representing an AI coding agent's work on an issue or conversation. Agent sessions track the lifecycle of an agent's engagement, from creation through active work to completion or dismissal. Each session is associated with an agent user (the bot), optionally a human creator, an issue, and a comment thread where the agent posts updates. Sessions contain activities that record the agent's observable steps and can be linked to pull requests created during the work.
 """
 type AgentSession implements Node {
@@ -719,7 +741,7 @@ type AgentSession implements Node {
     The diff's content hash, from the session's `workspaceDiff`.
     """
     contentHash: String!
-  ): [AgentSessionWorkspaceDiffFile!]
+  ): [AgentSessionWorkspaceDiffFile!] @deprecated(reason: "Use Diff.files instead.")
 }
 
 type AgentSessionConnection {
@@ -1767,6 +1789,7 @@ enum AiConversationEntityCardWidgetArgsType {
   IssueDraft
   Project
   ProjectDraft
+  ProjectMilestone
   ProjectUpdate
   PullRequest
   Release
@@ -1851,6 +1874,7 @@ enum AiConversationEntityListWidgetArgsEntitiesType {
   IssueDraft
   Project
   ProjectDraft
+  ProjectMilestone
   ProjectUpdate
   PullRequest
   Release
@@ -1881,6 +1905,10 @@ type AiConversationErrorPart implements AiConversationBasePart {
   The metadata of the part.
   """
   metadata: AiConversationPartMetadata!
+  """
+  The outcome of retrying this error's loop run. Null when the run has not been reconsidered.
+  """
+  retryResolution: AgentAutomationRetryResolution
   """
   The type of the part.
   """
@@ -8964,6 +8992,113 @@ type DeletePayload implements ArchivePayload {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+
+"""
+[Internal] A first-class code diff. Starts as the live working-tree state of a coding session and is promoted to a review by linking it to a pull request, while continuing to represent local, uncommitted changes.
+"""
+type Diff implements Node {
+  """
+  [Internal] The total number of added lines across the diff.
+  """
+  additions: Float!
+  """
+  The agent session the diff belongs to.
+  """
+  agentSession: AgentSession
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  [Internal] The opaque content hash identifying the diff's content in code.storage.
+  """
+  contentHash: String!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user responsible for the diff.
+  """
+  creator: User
+  """
+  [Internal] The total number of deleted lines across the diff.
+  """
+  deletions: Float!
+  """
+  [Internal] The number of changed files in the diff.
+  """
+  fileCount: Float!
+  """
+  [Internal] Per-file metadata for the diff. Served behind a repository-read-access gate (the synced row carries only aggregate counts); null when the requester lacks repository access or the diff is empty.
+  """
+  files: [DiffFile!]
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The workspace the diff belongs to.
+  """
+  organization: Organization!
+  """
+  The pull request the diff was promoted to when opened for review.
+  """
+  pullRequest: PullRequest
+  """
+  [Internal] The diff's unique URL slug.
+  """
+  slugId: String!
+  """
+  [Internal] Whether oversized files were omitted when the diff was computed.
+  """
+  truncated: Boolean!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+"""
+[Internal] One changed file in a diff.
+"""
+type DiffFile {
+  """
+  Lines added in this file.
+  """
+  additions: Int!
+  """
+  Lines removed in this file.
+  """
+  deletions: Int!
+  """
+  Previous path, when the file was renamed or copied.
+  """
+  oldPath: String
+  """
+  Path of the changed file (the new path, for renames).
+  """
+  path: String!
+  """
+  The kind of change for this file.
+  """
+  state: DiffFileState!
+}
+
+"""
+[Internal] The kind of change for a file in a diff.
+"""
+enum DiffFileState {
+  added
+  copied
+  deleted
+  modified
+  renamed
+  type_changed
+  unknown
+  unmerged
 }
 
 """
@@ -29587,6 +29722,10 @@ type Organization implements Node {
   projectUpdatesReminderFrequency: ProjectUpdateReminderFrequency!
     @deprecated(reason: "Use organization.projectUpdatesReminderFrequencyInWeeks instead")
   """
+  How Linear suggests and links issues for pull requests that have none linked: 'off', 'suggest', or 'autoOnMerge'.
+  """
+  pullRequestIssueMode: String!
+  """
   Whether the workspace generates AI Pull Request guides for new pull requests.
   """
   pullRequestTourEnabled: Boolean!
@@ -30556,6 +30695,10 @@ input OrganizationUpdateInput {
   The hour at which project updates are sent.
   """
   projectUpdateRemindersHour: Float
+  """
+  How Linear suggests and links issues for pull requests that have none linked: 'off', 'suggest', or 'autoOnMerge'.
+  """
+  pullRequestIssueMode: String
   """
   Whether the workspace generates AI Pull Request guides for new pull requests.
   """
@@ -37126,6 +37269,15 @@ type Query {
     orderBy: PaginationOrderBy
   ): CycleConnection!
   """
+  [Internal] A specific diff.
+  """
+  diff(
+    """
+    The identifier of the diff to retrieve.
+    """
+    id: String!
+  ): Diff!
+  """
   A specific document by ID or slug.
   """
   document(
@@ -38343,6 +38495,10 @@ type Query {
     The identifier of the project update to retrieve.
     """
     id: String!
+    """
+    The id or URL slug of the project containing the update. When provided, the update is resolved by id or URL slug within that project.
+    """
+    projectId: String
   ): ProjectUpdate!
   """
   Returns all project status updates in the workspace, with optional filtering.
@@ -39858,7 +40014,7 @@ Input for completing a release in a specific pipeline.
 """
 input ReleaseCompleteInput {
   """
-  The commit SHA associated with this completion. If a completed release with this SHA already exists, it will be returned instead of completing a new release.
+  The commit SHA to store when moving a release to completed. With a version, an existing SHA is preserved. Without a version, this SHA replaces the started release's SHA and is used to detect retries.
   """
   commitSha: String
   """
@@ -39892,7 +40048,7 @@ Base input for completing a release. Contains the optional version and commit SH
 """
 input ReleaseCompleteInputBase {
   """
-  The commit SHA associated with this completion. If a completed release with this SHA already exists, it will be returned instead of completing a new release.
+  The commit SHA to store when moving a release to completed. With a version, an existing SHA is preserved. Without a version, this SHA replaces the started release's SHA and is used to detect retries.
   """
   commitSha: String
   """
