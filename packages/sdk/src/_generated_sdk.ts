@@ -496,6 +496,24 @@ export class AgentActivityWebhookPayload {
   public user: UserChildWebhookPayload;
 }
 /**
+ * The outcome of retrying a loop run blocked by its trusted-source policy.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentAutomationRetryResolutionFragment response data
+ */
+export class AgentAutomationRetryResolution extends Request {
+  public constructor(request: LinearRequest, data: L.AgentAutomationRetryResolutionFragment) {
+    super(request);
+    this.aiConversationId = data.aiConversationId ?? undefined;
+    this.status = data.status;
+  }
+
+  /** Identifier of the replacement AI conversation. Null when no replacement run was scheduled. */
+  public aiConversationId?: string | null;
+  /** Whether a replacement run was scheduled or the loop could no longer be retried. */
+  public status: L.AgentAutomationRetryResolutionStatus;
+}
+/**
  * A session representing an AI coding agent's work on an issue or conversation. Agent sessions track the lifecycle of an agent's engagement, from creation through active work to completion or dismissal. Each session is associated with an agent user (the bot), optionally a human creator, an issue, and a comment thread where the agent posts updates. Sessions contain activities that record the agent's observable steps and can be linked to pull requests created during the work.
  *
  * @param request - function to call the graphql client
@@ -1505,6 +1523,9 @@ export class AiConversationErrorPart extends Request {
     this.id = data.id;
     this.message = data.message;
     this.metadata = new AiConversationPartMetadata(request, data.metadata);
+    this.retryResolution = data.retryResolution
+      ? new AgentAutomationRetryResolution(request, data.retryResolution)
+      : undefined;
     this.errorType = data.errorType ?? undefined;
     this.type = data.type;
   }
@@ -1515,6 +1536,8 @@ export class AiConversationErrorPart extends Request {
   public message: string;
   /** The metadata of the part. */
   public metadata: AiConversationPartMetadata;
+  /** The outcome of retrying this error's loop run. Null when the run has not been reconsidered. */
+  public retryResolution?: AgentAutomationRetryResolution | null;
   /** The category of the error. Absent for errors without a specific category, which default to unknown. */
   public errorType?: L.AiConversationErrorType | null;
   /** The type of the part. */
@@ -15390,6 +15413,7 @@ export class Organization extends Request {
     this.previousUrlKeys = data.previousUrlKeys;
     this.projectUpdateReminderFrequencyInWeeks = data.projectUpdateReminderFrequencyInWeeks ?? undefined;
     this.projectUpdateRemindersHour = data.projectUpdateRemindersHour;
+    this.pullRequestIssueMode = data.pullRequestIssueMode;
     this.pullRequestTourEnabled = data.pullRequestTourEnabled;
     this.releasesEnabled = data.releasesEnabled;
     this.restrictLabelManagementToAdmins = data.restrictLabelManagementToAdmins ?? undefined;
@@ -15477,6 +15501,8 @@ export class Organization extends Request {
   public projectUpdateReminderFrequencyInWeeks?: number | null;
   /** The hour of the day (0-23) at which project update reminders are sent. */
   public projectUpdateRemindersHour: number;
+  /** How Linear suggests and links issues for pull requests that have none linked: 'off', 'suggest', or 'autoOnMerge'. */
+  public pullRequestIssueMode: string;
   /** Whether the workspace generates AI Pull Request guides for new pull requests. */
   public pullRequestTourEnabled: boolean;
   /** Whether release management is enabled for the workspace. */
@@ -16655,8 +16681,8 @@ export class Project extends Request {
     return new UnarchiveProjectMutation(this._request).fetch(this.id);
   }
   /** Updates a project. */
-  public update() {
-    return new ProjectUpdateQuery(this._request).fetch(this.id);
+  public update(variables?: Omit<L.ProjectUpdateQueryVariables, "id">) {
+    return new ProjectUpdateQuery(this._request).fetch(this.id, variables);
   }
 }
 /**
@@ -28482,13 +28508,15 @@ export class ProjectUpdateQuery extends Request {
    * Call the ProjectUpdate query and return a ProjectUpdate
    *
    * @param id - required id to pass to projectUpdate
+   * @param variables - variables without 'id' to pass into the ProjectUpdateQuery
    * @returns parsed response from ProjectUpdateQuery
    */
-  public async fetch(id: string): LinearFetch<ProjectUpdate> {
+  public async fetch(id: string, variables?: Omit<L.ProjectUpdateQueryVariables, "id">): LinearFetch<ProjectUpdate> {
     const response = await this._request<L.ProjectUpdateQuery, L.ProjectUpdateQueryVariables>(
       L.ProjectUpdateDocument.toString(),
       {
         id,
+        ...variables,
       }
     );
     const data = response.projectUpdate;
@@ -49412,10 +49440,11 @@ export class LinearSdk extends Request {
    * Returns a single project update by its identifier.
    *
    * @param id - required id to pass to projectUpdate
+   * @param variables - variables without 'id' to pass into the ProjectUpdateQuery
    * @returns ProjectUpdate
    */
-  public projectUpdate(id: string): LinearFetch<ProjectUpdate> {
-    return new ProjectUpdateQuery(this._request).fetch(id);
+  public projectUpdate(id: string, variables?: Omit<L.ProjectUpdateQueryVariables, "id">): LinearFetch<ProjectUpdate> {
+    return new ProjectUpdateQuery(this._request).fetch(id, variables);
   }
   /**
    * Returns all project status updates in the workspace, with optional filtering.
@@ -53252,6 +53281,7 @@ export class LinearSdk extends Request {
 export {
   AgentActivitySignal,
   AgentActivityType,
+  AgentAutomationRetryResolutionStatus,
   AgentSessionStatus,
   AgentSessionType,
   AiConversationAckKind,
@@ -53282,6 +53312,7 @@ export {
   CyclePeriod,
   DateResolutionType,
   Day,
+  DiffFileState,
   DocumentContentAgentCheckpointMode,
   EmailIntakeAddressType,
   ExternalSyncService,

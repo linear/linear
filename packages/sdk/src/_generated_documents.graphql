@@ -5030,6 +5030,8 @@ fragment Organization on Organization {
   customersConfiguration
   # Default schedule for how often feed summaries are generated.
   defaultFeedSummarySchedule
+  # How Linear suggests and links issues for pull requests that have none linked: 'off', 'suggest', or 'autoOnMerge'.
+  pullRequestIssueMode
   # Previously used URL keys for the workspace. The last 3 are kept and automatically redirected to the current URL key.
   previousUrlKeys
   # Rolling 30-day total file upload volume for the workspace, measured in megabytes. Used for enforcing upload quotas.
@@ -5657,6 +5659,10 @@ fragment AiConversationErrorPart on AiConversationErrorPart {
   # The metadata of the part.
   metadata {
     ...AiConversationPartMetadata
+  }
+  # The outcome of retrying this error's loop run. Null when the run has not been reconsidered.
+  retryResolution {
+    ...AgentAutomationRetryResolution
   }
   # The type of the part.
   type
@@ -9686,6 +9692,15 @@ fragment InitiativeToProject on InitiativeToProject {
   createdAt
   # The unique identifier of the entity.
   id
+}
+
+# The outcome of retrying a loop run blocked by its trusted-source policy.
+fragment AgentAutomationRetryResolution on AgentAutomationRetryResolution {
+  __typename
+  # Identifier of the replacement AI conversation. Null when no replacement run was scheduled.
+  aiConversationId
+  # Whether a replacement run was scheduled or the loop could no longer be retried.
+  status
 }
 
 # The payload returned by cycle mutations.
@@ -18584,8 +18599,10 @@ query projectStatuses(
 query projectUpdate(
   # The identifier of the project update to retrieve.
   $id: String!
+  # The id or URL slug of the project containing the update. When provided, the update is resolved by id or URL slug within that project.
+  $projectId: String
 ) {
-  projectUpdate(id: $id) {
+  projectUpdate(id: $id, projectId: $projectId) {
     ...ProjectUpdate
   }
 }
@@ -18593,6 +18610,8 @@ query projectUpdate(
 query projectUpdate_comments(
   # The identifier of the project update to retrieve.
   $id: String!
+  # The id or URL slug of the project containing the update. When provided, the update is resolved by id or URL slug within that project.
+  $projectId: String
   # A cursor to be used with first for forward pagination
   $after: String
   # A cursor to be used with last for backward pagination.
@@ -18608,7 +18627,7 @@ query projectUpdate_comments(
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
 ) {
-  projectUpdate(id: $id) {
+  projectUpdate(id: $id, projectId: $projectId) {
     comments(
       after: $after
       before: $before
