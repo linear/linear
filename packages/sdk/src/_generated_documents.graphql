@@ -65,6 +65,8 @@ fragment IdentityProvider on IdentityProvider {
   updatedAt
   # The service provider (Linear) custom entity ID. Defaults to https://auth.linear.app/sso
   spEntityId
+  # The time at which the current SAML configuration was marked as verified. Null if it has not been verified. Cleared whenever the SAML configuration changes.
+  ssoVerifiedAt
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
@@ -4565,9 +4567,9 @@ fragment AuthUser on AuthUser {
 
 # A user's bookmarked item that appears in their sidebar for quick access. Favorites can reference
 # various entity types including issues, projects, cycles, views, documents, initiatives, labels,
-# users, customers, dashboards, and pull requests. Favorites can be organized into folders and ordered
-# by the user. Each favorite is owned by a single user and links to exactly one target entity (or is a
-# folder containing other favorites).
+# users, customers, dashboards, pull requests, and Agent conversations. Favorites can be organized
+# into folders and ordered by the user. Each favorite is owned by a single user and links to exactly
+# one target entity (or is a folder containing other favorites).
 fragment Favorite on Favorite {
   __typename
   # The favorited custom view.
@@ -24086,9 +24088,9 @@ mutation archiveReleaseStage(
     ...ReleaseStageArchivePayload
   }
 }
-# Creates a new release stage in a pipeline. Non-started stages must use default names and colors, and
-# only one stage of each non-started type is allowed per pipeline. Started stages can optionally be
-# frozen, but at least one non-frozen started stage must remain.
+# Creates a new release stage in a pipeline. Non-started stages must use default names and colors and
+# are unique by type; creating a canonical duplicate returns the existing stage. Started stages can
+# optionally be frozen, but at least one non-frozen started stage must remain.
 mutation createReleaseStage(
   # The ReleaseStage object to create.
   $input: ReleaseStageCreateInput!

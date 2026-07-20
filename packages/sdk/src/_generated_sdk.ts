@@ -8342,7 +8342,7 @@ export class FacetConnection extends Connection<Facet> {
   }
 }
 /**
- * A user's bookmarked item that appears in their sidebar for quick access. Favorites can reference various entity types including issues, projects, cycles, views, documents, initiatives, labels, users, customers, dashboards, and pull requests. Favorites can be organized into folders and ordered by the user. Each favorite is owned by a single user and links to exactly one target entity (or is a folder containing other favorites).
+ * A user's bookmarked item that appears in their sidebar for quick access. Favorites can reference various entity types including issues, projects, cycles, views, documents, initiatives, labels, users, customers, dashboards, pull requests, and Agent conversations. Favorites can be organized into folders and ordered by the user. Each favorite is owned by a single user and links to exactly one target entity (or is a folder containing other favorites).
  *
  * @param request - function to call the graphql client
  * @param data - L.FavoriteFragment response data
@@ -9132,6 +9132,7 @@ export class IdentityProvider extends Request {
     this.ssoEndpoint = data.ssoEndpoint ?? undefined;
     this.ssoSignAlgo = data.ssoSignAlgo ?? undefined;
     this.ssoSigningCert = data.ssoSigningCert ?? undefined;
+    this.ssoVerifiedAt = parseDate(data.ssoVerifiedAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.type = data.type;
   }
@@ -9164,6 +9165,8 @@ export class IdentityProvider extends Request {
   public ssoSignAlgo?: string | null;
   /** X.509 Signing Certificate in string form. */
   public ssoSigningCert?: string | null;
+  /** The time at which the current SAML configuration was marked as verified. Null if it has not been verified. Cleared whenever the SAML configuration changes. */
+  public ssoVerifiedAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -19810,7 +19813,7 @@ export class ReleaseStage extends Request {
   public archive() {
     return new ArchiveReleaseStageMutation(this._request).fetch(this.id);
   }
-  /** Creates a new release stage in a pipeline. Non-started stages must use default names and colors, and only one stage of each non-started type is allowed per pipeline. Started stages can optionally be frozen, but at least one non-frozen started stage must remain. */
+  /** Creates a new release stage in a pipeline. Non-started stages must use default names and colors and are unique by type; creating a canonical duplicate returns the existing stage. Started stages can optionally be frozen, but at least one non-frozen started stage must remain. */
   public create(input: L.ReleaseStageCreateInput) {
     return new CreateReleaseStageMutation(this._request).fetch(input);
   }
@@ -52655,7 +52658,7 @@ export class LinearSdk extends Request {
     return new ArchiveReleaseStageMutation(this._request).fetch(id);
   }
   /**
-   * Creates a new release stage in a pipeline. Non-started stages must use default names and colors, and only one stage of each non-started type is allowed per pipeline. Started stages can optionally be frozen, but at least one non-frozen started stage must remain.
+   * Creates a new release stage in a pipeline. Non-started stages must use default names and colors and are unique by type; creating a canonical duplicate returns the existing stage. Started stages can optionally be frozen, but at least one non-frozen started stage must remain.
    *
    * @param input - required input to pass to createReleaseStage
    * @returns ReleaseStagePayload
