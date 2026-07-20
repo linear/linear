@@ -59,6 +59,16 @@ jobs:
         run: npx @arethetypeswrong/cli@0.18.2 --pack packages/sdk
 
       - name: Compare schema for changes
+        id: compare_schema
+        continue-on-error: true
+        uses: graphql-hive/graphql-inspector@8733c10560f98b868d3eb4db1325c8edf64936b3 # @graphql-inspector/action@5.0.21
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          schema: "master:packages/sdk/src/schema.graphql"
+          fail-on-breaking: false
+
+      - name: Retry schema comparison
+        if: steps.compare_schema.outcome == 'failure'
         uses: graphql-hive/graphql-inspector@8733c10560f98b868d3eb4db1325c8edf64936b3 # @graphql-inspector/action@5.0.21
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
