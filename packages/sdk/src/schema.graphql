@@ -409,6 +409,10 @@ type AgentActivityPromptContent {
   """
   bodyData: JSONObject!
   """
+  A short title capturing the intent of the prompt.
+  """
+  title: String
+  """
   The type of activity.
   """
   type: AgentActivityType!
@@ -663,6 +667,10 @@ type AgentSession implements Node {
   A dynamically updated plan describing the agent's execution strategy, including steps to be taken and their current status. Updated as the agent progresses through its work. Null if no plan has been set.
   """
   plan: JSON
+  """
+  The pull request this agent session is anchored to, when started from a pull request.
+  """
+  pullRequest: PullRequest
   """
   [Internal] Pull requests associated with this agent session.
   """
@@ -1615,11 +1623,19 @@ type AiConversationCreateEntityToolCall implements AiConversationBaseToolCall {
   The result of the tool call.
   """
   rawResult: JSON
+  """
+  The result of the tool call.
+  """
+  result: AiConversationCreateEntityToolCallResult
 }
 
 type AiConversationCreateEntityToolCallArgs {
   count: Float
   type: String!
+}
+
+type AiConversationCreateEntityToolCallResult {
+  startedAgentSessions: [AiConversationSearchEntitiesToolCallResultEntities!]
 }
 
 type AiConversationCreateSandboxToolCall implements AiConversationBaseToolCall {
@@ -2215,6 +2231,31 @@ type AiConversationNavigateToPageToolCallArgsEntities {
 
 type AiConversationNavigateToPageToolCallResult {
   urls: [String!]!
+}
+
+type AiConversationNotifyUsersToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationNotifyUsersToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationNotifyUsersToolCallArgs {
+  summary: String
+  userIds: [String!]!
 }
 
 """
@@ -2858,6 +2899,7 @@ enum AiConversationTool {
   InvokeMcpTool
   ListCodingSessions
   NavigateToPage
+  NotifyUsers
   PromptCodingSession
   QueryActivity
   QueryUpdates
@@ -2899,6 +2941,7 @@ union AiConversationToolCall =
   | AiConversationInvokeMcpToolToolCall
   | AiConversationListCodingSessionsToolCall
   | AiConversationNavigateToPageToolCall
+  | AiConversationNotifyUsersToolCall
   | AiConversationPromptCodingSessionToolCall
   | AiConversationQueryActivityToolCall
   | AiConversationQueryUpdatesToolCall
@@ -3026,11 +3069,19 @@ type AiConversationUpdateEntityToolCall implements AiConversationBaseToolCall {
   The result of the tool call.
   """
   rawResult: JSON
+  """
+  The result of the tool call.
+  """
+  result: AiConversationUpdateEntityToolCallResult
 }
 
 type AiConversationUpdateEntityToolCallArgs {
   entities: [AiConversationSearchEntitiesToolCallResultEntities!]
   entity: AiConversationSearchEntitiesToolCallResultEntities
+}
+
+type AiConversationUpdateEntityToolCallResult {
+  startedAgentSessions: [AiConversationSearchEntitiesToolCallResultEntities!]
 }
 
 """
@@ -9550,6 +9601,10 @@ type DocumentContentRevision implements Node {
   """
   baseContentState: String!
   """
+  Hash of the revision state that should be summarized.
+  """
+  contentHash: String
+  """
   The pending revision content state as a base64-encoded Yjs state update. This represents the revision that has not yet been applied to the live document.
   """
   contentState: String!
@@ -9573,6 +9628,14 @@ type DocumentContentRevision implements Node {
   The unique identifier of the entity.
   """
   id: ID!
+  """
+  A short summary of the pending revision changes.
+  """
+  summary: String
+  """
+  Hash of the revision state that the summary describes.
+  """
+  summaryContentHash: String
   """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -21967,7 +22030,7 @@ enum LinearAgentMcpServersMode {
 }
 
 """
-How workspace trusted source access is restricted for agent loops.
+How workspace trusted source access is restricted for loops.
 """
 enum LinearAgentTrustedSourcesMode {
   allowlist
@@ -30443,11 +30506,11 @@ input OrganizationLinearAgentSettingsInput {
   """
   mcpServersMode: LinearAgentMcpServersMode
   """
-  [Internal] Trusted-source allowlist for Linear Agent loops.
+  [Internal] Trusted-source allowlist for loops.
   """
   trustedSourcesAllowlist: [OrganizationLinearAgentTrustedSourcesAllowlistEntryInput!]
   """
-  [Internal] Whether external trusted sources are disabled or restricted to approved sources for agent loops.
+  [Internal] Whether external trusted sources are disabled or restricted to approved sources for loops.
   """
   trustedSourcesMode: LinearAgentTrustedSourcesMode
   """
@@ -30457,11 +30520,11 @@ input OrganizationLinearAgentSettingsInput {
 }
 
 """
-[Internal] A trusted-source entry for the Linear Agent loop allowlist.
+[Internal] A trusted-source entry for the loop allowlist.
 """
 input OrganizationLinearAgentTrustedSourcesAllowlistEntryInput {
   """
-  [Internal] The trusted-source key that Linear Agent loops are allowed to use.
+  [Internal] The trusted-source key that loops are allowed to use.
   """
   key: String!
 }
@@ -30593,7 +30656,7 @@ Input for updating the workspace.
 """
 input OrganizationUpdateInput {
   """
-  [INTERNAL] Whether the workspace has enabled agent loops.
+  [INTERNAL] Whether the workspace has enabled loops.
   """
   agentAutomationEnabled: Boolean
   """
@@ -43239,6 +43302,10 @@ input SubTypeComparator {
 }
 
 type Subscription {
+  """
+  Triggered when an agent activity is archived
+  """
+  agentActivityArchived: AgentActivity!
   """
   Triggered when an agent activity is created
   """

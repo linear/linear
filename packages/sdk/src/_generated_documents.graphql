@@ -2735,6 +2735,12 @@ fragment OrganizationInvite on OrganizationInvite {
 # published document until the changes are explicitly applied.
 fragment DocumentContentRevision on DocumentContentRevision {
   __typename
+  # A short summary of the pending revision changes.
+  summary
+  # Hash of the revision state that should be summarized.
+  contentHash
+  # Hash of the revision state that the summary describes.
+  summaryContentHash
   # The document content that this revision is based on.
   documentContent {
     ...DocumentContent
@@ -4376,6 +4382,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     }
     ... on AiConversationNavigateToPageToolCall {
       ...AiConversationNavigateToPageToolCall
+    }
+    ... on AiConversationNotifyUsersToolCall {
+      ...AiConversationNotifyUsersToolCall
     }
     ... on AiConversationPromptCodingSessionToolCall {
       ...AiConversationPromptCodingSessionToolCall
@@ -6649,6 +6658,8 @@ fragment AgentActivityPromptContent on AgentActivityPromptContent {
   __typename
   # A message requesting additional information or action from user.
   body
+  # A short title capturing the intent of the prompt.
+  title
   # The type of activity.
   type
 }
@@ -10898,6 +10909,10 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
     ...AiConversationNavigateToPageToolCall
   }
 
+  ... on AiConversationNotifyUsersToolCall {
+    ...AiConversationNotifyUsersToolCall
+  }
+
   ... on AiConversationPromptCodingSessionToolCall {
     ...AiConversationPromptCodingSessionToolCall
   }
@@ -11059,6 +11074,10 @@ fragment AiConversationCreateEntityToolCall on AiConversationCreateEntityToolCal
   name
   # The result of the tool call.
   rawResult
+  # The result of the tool call.
+  result {
+    ...AiConversationCreateEntityToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
@@ -11068,6 +11087,13 @@ fragment AiConversationCreateEntityToolCallArgs on AiConversationCreateEntityToo
   __typename
   count
   type
+}
+
+fragment AiConversationCreateEntityToolCallResult on AiConversationCreateEntityToolCallResult {
+  __typename
+  startedAgentSessions {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
 }
 
 fragment AiConversationCreateSandboxToolCall on AiConversationCreateSandboxToolCall {
@@ -11427,6 +11453,29 @@ fragment AiConversationNavigateToPageToolCallArgsEntities on AiConversationNavig
 fragment AiConversationNavigateToPageToolCallResult on AiConversationNavigateToPageToolCallResult {
   __typename
   urls
+}
+
+fragment AiConversationNotifyUsersToolCall on AiConversationNotifyUsersToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationNotifyUsersToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationNotifyUsersToolCallArgs on AiConversationNotifyUsersToolCallArgs {
+  __typename
+  summary
+  userIds
 }
 
 fragment AiConversationPromptCodingSessionToolCall on AiConversationPromptCodingSessionToolCall {
@@ -11933,6 +11982,10 @@ fragment AiConversationUpdateEntityToolCall on AiConversationUpdateEntityToolCal
   name
   # The result of the tool call.
   rawResult
+  # The result of the tool call.
+  result {
+    ...AiConversationUpdateEntityToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
@@ -11944,6 +11997,13 @@ fragment AiConversationUpdateEntityToolCallArgs on AiConversationUpdateEntityToo
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
   entity {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+
+fragment AiConversationUpdateEntityToolCallResult on AiConversationUpdateEntityToolCallResult {
+  __typename
+  startedAgentSessions {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
 }
@@ -13528,6 +13588,10 @@ fragment Subscription on Subscription {
   }
   # Triggered when a workflow state is updated
   workflowStateUpdated {
+    id
+  }
+  # Triggered when an agent activity is archived
+  agentActivityArchived {
     id
   }
   # Triggered when an agent activity is created

@@ -408,11 +408,14 @@ export class AgentActivityPromptContent extends Request {
   public constructor(request: LinearRequest, data: L.AgentActivityPromptContentFragment) {
     super(request);
     this.body = data.body;
+    this.title = data.title ?? undefined;
     this.type = data.type;
   }
 
   /** A message requesting additional information or action from user. */
   public body: string;
+  /** A short title capturing the intent of the prompt. */
+  public title?: string | null;
   /** The type of activity. */
   public type: L.AgentActivityType;
 }
@@ -1244,6 +1247,7 @@ export class AiConversationCreateEntityToolCall extends Request {
     this.rawResult = parseJson(data.rawResult) ?? undefined;
     this.args = data.args ? new AiConversationCreateEntityToolCallArgs(request, data.args) : undefined;
     this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.result = data.result ? new AiConversationCreateEntityToolCallResult(request, data.result) : undefined;
     this.name = data.name;
   }
 
@@ -1254,6 +1258,8 @@ export class AiConversationCreateEntityToolCall extends Request {
   /** The arguments to the tool call. */
   public args?: AiConversationCreateEntityToolCallArgs | null;
   public displayInfo: AiConversationToolDisplayInfo;
+  /** The result of the tool call. */
+  public result?: AiConversationCreateEntityToolCallResult | null;
   /** The name of the tool that was called. */
   public name: L.AiConversationTool;
 }
@@ -1272,6 +1278,22 @@ export class AiConversationCreateEntityToolCallArgs extends Request {
 
   public count?: number | null;
   public type: string;
+}
+/**
+ * AiConversationCreateEntityToolCallResult model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationCreateEntityToolCallResultFragment response data
+ */
+export class AiConversationCreateEntityToolCallResult extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationCreateEntityToolCallResultFragment) {
+    super(request);
+    this.startedAgentSessions = data.startedAgentSessions
+      ? data.startedAgentSessions.map(node => new AiConversationSearchEntitiesToolCallResultEntities(request, node))
+      : undefined;
+  }
+
+  public startedAgentSessions?: AiConversationSearchEntitiesToolCallResultEntities[] | null;
 }
 /**
  * AiConversationCreateSandboxToolCall model
@@ -2024,6 +2046,48 @@ export class AiConversationNavigateToPageToolCallResult extends Request {
   }
 
   public urls: string[];
+}
+/**
+ * AiConversationNotifyUsersToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationNotifyUsersToolCallFragment response data
+ */
+export class AiConversationNotifyUsersToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationNotifyUsersToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationNotifyUsersToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationNotifyUsersToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationNotifyUsersToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationNotifyUsersToolCallArgsFragment response data
+ */
+export class AiConversationNotifyUsersToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationNotifyUsersToolCallArgsFragment) {
+    super(request);
+    this.summary = data.summary ?? undefined;
+    this.userIds = data.userIds;
+  }
+
+  public summary?: string | null;
+  public userIds: string[];
 }
 /**
  * Metadata about a part in an AI conversation.
@@ -3061,6 +3125,7 @@ export class AiConversationUpdateEntityToolCall extends Request {
     this.rawResult = parseJson(data.rawResult) ?? undefined;
     this.args = data.args ? new AiConversationUpdateEntityToolCallArgs(request, data.args) : undefined;
     this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.result = data.result ? new AiConversationUpdateEntityToolCallResult(request, data.result) : undefined;
     this.name = data.name;
   }
 
@@ -3071,6 +3136,8 @@ export class AiConversationUpdateEntityToolCall extends Request {
   /** The arguments to the tool call. */
   public args?: AiConversationUpdateEntityToolCallArgs | null;
   public displayInfo: AiConversationToolDisplayInfo;
+  /** The result of the tool call. */
+  public result?: AiConversationUpdateEntityToolCallResult | null;
   /** The name of the tool that was called. */
   public name: L.AiConversationTool;
 }
@@ -3093,6 +3160,22 @@ export class AiConversationUpdateEntityToolCallArgs extends Request {
 
   public entities?: AiConversationSearchEntitiesToolCallResultEntities[] | null;
   public entity?: AiConversationSearchEntitiesToolCallResultEntities | null;
+}
+/**
+ * AiConversationUpdateEntityToolCallResult model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationUpdateEntityToolCallResultFragment response data
+ */
+export class AiConversationUpdateEntityToolCallResult extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationUpdateEntityToolCallResultFragment) {
+    super(request);
+    this.startedAgentSessions = data.startedAgentSessions
+      ? data.startedAgentSessions.map(node => new AiConversationSearchEntitiesToolCallResultEntities(request, node))
+      : undefined;
+  }
+
+  public startedAgentSessions?: AiConversationSearchEntitiesToolCallResultEntities[] | null;
 }
 /**
  * AiConversationWebSearchToolCall model
@@ -6982,11 +7065,14 @@ export class DocumentContentRevision extends Request {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.baseContentState = data.baseContentState;
+    this.contentHash = data.contentHash ?? undefined;
     this.contentState = data.contentState;
     this.contributorWorkflowDefinitionIds = data.contributorWorkflowDefinitionIds;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.documentContentId = data.documentContentId;
     this.id = data.id;
+    this.summary = data.summary ?? undefined;
+    this.summaryContentHash = data.summaryContentHash ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.documentContent = new DocumentContent(request, data.documentContent);
   }
@@ -6995,6 +7081,8 @@ export class DocumentContentRevision extends Request {
   public archivedAt?: Date | null;
   /** The live document content state this revision was last refreshed from, as a base64-encoded Yjs state update. */
   public baseContentState: string;
+  /** Hash of the revision state that should be summarized. */
+  public contentHash?: string | null;
   /** The pending revision content state as a base64-encoded Yjs state update. This represents the revision that has not yet been applied to the live document. */
   public contentState: string;
   /** The workflow definitions that contributed edits to this revision. */
@@ -7005,6 +7093,10 @@ export class DocumentContentRevision extends Request {
   public documentContentId: string;
   /** The unique identifier of the entity. */
   public id: string;
+  /** A short summary of the pending revision changes. */
+  public summary?: string | null;
+  /** Hash of the revision state that the summary describes. */
+  public summaryContentHash?: string | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -20652,6 +20744,7 @@ export class SsoUrlFromEmailResponse extends Request {
  * @param data - L.SubscriptionFragment response data
  */
 export class Subscription extends Request {
+  private _agentActivityArchived: L.SubscriptionFragment["agentActivityArchived"];
   private _agentActivityCreated: L.SubscriptionFragment["agentActivityCreated"];
   private _agentActivityUpdated: L.SubscriptionFragment["agentActivityUpdated"];
   private _agentSessionCreated: L.SubscriptionFragment["agentSessionCreated"];
@@ -20722,6 +20815,7 @@ export class Subscription extends Request {
     this.draftUpdated = new Draft(request, data.draftUpdated);
     this.issueHistoryCreated = new IssueHistory(request, data.issueHistoryCreated);
     this.issueHistoryUpdated = new IssueHistory(request, data.issueHistoryUpdated);
+    this._agentActivityArchived = data.agentActivityArchived;
     this._agentActivityCreated = data.agentActivityCreated;
     this._agentActivityUpdated = data.agentActivityUpdated;
     this._agentSessionCreated = data.agentSessionCreated;
@@ -20804,6 +20898,14 @@ export class Subscription extends Request {
   public issueHistoryCreated: IssueHistory;
   /** Triggered when an issue history is updated */
   public issueHistoryUpdated: IssueHistory;
+  /** Triggered when an agent activity is archived */
+  public get agentActivityArchived(): LinearFetch<AgentActivity> | undefined {
+    return new AgentActivityQuery(this._request).fetch(this._agentActivityArchived.id);
+  }
+  /** The ID of triggered when an agent activity is archived */
+  public get agentActivityArchivedId(): string | undefined {
+    return this._agentActivityArchived?.id;
+  }
   /** Triggered when an agent activity is created */
   public get agentActivityCreated(): LinearFetch<AgentActivity> | undefined {
     return new AgentActivityQuery(this._request).fetch(this._agentActivityCreated.id);
