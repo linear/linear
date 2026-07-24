@@ -1414,6 +1414,10 @@ type AiConversation implements Node {
   """
   initiative: Initiative
   """
+  [Internal] The issue this shared conversation is attached to. Null if the conversation is private.
+  """
+  issue: Issue
+  """
   The iteration ID when this conversation is part of an agentic workflow. Used to track multi-step workflow executions. Null for non-workflow conversations.
   """
   iterationId: String
@@ -2118,6 +2122,7 @@ enum AiConversationInitialSource {
   onboarding
   pullRequestComment
   slack
+  subAgent
   workflow
 }
 
@@ -2730,6 +2735,38 @@ type AiConversationSearchEntitiesToolCallResultEntities {
   type: String!
 }
 
+type AiConversationSpawnSubagentToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationSpawnSubagentToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+  """
+  The result of the tool call.
+  """
+  result: AiConversationSpawnSubagentToolCallResult
+}
+
+type AiConversationSpawnSubagentToolCallArgs {
+  description: String!
+}
+
+type AiConversationSpawnSubagentToolCallResult {
+  conversationId: String!
+}
+
 type AiConversationStartCodingSessionToolCall implements AiConversationBaseToolCall {
   """
   The arguments to the tool call.
@@ -2912,6 +2949,7 @@ enum AiConversationTool {
   RetryPullRequestCheck
   SearchDocumentation
   SearchEntities
+  SpawnSubagent
   StartCodingSession
   SubscribeToEvent
   SuggestRepository
@@ -2954,6 +2992,7 @@ union AiConversationToolCall =
   | AiConversationRetryPullRequestCheckToolCall
   | AiConversationSearchDocumentationToolCall
   | AiConversationSearchEntitiesToolCall
+  | AiConversationSpawnSubagentToolCall
   | AiConversationStartCodingSessionToolCall
   | AiConversationSubscribeToEventToolCall
   | AiConversationSuggestRepositoryToolCall
@@ -12868,6 +12907,10 @@ input InheritanceEntityMapping {
   """
   issueLabels: JSONObject
   """
+  Mapping of the ProjectLabel ID to the new ProjectLabel name.
+  """
+  projectLabels: JSONObject
+  """
   Mapping of the WorkflowState ID to the new WorkflowState ID.
   """
   workflowStates: JSONObject!
@@ -20870,6 +20913,10 @@ type IssueSuggestion implements Node {
   """
   metadata: IssueSuggestionMetadata
   """
+  The suggestion reasons with entity mentions resolved to readable labels and structured references.
+  """
+  presentedReasons: [PresentedIssueSuggestionReason!]!
+  """
   [Internal] The current state of the suggestion: active, accepted, or dismissed.
   """
   state: IssueSuggestionState!
@@ -21086,6 +21133,28 @@ type IssueSuggestionMetadata {
   [Internal] The AI prompt variant that generated this suggestion. Null if not applicable.
   """
   variant: String
+}
+
+"""
+An entity referenced by a presented issue suggestion reason.
+"""
+type IssueSuggestionReasonReference {
+  """
+  The referenced entity identifier.
+  """
+  id: String!
+  """
+  The readable label for the referenced entity.
+  """
+  label: String
+  """
+  The title of the referenced entity, when available.
+  """
+  title: String
+  """
+  The referenced entity type.
+  """
+  type: String!
 }
 
 """
@@ -22817,6 +22886,10 @@ type Mutation {
     Details for the new workspace.
     """
     input: CreateOrganizationInput!
+    """
+    Signed partner-offer signup token minted when the visitor redeemed a partner offer on the marketing website.
+    """
+    partnerOfferToken: String
     """
     PostHog session ID for attribution tracking.
     """
@@ -25520,6 +25593,10 @@ type Mutation {
     The project label to create.
     """
     input: ProjectLabelCreateInput!
+    """
+    Whether to replace all team-specific labels with the same name with this newly created workspace label (default: false).
+    """
+    replaceTeamLabels: Boolean
   ): ProjectLabelPayload!
   """
   Deletes a project label.
@@ -25560,6 +25637,10 @@ type Mutation {
     A partial label object to update.
     """
     input: ProjectLabelUpdateInput!
+    """
+    Whether to replace all team-specific labels with the same name with this updated workspace label (default: false).
+    """
+    replaceTeamLabels: Boolean
   ): ProjectLabelPayload!
   """
   Creates a new project milestone.
@@ -29618,6 +29699,10 @@ type Organization implements Node {
   """
   defaultHomeView: String
   """
+  The id of the specific initiative, project, view, dashboard, or page tab used as the default home view. The type of entity is given by defaultHomeView.
+  """
+  defaultHomeViewTargetId: String
+  """
   The time at which deletion of the workspace was requested. Null if no deletion has been requested.
   """
   deletionRequestedAt: DateTime
@@ -30615,6 +30700,10 @@ input OrganizationSecuritySettingsInput {
   The minimum role required to manage workspace templates.
   """
   templateManagementRole: UserRoleType
+  """
+  The minimum role required to create initiatives without a lead team or move initiatives between workspace and team scopes.
+  """
+  workspaceInitiativesRole: UserRoleType
 }
 
 """
@@ -30715,6 +30804,10 @@ input OrganizationUpdateInput {
   The default home view for members of the workspace who have not chosen their own default.
   """
   defaultHomeView: String
+  """
+  The id of the specific initiative, project, view, or dashboard used as the default home view. The type of entity is given by defaultHomeView.
+  """
+  defaultHomeViewTargetId: String
   """
   Whether the workspace has enabled the feed feature.
   """
@@ -31526,6 +31619,20 @@ Type of Post
 enum PostType {
   summary
   update
+}
+
+"""
+A readable issue suggestion reason and its structured entity references.
+"""
+type PresentedIssueSuggestionReason {
+  """
+  Entities referenced by the reason.
+  """
+  references: [IssueSuggestionReasonReference!]!
+  """
+  The reason with entity mentions rendered as readable text.
+  """
+  text: String!
 }
 
 """
@@ -47774,6 +47881,10 @@ type ViewPreferencesValues {
   """
   automationShowDescendants: Boolean
   """
+  Whether to show disabled loops.
+  """
+  automationShowDisabled: Boolean
+  """
   The loop stats period.
   """
   automationStatsPeriod: String
@@ -48553,6 +48664,10 @@ type ViewPreferencesValues {
   Whether to show only snoozed items.
   """
   showOnlySnoozedItems: Boolean
+  """
+  [Internal] Whether parent initiatives that do not match the view are shown. Defaults to true when unset.
+  """
+  showParentInitiatives: Boolean
   """
   Whether to show parent issues for sub-issues.
   """

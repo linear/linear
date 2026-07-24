@@ -2774,6 +2774,63 @@ export class AiConversationSearchEntitiesToolCallResultEntities extends Request 
   public type: string;
 }
 /**
+ * AiConversationSpawnSubagentToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSpawnSubagentToolCallFragment response data
+ */
+export class AiConversationSpawnSubagentToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSpawnSubagentToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationSpawnSubagentToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.result = data.result ? new AiConversationSpawnSubagentToolCallResult(request, data.result) : undefined;
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationSpawnSubagentToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The result of the tool call. */
+  public result?: AiConversationSpawnSubagentToolCallResult | null;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationSpawnSubagentToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSpawnSubagentToolCallArgsFragment response data
+ */
+export class AiConversationSpawnSubagentToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSpawnSubagentToolCallArgsFragment) {
+    super(request);
+    this.description = data.description;
+  }
+
+  public description: string;
+}
+/**
+ * AiConversationSpawnSubagentToolCallResult model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSpawnSubagentToolCallResultFragment response data
+ */
+export class AiConversationSpawnSubagentToolCallResult extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSpawnSubagentToolCallResultFragment) {
+    super(request);
+    this.conversationId = data.conversationId;
+  }
+
+  public conversationId: string;
+}
+/**
  * AiConversationStartCodingSessionToolCall model
  *
  * @param request - function to call the graphql client
@@ -13771,6 +13828,30 @@ export class IssueStatusChangedNotificationWebhookPayload {
   public issue: IssueWithDescriptionChildWebhookPayload;
 }
 /**
+ * An entity referenced by a presented issue suggestion reason.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssueSuggestionReasonReferenceFragment response data
+ */
+export class IssueSuggestionReasonReference extends Request {
+  public constructor(request: LinearRequest, data: L.IssueSuggestionReasonReferenceFragment) {
+    super(request);
+    this.id = data.id;
+    this.label = data.label ?? undefined;
+    this.title = data.title ?? undefined;
+    this.type = data.type;
+  }
+
+  /** The referenced entity identifier. */
+  public id: string;
+  /** The readable label for the referenced entity. */
+  public label?: string | null;
+  /** The title of the referenced entity, when available. */
+  public title?: string | null;
+  /** The referenced entity type. */
+  public type: string;
+}
+/**
  * Return type for AI-generated issue title suggestions based on customer request content.
  *
  * @param request - function to call the graphql client
@@ -15490,6 +15571,7 @@ export class Organization extends Request {
     this.customersConfiguration = data.customersConfiguration;
     this.customersEnabled = data.customersEnabled;
     this.defaultHomeView = data.defaultHomeView ?? undefined;
+    this.defaultHomeViewTargetId = data.defaultHomeViewTargetId ?? undefined;
     this.deletionRequestedAt = parseDate(data.deletionRequestedAt) ?? undefined;
     this.feedEnabled = data.feedEnabled;
     this.fiscalYearStartMonth = data.fiscalYearStartMonth;
@@ -15560,6 +15642,8 @@ export class Organization extends Request {
   public customersEnabled: boolean;
   /** The default home view for members of the workspace who have not chosen their own default. */
   public defaultHomeView?: string | null;
+  /** The id of the specific initiative, project, view, dashboard, or page tab used as the default home view. The type of entity is given by defaultHomeView. */
+  public defaultHomeViewTargetId?: string | null;
   /** The time at which deletion of the workspace was requested. Null if no deletion has been requested. */
   public deletionRequestedAt?: Date | null;
   /** Whether the activity feed feature is enabled for the workspace. */
@@ -16322,6 +16406,24 @@ export class PostNotification extends Request {
   public get userId(): string | undefined {
     return this._user?.id;
   }
+}
+/**
+ * A readable issue suggestion reason and its structured entity references.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.PresentedIssueSuggestionReasonFragment response data
+ */
+export class PresentedIssueSuggestionReason extends Request {
+  public constructor(request: LinearRequest, data: L.PresentedIssueSuggestionReasonFragment) {
+    super(request);
+    this.text = data.text;
+    this.references = data.references.map(node => new IssueSuggestionReasonReference(request, node));
+  }
+
+  /** The reason with entity mentions rendered as readable text. */
+  public text: string;
+  /** Entities referenced by the reason. */
+  public references: IssueSuggestionReasonReference[];
 }
 /**
  * A product announcement shown in targeted workspace inbox notifications. Product announcements store reusable launch copy and are sent to specific recipients through related notifications.
@@ -17091,16 +17193,19 @@ export class ProjectLabel extends Request {
     return new ProjectLabel_ProjectsQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Creates a new project label. */
-  public create(input: L.ProjectLabelCreateInput) {
-    return new CreateProjectLabelMutation(this._request).fetch(input);
+  public create(input: L.ProjectLabelCreateInput, variables?: Omit<L.CreateProjectLabelMutationVariables, "input">) {
+    return new CreateProjectLabelMutation(this._request).fetch(input, variables);
   }
   /** Deletes a project label. */
   public delete() {
     return new DeleteProjectLabelMutation(this._request).fetch(this.id);
   }
   /** Updates a project label. */
-  public update(input: L.ProjectLabelUpdateInput) {
-    return new UpdateProjectLabelMutation(this._request).fetch(this.id, input);
+  public update(
+    input: L.ProjectLabelUpdateInput,
+    variables?: Omit<L.UpdateProjectLabelMutationVariables, "id" | "input">
+  ) {
+    return new UpdateProjectLabelMutation(this._request).fetch(this.id, input, variables);
   }
 }
 /**
@@ -23850,6 +23955,7 @@ export class ViewPreferencesValues extends Request {
     this.automationGrouping = data.automationGrouping ?? undefined;
     this.automationOrdering = data.automationOrdering ?? undefined;
     this.automationShowDescendants = data.automationShowDescendants ?? undefined;
+    this.automationShowDisabled = data.automationShowDisabled ?? undefined;
     this.automationStatsPeriod = data.automationStatsPeriod ?? undefined;
     this.closedIssuesOrderedByRecency = data.closedIssuesOrderedByRecency ?? undefined;
     this.columnOrderBoard = data.columnOrderBoard ?? undefined;
@@ -24094,6 +24200,8 @@ export class ViewPreferencesValues extends Request {
   public automationOrdering?: string | null;
   /** Whether to show sub-team loops. */
   public automationShowDescendants?: boolean | null;
+  /** Whether to show disabled loops. */
+  public automationShowDisabled?: boolean | null;
   /** The loop stats period. */
   public automationStatsPeriod?: string | null;
   /** Whether issues in closed columns should be ordered by recency. */
@@ -36859,13 +36967,18 @@ export class CreateProjectLabelMutation extends Request {
    * Call the CreateProjectLabel mutation and return a ProjectLabelPayload
    *
    * @param input - required input to pass to createProjectLabel
+   * @param variables - variables without 'input' to pass into the CreateProjectLabelMutation
    * @returns parsed response from CreateProjectLabelMutation
    */
-  public async fetch(input: L.ProjectLabelCreateInput): LinearFetch<ProjectLabelPayload> {
+  public async fetch(
+    input: L.ProjectLabelCreateInput,
+    variables?: Omit<L.CreateProjectLabelMutationVariables, "input">
+  ): LinearFetch<ProjectLabelPayload> {
     const response = await this._request<L.CreateProjectLabelMutation, L.CreateProjectLabelMutationVariables>(
       L.CreateProjectLabelDocument.toString(),
       {
         input,
+        ...variables,
       }
     );
     const data = response.projectLabelCreate;
@@ -36976,14 +37089,20 @@ export class UpdateProjectLabelMutation extends Request {
    *
    * @param id - required id to pass to updateProjectLabel
    * @param input - required input to pass to updateProjectLabel
+   * @param variables - variables without 'id', 'input' to pass into the UpdateProjectLabelMutation
    * @returns parsed response from UpdateProjectLabelMutation
    */
-  public async fetch(id: string, input: L.ProjectLabelUpdateInput): LinearFetch<ProjectLabelPayload> {
+  public async fetch(
+    id: string,
+    input: L.ProjectLabelUpdateInput,
+    variables?: Omit<L.UpdateProjectLabelMutationVariables, "id" | "input">
+  ): LinearFetch<ProjectLabelPayload> {
     const response = await this._request<L.UpdateProjectLabelMutation, L.UpdateProjectLabelMutationVariables>(
       L.UpdateProjectLabelDocument.toString(),
       {
         id,
         input,
+        ...variables,
       }
     );
     const data = response.projectLabelUpdate;
@@ -52369,10 +52488,14 @@ export class LinearSdk extends Request {
    * Creates a new project label.
    *
    * @param input - required input to pass to createProjectLabel
+   * @param variables - variables without 'input' to pass into the CreateProjectLabelMutation
    * @returns ProjectLabelPayload
    */
-  public createProjectLabel(input: L.ProjectLabelCreateInput): LinearFetch<ProjectLabelPayload> {
-    return new CreateProjectLabelMutation(this._request).fetch(input);
+  public createProjectLabel(
+    input: L.ProjectLabelCreateInput,
+    variables?: Omit<L.CreateProjectLabelMutationVariables, "input">
+  ): LinearFetch<ProjectLabelPayload> {
+    return new CreateProjectLabelMutation(this._request).fetch(input, variables);
   }
   /**
    * Deletes a project label.
@@ -52406,10 +52529,15 @@ export class LinearSdk extends Request {
    *
    * @param id - required id to pass to updateProjectLabel
    * @param input - required input to pass to updateProjectLabel
+   * @param variables - variables without 'id', 'input' to pass into the UpdateProjectLabelMutation
    * @returns ProjectLabelPayload
    */
-  public updateProjectLabel(id: string, input: L.ProjectLabelUpdateInput): LinearFetch<ProjectLabelPayload> {
-    return new UpdateProjectLabelMutation(this._request).fetch(id, input);
+  public updateProjectLabel(
+    id: string,
+    input: L.ProjectLabelUpdateInput,
+    variables?: Omit<L.UpdateProjectLabelMutationVariables, "id" | "input">
+  ): LinearFetch<ProjectLabelPayload> {
+    return new UpdateProjectLabelMutation(this._request).fetch(id, input, variables);
   }
   /**
    * Creates a new project milestone.

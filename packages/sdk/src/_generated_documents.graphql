@@ -2950,6 +2950,17 @@ fragment AiConversationPromptPart on AiConversationPromptPart {
   }
 }
 
+# A readable issue suggestion reason and its structured entity references.
+fragment PresentedIssueSuggestionReason on PresentedIssueSuggestionReason {
+  __typename
+  # Entities referenced by the reason.
+  references {
+    ...IssueSuggestionReasonReference
+  }
+  # The reason with entity mentions rendered as readable text.
+  text
+}
+
 # A reasoning part in an AI conversation.
 fragment AiConversationReasoningPart on AiConversationReasoningPart {
   __typename
@@ -4422,6 +4433,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     ... on AiConversationSearchEntitiesToolCall {
       ...AiConversationSearchEntitiesToolCall
     }
+    ... on AiConversationSpawnSubagentToolCall {
+      ...AiConversationSpawnSubagentToolCall
+    }
     ... on AiConversationStartCodingSessionToolCall {
       ...AiConversationStartCodingSessionToolCall
     }
@@ -5071,6 +5085,8 @@ fragment Organization on Organization {
   initiativeUpdateRemindersHour
   # The hour of the day (0-23) at which project update reminders are sent.
   projectUpdateRemindersHour
+  # The id of the specific initiative, project, view, dashboard, or page tab used as the default home view. The type of entity is given by defaultHomeView.
+  defaultHomeViewTargetId
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
@@ -5658,6 +5674,19 @@ fragment Reaction on Reaction {
   user {
     id
   }
+}
+
+# An entity referenced by a presented issue suggestion reason.
+fragment IssueSuggestionReasonReference on IssueSuggestionReasonReference {
+  __typename
+  # The readable label for the referenced entity.
+  label
+  # The referenced entity identifier.
+  id
+  # The referenced entity type.
+  type
+  # The title of the referenced entity, when available.
+  title
 }
 
 # An error part in an AI conversation.
@@ -9268,6 +9297,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   customerPageNeedsShowCompletedIssuesAndProjects
   # Whether to show completed issues last in project customer needs.
   projectCustomerNeedsShowCompletedIssuesLast
+  # Whether to show disabled loops.
+  automationShowDisabled
   # Whether to show draft reviews.
   showDraftReviews
   # Whether to show empty groups on the board layout.
@@ -10961,6 +10992,10 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
     ...AiConversationSearchEntitiesToolCall
   }
 
+  ... on AiConversationSpawnSubagentToolCall {
+    ...AiConversationSpawnSubagentToolCall
+  }
+
   ... on AiConversationStartCodingSessionToolCall {
     ...AiConversationStartCodingSessionToolCall
   }
@@ -11809,6 +11844,37 @@ fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSea
   __typename
   id
   type
+}
+
+fragment AiConversationSpawnSubagentToolCall on AiConversationSpawnSubagentToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationSpawnSubagentToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  # The result of the tool call.
+  result {
+    ...AiConversationSpawnSubagentToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationSpawnSubagentToolCallArgs on AiConversationSpawnSubagentToolCallArgs {
+  __typename
+  description
+}
+
+fragment AiConversationSpawnSubagentToolCallResult on AiConversationSpawnSubagentToolCallResult {
+  __typename
+  conversationId
 }
 
 fragment AiConversationStartCodingSessionToolCall on AiConversationStartCodingSessionToolCall {
@@ -23743,8 +23809,10 @@ mutation projectExternalSyncDisable(
 mutation createProjectLabel(
   # The project label to create.
   $input: ProjectLabelCreateInput!
+  # Whether to replace all team-specific labels with the same name with this newly created workspace label (default: false).
+  $replaceTeamLabels: Boolean
 ) {
-  projectLabelCreate(input: $input) {
+  projectLabelCreate(input: $input, replaceTeamLabels: $replaceTeamLabels) {
     ...ProjectLabelPayload
   }
 }
@@ -23782,8 +23850,10 @@ mutation updateProjectLabel(
   $id: String!
   # A partial label object to update.
   $input: ProjectLabelUpdateInput!
+  # Whether to replace all team-specific labels with the same name with this updated workspace label (default: false).
+  $replaceTeamLabels: Boolean
 ) {
-  projectLabelUpdate(id: $id, input: $input) {
+  projectLabelUpdate(id: $id, input: $input, replaceTeamLabels: $replaceTeamLabels) {
     ...ProjectLabelPayload
   }
 }
