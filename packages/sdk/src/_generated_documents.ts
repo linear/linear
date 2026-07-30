@@ -45,6 +45,56 @@ export type Scalars = {
   UUID: any;
 };
 
+/** A release returned using a release pipeline access key. */
+export type AccessKeyRelease = {
+  __typename?: "AccessKeyRelease";
+  /** The time at which the release was archived. Null if the release has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The Git commit SHA associated with the release. */
+  commitSha?: Maybe<Scalars["String"]>;
+  /** The time at which the release was completed. Null if the release has not been completed. */
+  completedAt?: Maybe<Scalars["DateTime"]>;
+  /** The time at which the release was created. */
+  createdAt: Scalars["DateTime"];
+  /** The unique identifier of the release. */
+  id: Scalars["ID"];
+  /** The name of the release. */
+  name: Scalars["String"];
+  /** The current stage of the release. */
+  stage: AccessKeyReleaseStage;
+  /** The URL to the release page in the Linear app. */
+  url: Scalars["String"];
+  /** The version identifier for this release. Null if no version has been assigned. */
+  version?: Maybe<Scalars["String"]>;
+};
+
+/** The result of a release mutation using a release pipeline access key. */
+export type AccessKeyReleasePayload = {
+  __typename?: "AccessKeyReleasePayload";
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars["Float"];
+  /** The release that was created or updated. */
+  release: AccessKeyRelease;
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
+};
+
+/** A release pipeline returned using a release pipeline access key. */
+export type AccessKeyReleasePipeline = {
+  __typename?: "AccessKeyReleasePipeline";
+  /** The unique identifier of the release pipeline. */
+  id: Scalars["ID"];
+  /** Glob patterns used to filter commits by changed file path. An empty array means all commits are included. */
+  includePathPatterns: Array<Scalars["String"]>;
+};
+
+/** A release stage returned using a release pipeline access key. */
+export type AccessKeyReleaseStage = {
+  __typename?: "AccessKeyReleaseStage";
+  /** The name of the release stage. */
+  name: Scalars["String"];
+};
+
 /** Activity collection filtering options. */
 export type ActivityCollectionFilter = {
   /** Compound filters, all of which need to be matched by the activity. */
@@ -117,6 +167,8 @@ export type AgentActivity = Node & {
   ephemeral: Scalars["Boolean"];
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** [Internal] What the turn pushed to its branch, captured in the sandbox at push time. Only set on the activity for a successful push. */
+  pushSummary?: Maybe<AgentActivityPushSummary>;
   /** [Internal] Whether this activity is queued for later processing. Queued activities are not sent to the agent until the session reaches a terminal state. */
   queued: Scalars["Boolean"];
   /** [Internal] The time at which the prompt actually entered the conversation. Only set when the prompt did not enter the conversation immediately (i.e., it was queued and later dequeued). Null for prompts that were sent directly and for non-prompt activities. */
@@ -293,6 +345,34 @@ export type AgentActivityPromptCreateInputContent = {
   bodyData?: InputMaybe<Scalars["JSON"]>;
   /** The type of activity. */
   type?: AgentActivityType;
+};
+
+/** [Internal] Diff stats for a single commit a coding agent turn pushed, measured in the sandbox at push time. */
+export type AgentActivityPushCommit = {
+  __typename?: "AgentActivityPushCommit";
+  /** The number of lines the commit added across the files it touched. */
+  additions: Scalars["Int"];
+  /** The number of files the commit changed. */
+  changedFiles: Scalars["Int"];
+  /** The number of lines the commit removed across the files it touched. */
+  deletions: Scalars["Int"];
+  /** The commit sha. */
+  sha: Scalars["String"];
+};
+
+/** [Internal] What a coding agent turn pushed to its branch, measured in the sandbox at push time. The range is cumulative within a turn, so a turn that pushes several times reports every commit each time — consumers use the last summary in a turn rather than combining across pushes. */
+export type AgentActivityPushSummary = {
+  __typename?: "AgentActivityPushSummary";
+  /** Shas of the turn's commits beyond the detailed cap, newest first. Stats aren't captured for these. */
+  additionalCommitShas: Array<Scalars["String"]>;
+  /** The commit the turn started from — the sandbox HEAD when the prompt began. */
+  baseSha: Scalars["String"];
+  /** The number of non-merge commits the turn added. Equals the length of commits plus additionalCommitShas. */
+  commitCount: Scalars["Int"];
+  /** The turn's non-merge commits with stats, newest first. Capped, so it may hold fewer commits than commitCount reports. */
+  commits: Array<AgentActivityPushCommit>;
+  /** The commit that was pushed. */
+  headSha: Scalars["String"];
 };
 
 /** Content for a response activity. */
@@ -873,6 +953,8 @@ export type AiConversation = Node & {
   initialSource: AiConversationInitialSource;
   /** [Internal] The initiative this shared conversation is attached to. Null if the conversation is private. */
   initiative?: Maybe<Initiative>;
+  /** [Internal] The issue this shared conversation is attached to. Null if the conversation is private. */
+  issue?: Maybe<Issue>;
   /** The iteration ID when this conversation is part of an agentic workflow. Used to track multi-step workflow executions. Null for non-workflow conversations. */
   iterationId?: Maybe<Scalars["String"]>;
   /** The ordered sequence of conversation parts (prompts, text responses, reasoning steps, tool calls, errors, and widgets) that make up this conversation's visible history. */
@@ -1369,6 +1451,7 @@ export enum AiConversationInitialSource {
   Onboarding = "onboarding",
   PullRequestComment = "pullRequestComment",
   Slack = "slack",
+  SubAgent = "subAgent",
   Workflow = "workflow",
 }
 
@@ -1842,6 +1925,31 @@ export type AiConversationSearchEntitiesToolCallResultEntities = {
   type: Scalars["String"];
 };
 
+export type AiConversationSpawnSubagentToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationSpawnSubagentToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationSpawnSubagentToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  result?: Maybe<AiConversationSpawnSubagentToolCallResult>;
+};
+
+export type AiConversationSpawnSubagentToolCallArgs = {
+  __typename?: "AiConversationSpawnSubagentToolCallArgs";
+  description: Scalars["String"];
+};
+
+export type AiConversationSpawnSubagentToolCallResult = {
+  __typename?: "AiConversationSpawnSubagentToolCallResult";
+  conversationId: Scalars["String"];
+};
+
 export type AiConversationStartCodingSessionToolCall = AiConversationBaseToolCall & {
   __typename?: "AiConversationStartCodingSessionToolCall";
   /** The arguments to the tool call. */
@@ -1985,6 +2093,7 @@ export enum AiConversationTool {
   RetryPullRequestCheck = "RetryPullRequestCheck",
   SearchDocumentation = "SearchDocumentation",
   SearchEntities = "SearchEntities",
+  SpawnSubagent = "SpawnSubagent",
   StartCodingSession = "StartCodingSession",
   SubscribeToEvent = "SubscribeToEvent",
   SuggestRepository = "SuggestRepository",
@@ -2025,6 +2134,7 @@ export type AiConversationToolCall =
   | AiConversationRetryPullRequestCheckToolCall
   | AiConversationSearchDocumentationToolCall
   | AiConversationSearchEntitiesToolCall
+  | AiConversationSpawnSubagentToolCall
   | AiConversationStartCodingSessionToolCall
   | AiConversationSubscribeToEventToolCall
   | AiConversationSuggestRepositoryToolCall
@@ -2127,6 +2237,8 @@ export type AiConversationUpdateEntityToolCallResult = {
 /** [Internal] Per-user state for an AI conversation, tracking read status and other user-specific data. */
 export type AiConversationUserState = {
   __typename?: "AiConversationUserState";
+  /** The ID of the elicitation part the user dismissed. */
+  dismissedElicitationId?: Maybe<Scalars["String"]>;
   /** The time at which the user most recently viewed the conversation. */
   lastReadAt?: Maybe<Scalars["DateTime"]>;
   /** The ID of the user this state belongs to. */
@@ -7672,6 +7784,8 @@ export type ImageUploadFromUrlPayload = {
 export type InheritanceEntityMapping = {
   /** Mapping of the IssueLabel ID to the new IssueLabel name. */
   issueLabels?: InputMaybe<Scalars["JSONObject"]>;
+  /** Mapping of the ProjectLabel ID to the new ProjectLabel name. */
+  projectLabels?: InputMaybe<Scalars["JSONObject"]>;
   /** Mapping of the WorkflowState ID to the new WorkflowState ID. */
   workflowStates: Scalars["JSONObject"];
 };
@@ -11920,6 +12034,8 @@ export type IssueSuggestion = Node & {
   issueId: Scalars["String"];
   /** [Internal] Metadata associated with the suggestion, including confidence scores and classification. Null if no metadata is available. */
   metadata?: Maybe<IssueSuggestionMetadata>;
+  /** The suggestion reasons with entity mentions resolved to readable labels and structured references. */
+  presentedReasons: Array<PresentedIssueSuggestionReason>;
   /** [Internal] The current state of the suggestion: active, accepted, or dismissed. */
   state: IssueSuggestionState;
   /** [Internal] The date when the suggestion's state was last changed (e.g., from active to accepted or dismissed). */
@@ -12042,6 +12158,19 @@ export type IssueSuggestionMetadata = {
   score?: Maybe<Scalars["Float"]>;
   /** [Internal] The AI prompt variant that generated this suggestion. Null if not applicable. */
   variant?: Maybe<Scalars["String"]>;
+};
+
+/** An entity referenced by a presented issue suggestion reason. */
+export type IssueSuggestionReasonReference = {
+  __typename?: "IssueSuggestionReasonReference";
+  /** The referenced entity identifier. */
+  id: Scalars["String"];
+  /** The readable label for the referenced entity. */
+  label?: Maybe<Scalars["String"]>;
+  /** The title of the referenced entity, when available. */
+  title?: Maybe<Scalars["String"]>;
+  /** The referenced entity type. */
+  type: Scalars["String"];
 };
 
 /** The state of an issue suggestion, indicating whether it is active, accepted, or dismissed. */
@@ -13185,6 +13314,8 @@ export type Mutation = {
   organizationUpdate: OrganizationPayload;
   /** [INTERNAL] Submits a Startup Program partner application from the website, creating a triage issue for the startup team. */
   partnerApplicationCreate: ContactPayload;
+  /** [Internal] Redeems a partner-offer token for one of the viewer's existing workspaces, recording a pending redemption that is applied when the workspace subscribes. Requires an admin or owner role in the workspace. */
+  partnerOfferRedeem: PartnerOfferRedeemPayload;
   /** [INTERNAL] Finish passkey login process. */
   passkeyLoginFinish: AuthResolverResponse;
   /** [INTERNAL] Starts passkey login process. */
@@ -13272,7 +13403,7 @@ export type Mutation = {
   /** Marks a release as completed. If version is provided, completes that specific release; otherwise completes the most recent started release. */
   releaseComplete: ReleasePayload;
   /** Marks a release as completed using an access key. If version is provided, completes that specific release; otherwise completes the most recent started release. The pipeline is inferred from the access key. */
-  releaseCompleteByAccessKey: ReleasePayload;
+  releaseCompleteByAccessKey: AccessKeyReleasePayload;
   /** Creates a new release in a pipeline. If no stage is specified, defaults to the first completed stage for continuous pipelines or the first started stage for scheduled pipelines. */
   releaseCreate: ReleasePayload;
   /** Moves a release to the trash bin. Trashed releases are archived and will be permanently deleted after a retention period. If the release is already archived, it is marked as trashed with a fresh archive timestamp. */
@@ -13304,7 +13435,7 @@ export type Mutation = {
   /** Syncs release data by resolving issue and pull request references and associating them with a release. For continuous pipelines, creates a new completed release. For scheduled pipelines, finds or creates a started release and accumulates issues into it. */
   releaseSync: ReleasePayload;
   /** Syncs release data using an access key for CI/CD integration. The pipeline is automatically inferred from the access key's configured resources, so no pipeline ID is needed in the input. */
-  releaseSyncByAccessKey: ReleasePayload;
+  releaseSyncByAccessKey: AccessKeyReleasePayload;
   /** Unarchives a release. */
   releaseUnarchive: ReleaseArchivePayload;
   /** Updates an existing release by ID. Supports updating name, description, version, commit SHA, pipeline, stage, and dates. */
@@ -13312,7 +13443,7 @@ export type Mutation = {
   /** Updates a release by pipeline identifier. Finds the release by version or latest started/planned release, and optionally transitions it to a new stage by name. */
   releaseUpdateByPipeline: ReleasePayload;
   /** Updates a release by pipeline using an access key. */
-  releaseUpdateByPipelineByAccessKey: ReleasePayload;
+  releaseUpdateByPipelineByAccessKey: AccessKeyReleasePayload;
   /** Re-sends a workspace invitation email for the specified invite ID. */
   resendOrganizationInvite: DeletePayload;
   /** Re-sends a workspace invitation email to the specified email address, if an outstanding invite exists for that address. */
@@ -13664,6 +13795,7 @@ export type MutationCreateInitiativeUpdateReminderArgs = {
 
 export type MutationCreateOrganizationFromOnboardingArgs = {
   input: CreateOrganizationInput;
+  partnerOfferToken?: InputMaybe<Scalars["String"]>;
   sessionId?: InputMaybe<Scalars["String"]>;
   survey?: InputMaybe<OnboardingCustomerSurvey>;
 };
@@ -14304,6 +14436,7 @@ export type MutationIntegrationUpdateArgs = {
 };
 
 export type MutationIntegrationZendeskArgs = {
+  botUserRole?: InputMaybe<Scalars["String"]>;
   code: Scalars["String"];
   redirectUri: Scalars["String"];
   scope: Scalars["String"];
@@ -14672,6 +14805,11 @@ export type MutationPartnerApplicationCreateArgs = {
   input: PartnerApplicationCreateInput;
 };
 
+export type MutationPartnerOfferRedeemArgs = {
+  organizationId: Scalars["String"];
+  token: Scalars["String"];
+};
+
 export type MutationPasskeyLoginFinishArgs = {
   authId: Scalars["String"];
   response: Scalars["JSONObject"];
@@ -14713,6 +14851,7 @@ export type MutationProjectExternalSyncDisableArgs = {
 
 export type MutationProjectLabelCreateArgs = {
   input: ProjectLabelCreateInput;
+  replaceTeamLabels?: InputMaybe<Scalars["Boolean"]>;
 };
 
 export type MutationProjectLabelDeleteArgs = {
@@ -14730,6 +14869,7 @@ export type MutationProjectLabelRetireArgs = {
 export type MutationProjectLabelUpdateArgs = {
   id: Scalars["String"];
   input: ProjectLabelUpdateInput;
+  replaceTeamLabels?: InputMaybe<Scalars["Boolean"]>;
 };
 
 export type MutationProjectMilestoneCreateArgs = {
@@ -16828,6 +16968,8 @@ export type Organization = Node & {
   defaultFeedSummarySchedule?: Maybe<FeedSummarySchedule>;
   /** The default home view for members of the workspace who have not chosen their own default. */
   defaultHomeView?: Maybe<Scalars["String"]>;
+  /** The id of the specific initiative, project, view, dashboard, or page tab used as the default home view. The type of entity is given by defaultHomeView. */
+  defaultHomeViewTargetId?: Maybe<Scalars["String"]>;
   /** The time at which deletion of the workspace was requested. Null if no deletion has been requested. */
   deletionRequestedAt?: Maybe<Scalars["DateTime"]>;
   /** [Internal] Facets associated with the workspace, used for configuring custom views and filters. */
@@ -17388,6 +17530,8 @@ export type OrganizationSecuritySettingsInput = {
   teamCreationRole?: InputMaybe<UserRoleType>;
   /** The minimum role required to manage workspace templates. */
   templateManagementRole?: InputMaybe<UserRoleType>;
+  /** The minimum role required to create initiatives without a lead team or move initiatives between workspace and team scopes. */
+  workspaceInitiativesRole?: InputMaybe<UserRoleType>;
 };
 
 /** Input for starting a workspace trial on a specific plan. */
@@ -17443,6 +17587,8 @@ export type OrganizationUpdateInput = {
   defaultFeedSummarySchedule?: InputMaybe<FeedSummarySchedule>;
   /** The default home view for members of the workspace who have not chosen their own default. */
   defaultHomeView?: InputMaybe<Scalars["String"]>;
+  /** The id of the specific initiative, project, view, or dashboard used as the default home view. The type of entity is given by defaultHomeView. */
+  defaultHomeViewTargetId?: InputMaybe<Scalars["String"]>;
   /** Whether the workspace has enabled the feed feature. */
   feedEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** The month at which the fiscal year starts. */
@@ -17784,17 +17930,64 @@ export type PartnerApplicationCreateInput = {
   role: Scalars["String"];
 };
 
+/** [Internal] The kind of benefit a partner offer grants, which determines how its discount value is interpreted. */
+export enum PartnerDiscountType {
+  AmountOff = "amount_off",
+  FreeSeats = "free_seats",
+  PercentOff = "percent_off",
+}
+
 /** [Internal] Public details of an active partner-program offer. */
 export type PartnerOfferDetailsPayload = {
   __typename?: "PartnerOfferDetailsPayload";
+  /** How the offer's benefit is applied, which determines the meaning of `discountValue`. */
+  discountType: PartnerDiscountType;
+  /** The magnitude of the benefit, interpreted according to `discountType`. */
+  discountValue: Scalars["Int"];
+  /** Duration of the benefit in months, or null when the benefit is not time-bounded. */
+  durationMonths?: Maybe<Scalars["Int"]>;
   /** The unique identifier of the offer. */
   id: Scalars["String"];
   /** Display name of the partner. */
   partnerName: Scalars["String"];
   /** Stable, URL-safe identifier for the partner. */
   partnerSlug: Scalars["String"];
-  /** Short-lived signed token to carry the redemption through signup. Embeds a freshly minted redemption identifier, the offer identifier, and its mint and expiry times. */
+  /** Short-lived signed token that carries the redemption through signup or an existing-workspace redemption. Embeds a pre-minted redemption identifier, the offer identifier, and its mint and expiry times. */
   token: Scalars["String"];
+};
+
+/** [Internal] Why a workspace cannot redeem a partner offer. */
+export enum PartnerOfferIneligibilityReason {
+  AlreadyRedeemed = "alreadyRedeemed",
+  AlreadySubscribed = "alreadySubscribed",
+  OtherOfferPending = "otherOfferPending",
+}
+
+/** [Internal] The result of redeeming a partner offer for an existing workspace. */
+export type PartnerOfferRedeemPayload = {
+  __typename?: "PartnerOfferRedeemPayload";
+  /** Whether the redemption was recorded. */
+  success: Scalars["Boolean"];
+};
+
+/** [Internal] One of the viewer's workspaces and whether it can redeem a partner offer. */
+export type PartnerOfferWorkspacePayload = {
+  __typename?: "PartnerOfferWorkspacePayload";
+  /** Whether the workspace can redeem the offer. */
+  eligible: Scalars["Boolean"];
+  /** Why the workspace cannot redeem the offer. Null when the workspace is eligible. */
+  ineligibilityReason?: Maybe<PartnerOfferIneligibilityReason>;
+  /** The identifier of the workspace. */
+  organizationId: Scalars["String"];
+};
+
+/** [Internal] The viewer's workspaces hosted in the serving cell, with partner-offer eligibility. */
+export type PartnerOfferWorkspacesPayload = {
+  __typename?: "PartnerOfferWorkspacesPayload";
+  /** Details of the offer the token was minted for. */
+  offer: PartnerOfferDetailsPayload;
+  /** The viewer's workspaces hosted in the cell that served this request. Workspaces hosted in other cells are not included; query each cell to assemble the full list. */
+  workspaces: Array<PartnerOfferWorkspacePayload>;
 };
 
 export type PasskeyLoginStartResponse = {
@@ -17934,6 +18127,15 @@ export enum PostType {
   Summary = "summary",
   Update = "update",
 }
+
+/** A readable issue suggestion reason and its structured entity references. */
+export type PresentedIssueSuggestionReason = {
+  __typename?: "PresentedIssueSuggestionReason";
+  /** Entities referenced by the reason. */
+  references: Array<IssueSuggestionReasonReference>;
+  /** The reason with entity mentions rendered as readable text. */
+  text: Scalars["String"];
+};
 
 /** Issue priority sorting options. */
 export type PrioritySort = {
@@ -18106,6 +18308,8 @@ export type Project = Node & {
   icon?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** [Internal] The human-readable identifier of the project. Returns the custom identifier override when set, otherwise the workspace default `<prefix>-<number>`. Null for legacy projects that have not been backfilled. */
+  identifier?: Maybe<Scalars["String"]>;
   /** The number of in-progress estimation points at the end of each week since project creation. Each entry represents one week. */
   inProgressScopeHistory: Array<Scalars["Float"]>;
   /** Associations of this project to parent initiatives. */
@@ -18130,6 +18334,8 @@ export type Project = Node & {
   lastUpdate?: Maybe<ProjectUpdate>;
   /** The user who leads the project. The project lead is typically responsible for posting status updates and driving the project to completion. Null if no lead is assigned. */
   lead?: Maybe<User>;
+  /** [Internal] The team that leads the project. Null if no lead team is assigned. */
+  leadTeam?: Maybe<Team>;
   /** Users that are members of the project. */
   members: UserConnection;
   /** The ID of the Microsoft Teams channel connected to the project, if any. */
@@ -18138,6 +18344,8 @@ export type Project = Node & {
   name: Scalars["String"];
   /** Customer needs associated with the project. */
   needs: CustomerNeedConnection;
+  /** [Internal] Identifiers (default and custom) that this project has previously held. Used to resolve URLs that referenced an older identifier. */
+  previousIdentifiers: Array<Scalars["String"]>;
   /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
   priority: Scalars["Int"];
   /** The priority of the project as a label. */
@@ -18156,6 +18364,8 @@ export type Project = Node & {
   projectUpdates: ProjectUpdateConnection;
   /** Relations associated with this project. */
   relations: ProjectRelationConnection;
+  /** The number of resources associated with the project, including documents, external links, and attachments. */
+  resourceCount: Scalars["Int"];
   /** The overall scope (total estimate points) of the project. */
   scope: Scalars["Float"];
   /** The total scope (estimation points) of the project at the end of each week since project creation. Each entry represents one week. */
@@ -18575,6 +18785,8 @@ export type ProjectCreateInput = {
   lastAppliedTemplateId?: InputMaybe<Scalars["String"]>;
   /** The identifier of the project lead. */
   leadId?: InputMaybe<Scalars["String"]>;
+  /** [Internal] The identifier of the team that leads the project. */
+  leadTeamId?: InputMaybe<Scalars["String"]>;
   /** The identifiers of the members of this project. */
   memberIds?: InputMaybe<Array<Scalars["String"]>>;
   /** The name of the project. */
@@ -19546,6 +19758,8 @@ export type ProjectSearchResult = Node & {
   icon?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** [Internal] The human-readable identifier of the project. Returns the custom identifier override when set, otherwise the workspace default `<prefix>-<number>`. Null for legacy projects that have not been backfilled. */
+  identifier?: Maybe<Scalars["String"]>;
   /** The number of in-progress estimation points at the end of each week since project creation. Each entry represents one week. */
   inProgressScopeHistory: Array<Scalars["Float"]>;
   /** Associations of this project to parent initiatives. */
@@ -19570,6 +19784,8 @@ export type ProjectSearchResult = Node & {
   lastUpdate?: Maybe<ProjectUpdate>;
   /** The user who leads the project. The project lead is typically responsible for posting status updates and driving the project to completion. Null if no lead is assigned. */
   lead?: Maybe<User>;
+  /** [Internal] The team that leads the project. Null if no lead team is assigned. */
+  leadTeam?: Maybe<Team>;
   /** Users that are members of the project. */
   members: UserConnection;
   /** Metadata related to search result. */
@@ -19580,6 +19796,8 @@ export type ProjectSearchResult = Node & {
   name: Scalars["String"];
   /** Customer needs associated with the project. */
   needs: CustomerNeedConnection;
+  /** [Internal] Identifiers (default and custom) that this project has previously held. Used to resolve URLs that referenced an older identifier. */
+  previousIdentifiers: Array<Scalars["String"]>;
   /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
   priority: Scalars["Int"];
   /** The priority of the project as a label. */
@@ -19598,6 +19816,8 @@ export type ProjectSearchResult = Node & {
   projectUpdates: ProjectUpdateConnection;
   /** Relations associated with this project. */
   relations: ProjectRelationConnection;
+  /** The number of resources associated with the project, including documents, external links, and attachments. */
+  resourceCount: Scalars["Int"];
   /** The overall scope (total estimate points) of the project. */
   scope: Scalars["Float"];
   /** The total scope (estimation points) of the project at the end of each week since project creation. Each entry represents one week. */
@@ -20193,6 +20413,8 @@ export type ProjectUpdateInput = {
   lastAppliedTemplateId?: InputMaybe<Scalars["String"]>;
   /** The identifier of the project lead. */
   leadId?: InputMaybe<Scalars["String"]>;
+  /** [Internal] The identifier of the team that leads the project. */
+  leadTeamId?: InputMaybe<Scalars["String"]>;
   /** The identifiers of the members of this project. */
   memberIds?: InputMaybe<Array<Scalars["String"]>>;
   /** The name of the project. */
@@ -20393,6 +20615,8 @@ export type ProjectWebhookPayload = {
   icon?: Maybe<Scalars["String"]>;
   /** The ID of the entity. */
   id: Scalars["String"];
+  /** The human-readable identifier of the project. */
+  identifier?: Maybe<Scalars["String"]>;
   /** The number of in progress estimation points after each week. */
   inProgressScopeHistory: Array<Scalars["Float"]>;
   /** The initiatives associated with the project. */
@@ -20415,6 +20639,8 @@ export type ProjectWebhookPayload = {
   milestones?: Maybe<Array<ProjectMilestoneChildWebhookPayload>>;
   /** The project's name. */
   name: Scalars["String"];
+  /** Previous identifiers of the project. */
+  previousIdentifiers?: Maybe<Array<Scalars["String"]>>;
   /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
   priority: Scalars["Float"];
   /** The sort order for the project within the organization, when ordered by priority. */
@@ -20941,7 +21167,7 @@ export type Query = {
   /** All issues. Returns a paginated list of issues visible to the authenticated user. Can be filtered by various criteria including team, assignee, state, labels, project, and cycle. */
   issues: IssueConnection;
   /** Returns the latest release for the pipeline associated with the access key. */
-  latestReleaseByAccessKey?: Maybe<Release>;
+  latestReleaseByAccessKey?: Maybe<AccessKeyRelease>;
   /** [Internal] Lists Microsoft Teams teams and channels accessible to the connecting user. Uses the user's microsoftPersonal integration for auth. Used by the project channel picker dialog to populate the team/channel dropdowns. */
   microsoftTeamsChannels: MicrosoftTeamsChannelsPayload;
   /** A specific notification by ID. */
@@ -20974,6 +21200,8 @@ export type Query = {
   organizationMeta?: Maybe<OrganizationMeta>;
   /** [Internal] Fetches public details of an active partner-program offer by its partner slug. Returns null when no active offer matches the slug. */
   partnerOfferDetails?: Maybe<PartnerOfferDetailsPayload>;
+  /** [Internal] Fetches the viewer's workspaces hosted in the serving cell, with each workspace's eligibility to redeem the given partner-offer token. Returns null when the token is invalid or the offer is no longer available. */
+  partnerOfferWorkspaces?: Maybe<PartnerOfferWorkspacesPayload>;
   /** Returns a single project by its identifier or URL slug. */
   project: Project;
   /** Suggests filters for a project view based on a text prompt. */
@@ -21006,8 +21234,8 @@ export type Query = {
   pushSubscriptionTest: PushSubscriptionTestPayload;
   /** The current rate limit status for the authenticated client, including remaining quota and reset timing for each limit type. */
   rateLimitStatus: RateLimitPayload;
-  /** Returns recent in-progress and completed releases for the pipeline associated with the access key, ordered with in-progress first then most recently completed. Used by `linear-release` to walk candidates and pick the one whose `commitSha` is an ancestor of the current build commit, which disambiguates concurrent release trains on the same pipeline. */
-  recentReleasesByAccessKey: Array<Release>;
+  /** Returns recent releases for the pipeline associated with the access key, ordered with in-progress releases first, followed by the most recently completed releases. */
+  recentReleasesByAccessKey: Array<AccessKeyRelease>;
   /** Fetch a single release by its UUID or slug identifier. */
   release: Release;
   /** Fetch a release note by its UUID or slug identifier. */
@@ -21016,8 +21244,8 @@ export type Query = {
   releaseNotes: ReleaseNoteConnection;
   /** Fetch a single release pipeline by its UUID or slug identifier. */
   releasePipeline: ReleasePipeline;
-  /** Returns a release pipeline by ID. Requires the access key to have access to the pipeline. */
-  releasePipelineByAccessKey: ReleasePipeline;
+  /** Returns the release pipeline associated with the access key. */
+  releasePipelineByAccessKey: AccessKeyReleasePipeline;
   /** All release pipelines in the workspace, with optional filtering and sorting. */
   releasePipelines: ReleasePipelineConnection;
   /** Search releases with optional text matching against name, version, and pipeline name. When no search term is provided, returns releases ordered by stage priority (started > planned > completed > canceled). */
@@ -21689,6 +21917,10 @@ export type QueryOrganizationMetaArgs = {
 
 export type QueryPartnerOfferDetailsArgs = {
   slug: Scalars["String"];
+};
+
+export type QueryPartnerOfferWorkspacesArgs = {
+  token: Scalars["String"];
 };
 
 export type QueryProjectArgs = {
@@ -22473,6 +22705,8 @@ export type ReleaseDebugSinkInput = {
   includeSubjects?: InputMaybe<Array<Scalars["String"]>>;
   /** List of commit SHAs that were inspected. */
   inspectedShas: Array<Scalars["String"]>;
+  /** Custom regex used to extract issue identifiers from commit subjects. */
+  issuePattern?: InputMaybe<Scalars["String"]>;
   /** Map of issue identifiers to their source information. */
   issues: Scalars["JSONObject"];
   /** Pull request debug information. */
@@ -26452,7 +26686,7 @@ export type UserSettingsUpdateInput = {
   notificationChannelPreferences?: InputMaybe<PartialNotificationChannelPreferencesInput>;
   /** The user's notification delivery preferences. */
   notificationDeliveryPreferences?: InputMaybe<NotificationDeliveryPreferencesInput>;
-  /** The user's settings. */
+  /** The user's settings. Merged key by key into the existing settings: keys missing from the object are left unchanged, and a key set to null is removed. */
   settings?: InputMaybe<Scalars["JSONObject"]>;
   /** Whether this user is subscribed to changelog email or not. */
   subscribedToChangelog?: InputMaybe<Scalars["Boolean"]>;
@@ -26651,6 +26885,8 @@ export type ViewPreferencesValues = {
   automationOrdering?: Maybe<Scalars["String"]>;
   /** Whether to show sub-team loops. */
   automationShowDescendants?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show disabled loops. */
+  automationShowDisabled?: Maybe<Scalars["Boolean"]>;
   /** The loop stats period. */
   automationStatsPeriod?: Maybe<Scalars["String"]>;
   /** Whether issues in closed columns should be ordered by recency. */
@@ -26799,6 +27035,8 @@ export type ViewPreferencesValues = {
   initiativeFieldDescription?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the initiative active projects health field. */
   initiativeFieldHealth?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show the initiative identifier field. */
+  initiativeFieldId?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the initiative health field. */
   initiativeFieldInitiativeHealth?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the initiative labels field. */
@@ -26873,6 +27111,8 @@ export type ViewPreferencesValues = {
   projectFieldHealth?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the project health field on the timeline. */
   projectFieldHealthTimeline?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show the project identifier field. */
+  projectFieldId?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the project initiatives field. */
   projectFieldInitiatives?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the project issue count field. */
@@ -26993,10 +27233,14 @@ export type ViewPreferencesValues = {
   reviewFieldGithubTeam?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the review identifier field. */
   reviewFieldIdentifier?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show the pull request opened timestamp. */
+  reviewFieldOpenedAt?: Maybe<Scalars["Boolean"]>;
   /** No longer used. Previously controlled the review preview links field. */
   reviewFieldPreviewLinks?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the review repository field. */
   reviewFieldRepository?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show review status details on a second line. */
+  reviewFieldStatusDetails?: Maybe<Scalars["Boolean"]>;
   /** The review grouping. */
   reviewGrouping?: Maybe<Scalars["String"]>;
   /** The review view ordering. */
@@ -27047,6 +27291,8 @@ export type ViewPreferencesValues = {
   showNestedInitiatives?: Maybe<Scalars["Boolean"]>;
   /** Whether to show only snoozed items. */
   showOnlySnoozedItems?: Maybe<Scalars["Boolean"]>;
+  /** [Internal] Whether parent initiatives that do not match the view are shown. Defaults to true when unset. */
+  showParentInitiatives?: Maybe<Scalars["Boolean"]>;
   /** Whether to show parent issues for sub-issues. */
   showParents?: Maybe<Scalars["Boolean"]>;
   /** Whether to show read items. */
@@ -28489,6 +28735,27 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
               "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
             >;
           })
+      | ({ __typename: "AiConversationSpawnSubagentToolCall" } & Pick<
+          AiConversationSpawnSubagentToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationSpawnSubagentToolCallArgs" } & Pick<
+                AiConversationSpawnSubagentToolCallArgs,
+                "description"
+              >
+            >;
+            result?: Maybe<
+              { __typename: "AiConversationSpawnSubagentToolCallResult" } & Pick<
+                AiConversationSpawnSubagentToolCallResult,
+                "conversationId"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
       | ({ __typename: "AiConversationStartCodingSessionToolCall" } & Pick<
           AiConversationStartCodingSessionToolCall,
           "rawArgs" | "name" | "rawResult"
@@ -29092,6 +29359,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "showArchivedItems"
         | "customerPageNeedsShowCompletedIssuesAndProjects"
         | "projectCustomerNeedsShowCompletedIssuesLast"
+        | "automationShowDisabled"
         | "showDraftReviews"
         | "showEmptyGroupsBoard"
         | "showEmptyGroupsList"
@@ -29106,6 +29374,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "showParents"
         | "fieldPreviewLinks"
         | "showReadItems"
+        | "reviewFieldStatusDetails"
         | "showSnoozedItems"
         | "showSubInitiativeProjects"
         | "showNestedInitiatives"
@@ -29143,6 +29412,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "initiativeFieldDateCreated"
         | "initiativeFieldDescription"
         | "initiativeFieldInitiativeHealth"
+        | "initiativeFieldId"
         | "initiativeFieldLabels"
         | "initiativeFieldLeadTeam"
         | "initiativeFieldOwner"
@@ -29187,6 +29457,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "fieldProject"
         | "projectFieldHealthTimeline"
         | "projectFieldHealth"
+        | "projectFieldId"
         | "projectFieldInitiatives"
         | "projectFieldIssues"
         | "projectFieldLabels"
@@ -29218,6 +29489,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "projectFieldTeams"
         | "projectFieldDateUpdated"
         | "timelineShowProjectsAside"
+        | "reviewFieldOpenedAt"
         | "fieldPullRequests"
         | "continuousPipelineReleaseFieldReleaseDate"
         | "scheduledPipelineReleaseFieldReleaseDate"
@@ -29346,6 +29618,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "showArchivedItems"
             | "customerPageNeedsShowCompletedIssuesAndProjects"
             | "projectCustomerNeedsShowCompletedIssuesLast"
+            | "automationShowDisabled"
             | "showDraftReviews"
             | "showEmptyGroupsBoard"
             | "showEmptyGroupsList"
@@ -29360,6 +29633,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "showParents"
             | "fieldPreviewLinks"
             | "showReadItems"
+            | "reviewFieldStatusDetails"
             | "showSnoozedItems"
             | "showSubInitiativeProjects"
             | "showNestedInitiatives"
@@ -29397,6 +29671,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "initiativeFieldDateCreated"
             | "initiativeFieldDescription"
             | "initiativeFieldInitiativeHealth"
+            | "initiativeFieldId"
             | "initiativeFieldLabels"
             | "initiativeFieldLeadTeam"
             | "initiativeFieldOwner"
@@ -29441,6 +29716,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "fieldProject"
             | "projectFieldHealthTimeline"
             | "projectFieldHealth"
+            | "projectFieldId"
             | "projectFieldInitiatives"
             | "projectFieldIssues"
             | "projectFieldLabels"
@@ -29472,6 +29748,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "projectFieldTeams"
             | "projectFieldDateUpdated"
             | "timelineShowProjectsAside"
+            | "reviewFieldOpenedAt"
             | "fieldPullRequests"
             | "continuousPipelineReleaseFieldReleaseDate"
             | "scheduledPipelineReleaseFieldReleaseDate"
@@ -29605,6 +29882,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "showArchivedItems"
             | "customerPageNeedsShowCompletedIssuesAndProjects"
             | "projectCustomerNeedsShowCompletedIssuesLast"
+            | "automationShowDisabled"
             | "showDraftReviews"
             | "showEmptyGroupsBoard"
             | "showEmptyGroupsList"
@@ -29619,6 +29897,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "showParents"
             | "fieldPreviewLinks"
             | "showReadItems"
+            | "reviewFieldStatusDetails"
             | "showSnoozedItems"
             | "showSubInitiativeProjects"
             | "showNestedInitiatives"
@@ -29656,6 +29935,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "initiativeFieldDateCreated"
             | "initiativeFieldDescription"
             | "initiativeFieldInitiativeHealth"
+            | "initiativeFieldId"
             | "initiativeFieldLabels"
             | "initiativeFieldLeadTeam"
             | "initiativeFieldOwner"
@@ -29700,6 +29980,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "fieldProject"
             | "projectFieldHealthTimeline"
             | "projectFieldHealth"
+            | "projectFieldId"
             | "projectFieldInitiatives"
             | "projectFieldIssues"
             | "projectFieldLabels"
@@ -29731,6 +30012,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "projectFieldTeams"
             | "projectFieldDateUpdated"
             | "timelineShowProjectsAside"
+            | "reviewFieldOpenedAt"
             | "fieldPullRequests"
             | "continuousPipelineReleaseFieldReleaseDate"
             | "scheduledPipelineReleaseFieldReleaseDate"
@@ -32708,6 +32990,7 @@ export type ProjectFragment = { __typename: "Project" } & Pick<
   | "completedScopeHistory"
   | "completedIssueCountHistory"
   | "inProgressScopeHistory"
+  | "resourceCount"
   | "health"
   | "progress"
   | "scope"
@@ -32800,6 +33083,18 @@ export type AiConversationPromptPartFragment = { __typename: "AiConversationProm
       "feedback" | "evalLogId" | "phase" | "endedAt" | "startedAt" | "turnId"
     >;
     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+  };
+
+export type PresentedIssueSuggestionReasonFragment = { __typename: "PresentedIssueSuggestionReason" } & Pick<
+  PresentedIssueSuggestionReason,
+  "text"
+> & {
+    references: Array<
+      { __typename: "IssueSuggestionReasonReference" } & Pick<
+        IssueSuggestionReasonReference,
+        "label" | "id" | "type" | "title"
+      >
+    >;
   };
 
 export type AiConversationReasoningPartFragment = { __typename: "AiConversationReasoningPart" } & Pick<
@@ -33104,6 +33399,11 @@ export type ReleaseHistoryFragment = { __typename: "ReleaseHistory" } & Pick<
   "entries" | "updatedAt" | "archivedAt" | "createdAt" | "id"
 > & { release: { __typename?: "Release" } & Pick<Release, "id"> };
 
+export type AccessKeyReleasePipelineFragment = { __typename: "AccessKeyReleasePipeline" } & Pick<
+  AccessKeyReleasePipeline,
+  "includePathPatterns" | "id"
+>;
+
 export type ReleasePipelineFragment = { __typename: "ReleasePipeline" } & Pick<
   ReleasePipeline,
   | "trashed"
@@ -33123,6 +33423,16 @@ export type ReleasePipelineFragment = { __typename: "ReleasePipeline" } & Pick<
     releaseNoteTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
     latestReleaseNote?: Maybe<{ __typename?: "ReleaseNote" } & Pick<ReleaseNote, "id">>;
   };
+
+export type AccessKeyReleaseFragment = { __typename: "AccessKeyRelease" } & Pick<
+  AccessKeyRelease,
+  "commitSha" | "url" | "name" | "archivedAt" | "completedAt" | "createdAt" | "id" | "version"
+> & { stage: { __typename: "AccessKeyReleaseStage" } & Pick<AccessKeyReleaseStage, "name"> };
+
+export type AccessKeyReleaseStageFragment = { __typename: "AccessKeyReleaseStage" } & Pick<
+  AccessKeyReleaseStage,
+  "name"
+>;
 
 export type ReleaseFragment = { __typename: "Release" } & Pick<
   Release,
@@ -34252,6 +34562,27 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
               "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
             >;
           })
+      | ({ __typename: "AiConversationSpawnSubagentToolCall" } & Pick<
+          AiConversationSpawnSubagentToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationSpawnSubagentToolCallArgs" } & Pick<
+                AiConversationSpawnSubagentToolCallArgs,
+                "description"
+              >
+            >;
+            result?: Maybe<
+              { __typename: "AiConversationSpawnSubagentToolCallResult" } & Pick<
+                AiConversationSpawnSubagentToolCallResult,
+                "conversationId"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
       | ({ __typename: "AiConversationStartCodingSessionToolCall" } & Pick<
           AiConversationStartCodingSessionToolCall,
           "rawArgs" | "name" | "rawResult"
@@ -34851,6 +35182,7 @@ export type OrganizationFragment = { __typename: "Organization" } & Pick<
   | "projectUpdateReminderFrequencyInWeeks"
   | "initiativeUpdateRemindersHour"
   | "projectUpdateRemindersHour"
+  | "defaultHomeViewTargetId"
   | "updatedAt"
   | "customerCount"
   | "userCount"
@@ -35120,6 +35452,11 @@ export type ReactionFragment = { __typename: "Reaction" } & Pick<
     projectUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
+
+export type IssueSuggestionReasonReferenceFragment = { __typename: "IssueSuggestionReasonReference" } & Pick<
+  IssueSuggestionReasonReference,
+  "label" | "id" | "type" | "title"
+>;
 
 export type AiConversationErrorPartFragment = { __typename: "AiConversationErrorPart" } & Pick<
   AiConversationErrorPart,
@@ -36378,6 +36715,7 @@ export type ProjectWebhookPayloadFragment = { __typename: "ProjectWebhookPayload
   | "labelIds"
   | "memberIds"
   | "teamIds"
+  | "previousIdentifiers"
   | "id"
   | "convertedFromIssueId"
   | "lastAppliedTemplateId"
@@ -36394,6 +36732,7 @@ export type ProjectWebhookPayloadFragment = { __typename: "ProjectWebhookPayload
   | "startDate"
   | "syncedWith"
   | "health"
+  | "identifier"
   | "icon"
   | "completedScopeHistory"
   | "completedIssueCountHistory"
@@ -38921,6 +39260,7 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "showArchivedItems"
   | "customerPageNeedsShowCompletedIssuesAndProjects"
   | "projectCustomerNeedsShowCompletedIssuesLast"
+  | "automationShowDisabled"
   | "showDraftReviews"
   | "showEmptyGroupsBoard"
   | "showEmptyGroupsList"
@@ -38935,6 +39275,7 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "showParents"
   | "fieldPreviewLinks"
   | "showReadItems"
+  | "reviewFieldStatusDetails"
   | "showSnoozedItems"
   | "showSubInitiativeProjects"
   | "showNestedInitiatives"
@@ -38972,6 +39313,7 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "initiativeFieldDateCreated"
   | "initiativeFieldDescription"
   | "initiativeFieldInitiativeHealth"
+  | "initiativeFieldId"
   | "initiativeFieldLabels"
   | "initiativeFieldLeadTeam"
   | "initiativeFieldOwner"
@@ -39016,6 +39358,7 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "fieldProject"
   | "projectFieldHealthTimeline"
   | "projectFieldHealth"
+  | "projectFieldId"
   | "projectFieldInitiatives"
   | "projectFieldIssues"
   | "projectFieldLabels"
@@ -39047,6 +39390,7 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "projectFieldTeams"
   | "projectFieldDateUpdated"
   | "timelineShowProjectsAside"
+  | "reviewFieldOpenedAt"
   | "fieldPullRequests"
   | "continuousPipelineReleaseFieldReleaseDate"
   | "scheduledPipelineReleaseFieldReleaseDate"
@@ -39217,6 +39561,7 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "showArchivedItems"
       | "customerPageNeedsShowCompletedIssuesAndProjects"
       | "projectCustomerNeedsShowCompletedIssuesLast"
+      | "automationShowDisabled"
       | "showDraftReviews"
       | "showEmptyGroupsBoard"
       | "showEmptyGroupsList"
@@ -39231,6 +39576,7 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "showParents"
       | "fieldPreviewLinks"
       | "showReadItems"
+      | "reviewFieldStatusDetails"
       | "showSnoozedItems"
       | "showSubInitiativeProjects"
       | "showNestedInitiatives"
@@ -39268,6 +39614,7 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "initiativeFieldDateCreated"
       | "initiativeFieldDescription"
       | "initiativeFieldInitiativeHealth"
+      | "initiativeFieldId"
       | "initiativeFieldLabels"
       | "initiativeFieldLeadTeam"
       | "initiativeFieldOwner"
@@ -39312,6 +39659,7 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "fieldProject"
       | "projectFieldHealthTimeline"
       | "projectFieldHealth"
+      | "projectFieldId"
       | "projectFieldInitiatives"
       | "projectFieldIssues"
       | "projectFieldLabels"
@@ -39343,6 +39691,7 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "projectFieldTeams"
       | "projectFieldDateUpdated"
       | "timelineShowProjectsAside"
+      | "reviewFieldOpenedAt"
       | "fieldPullRequests"
       | "continuousPipelineReleaseFieldReleaseDate"
       | "scheduledPipelineReleaseFieldReleaseDate"
@@ -39826,6 +40175,11 @@ export type ReactionPayloadFragment = { __typename: "ReactionPayload" } & Pick<
       };
   };
 
+export type AccessKeyReleasePayloadFragment = { __typename: "AccessKeyReleasePayload" } & Pick<
+  AccessKeyReleasePayload,
+  "lastSyncId" | "success"
+>;
+
 export type ReleasePayloadFragment = { __typename: "ReleasePayload" } & Pick<
   ReleasePayload,
   "lastSyncId" | "success"
@@ -39965,6 +40319,7 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "showArchivedItems"
           | "customerPageNeedsShowCompletedIssuesAndProjects"
           | "projectCustomerNeedsShowCompletedIssuesLast"
+          | "automationShowDisabled"
           | "showDraftReviews"
           | "showEmptyGroupsBoard"
           | "showEmptyGroupsList"
@@ -39979,6 +40334,7 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "showParents"
           | "fieldPreviewLinks"
           | "showReadItems"
+          | "reviewFieldStatusDetails"
           | "showSnoozedItems"
           | "showSubInitiativeProjects"
           | "showNestedInitiatives"
@@ -40016,6 +40372,7 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "initiativeFieldDateCreated"
           | "initiativeFieldDescription"
           | "initiativeFieldInitiativeHealth"
+          | "initiativeFieldId"
           | "initiativeFieldLabels"
           | "initiativeFieldLeadTeam"
           | "initiativeFieldOwner"
@@ -40060,6 +40417,7 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "fieldProject"
           | "projectFieldHealthTimeline"
           | "projectFieldHealth"
+          | "projectFieldId"
           | "projectFieldInitiatives"
           | "projectFieldIssues"
           | "projectFieldLabels"
@@ -40091,6 +40449,7 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "projectFieldTeams"
           | "projectFieldDateUpdated"
           | "timelineShowProjectsAside"
+          | "reviewFieldOpenedAt"
           | "fieldPullRequests"
           | "continuousPipelineReleaseFieldReleaseDate"
           | "scheduledPipelineReleaseFieldReleaseDate"
@@ -41103,6 +41462,27 @@ type AiConversationBaseToolCall_AiConversationSearchEntitiesToolCall_Fragment = 
     >;
   };
 
+type AiConversationBaseToolCall_AiConversationSpawnSubagentToolCall_Fragment = {
+  __typename: "AiConversationSpawnSubagentToolCall";
+} & Pick<AiConversationSpawnSubagentToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationSpawnSubagentToolCallArgs" } & Pick<
+        AiConversationSpawnSubagentToolCallArgs,
+        "description"
+      >
+    >;
+    result?: Maybe<
+      { __typename: "AiConversationSpawnSubagentToolCallResult" } & Pick<
+        AiConversationSpawnSubagentToolCallResult,
+        "conversationId"
+      >
+    >;
+  };
+
 type AiConversationBaseToolCall_AiConversationStartCodingSessionToolCall_Fragment = {
   __typename: "AiConversationStartCodingSessionToolCall";
 } & Pick<AiConversationStartCodingSessionToolCall, "rawArgs" | "name" | "rawResult"> & {
@@ -41293,6 +41673,7 @@ export type AiConversationBaseToolCallFragment =
   | AiConversationBaseToolCall_AiConversationRetryPullRequestCheckToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationSearchDocumentationToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationSearchEntitiesToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationSpawnSubagentToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationStartCodingSessionToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationSubscribeToEventToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationSuggestRepositoryToolCall_Fragment
@@ -42270,6 +42651,36 @@ export type AiConversationSearchEntitiesToolCallResultEntitiesFragment = {
   __typename: "AiConversationSearchEntitiesToolCallResultEntities";
 } & Pick<AiConversationSearchEntitiesToolCallResultEntities, "id" | "type">;
 
+export type AiConversationSpawnSubagentToolCallFragment = { __typename: "AiConversationSpawnSubagentToolCall" } & Pick<
+  AiConversationSpawnSubagentToolCall,
+  "rawArgs" | "name" | "rawResult"
+> & {
+    args?: Maybe<
+      { __typename: "AiConversationSpawnSubagentToolCallArgs" } & Pick<
+        AiConversationSpawnSubagentToolCallArgs,
+        "description"
+      >
+    >;
+    result?: Maybe<
+      { __typename: "AiConversationSpawnSubagentToolCallResult" } & Pick<
+        AiConversationSpawnSubagentToolCallResult,
+        "conversationId"
+      >
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationSpawnSubagentToolCallArgsFragment = {
+  __typename: "AiConversationSpawnSubagentToolCallArgs";
+} & Pick<AiConversationSpawnSubagentToolCallArgs, "description">;
+
+export type AiConversationSpawnSubagentToolCallResultFragment = {
+  __typename: "AiConversationSpawnSubagentToolCallResult";
+} & Pick<AiConversationSpawnSubagentToolCallResult, "conversationId">;
+
 export type AiConversationStartCodingSessionToolCallFragment = {
   __typename: "AiConversationStartCodingSessionToolCall";
 } & Pick<AiConversationStartCodingSessionToolCall, "rawArgs" | "name" | "rawResult"> & {
@@ -42951,6 +43362,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "showArchivedItems"
             | "customerPageNeedsShowCompletedIssuesAndProjects"
             | "projectCustomerNeedsShowCompletedIssuesLast"
+            | "automationShowDisabled"
             | "showDraftReviews"
             | "showEmptyGroupsBoard"
             | "showEmptyGroupsList"
@@ -42965,6 +43377,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "showParents"
             | "fieldPreviewLinks"
             | "showReadItems"
+            | "reviewFieldStatusDetails"
             | "showSnoozedItems"
             | "showSubInitiativeProjects"
             | "showNestedInitiatives"
@@ -43002,6 +43415,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "initiativeFieldDateCreated"
             | "initiativeFieldDescription"
             | "initiativeFieldInitiativeHealth"
+            | "initiativeFieldId"
             | "initiativeFieldLabels"
             | "initiativeFieldLeadTeam"
             | "initiativeFieldOwner"
@@ -43046,6 +43460,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "fieldProject"
             | "projectFieldHealthTimeline"
             | "projectFieldHealth"
+            | "projectFieldId"
             | "projectFieldInitiatives"
             | "projectFieldIssues"
             | "projectFieldLabels"
@@ -43077,6 +43492,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "projectFieldTeams"
             | "projectFieldDateUpdated"
             | "timelineShowProjectsAside"
+            | "reviewFieldOpenedAt"
             | "fieldPullRequests"
             | "continuousPipelineReleaseFieldReleaseDate"
             | "scheduledPipelineReleaseFieldReleaseDate"
@@ -43205,6 +43621,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "showArchivedItems"
                 | "customerPageNeedsShowCompletedIssuesAndProjects"
                 | "projectCustomerNeedsShowCompletedIssuesLast"
+                | "automationShowDisabled"
                 | "showDraftReviews"
                 | "showEmptyGroupsBoard"
                 | "showEmptyGroupsList"
@@ -43219,6 +43636,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "showParents"
                 | "fieldPreviewLinks"
                 | "showReadItems"
+                | "reviewFieldStatusDetails"
                 | "showSnoozedItems"
                 | "showSubInitiativeProjects"
                 | "showNestedInitiatives"
@@ -43256,6 +43674,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "initiativeFieldDateCreated"
                 | "initiativeFieldDescription"
                 | "initiativeFieldInitiativeHealth"
+                | "initiativeFieldId"
                 | "initiativeFieldLabels"
                 | "initiativeFieldLeadTeam"
                 | "initiativeFieldOwner"
@@ -43300,6 +43719,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "fieldProject"
                 | "projectFieldHealthTimeline"
                 | "projectFieldHealth"
+                | "projectFieldId"
                 | "projectFieldInitiatives"
                 | "projectFieldIssues"
                 | "projectFieldLabels"
@@ -43331,6 +43751,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "projectFieldTeams"
                 | "projectFieldDateUpdated"
                 | "timelineShowProjectsAside"
+                | "reviewFieldOpenedAt"
                 | "fieldPullRequests"
                 | "continuousPipelineReleaseFieldReleaseDate"
                 | "scheduledPipelineReleaseFieldReleaseDate"
@@ -43464,6 +43885,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "showArchivedItems"
                 | "customerPageNeedsShowCompletedIssuesAndProjects"
                 | "projectCustomerNeedsShowCompletedIssuesLast"
+                | "automationShowDisabled"
                 | "showDraftReviews"
                 | "showEmptyGroupsBoard"
                 | "showEmptyGroupsList"
@@ -43478,6 +43900,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "showParents"
                 | "fieldPreviewLinks"
                 | "showReadItems"
+                | "reviewFieldStatusDetails"
                 | "showSnoozedItems"
                 | "showSubInitiativeProjects"
                 | "showNestedInitiatives"
@@ -43515,6 +43938,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "initiativeFieldDateCreated"
                 | "initiativeFieldDescription"
                 | "initiativeFieldInitiativeHealth"
+                | "initiativeFieldId"
                 | "initiativeFieldLabels"
                 | "initiativeFieldLeadTeam"
                 | "initiativeFieldOwner"
@@ -43559,6 +43983,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "fieldProject"
                 | "projectFieldHealthTimeline"
                 | "projectFieldHealth"
+                | "projectFieldId"
                 | "projectFieldInitiatives"
                 | "projectFieldIssues"
                 | "projectFieldLabels"
@@ -43590,6 +44015,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "projectFieldTeams"
                 | "projectFieldDateUpdated"
                 | "timelineShowProjectsAside"
+                | "reviewFieldOpenedAt"
                 | "fieldPullRequests"
                 | "continuousPipelineReleaseFieldReleaseDate"
                 | "scheduledPipelineReleaseFieldReleaseDate"
@@ -46378,6 +46804,7 @@ export type ProjectConnectionFragment = { __typename: "ProjectConnection" } & {
       | "completedScopeHistory"
       | "completedIssueCountHistory"
       | "inProgressScopeHistory"
+      | "resourceCount"
       | "health"
       | "progress"
       | "scope"
@@ -46604,6 +47031,7 @@ export type ProjectSearchPayloadFragment = { __typename: "ProjectSearchPayload" 
         | "completedScopeHistory"
         | "completedIssueCountHistory"
         | "inProgressScopeHistory"
+        | "resourceCount"
         | "health"
         | "progress"
         | "scope"
@@ -46714,6 +47142,7 @@ export type ProjectSearchResultFragment = { __typename: "ProjectSearchResult" } 
   | "completedScopeHistory"
   | "completedIssueCountHistory"
   | "inProgressScopeHistory"
+  | "resourceCount"
   | "health"
   | "progress"
   | "scope"
@@ -53675,6 +54104,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "showArchivedItems"
           | "customerPageNeedsShowCompletedIssuesAndProjects"
           | "projectCustomerNeedsShowCompletedIssuesLast"
+          | "automationShowDisabled"
           | "showDraftReviews"
           | "showEmptyGroupsBoard"
           | "showEmptyGroupsList"
@@ -53689,6 +54119,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "showParents"
           | "fieldPreviewLinks"
           | "showReadItems"
+          | "reviewFieldStatusDetails"
           | "showSnoozedItems"
           | "showSubInitiativeProjects"
           | "showNestedInitiatives"
@@ -53726,6 +54157,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "initiativeFieldDateCreated"
           | "initiativeFieldDescription"
           | "initiativeFieldInitiativeHealth"
+          | "initiativeFieldId"
           | "initiativeFieldLabels"
           | "initiativeFieldLeadTeam"
           | "initiativeFieldOwner"
@@ -53770,6 +54202,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "fieldProject"
           | "projectFieldHealthTimeline"
           | "projectFieldHealth"
+          | "projectFieldId"
           | "projectFieldInitiatives"
           | "projectFieldIssues"
           | "projectFieldLabels"
@@ -53801,6 +54234,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "projectFieldTeams"
           | "projectFieldDateUpdated"
           | "timelineShowProjectsAside"
+          | "reviewFieldOpenedAt"
           | "fieldPullRequests"
           | "continuousPipelineReleaseFieldReleaseDate"
           | "scheduledPipelineReleaseFieldReleaseDate"
@@ -53929,6 +54363,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "showArchivedItems"
               | "customerPageNeedsShowCompletedIssuesAndProjects"
               | "projectCustomerNeedsShowCompletedIssuesLast"
+              | "automationShowDisabled"
               | "showDraftReviews"
               | "showEmptyGroupsBoard"
               | "showEmptyGroupsList"
@@ -53943,6 +54378,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "showParents"
               | "fieldPreviewLinks"
               | "showReadItems"
+              | "reviewFieldStatusDetails"
               | "showSnoozedItems"
               | "showSubInitiativeProjects"
               | "showNestedInitiatives"
@@ -53980,6 +54416,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "initiativeFieldDateCreated"
               | "initiativeFieldDescription"
               | "initiativeFieldInitiativeHealth"
+              | "initiativeFieldId"
               | "initiativeFieldLabels"
               | "initiativeFieldLeadTeam"
               | "initiativeFieldOwner"
@@ -54024,6 +54461,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "fieldProject"
               | "projectFieldHealthTimeline"
               | "projectFieldHealth"
+              | "projectFieldId"
               | "projectFieldInitiatives"
               | "projectFieldIssues"
               | "projectFieldLabels"
@@ -54055,6 +54493,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "projectFieldTeams"
               | "projectFieldDateUpdated"
               | "timelineShowProjectsAside"
+              | "reviewFieldOpenedAt"
               | "fieldPullRequests"
               | "continuousPipelineReleaseFieldReleaseDate"
               | "scheduledPipelineReleaseFieldReleaseDate"
@@ -54188,6 +54627,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "showArchivedItems"
               | "customerPageNeedsShowCompletedIssuesAndProjects"
               | "projectCustomerNeedsShowCompletedIssuesLast"
+              | "automationShowDisabled"
               | "showDraftReviews"
               | "showEmptyGroupsBoard"
               | "showEmptyGroupsList"
@@ -54202,6 +54642,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "showParents"
               | "fieldPreviewLinks"
               | "showReadItems"
+              | "reviewFieldStatusDetails"
               | "showSnoozedItems"
               | "showSubInitiativeProjects"
               | "showNestedInitiatives"
@@ -54239,6 +54680,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "initiativeFieldDateCreated"
               | "initiativeFieldDescription"
               | "initiativeFieldInitiativeHealth"
+              | "initiativeFieldId"
               | "initiativeFieldLabels"
               | "initiativeFieldLeadTeam"
               | "initiativeFieldOwner"
@@ -54283,6 +54725,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "fieldProject"
               | "projectFieldHealthTimeline"
               | "projectFieldHealth"
+              | "projectFieldId"
               | "projectFieldInitiatives"
               | "projectFieldIssues"
               | "projectFieldLabels"
@@ -54314,6 +54757,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "projectFieldTeams"
               | "projectFieldDateUpdated"
               | "timelineShowProjectsAside"
+              | "reviewFieldOpenedAt"
               | "fieldPullRequests"
               | "continuousPipelineReleaseFieldReleaseDate"
               | "scheduledPipelineReleaseFieldReleaseDate"
@@ -54704,6 +55148,7 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "showArchivedItems"
             | "customerPageNeedsShowCompletedIssuesAndProjects"
             | "projectCustomerNeedsShowCompletedIssuesLast"
+            | "automationShowDisabled"
             | "showDraftReviews"
             | "showEmptyGroupsBoard"
             | "showEmptyGroupsList"
@@ -54718,6 +55163,7 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "showParents"
             | "fieldPreviewLinks"
             | "showReadItems"
+            | "reviewFieldStatusDetails"
             | "showSnoozedItems"
             | "showSubInitiativeProjects"
             | "showNestedInitiatives"
@@ -54755,6 +55201,7 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "initiativeFieldDateCreated"
             | "initiativeFieldDescription"
             | "initiativeFieldInitiativeHealth"
+            | "initiativeFieldId"
             | "initiativeFieldLabels"
             | "initiativeFieldLeadTeam"
             | "initiativeFieldOwner"
@@ -54799,6 +55246,7 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "fieldProject"
             | "projectFieldHealthTimeline"
             | "projectFieldHealth"
+            | "projectFieldId"
             | "projectFieldInitiatives"
             | "projectFieldIssues"
             | "projectFieldLabels"
@@ -54830,6 +55278,7 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "projectFieldTeams"
             | "projectFieldDateUpdated"
             | "timelineShowProjectsAside"
+            | "reviewFieldOpenedAt"
             | "fieldPullRequests"
             | "continuousPipelineReleaseFieldReleaseDate"
             | "scheduledPipelineReleaseFieldReleaseDate"
@@ -54965,6 +55414,7 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "showArchivedItems"
           | "customerPageNeedsShowCompletedIssuesAndProjects"
           | "projectCustomerNeedsShowCompletedIssuesLast"
+          | "automationShowDisabled"
           | "showDraftReviews"
           | "showEmptyGroupsBoard"
           | "showEmptyGroupsList"
@@ -54979,6 +55429,7 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "showParents"
           | "fieldPreviewLinks"
           | "showReadItems"
+          | "reviewFieldStatusDetails"
           | "showSnoozedItems"
           | "showSubInitiativeProjects"
           | "showNestedInitiatives"
@@ -55016,6 +55467,7 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "initiativeFieldDateCreated"
           | "initiativeFieldDescription"
           | "initiativeFieldInitiativeHealth"
+          | "initiativeFieldId"
           | "initiativeFieldLabels"
           | "initiativeFieldLeadTeam"
           | "initiativeFieldOwner"
@@ -55060,6 +55512,7 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "fieldProject"
           | "projectFieldHealthTimeline"
           | "projectFieldHealth"
+          | "projectFieldId"
           | "projectFieldInitiatives"
           | "projectFieldIssues"
           | "projectFieldLabels"
@@ -55091,6 +55544,7 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "projectFieldTeams"
           | "projectFieldDateUpdated"
           | "timelineShowProjectsAside"
+          | "reviewFieldOpenedAt"
           | "fieldPullRequests"
           | "continuousPipelineReleaseFieldReleaseDate"
           | "scheduledPipelineReleaseFieldReleaseDate"
@@ -55177,6 +55631,7 @@ export type CustomView_ProjectsQuery = { __typename?: "Query" } & {
           | "completedScopeHistory"
           | "completedIssueCountHistory"
           | "inProgressScopeHistory"
+          | "resourceCount"
           | "health"
           | "progress"
           | "scope"
@@ -55357,6 +55812,7 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "showArchivedItems"
             | "customerPageNeedsShowCompletedIssuesAndProjects"
             | "projectCustomerNeedsShowCompletedIssuesLast"
+            | "automationShowDisabled"
             | "showDraftReviews"
             | "showEmptyGroupsBoard"
             | "showEmptyGroupsList"
@@ -55371,6 +55827,7 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "showParents"
             | "fieldPreviewLinks"
             | "showReadItems"
+            | "reviewFieldStatusDetails"
             | "showSnoozedItems"
             | "showSubInitiativeProjects"
             | "showNestedInitiatives"
@@ -55408,6 +55865,7 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "initiativeFieldDateCreated"
             | "initiativeFieldDescription"
             | "initiativeFieldInitiativeHealth"
+            | "initiativeFieldId"
             | "initiativeFieldLabels"
             | "initiativeFieldLeadTeam"
             | "initiativeFieldOwner"
@@ -55452,6 +55910,7 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "fieldProject"
             | "projectFieldHealthTimeline"
             | "projectFieldHealth"
+            | "projectFieldId"
             | "projectFieldInitiatives"
             | "projectFieldIssues"
             | "projectFieldLabels"
@@ -55483,6 +55942,7 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "projectFieldTeams"
             | "projectFieldDateUpdated"
             | "timelineShowProjectsAside"
+            | "reviewFieldOpenedAt"
             | "fieldPullRequests"
             | "continuousPipelineReleaseFieldReleaseDate"
             | "scheduledPipelineReleaseFieldReleaseDate"
@@ -55618,6 +56078,7 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "showArchivedItems"
           | "customerPageNeedsShowCompletedIssuesAndProjects"
           | "projectCustomerNeedsShowCompletedIssuesLast"
+          | "automationShowDisabled"
           | "showDraftReviews"
           | "showEmptyGroupsBoard"
           | "showEmptyGroupsList"
@@ -55632,6 +56093,7 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "showParents"
           | "fieldPreviewLinks"
           | "showReadItems"
+          | "reviewFieldStatusDetails"
           | "showSnoozedItems"
           | "showSubInitiativeProjects"
           | "showNestedInitiatives"
@@ -55669,6 +56131,7 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "initiativeFieldDateCreated"
           | "initiativeFieldDescription"
           | "initiativeFieldInitiativeHealth"
+          | "initiativeFieldId"
           | "initiativeFieldLabels"
           | "initiativeFieldLeadTeam"
           | "initiativeFieldOwner"
@@ -55713,6 +56176,7 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "fieldProject"
           | "projectFieldHealthTimeline"
           | "projectFieldHealth"
+          | "projectFieldId"
           | "projectFieldInitiatives"
           | "projectFieldIssues"
           | "projectFieldLabels"
@@ -55744,6 +56208,7 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "projectFieldTeams"
           | "projectFieldDateUpdated"
           | "timelineShowProjectsAside"
+          | "reviewFieldOpenedAt"
           | "fieldPullRequests"
           | "continuousPipelineReleaseFieldReleaseDate"
           | "scheduledPipelineReleaseFieldReleaseDate"
@@ -55878,6 +56343,7 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "showArchivedItems"
         | "customerPageNeedsShowCompletedIssuesAndProjects"
         | "projectCustomerNeedsShowCompletedIssuesLast"
+        | "automationShowDisabled"
         | "showDraftReviews"
         | "showEmptyGroupsBoard"
         | "showEmptyGroupsList"
@@ -55892,6 +56358,7 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "showParents"
         | "fieldPreviewLinks"
         | "showReadItems"
+        | "reviewFieldStatusDetails"
         | "showSnoozedItems"
         | "showSubInitiativeProjects"
         | "showNestedInitiatives"
@@ -55929,6 +56396,7 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "initiativeFieldDateCreated"
         | "initiativeFieldDescription"
         | "initiativeFieldInitiativeHealth"
+        | "initiativeFieldId"
         | "initiativeFieldLabels"
         | "initiativeFieldLeadTeam"
         | "initiativeFieldOwner"
@@ -55973,6 +56441,7 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "fieldProject"
         | "projectFieldHealthTimeline"
         | "projectFieldHealth"
+        | "projectFieldId"
         | "projectFieldInitiatives"
         | "projectFieldIssues"
         | "projectFieldLabels"
@@ -56004,6 +56473,7 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "projectFieldTeams"
         | "projectFieldDateUpdated"
         | "timelineShowProjectsAside"
+        | "reviewFieldOpenedAt"
         | "fieldPullRequests"
         | "continuousPipelineReleaseFieldReleaseDate"
         | "scheduledPipelineReleaseFieldReleaseDate"
@@ -56175,6 +56645,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "showArchivedItems"
               | "customerPageNeedsShowCompletedIssuesAndProjects"
               | "projectCustomerNeedsShowCompletedIssuesLast"
+              | "automationShowDisabled"
               | "showDraftReviews"
               | "showEmptyGroupsBoard"
               | "showEmptyGroupsList"
@@ -56189,6 +56660,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "showParents"
               | "fieldPreviewLinks"
               | "showReadItems"
+              | "reviewFieldStatusDetails"
               | "showSnoozedItems"
               | "showSubInitiativeProjects"
               | "showNestedInitiatives"
@@ -56226,6 +56698,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "initiativeFieldDateCreated"
               | "initiativeFieldDescription"
               | "initiativeFieldInitiativeHealth"
+              | "initiativeFieldId"
               | "initiativeFieldLabels"
               | "initiativeFieldLeadTeam"
               | "initiativeFieldOwner"
@@ -56270,6 +56743,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "fieldProject"
               | "projectFieldHealthTimeline"
               | "projectFieldHealth"
+              | "projectFieldId"
               | "projectFieldInitiatives"
               | "projectFieldIssues"
               | "projectFieldLabels"
@@ -56301,6 +56775,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "projectFieldTeams"
               | "projectFieldDateUpdated"
               | "timelineShowProjectsAside"
+              | "reviewFieldOpenedAt"
               | "fieldPullRequests"
               | "continuousPipelineReleaseFieldReleaseDate"
               | "scheduledPipelineReleaseFieldReleaseDate"
@@ -56429,6 +56904,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "showArchivedItems"
                   | "customerPageNeedsShowCompletedIssuesAndProjects"
                   | "projectCustomerNeedsShowCompletedIssuesLast"
+                  | "automationShowDisabled"
                   | "showDraftReviews"
                   | "showEmptyGroupsBoard"
                   | "showEmptyGroupsList"
@@ -56443,6 +56919,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "showParents"
                   | "fieldPreviewLinks"
                   | "showReadItems"
+                  | "reviewFieldStatusDetails"
                   | "showSnoozedItems"
                   | "showSubInitiativeProjects"
                   | "showNestedInitiatives"
@@ -56480,6 +56957,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "initiativeFieldDateCreated"
                   | "initiativeFieldDescription"
                   | "initiativeFieldInitiativeHealth"
+                  | "initiativeFieldId"
                   | "initiativeFieldLabels"
                   | "initiativeFieldLeadTeam"
                   | "initiativeFieldOwner"
@@ -56524,6 +57002,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "fieldProject"
                   | "projectFieldHealthTimeline"
                   | "projectFieldHealth"
+                  | "projectFieldId"
                   | "projectFieldInitiatives"
                   | "projectFieldIssues"
                   | "projectFieldLabels"
@@ -56555,6 +57034,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "projectFieldTeams"
                   | "projectFieldDateUpdated"
                   | "timelineShowProjectsAside"
+                  | "reviewFieldOpenedAt"
                   | "fieldPullRequests"
                   | "continuousPipelineReleaseFieldReleaseDate"
                   | "scheduledPipelineReleaseFieldReleaseDate"
@@ -56688,6 +57168,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "showArchivedItems"
                   | "customerPageNeedsShowCompletedIssuesAndProjects"
                   | "projectCustomerNeedsShowCompletedIssuesLast"
+                  | "automationShowDisabled"
                   | "showDraftReviews"
                   | "showEmptyGroupsBoard"
                   | "showEmptyGroupsList"
@@ -56702,6 +57183,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "showParents"
                   | "fieldPreviewLinks"
                   | "showReadItems"
+                  | "reviewFieldStatusDetails"
                   | "showSnoozedItems"
                   | "showSubInitiativeProjects"
                   | "showNestedInitiatives"
@@ -56739,6 +57221,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "initiativeFieldDateCreated"
                   | "initiativeFieldDescription"
                   | "initiativeFieldInitiativeHealth"
+                  | "initiativeFieldId"
                   | "initiativeFieldLabels"
                   | "initiativeFieldLeadTeam"
                   | "initiativeFieldOwner"
@@ -56783,6 +57266,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "fieldProject"
                   | "projectFieldHealthTimeline"
                   | "projectFieldHealth"
+                  | "projectFieldId"
                   | "projectFieldInitiatives"
                   | "projectFieldIssues"
                   | "projectFieldLabels"
@@ -56814,6 +57298,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "projectFieldTeams"
                   | "projectFieldDateUpdated"
                   | "timelineShowProjectsAside"
+                  | "reviewFieldOpenedAt"
                   | "fieldPullRequests"
                   | "continuousPipelineReleaseFieldReleaseDate"
                   | "scheduledPipelineReleaseFieldReleaseDate"
@@ -58522,6 +59007,7 @@ export type Initiative_ProjectsQuery = { __typename?: "Query" } & {
           | "completedScopeHistory"
           | "completedIssueCountHistory"
           | "inProgressScopeHistory"
+          | "resourceCount"
           | "health"
           | "progress"
           | "scope"
@@ -62976,353 +63462,19 @@ export type LatestReleaseByAccessKeyQueryVariables = Exact<{ [key: string]: neve
 
 export type LatestReleaseByAccessKeyQuery = { __typename?: "Query" } & {
   latestReleaseByAccessKey?: Maybe<
-    { __typename: "Release" } & Pick<
-      Release,
-      | "trashed"
-      | "issueCount"
-      | "commitSha"
-      | "url"
-      | "currentProgress"
-      | "description"
-      | "targetDate"
-      | "startDate"
-      | "progressHistory"
-      | "updatedAt"
-      | "name"
-      | "slugId"
-      | "archivedAt"
-      | "createdAt"
-      | "startedAt"
-      | "autoArchivedAt"
-      | "canceledAt"
-      | "completedAt"
-      | "id"
-      | "version"
-    > & {
-        releaseNotes: Array<
-          { __typename: "ReleaseNote" } & Pick<
-            ReleaseNote,
-            | "generationStatus"
-            | "url"
-            | "updatedAt"
-            | "releaseCount"
-            | "slugId"
-            | "archivedAt"
-            | "createdAt"
-            | "id"
-            | "title"
-          > & {
-              documentContent?: Maybe<
-                { __typename: "DocumentContent" } & Pick<
-                  DocumentContent,
-                  "content" | "contentState" | "updatedAt" | "restoredAt" | "archivedAt" | "createdAt" | "id"
-                > & {
-                    aiPromptRules?: Maybe<
-                      { __typename: "AiPromptRules" } & Pick<
-                        AiPromptRules,
-                        "updatedAt" | "archivedAt" | "createdAt" | "id"
-                      > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
-                    >;
-                    document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
-                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                    issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-                    projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
-                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                    welcomeMessage?: Maybe<
-                      { __typename: "WelcomeMessage" } & Pick<
-                        WelcomeMessage,
-                        "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
-                      > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
-                    >;
-                  }
-              >;
-              firstRelease?: Maybe<{ __typename?: "Release" } & Pick<Release, "id">>;
-              lastRelease?: Maybe<{ __typename?: "Release" } & Pick<Release, "id">>;
-              pipeline: { __typename?: "ReleasePipeline" } & Pick<ReleasePipeline, "id">;
-            }
-        >;
-        stage: { __typename?: "ReleaseStage" } & Pick<ReleaseStage, "id">;
-        pipeline: { __typename?: "ReleasePipeline" } & Pick<ReleasePipeline, "id">;
-        creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-      }
+    { __typename: "AccessKeyRelease" } & Pick<
+      AccessKeyRelease,
+      "commitSha" | "url" | "name" | "archivedAt" | "completedAt" | "createdAt" | "id" | "version"
+    > & { stage: { __typename: "AccessKeyReleaseStage" } & Pick<AccessKeyReleaseStage, "name"> }
   >;
 };
 
-export type LatestReleaseByAccessKey_DocumentsQueryVariables = Exact<{
-  after?: InputMaybe<Scalars["String"]>;
-  before?: InputMaybe<Scalars["String"]>;
-  filter?: InputMaybe<DocumentFilter>;
-  first?: InputMaybe<Scalars["Int"]>;
-  includeArchived?: InputMaybe<Scalars["Boolean"]>;
-  last?: InputMaybe<Scalars["Int"]>;
-  orderBy?: InputMaybe<PaginationOrderBy>;
-}>;
+export type LatestReleaseByAccessKey_StageQueryVariables = Exact<{ [key: string]: never }>;
 
-export type LatestReleaseByAccessKey_DocumentsQuery = { __typename?: "Query" } & {
+export type LatestReleaseByAccessKey_StageQuery = { __typename?: "Query" } & {
   latestReleaseByAccessKey?: Maybe<
-    { __typename?: "Release" } & {
-      documents: { __typename: "DocumentConnection" } & {
-        nodes: Array<
-          { __typename: "Document" } & Pick<
-            Document,
-            | "trashed"
-            | "documentContentId"
-            | "url"
-            | "content"
-            | "slugId"
-            | "color"
-            | "icon"
-            | "updatedAt"
-            | "sortOrder"
-            | "hiddenAt"
-            | "archivedAt"
-            | "createdAt"
-            | "title"
-            | "id"
-          > & {
-              initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-              issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-              lastAppliedTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
-              project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-              release?: Maybe<{ __typename?: "Release" } & Pick<Release, "id">>;
-              creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-              updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-            }
-        >;
-        pageInfo: { __typename: "PageInfo" } & Pick<
-          PageInfo,
-          "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
-        >;
-      };
-    }
-  >;
-};
-
-export type LatestReleaseByAccessKey_HistoryQueryVariables = Exact<{
-  after?: InputMaybe<Scalars["String"]>;
-  before?: InputMaybe<Scalars["String"]>;
-  first?: InputMaybe<Scalars["Int"]>;
-  includeArchived?: InputMaybe<Scalars["Boolean"]>;
-  last?: InputMaybe<Scalars["Int"]>;
-  orderBy?: InputMaybe<PaginationOrderBy>;
-}>;
-
-export type LatestReleaseByAccessKey_HistoryQuery = { __typename?: "Query" } & {
-  latestReleaseByAccessKey?: Maybe<
-    { __typename?: "Release" } & {
-      history: { __typename: "ReleaseHistoryConnection" } & {
-        nodes: Array<
-          { __typename: "ReleaseHistory" } & Pick<
-            ReleaseHistory,
-            "entries" | "updatedAt" | "archivedAt" | "createdAt" | "id"
-          > & { release: { __typename?: "Release" } & Pick<Release, "id"> }
-        >;
-        pageInfo: { __typename: "PageInfo" } & Pick<
-          PageInfo,
-          "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
-        >;
-      };
-    }
-  >;
-};
-
-export type LatestReleaseByAccessKey_IssuesQueryVariables = Exact<{
-  after?: InputMaybe<Scalars["String"]>;
-  before?: InputMaybe<Scalars["String"]>;
-  filter?: InputMaybe<IssueFilter>;
-  first?: InputMaybe<Scalars["Int"]>;
-  includeArchived?: InputMaybe<Scalars["Boolean"]>;
-  last?: InputMaybe<Scalars["Int"]>;
-  orderBy?: InputMaybe<PaginationOrderBy>;
-}>;
-
-export type LatestReleaseByAccessKey_IssuesQuery = { __typename?: "Query" } & {
-  latestReleaseByAccessKey?: Maybe<
-    { __typename?: "Release" } & {
-      issues: { __typename: "IssueConnection" } & {
-        nodes: Array<
-          { __typename: "Issue" } & Pick<
-            Issue,
-            | "trashed"
-            | "reactionData"
-            | "labelIds"
-            | "integrationSourceType"
-            | "url"
-            | "identifier"
-            | "priorityLabel"
-            | "previousIdentifiers"
-            | "customerTicketCount"
-            | "branchName"
-            | "dueDate"
-            | "estimate"
-            | "description"
-            | "title"
-            | "number"
-            | "updatedAt"
-            | "boardOrder"
-            | "sortOrder"
-            | "prioritySortOrder"
-            | "subIssueSortOrder"
-            | "priority"
-            | "archivedAt"
-            | "createdAt"
-            | "startedTriageAt"
-            | "triagedAt"
-            | "addedToCycleAt"
-            | "addedToProjectAt"
-            | "addedToTeamAt"
-            | "autoArchivedAt"
-            | "autoClosedAt"
-            | "canceledAt"
-            | "completedAt"
-            | "startedAt"
-            | "slaStartedAt"
-            | "slaBreachesAt"
-            | "slaHighRiskAt"
-            | "slaMediumRiskAt"
-            | "snoozedUntilAt"
-            | "slaType"
-            | "id"
-            | "inheritsSharedAccess"
-          > & {
-              reactions: Array<
-                { __typename: "Reaction" } & Pick<
-                  Reaction,
-                  "updatedAt" | "emoji" | "archivedAt" | "createdAt" | "id"
-                > & {
-                    comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
-                    externalUser?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
-                    initiativeUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
-                    issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-                    projectUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
-                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-                  }
-              >;
-              sharedAccess: { __typename: "IssueSharedAccess" } & Pick<
-                IssueSharedAccess,
-                "disallowedIssueFields" | "sharedWithCount" | "viewerHasOnlySharedAccess" | "isShared"
-              > & {
-                  sharedWithUsers: Array<
-                    { __typename: "User" } & Pick<
-                      User,
-                      | "description"
-                      | "avatarUrl"
-                      | "createdIssueCount"
-                      | "avatarBackgroundColor"
-                      | "statusUntilAt"
-                      | "statusEmoji"
-                      | "initials"
-                      | "updatedAt"
-                      | "lastSeen"
-                      | "timezone"
-                      | "disableReason"
-                      | "statusLabel"
-                      | "archivedAt"
-                      | "createdAt"
-                      | "id"
-                      | "gitHubUserId"
-                      | "displayName"
-                      | "email"
-                      | "name"
-                      | "title"
-                      | "url"
-                      | "active"
-                      | "isAssignable"
-                      | "guest"
-                      | "admin"
-                      | "owner"
-                      | "app"
-                      | "isMentionable"
-                      | "isMe"
-                      | "supportsAgentSessions"
-                      | "canAccessAnyPublicTeam"
-                      | "calendarHash"
-                      | "inviteHash"
-                    >
-                  >;
-                };
-              delegate?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-              botActor?: Maybe<
-                { __typename: "ActorBot" } & Pick<
-                  ActorBot,
-                  "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
-                >
-              >;
-              sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
-              cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-              syncedWith?: Maybe<
-                Array<
-                  { __typename: "ExternalEntityInfo" } & Pick<ExternalEntityInfo, "service" | "id"> & {
-                      metadata?: Maybe<
-                        | ({ __typename: "ExternalEntityInfoGithubMetadata" } & Pick<
-                            ExternalEntityInfoGithubMetadata,
-                            "number" | "owner" | "repo"
-                          >)
-                        | ({ __typename: "ExternalEntityInfoJiraMetadata" } & Pick<
-                            ExternalEntityInfoJiraMetadata,
-                            "issueTypeId" | "projectId" | "issueKey"
-                          >)
-                        | ({ __typename: "ExternalEntitySlackMetadata" } & Pick<
-                            ExternalEntitySlackMetadata,
-                            "messageUrl" | "channelId" | "channelName" | "isFromSlack"
-                          >)
-                      >;
-                    }
-                >
-              >;
-              externalUserCreator?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
-              asksExternalUserRequester?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
-              asksRequester?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-              lastAppliedTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
-              parent?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-              projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
-              project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-              recurringIssueTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
-              team: { __typename?: "Team" } & Pick<Team, "id">;
-              assignee?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-              creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-              snoozedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-              favorite?: Maybe<{ __typename?: "Favorite" } & Pick<Favorite, "id">>;
-              state: { __typename?: "WorkflowState" } & Pick<WorkflowState, "id">;
-            }
-        >;
-        pageInfo: { __typename: "PageInfo" } & Pick<
-          PageInfo,
-          "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
-        >;
-      };
-    }
-  >;
-};
-
-export type LatestReleaseByAccessKey_LinksQueryVariables = Exact<{
-  after?: InputMaybe<Scalars["String"]>;
-  before?: InputMaybe<Scalars["String"]>;
-  first?: InputMaybe<Scalars["Int"]>;
-  includeArchived?: InputMaybe<Scalars["Boolean"]>;
-  last?: InputMaybe<Scalars["Int"]>;
-  orderBy?: InputMaybe<PaginationOrderBy>;
-}>;
-
-export type LatestReleaseByAccessKey_LinksQuery = { __typename?: "Query" } & {
-  latestReleaseByAccessKey?: Maybe<
-    { __typename?: "Release" } & {
-      links: { __typename: "EntityExternalLinkConnection" } & {
-        nodes: Array<
-          { __typename: "EntityExternalLink" } & Pick<
-            EntityExternalLink,
-            "updatedAt" | "url" | "label" | "sortOrder" | "archivedAt" | "createdAt" | "id"
-          > & {
-              initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-              project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-              creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-            }
-        >;
-        pageInfo: { __typename: "PageInfo" } & Pick<
-          PageInfo,
-          "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
-        >;
-      };
+    { __typename?: "AccessKeyRelease" } & {
+      stage: { __typename: "AccessKeyReleaseStage" } & Pick<AccessKeyReleaseStage, "name">;
     }
   >;
 };
@@ -64748,6 +64900,7 @@ export type OrganizationQuery = { __typename?: "Query" } & {
     | "projectUpdateReminderFrequencyInWeeks"
     | "initiativeUpdateRemindersHour"
     | "projectUpdateRemindersHour"
+    | "defaultHomeViewTargetId"
     | "updatedAt"
     | "customerCount"
     | "userCount"
@@ -65246,6 +65399,7 @@ export type ProjectQuery = { __typename?: "Query" } & {
     | "completedScopeHistory"
     | "completedIssueCountHistory"
     | "inProgressScopeHistory"
+    | "resourceCount"
     | "health"
     | "progress"
     | "scope"
@@ -66486,6 +66640,7 @@ export type ProjectLabel_ProjectsQuery = { __typename?: "Query" } & {
           | "completedScopeHistory"
           | "completedIssueCountHistory"
           | "inProgressScopeHistory"
+          | "resourceCount"
           | "health"
           | "progress"
           | "scope"
@@ -67302,6 +67457,7 @@ export type ProjectsQuery = { __typename?: "Query" } & {
         | "completedScopeHistory"
         | "completedIssueCountHistory"
         | "inProgressScopeHistory"
+        | "resourceCount"
         | "health"
         | "progress"
         | "scope"
@@ -67421,75 +67577,10 @@ export type RecentReleasesByAccessKeyQueryVariables = Exact<{
 
 export type RecentReleasesByAccessKeyQuery = { __typename?: "Query" } & {
   recentReleasesByAccessKey: Array<
-    { __typename: "Release" } & Pick<
-      Release,
-      | "trashed"
-      | "issueCount"
-      | "commitSha"
-      | "url"
-      | "currentProgress"
-      | "description"
-      | "targetDate"
-      | "startDate"
-      | "progressHistory"
-      | "updatedAt"
-      | "name"
-      | "slugId"
-      | "archivedAt"
-      | "createdAt"
-      | "startedAt"
-      | "autoArchivedAt"
-      | "canceledAt"
-      | "completedAt"
-      | "id"
-      | "version"
-    > & {
-        releaseNotes: Array<
-          { __typename: "ReleaseNote" } & Pick<
-            ReleaseNote,
-            | "generationStatus"
-            | "url"
-            | "updatedAt"
-            | "releaseCount"
-            | "slugId"
-            | "archivedAt"
-            | "createdAt"
-            | "id"
-            | "title"
-          > & {
-              documentContent?: Maybe<
-                { __typename: "DocumentContent" } & Pick<
-                  DocumentContent,
-                  "content" | "contentState" | "updatedAt" | "restoredAt" | "archivedAt" | "createdAt" | "id"
-                > & {
-                    aiPromptRules?: Maybe<
-                      { __typename: "AiPromptRules" } & Pick<
-                        AiPromptRules,
-                        "updatedAt" | "archivedAt" | "createdAt" | "id"
-                      > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
-                    >;
-                    document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
-                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                    issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-                    projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
-                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                    welcomeMessage?: Maybe<
-                      { __typename: "WelcomeMessage" } & Pick<
-                        WelcomeMessage,
-                        "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
-                      > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
-                    >;
-                  }
-              >;
-              firstRelease?: Maybe<{ __typename?: "Release" } & Pick<Release, "id">>;
-              lastRelease?: Maybe<{ __typename?: "Release" } & Pick<Release, "id">>;
-              pipeline: { __typename?: "ReleasePipeline" } & Pick<ReleasePipeline, "id">;
-            }
-        >;
-        stage: { __typename?: "ReleaseStage" } & Pick<ReleaseStage, "id">;
-        pipeline: { __typename?: "ReleasePipeline" } & Pick<ReleasePipeline, "id">;
-        creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-      }
+    { __typename: "AccessKeyRelease" } & Pick<
+      AccessKeyRelease,
+      "commitSha" | "url" | "name" | "archivedAt" | "completedAt" | "createdAt" | "id" | "version"
+    > & { stage: { __typename: "AccessKeyReleaseStage" } & Pick<AccessKeyReleaseStage, "name"> }
   >;
 };
 
@@ -68254,238 +68345,10 @@ export type ReleasePipeline_TeamsQuery = { __typename?: "Query" } & {
 export type ReleasePipelineByAccessKeyQueryVariables = Exact<{ [key: string]: never }>;
 
 export type ReleasePipelineByAccessKeyQuery = { __typename?: "Query" } & {
-  releasePipelineByAccessKey: { __typename: "ReleasePipeline" } & Pick<
-    ReleasePipeline,
-    | "trashed"
-    | "includePathPatterns"
-    | "url"
-    | "approximateReleaseCount"
-    | "updatedAt"
-    | "name"
-    | "slugId"
-    | "archivedAt"
-    | "createdAt"
-    | "type"
-    | "id"
-    | "isProduction"
-    | "autoGenerateReleaseNotesOnCompletion"
-  > & {
-      releaseNoteTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
-      latestReleaseNote?: Maybe<{ __typename?: "ReleaseNote" } & Pick<ReleaseNote, "id">>;
-    };
-};
-
-export type ReleasePipelineByAccessKey_ReleasesQueryVariables = Exact<{
-  after?: InputMaybe<Scalars["String"]>;
-  before?: InputMaybe<Scalars["String"]>;
-  first?: InputMaybe<Scalars["Int"]>;
-  includeArchived?: InputMaybe<Scalars["Boolean"]>;
-  last?: InputMaybe<Scalars["Int"]>;
-  orderBy?: InputMaybe<PaginationOrderBy>;
-  sort?: InputMaybe<Array<ReleaseSortInput> | ReleaseSortInput>;
-}>;
-
-export type ReleasePipelineByAccessKey_ReleasesQuery = { __typename?: "Query" } & {
-  releasePipelineByAccessKey: { __typename?: "ReleasePipeline" } & {
-    releases: { __typename: "ReleaseConnection" } & {
-      nodes: Array<
-        { __typename: "Release" } & Pick<
-          Release,
-          | "trashed"
-          | "issueCount"
-          | "commitSha"
-          | "url"
-          | "currentProgress"
-          | "description"
-          | "targetDate"
-          | "startDate"
-          | "progressHistory"
-          | "updatedAt"
-          | "name"
-          | "slugId"
-          | "archivedAt"
-          | "createdAt"
-          | "startedAt"
-          | "autoArchivedAt"
-          | "canceledAt"
-          | "completedAt"
-          | "id"
-          | "version"
-        > & {
-            releaseNotes: Array<
-              { __typename: "ReleaseNote" } & Pick<
-                ReleaseNote,
-                | "generationStatus"
-                | "url"
-                | "updatedAt"
-                | "releaseCount"
-                | "slugId"
-                | "archivedAt"
-                | "createdAt"
-                | "id"
-                | "title"
-              > & {
-                  documentContent?: Maybe<
-                    { __typename: "DocumentContent" } & Pick<
-                      DocumentContent,
-                      "content" | "contentState" | "updatedAt" | "restoredAt" | "archivedAt" | "createdAt" | "id"
-                    > & {
-                        aiPromptRules?: Maybe<
-                          { __typename: "AiPromptRules" } & Pick<
-                            AiPromptRules,
-                            "updatedAt" | "archivedAt" | "createdAt" | "id"
-                          > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
-                        >;
-                        document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
-                        initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                        issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-                        projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
-                        project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                        welcomeMessage?: Maybe<
-                          { __typename: "WelcomeMessage" } & Pick<
-                            WelcomeMessage,
-                            "updatedAt" | "archivedAt" | "createdAt" | "title" | "id" | "enabled"
-                          > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
-                        >;
-                      }
-                  >;
-                  firstRelease?: Maybe<{ __typename?: "Release" } & Pick<Release, "id">>;
-                  lastRelease?: Maybe<{ __typename?: "Release" } & Pick<Release, "id">>;
-                  pipeline: { __typename?: "ReleasePipeline" } & Pick<ReleasePipeline, "id">;
-                }
-            >;
-            stage: { __typename?: "ReleaseStage" } & Pick<ReleaseStage, "id">;
-            pipeline: { __typename?: "ReleasePipeline" } & Pick<ReleasePipeline, "id">;
-            creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-          }
-      >;
-      pageInfo: { __typename: "PageInfo" } & Pick<
-        PageInfo,
-        "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
-      >;
-    };
-  };
-};
-
-export type ReleasePipelineByAccessKey_StagesQueryVariables = Exact<{
-  after?: InputMaybe<Scalars["String"]>;
-  before?: InputMaybe<Scalars["String"]>;
-  first?: InputMaybe<Scalars["Int"]>;
-  includeArchived?: InputMaybe<Scalars["Boolean"]>;
-  last?: InputMaybe<Scalars["Int"]>;
-  orderBy?: InputMaybe<PaginationOrderBy>;
-}>;
-
-export type ReleasePipelineByAccessKey_StagesQuery = { __typename?: "Query" } & {
-  releasePipelineByAccessKey: { __typename?: "ReleasePipeline" } & {
-    stages: { __typename: "ReleaseStageConnection" } & {
-      nodes: Array<
-        { __typename: "ReleaseStage" } & Pick<
-          ReleaseStage,
-          "color" | "updatedAt" | "type" | "name" | "position" | "archivedAt" | "createdAt" | "id" | "frozen"
-        > & { pipeline: { __typename?: "ReleasePipeline" } & Pick<ReleasePipeline, "id"> }
-      >;
-      pageInfo: { __typename: "PageInfo" } & Pick<
-        PageInfo,
-        "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
-      >;
-    };
-  };
-};
-
-export type ReleasePipelineByAccessKey_TeamsQueryVariables = Exact<{
-  after?: InputMaybe<Scalars["String"]>;
-  before?: InputMaybe<Scalars["String"]>;
-  first?: InputMaybe<Scalars["Int"]>;
-  includeArchived?: InputMaybe<Scalars["Boolean"]>;
-  last?: InputMaybe<Scalars["Int"]>;
-  orderBy?: InputMaybe<PaginationOrderBy>;
-}>;
-
-export type ReleasePipelineByAccessKey_TeamsQuery = { __typename?: "Query" } & {
-  releasePipelineByAccessKey: { __typename?: "ReleasePipeline" } & {
-    teams: { __typename: "TeamConnection" } & {
-      nodes: Array<
-        { __typename: "Team" } & Pick<
-          Team,
-          | "cycleIssueAutoAssignCompleted"
-          | "cycleLockToActive"
-          | "cycleIssueAutoAssignStarted"
-          | "cycleCalenderUrl"
-          | "upcomingCycleCount"
-          | "autoArchivePeriod"
-          | "autoClosePeriod"
-          | "securitySettings"
-          | "scimGroupName"
-          | "autoCloseStateId"
-          | "cycleCooldownTime"
-          | "cycleStartDay"
-          | "cycleDuration"
-          | "icon"
-          | "defaultTemplateForMembersId"
-          | "defaultTemplateForNonMembersId"
-          | "issueEstimationType"
-          | "updatedAt"
-          | "displayName"
-          | "ledInitiativeCount"
-          | "color"
-          | "description"
-          | "name"
-          | "key"
-          | "archivedAt"
-          | "createdAt"
-          | "retiredAt"
-          | "timezone"
-          | "issueCount"
-          | "id"
-          | "visibility"
-          | "defaultIssueEstimate"
-          | "setIssueSortOrderOnStateChange"
-          | "allMembersCanJoin"
-          | "requirePriorityToLeaveTriage"
-          | "autoCloseChildIssues"
-          | "autoCloseParentIssues"
-          | "scimManaged"
-          | "private"
-          | "inheritIssueEstimation"
-          | "inheritWorkflowStatuses"
-          | "cyclesEnabled"
-          | "issueEstimationExtended"
-          | "issueEstimationAllowZero"
-          | "aiDiscussionSummariesEnabled"
-          | "aiThreadSummariesEnabled"
-          | "groupIssueHistory"
-          | "slackIssueComments"
-          | "slackNewIssue"
-          | "slackIssueStatuses"
-          | "triageEnabled"
-          | "inviteHash"
-          | "issueOrderingNoPriorityFirst"
-          | "issueSortOrderDefaultToBottom"
-        > & {
-            integrationsSettings?: Maybe<{ __typename?: "IntegrationsSettings" } & Pick<IntegrationsSettings, "id">>;
-            activeCycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-            triageResponsibility?: Maybe<{ __typename?: "TriageResponsibility" } & Pick<TriageResponsibility, "id">>;
-            defaultTemplateForMembers?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
-            defaultTemplateForNonMembers?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
-            defaultProjectTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
-            defaultIssueState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
-            parent?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-            mergeWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
-            draftWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
-            startWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
-            mergeableWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
-            reviewWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
-            triageIssueState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
-            markedAsDuplicateWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
-          }
-      >;
-      pageInfo: { __typename: "PageInfo" } & Pick<
-        PageInfo,
-        "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
-      >;
-    };
-  };
+  releasePipelineByAccessKey: { __typename: "AccessKeyReleasePipeline" } & Pick<
+    AccessKeyReleasePipeline,
+    "includePathPatterns" | "id"
+  >;
 };
 
 export type ReleasePipelinesQueryVariables = Exact<{
@@ -68876,6 +68739,7 @@ export type Roadmap_ProjectsQuery = { __typename?: "Query" } & {
           | "completedScopeHistory"
           | "completedIssueCountHistory"
           | "inProgressScopeHistory"
+          | "resourceCount"
           | "health"
           | "progress"
           | "scope"
@@ -69350,6 +69214,7 @@ export type SearchProjectsQuery = { __typename?: "Query" } & {
           | "completedScopeHistory"
           | "completedIssueCountHistory"
           | "inProgressScopeHistory"
+          | "resourceCount"
           | "health"
           | "progress"
           | "scope"
@@ -70007,6 +69872,7 @@ export type Team_ProjectsQuery = { __typename?: "Query" } & {
           | "completedScopeHistory"
           | "completedIssueCountHistory"
           | "inProgressScopeHistory"
+          | "resourceCount"
           | "health"
           | "progress"
           | "scope"
@@ -75360,6 +75226,7 @@ export type DeleteIntegrationTemplateMutation = { __typename?: "Mutation" } & {
 };
 
 export type IntegrationZendeskMutationVariables = Exact<{
+  botUserRole?: InputMaybe<Scalars["String"]>;
   code: Scalars["String"];
   redirectUri: Scalars["String"];
   scope: Scalars["String"];
@@ -81458,6 +81325,7 @@ export type ProjectExternalSyncDisableMutation = { __typename?: "Mutation" } & {
 
 export type CreateProjectLabelMutationVariables = Exact<{
   input: ProjectLabelCreateInput;
+  replaceTeamLabels?: InputMaybe<Scalars["Boolean"]>;
 }>;
 
 export type CreateProjectLabelMutation = { __typename?: "Mutation" } & {
@@ -81497,6 +81365,7 @@ export type ProjectLabelRetireMutation = { __typename?: "Mutation" } & {
 export type UpdateProjectLabelMutationVariables = Exact<{
   id: Scalars["String"];
   input: ProjectLabelUpdateInput;
+  replaceTeamLabels?: InputMaybe<Scalars["Boolean"]>;
 }>;
 
 export type UpdateProjectLabelMutation = { __typename?: "Mutation" } & {
@@ -81792,9 +81661,10 @@ export type ReleaseCompleteByAccessKeyMutationVariables = Exact<{
 }>;
 
 export type ReleaseCompleteByAccessKeyMutation = { __typename?: "Mutation" } & {
-  releaseCompleteByAccessKey: { __typename: "ReleasePayload" } & Pick<ReleasePayload, "lastSyncId" | "success"> & {
-      release: { __typename?: "Release" } & Pick<Release, "id">;
-    };
+  releaseCompleteByAccessKey: { __typename: "AccessKeyReleasePayload" } & Pick<
+    AccessKeyReleasePayload,
+    "lastSyncId" | "success"
+  >;
 };
 
 export type CreateReleaseMutationVariables = Exact<{
@@ -81960,9 +81830,10 @@ export type ReleaseSyncByAccessKeyMutationVariables = Exact<{
 }>;
 
 export type ReleaseSyncByAccessKeyMutation = { __typename?: "Mutation" } & {
-  releaseSyncByAccessKey: { __typename: "ReleasePayload" } & Pick<ReleasePayload, "lastSyncId" | "success"> & {
-      release: { __typename?: "Release" } & Pick<Release, "id">;
-    };
+  releaseSyncByAccessKey: { __typename: "AccessKeyReleasePayload" } & Pick<
+    AccessKeyReleasePayload,
+    "lastSyncId" | "success"
+  >;
 };
 
 export type UnarchiveReleaseMutationVariables = Exact<{
@@ -82001,10 +81872,10 @@ export type ReleaseUpdateByPipelineByAccessKeyMutationVariables = Exact<{
 }>;
 
 export type ReleaseUpdateByPipelineByAccessKeyMutation = { __typename?: "Mutation" } & {
-  releaseUpdateByPipelineByAccessKey: { __typename: "ReleasePayload" } & Pick<
-    ReleasePayload,
+  releaseUpdateByPipelineByAccessKey: { __typename: "AccessKeyReleasePayload" } & Pick<
+    AccessKeyReleasePayload,
     "lastSyncId" | "success"
-  > & { release: { __typename?: "Release" } & Pick<Release, "id"> };
+  >;
 };
 
 export type ResendOrganizationInviteMutationVariables = Exact<{
@@ -82669,6 +82540,7 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "showArchivedItems"
             | "customerPageNeedsShowCompletedIssuesAndProjects"
             | "projectCustomerNeedsShowCompletedIssuesLast"
+            | "automationShowDisabled"
             | "showDraftReviews"
             | "showEmptyGroupsBoard"
             | "showEmptyGroupsList"
@@ -82683,6 +82555,7 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "showParents"
             | "fieldPreviewLinks"
             | "showReadItems"
+            | "reviewFieldStatusDetails"
             | "showSnoozedItems"
             | "showSubInitiativeProjects"
             | "showNestedInitiatives"
@@ -82720,6 +82593,7 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "initiativeFieldDateCreated"
             | "initiativeFieldDescription"
             | "initiativeFieldInitiativeHealth"
+            | "initiativeFieldId"
             | "initiativeFieldLabels"
             | "initiativeFieldLeadTeam"
             | "initiativeFieldOwner"
@@ -82764,6 +82638,7 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "fieldProject"
             | "projectFieldHealthTimeline"
             | "projectFieldHealth"
+            | "projectFieldId"
             | "projectFieldInitiatives"
             | "projectFieldIssues"
             | "projectFieldLabels"
@@ -82795,6 +82670,7 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "projectFieldTeams"
             | "projectFieldDateUpdated"
             | "timelineShowProjectsAside"
+            | "reviewFieldOpenedAt"
             | "fieldPullRequests"
             | "continuousPipelineReleaseFieldReleaseDate"
             | "scheduledPipelineReleaseFieldReleaseDate"
@@ -82943,6 +82819,7 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "showArchivedItems"
             | "customerPageNeedsShowCompletedIssuesAndProjects"
             | "projectCustomerNeedsShowCompletedIssuesLast"
+            | "automationShowDisabled"
             | "showDraftReviews"
             | "showEmptyGroupsBoard"
             | "showEmptyGroupsList"
@@ -82957,6 +82834,7 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "showParents"
             | "fieldPreviewLinks"
             | "showReadItems"
+            | "reviewFieldStatusDetails"
             | "showSnoozedItems"
             | "showSubInitiativeProjects"
             | "showNestedInitiatives"
@@ -82994,6 +82872,7 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "initiativeFieldDateCreated"
             | "initiativeFieldDescription"
             | "initiativeFieldInitiativeHealth"
+            | "initiativeFieldId"
             | "initiativeFieldLabels"
             | "initiativeFieldLeadTeam"
             | "initiativeFieldOwner"
@@ -83038,6 +82917,7 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "fieldProject"
             | "projectFieldHealthTimeline"
             | "projectFieldHealth"
+            | "projectFieldId"
             | "projectFieldInitiatives"
             | "projectFieldIssues"
             | "projectFieldLabels"
@@ -83069,6 +82949,7 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "projectFieldTeams"
             | "projectFieldDateUpdated"
             | "timelineShowProjectsAside"
+            | "reviewFieldOpenedAt"
             | "fieldPullRequests"
             | "continuousPipelineReleaseFieldReleaseDate"
             | "scheduledPipelineReleaseFieldReleaseDate"
@@ -84896,6 +84777,59 @@ fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
 }`,
   { fragmentName: "AiConversationSearchEntitiesToolCall" }
 ) as unknown as TypedDocumentString<AiConversationSearchEntitiesToolCallFragment, unknown>;
+export const AiConversationSpawnSubagentToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationSpawnSubagentToolCallArgs on AiConversationSpawnSubagentToolCallArgs {
+  __typename
+  description
+}
+    `,
+  { fragmentName: "AiConversationSpawnSubagentToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationSpawnSubagentToolCallArgsFragment, unknown>;
+export const AiConversationSpawnSubagentToolCallResultFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationSpawnSubagentToolCallResult on AiConversationSpawnSubagentToolCallResult {
+  __typename
+  conversationId
+}
+    `,
+  { fragmentName: "AiConversationSpawnSubagentToolCallResult" }
+) as unknown as TypedDocumentString<AiConversationSpawnSubagentToolCallResultFragment, unknown>;
+export const AiConversationSpawnSubagentToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationSpawnSubagentToolCall on AiConversationSpawnSubagentToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationSpawnSubagentToolCallArgs
+  }
+  name
+  rawResult
+  result {
+    ...AiConversationSpawnSubagentToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationSpawnSubagentToolCallArgs on AiConversationSpawnSubagentToolCallArgs {
+  __typename
+  description
+}
+fragment AiConversationSpawnSubagentToolCallResult on AiConversationSpawnSubagentToolCallResult {
+  __typename
+  conversationId
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationSpawnSubagentToolCall" }
+) as unknown as TypedDocumentString<AiConversationSpawnSubagentToolCallFragment, unknown>;
 export const AiConversationStartCodingSessionToolCallArgsFragmentDoc = new TypedDocumentString(
   `
     fragment AiConversationStartCodingSessionToolCallArgs on AiConversationStartCodingSessionToolCallArgs {
@@ -85368,6 +85302,9 @@ export const AiConversationToolCallPartFragmentDoc = new TypedDocumentString(
     }
     ... on AiConversationSearchEntitiesToolCall {
       ...AiConversationSearchEntitiesToolCall
+    }
+    ... on AiConversationSpawnSubagentToolCall {
+      ...AiConversationSpawnSubagentToolCall
     }
     ... on AiConversationStartCodingSessionToolCall {
       ...AiConversationStartCodingSessionToolCall
@@ -85964,6 +85901,29 @@ fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSea
   id
   type
 }
+fragment AiConversationSpawnSubagentToolCall on AiConversationSpawnSubagentToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationSpawnSubagentToolCallArgs
+  }
+  name
+  rawResult
+  result {
+    ...AiConversationSpawnSubagentToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationSpawnSubagentToolCallArgs on AiConversationSpawnSubagentToolCallArgs {
+  __typename
+  description
+}
+fragment AiConversationSpawnSubagentToolCallResult on AiConversationSpawnSubagentToolCallResult {
+  __typename
+  conversationId
+}
 fragment AiConversationStartCodingSessionToolCall on AiConversationStartCodingSessionToolCall {
   __typename
   rawArgs
@@ -86503,6 +86463,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     }
     ... on AiConversationSearchEntitiesToolCall {
       ...AiConversationSearchEntitiesToolCall
+    }
+    ... on AiConversationSpawnSubagentToolCall {
+      ...AiConversationSpawnSubagentToolCall
     }
     ... on AiConversationStartCodingSessionToolCall {
       ...AiConversationStartCodingSessionToolCall
@@ -87185,6 +87148,29 @@ fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSea
   __typename
   id
   type
+}
+fragment AiConversationSpawnSubagentToolCall on AiConversationSpawnSubagentToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationSpawnSubagentToolCallArgs
+  }
+  name
+  rawResult
+  result {
+    ...AiConversationSpawnSubagentToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationSpawnSubagentToolCallArgs on AiConversationSpawnSubagentToolCallArgs {
+  __typename
+  description
+}
+fragment AiConversationSpawnSubagentToolCallResult on AiConversationSpawnSubagentToolCallResult {
+  __typename
+  conversationId
 }
 fragment AiConversationStartCodingSessionToolCall on AiConversationStartCodingSessionToolCall {
   __typename
@@ -90923,6 +90909,36 @@ export const UserNotificationSubscriptionFragmentDoc = new TypedDocumentString(
     `,
   { fragmentName: "UserNotificationSubscription" }
 ) as unknown as TypedDocumentString<UserNotificationSubscriptionFragment, unknown>;
+export const IssueSuggestionReasonReferenceFragmentDoc = new TypedDocumentString(
+  `
+    fragment IssueSuggestionReasonReference on IssueSuggestionReasonReference {
+  __typename
+  label
+  id
+  type
+  title
+}
+    `,
+  { fragmentName: "IssueSuggestionReasonReference" }
+) as unknown as TypedDocumentString<IssueSuggestionReasonReferenceFragment, unknown>;
+export const PresentedIssueSuggestionReasonFragmentDoc = new TypedDocumentString(
+  `
+    fragment PresentedIssueSuggestionReason on PresentedIssueSuggestionReason {
+  __typename
+  references {
+    ...IssueSuggestionReasonReference
+  }
+  text
+}
+    fragment IssueSuggestionReasonReference on IssueSuggestionReasonReference {
+  __typename
+  label
+  id
+  type
+  title
+}`,
+  { fragmentName: "PresentedIssueSuggestionReason" }
+) as unknown as TypedDocumentString<PresentedIssueSuggestionReasonFragment, unknown>;
 export const ArchivedIntegrationPayloadFragmentDoc = new TypedDocumentString(
   `
     fragment ArchivedIntegrationPayload on ArchivedIntegrationPayload {
@@ -90956,6 +90972,47 @@ export const WebhookFailureEventFragmentDoc = new TypedDocumentString(
     `,
   { fragmentName: "WebhookFailureEvent" }
 ) as unknown as TypedDocumentString<WebhookFailureEventFragment, unknown>;
+export const AccessKeyReleasePipelineFragmentDoc = new TypedDocumentString(
+  `
+    fragment AccessKeyReleasePipeline on AccessKeyReleasePipeline {
+  __typename
+  includePathPatterns
+  id
+}
+    `,
+  { fragmentName: "AccessKeyReleasePipeline" }
+) as unknown as TypedDocumentString<AccessKeyReleasePipelineFragment, unknown>;
+export const AccessKeyReleaseStageFragmentDoc = new TypedDocumentString(
+  `
+    fragment AccessKeyReleaseStage on AccessKeyReleaseStage {
+  __typename
+  name
+}
+    `,
+  { fragmentName: "AccessKeyReleaseStage" }
+) as unknown as TypedDocumentString<AccessKeyReleaseStageFragment, unknown>;
+export const AccessKeyReleaseFragmentDoc = new TypedDocumentString(
+  `
+    fragment AccessKeyRelease on AccessKeyRelease {
+  __typename
+  commitSha
+  url
+  stage {
+    ...AccessKeyReleaseStage
+  }
+  name
+  archivedAt
+  completedAt
+  createdAt
+  id
+  version
+}
+    fragment AccessKeyReleaseStage on AccessKeyReleaseStage {
+  __typename
+  name
+}`,
+  { fragmentName: "AccessKeyRelease" }
+) as unknown as TypedDocumentString<AccessKeyReleaseFragment, unknown>;
 export const WorkflowCronJobDefinitionFragmentDoc = new TypedDocumentString(
   `
     fragment WorkflowCronJobDefinition on WorkflowCronJobDefinition {
@@ -91116,6 +91173,7 @@ export const OrganizationFragmentDoc = new TypedDocumentString(
   projectUpdateReminderFrequencyInWeeks
   initiativeUpdateRemindersHour
   projectUpdateRemindersHour
+  defaultHomeViewTargetId
   updatedAt
   customerCount
   userCount
@@ -92616,6 +92674,7 @@ export const ProjectWebhookPayloadFragmentDoc = new TypedDocumentString(
   labelIds
   memberIds
   teamIds
+  previousIdentifiers
   id
   convertedFromIssueId
   lastAppliedTemplateId
@@ -92632,6 +92691,7 @@ export const ProjectWebhookPayloadFragmentDoc = new TypedDocumentString(
   startDate
   syncedWith
   health
+  identifier
   icon
   initiatives {
     ...InitiativeChildWebhookPayload
@@ -97550,6 +97610,16 @@ export const ReactionPayloadFragmentDoc = new TypedDocumentString(
 }`,
   { fragmentName: "ReactionPayload" }
 ) as unknown as TypedDocumentString<ReactionPayloadFragment, unknown>;
+export const AccessKeyReleasePayloadFragmentDoc = new TypedDocumentString(
+  `
+    fragment AccessKeyReleasePayload on AccessKeyReleasePayload {
+  __typename
+  lastSyncId
+  success
+}
+    `,
+  { fragmentName: "AccessKeyReleasePayload" }
+) as unknown as TypedDocumentString<AccessKeyReleasePayloadFragment, unknown>;
 export const ReleasePayloadFragmentDoc = new TypedDocumentString(
   `
     fragment ReleasePayload on ReleasePayload {
@@ -97799,6 +97869,7 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   showArchivedItems
   customerPageNeedsShowCompletedIssuesAndProjects
   projectCustomerNeedsShowCompletedIssuesLast
+  automationShowDisabled
   showDraftReviews
   showEmptyGroupsBoard
   showEmptyGroupsList
@@ -97813,6 +97884,7 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   showParents
   fieldPreviewLinks
   showReadItems
+  reviewFieldStatusDetails
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -97850,6 +97922,7 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
+  initiativeFieldId
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -97894,6 +97967,7 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   fieldProject
   projectFieldHealthTimeline
   projectFieldHealth
+  projectFieldId
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -97925,6 +97999,7 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   projectFieldTeams
   projectFieldDateUpdated
   timelineShowProjectsAside
+  reviewFieldOpenedAt
   fieldPullRequests
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
@@ -98072,6 +98147,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showArchivedItems
   customerPageNeedsShowCompletedIssuesAndProjects
   projectCustomerNeedsShowCompletedIssuesLast
+  automationShowDisabled
   showDraftReviews
   showEmptyGroupsBoard
   showEmptyGroupsList
@@ -98086,6 +98162,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showParents
   fieldPreviewLinks
   showReadItems
+  reviewFieldStatusDetails
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -98123,6 +98200,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
+  initiativeFieldId
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -98167,6 +98245,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldProject
   projectFieldHealthTimeline
   projectFieldHealth
+  projectFieldId
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -98198,6 +98277,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   timelineShowProjectsAside
+  reviewFieldOpenedAt
   fieldPullRequests
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
@@ -98331,6 +98411,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showArchivedItems
   customerPageNeedsShowCompletedIssuesAndProjects
   projectCustomerNeedsShowCompletedIssuesLast
+  automationShowDisabled
   showDraftReviews
   showEmptyGroupsBoard
   showEmptyGroupsList
@@ -98345,6 +98426,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showParents
   fieldPreviewLinks
   showReadItems
+  reviewFieldStatusDetails
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -98382,6 +98464,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
+  initiativeFieldId
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -98426,6 +98509,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldProject
   projectFieldHealthTimeline
   projectFieldHealth
+  projectFieldId
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -98457,6 +98541,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   timelineShowProjectsAside
+  reviewFieldOpenedAt
   fieldPullRequests
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
@@ -99663,6 +99748,9 @@ export const AiConversationBaseToolCallFragmentDoc = new TypedDocumentString(
   ... on AiConversationSearchEntitiesToolCall {
     ...AiConversationSearchEntitiesToolCall
   }
+  ... on AiConversationSpawnSubagentToolCall {
+    ...AiConversationSpawnSubagentToolCall
+  }
   ... on AiConversationStartCodingSessionToolCall {
     ...AiConversationStartCodingSessionToolCall
   }
@@ -100246,6 +100334,29 @@ fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSea
   __typename
   id
   type
+}
+fragment AiConversationSpawnSubagentToolCall on AiConversationSpawnSubagentToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationSpawnSubagentToolCallArgs
+  }
+  name
+  rawResult
+  result {
+    ...AiConversationSpawnSubagentToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationSpawnSubagentToolCallArgs on AiConversationSpawnSubagentToolCallArgs {
+  __typename
+  description
+}
+fragment AiConversationSpawnSubagentToolCallResult on AiConversationSpawnSubagentToolCallResult {
+  __typename
+  conversationId
 }
 fragment AiConversationStartCodingSessionToolCall on AiConversationStartCodingSessionToolCall {
   __typename
@@ -101526,6 +101637,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showArchivedItems
   customerPageNeedsShowCompletedIssuesAndProjects
   projectCustomerNeedsShowCompletedIssuesLast
+  automationShowDisabled
   showDraftReviews
   showEmptyGroupsBoard
   showEmptyGroupsList
@@ -101540,6 +101652,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showParents
   fieldPreviewLinks
   showReadItems
+  reviewFieldStatusDetails
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -101577,6 +101690,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
+  initiativeFieldId
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -101621,6 +101735,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldProject
   projectFieldHealthTimeline
   projectFieldHealth
+  projectFieldId
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -101652,6 +101767,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   timelineShowProjectsAside
+  reviewFieldOpenedAt
   fieldPullRequests
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
@@ -101838,6 +101954,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showArchivedItems
   customerPageNeedsShowCompletedIssuesAndProjects
   projectCustomerNeedsShowCompletedIssuesLast
+  automationShowDisabled
   showDraftReviews
   showEmptyGroupsBoard
   showEmptyGroupsList
@@ -101852,6 +101969,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showParents
   fieldPreviewLinks
   showReadItems
+  reviewFieldStatusDetails
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -101889,6 +102007,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
+  initiativeFieldId
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -101933,6 +102052,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldProject
   projectFieldHealthTimeline
   projectFieldHealth
+  projectFieldId
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -101964,6 +102084,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   timelineShowProjectsAside
+  reviewFieldOpenedAt
   fieldPullRequests
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
@@ -106557,6 +106678,7 @@ export const ProjectFragmentDoc = new TypedDocumentString(
   completedScopeHistory
   completedIssueCountHistory
   inProgressScopeHistory
+  resourceCount
   health
   progress
   scope
@@ -106737,6 +106859,7 @@ export const ProjectConnectionFragmentDoc = new TypedDocumentString(
   completedScopeHistory
   completedIssueCountHistory
   inProgressScopeHistory
+  resourceCount
   health
   progress
   scope
@@ -107293,6 +107416,7 @@ export const ProjectSearchResultFragmentDoc = new TypedDocumentString(
   completedScopeHistory
   completedIssueCountHistory
   inProgressScopeHistory
+  resourceCount
   health
   progress
   scope
@@ -107580,6 +107704,7 @@ fragment ProjectSearchResult on ProjectSearchResult {
   completedScopeHistory
   completedIssueCountHistory
   inProgressScopeHistory
+  resourceCount
   health
   progress
   scope
@@ -114661,6 +114786,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showArchivedItems
   customerPageNeedsShowCompletedIssuesAndProjects
   projectCustomerNeedsShowCompletedIssuesLast
+  automationShowDisabled
   showDraftReviews
   showEmptyGroupsBoard
   showEmptyGroupsList
@@ -114675,6 +114801,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showParents
   fieldPreviewLinks
   showReadItems
+  reviewFieldStatusDetails
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -114712,6 +114839,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
+  initiativeFieldId
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -114756,6 +114884,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldProject
   projectFieldHealthTimeline
   projectFieldHealth
+  projectFieldId
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -114787,6 +114916,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   timelineShowProjectsAside
+  reviewFieldOpenedAt
   fieldPullRequests
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
@@ -115319,6 +115449,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showArchivedItems
   customerPageNeedsShowCompletedIssuesAndProjects
   projectCustomerNeedsShowCompletedIssuesLast
+  automationShowDisabled
   showDraftReviews
   showEmptyGroupsBoard
   showEmptyGroupsList
@@ -115333,6 +115464,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showParents
   fieldPreviewLinks
   showReadItems
+  reviewFieldStatusDetails
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -115370,6 +115502,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
+  initiativeFieldId
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -115414,6 +115547,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldProject
   projectFieldHealthTimeline
   projectFieldHealth
+  projectFieldId
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -115445,6 +115579,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   timelineShowProjectsAside
+  reviewFieldOpenedAt
   fieldPullRequests
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
@@ -115591,6 +115726,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showArchivedItems
   customerPageNeedsShowCompletedIssuesAndProjects
   projectCustomerNeedsShowCompletedIssuesLast
+  automationShowDisabled
   showDraftReviews
   showEmptyGroupsBoard
   showEmptyGroupsList
@@ -115605,6 +115741,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showParents
   fieldPreviewLinks
   showReadItems
+  reviewFieldStatusDetails
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -115642,6 +115779,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
+  initiativeFieldId
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -115686,6 +115824,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldProject
   projectFieldHealthTimeline
   projectFieldHealth
+  projectFieldId
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -115717,6 +115856,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   timelineShowProjectsAside
+  reviewFieldOpenedAt
   fieldPullRequests
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
@@ -115806,6 +115946,7 @@ export const CustomView_ProjectsDocument = new TypedDocumentString(`
   completedScopeHistory
   completedIssueCountHistory
   inProgressScopeHistory
+  resourceCount
   health
   progress
   scope
@@ -116050,6 +116191,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showArchivedItems
   customerPageNeedsShowCompletedIssuesAndProjects
   projectCustomerNeedsShowCompletedIssuesLast
+  automationShowDisabled
   showDraftReviews
   showEmptyGroupsBoard
   showEmptyGroupsList
@@ -116064,6 +116206,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showParents
   fieldPreviewLinks
   showReadItems
+  reviewFieldStatusDetails
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -116101,6 +116244,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
+  initiativeFieldId
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -116145,6 +116289,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldProject
   projectFieldHealthTimeline
   projectFieldHealth
+  projectFieldId
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -116176,6 +116321,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   timelineShowProjectsAside
+  reviewFieldOpenedAt
   fieldPullRequests
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
@@ -116322,6 +116468,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showArchivedItems
   customerPageNeedsShowCompletedIssuesAndProjects
   projectCustomerNeedsShowCompletedIssuesLast
+  automationShowDisabled
   showDraftReviews
   showEmptyGroupsBoard
   showEmptyGroupsList
@@ -116336,6 +116483,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showParents
   fieldPreviewLinks
   showReadItems
+  reviewFieldStatusDetails
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -116373,6 +116521,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
+  initiativeFieldId
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -116417,6 +116566,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldProject
   projectFieldHealthTimeline
   projectFieldHealth
+  projectFieldId
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -116448,6 +116598,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   timelineShowProjectsAside
+  reviewFieldOpenedAt
   fieldPullRequests
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
@@ -116580,6 +116731,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showArchivedItems
   customerPageNeedsShowCompletedIssuesAndProjects
   projectCustomerNeedsShowCompletedIssuesLast
+  automationShowDisabled
   showDraftReviews
   showEmptyGroupsBoard
   showEmptyGroupsList
@@ -116594,6 +116746,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showParents
   fieldPreviewLinks
   showReadItems
+  reviewFieldStatusDetails
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -116631,6 +116784,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
+  initiativeFieldId
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -116675,6 +116829,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldProject
   projectFieldHealthTimeline
   projectFieldHealth
+  projectFieldId
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -116706,6 +116861,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   timelineShowProjectsAside
+  reviewFieldOpenedAt
   fieldPullRequests
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
@@ -116895,6 +117051,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showArchivedItems
   customerPageNeedsShowCompletedIssuesAndProjects
   projectCustomerNeedsShowCompletedIssuesLast
+  automationShowDisabled
   showDraftReviews
   showEmptyGroupsBoard
   showEmptyGroupsList
@@ -116909,6 +117066,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showParents
   fieldPreviewLinks
   showReadItems
+  reviewFieldStatusDetails
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -116946,6 +117104,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
+  initiativeFieldId
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -116990,6 +117149,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldProject
   projectFieldHealthTimeline
   projectFieldHealth
+  projectFieldId
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -117021,6 +117181,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   timelineShowProjectsAside
+  reviewFieldOpenedAt
   fieldPullRequests
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
@@ -119639,6 +119800,7 @@ export const Initiative_ProjectsDocument = new TypedDocumentString(`
   completedScopeHistory
   completedIssueCountHistory
   inProgressScopeHistory
+  resourceCount
   health
   progress
   scope
@@ -126032,549 +126194,41 @@ fragment PageInfo on PageInfo {
 export const LatestReleaseByAccessKeyDocument = new TypedDocumentString(`
     query latestReleaseByAccessKey {
   latestReleaseByAccessKey {
-    ...Release
+    ...AccessKeyRelease
   }
 }
-    fragment ReleaseNote on ReleaseNote {
+    fragment AccessKeyRelease on AccessKeyRelease {
   __typename
-  documentContent {
-    ...DocumentContent
-  }
-  generationStatus
-  url
-  firstRelease {
-    id
-  }
-  updatedAt
-  lastRelease {
-    id
-  }
-  releaseCount
-  slugId
-  pipeline {
-    id
-  }
-  archivedAt
-  createdAt
-  id
-  title
-}
-fragment Release on Release {
-  __typename
-  trashed
-  issueCount
-  releaseNotes {
-    ...ReleaseNote
-  }
   commitSha
   url
-  currentProgress
   stage {
-    id
+    ...AccessKeyReleaseStage
   }
-  description
-  targetDate
-  startDate
-  progressHistory
-  updatedAt
   name
-  pipeline {
-    id
-  }
-  slugId
   archivedAt
-  createdAt
-  startedAt
-  autoArchivedAt
-  canceledAt
   completedAt
+  createdAt
   id
-  creator {
-    id
-  }
   version
 }
-fragment WelcomeMessage on WelcomeMessage {
+fragment AccessKeyReleaseStage on AccessKeyReleaseStage {
   __typename
-  updatedAt
-  archivedAt
-  createdAt
-  title
-  id
-  updatedBy {
-    id
-  }
-  enabled
-}
-fragment AiPromptRules on AiPromptRules {
-  __typename
-  updatedAt
-  archivedAt
-  createdAt
-  id
-  updatedBy {
-    id
-  }
-}
-fragment DocumentContent on DocumentContent {
-  __typename
-  aiPromptRules {
-    ...AiPromptRules
-  }
-  content
-  contentState
-  document {
-    id
-  }
-  initiative {
-    id
-  }
-  issue {
-    id
-  }
-  updatedAt
-  projectMilestone {
-    id
-  }
-  project {
-    id
-  }
-  restoredAt
-  archivedAt
-  createdAt
-  id
-  welcomeMessage {
-    ...WelcomeMessage
-  }
+  name
 }`) as unknown as TypedDocumentString<LatestReleaseByAccessKeyQuery, LatestReleaseByAccessKeyQueryVariables>;
-export const LatestReleaseByAccessKey_DocumentsDocument = new TypedDocumentString(`
-    query latestReleaseByAccessKey_documents($after: String, $before: String, $filter: DocumentFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+export const LatestReleaseByAccessKey_StageDocument = new TypedDocumentString(`
+    query latestReleaseByAccessKey_stage {
   latestReleaseByAccessKey {
-    documents(
-      after: $after
-      before: $before
-      filter: $filter
-      first: $first
-      includeArchived: $includeArchived
-      last: $last
-      orderBy: $orderBy
-    ) {
-      ...DocumentConnection
+    stage {
+      ...AccessKeyReleaseStage
     }
   }
 }
-    fragment Document on Document {
+    fragment AccessKeyReleaseStage on AccessKeyReleaseStage {
   __typename
-  trashed
-  documentContentId
-  url
-  content
-  slugId
-  color
-  icon
-  initiative {
-    id
-  }
-  issue {
-    id
-  }
-  lastAppliedTemplate {
-    id
-  }
-  updatedAt
-  project {
-    id
-  }
-  release {
-    id
-  }
-  sortOrder
-  hiddenAt
-  archivedAt
-  createdAt
-  title
-  id
-  creator {
-    id
-  }
-  updatedBy {
-    id
-  }
-}
-fragment DocumentConnection on DocumentConnection {
-  __typename
-  nodes {
-    ...Document
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-fragment PageInfo on PageInfo {
-  __typename
-  startCursor
-  endCursor
-  hasPreviousPage
-  hasNextPage
-}`) as unknown as TypedDocumentString<
-  LatestReleaseByAccessKey_DocumentsQuery,
-  LatestReleaseByAccessKey_DocumentsQueryVariables
->;
-export const LatestReleaseByAccessKey_HistoryDocument = new TypedDocumentString(`
-    query latestReleaseByAccessKey_history($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
-  latestReleaseByAccessKey {
-    history(
-      after: $after
-      before: $before
-      first: $first
-      includeArchived: $includeArchived
-      last: $last
-      orderBy: $orderBy
-    ) {
-      ...ReleaseHistoryConnection
-    }
-  }
-}
-    fragment ReleaseHistory on ReleaseHistory {
-  __typename
-  entries
-  updatedAt
-  release {
-    id
-  }
-  archivedAt
-  createdAt
-  id
-}
-fragment PageInfo on PageInfo {
-  __typename
-  startCursor
-  endCursor
-  hasPreviousPage
-  hasNextPage
-}
-fragment ReleaseHistoryConnection on ReleaseHistoryConnection {
-  __typename
-  nodes {
-    ...ReleaseHistory
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}`) as unknown as TypedDocumentString<
-  LatestReleaseByAccessKey_HistoryQuery,
-  LatestReleaseByAccessKey_HistoryQueryVariables
->;
-export const LatestReleaseByAccessKey_IssuesDocument = new TypedDocumentString(`
-    query latestReleaseByAccessKey_issues($after: String, $before: String, $filter: IssueFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
-  latestReleaseByAccessKey {
-    issues(
-      after: $after
-      before: $before
-      filter: $filter
-      first: $first
-      includeArchived: $includeArchived
-      last: $last
-      orderBy: $orderBy
-    ) {
-      ...IssueConnection
-    }
-  }
-}
-    fragment ActorBot on ActorBot {
-  __typename
-  avatarUrl
-  subType
-  id
   name
-  userDisplayName
-  type
-}
-fragment User on User {
-  __typename
-  description
-  avatarUrl
-  createdIssueCount
-  avatarBackgroundColor
-  statusUntilAt
-  statusEmoji
-  initials
-  updatedAt
-  lastSeen
-  timezone
-  disableReason
-  statusLabel
-  archivedAt
-  createdAt
-  id
-  gitHubUserId
-  displayName
-  email
-  name
-  title
-  url
-  active
-  isAssignable
-  guest
-  admin
-  owner
-  app
-  isMentionable
-  isMe
-  supportsAgentSessions
-  canAccessAnyPublicTeam
-  calendarHash
-  inviteHash
-}
-fragment Reaction on Reaction {
-  __typename
-  comment {
-    id
-  }
-  externalUser {
-    id
-  }
-  initiativeUpdate {
-    id
-  }
-  issue {
-    id
-  }
-  updatedAt
-  emoji
-  projectUpdate {
-    id
-  }
-  archivedAt
-  createdAt
-  id
-  user {
-    id
-  }
-}
-fragment Issue on Issue {
-  __typename
-  trashed
-  reactionData
-  labelIds
-  integrationSourceType
-  url
-  identifier
-  priorityLabel
-  previousIdentifiers
-  reactions {
-    ...Reaction
-  }
-  customerTicketCount
-  sharedAccess {
-    ...IssueSharedAccess
-  }
-  branchName
-  delegate {
-    id
-  }
-  botActor {
-    ...ActorBot
-  }
-  sourceComment {
-    id
-  }
-  cycle {
-    id
-  }
-  dueDate
-  estimate
-  syncedWith {
-    ...ExternalEntityInfo
-  }
-  externalUserCreator {
-    id
-  }
-  asksExternalUserRequester {
-    id
-  }
-  asksRequester {
-    id
-  }
-  description
-  title
-  number
-  lastAppliedTemplate {
-    id
-  }
-  updatedAt
-  boardOrder
-  sortOrder
-  prioritySortOrder
-  subIssueSortOrder
-  parent {
-    id
-  }
-  priority
-  projectMilestone {
-    id
-  }
-  project {
-    id
-  }
-  recurringIssueTemplate {
-    id
-  }
-  team {
-    id
-  }
-  archivedAt
-  createdAt
-  startedTriageAt
-  triagedAt
-  addedToCycleAt
-  addedToProjectAt
-  addedToTeamAt
-  autoArchivedAt
-  autoClosedAt
-  canceledAt
-  completedAt
-  startedAt
-  slaStartedAt
-  slaBreachesAt
-  slaHighRiskAt
-  slaMediumRiskAt
-  snoozedUntilAt
-  slaType
-  id
-  assignee {
-    id
-  }
-  creator {
-    id
-  }
-  snoozedBy {
-    id
-  }
-  favorite {
-    id
-  }
-  state {
-    id
-  }
-  inheritsSharedAccess
-}
-fragment ExternalEntityInfo on ExternalEntityInfo {
-  __typename
-  metadata {
-    ... on ExternalEntityInfoGithubMetadata {
-      ...ExternalEntityInfoGithubMetadata
-    }
-    ... on ExternalEntityInfoJiraMetadata {
-      ...ExternalEntityInfoJiraMetadata
-    }
-    ... on ExternalEntitySlackMetadata {
-      ...ExternalEntitySlackMetadata
-    }
-  }
-  service
-  id
-}
-fragment IssueSharedAccess on IssueSharedAccess {
-  __typename
-  disallowedIssueFields
-  sharedWithCount
-  sharedWithUsers {
-    ...User
-  }
-  viewerHasOnlySharedAccess
-  isShared
-}
-fragment ExternalEntityInfoGithubMetadata on ExternalEntityInfoGithubMetadata {
-  __typename
-  number
-  owner
-  repo
-}
-fragment ExternalEntityInfoJiraMetadata on ExternalEntityInfoJiraMetadata {
-  __typename
-  issueTypeId
-  projectId
-  issueKey
-}
-fragment ExternalEntitySlackMetadata on ExternalEntitySlackMetadata {
-  __typename
-  messageUrl
-  channelId
-  channelName
-  isFromSlack
-}
-fragment IssueConnection on IssueConnection {
-  __typename
-  nodes {
-    ...Issue
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-fragment PageInfo on PageInfo {
-  __typename
-  startCursor
-  endCursor
-  hasPreviousPage
-  hasNextPage
 }`) as unknown as TypedDocumentString<
-  LatestReleaseByAccessKey_IssuesQuery,
-  LatestReleaseByAccessKey_IssuesQueryVariables
->;
-export const LatestReleaseByAccessKey_LinksDocument = new TypedDocumentString(`
-    query latestReleaseByAccessKey_links($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
-  latestReleaseByAccessKey {
-    links(
-      after: $after
-      before: $before
-      first: $first
-      includeArchived: $includeArchived
-      last: $last
-      orderBy: $orderBy
-    ) {
-      ...EntityExternalLinkConnection
-    }
-  }
-}
-    fragment EntityExternalLink on EntityExternalLink {
-  __typename
-  initiative {
-    id
-  }
-  updatedAt
-  url
-  label
-  project {
-    id
-  }
-  sortOrder
-  archivedAt
-  createdAt
-  id
-  creator {
-    id
-  }
-}
-fragment EntityExternalLinkConnection on EntityExternalLinkConnection {
-  __typename
-  nodes {
-    ...EntityExternalLink
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-fragment PageInfo on PageInfo {
-  __typename
-  startCursor
-  endCursor
-  hasPreviousPage
-  hasNextPage
-}`) as unknown as TypedDocumentString<
-  LatestReleaseByAccessKey_LinksQuery,
-  LatestReleaseByAccessKey_LinksQueryVariables
+  LatestReleaseByAccessKey_StageQuery,
+  LatestReleaseByAccessKey_StageQueryVariables
 >;
 export const NotificationDocument = new TypedDocumentString(`
     query notification($id: String!) {
@@ -128022,6 +127676,7 @@ fragment Organization on Organization {
   projectUpdateReminderFrequencyInWeeks
   initiativeUpdateRemindersHour
   projectUpdateRemindersHour
+  defaultHomeViewTargetId
   updatedAt
   customerCount
   userCount
@@ -128659,6 +128314,7 @@ export const ProjectDocument = new TypedDocumentString(`
   completedScopeHistory
   completedIssueCountHistory
   inProgressScopeHistory
+  resourceCount
   health
   progress
   scope
@@ -130560,6 +130216,7 @@ export const ProjectLabel_ProjectsDocument = new TypedDocumentString(`
   completedScopeHistory
   completedIssueCountHistory
   inProgressScopeHistory
+  resourceCount
   health
   progress
   scope
@@ -131880,6 +131537,7 @@ export const ProjectsDocument = new TypedDocumentString(`
   completedScopeHistory
   completedIssueCountHistory
   inProgressScopeHistory
+  resourceCount
   health
   progress
   scope
@@ -132059,120 +131717,26 @@ fragment RateLimitResultPayload on RateLimitResultPayload {
 export const RecentReleasesByAccessKeyDocument = new TypedDocumentString(`
     query recentReleasesByAccessKey($limit: Int) {
   recentReleasesByAccessKey(limit: $limit) {
-    ...Release
+    ...AccessKeyRelease
   }
 }
-    fragment ReleaseNote on ReleaseNote {
+    fragment AccessKeyRelease on AccessKeyRelease {
   __typename
-  documentContent {
-    ...DocumentContent
-  }
-  generationStatus
-  url
-  firstRelease {
-    id
-  }
-  updatedAt
-  lastRelease {
-    id
-  }
-  releaseCount
-  slugId
-  pipeline {
-    id
-  }
-  archivedAt
-  createdAt
-  id
-  title
-}
-fragment Release on Release {
-  __typename
-  trashed
-  issueCount
-  releaseNotes {
-    ...ReleaseNote
-  }
   commitSha
   url
-  currentProgress
   stage {
-    id
+    ...AccessKeyReleaseStage
   }
-  description
-  targetDate
-  startDate
-  progressHistory
-  updatedAt
   name
-  pipeline {
-    id
-  }
-  slugId
   archivedAt
-  createdAt
-  startedAt
-  autoArchivedAt
-  canceledAt
   completedAt
+  createdAt
   id
-  creator {
-    id
-  }
   version
 }
-fragment WelcomeMessage on WelcomeMessage {
+fragment AccessKeyReleaseStage on AccessKeyReleaseStage {
   __typename
-  updatedAt
-  archivedAt
-  createdAt
-  title
-  id
-  updatedBy {
-    id
-  }
-  enabled
-}
-fragment AiPromptRules on AiPromptRules {
-  __typename
-  updatedAt
-  archivedAt
-  createdAt
-  id
-  updatedBy {
-    id
-  }
-}
-fragment DocumentContent on DocumentContent {
-  __typename
-  aiPromptRules {
-    ...AiPromptRules
-  }
-  content
-  contentState
-  document {
-    id
-  }
-  initiative {
-    id
-  }
-  issue {
-    id
-  }
-  updatedAt
-  projectMilestone {
-    id
-  }
-  project {
-    id
-  }
-  restoredAt
-  archivedAt
-  createdAt
-  id
-  welcomeMessage {
-    ...WelcomeMessage
-  }
+  name
 }`) as unknown as TypedDocumentString<RecentReleasesByAccessKeyQuery, RecentReleasesByAccessKeyQueryVariables>;
 export const ReleaseDocument = new TypedDocumentString(`
     query release($id: String!) {
@@ -133362,363 +132926,14 @@ fragment TeamConnection on TeamConnection {
 export const ReleasePipelineByAccessKeyDocument = new TypedDocumentString(`
     query releasePipelineByAccessKey {
   releasePipelineByAccessKey {
-    ...ReleasePipeline
+    ...AccessKeyReleasePipeline
   }
 }
-    fragment ReleasePipeline on ReleasePipeline {
+    fragment AccessKeyReleasePipeline on AccessKeyReleasePipeline {
   __typename
-  trashed
   includePathPatterns
-  url
-  approximateReleaseCount
-  releaseNoteTemplate {
-    id
-  }
-  updatedAt
-  name
-  slugId
-  latestReleaseNote {
-    id
-  }
-  archivedAt
-  createdAt
-  type
   id
-  isProduction
-  autoGenerateReleaseNotesOnCompletion
 }`) as unknown as TypedDocumentString<ReleasePipelineByAccessKeyQuery, ReleasePipelineByAccessKeyQueryVariables>;
-export const ReleasePipelineByAccessKey_ReleasesDocument = new TypedDocumentString(`
-    query releasePipelineByAccessKey_releases($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy, $sort: [ReleaseSortInput!]) {
-  releasePipelineByAccessKey {
-    releases(
-      after: $after
-      before: $before
-      first: $first
-      includeArchived: $includeArchived
-      last: $last
-      orderBy: $orderBy
-      sort: $sort
-    ) {
-      ...ReleaseConnection
-    }
-  }
-}
-    fragment ReleaseNote on ReleaseNote {
-  __typename
-  documentContent {
-    ...DocumentContent
-  }
-  generationStatus
-  url
-  firstRelease {
-    id
-  }
-  updatedAt
-  lastRelease {
-    id
-  }
-  releaseCount
-  slugId
-  pipeline {
-    id
-  }
-  archivedAt
-  createdAt
-  id
-  title
-}
-fragment Release on Release {
-  __typename
-  trashed
-  issueCount
-  releaseNotes {
-    ...ReleaseNote
-  }
-  commitSha
-  url
-  currentProgress
-  stage {
-    id
-  }
-  description
-  targetDate
-  startDate
-  progressHistory
-  updatedAt
-  name
-  pipeline {
-    id
-  }
-  slugId
-  archivedAt
-  createdAt
-  startedAt
-  autoArchivedAt
-  canceledAt
-  completedAt
-  id
-  creator {
-    id
-  }
-  version
-}
-fragment WelcomeMessage on WelcomeMessage {
-  __typename
-  updatedAt
-  archivedAt
-  createdAt
-  title
-  id
-  updatedBy {
-    id
-  }
-  enabled
-}
-fragment AiPromptRules on AiPromptRules {
-  __typename
-  updatedAt
-  archivedAt
-  createdAt
-  id
-  updatedBy {
-    id
-  }
-}
-fragment DocumentContent on DocumentContent {
-  __typename
-  aiPromptRules {
-    ...AiPromptRules
-  }
-  content
-  contentState
-  document {
-    id
-  }
-  initiative {
-    id
-  }
-  issue {
-    id
-  }
-  updatedAt
-  projectMilestone {
-    id
-  }
-  project {
-    id
-  }
-  restoredAt
-  archivedAt
-  createdAt
-  id
-  welcomeMessage {
-    ...WelcomeMessage
-  }
-}
-fragment PageInfo on PageInfo {
-  __typename
-  startCursor
-  endCursor
-  hasPreviousPage
-  hasNextPage
-}
-fragment ReleaseConnection on ReleaseConnection {
-  __typename
-  nodes {
-    ...Release
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}`) as unknown as TypedDocumentString<
-  ReleasePipelineByAccessKey_ReleasesQuery,
-  ReleasePipelineByAccessKey_ReleasesQueryVariables
->;
-export const ReleasePipelineByAccessKey_StagesDocument = new TypedDocumentString(`
-    query releasePipelineByAccessKey_stages($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
-  releasePipelineByAccessKey {
-    stages(
-      after: $after
-      before: $before
-      first: $first
-      includeArchived: $includeArchived
-      last: $last
-      orderBy: $orderBy
-    ) {
-      ...ReleaseStageConnection
-    }
-  }
-}
-    fragment ReleaseStage on ReleaseStage {
-  __typename
-  color
-  updatedAt
-  type
-  name
-  position
-  pipeline {
-    id
-  }
-  archivedAt
-  createdAt
-  id
-  frozen
-}
-fragment PageInfo on PageInfo {
-  __typename
-  startCursor
-  endCursor
-  hasPreviousPage
-  hasNextPage
-}
-fragment ReleaseStageConnection on ReleaseStageConnection {
-  __typename
-  nodes {
-    ...ReleaseStage
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}`) as unknown as TypedDocumentString<
-  ReleasePipelineByAccessKey_StagesQuery,
-  ReleasePipelineByAccessKey_StagesQueryVariables
->;
-export const ReleasePipelineByAccessKey_TeamsDocument = new TypedDocumentString(`
-    query releasePipelineByAccessKey_teams($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
-  releasePipelineByAccessKey {
-    teams(
-      after: $after
-      before: $before
-      first: $first
-      includeArchived: $includeArchived
-      last: $last
-      orderBy: $orderBy
-    ) {
-      ...TeamConnection
-    }
-  }
-}
-    fragment Team on Team {
-  __typename
-  cycleIssueAutoAssignCompleted
-  cycleLockToActive
-  cycleIssueAutoAssignStarted
-  cycleCalenderUrl
-  upcomingCycleCount
-  autoArchivePeriod
-  autoClosePeriod
-  securitySettings
-  integrationsSettings {
-    id
-  }
-  activeCycle {
-    id
-  }
-  triageResponsibility {
-    id
-  }
-  scimGroupName
-  autoCloseStateId
-  cycleCooldownTime
-  cycleStartDay
-  defaultTemplateForMembers {
-    id
-  }
-  defaultTemplateForNonMembers {
-    id
-  }
-  defaultProjectTemplate {
-    id
-  }
-  defaultIssueState {
-    id
-  }
-  cycleDuration
-  icon
-  defaultTemplateForMembersId
-  defaultTemplateForNonMembersId
-  issueEstimationType
-  updatedAt
-  displayName
-  ledInitiativeCount
-  color
-  description
-  name
-  parent {
-    id
-  }
-  key
-  archivedAt
-  createdAt
-  retiredAt
-  timezone
-  issueCount
-  id
-  visibility
-  mergeWorkflowState {
-    id
-  }
-  draftWorkflowState {
-    id
-  }
-  startWorkflowState {
-    id
-  }
-  mergeableWorkflowState {
-    id
-  }
-  reviewWorkflowState {
-    id
-  }
-  triageIssueState {
-    id
-  }
-  defaultIssueEstimate
-  setIssueSortOrderOnStateChange
-  allMembersCanJoin
-  requirePriorityToLeaveTriage
-  autoCloseChildIssues
-  autoCloseParentIssues
-  scimManaged
-  private
-  inheritIssueEstimation
-  inheritWorkflowStatuses
-  cyclesEnabled
-  issueEstimationExtended
-  issueEstimationAllowZero
-  aiDiscussionSummariesEnabled
-  aiThreadSummariesEnabled
-  groupIssueHistory
-  slackIssueComments
-  slackNewIssue
-  slackIssueStatuses
-  triageEnabled
-  markedAsDuplicateWorkflowState {
-    id
-  }
-  inviteHash
-  issueOrderingNoPriorityFirst
-  issueSortOrderDefaultToBottom
-}
-fragment PageInfo on PageInfo {
-  __typename
-  startCursor
-  endCursor
-  hasPreviousPage
-  hasNextPage
-}
-fragment TeamConnection on TeamConnection {
-  __typename
-  nodes {
-    ...Team
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}`) as unknown as TypedDocumentString<
-  ReleasePipelineByAccessKey_TeamsQuery,
-  ReleasePipelineByAccessKey_TeamsQueryVariables
->;
 export const ReleasePipelinesDocument = new TypedDocumentString(`
     query releasePipelines($after: String, $before: String, $filter: ReleasePipelineFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy, $sort: [ReleasePipelineSortInput!]) {
   releasePipelines(
@@ -134323,6 +133538,7 @@ export const Roadmap_ProjectsDocument = new TypedDocumentString(`
   completedScopeHistory
   completedIssueCountHistory
   inProgressScopeHistory
+  resourceCount
   health
   progress
   scope
@@ -135153,6 +134369,7 @@ fragment ProjectSearchResult on ProjectSearchResult {
   completedScopeHistory
   completedIssueCountHistory
   inProgressScopeHistory
+  resourceCount
   health
   progress
   scope
@@ -136000,6 +135217,7 @@ export const Team_ProjectsDocument = new TypedDocumentString(`
   completedScopeHistory
   completedIssueCountHistory
   inProgressScopeHistory
+  resourceCount
   health
   progress
   scope
@@ -143220,8 +142438,9 @@ export const DeleteIntegrationTemplateDocument = new TypedDocumentString(`
   success
 }`) as unknown as TypedDocumentString<DeleteIntegrationTemplateMutation, DeleteIntegrationTemplateMutationVariables>;
 export const IntegrationZendeskDocument = new TypedDocumentString(`
-    mutation integrationZendesk($code: String!, $redirectUri: String!, $scope: String!, $subdomain: String!) {
+    mutation integrationZendesk($botUserRole: String, $code: String!, $redirectUri: String!, $scope: String!, $subdomain: String!) {
   integrationZendesk(
+    botUserRole: $botUserRole
     code: $code
     redirectUri: $redirectUri
     scope: $scope
@@ -149890,8 +149109,8 @@ export const ProjectExternalSyncDisableDocument = new TypedDocumentString(`
   success
 }`) as unknown as TypedDocumentString<ProjectExternalSyncDisableMutation, ProjectExternalSyncDisableMutationVariables>;
 export const CreateProjectLabelDocument = new TypedDocumentString(`
-    mutation createProjectLabel($input: ProjectLabelCreateInput!) {
-  projectLabelCreate(input: $input) {
+    mutation createProjectLabel($input: ProjectLabelCreateInput!, $replaceTeamLabels: Boolean) {
+  projectLabelCreate(input: $input, replaceTeamLabels: $replaceTeamLabels) {
     ...ProjectLabelPayload
   }
 }
@@ -149944,8 +149163,12 @@ export const ProjectLabelRetireDocument = new TypedDocumentString(`
   success
 }`) as unknown as TypedDocumentString<ProjectLabelRetireMutation, ProjectLabelRetireMutationVariables>;
 export const UpdateProjectLabelDocument = new TypedDocumentString(`
-    mutation updateProjectLabel($id: String!, $input: ProjectLabelUpdateInput!) {
-  projectLabelUpdate(id: $id, input: $input) {
+    mutation updateProjectLabel($id: String!, $input: ProjectLabelUpdateInput!, $replaceTeamLabels: Boolean) {
+  projectLabelUpdate(
+    id: $id
+    input: $input
+    replaceTeamLabels: $replaceTeamLabels
+  ) {
     ...ProjectLabelPayload
   }
 }
@@ -150349,15 +149572,12 @@ export const ReleaseCompleteDocument = new TypedDocumentString(`
 export const ReleaseCompleteByAccessKeyDocument = new TypedDocumentString(`
     mutation releaseCompleteByAccessKey($input: ReleaseCompleteInputBase!) {
   releaseCompleteByAccessKey(input: $input) {
-    ...ReleasePayload
+    ...AccessKeyReleasePayload
   }
 }
-    fragment ReleasePayload on ReleasePayload {
+    fragment AccessKeyReleasePayload on AccessKeyReleasePayload {
   __typename
   lastSyncId
-  release {
-    id
-  }
   success
 }`) as unknown as TypedDocumentString<ReleaseCompleteByAccessKeyMutation, ReleaseCompleteByAccessKeyMutationVariables>;
 export const CreateReleaseDocument = new TypedDocumentString(`
@@ -150571,15 +149791,12 @@ export const ReleaseSyncDocument = new TypedDocumentString(`
 export const ReleaseSyncByAccessKeyDocument = new TypedDocumentString(`
     mutation releaseSyncByAccessKey($input: ReleaseSyncInputBase!) {
   releaseSyncByAccessKey(input: $input) {
-    ...ReleasePayload
+    ...AccessKeyReleasePayload
   }
 }
-    fragment ReleasePayload on ReleasePayload {
+    fragment AccessKeyReleasePayload on AccessKeyReleasePayload {
   __typename
   lastSyncId
-  release {
-    id
-  }
   success
 }`) as unknown as TypedDocumentString<ReleaseSyncByAccessKeyMutation, ReleaseSyncByAccessKeyMutationVariables>;
 export const UnarchiveReleaseDocument = new TypedDocumentString(`
@@ -150627,15 +149844,12 @@ export const ReleaseUpdateByPipelineDocument = new TypedDocumentString(`
 export const ReleaseUpdateByPipelineByAccessKeyDocument = new TypedDocumentString(`
     mutation releaseUpdateByPipelineByAccessKey($input: ReleaseUpdateByPipelineInputBase!) {
   releaseUpdateByPipelineByAccessKey(input: $input) {
-    ...ReleasePayload
+    ...AccessKeyReleasePayload
   }
 }
-    fragment ReleasePayload on ReleasePayload {
+    fragment AccessKeyReleasePayload on AccessKeyReleasePayload {
   __typename
   lastSyncId
-  release {
-    id
-  }
   success
 }`) as unknown as TypedDocumentString<
   ReleaseUpdateByPipelineByAccessKeyMutation,
@@ -151364,6 +150578,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showArchivedItems
   customerPageNeedsShowCompletedIssuesAndProjects
   projectCustomerNeedsShowCompletedIssuesLast
+  automationShowDisabled
   showDraftReviews
   showEmptyGroupsBoard
   showEmptyGroupsList
@@ -151378,6 +150593,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showParents
   fieldPreviewLinks
   showReadItems
+  reviewFieldStatusDetails
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -151415,6 +150631,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
+  initiativeFieldId
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -151459,6 +150676,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldProject
   projectFieldHealthTimeline
   projectFieldHealth
+  projectFieldId
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -151490,6 +150708,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   timelineShowProjectsAside
+  reviewFieldOpenedAt
   fieldPullRequests
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
@@ -151649,6 +150868,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showArchivedItems
   customerPageNeedsShowCompletedIssuesAndProjects
   projectCustomerNeedsShowCompletedIssuesLast
+  automationShowDisabled
   showDraftReviews
   showEmptyGroupsBoard
   showEmptyGroupsList
@@ -151663,6 +150883,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showParents
   fieldPreviewLinks
   showReadItems
+  reviewFieldStatusDetails
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -151700,6 +150921,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDateCreated
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
+  initiativeFieldId
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -151744,6 +150966,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldProject
   projectFieldHealthTimeline
   projectFieldHealth
+  projectFieldId
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -151775,6 +150998,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldTeams
   projectFieldDateUpdated
   timelineShowProjectsAside
+  reviewFieldOpenedAt
   fieldPullRequests
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate

@@ -4155,59 +4155,23 @@ describe("generated", () => {
 
   /** Test LatestReleaseByAccessKey query */
   describe("LatestReleaseByAccessKey", () => {
-    let _latestReleaseByAccessKey: L.Release | undefined | null;
+    let _latestReleaseByAccessKey: L.AccessKeyRelease | undefined | null;
 
     /** Test the root model query for LatestReleaseByAccessKey */
     it("latestReleaseByAccessKey", async () => {
-      const latestReleaseByAccessKey: L.Release | undefined | null = await client.latestReleaseByAccessKey;
+      const latestReleaseByAccessKey: L.AccessKeyRelease | undefined | null = await client.latestReleaseByAccessKey;
       _latestReleaseByAccessKey = latestReleaseByAccessKey;
-      expect(latestReleaseByAccessKey instanceof L.Release);
+      expect(latestReleaseByAccessKey instanceof L.AccessKeyRelease);
     });
 
-    /** Test the latestReleaseByAccessKey connection query for the Document */
-    it("latestReleaseByAccessKey.documents", async () => {
+    /** Test the latestReleaseByAccessKey model query for LatestReleaseByAccessKey_Stage */
+    it("latestReleaseByAccessKey.stage", async () => {
       if (_latestReleaseByAccessKey) {
-        const documents: L.DocumentConnection | undefined | null = await _latestReleaseByAccessKey.documents();
-        expect(documents instanceof L.DocumentConnection);
+        const stage: L.AccessKeyReleaseStage | undefined | null = _latestReleaseByAccessKey.stage;
+        expect(stage instanceof L.AccessKeyReleaseStage);
       } else {
         console.warn(
-          "codegen-doc:print: No latestReleaseByAccessKey found - cannot test _latestReleaseByAccessKey.documents query"
-        );
-      }
-    });
-
-    /** Test the latestReleaseByAccessKey connection query for the ReleaseHistory */
-    it("latestReleaseByAccessKey.history", async () => {
-      if (_latestReleaseByAccessKey) {
-        const history: L.ReleaseHistoryConnection | undefined | null = await _latestReleaseByAccessKey.history();
-        expect(history instanceof L.ReleaseHistoryConnection);
-      } else {
-        console.warn(
-          "codegen-doc:print: No latestReleaseByAccessKey found - cannot test _latestReleaseByAccessKey.history query"
-        );
-      }
-    });
-
-    /** Test the latestReleaseByAccessKey connection query for the Issue */
-    it("latestReleaseByAccessKey.issues", async () => {
-      if (_latestReleaseByAccessKey) {
-        const issues: L.IssueConnection | undefined | null = await _latestReleaseByAccessKey.issues();
-        expect(issues instanceof L.IssueConnection);
-      } else {
-        console.warn(
-          "codegen-doc:print: No latestReleaseByAccessKey found - cannot test _latestReleaseByAccessKey.issues query"
-        );
-      }
-    });
-
-    /** Test the latestReleaseByAccessKey connection query for the EntityExternalLink */
-    it("latestReleaseByAccessKey.links", async () => {
-      if (_latestReleaseByAccessKey) {
-        const links: L.EntityExternalLinkConnection | undefined | null = await _latestReleaseByAccessKey.links();
-        expect(links instanceof L.EntityExternalLinkConnection);
-      } else {
-        console.warn(
-          "codegen-doc:print: No latestReleaseByAccessKey found - cannot test _latestReleaseByAccessKey.links query"
+          "codegen-doc:print: No latestReleaseByAccessKey found - cannot test _latestReleaseByAccessKey.stage query"
         );
       }
     });
@@ -5278,8 +5242,9 @@ describe("generated", () => {
   describe("RecentReleasesByAccessKey", () => {
     /** Test the root model query for RecentReleasesByAccessKey */
     it("recentReleasesByAccessKey", async () => {
-      const recentReleasesByAccessKey: L.Release[] | undefined | null = await client.recentReleasesByAccessKey();
-      recentReleasesByAccessKey?.map(node => expect(node instanceof L.Release));
+      const recentReleasesByAccessKey: L.AccessKeyRelease[] | undefined | null =
+        await client.recentReleasesByAccessKey();
+      recentReleasesByAccessKey?.map(node => expect(node instanceof L.AccessKeyRelease));
     });
   });
 
@@ -5383,49 +5348,11 @@ describe("generated", () => {
 
   /** Test ReleasePipelineByAccessKey query */
   describe("ReleasePipelineByAccessKey", () => {
-    let _releasePipelineByAccessKey: L.ReleasePipeline | undefined | null;
-
     /** Test the root model query for ReleasePipelineByAccessKey */
     it("releasePipelineByAccessKey", async () => {
-      const releasePipelineByAccessKey: L.ReleasePipeline | undefined | null = await client.releasePipelineByAccessKey;
-      _releasePipelineByAccessKey = releasePipelineByAccessKey;
-      expect(releasePipelineByAccessKey instanceof L.ReleasePipeline);
-    });
-
-    /** Test the releasePipelineByAccessKey connection query for the Release */
-    it("releasePipelineByAccessKey.releases", async () => {
-      if (_releasePipelineByAccessKey) {
-        const releases: L.ReleaseConnection | undefined | null = await _releasePipelineByAccessKey.releases();
-        expect(releases instanceof L.ReleaseConnection);
-      } else {
-        console.warn(
-          "codegen-doc:print: No releasePipelineByAccessKey found - cannot test _releasePipelineByAccessKey.releases query"
-        );
-      }
-    });
-
-    /** Test the releasePipelineByAccessKey connection query for the ReleaseStage */
-    it("releasePipelineByAccessKey.stages", async () => {
-      if (_releasePipelineByAccessKey) {
-        const stages: L.ReleaseStageConnection | undefined | null = await _releasePipelineByAccessKey.stages();
-        expect(stages instanceof L.ReleaseStageConnection);
-      } else {
-        console.warn(
-          "codegen-doc:print: No releasePipelineByAccessKey found - cannot test _releasePipelineByAccessKey.stages query"
-        );
-      }
-    });
-
-    /** Test the releasePipelineByAccessKey connection query for the Team */
-    it("releasePipelineByAccessKey.teams", async () => {
-      if (_releasePipelineByAccessKey) {
-        const teams: L.TeamConnection | undefined | null = await _releasePipelineByAccessKey.teams();
-        expect(teams instanceof L.TeamConnection);
-      } else {
-        console.warn(
-          "codegen-doc:print: No releasePipelineByAccessKey found - cannot test _releasePipelineByAccessKey.teams query"
-        );
-      }
+      const releasePipelineByAccessKey: L.AccessKeyReleasePipeline | undefined | null =
+        await client.releasePipelineByAccessKey;
+      expect(releasePipelineByAccessKey instanceof L.AccessKeyReleasePipeline);
     });
   });
 
