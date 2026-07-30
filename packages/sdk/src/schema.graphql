@@ -8,6 +8,90 @@ schema {
 directive @oneOf on INPUT_OBJECT
 
 """
+A release returned using a release pipeline access key.
+"""
+type AccessKeyRelease {
+  """
+  The time at which the release was archived. Null if the release has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The Git commit SHA associated with the release.
+  """
+  commitSha: String
+  """
+  The time at which the release was completed. Null if the release has not been completed.
+  """
+  completedAt: DateTime
+  """
+  The time at which the release was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the release.
+  """
+  id: ID!
+  """
+  The name of the release.
+  """
+  name: String!
+  """
+  The current stage of the release.
+  """
+  stage: AccessKeyReleaseStage!
+  """
+  The URL to the release page in the Linear app.
+  """
+  url: String!
+  """
+  The version identifier for this release. Null if no version has been assigned.
+  """
+  version: String
+}
+
+"""
+The result of a release mutation using a release pipeline access key.
+"""
+type AccessKeyReleasePayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  The release that was created or updated.
+  """
+  release: AccessKeyRelease!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
+A release pipeline returned using a release pipeline access key.
+"""
+type AccessKeyReleasePipeline {
+  """
+  The unique identifier of the release pipeline.
+  """
+  id: ID!
+  """
+  Glob patterns used to filter commits by changed file path. An empty array means all commits are included.
+  """
+  includePathPatterns: [String!]!
+}
+
+"""
+A release stage returned using a release pipeline access key.
+"""
+type AccessKeyReleaseStage {
+  """
+  The name of the release stage.
+  """
+  name: String!
+}
+
+"""
 Activity collection filtering options.
 """
 input ActivityCollectionFilter {
@@ -141,6 +225,10 @@ type AgentActivity implements Node {
   The unique identifier of the entity.
   """
   id: ID!
+  """
+  [Internal] What the turn pushed to its branch, captured in the sandbox at push time. Only set on the activity for a successful push.
+  """
+  pushSummary: AgentActivityPushSummary
   """
   [Internal] Whether this activity is queued for later processing. Queued activities are not sent to the agent until the session reaches a terminal state.
   """
@@ -434,6 +522,54 @@ input AgentActivityPromptCreateInputContent {
   The type of activity.
   """
   type: AgentActivityType! = prompt
+}
+
+"""
+[Internal] Diff stats for a single commit a coding agent turn pushed, measured in the sandbox at push time.
+"""
+type AgentActivityPushCommit {
+  """
+  The number of lines the commit added across the files it touched.
+  """
+  additions: Int!
+  """
+  The number of files the commit changed.
+  """
+  changedFiles: Int!
+  """
+  The number of lines the commit removed across the files it touched.
+  """
+  deletions: Int!
+  """
+  The commit sha.
+  """
+  sha: String!
+}
+
+"""
+[Internal] What a coding agent turn pushed to its branch, measured in the sandbox at push time. The range is cumulative within a turn, so a turn that pushes several times reports every commit each time — consumers use the last summary in a turn rather than combining across pushes.
+"""
+type AgentActivityPushSummary {
+  """
+  Shas of the turn's commits beyond the detailed cap, newest first. Stats aren't captured for these.
+  """
+  additionalCommitShas: [String!]!
+  """
+  The commit the turn started from — the sandbox HEAD when the prompt began.
+  """
+  baseSha: String!
+  """
+  The number of non-merge commits the turn added. Equals the length of commits plus additionalCommitShas.
+  """
+  commitCount: Int!
+  """
+  The turn's non-merge commits with stats, newest first. Capped, so it may hold fewer commits than commitCount reports.
+  """
+  commits: [AgentActivityPushCommit!]!
+  """
+  The commit that was pushed.
+  """
+  headSha: String!
 }
 
 """
@@ -1414,6 +1550,10 @@ type AiConversation implements Node {
   """
   initiative: Initiative
   """
+  [Internal] The issue this shared conversation is attached to. Null if the conversation is private.
+  """
+  issue: Issue
+  """
   The iteration ID when this conversation is part of an agentic workflow. Used to track multi-step workflow executions. Null for non-workflow conversations.
   """
   iterationId: String
@@ -2118,6 +2258,7 @@ enum AiConversationInitialSource {
   onboarding
   pullRequestComment
   slack
+  subAgent
   workflow
 }
 
@@ -2730,6 +2871,38 @@ type AiConversationSearchEntitiesToolCallResultEntities {
   type: String!
 }
 
+type AiConversationSpawnSubagentToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationSpawnSubagentToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+  """
+  The result of the tool call.
+  """
+  result: AiConversationSpawnSubagentToolCallResult
+}
+
+type AiConversationSpawnSubagentToolCallArgs {
+  description: String!
+}
+
+type AiConversationSpawnSubagentToolCallResult {
+  conversationId: String!
+}
+
 type AiConversationStartCodingSessionToolCall implements AiConversationBaseToolCall {
   """
   The arguments to the tool call.
@@ -2912,6 +3085,7 @@ enum AiConversationTool {
   RetryPullRequestCheck
   SearchDocumentation
   SearchEntities
+  SpawnSubagent
   StartCodingSession
   SubscribeToEvent
   SuggestRepository
@@ -2954,6 +3128,7 @@ union AiConversationToolCall =
   | AiConversationRetryPullRequestCheckToolCall
   | AiConversationSearchDocumentationToolCall
   | AiConversationSearchEntitiesToolCall
+  | AiConversationSpawnSubagentToolCall
   | AiConversationStartCodingSessionToolCall
   | AiConversationSubscribeToEventToolCall
   | AiConversationSuggestRepositoryToolCall
@@ -3088,6 +3263,10 @@ type AiConversationUpdateEntityToolCallResult {
 [Internal] Per-user state for an AI conversation, tracking read status and other user-specific data.
 """
 type AiConversationUserState {
+  """
+  The ID of the elicitation part the user dismissed.
+  """
+  dismissedElicitationId: String
   """
   The time at which the user most recently viewed the conversation.
   """
@@ -12868,6 +13047,10 @@ input InheritanceEntityMapping {
   """
   issueLabels: JSONObject
   """
+  Mapping of the ProjectLabel ID to the new ProjectLabel name.
+  """
+  projectLabels: JSONObject
+  """
   Mapping of the WorkflowState ID to the new WorkflowState ID.
   """
   workflowStates: JSONObject!
@@ -20870,6 +21053,10 @@ type IssueSuggestion implements Node {
   """
   metadata: IssueSuggestionMetadata
   """
+  The suggestion reasons with entity mentions resolved to readable labels and structured references.
+  """
+  presentedReasons: [PresentedIssueSuggestionReason!]!
+  """
   [Internal] The current state of the suggestion: active, accepted, or dismissed.
   """
   state: IssueSuggestionState!
@@ -21086,6 +21273,28 @@ type IssueSuggestionMetadata {
   [Internal] The AI prompt variant that generated this suggestion. Null if not applicable.
   """
   variant: String
+}
+
+"""
+An entity referenced by a presented issue suggestion reason.
+"""
+type IssueSuggestionReasonReference {
+  """
+  The referenced entity identifier.
+  """
+  id: String!
+  """
+  The readable label for the referenced entity.
+  """
+  label: String
+  """
+  The title of the referenced entity, when available.
+  """
+  title: String
+  """
+  The referenced entity type.
+  """
+  type: String!
 }
 
 """
@@ -22818,6 +23027,10 @@ type Mutation {
     """
     input: CreateOrganizationInput!
     """
+    Signed partner-offer signup token minted when the visitor redeemed a partner offer on the marketing website.
+    """
+    partnerOfferToken: String
+    """
     PostHog session ID for attribution tracking.
     """
     sessionId: String
@@ -24454,6 +24667,10 @@ type Mutation {
   """
   integrationZendesk(
     """
+    The role to assign to the Linear bot user in Zendesk.
+    """
+    botUserRole: String
+    """
     The Zendesk OAuth code.
     """
     code: String!
@@ -25413,6 +25630,19 @@ type Mutation {
     input: PartnerApplicationCreateInput!
   ): ContactPayload!
   """
+  [Internal] Redeems a partner-offer token for one of the viewer's existing workspaces, recording a pending redemption that is applied when the workspace subscribes. Requires an admin or owner role in the workspace.
+  """
+  partnerOfferRedeem(
+    """
+    The identifier of the workspace to redeem the offer for.
+    """
+    organizationId: String!
+    """
+    The signed partner-offer token to redeem.
+    """
+    token: String!
+  ): PartnerOfferRedeemPayload!
+  """
   [INTERNAL] Finish passkey login process.
   """
   passkeyLoginFinish(
@@ -25520,6 +25750,10 @@ type Mutation {
     The project label to create.
     """
     input: ProjectLabelCreateInput!
+    """
+    Whether to replace all team-specific labels with the same name with this newly created workspace label (default: false).
+    """
+    replaceTeamLabels: Boolean
   ): ProjectLabelPayload!
   """
   Deletes a project label.
@@ -25560,6 +25794,10 @@ type Mutation {
     A partial label object to update.
     """
     input: ProjectLabelUpdateInput!
+    """
+    Whether to replace all team-specific labels with the same name with this updated workspace label (default: false).
+    """
+    replaceTeamLabels: Boolean
   ): ProjectLabelPayload!
   """
   Creates a new project milestone.
@@ -25848,7 +26086,7 @@ type Mutation {
     The input containing the optional version.
     """
     input: ReleaseCompleteInputBase!
-  ): ReleasePayload!
+  ): AccessKeyReleasePayload!
   """
   Creates a new release in a pipeline. If no stage is specified, defaults to the first completed stage for continuous pipelines or the first started stage for scheduled pipelines.
   """
@@ -26004,7 +26242,7 @@ type Mutation {
     The release data to sync.
     """
     input: ReleaseSyncInputBase!
-  ): ReleasePayload!
+  ): AccessKeyReleasePayload!
   """
   Unarchives a release.
   """
@@ -26044,7 +26282,7 @@ type Mutation {
     The input containing the optional version and optional stage name.
     """
     input: ReleaseUpdateByPipelineInputBase!
-  ): ReleasePayload!
+  ): AccessKeyReleasePayload!
   """
   Re-sends a workspace invitation email for the specified invite ID.
   """
@@ -29618,6 +29856,10 @@ type Organization implements Node {
   """
   defaultHomeView: String
   """
+  The id of the specific initiative, project, view, dashboard, or page tab used as the default home view. The type of entity is given by defaultHomeView.
+  """
+  defaultHomeViewTargetId: String
+  """
   The time at which deletion of the workspace was requested. Null if no deletion has been requested.
   """
   deletionRequestedAt: DateTime
@@ -30615,6 +30857,10 @@ input OrganizationSecuritySettingsInput {
   The minimum role required to manage workspace templates.
   """
   templateManagementRole: UserRoleType
+  """
+  The minimum role required to create initiatives without a lead team or move initiatives between workspace and team scopes.
+  """
+  workspaceInitiativesRole: UserRoleType
 }
 
 """
@@ -30715,6 +30961,10 @@ input OrganizationUpdateInput {
   The default home view for members of the workspace who have not chosen their own default.
   """
   defaultHomeView: String
+  """
+  The id of the specific initiative, project, view, or dashboard used as the default home view. The type of entity is given by defaultHomeView.
+  """
+  defaultHomeViewTargetId: String
   """
   Whether the workspace has enabled the feed feature.
   """
@@ -31266,9 +31516,30 @@ input PartnerApplicationCreateInput {
 }
 
 """
+[Internal] The kind of benefit a partner offer grants, which determines how its discount value is interpreted.
+"""
+enum PartnerDiscountType {
+  amount_off
+  free_seats
+  percent_off
+}
+
+"""
 [Internal] Public details of an active partner-program offer.
 """
 type PartnerOfferDetailsPayload {
+  """
+  How the offer's benefit is applied, which determines the meaning of `discountValue`.
+  """
+  discountType: PartnerDiscountType!
+  """
+  The magnitude of the benefit, interpreted according to `discountType`.
+  """
+  discountValue: Int!
+  """
+  Duration of the benefit in months, or null when the benefit is not time-bounded.
+  """
+  durationMonths: Int
   """
   The unique identifier of the offer.
   """
@@ -31282,9 +31553,60 @@ type PartnerOfferDetailsPayload {
   """
   partnerSlug: String!
   """
-  Short-lived signed token to carry the redemption through signup. Embeds a freshly minted redemption identifier, the offer identifier, and its mint and expiry times.
+  Short-lived signed token that carries the redemption through signup or an existing-workspace redemption. Embeds a pre-minted redemption identifier, the offer identifier, and its mint and expiry times.
   """
   token: String!
+}
+
+"""
+[Internal] Why a workspace cannot redeem a partner offer.
+"""
+enum PartnerOfferIneligibilityReason {
+  alreadyRedeemed
+  alreadySubscribed
+  otherOfferPending
+}
+
+"""
+[Internal] The result of redeeming a partner offer for an existing workspace.
+"""
+type PartnerOfferRedeemPayload {
+  """
+  Whether the redemption was recorded.
+  """
+  success: Boolean!
+}
+
+"""
+[Internal] One of the viewer's workspaces and whether it can redeem a partner offer.
+"""
+type PartnerOfferWorkspacePayload {
+  """
+  Whether the workspace can redeem the offer.
+  """
+  eligible: Boolean!
+  """
+  Why the workspace cannot redeem the offer. Null when the workspace is eligible.
+  """
+  ineligibilityReason: PartnerOfferIneligibilityReason
+  """
+  The identifier of the workspace.
+  """
+  organizationId: String!
+}
+
+"""
+[Internal] The viewer's workspaces hosted in the serving cell, with partner-offer eligibility.
+"""
+type PartnerOfferWorkspacesPayload {
+  """
+  Details of the offer the token was minted for.
+  """
+  offer: PartnerOfferDetailsPayload!
+  """
+  The viewer's workspaces hosted in the cell that served this request. Workspaces hosted in other cells are not included; query each cell to assemble the full list.
+  """
+  workspaces: [PartnerOfferWorkspacePayload!]!
 }
 
 type PasskeyLoginStartResponse {
@@ -31526,6 +31848,20 @@ Type of Post
 enum PostType {
   summary
   update
+}
+
+"""
+A readable issue suggestion reason and its structured entity references.
+"""
+type PresentedIssueSuggestionReason {
+  """
+  Entities referenced by the reason.
+  """
+  references: [IssueSuggestionReasonReference!]!
+  """
+  The reason with entity mentions rendered as readable text.
+  """
+  text: String!
 }
 
 """
@@ -31972,6 +32308,10 @@ type Project implements Node {
   """
   id: ID!
   """
+  [Internal] The human-readable identifier of the project. Returns the custom identifier override when set, otherwise the workspace default `<prefix>-<number>`. Null for legacy projects that have not been backfilled.
+  """
+  identifier: String
+  """
   The number of in-progress estimation points at the end of each week since project creation. Each entry represents one week.
   """
   inProgressScopeHistory: [Float!]!
@@ -32153,6 +32493,10 @@ type Project implements Node {
   """
   lead: User
   """
+  [Internal] The team that leads the project. Null if no lead team is assigned.
+  """
+  leadTeam: Team
+  """
   Users that are members of the project.
   """
   members(
@@ -32230,6 +32574,10 @@ type Project implements Node {
     """
     orderBy: PaginationOrderBy
   ): CustomerNeedConnection!
+  """
+  [Internal] Identifiers (default and custom) that this project has previously held. Used to resolve URLs that referenced an older identifier.
+  """
+  previousIdentifiers: [String!]!
   """
   The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   """
@@ -32345,6 +32693,10 @@ type Project implements Node {
     """
     orderBy: PaginationOrderBy
   ): ProjectRelationConnection!
+  """
+  The number of resources associated with the project, including documents, external links, and attachments.
+  """
+  resourceCount: Int!
   """
   The overall scope (total estimate points) of the project.
   """
@@ -32802,6 +33154,10 @@ input ProjectCreateInput {
   The identifier of the project lead.
   """
   leadId: String
+  """
+  [Internal] The identifier of the team that leads the project.
+  """
+  leadTeamId: String
   """
   The identifiers of the members of this project.
   """
@@ -34672,6 +35028,10 @@ type ProjectSearchResult implements Node {
   """
   id: ID!
   """
+  [Internal] The human-readable identifier of the project. Returns the custom identifier override when set, otherwise the workspace default `<prefix>-<number>`. Null for legacy projects that have not been backfilled.
+  """
+  identifier: String
+  """
   The number of in-progress estimation points at the end of each week since project creation. Each entry represents one week.
   """
   inProgressScopeHistory: [Float!]!
@@ -34853,6 +35213,10 @@ type ProjectSearchResult implements Node {
   """
   lead: User
   """
+  [Internal] The team that leads the project. Null if no lead team is assigned.
+  """
+  leadTeam: Team
+  """
   Users that are members of the project.
   """
   members(
@@ -34934,6 +35298,10 @@ type ProjectSearchResult implements Node {
     """
     orderBy: PaginationOrderBy
   ): CustomerNeedConnection!
+  """
+  [Internal] Identifiers (default and custom) that this project has previously held. Used to resolve URLs that referenced an older identifier.
+  """
+  previousIdentifiers: [String!]!
   """
   The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   """
@@ -35049,6 +35417,10 @@ type ProjectSearchResult implements Node {
     """
     orderBy: PaginationOrderBy
   ): ProjectRelationConnection!
+  """
+  The number of resources associated with the project, including documents, external links, and attachments.
+  """
+  resourceCount: Int!
   """
   The overall scope (total estimate points) of the project.
   """
@@ -35828,6 +36200,10 @@ input ProjectUpdateInput {
   """
   leadId: String
   """
+  [Internal] The identifier of the team that leads the project.
+  """
+  leadTeamId: String
+  """
   The identifiers of the members of this project.
   """
   memberIds: [String!]
@@ -36198,6 +36574,10 @@ type ProjectWebhookPayload {
   """
   id: String!
   """
+  The human-readable identifier of the project.
+  """
+  identifier: String
+  """
   The number of in progress estimation points after each week.
   """
   inProgressScopeHistory: [Float!]!
@@ -36241,6 +36621,10 @@ type ProjectWebhookPayload {
   The project's name.
   """
   name: String!
+  """
+  Previous identifiers of the project.
+  """
+  previousIdentifiers: [String!]
   """
   The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   """
@@ -38344,7 +38728,7 @@ type Query {
   """
   Returns the latest release for the pipeline associated with the access key.
   """
-  latestReleaseByAccessKey: Release
+  latestReleaseByAccessKey: AccessKeyRelease
   """
   [Internal] Lists Microsoft Teams teams and channels accessible to the connecting user. Uses the user's microsoftPersonal integration for auth. Used by the project channel picker dialog to populate the team/channel dropdowns.
   """
@@ -38533,6 +38917,15 @@ type Query {
     """
     slug: String!
   ): PartnerOfferDetailsPayload
+  """
+  [Internal] Fetches the viewer's workspaces hosted in the serving cell, with each workspace's eligibility to redeem the given partner-offer token. Returns null when the token is invalid or the offer is no longer available.
+  """
+  partnerOfferWorkspaces(
+    """
+    The signed partner-offer token to check eligibility for.
+    """
+    token: String!
+  ): PartnerOfferWorkspacesPayload
   """
   Returns a single project by its identifier or URL slug.
   """
@@ -38797,14 +39190,14 @@ type Query {
   """
   rateLimitStatus: RateLimitPayload!
   """
-  Returns recent in-progress and completed releases for the pipeline associated with the access key, ordered with in-progress first then most recently completed. Used by `linear-release` to walk candidates and pick the one whose `commitSha` is an ancestor of the current build commit, which disambiguates concurrent release trains on the same pipeline.
+  Returns recent releases for the pipeline associated with the access key, ordered with in-progress releases first, followed by the most recently completed releases.
   """
   recentReleasesByAccessKey(
     """
     Maximum number of releases to return. Defaults to 20 and is capped at 100.
     """
     limit: Int
-  ): [Release!]!
+  ): [AccessKeyRelease!]!
   """
   Fetch a single release by its UUID or slug identifier.
   """
@@ -38851,9 +39244,9 @@ type Query {
   """
   releasePipeline(id: String!): ReleasePipeline!
   """
-  Returns a release pipeline by ID. Requires the access key to have access to the pipeline.
+  Returns the release pipeline associated with the access key.
   """
-  releasePipelineByAccessKey: ReleasePipeline!
+  releasePipelineByAccessKey: AccessKeyReleasePipeline!
   """
   All release pipelines in the workspace, with optional filtering and sorting.
   """
@@ -40358,6 +40751,10 @@ input ReleaseDebugSinkInput {
   List of commit SHAs that were inspected.
   """
   inspectedShas: [String!]!
+  """
+  Custom regex used to extract issue identifiers from commit subjects.
+  """
+  issuePattern: String
   """
   Map of issue identifiers to their source information.
   """
@@ -47417,7 +47814,7 @@ input UserSettingsUpdateInput {
   """
   notificationDeliveryPreferences: NotificationDeliveryPreferencesInput
   """
-  The user's settings.
+  The user's settings. Merged key by key into the existing settings: keys missing from the object are left unchanged, and a key set to null is removed.
   """
   settings: JSONObject
   """
@@ -47774,6 +48171,10 @@ type ViewPreferencesValues {
   """
   automationShowDescendants: Boolean
   """
+  Whether to show disabled loops.
+  """
+  automationShowDisabled: Boolean
+  """
   The loop stats period.
   """
   automationStatsPeriod: String
@@ -48070,6 +48471,10 @@ type ViewPreferencesValues {
   """
   initiativeFieldHealth: Boolean
   """
+  Whether to show the initiative identifier field.
+  """
+  initiativeFieldId: Boolean
+  """
   Whether to show the initiative health field.
   """
   initiativeFieldInitiativeHealth: Boolean
@@ -48217,6 +48622,10 @@ type ViewPreferencesValues {
   Whether to show the project health field on the timeline.
   """
   projectFieldHealthTimeline: Boolean
+  """
+  Whether to show the project identifier field.
+  """
+  projectFieldId: Boolean
   """
   Whether to show the project initiatives field.
   """
@@ -48446,6 +48855,10 @@ type ViewPreferencesValues {
   """
   reviewFieldIdentifier: Boolean
   """
+  Whether to show the pull request opened timestamp.
+  """
+  reviewFieldOpenedAt: Boolean
+  """
   No longer used. Previously controlled the review preview links field.
   """
   reviewFieldPreviewLinks: Boolean
@@ -48453,6 +48866,10 @@ type ViewPreferencesValues {
   Whether to show the review repository field.
   """
   reviewFieldRepository: Boolean
+  """
+  Whether to show review status details on a second line.
+  """
+  reviewFieldStatusDetails: Boolean
   """
   The review grouping.
   """
@@ -48553,6 +48970,10 @@ type ViewPreferencesValues {
   Whether to show only snoozed items.
   """
   showOnlySnoozedItems: Boolean
+  """
+  [Internal] Whether parent initiatives that do not match the view are shown. Defaults to true when unset.
+  """
+  showParentInitiatives: Boolean
   """
   Whether to show parent issues for sub-issues.
   """

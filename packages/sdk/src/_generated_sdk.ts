@@ -178,6 +178,100 @@ function parseJson(value?: any): Record<string, unknown> | undefined {
 }
 
 /**
+ * A release returned using a release pipeline access key.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AccessKeyReleaseFragment response data
+ */
+export class AccessKeyRelease extends Request {
+  public constructor(request: LinearRequest, data: L.AccessKeyReleaseFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.commitSha = data.commitSha ?? undefined;
+    this.completedAt = parseDate(data.completedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.name = data.name;
+    this.url = data.url;
+    this.version = data.version ?? undefined;
+    this.stage = new AccessKeyReleaseStage(request, data.stage);
+  }
+
+  /** The time at which the release was archived. Null if the release has not been archived. */
+  public archivedAt?: Date | null;
+  /** The Git commit SHA associated with the release. */
+  public commitSha?: string | null;
+  /** The time at which the release was completed. Null if the release has not been completed. */
+  public completedAt?: Date | null;
+  /** The time at which the release was created. */
+  public createdAt: Date;
+  /** The unique identifier of the release. */
+  public id: string;
+  /** The name of the release. */
+  public name: string;
+  /** The URL to the release page in the Linear app. */
+  public url: string;
+  /** The version identifier for this release. Null if no version has been assigned. */
+  public version?: string | null;
+  /** The current stage of the release. */
+  public stage: AccessKeyReleaseStage;
+}
+/**
+ * The result of a release mutation using a release pipeline access key.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AccessKeyReleasePayloadFragment response data
+ */
+export class AccessKeyReleasePayload extends Request {
+  public constructor(request: LinearRequest, data: L.AccessKeyReleasePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The release that was created or updated. */
+  public get release(): LinearFetch<AccessKeyRelease | undefined> {
+    return new LatestReleaseByAccessKeyQuery(this._request).fetch();
+  }
+}
+/**
+ * A release pipeline returned using a release pipeline access key.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AccessKeyReleasePipelineFragment response data
+ */
+export class AccessKeyReleasePipeline extends Request {
+  public constructor(request: LinearRequest, data: L.AccessKeyReleasePipelineFragment) {
+    super(request);
+    this.id = data.id;
+    this.includePathPatterns = data.includePathPatterns;
+  }
+
+  /** The unique identifier of the release pipeline. */
+  public id: string;
+  /** Glob patterns used to filter commits by changed file path. An empty array means all commits are included. */
+  public includePathPatterns: string[];
+}
+/**
+ * A release stage returned using a release pipeline access key.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AccessKeyReleaseStageFragment response data
+ */
+export class AccessKeyReleaseStage extends Request {
+  public constructor(request: LinearRequest, data: L.AccessKeyReleaseStageFragment) {
+    super(request);
+    this.name = data.name;
+  }
+
+  /** The name of the release stage. */
+  public name: string;
+}
+/**
  * A bot actor representing a non-human entity that performed an action, such as an integration (GitHub, Slack, Zendesk), an AI assistant, or an automated workflow. Bot actors are displayed in activity feeds and history to indicate when changes were made by applications rather than users.
  *
  * @param request - function to call the graphql client
@@ -2772,6 +2866,63 @@ export class AiConversationSearchEntitiesToolCallResultEntities extends Request 
 
   public id: string;
   public type: string;
+}
+/**
+ * AiConversationSpawnSubagentToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSpawnSubagentToolCallFragment response data
+ */
+export class AiConversationSpawnSubagentToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSpawnSubagentToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationSpawnSubagentToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.result = data.result ? new AiConversationSpawnSubagentToolCallResult(request, data.result) : undefined;
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationSpawnSubagentToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The result of the tool call. */
+  public result?: AiConversationSpawnSubagentToolCallResult | null;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationSpawnSubagentToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSpawnSubagentToolCallArgsFragment response data
+ */
+export class AiConversationSpawnSubagentToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSpawnSubagentToolCallArgsFragment) {
+    super(request);
+    this.description = data.description;
+  }
+
+  public description: string;
+}
+/**
+ * AiConversationSpawnSubagentToolCallResult model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSpawnSubagentToolCallResultFragment response data
+ */
+export class AiConversationSpawnSubagentToolCallResult extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSpawnSubagentToolCallResultFragment) {
+    super(request);
+    this.conversationId = data.conversationId;
+  }
+
+  public conversationId: string;
 }
 /**
  * AiConversationStartCodingSessionToolCall model
@@ -12230,7 +12381,7 @@ export class IssueHistory extends Request {
   }
   /** The releases that the issue was added to. */
   public get addedToReleases(): LinearFetch<Release[]> {
-    return new RecentReleasesByAccessKeyQuery(this._request).fetch();
+    return new ReleaseSearchQuery(this._request).fetch();
   }
   /** The linked attachment. */
   public get attachment(): LinearFetch<Attachment> | undefined {
@@ -12288,7 +12439,7 @@ export class IssueHistory extends Request {
   }
   /** The releases that the issue was removed from. */
   public get removedFromReleases(): LinearFetch<Release[]> {
-    return new RecentReleasesByAccessKeyQuery(this._request).fetch();
+    return new ReleaseSearchQuery(this._request).fetch();
   }
   /** The user that was assigned to the issue. */
   public get toAssignee(): LinearFetch<User> | undefined {
@@ -13769,6 +13920,30 @@ export class IssueStatusChangedNotificationWebhookPayload {
   public actor?: UserChildWebhookPayload | null;
   /** The issue this notification belongs to. */
   public issue: IssueWithDescriptionChildWebhookPayload;
+}
+/**
+ * An entity referenced by a presented issue suggestion reason.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssueSuggestionReasonReferenceFragment response data
+ */
+export class IssueSuggestionReasonReference extends Request {
+  public constructor(request: LinearRequest, data: L.IssueSuggestionReasonReferenceFragment) {
+    super(request);
+    this.id = data.id;
+    this.label = data.label ?? undefined;
+    this.title = data.title ?? undefined;
+    this.type = data.type;
+  }
+
+  /** The referenced entity identifier. */
+  public id: string;
+  /** The readable label for the referenced entity. */
+  public label?: string | null;
+  /** The title of the referenced entity, when available. */
+  public title?: string | null;
+  /** The referenced entity type. */
+  public type: string;
 }
 /**
  * Return type for AI-generated issue title suggestions based on customer request content.
@@ -15490,6 +15665,7 @@ export class Organization extends Request {
     this.customersConfiguration = data.customersConfiguration;
     this.customersEnabled = data.customersEnabled;
     this.defaultHomeView = data.defaultHomeView ?? undefined;
+    this.defaultHomeViewTargetId = data.defaultHomeViewTargetId ?? undefined;
     this.deletionRequestedAt = parseDate(data.deletionRequestedAt) ?? undefined;
     this.feedEnabled = data.feedEnabled;
     this.fiscalYearStartMonth = data.fiscalYearStartMonth;
@@ -15560,6 +15736,8 @@ export class Organization extends Request {
   public customersEnabled: boolean;
   /** The default home view for members of the workspace who have not chosen their own default. */
   public defaultHomeView?: string | null;
+  /** The id of the specific initiative, project, view, dashboard, or page tab used as the default home view. The type of entity is given by defaultHomeView. */
+  public defaultHomeViewTargetId?: string | null;
   /** The time at which deletion of the workspace was requested. Null if no deletion has been requested. */
   public deletionRequestedAt?: Date | null;
   /** Whether the activity feed feature is enabled for the workspace. */
@@ -16324,6 +16502,24 @@ export class PostNotification extends Request {
   }
 }
 /**
+ * A readable issue suggestion reason and its structured entity references.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.PresentedIssueSuggestionReasonFragment response data
+ */
+export class PresentedIssueSuggestionReason extends Request {
+  public constructor(request: LinearRequest, data: L.PresentedIssueSuggestionReasonFragment) {
+    super(request);
+    this.text = data.text;
+    this.references = data.references.map(node => new IssueSuggestionReasonReference(request, node));
+  }
+
+  /** The reason with entity mentions rendered as readable text. */
+  public text: string;
+  /** Entities referenced by the reason. */
+  public references: IssueSuggestionReasonReference[];
+}
+/**
  * A product announcement shown in targeted workspace inbox notifications. Product announcements store reusable launch copy and are sent to specific recipients through related notifications.
  *
  * @param request - function to call the graphql client
@@ -16493,6 +16689,7 @@ export class Project extends Request {
     this.prioritySortOrder = data.prioritySortOrder;
     this.progress = data.progress;
     this.projectUpdateRemindersPausedUntilAt = parseDate(data.projectUpdateRemindersPausedUntilAt) ?? undefined;
+    this.resourceCount = data.resourceCount;
     this.scope = data.scope;
     this.scopeHistory = data.scopeHistory;
     this.slackChannelId = data.slackChannelId ?? undefined;
@@ -16574,6 +16771,8 @@ export class Project extends Request {
   public progress: number;
   /** The time until which project update reminders are paused. When set, no update reminders will be sent for this project until this date passes. Null means reminders are active. */
   public projectUpdateRemindersPausedUntilAt?: Date | null;
+  /** The number of resources associated with the project, including documents, external links, and attachments. */
+  public resourceCount: number;
   /** The overall scope (total estimate points) of the project. */
   public scope: number;
   /** The total scope (estimation points) of the project at the end of each week since project creation. Each entry represents one week. */
@@ -17091,16 +17290,19 @@ export class ProjectLabel extends Request {
     return new ProjectLabel_ProjectsQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Creates a new project label. */
-  public create(input: L.ProjectLabelCreateInput) {
-    return new CreateProjectLabelMutation(this._request).fetch(input);
+  public create(input: L.ProjectLabelCreateInput, variables?: Omit<L.CreateProjectLabelMutationVariables, "input">) {
+    return new CreateProjectLabelMutation(this._request).fetch(input, variables);
   }
   /** Deletes a project label. */
   public delete() {
     return new DeleteProjectLabelMutation(this._request).fetch(this.id);
   }
   /** Updates a project label. */
-  public update(input: L.ProjectLabelUpdateInput) {
-    return new UpdateProjectLabelMutation(this._request).fetch(this.id, input);
+  public update(
+    input: L.ProjectLabelUpdateInput,
+    variables?: Omit<L.UpdateProjectLabelMutationVariables, "id" | "input">
+  ) {
+    return new UpdateProjectLabelMutation(this._request).fetch(this.id, input, variables);
   }
 }
 /**
@@ -17905,6 +18107,7 @@ export class ProjectSearchResult extends Request {
     this.prioritySortOrder = data.prioritySortOrder;
     this.progress = data.progress;
     this.projectUpdateRemindersPausedUntilAt = parseDate(data.projectUpdateRemindersPausedUntilAt) ?? undefined;
+    this.resourceCount = data.resourceCount;
     this.scope = data.scope;
     this.scopeHistory = data.scopeHistory;
     this.slackChannelId = data.slackChannelId ?? undefined;
@@ -17988,6 +18191,8 @@ export class ProjectSearchResult extends Request {
   public progress: number;
   /** The time until which project update reminders are paused. When set, no update reminders will be sent for this project until this date passes. Null means reminders are active. */
   public projectUpdateRemindersPausedUntilAt?: Date | null;
+  /** The number of resources associated with the project, including documents, external links, and attachments. */
+  public resourceCount: number;
   /** The overall scope (total estimate points) of the project. */
   public scope: number;
   /** The total scope (estimation points) of the project at the end of each week since project creation. Each entry represents one week. */
@@ -18603,6 +18808,7 @@ export class ProjectWebhookPayload {
     this.healthUpdatedAt = data.healthUpdatedAt ?? undefined;
     this.icon = data.icon ?? undefined;
     this.id = data.id;
+    this.identifier = data.identifier ?? undefined;
     this.inProgressScopeHistory = data.inProgressScopeHistory;
     this.issueCountHistory = data.issueCountHistory;
     this.labelIds = data.labelIds;
@@ -18611,6 +18817,7 @@ export class ProjectWebhookPayload {
     this.leadId = data.leadId ?? undefined;
     this.memberIds = data.memberIds;
     this.name = data.name;
+    this.previousIdentifiers = data.previousIdentifiers ?? undefined;
     this.priority = data.priority;
     this.prioritySortOrder = data.prioritySortOrder;
     this.projectUpdateRemindersPausedUntilAt = data.projectUpdateRemindersPausedUntilAt ?? undefined;
@@ -18672,6 +18879,8 @@ export class ProjectWebhookPayload {
   public icon?: string | null;
   /** The ID of the entity. */
   public id: string;
+  /** The human-readable identifier of the project. */
+  public identifier?: string | null;
   /** The number of in progress estimation points after each week. */
   public inProgressScopeHistory: number[];
   /** The total number of issues in the project after each week. */
@@ -18688,6 +18897,8 @@ export class ProjectWebhookPayload {
   public memberIds: string[];
   /** The project's name. */
   public name: string;
+  /** Previous identifiers of the project. */
+  public previousIdentifiers?: string[] | null;
   /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low. */
   public priority: number;
   /** The sort order for the project within the organization, when ordered by priority. */
@@ -19486,7 +19697,7 @@ export class ReleaseNote extends Request {
   }
   /** Releases included in the note. */
   public get releases(): LinearFetch<Release[]> {
-    return new RecentReleasesByAccessKeyQuery(this._request).fetch();
+    return new ReleaseSearchQuery(this._request).fetch();
   }
 
   /** Creates a release note. */
@@ -23850,6 +24061,7 @@ export class ViewPreferencesValues extends Request {
     this.automationGrouping = data.automationGrouping ?? undefined;
     this.automationOrdering = data.automationOrdering ?? undefined;
     this.automationShowDescendants = data.automationShowDescendants ?? undefined;
+    this.automationShowDisabled = data.automationShowDisabled ?? undefined;
     this.automationStatsPeriod = data.automationStatsPeriod ?? undefined;
     this.closedIssuesOrderedByRecency = data.closedIssuesOrderedByRecency ?? undefined;
     this.columnOrderBoard = data.columnOrderBoard ?? undefined;
@@ -23925,6 +24137,7 @@ export class ViewPreferencesValues extends Request {
     this.initiativeFieldDateUpdated = data.initiativeFieldDateUpdated ?? undefined;
     this.initiativeFieldDescription = data.initiativeFieldDescription ?? undefined;
     this.initiativeFieldHealth = data.initiativeFieldHealth ?? undefined;
+    this.initiativeFieldId = data.initiativeFieldId ?? undefined;
     this.initiativeFieldInitiativeHealth = data.initiativeFieldInitiativeHealth ?? undefined;
     this.initiativeFieldLabels = data.initiativeFieldLabels ?? undefined;
     this.initiativeFieldLeadTeam = data.initiativeFieldLeadTeam ?? undefined;
@@ -23961,6 +24174,7 @@ export class ViewPreferencesValues extends Request {
     this.projectFieldDescriptionBoard = data.projectFieldDescriptionBoard ?? undefined;
     this.projectFieldHealth = data.projectFieldHealth ?? undefined;
     this.projectFieldHealthTimeline = data.projectFieldHealthTimeline ?? undefined;
+    this.projectFieldId = data.projectFieldId ?? undefined;
     this.projectFieldInitiatives = data.projectFieldInitiatives ?? undefined;
     this.projectFieldIssues = data.projectFieldIssues ?? undefined;
     this.projectFieldLabels = data.projectFieldLabels ?? undefined;
@@ -24017,8 +24231,10 @@ export class ViewPreferencesValues extends Request {
     this.reviewFieldChecks = data.reviewFieldChecks ?? undefined;
     this.reviewFieldGithubTeam = data.reviewFieldGithubTeam ?? undefined;
     this.reviewFieldIdentifier = data.reviewFieldIdentifier ?? undefined;
+    this.reviewFieldOpenedAt = data.reviewFieldOpenedAt ?? undefined;
     this.reviewFieldPreviewLinks = data.reviewFieldPreviewLinks ?? undefined;
     this.reviewFieldRepository = data.reviewFieldRepository ?? undefined;
+    this.reviewFieldStatusDetails = data.reviewFieldStatusDetails ?? undefined;
     this.reviewGrouping = data.reviewGrouping ?? undefined;
     this.reviewViewOrdering = data.reviewViewOrdering ?? undefined;
     this.scheduledPipelineReleaseFieldCompletion = data.scheduledPipelineReleaseFieldCompletion ?? undefined;
@@ -24094,6 +24310,8 @@ export class ViewPreferencesValues extends Request {
   public automationOrdering?: string | null;
   /** Whether to show sub-team loops. */
   public automationShowDescendants?: boolean | null;
+  /** Whether to show disabled loops. */
+  public automationShowDisabled?: boolean | null;
   /** The loop stats period. */
   public automationStatsPeriod?: string | null;
   /** Whether issues in closed columns should be ordered by recency. */
@@ -24242,6 +24460,8 @@ export class ViewPreferencesValues extends Request {
   public initiativeFieldDescription?: boolean | null;
   /** Whether to show the initiative active projects health field. */
   public initiativeFieldHealth?: boolean | null;
+  /** Whether to show the initiative identifier field. */
+  public initiativeFieldId?: boolean | null;
   /** Whether to show the initiative health field. */
   public initiativeFieldInitiativeHealth?: boolean | null;
   /** Whether to show the initiative labels field. */
@@ -24314,6 +24534,8 @@ export class ViewPreferencesValues extends Request {
   public projectFieldHealth?: boolean | null;
   /** Whether to show the project health field on the timeline. */
   public projectFieldHealthTimeline?: boolean | null;
+  /** Whether to show the project identifier field. */
+  public projectFieldId?: boolean | null;
   /** Whether to show the project initiatives field. */
   public projectFieldInitiatives?: boolean | null;
   /** Whether to show the project issue count field. */
@@ -24426,10 +24648,14 @@ export class ViewPreferencesValues extends Request {
   public reviewFieldGithubTeam?: boolean | null;
   /** Whether to show the review identifier field. */
   public reviewFieldIdentifier?: boolean | null;
+  /** Whether to show the pull request opened timestamp. */
+  public reviewFieldOpenedAt?: boolean | null;
   /** No longer used. Previously controlled the review preview links field. */
   public reviewFieldPreviewLinks?: boolean | null;
   /** Whether to show the review repository field. */
   public reviewFieldRepository?: boolean | null;
+  /** Whether to show review status details on a second line. */
+  public reviewFieldStatusDetails?: boolean | null;
   /** The review grouping. */
   public reviewGrouping?: string | null;
   /** The review view ordering. */
@@ -27920,18 +28146,18 @@ export class LatestReleaseByAccessKeyQuery extends Request {
   }
 
   /**
-   * Call the LatestReleaseByAccessKey query and return a Release
+   * Call the LatestReleaseByAccessKey query and return a AccessKeyRelease
    *
    * @returns parsed response from LatestReleaseByAccessKeyQuery
    */
-  public async fetch(): LinearFetch<Release | undefined> {
+  public async fetch(): LinearFetch<AccessKeyRelease | undefined> {
     const response = await this._request<L.LatestReleaseByAccessKeyQuery, L.LatestReleaseByAccessKeyQueryVariables>(
       L.LatestReleaseByAccessKeyDocument.toString(),
       {}
     );
     const data = response.latestReleaseByAccessKey;
 
-    return data ? new Release(this._request, data) : undefined;
+    return data ? new AccessKeyRelease(this._request, data) : undefined;
   }
 }
 
@@ -28768,12 +28994,12 @@ export class RecentReleasesByAccessKeyQuery extends Request {
   }
 
   /**
-   * Call the RecentReleasesByAccessKey query and return a Release list
+   * Call the RecentReleasesByAccessKey query and return a AccessKeyRelease list
    *
    * @param variables - variables to pass into the RecentReleasesByAccessKeyQuery
    * @returns parsed response from RecentReleasesByAccessKeyQuery
    */
-  public async fetch(variables?: L.RecentReleasesByAccessKeyQueryVariables): LinearFetch<Release[]> {
+  public async fetch(variables?: L.RecentReleasesByAccessKeyQueryVariables): LinearFetch<AccessKeyRelease[]> {
     const response = await this._request<L.RecentReleasesByAccessKeyQuery, L.RecentReleasesByAccessKeyQueryVariables>(
       L.RecentReleasesByAccessKeyDocument.toString(),
       variables
@@ -28781,7 +29007,7 @@ export class RecentReleasesByAccessKeyQuery extends Request {
     const data = response.recentReleasesByAccessKey;
 
     return data.map(node => {
-      return new Release(this._request, node);
+      return new AccessKeyRelease(this._request, node);
     });
   }
 }
@@ -28918,18 +29144,18 @@ export class ReleasePipelineByAccessKeyQuery extends Request {
   }
 
   /**
-   * Call the ReleasePipelineByAccessKey query and return a ReleasePipeline
+   * Call the ReleasePipelineByAccessKey query and return a AccessKeyReleasePipeline
    *
    * @returns parsed response from ReleasePipelineByAccessKeyQuery
    */
-  public async fetch(): LinearFetch<ReleasePipeline> {
+  public async fetch(): LinearFetch<AccessKeyReleasePipeline> {
     const response = await this._request<L.ReleasePipelineByAccessKeyQuery, L.ReleasePipelineByAccessKeyQueryVariables>(
       L.ReleasePipelineByAccessKeyDocument.toString(),
       {}
     );
     const data = response.releasePipelineByAccessKey;
 
-    return new ReleasePipeline(this._request, data);
+    return new AccessKeyReleasePipeline(this._request, data);
   }
 }
 
@@ -34759,13 +34985,15 @@ export class IntegrationZendeskMutation extends Request {
    * @param redirectUri - required redirectUri to pass to integrationZendesk
    * @param scope - required scope to pass to integrationZendesk
    * @param subdomain - required subdomain to pass to integrationZendesk
+   * @param variables - variables without 'code', 'redirectUri', 'scope', 'subdomain' to pass into the IntegrationZendeskMutation
    * @returns parsed response from IntegrationZendeskMutation
    */
   public async fetch(
     code: string,
     redirectUri: string,
     scope: string,
-    subdomain: string
+    subdomain: string,
+    variables?: Omit<L.IntegrationZendeskMutationVariables, "code" | "redirectUri" | "scope" | "subdomain">
   ): LinearFetch<IntegrationPayload> {
     const response = await this._request<L.IntegrationZendeskMutation, L.IntegrationZendeskMutationVariables>(
       L.IntegrationZendeskDocument.toString(),
@@ -34774,6 +35002,7 @@ export class IntegrationZendeskMutation extends Request {
         redirectUri,
         scope,
         subdomain,
+        ...variables,
       }
     );
     const data = response.integrationZendesk;
@@ -36859,13 +37088,18 @@ export class CreateProjectLabelMutation extends Request {
    * Call the CreateProjectLabel mutation and return a ProjectLabelPayload
    *
    * @param input - required input to pass to createProjectLabel
+   * @param variables - variables without 'input' to pass into the CreateProjectLabelMutation
    * @returns parsed response from CreateProjectLabelMutation
    */
-  public async fetch(input: L.ProjectLabelCreateInput): LinearFetch<ProjectLabelPayload> {
+  public async fetch(
+    input: L.ProjectLabelCreateInput,
+    variables?: Omit<L.CreateProjectLabelMutationVariables, "input">
+  ): LinearFetch<ProjectLabelPayload> {
     const response = await this._request<L.CreateProjectLabelMutation, L.CreateProjectLabelMutationVariables>(
       L.CreateProjectLabelDocument.toString(),
       {
         input,
+        ...variables,
       }
     );
     const data = response.projectLabelCreate;
@@ -36976,14 +37210,20 @@ export class UpdateProjectLabelMutation extends Request {
    *
    * @param id - required id to pass to updateProjectLabel
    * @param input - required input to pass to updateProjectLabel
+   * @param variables - variables without 'id', 'input' to pass into the UpdateProjectLabelMutation
    * @returns parsed response from UpdateProjectLabelMutation
    */
-  public async fetch(id: string, input: L.ProjectLabelUpdateInput): LinearFetch<ProjectLabelPayload> {
+  public async fetch(
+    id: string,
+    input: L.ProjectLabelUpdateInput,
+    variables?: Omit<L.UpdateProjectLabelMutationVariables, "id" | "input">
+  ): LinearFetch<ProjectLabelPayload> {
     const response = await this._request<L.UpdateProjectLabelMutation, L.UpdateProjectLabelMutationVariables>(
       L.UpdateProjectLabelDocument.toString(),
       {
         id,
         input,
+        ...variables,
       }
     );
     const data = response.projectLabelUpdate;
@@ -37745,12 +37985,12 @@ export class ReleaseCompleteByAccessKeyMutation extends Request {
   }
 
   /**
-   * Call the ReleaseCompleteByAccessKey mutation and return a ReleasePayload
+   * Call the ReleaseCompleteByAccessKey mutation and return a AccessKeyReleasePayload
    *
    * @param input - required input to pass to releaseCompleteByAccessKey
    * @returns parsed response from ReleaseCompleteByAccessKeyMutation
    */
-  public async fetch(input: L.ReleaseCompleteInputBase): LinearFetch<ReleasePayload> {
+  public async fetch(input: L.ReleaseCompleteInputBase): LinearFetch<AccessKeyReleasePayload> {
     const response = await this._request<
       L.ReleaseCompleteByAccessKeyMutation,
       L.ReleaseCompleteByAccessKeyMutationVariables
@@ -37759,7 +37999,7 @@ export class ReleaseCompleteByAccessKeyMutation extends Request {
     });
     const data = response.releaseCompleteByAccessKey;
 
-    return new ReleasePayload(this._request, data);
+    return new AccessKeyReleasePayload(this._request, data);
   }
 }
 
@@ -38215,12 +38455,12 @@ export class ReleaseSyncByAccessKeyMutation extends Request {
   }
 
   /**
-   * Call the ReleaseSyncByAccessKey mutation and return a ReleasePayload
+   * Call the ReleaseSyncByAccessKey mutation and return a AccessKeyReleasePayload
    *
    * @param input - required input to pass to releaseSyncByAccessKey
    * @returns parsed response from ReleaseSyncByAccessKeyMutation
    */
-  public async fetch(input: L.ReleaseSyncInputBase): LinearFetch<ReleasePayload> {
+  public async fetch(input: L.ReleaseSyncInputBase): LinearFetch<AccessKeyReleasePayload> {
     const response = await this._request<L.ReleaseSyncByAccessKeyMutation, L.ReleaseSyncByAccessKeyMutationVariables>(
       L.ReleaseSyncByAccessKeyDocument.toString(),
       {
@@ -38229,7 +38469,7 @@ export class ReleaseSyncByAccessKeyMutation extends Request {
     );
     const data = response.releaseSyncByAccessKey;
 
-    return new ReleasePayload(this._request, data);
+    return new AccessKeyReleasePayload(this._request, data);
   }
 }
 
@@ -38333,12 +38573,12 @@ export class ReleaseUpdateByPipelineByAccessKeyMutation extends Request {
   }
 
   /**
-   * Call the ReleaseUpdateByPipelineByAccessKey mutation and return a ReleasePayload
+   * Call the ReleaseUpdateByPipelineByAccessKey mutation and return a AccessKeyReleasePayload
    *
    * @param input - required input to pass to releaseUpdateByPipelineByAccessKey
    * @returns parsed response from ReleaseUpdateByPipelineByAccessKeyMutation
    */
-  public async fetch(input: L.ReleaseUpdateByPipelineInputBase): LinearFetch<ReleasePayload> {
+  public async fetch(input: L.ReleaseUpdateByPipelineInputBase): LinearFetch<AccessKeyReleasePayload> {
     const response = await this._request<
       L.ReleaseUpdateByPipelineByAccessKeyMutation,
       L.ReleaseUpdateByPipelineByAccessKeyMutationVariables
@@ -38347,7 +38587,7 @@ export class ReleaseUpdateByPipelineByAccessKeyMutation extends Request {
     });
     const data = response.releaseUpdateByPipelineByAccessKey;
 
-    return new ReleasePayload(this._request, data);
+    return new AccessKeyReleasePayload(this._request, data);
   }
 }
 
@@ -44052,194 +44292,28 @@ export class IssueVcsBranchSearch_SubscribersQuery extends Request {
 }
 
 /**
- * A fetchable LatestReleaseByAccessKey_Documents Query
+ * A fetchable LatestReleaseByAccessKey_Stage Query
  *
  * @param request - function to call the graphql client
- * @param variables - variables to pass into the LatestReleaseByAccessKey_DocumentsQuery
  */
-export class LatestReleaseByAccessKey_DocumentsQuery extends Request {
-  private _variables?: L.LatestReleaseByAccessKey_DocumentsQueryVariables;
-
-  public constructor(request: LinearRequest, variables?: L.LatestReleaseByAccessKey_DocumentsQueryVariables) {
+export class LatestReleaseByAccessKey_StageQuery extends Request {
+  public constructor(request: LinearRequest) {
     super(request);
-
-    this._variables = variables;
   }
 
   /**
-   * Call the LatestReleaseByAccessKey_Documents query and return a DocumentConnection
+   * Call the LatestReleaseByAccessKey_Stage query and return a AccessKeyReleaseStage
    *
-   * @param variables - variables to pass into the LatestReleaseByAccessKey_DocumentsQuery
-   * @returns parsed response from LatestReleaseByAccessKey_DocumentsQuery
+   * @returns parsed response from LatestReleaseByAccessKey_StageQuery
    */
-  public async fetch(
-    variables?: L.LatestReleaseByAccessKey_DocumentsQueryVariables
-  ): LinearFetch<DocumentConnection | undefined> {
+  public async fetch(): LinearFetch<AccessKeyReleaseStage | undefined> {
     const response = await this._request<
-      L.LatestReleaseByAccessKey_DocumentsQuery,
-      L.LatestReleaseByAccessKey_DocumentsQueryVariables
-    >(L.LatestReleaseByAccessKey_DocumentsDocument.toString(), variables);
-    const data = response.latestReleaseByAccessKey?.documents;
-    if (data) {
-      return new DocumentConnection(
-        this._request,
-        connection =>
-          this.fetch(
-            defaultConnection({
-              ...this._variables,
-              ...variables,
-              ...connection,
-            })
-          ),
-        data
-      );
-    } else {
-      return undefined;
-    }
-  }
-}
+      L.LatestReleaseByAccessKey_StageQuery,
+      L.LatestReleaseByAccessKey_StageQueryVariables
+    >(L.LatestReleaseByAccessKey_StageDocument.toString(), {});
+    const data = response.latestReleaseByAccessKey?.stage;
 
-/**
- * A fetchable LatestReleaseByAccessKey_History Query
- *
- * @param request - function to call the graphql client
- * @param variables - variables to pass into the LatestReleaseByAccessKey_HistoryQuery
- */
-export class LatestReleaseByAccessKey_HistoryQuery extends Request {
-  private _variables?: L.LatestReleaseByAccessKey_HistoryQueryVariables;
-
-  public constructor(request: LinearRequest, variables?: L.LatestReleaseByAccessKey_HistoryQueryVariables) {
-    super(request);
-
-    this._variables = variables;
-  }
-
-  /**
-   * Call the LatestReleaseByAccessKey_History query and return a ReleaseHistoryConnection
-   *
-   * @param variables - variables to pass into the LatestReleaseByAccessKey_HistoryQuery
-   * @returns parsed response from LatestReleaseByAccessKey_HistoryQuery
-   */
-  public async fetch(
-    variables?: L.LatestReleaseByAccessKey_HistoryQueryVariables
-  ): LinearFetch<ReleaseHistoryConnection | undefined> {
-    const response = await this._request<
-      L.LatestReleaseByAccessKey_HistoryQuery,
-      L.LatestReleaseByAccessKey_HistoryQueryVariables
-    >(L.LatestReleaseByAccessKey_HistoryDocument.toString(), variables);
-    const data = response.latestReleaseByAccessKey?.history;
-    if (data) {
-      return new ReleaseHistoryConnection(
-        this._request,
-        connection =>
-          this.fetch(
-            defaultConnection({
-              ...this._variables,
-              ...variables,
-              ...connection,
-            })
-          ),
-        data
-      );
-    } else {
-      return undefined;
-    }
-  }
-}
-
-/**
- * A fetchable LatestReleaseByAccessKey_Issues Query
- *
- * @param request - function to call the graphql client
- * @param variables - variables to pass into the LatestReleaseByAccessKey_IssuesQuery
- */
-export class LatestReleaseByAccessKey_IssuesQuery extends Request {
-  private _variables?: L.LatestReleaseByAccessKey_IssuesQueryVariables;
-
-  public constructor(request: LinearRequest, variables?: L.LatestReleaseByAccessKey_IssuesQueryVariables) {
-    super(request);
-
-    this._variables = variables;
-  }
-
-  /**
-   * Call the LatestReleaseByAccessKey_Issues query and return a IssueConnection
-   *
-   * @param variables - variables to pass into the LatestReleaseByAccessKey_IssuesQuery
-   * @returns parsed response from LatestReleaseByAccessKey_IssuesQuery
-   */
-  public async fetch(
-    variables?: L.LatestReleaseByAccessKey_IssuesQueryVariables
-  ): LinearFetch<IssueConnection | undefined> {
-    const response = await this._request<
-      L.LatestReleaseByAccessKey_IssuesQuery,
-      L.LatestReleaseByAccessKey_IssuesQueryVariables
-    >(L.LatestReleaseByAccessKey_IssuesDocument.toString(), variables);
-    const data = response.latestReleaseByAccessKey?.issues;
-    if (data) {
-      return new IssueConnection(
-        this._request,
-        connection =>
-          this.fetch(
-            defaultConnection({
-              ...this._variables,
-              ...variables,
-              ...connection,
-            })
-          ),
-        data
-      );
-    } else {
-      return undefined;
-    }
-  }
-}
-
-/**
- * A fetchable LatestReleaseByAccessKey_Links Query
- *
- * @param request - function to call the graphql client
- * @param variables - variables to pass into the LatestReleaseByAccessKey_LinksQuery
- */
-export class LatestReleaseByAccessKey_LinksQuery extends Request {
-  private _variables?: L.LatestReleaseByAccessKey_LinksQueryVariables;
-
-  public constructor(request: LinearRequest, variables?: L.LatestReleaseByAccessKey_LinksQueryVariables) {
-    super(request);
-
-    this._variables = variables;
-  }
-
-  /**
-   * Call the LatestReleaseByAccessKey_Links query and return a EntityExternalLinkConnection
-   *
-   * @param variables - variables to pass into the LatestReleaseByAccessKey_LinksQuery
-   * @returns parsed response from LatestReleaseByAccessKey_LinksQuery
-   */
-  public async fetch(
-    variables?: L.LatestReleaseByAccessKey_LinksQueryVariables
-  ): LinearFetch<EntityExternalLinkConnection | undefined> {
-    const response = await this._request<
-      L.LatestReleaseByAccessKey_LinksQuery,
-      L.LatestReleaseByAccessKey_LinksQueryVariables
-    >(L.LatestReleaseByAccessKey_LinksDocument.toString(), variables);
-    const data = response.latestReleaseByAccessKey?.links;
-    if (data) {
-      return new EntityExternalLinkConnection(
-        this._request,
-        connection =>
-          this.fetch(
-            defaultConnection({
-              ...this._variables,
-              ...variables,
-              ...connection,
-            })
-          ),
-        data
-      );
-    } else {
-      return undefined;
-    }
+    return data ? new AccessKeyReleaseStage(this._request, data) : undefined;
   }
 }
 
@@ -46188,137 +46262,6 @@ export class ReleasePipeline_TeamsQuery extends Request {
       }
     );
     const data = response.releasePipeline.teams;
-
-    return new TeamConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...this._variables,
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable ReleasePipelineByAccessKey_Releases Query
- *
- * @param request - function to call the graphql client
- * @param variables - variables to pass into the ReleasePipelineByAccessKey_ReleasesQuery
- */
-export class ReleasePipelineByAccessKey_ReleasesQuery extends Request {
-  private _variables?: L.ReleasePipelineByAccessKey_ReleasesQueryVariables;
-
-  public constructor(request: LinearRequest, variables?: L.ReleasePipelineByAccessKey_ReleasesQueryVariables) {
-    super(request);
-
-    this._variables = variables;
-  }
-
-  /**
-   * Call the ReleasePipelineByAccessKey_Releases query and return a ReleaseConnection
-   *
-   * @param variables - variables to pass into the ReleasePipelineByAccessKey_ReleasesQuery
-   * @returns parsed response from ReleasePipelineByAccessKey_ReleasesQuery
-   */
-  public async fetch(variables?: L.ReleasePipelineByAccessKey_ReleasesQueryVariables): LinearFetch<ReleaseConnection> {
-    const response = await this._request<
-      L.ReleasePipelineByAccessKey_ReleasesQuery,
-      L.ReleasePipelineByAccessKey_ReleasesQueryVariables
-    >(L.ReleasePipelineByAccessKey_ReleasesDocument.toString(), variables);
-    const data = response.releasePipelineByAccessKey.releases;
-
-    return new ReleaseConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...this._variables,
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable ReleasePipelineByAccessKey_Stages Query
- *
- * @param request - function to call the graphql client
- * @param variables - variables to pass into the ReleasePipelineByAccessKey_StagesQuery
- */
-export class ReleasePipelineByAccessKey_StagesQuery extends Request {
-  private _variables?: L.ReleasePipelineByAccessKey_StagesQueryVariables;
-
-  public constructor(request: LinearRequest, variables?: L.ReleasePipelineByAccessKey_StagesQueryVariables) {
-    super(request);
-
-    this._variables = variables;
-  }
-
-  /**
-   * Call the ReleasePipelineByAccessKey_Stages query and return a ReleaseStageConnection
-   *
-   * @param variables - variables to pass into the ReleasePipelineByAccessKey_StagesQuery
-   * @returns parsed response from ReleasePipelineByAccessKey_StagesQuery
-   */
-  public async fetch(
-    variables?: L.ReleasePipelineByAccessKey_StagesQueryVariables
-  ): LinearFetch<ReleaseStageConnection> {
-    const response = await this._request<
-      L.ReleasePipelineByAccessKey_StagesQuery,
-      L.ReleasePipelineByAccessKey_StagesQueryVariables
-    >(L.ReleasePipelineByAccessKey_StagesDocument.toString(), variables);
-    const data = response.releasePipelineByAccessKey.stages;
-
-    return new ReleaseStageConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...this._variables,
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable ReleasePipelineByAccessKey_Teams Query
- *
- * @param request - function to call the graphql client
- * @param variables - variables to pass into the ReleasePipelineByAccessKey_TeamsQuery
- */
-export class ReleasePipelineByAccessKey_TeamsQuery extends Request {
-  private _variables?: L.ReleasePipelineByAccessKey_TeamsQueryVariables;
-
-  public constructor(request: LinearRequest, variables?: L.ReleasePipelineByAccessKey_TeamsQueryVariables) {
-    super(request);
-
-    this._variables = variables;
-  }
-
-  /**
-   * Call the ReleasePipelineByAccessKey_Teams query and return a TeamConnection
-   *
-   * @param variables - variables to pass into the ReleasePipelineByAccessKey_TeamsQuery
-   * @returns parsed response from ReleasePipelineByAccessKey_TeamsQuery
-   */
-  public async fetch(variables?: L.ReleasePipelineByAccessKey_TeamsQueryVariables): LinearFetch<TeamConnection> {
-    const response = await this._request<
-      L.ReleasePipelineByAccessKey_TeamsQuery,
-      L.ReleasePipelineByAccessKey_TeamsQueryVariables
-    >(L.ReleasePipelineByAccessKey_TeamsDocument.toString(), variables);
-    const data = response.releasePipelineByAccessKey.teams;
 
     return new TeamConnection(
       this._request,
@@ -49338,9 +49281,9 @@ export class LinearSdk extends Request {
   /**
    * Returns the latest release for the pipeline associated with the access key.
    *
-   * @returns Release
+   * @returns AccessKeyRelease
    */
-  public get latestReleaseByAccessKey(): LinearFetch<Release | undefined> {
+  public get latestReleaseByAccessKey(): LinearFetch<AccessKeyRelease | undefined> {
     return new LatestReleaseByAccessKeyQuery(this._request).fetch();
   }
   /**
@@ -49589,12 +49532,14 @@ export class LinearSdk extends Request {
     return new RateLimitStatusQuery(this._request).fetch();
   }
   /**
-   * Returns recent in-progress and completed releases for the pipeline associated with the access key, ordered with in-progress first then most recently completed. Used by `linear-release` to walk candidates and pick the one whose `commitSha` is an ancestor of the current build commit, which disambiguates concurrent release trains on the same pipeline.
+   * Returns recent releases for the pipeline associated with the access key, ordered with in-progress releases first, followed by the most recently completed releases.
    *
    * @param variables - variables to pass into the RecentReleasesByAccessKeyQuery
-   * @returns Release[]
+   * @returns AccessKeyRelease[]
    */
-  public recentReleasesByAccessKey(variables?: L.RecentReleasesByAccessKeyQueryVariables): LinearFetch<Release[]> {
+  public recentReleasesByAccessKey(
+    variables?: L.RecentReleasesByAccessKeyQueryVariables
+  ): LinearFetch<AccessKeyRelease[]> {
     return new RecentReleasesByAccessKeyQuery(this._request).fetch(variables);
   }
   /**
@@ -49634,11 +49579,11 @@ export class LinearSdk extends Request {
     return new ReleasePipelineQuery(this._request).fetch(id);
   }
   /**
-   * Returns a release pipeline by ID. Requires the access key to have access to the pipeline.
+   * Returns the release pipeline associated with the access key.
    *
-   * @returns ReleasePipeline
+   * @returns AccessKeyReleasePipeline
    */
-  public get releasePipelineByAccessKey(): LinearFetch<ReleasePipeline> {
+  public get releasePipelineByAccessKey(): LinearFetch<AccessKeyReleasePipeline> {
     return new ReleasePipelineByAccessKeyQuery(this._request).fetch();
   }
   /**
@@ -51630,15 +51575,17 @@ export class LinearSdk extends Request {
    * @param redirectUri - required redirectUri to pass to integrationZendesk
    * @param scope - required scope to pass to integrationZendesk
    * @param subdomain - required subdomain to pass to integrationZendesk
+   * @param variables - variables without 'code', 'redirectUri', 'scope', 'subdomain' to pass into the IntegrationZendeskMutation
    * @returns IntegrationPayload
    */
   public integrationZendesk(
     code: string,
     redirectUri: string,
     scope: string,
-    subdomain: string
+    subdomain: string,
+    variables?: Omit<L.IntegrationZendeskMutationVariables, "code" | "redirectUri" | "scope" | "subdomain">
   ): LinearFetch<IntegrationPayload> {
-    return new IntegrationZendeskMutation(this._request).fetch(code, redirectUri, scope, subdomain);
+    return new IntegrationZendeskMutation(this._request).fetch(code, redirectUri, scope, subdomain, variables);
   }
   /**
    * Creates new Slack notification settings for a team, project, initiative, or custom view.
@@ -52369,10 +52316,14 @@ export class LinearSdk extends Request {
    * Creates a new project label.
    *
    * @param input - required input to pass to createProjectLabel
+   * @param variables - variables without 'input' to pass into the CreateProjectLabelMutation
    * @returns ProjectLabelPayload
    */
-  public createProjectLabel(input: L.ProjectLabelCreateInput): LinearFetch<ProjectLabelPayload> {
-    return new CreateProjectLabelMutation(this._request).fetch(input);
+  public createProjectLabel(
+    input: L.ProjectLabelCreateInput,
+    variables?: Omit<L.CreateProjectLabelMutationVariables, "input">
+  ): LinearFetch<ProjectLabelPayload> {
+    return new CreateProjectLabelMutation(this._request).fetch(input, variables);
   }
   /**
    * Deletes a project label.
@@ -52406,10 +52357,15 @@ export class LinearSdk extends Request {
    *
    * @param id - required id to pass to updateProjectLabel
    * @param input - required input to pass to updateProjectLabel
+   * @param variables - variables without 'id', 'input' to pass into the UpdateProjectLabelMutation
    * @returns ProjectLabelPayload
    */
-  public updateProjectLabel(id: string, input: L.ProjectLabelUpdateInput): LinearFetch<ProjectLabelPayload> {
-    return new UpdateProjectLabelMutation(this._request).fetch(id, input);
+  public updateProjectLabel(
+    id: string,
+    input: L.ProjectLabelUpdateInput,
+    variables?: Omit<L.UpdateProjectLabelMutationVariables, "id" | "input">
+  ): LinearFetch<ProjectLabelPayload> {
+    return new UpdateProjectLabelMutation(this._request).fetch(id, input, variables);
   }
   /**
    * Creates a new project milestone.
@@ -52653,9 +52609,9 @@ export class LinearSdk extends Request {
    * Marks a release as completed using an access key. If version is provided, completes that specific release; otherwise completes the most recent started release. The pipeline is inferred from the access key.
    *
    * @param input - required input to pass to releaseCompleteByAccessKey
-   * @returns ReleasePayload
+   * @returns AccessKeyReleasePayload
    */
-  public releaseCompleteByAccessKey(input: L.ReleaseCompleteInputBase): LinearFetch<ReleasePayload> {
+  public releaseCompleteByAccessKey(input: L.ReleaseCompleteInputBase): LinearFetch<AccessKeyReleasePayload> {
     return new ReleaseCompleteByAccessKeyMutation(this._request).fetch(input);
   }
   /**
@@ -52800,9 +52756,9 @@ export class LinearSdk extends Request {
    * Syncs release data using an access key for CI/CD integration. The pipeline is automatically inferred from the access key's configured resources, so no pipeline ID is needed in the input.
    *
    * @param input - required input to pass to releaseSyncByAccessKey
-   * @returns ReleasePayload
+   * @returns AccessKeyReleasePayload
    */
-  public releaseSyncByAccessKey(input: L.ReleaseSyncInputBase): LinearFetch<ReleasePayload> {
+  public releaseSyncByAccessKey(input: L.ReleaseSyncInputBase): LinearFetch<AccessKeyReleasePayload> {
     return new ReleaseSyncByAccessKeyMutation(this._request).fetch(input);
   }
   /**
@@ -52837,9 +52793,11 @@ export class LinearSdk extends Request {
    * Updates a release by pipeline using an access key.
    *
    * @param input - required input to pass to releaseUpdateByPipelineByAccessKey
-   * @returns ReleasePayload
+   * @returns AccessKeyReleasePayload
    */
-  public releaseUpdateByPipelineByAccessKey(input: L.ReleaseUpdateByPipelineInputBase): LinearFetch<ReleasePayload> {
+  public releaseUpdateByPipelineByAccessKey(
+    input: L.ReleaseUpdateByPipelineInputBase
+  ): LinearFetch<AccessKeyReleasePayload> {
     return new ReleaseUpdateByPipelineByAccessKeyMutation(this._request).fetch(input);
   }
   /**
@@ -53454,6 +53412,8 @@ export {
   PaginationNulls,
   PaginationOrderBy,
   PaginationSortOrder,
+  PartnerDiscountType,
+  PartnerOfferIneligibilityReason,
   PipelineTab,
   PostType,
   ProductIntelligenceScope,

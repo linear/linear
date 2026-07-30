@@ -2857,6 +2857,8 @@ fragment Project on Project {
   completedIssueCountHistory
   # The number of in-progress estimation points at the end of each week since project creation. Each entry represents one week.
   inProgressScopeHistory
+  # The number of resources associated with the project, including documents, external links, and attachments.
+  resourceCount
   # The overall health of the project, derived from the most recent project update. Possible values are onTrack, atRisk, or offTrack. Null if no health has been reported.
   health
   # The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points.
@@ -2948,6 +2950,17 @@ fragment AiConversationPromptPart on AiConversationPromptPart {
   user {
     id
   }
+}
+
+# A readable issue suggestion reason and its structured entity references.
+fragment PresentedIssueSuggestionReason on PresentedIssueSuggestionReason {
+  __typename
+  # Entities referenced by the reason.
+  references {
+    ...IssueSuggestionReasonReference
+  }
+  # The reason with entity mentions rendered as readable text.
+  text
 }
 
 # A reasoning part in an AI conversation.
@@ -3307,6 +3320,15 @@ fragment ReleaseHistory on ReleaseHistory {
   id
 }
 
+# A release pipeline returned using a release pipeline access key.
+fragment AccessKeyReleasePipeline on AccessKeyReleasePipeline {
+  __typename
+  # Glob patterns used to filter commits by changed file path. An empty array means all commits are included.
+  includePathPatterns
+  # The unique identifier of the release pipeline.
+  id
+}
+
 # A release pipeline that defines a release workflow with ordered stages. Pipelines can be continuous
 # (each sync creates a completed release) or scheduled (issues accumulate in a started release that is
 # explicitly completed). Pipelines are associated with teams and can filter commits by file path
@@ -3348,6 +3370,38 @@ fragment ReleasePipeline on ReleasePipeline {
   isProduction
   # Whether to automatically generate a release note when a release is completed.
   autoGenerateReleaseNotesOnCompletion
+}
+
+# A release returned using a release pipeline access key.
+fragment AccessKeyRelease on AccessKeyRelease {
+  __typename
+  # The Git commit SHA associated with the release.
+  commitSha
+  # The URL to the release page in the Linear app.
+  url
+  # The current stage of the release.
+  stage {
+    ...AccessKeyReleaseStage
+  }
+  # The name of the release.
+  name
+  # The time at which the release was archived. Null if the release has not been archived.
+  archivedAt
+  # The time at which the release was completed. Null if the release has not been completed.
+  completedAt
+  # The time at which the release was created.
+  createdAt
+  # The unique identifier of the release.
+  id
+  # The version identifier for this release. Null if no version has been assigned.
+  version
+}
+
+# A release stage returned using a release pipeline access key.
+fragment AccessKeyReleaseStage on AccessKeyReleaseStage {
+  __typename
+  # The name of the release stage.
+  name
 }
 
 # A release that bundles issues together for a software deployment or version. Releases belong to a
@@ -4422,6 +4476,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     ... on AiConversationSearchEntitiesToolCall {
       ...AiConversationSearchEntitiesToolCall
     }
+    ... on AiConversationSpawnSubagentToolCall {
+      ...AiConversationSpawnSubagentToolCall
+    }
     ... on AiConversationStartCodingSessionToolCall {
       ...AiConversationStartCodingSessionToolCall
     }
@@ -5071,6 +5128,8 @@ fragment Organization on Organization {
   initiativeUpdateRemindersHour
   # The hour of the day (0-23) at which project update reminders are sent.
   projectUpdateRemindersHour
+  # The id of the specific initiative, project, view, dashboard, or page tab used as the default home view. The type of entity is given by defaultHomeView.
+  defaultHomeViewTargetId
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
@@ -5658,6 +5717,19 @@ fragment Reaction on Reaction {
   user {
     id
   }
+}
+
+# An entity referenced by a presented issue suggestion reason.
+fragment IssueSuggestionReasonReference on IssueSuggestionReasonReference {
+  __typename
+  # The readable label for the referenced entity.
+  label
+  # The referenced entity identifier.
+  id
+  # The referenced entity type.
+  type
+  # The title of the referenced entity, when available.
+  title
 }
 
 # An error part in an AI conversation.
@@ -7509,6 +7581,8 @@ fragment ProjectWebhookPayload on ProjectWebhookPayload {
   memberIds
   # IDs of the teams associated with this project.
   teamIds
+  # Previous identifiers of the project.
+  previousIdentifiers
   # The ID of the entity.
   id
   # The ID of the issue that was converted to the project.
@@ -7541,6 +7615,8 @@ fragment ProjectWebhookPayload on ProjectWebhookPayload {
   syncedWith
   # The health of the project.
   health
+  # The human-readable identifier of the project.
+  identifier
   # The icon of the project.
   icon
   # The initiatives associated with the project.
@@ -9268,6 +9344,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   customerPageNeedsShowCompletedIssuesAndProjects
   # Whether to show completed issues last in project customer needs.
   projectCustomerNeedsShowCompletedIssuesLast
+  # Whether to show disabled loops.
+  automationShowDisabled
   # Whether to show draft reviews.
   showDraftReviews
   # Whether to show empty groups on the board layout.
@@ -9296,6 +9374,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldPreviewLinks
   # Whether to show read items.
   showReadItems
+  # Whether to show review status details on a second line.
+  reviewFieldStatusDetails
   # Whether to show snoozed items.
   showSnoozedItems
   # Whether to show sub-initiative projects.
@@ -9370,6 +9450,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDescription
   # Whether to show the initiative health field.
   initiativeFieldInitiativeHealth
+  # Whether to show the initiative identifier field.
+  initiativeFieldId
   # Whether to show the initiative labels field.
   initiativeFieldLabels
   # Whether to show the initiative lead team field.
@@ -9458,6 +9540,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   # Whether to show the project health field.
   projectFieldHealth
+  # Whether to show the project identifier field.
+  projectFieldId
   # Whether to show the project initiatives field.
   projectFieldInitiatives
   # Whether to show the project issue count field.
@@ -9520,6 +9604,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldDateUpdated
   # Whether to show the projects aside panel on the timeline.
   timelineShowProjectsAside
+  # Whether to show the pull request opened timestamp.
+  reviewFieldOpenedAt
   # Whether to show the pull requests field.
   fieldPullRequests
   # Whether to show the release date field for continuous pipeline releases.
@@ -10026,6 +10112,15 @@ fragment ReactionPayload on ReactionPayload {
   reaction {
     ...Reaction
   }
+  # Whether the operation was successful.
+  success
+}
+
+# The result of a release mutation using a release pipeline access key.
+fragment AccessKeyReleasePayload on AccessKeyReleasePayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
   # Whether the operation was successful.
   success
 }
@@ -10961,6 +11056,10 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
     ...AiConversationSearchEntitiesToolCall
   }
 
+  ... on AiConversationSpawnSubagentToolCall {
+    ...AiConversationSpawnSubagentToolCall
+  }
+
   ... on AiConversationStartCodingSessionToolCall {
     ...AiConversationStartCodingSessionToolCall
   }
@@ -11809,6 +11908,37 @@ fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSea
   __typename
   id
   type
+}
+
+fragment AiConversationSpawnSubagentToolCall on AiConversationSpawnSubagentToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationSpawnSubagentToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  # The result of the tool call.
+  result {
+    ...AiConversationSpawnSubagentToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationSpawnSubagentToolCallArgs on AiConversationSpawnSubagentToolCallArgs {
+  __typename
+  description
+}
+
+fragment AiConversationSpawnSubagentToolCallResult on AiConversationSpawnSubagentToolCallResult {
+  __typename
+  conversationId
 }
 
 fragment AiConversationStartCodingSessionToolCall on AiConversationStartCodingSessionToolCall {
@@ -13188,6 +13318,8 @@ fragment ProjectSearchResult on ProjectSearchResult {
   completedIssueCountHistory
   # The number of in-progress estimation points at the end of each week since project creation. Each entry represents one week.
   inProgressScopeHistory
+  # The number of resources associated with the project, including documents, external links, and attachments.
+  resourceCount
   # The overall health of the project, derived from the most recent project update. Possible values are onTrack, atRisk, or offTrack. Null if no health has been reported.
   health
   # The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points.
@@ -17420,124 +17552,14 @@ query issues(
 # Returns the latest release for the pipeline associated with the access key.
 query latestReleaseByAccessKey {
   latestReleaseByAccessKey {
-    ...Release
+    ...AccessKeyRelease
   }
 }
-# Documents associated with the release.
-query latestReleaseByAccessKey_documents(
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # Filter returned documents.
-  $filter: DocumentFilter
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
+# The current stage of the release.
+query latestReleaseByAccessKey_stage {
   latestReleaseByAccessKey {
-    documents(
-      after: $after
-      before: $before
-      filter: $filter
-      first: $first
-      includeArchived: $includeArchived
-      last: $last
-      orderBy: $orderBy
-    ) {
-      ...DocumentConnection
-    }
-  }
-}
-# History entries associated with the release.
-query latestReleaseByAccessKey_history(
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  latestReleaseByAccessKey {
-    history(
-      after: $after
-      before: $before
-      first: $first
-      includeArchived: $includeArchived
-      last: $last
-      orderBy: $orderBy
-    ) {
-      ...ReleaseHistoryConnection
-    }
-  }
-}
-# Issues associated with the release.
-query latestReleaseByAccessKey_issues(
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # Filter returned issues.
-  $filter: IssueFilter
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  latestReleaseByAccessKey {
-    issues(
-      after: $after
-      before: $before
-      filter: $filter
-      first: $first
-      includeArchived: $includeArchived
-      last: $last
-      orderBy: $orderBy
-    ) {
-      ...IssueConnection
-    }
-  }
-}
-# Links associated with the release.
-query latestReleaseByAccessKey_links(
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  latestReleaseByAccessKey {
-    links(
-      after: $after
-      before: $before
-      first: $first
-      includeArchived: $includeArchived
-      last: $last
-      orderBy: $orderBy
-    ) {
-      ...EntityExternalLinkConnection
+    stage {
+      ...AccessKeyReleaseStage
     }
   }
 }
@@ -18787,16 +18809,14 @@ query rateLimitStatus {
     ...RateLimitPayload
   }
 }
-# Returns recent in-progress and completed releases for the pipeline associated with the access key,
-# ordered with in-progress first then most recently completed. Used by `linear-release` to walk
-# candidates and pick the one whose `commitSha` is an ancestor of the current build commit, which
-# disambiguates concurrent release trains on the same pipeline.
+# Returns recent releases for the pipeline associated with the access key, ordered with in-progress
+# releases first, followed by the most recently completed releases.
 query recentReleasesByAccessKey(
   # Maximum number of releases to return. Defaults to 20 and is capped at 100.
   $limit: Int
 ) {
   recentReleasesByAccessKey(limit: $limit) {
-    ...Release
+    ...AccessKeyRelease
   }
 }
 # Fetch a single release by its UUID or slug identifier.
@@ -19088,97 +19108,10 @@ query releasePipeline_teams(
     }
   }
 }
-# Returns a release pipeline by ID. Requires the access key to have access to the pipeline.
+# Returns the release pipeline associated with the access key.
 query releasePipelineByAccessKey {
   releasePipelineByAccessKey {
-    ...ReleasePipeline
-  }
-}
-# Releases associated with this pipeline.
-query releasePipelineByAccessKey_releases(
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-  # Sort returned releases.
-  $sort: [ReleaseSortInput!]
-) {
-  releasePipelineByAccessKey {
-    releases(
-      after: $after
-      before: $before
-      first: $first
-      includeArchived: $includeArchived
-      last: $last
-      orderBy: $orderBy
-      sort: $sort
-    ) {
-      ...ReleaseConnection
-    }
-  }
-}
-# Stages associated with this pipeline.
-query releasePipelineByAccessKey_stages(
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  releasePipelineByAccessKey {
-    stages(
-      after: $after
-      before: $before
-      first: $first
-      includeArchived: $includeArchived
-      last: $last
-      orderBy: $orderBy
-    ) {
-      ...ReleaseStageConnection
-    }
-  }
-}
-# Teams associated with this pipeline.
-query releasePipelineByAccessKey_teams(
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  releasePipelineByAccessKey {
-    teams(
-      after: $after
-      before: $before
-      first: $first
-      includeArchived: $includeArchived
-      last: $last
-      orderBy: $orderBy
-    ) {
-      ...TeamConnection
-    }
+    ...AccessKeyReleasePipeline
   }
 }
 # All release pipelines in the workspace, with optional filtering and sorting.
@@ -22945,6 +22878,8 @@ mutation deleteIntegrationTemplate(
 }
 # Integrates the workspace with Zendesk.
 mutation integrationZendesk(
+  # The role to assign to the Linear bot user in Zendesk.
+  $botUserRole: String
   # The Zendesk OAuth code.
   $code: String!
   # The Zendesk OAuth redirect URI.
@@ -22954,7 +22889,13 @@ mutation integrationZendesk(
   # The Zendesk installation subdomain.
   $subdomain: String!
 ) {
-  integrationZendesk(code: $code, redirectUri: $redirectUri, scope: $scope, subdomain: $subdomain) {
+  integrationZendesk(
+    botUserRole: $botUserRole
+    code: $code
+    redirectUri: $redirectUri
+    scope: $scope
+    subdomain: $subdomain
+  ) {
     ...IntegrationPayload
   }
 }
@@ -23743,8 +23684,10 @@ mutation projectExternalSyncDisable(
 mutation createProjectLabel(
   # The project label to create.
   $input: ProjectLabelCreateInput!
+  # Whether to replace all team-specific labels with the same name with this newly created workspace label (default: false).
+  $replaceTeamLabels: Boolean
 ) {
-  projectLabelCreate(input: $input) {
+  projectLabelCreate(input: $input, replaceTeamLabels: $replaceTeamLabels) {
     ...ProjectLabelPayload
   }
 }
@@ -23782,8 +23725,10 @@ mutation updateProjectLabel(
   $id: String!
   # A partial label object to update.
   $input: ProjectLabelUpdateInput!
+  # Whether to replace all team-specific labels with the same name with this updated workspace label (default: false).
+  $replaceTeamLabels: Boolean
 ) {
-  projectLabelUpdate(id: $id, input: $input) {
+  projectLabelUpdate(id: $id, input: $input, replaceTeamLabels: $replaceTeamLabels) {
     ...ProjectLabelPayload
   }
 }
@@ -24037,7 +23982,7 @@ mutation releaseCompleteByAccessKey(
   $input: ReleaseCompleteInputBase!
 ) {
   releaseCompleteByAccessKey(input: $input) {
-    ...ReleasePayload
+    ...AccessKeyReleasePayload
   }
 }
 # Creates a new release in a pipeline. If no stage is specified, defaults to the first completed stage
@@ -24202,7 +24147,7 @@ mutation releaseSyncByAccessKey(
   $input: ReleaseSyncInputBase!
 ) {
   releaseSyncByAccessKey(input: $input) {
-    ...ReleasePayload
+    ...AccessKeyReleasePayload
   }
 }
 # Unarchives a release.
@@ -24242,7 +24187,7 @@ mutation releaseUpdateByPipelineByAccessKey(
   $input: ReleaseUpdateByPipelineInputBase!
 ) {
   releaseUpdateByPipelineByAccessKey(input: $input) {
-    ...ReleasePayload
+    ...AccessKeyReleasePayload
   }
 }
 # Re-sends a workspace invitation email for the specified invite ID.
