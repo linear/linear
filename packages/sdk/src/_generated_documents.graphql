@@ -3366,6 +3366,8 @@ fragment ReleasePipeline on ReleasePipeline {
   type
   # The unique identifier of the entity.
   id
+  # Whether completing a scheduled release moves its open issues to the next release. When false, open issues remain on the completed release.
+  rolloverIssuesOnCompletion
   # Whether this pipeline targets a production environment. Defaults to true. Used to distinguish production pipelines from staging or development pipelines.
   isProduction
   # Whether to automatically generate a release note when a release is completed.
@@ -3589,6 +3591,10 @@ fragment Document on Document {
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The owner of the document. Null if no owner is assigned or the owner's account has been deleted.
+  owner {
+    id
+  }
   # The project that the document is associated with. Null if the document belongs to a different parent entity type.
   project {
     id
@@ -4767,6 +4773,10 @@ fragment NotificationCategoryPreferences on NotificationCategoryPreferences {
   }
   # The preferences for notifications about document changes.
   documentChanges {
+    ...NotificationChannelPreferences
+  }
+  # The preferences for notifications about loops.
+  loops {
     ...NotificationChannelPreferences
   }
   # The preferences for notifications about mentions.
@@ -9608,6 +9618,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   reviewFieldOpenedAt
   # Whether to show the pull requests field.
   fieldPullRequests
+  # Whether to show the quick-to-review badge on review list items. Null if the preference is unset.
+  reviewFieldQuickToReview
   # Whether to show the release date field for continuous pipeline releases.
   continuousPipelineReleaseFieldReleaseDate
   # Whether to show the release date field for scheduled pipeline releases.
@@ -12406,6 +12418,10 @@ fragment DocumentSearchResult on DocumentSearchResult {
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The owner of the document. Null if no owner is assigned or the owner's account has been deleted.
+  owner {
+    id
+  }
   # The project that the document is associated with. Null if the document belongs to a different parent entity type.
   project {
     id
@@ -20474,6 +20490,16 @@ query userSettings_notificationCategoryPreferences_feed {
     }
   }
 }
+# The preferences for notifications about loops.
+query userSettings_notificationCategoryPreferences_loops {
+  userSettings {
+    notificationCategoryPreferences {
+      loops {
+        ...NotificationChannelPreferences
+      }
+    }
+  }
+}
 # The preferences for notifications about mentions.
 query userSettings_notificationCategoryPreferences_mentions {
   userSettings {
@@ -23651,12 +23677,21 @@ mutation archiveProject(
 }
 # Creates a new project.
 mutation createProject(
+  # [Internal] The identifier of the project draft conversation to attach to this project.
+  $aiConversationId: String
   # The project properties to set on the new project.
   $input: ProjectCreateInput!
+  # [Internal] The identifier of the project draft that produced this project.
+  $projectDraftId: String
   # The full name for the Slack channel to create (including prefix). When provided, a Slack channel will be created and connected to the project.
   $slackChannelName: String
 ) {
-  projectCreate(input: $input, slackChannelName: $slackChannelName) {
+  projectCreate(
+    aiConversationId: $aiConversationId
+    input: $input
+    projectDraftId: $projectDraftId
+    slackChannelName: $slackChannelName
+  ) {
     ...ProjectPayload
   }
 }

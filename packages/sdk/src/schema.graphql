@@ -1578,7 +1578,7 @@ type AiConversation implements Node {
   """
   slugId: String!
   """
-  The current processing status of the conversation, indicating whether the AI is actively generating a response or has completed its turn.
+  The materialized conversation-level processing summary used by list and gating surfaces. Assistant response lifecycle is recorded on its turn.
   """
   status: AiConversationStatus!
   """
@@ -9433,6 +9433,10 @@ type Document implements Node {
   """
   lastAppliedTemplate: Template
   """
+  The owner of the document. Null if no owner is assigned or the owner's account has been deleted.
+  """
+  owner: User
+  """
   The project that the document is associated with. Null if the document belongs to a different parent entity type.
   """
   project: Project
@@ -9859,6 +9863,10 @@ input DocumentCreateInput {
   """
   lastAppliedTemplateId: String
   """
+  The owner of the document. Set to null to create a document without an owner.
+  """
+  ownerId: String
+  """
   Related project for the document.
   """
   projectId: String
@@ -9960,6 +9968,10 @@ input DocumentFilter {
   Compound filters, one of which need to be matched by the document.
   """
   or: [DocumentFilter!]
+  """
+  Filters that the document's owner must satisfy.
+  """
+  owner: NullableUserFilter
   """
   Filters that the document's project must satisfy.
   """
@@ -10258,6 +10270,10 @@ type DocumentSearchResult implements Node {
   """
   metadata: JSONObject!
   """
+  The owner of the document. Null if no owner is assigned or the owner's account has been deleted.
+  """
+  owner: User
+  """
   The project that the document is associated with. Null if the document belongs to a different parent entity type.
   """
   project: Project
@@ -10388,6 +10404,10 @@ input DocumentUpdateInput {
   The ID of the last template applied to the document.
   """
   lastAppliedTemplateId: String
+  """
+  The owner of the document. Set to null to clear.
+  """
+  ownerId: String
   """
   Related project for the document.
   """
@@ -25695,9 +25715,17 @@ type Mutation {
   """
   projectCreate(
     """
+    [Internal] The identifier of the project draft conversation to attach to this project.
+    """
+    aiConversationId: String
+    """
     The project properties to set on the new project.
     """
     input: ProjectCreateInput!
+    """
+    [Internal] The identifier of the project draft that produced this project.
+    """
+    projectDraftId: String
     """
     The full name for the Slack channel to create (including prefix). When provided, a Slack channel will be created and connected to the project.
     """
@@ -25729,6 +25757,15 @@ type Mutation {
     """
     id: String!
   ): ProjectArchivePayload!
+  """
+  [Internal] Dismisses the Slack channel creation failure notice for a project.
+  """
+  projectDismissSlackChannelCreationFailure(
+    """
+    The identifier of the project.
+    """
+    id: String!
+  ): ProjectPayload!
   """
   Disables external sync on a project.
   """
@@ -27063,6 +27100,7 @@ enum NotificationCategory {
   customers
   documentChanges
   feed
+  loops
   mentions
   postsAndUpdates
   reactions
@@ -27106,6 +27144,10 @@ type NotificationCategoryPreferences {
   The preferences for feed summary notifications.
   """
   feed: NotificationChannelPreferences!
+  """
+  The preferences for notifications about loops.
+  """
+  loops: NotificationChannelPreferences!
   """
   The preferences for notifications about mentions.
   """
@@ -27173,6 +27215,10 @@ input NotificationCategoryPreferencesInput {
   The preferences for notifications about feed summaries.
   """
   feed: PartialNotificationChannelPreferencesInput
+  """
+  The preferences for notifications about loops.
+  """
+  loops: PartialNotificationChannelPreferencesInput
   """
   The preferences for notifications about mentions.
   """
@@ -28682,6 +28728,10 @@ input NullableProjectFilter {
   Filters that the projects lead must satisfy.
   """
   lead: NullableUserFilter
+  """
+  [ALPHA] Filters that the project's lead team must satisfy.
+  """
+  leadTeam: NullableTeamFilter
   """
   Filters that the projects members must satisfy.
   """
@@ -31112,6 +31162,7 @@ enum OtherNotificationType {
   customerNeedCreated
   customerNeedMarkedAsImportant
   customerNeedResolved
+  documentAddedAsOwner
   documentCommentMention
   documentCommentReaction
   documentContentChange
@@ -31120,6 +31171,7 @@ enum OtherNotificationType {
   documentMoved
   documentNewComment
   documentReminder
+  documentRemovedAsOwner
   documentRestored
   documentSubscribed
   documentThreadResolved
@@ -33031,6 +33083,10 @@ input ProjectCollectionFilter {
   """
   lead: NullableUserFilter
   """
+  [ALPHA] Filters that the project's lead team must satisfy.
+  """
+  leadTeam: NullableTeamFilter
+  """
   Comparator for the collection length.
   """
   length: NumberComparator
@@ -33334,6 +33390,10 @@ input ProjectFilter {
   Filters that the projects lead must satisfy.
   """
   lead: NullableUserFilter
+  """
+  [ALPHA] Filters that the project's lead team must satisfy.
+  """
+  leadTeam: NullableTeamFilter
   """
   Filters that the projects members must satisfy.
   """
@@ -36720,6 +36780,10 @@ type PullRequest implements Node {
   """
   checks: [PullRequestCheck!]!
   """
+  The time at which the pull request was closed. Hosting providers also set this when a pull request is merged, so read `status` to tell a closed pull request from a merged one. Null while the pull request is still open.
+  """
+  closedAt: DateTime
+  """
   [ALPHA] The commits included in the pull request, synced from the hosting provider. Includes metadata such as SHA, message, diff stats, and author information.
   """
   commits: [PullRequestCommit!]!
@@ -36732,6 +36796,10 @@ type PullRequest implements Node {
   """
   creator: User
   """
+  Whether the source branch has conflicts with the target branch. When true, the conflicts must be resolved before the pull request can be merged. This is reported separately from `mergeStatus`, which describes whether the pull request is blocked by required approvals or checks.
+  """
+  hasConflicts: Boolean!
+  """
   The Git SHA of the latest commit on the source branch. Updated as new commits are pushed. Null if not yet synced.
   """
   headSha: String
@@ -36739,6 +36807,10 @@ type PullRequest implements Node {
   The unique identifier of the entity.
   """
   id: ID!
+  """
+  Whether the source branch is behind the target branch. When true, the source branch is missing commits that have landed on the target branch since it was last updated.
+  """
+  isBehind: Boolean!
   """
   The merge commit created when the pull request was merged. Null if the pull request has not been merged or if the merge commit data is not available.
   """
@@ -36752,6 +36824,10 @@ type PullRequest implements Node {
   """
   mergeStatus: String!
   """
+  The time at which the pull request was merged. Null if the pull request has not been merged.
+  """
+  mergedAt: DateTime
+  """
   The pull request number as assigned by the hosting provider (e.g., #123 on GitHub). Unique within a repository.
   """
   number: Float!
@@ -36760,9 +36836,17 @@ type PullRequest implements Node {
   """
   openedAt: DateTime!
   """
+  [Internal] The deploy/build preview links parsed from the pull request description and comments.
+  """
+  previewLinks: [PullRequestPreviewLink!]!
+  """
   Emoji reaction summary for this pull request, grouped by emoji type. Each entry contains the emoji name, count, and the IDs of users who reacted.
   """
   reactionData: JSONObject!
+  """
+  Reactions associated with this pull request.
+  """
+  reactions: [Reaction!]!
   """
   The pull request's unique URL slug, used to construct human-readable URLs within the Linear app.
   """
@@ -37090,6 +37174,24 @@ type PullRequestNotification implements Entity & Node & Notification {
   The recipient user of this notification.
   """
   user: User!
+}
+
+"""
+[Internal] A deploy or build preview link (e.g., Vercel, Cloudflare Pages, Netlify) parsed from a pull request's description or comments.
+"""
+type PullRequestPreviewLink {
+  """
+  Whether the preview is still building. Null when the build state is unknown.
+  """
+  isBuilding: Boolean
+  """
+  The display name of the preview (e.g., the deploy target). Null if the provider did not supply one.
+  """
+  name: String
+  """
+  The URL of the preview.
+  """
+  url: String!
 }
 
 """
@@ -41273,6 +41375,10 @@ type ReleasePipeline implements Node {
     sort: [ReleaseSortInput!]
   ): ReleaseConnection!
   """
+  Whether completing a scheduled release moves its open issues to the next release. When false, open issues remain on the completed release.
+  """
+  rolloverIssuesOnCompletion: Boolean!
+  """
   The pipeline's unique slug identifier, used in URLs and for lookup by human-readable identifier instead of UUID.
   """
   slugId: String!
@@ -41482,6 +41588,10 @@ input ReleasePipelineCreateInput {
   """
   name: String!
   """
+  Whether completing a scheduled release moves its open issues to the next release. Defaults to true. When false, open issues remain on the completed release.
+  """
+  rolloverIssuesOnCompletion: Boolean
+  """
   The pipeline's unique slug identifier. If not provided, it will be auto-generated.
   """
   slugId: String
@@ -41641,6 +41751,10 @@ input ReleasePipelineUpdateInput {
   The name of the pipeline.
   """
   name: String
+  """
+  Whether completing a scheduled release moves its open issues to the next release. When false, open issues remain on the completed release.
+  """
+  rolloverIssuesOnCompletion: Boolean
   """
   The pipeline's unique slug identifier.
   """
@@ -43983,6 +44097,10 @@ type Subscription {
   Triggered when a project is updated
   """
   projectUpdated: Project!
+  """
+  Triggered when a pull request is updated
+  """
+  pullRequestUpdated: PullRequest!
   """
   Triggered when a roadmap is created
   """
@@ -48862,6 +48980,10 @@ type ViewPreferencesValues {
   No longer used. Previously controlled the review preview links field.
   """
   reviewFieldPreviewLinks: Boolean
+  """
+  Whether to show the quick-to-review badge on review list items. Null if the preference is unset.
+  """
+  reviewFieldQuickToReview: Boolean
   """
   Whether to show the review repository field.
   """

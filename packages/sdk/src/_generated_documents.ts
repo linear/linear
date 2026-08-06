@@ -967,7 +967,7 @@ export type AiConversation = Node & {
   readAt?: Maybe<Scalars["DateTime"]>;
   /** The conversation's unique URL slug. */
   slugId: Scalars["String"];
-  /** The current processing status of the conversation, indicating whether the AI is actively generating a response or has completed its turn. */
+  /** The materialized conversation-level processing summary used by list and gating surfaces. Assistant response lifecycle is recorded on its turn. */
   status: AiConversationStatus;
   /** A summary of the conversation. */
   summary?: Maybe<Scalars["String"]>;
@@ -5660,6 +5660,8 @@ export type Document = Node & {
   issue?: Maybe<Issue>;
   /** The last template that was applied to this document. Null if no template has been applied. */
   lastAppliedTemplate?: Maybe<Template>;
+  /** The owner of the document. Null if no owner is assigned or the owner's account has been deleted. */
+  owner?: Maybe<User>;
   /** The project that the document is associated with. Null if the document belongs to a different parent entity type. */
   project?: Maybe<Project>;
   /** The release that the document is associated with. Null if the document belongs to a different parent entity type. */
@@ -5922,6 +5924,8 @@ export type DocumentCreateInput = {
   issueId?: InputMaybe<Scalars["String"]>;
   /** The ID of the last template applied to the document. */
   lastAppliedTemplateId?: InputMaybe<Scalars["String"]>;
+  /** The owner of the document. Set to null to create a document without an owner. */
+  ownerId?: InputMaybe<Scalars["String"]>;
   /** Related project for the document. */
   projectId?: InputMaybe<Scalars["String"]>;
   /** Related release for the document. */
@@ -5979,6 +5983,8 @@ export type DocumentFilter = {
   issue?: InputMaybe<IssueFilter>;
   /** Compound filters, one of which need to be matched by the document. */
   or?: InputMaybe<Array<DocumentFilter>>;
+  /** Filters that the document's owner must satisfy. */
+  owner?: InputMaybe<NullableUserFilter>;
   /** Filters that the document's project must satisfy. */
   project?: InputMaybe<ProjectFilter>;
   /** Filters that the document's release must satisfy. */
@@ -6129,6 +6135,8 @@ export type DocumentSearchResult = Node & {
   lastAppliedTemplate?: Maybe<Template>;
   /** Metadata related to search result. */
   metadata: Scalars["JSONObject"];
+  /** The owner of the document. Null if no owner is assigned or the owner's account has been deleted. */
+  owner?: Maybe<User>;
   /** The project that the document is associated with. Null if the document belongs to a different parent entity type. */
   project?: Maybe<Project>;
   /** The release that the document is associated with. Null if the document belongs to a different parent entity type. */
@@ -6213,6 +6221,8 @@ export type DocumentUpdateInput = {
   issueId?: InputMaybe<Scalars["String"]>;
   /** The ID of the last template applied to the document. */
   lastAppliedTemplateId?: InputMaybe<Scalars["String"]>;
+  /** The owner of the document. Set to null to clear. */
+  ownerId?: InputMaybe<Scalars["String"]>;
   /** Related project for the document. */
   projectId?: InputMaybe<Scalars["String"]>;
   /** Related release for the document. */
@@ -13333,6 +13343,8 @@ export type Mutation = {
   projectCreateSlackChannel: ProjectPayload;
   /** Deletes (trashes) a project. The project can be restored later with projectUnarchive. */
   projectDelete: ProjectArchivePayload;
+  /** [Internal] Dismisses the Slack channel creation failure notice for a project. */
+  projectDismissSlackChannelCreationFailure: ProjectPayload;
   /** Disables external sync on a project. */
   projectExternalSyncDisable: ProjectPayload;
   /** Creates a new project label. */
@@ -14830,7 +14842,9 @@ export type MutationProjectArchiveArgs = {
 };
 
 export type MutationProjectCreateArgs = {
+  aiConversationId?: InputMaybe<Scalars["String"]>;
   input: ProjectCreateInput;
+  projectDraftId?: InputMaybe<Scalars["String"]>;
   slackChannelName?: InputMaybe<Scalars["String"]>;
 };
 
@@ -14841,6 +14855,10 @@ export type MutationProjectCreateSlackChannelArgs = {
 };
 
 export type MutationProjectDeleteArgs = {
+  id: Scalars["String"];
+};
+
+export type MutationProjectDismissSlackChannelCreationFailureArgs = {
   id: Scalars["String"];
 };
 
@@ -15427,6 +15445,7 @@ export enum NotificationCategory {
   Customers = "customers",
   DocumentChanges = "documentChanges",
   Feed = "feed",
+  Loops = "loops",
   Mentions = "mentions",
   PostsAndUpdates = "postsAndUpdates",
   Reactions = "reactions",
@@ -15455,6 +15474,8 @@ export type NotificationCategoryPreferences = {
   documentChanges: NotificationChannelPreferences;
   /** The preferences for feed summary notifications. */
   feed: NotificationChannelPreferences;
+  /** The preferences for notifications about loops. */
+  loops: NotificationChannelPreferences;
   /** The preferences for notifications about mentions. */
   mentions: NotificationChannelPreferences;
   /** The preferences for notifications about posts and updates. */
@@ -15490,6 +15511,8 @@ export type NotificationCategoryPreferencesInput = {
   documentChanges?: InputMaybe<PartialNotificationChannelPreferencesInput>;
   /** The preferences for notifications about feed summaries. */
   feed?: InputMaybe<PartialNotificationChannelPreferencesInput>;
+  /** The preferences for notifications about loops. */
+  loops?: InputMaybe<PartialNotificationChannelPreferencesInput>;
   /** The preferences for notifications about mentions. */
   mentions?: InputMaybe<PartialNotificationChannelPreferencesInput>;
   /** The preferences for notifications about posts and updates. */
@@ -16319,6 +16342,8 @@ export type NullableProjectFilter = {
   lastAppliedTemplate?: InputMaybe<NullableTemplateFilter>;
   /** Filters that the projects lead must satisfy. */
   lead?: InputMaybe<NullableUserFilter>;
+  /** [ALPHA] Filters that the project's lead team must satisfy. */
+  leadTeam?: InputMaybe<NullableTeamFilter>;
   /** Filters that the projects members must satisfy. */
   members?: InputMaybe<UserCollectionFilter>;
   /** Comparator for the project name. */
@@ -17666,6 +17691,7 @@ export enum OtherNotificationType {
   CustomerNeedCreated = "customerNeedCreated",
   CustomerNeedMarkedAsImportant = "customerNeedMarkedAsImportant",
   CustomerNeedResolved = "customerNeedResolved",
+  DocumentAddedAsOwner = "documentAddedAsOwner",
   DocumentCommentMention = "documentCommentMention",
   DocumentCommentReaction = "documentCommentReaction",
   DocumentContentChange = "documentContentChange",
@@ -17674,6 +17700,7 @@ export enum OtherNotificationType {
   DocumentMoved = "documentMoved",
   DocumentNewComment = "documentNewComment",
   DocumentReminder = "documentReminder",
+  DocumentRemovedAsOwner = "documentRemovedAsOwner",
   DocumentRestored = "documentRestored",
   DocumentSubscribed = "documentSubscribed",
   DocumentThreadResolved = "documentThreadResolved",
@@ -18718,6 +18745,8 @@ export type ProjectCollectionFilter = {
   lastAppliedTemplate?: InputMaybe<NullableTemplateFilter>;
   /** Filters that the projects lead must satisfy. */
   lead?: InputMaybe<NullableUserFilter>;
+  /** [ALPHA] Filters that the project's lead team must satisfy. */
+  leadTeam?: InputMaybe<NullableTeamFilter>;
   /** Comparator for the collection length. */
   length?: InputMaybe<NumberComparator>;
   /** Filters that the projects members must satisfy. */
@@ -18880,6 +18909,8 @@ export type ProjectFilter = {
   lastAppliedTemplate?: InputMaybe<NullableTemplateFilter>;
   /** Filters that the projects lead must satisfy. */
   lead?: InputMaybe<NullableUserFilter>;
+  /** [ALPHA] Filters that the project's lead team must satisfy. */
+  leadTeam?: InputMaybe<NullableTeamFilter>;
   /** Filters that the projects members must satisfy. */
   members?: InputMaybe<UserCollectionFilter>;
   /** Comparator for the project name. */
@@ -20690,28 +20721,40 @@ export type PullRequest = Node & {
   baseSha?: Maybe<Scalars["String"]>;
   /** [Internal] The CI/CD checks and status checks associated with the pull request, synced from the hosting provider. */
   checks: Array<PullRequestCheck>;
+  /** The time at which the pull request was closed. Hosting providers also set this when a pull request is merged, so read `status` to tell a closed pull request from a merged one. Null while the pull request is still open. */
+  closedAt?: Maybe<Scalars["DateTime"]>;
   /** [ALPHA] The commits included in the pull request, synced from the hosting provider. Includes metadata such as SHA, message, diff stats, and author information. */
   commits: Array<PullRequestCommit>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /** [Internal] The Linear user who created the pull request. Null if the creator is an external user not mapped to a Linear account, or if the creator's account has been deleted. */
   creator?: Maybe<User>;
+  /** Whether the source branch has conflicts with the target branch. When true, the conflicts must be resolved before the pull request can be merged. This is reported separately from `mergeStatus`, which describes whether the pull request is blocked by required approvals or checks. */
+  hasConflicts: Scalars["Boolean"];
   /** The Git SHA of the latest commit on the source branch. Updated as new commits are pushed. Null if not yet synced. */
   headSha?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** Whether the source branch is behind the target branch. When true, the source branch is missing commits that have landed on the target branch since it was last updated. */
+  isBehind: Scalars["Boolean"];
   /** The merge commit created when the pull request was merged. Null if the pull request has not been merged or if the merge commit data is not available. */
   mergeCommit?: Maybe<PullRequestCommit>;
   /** Merge settings and allowed merge methods for this pull request's repository. Null if the settings have not been synced from the provider. */
   mergeSettings?: Maybe<PullRequestMergeSettings>;
   /** The current merge status of the pull request, synced from the hosting provider. */
   mergeStatus: Scalars["String"];
+  /** The time at which the pull request was merged. Null if the pull request has not been merged. */
+  mergedAt?: Maybe<Scalars["DateTime"]>;
   /** The pull request number as assigned by the hosting provider (e.g., #123 on GitHub). Unique within a repository. */
   number: Scalars["Float"];
   /** The time at which the pull request was opened. */
   openedAt: Scalars["DateTime"];
+  /** [Internal] The deploy/build preview links parsed from the pull request description and comments. */
+  previewLinks: Array<PullRequestPreviewLink>;
   /** Emoji reaction summary for this pull request, grouped by emoji type. Each entry contains the emoji name, count, and the IDs of users who reacted. */
   reactionData: Scalars["JSONObject"];
+  /** Reactions associated with this pull request. */
+  reactions: Array<Reaction>;
   /** The pull request's unique URL slug, used to construct human-readable URLs within the Linear app. */
   slugId: Scalars["String"];
   /** The source (head) branch of the pull request that contains the proposed changes. */
@@ -20899,6 +20942,17 @@ export type PullRequestNotification = Entity &
     /** The recipient user of this notification. */
     user: User;
   };
+
+/** [Internal] A deploy or build preview link (e.g., Vercel, Cloudflare Pages, Netlify) parsed from a pull request's description or comments. */
+export type PullRequestPreviewLink = {
+  __typename?: "PullRequestPreviewLink";
+  /** Whether the preview is still building. Null when the build state is unknown. */
+  isBuilding?: Maybe<Scalars["Boolean"]>;
+  /** The display name of the preview (e.g., the deploy target). Null if the provider did not supply one. */
+  name?: Maybe<Scalars["String"]>;
+  /** The URL of the preview. */
+  url: Scalars["String"];
+};
 
 /** A reference to a pull request by its repository owner, name, and pull request number. Used during release sync to look up pull requests and associate their linked issues with the release. */
 export type PullRequestReferenceInput = {
@@ -22994,6 +23048,8 @@ export type ReleasePipeline = Node & {
   releaseNoteTemplate?: Maybe<Template>;
   /** Releases associated with this pipeline. */
   releases: ReleaseConnection;
+  /** Whether completing a scheduled release moves its open issues to the next release. When false, open issues remain on the completed release. */
+  rolloverIssuesOnCompletion: Scalars["Boolean"];
   /** The pipeline's unique slug identifier, used in URLs and for lookup by human-readable identifier instead of UUID. */
   slugId: Scalars["String"];
   /** Stages associated with this pipeline. */
@@ -23117,6 +23173,8 @@ export type ReleasePipelineCreateInput = {
   isProduction?: InputMaybe<Scalars["Boolean"]>;
   /** The name of the pipeline. */
   name: Scalars["String"];
+  /** Whether completing a scheduled release moves its open issues to the next release. Defaults to true. When false, open issues remain on the completed release. */
+  rolloverIssuesOnCompletion?: InputMaybe<Scalars["Boolean"]>;
   /** The pipeline's unique slug identifier. If not provided, it will be auto-generated. */
   slugId?: InputMaybe<Scalars["String"]>;
   /** The identifiers of the teams this pipeline is associated with. */
@@ -23209,6 +23267,8 @@ export type ReleasePipelineUpdateInput = {
   isProduction?: InputMaybe<Scalars["Boolean"]>;
   /** The name of the pipeline. */
   name?: InputMaybe<Scalars["String"]>;
+  /** Whether completing a scheduled release moves its open issues to the next release. When false, open issues remain on the completed release. */
+  rolloverIssuesOnCompletion?: InputMaybe<Scalars["Boolean"]>;
   /** The pipeline's unique slug identifier. */
   slugId?: InputMaybe<Scalars["String"]>;
   /** The identifiers of the teams this pipeline is associated with. */
@@ -24507,6 +24567,8 @@ export type Subscription = {
   projectUpdateUpdated: ProjectUpdate;
   /** Triggered when a project is updated */
   projectUpdated: Project;
+  /** Triggered when a pull request is updated */
+  pullRequestUpdated: PullRequest;
   /** Triggered when a roadmap is created */
   roadmapCreated: Roadmap;
   /** Triggered when a roadmap is deleted */
@@ -27237,6 +27299,8 @@ export type ViewPreferencesValues = {
   reviewFieldOpenedAt?: Maybe<Scalars["Boolean"]>;
   /** No longer used. Previously controlled the review preview links field. */
   reviewFieldPreviewLinks?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show the quick-to-review badge on review list items. Null if the preference is unset. */
+  reviewFieldQuickToReview?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the review repository field. */
   reviewFieldRepository?: Maybe<Scalars["Boolean"]>;
   /** Whether to show review status details on a second line. */
@@ -29491,6 +29555,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "timelineShowProjectsAside"
         | "reviewFieldOpenedAt"
         | "fieldPullRequests"
+        | "reviewFieldQuickToReview"
         | "continuousPipelineReleaseFieldReleaseDate"
         | "scheduledPipelineReleaseFieldReleaseDate"
         | "fieldRelease"
@@ -29750,6 +29815,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "timelineShowProjectsAside"
             | "reviewFieldOpenedAt"
             | "fieldPullRequests"
+            | "reviewFieldQuickToReview"
             | "continuousPipelineReleaseFieldReleaseDate"
             | "scheduledPipelineReleaseFieldReleaseDate"
             | "fieldRelease"
@@ -30014,6 +30080,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "timelineShowProjectsAside"
             | "reviewFieldOpenedAt"
             | "fieldPullRequests"
+            | "reviewFieldQuickToReview"
             | "continuousPipelineReleaseFieldReleaseDate"
             | "scheduledPipelineReleaseFieldReleaseDate"
             | "fieldRelease"
@@ -33417,6 +33484,7 @@ export type ReleasePipelineFragment = { __typename: "ReleasePipeline" } & Pick<
   | "createdAt"
   | "type"
   | "id"
+  | "rolloverIssuesOnCompletion"
   | "isProduction"
   | "autoGenerateReleaseNotesOnCompletion"
 > & {
@@ -33562,6 +33630,7 @@ export type DocumentFragment = { __typename: "Document" } & Pick<
     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
     lastAppliedTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
+    owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
     release?: Maybe<{ __typename?: "Release" } & Pick<Release, "id">>;
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -34890,6 +34959,10 @@ export type NotificationCategoryPreferencesFragment = { __typename: "Notificatio
     "slack" | "desktop" | "email" | "mobile"
   >;
   documentChanges: { __typename: "NotificationChannelPreferences" } & Pick<
+    NotificationChannelPreferences,
+    "slack" | "desktop" | "email" | "mobile"
+  >;
+  loops: { __typename: "NotificationChannelPreferences" } & Pick<
     NotificationChannelPreferences,
     "slack" | "desktop" | "email" | "mobile"
   >;
@@ -37780,6 +37853,10 @@ export type UserSettingsFragment = { __typename: "UserSettings" } & Pick<
         NotificationChannelPreferences,
         "slack" | "desktop" | "email" | "mobile"
       >;
+      loops: { __typename: "NotificationChannelPreferences" } & Pick<
+        NotificationChannelPreferences,
+        "slack" | "desktop" | "email" | "mobile"
+      >;
       mentions: { __typename: "NotificationChannelPreferences" } & Pick<
         NotificationChannelPreferences,
         "slack" | "desktop" | "email" | "mobile"
@@ -39392,6 +39469,7 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "timelineShowProjectsAside"
   | "reviewFieldOpenedAt"
   | "fieldPullRequests"
+  | "reviewFieldQuickToReview"
   | "continuousPipelineReleaseFieldReleaseDate"
   | "scheduledPipelineReleaseFieldReleaseDate"
   | "fieldRelease"
@@ -39693,6 +39771,7 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "timelineShowProjectsAside"
       | "reviewFieldOpenedAt"
       | "fieldPullRequests"
+      | "reviewFieldQuickToReview"
       | "continuousPipelineReleaseFieldReleaseDate"
       | "scheduledPipelineReleaseFieldReleaseDate"
       | "fieldRelease"
@@ -40451,6 +40530,7 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "timelineShowProjectsAside"
           | "reviewFieldOpenedAt"
           | "fieldPullRequests"
+          | "reviewFieldQuickToReview"
           | "continuousPipelineReleaseFieldReleaseDate"
           | "scheduledPipelineReleaseFieldReleaseDate"
           | "fieldRelease"
@@ -43494,6 +43574,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "timelineShowProjectsAside"
             | "reviewFieldOpenedAt"
             | "fieldPullRequests"
+            | "reviewFieldQuickToReview"
             | "continuousPipelineReleaseFieldReleaseDate"
             | "scheduledPipelineReleaseFieldReleaseDate"
             | "fieldRelease"
@@ -43753,6 +43834,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "timelineShowProjectsAside"
                 | "reviewFieldOpenedAt"
                 | "fieldPullRequests"
+                | "reviewFieldQuickToReview"
                 | "continuousPipelineReleaseFieldReleaseDate"
                 | "scheduledPipelineReleaseFieldReleaseDate"
                 | "fieldRelease"
@@ -44017,6 +44099,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "timelineShowProjectsAside"
                 | "reviewFieldOpenedAt"
                 | "fieldPullRequests"
+                | "reviewFieldQuickToReview"
                 | "continuousPipelineReleaseFieldReleaseDate"
                 | "scheduledPipelineReleaseFieldReleaseDate"
                 | "fieldRelease"
@@ -44262,6 +44345,7 @@ export type DocumentConnectionFragment = { __typename: "DocumentConnection" } & 
         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
         issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
         lastAppliedTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
+        owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
         release?: Maybe<{ __typename?: "Release" } & Pick<Release, "id">>;
         creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -44321,6 +44405,7 @@ export type DocumentSearchPayloadFragment = { __typename: "DocumentSearchPayload
           initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
           issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
           lastAppliedTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
+          owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
           release?: Maybe<{ __typename?: "Release" } & Pick<Release, "id">>;
           creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -44354,6 +44439,7 @@ export type DocumentSearchResultFragment = { __typename: "DocumentSearchResult" 
     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
     lastAppliedTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
+    owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
     release?: Maybe<{ __typename?: "Release" } & Pick<Release, "id">>;
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -47435,6 +47521,7 @@ export type ReleasePipelineConnectionFragment = { __typename: "ReleasePipelineCo
       | "createdAt"
       | "type"
       | "id"
+      | "rolloverIssuesOnCompletion"
       | "isProduction"
       | "autoGenerateReleaseNotesOnCompletion"
     > & {
@@ -52282,6 +52369,7 @@ export type AttachmentIssue_DocumentsQuery = { __typename?: "Query" } & {
             initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
             issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
             lastAppliedTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
+            owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
             release?: Maybe<{ __typename?: "Release" } & Pick<Release, "id">>;
             creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -54236,6 +54324,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "timelineShowProjectsAside"
           | "reviewFieldOpenedAt"
           | "fieldPullRequests"
+          | "reviewFieldQuickToReview"
           | "continuousPipelineReleaseFieldReleaseDate"
           | "scheduledPipelineReleaseFieldReleaseDate"
           | "fieldRelease"
@@ -54495,6 +54584,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "timelineShowProjectsAside"
               | "reviewFieldOpenedAt"
               | "fieldPullRequests"
+              | "reviewFieldQuickToReview"
               | "continuousPipelineReleaseFieldReleaseDate"
               | "scheduledPipelineReleaseFieldReleaseDate"
               | "fieldRelease"
@@ -54759,6 +54849,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "timelineShowProjectsAside"
               | "reviewFieldOpenedAt"
               | "fieldPullRequests"
+              | "reviewFieldQuickToReview"
               | "continuousPipelineReleaseFieldReleaseDate"
               | "scheduledPipelineReleaseFieldReleaseDate"
               | "fieldRelease"
@@ -55280,6 +55371,7 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "timelineShowProjectsAside"
             | "reviewFieldOpenedAt"
             | "fieldPullRequests"
+            | "reviewFieldQuickToReview"
             | "continuousPipelineReleaseFieldReleaseDate"
             | "scheduledPipelineReleaseFieldReleaseDate"
             | "fieldRelease"
@@ -55546,6 +55638,7 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "timelineShowProjectsAside"
           | "reviewFieldOpenedAt"
           | "fieldPullRequests"
+          | "reviewFieldQuickToReview"
           | "continuousPipelineReleaseFieldReleaseDate"
           | "scheduledPipelineReleaseFieldReleaseDate"
           | "fieldRelease"
@@ -55944,6 +56037,7 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "timelineShowProjectsAside"
             | "reviewFieldOpenedAt"
             | "fieldPullRequests"
+            | "reviewFieldQuickToReview"
             | "continuousPipelineReleaseFieldReleaseDate"
             | "scheduledPipelineReleaseFieldReleaseDate"
             | "fieldRelease"
@@ -56210,6 +56304,7 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "timelineShowProjectsAside"
           | "reviewFieldOpenedAt"
           | "fieldPullRequests"
+          | "reviewFieldQuickToReview"
           | "continuousPipelineReleaseFieldReleaseDate"
           | "scheduledPipelineReleaseFieldReleaseDate"
           | "fieldRelease"
@@ -56475,6 +56570,7 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "timelineShowProjectsAside"
         | "reviewFieldOpenedAt"
         | "fieldPullRequests"
+        | "reviewFieldQuickToReview"
         | "continuousPipelineReleaseFieldReleaseDate"
         | "scheduledPipelineReleaseFieldReleaseDate"
         | "fieldRelease"
@@ -56777,6 +56873,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "timelineShowProjectsAside"
               | "reviewFieldOpenedAt"
               | "fieldPullRequests"
+              | "reviewFieldQuickToReview"
               | "continuousPipelineReleaseFieldReleaseDate"
               | "scheduledPipelineReleaseFieldReleaseDate"
               | "fieldRelease"
@@ -57036,6 +57133,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "timelineShowProjectsAside"
                   | "reviewFieldOpenedAt"
                   | "fieldPullRequests"
+                  | "reviewFieldQuickToReview"
                   | "continuousPipelineReleaseFieldReleaseDate"
                   | "scheduledPipelineReleaseFieldReleaseDate"
                   | "fieldRelease"
@@ -57300,6 +57398,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "timelineShowProjectsAside"
                   | "reviewFieldOpenedAt"
                   | "fieldPullRequests"
+                  | "reviewFieldQuickToReview"
                   | "continuousPipelineReleaseFieldReleaseDate"
                   | "scheduledPipelineReleaseFieldReleaseDate"
                   | "fieldRelease"
@@ -58123,6 +58222,7 @@ export type DocumentQuery = { __typename?: "Query" } & {
       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
       issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
       lastAppliedTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
+      owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
       release?: Maybe<{ __typename?: "Release" } & Pick<Release, "id">>;
       creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -58313,6 +58413,7 @@ export type DocumentsQuery = { __typename?: "Query" } & {
           initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
           issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
           lastAppliedTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
+          owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
           release?: Maybe<{ __typename?: "Release" } & Pick<Release, "id">>;
           creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -58805,6 +58906,7 @@ export type Initiative_DocumentsQuery = { __typename?: "Query" } & {
             initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
             issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
             lastAppliedTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
+            owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
             release?: Maybe<{ __typename?: "Release" } & Pick<Release, "id">>;
             creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -60411,6 +60513,7 @@ export type Issue_DocumentsQuery = { __typename?: "Query" } & {
             initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
             issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
             lastAppliedTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
+            owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
             release?: Maybe<{ __typename?: "Release" } & Pick<Release, "id">>;
             creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -62488,6 +62591,7 @@ export type IssueVcsBranchSearch_DocumentsQuery = { __typename?: "Query" } & {
               initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
               issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
               lastAppliedTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
+              owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
               release?: Maybe<{ __typename?: "Release" } & Pick<Release, "id">>;
               creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -65755,6 +65859,7 @@ export type Project_DocumentsQuery = { __typename?: "Query" } & {
             initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
             issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
             lastAppliedTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
+            owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
             release?: Maybe<{ __typename?: "Release" } & Pick<Release, "id">>;
             creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -67695,6 +67800,7 @@ export type Release_DocumentsQuery = { __typename?: "Query" } & {
             initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
             issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
             lastAppliedTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
+            owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
             release?: Maybe<{ __typename?: "Release" } & Pick<Release, "id">>;
             creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -68118,6 +68224,7 @@ export type ReleasePipelineQuery = { __typename?: "Query" } & {
     | "createdAt"
     | "type"
     | "id"
+    | "rolloverIssuesOnCompletion"
     | "isProduction"
     | "autoGenerateReleaseNotesOnCompletion"
   > & {
@@ -68378,6 +68485,7 @@ export type ReleasePipelinesQuery = { __typename?: "Query" } & {
         | "createdAt"
         | "type"
         | "id"
+        | "rolloverIssuesOnCompletion"
         | "isProduction"
         | "autoGenerateReleaseNotesOnCompletion"
       > & {
@@ -68949,6 +69057,7 @@ export type SearchDocumentsQuery = { __typename?: "Query" } & {
             initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
             issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
             lastAppliedTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
+            owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
             release?: Maybe<{ __typename?: "Release" } & Pick<Release, "id">>;
             creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -69993,6 +70102,7 @@ export type Team_ReleasePipelinesQuery = { __typename?: "Query" } & {
           | "createdAt"
           | "type"
           | "id"
+          | "rolloverIssuesOnCompletion"
           | "isProduction"
           | "autoGenerateReleaseNotesOnCompletion"
         > & {
@@ -71276,6 +71386,10 @@ export type UserSettingsQuery = { __typename?: "Query" } & {
           NotificationChannelPreferences,
           "slack" | "desktop" | "email" | "mobile"
         >;
+        loops: { __typename: "NotificationChannelPreferences" } & Pick<
+          NotificationChannelPreferences,
+          "slack" | "desktop" | "email" | "mobile"
+        >;
         mentions: { __typename: "NotificationChannelPreferences" } & Pick<
           NotificationChannelPreferences,
           "slack" | "desktop" | "email" | "mobile"
@@ -71367,6 +71481,10 @@ export type UserSettings_NotificationCategoryPreferencesQuery = { __typename?: "
         "slack" | "desktop" | "email" | "mobile"
       >;
       documentChanges: { __typename: "NotificationChannelPreferences" } & Pick<
+        NotificationChannelPreferences,
+        "slack" | "desktop" | "email" | "mobile"
+      >;
+      loops: { __typename: "NotificationChannelPreferences" } & Pick<
         NotificationChannelPreferences,
         "slack" | "desktop" | "email" | "mobile"
       >;
@@ -71500,6 +71618,19 @@ export type UserSettings_NotificationCategoryPreferences_FeedQuery = { __typenam
   userSettings: { __typename?: "UserSettings" } & {
     notificationCategoryPreferences: { __typename?: "NotificationCategoryPreferences" } & {
       feed: { __typename: "NotificationChannelPreferences" } & Pick<
+        NotificationChannelPreferences,
+        "slack" | "desktop" | "email" | "mobile"
+      >;
+    };
+  };
+};
+
+export type UserSettings_NotificationCategoryPreferences_LoopsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type UserSettings_NotificationCategoryPreferences_LoopsQuery = { __typename?: "Query" } & {
+  userSettings: { __typename?: "UserSettings" } & {
+    notificationCategoryPreferences: { __typename?: "NotificationCategoryPreferences" } & {
+      loops: { __typename: "NotificationChannelPreferences" } & Pick<
         NotificationChannelPreferences,
         "slack" | "desktop" | "email" | "mobile"
       >;
@@ -81292,7 +81423,9 @@ export type ArchiveProjectMutation = { __typename?: "Mutation" } & {
 };
 
 export type CreateProjectMutationVariables = Exact<{
+  aiConversationId?: InputMaybe<Scalars["String"]>;
   input: ProjectCreateInput;
+  projectDraftId?: InputMaybe<Scalars["String"]>;
   slackChannelName?: InputMaybe<Scalars["String"]>;
 }>;
 
@@ -82672,6 +82805,7 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "timelineShowProjectsAside"
             | "reviewFieldOpenedAt"
             | "fieldPullRequests"
+            | "reviewFieldQuickToReview"
             | "continuousPipelineReleaseFieldReleaseDate"
             | "scheduledPipelineReleaseFieldReleaseDate"
             | "fieldRelease"
@@ -82951,6 +83085,7 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "timelineShowProjectsAside"
             | "reviewFieldOpenedAt"
             | "fieldPullRequests"
+            | "reviewFieldQuickToReview"
             | "continuousPipelineReleaseFieldReleaseDate"
             | "scheduledPipelineReleaseFieldReleaseDate"
             | "fieldRelease"
@@ -94407,6 +94542,9 @@ export const NotificationCategoryPreferencesFragmentDoc = new TypedDocumentStrin
   documentChanges {
     ...NotificationChannelPreferences
   }
+  loops {
+    ...NotificationChannelPreferences
+  }
   mentions {
     ...NotificationChannelPreferences
   }
@@ -94555,6 +94693,9 @@ export const UserSettingsFragmentDoc = new TypedDocumentString(
     ...NotificationChannelPreferences
   }
   documentChanges {
+    ...NotificationChannelPreferences
+  }
+  loops {
     ...NotificationChannelPreferences
   }
   mentions {
@@ -98001,6 +98142,7 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   timelineShowProjectsAside
   reviewFieldOpenedAt
   fieldPullRequests
+  reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
@@ -98279,6 +98421,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   timelineShowProjectsAside
   reviewFieldOpenedAt
   fieldPullRequests
+  reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
@@ -98543,6 +98686,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   timelineShowProjectsAside
   reviewFieldOpenedAt
   fieldPullRequests
+  reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
@@ -101769,6 +101913,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   timelineShowProjectsAside
   reviewFieldOpenedAt
   fieldPullRequests
+  reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
@@ -102086,6 +102231,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   timelineShowProjectsAside
   reviewFieldOpenedAt
   fieldPullRequests
+  reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
@@ -102605,6 +102751,9 @@ export const DocumentFragmentDoc = new TypedDocumentString(
     id
   }
   updatedAt
+  owner {
+    id
+  }
   project {
     id
   }
@@ -102657,6 +102806,9 @@ export const DocumentConnectionFragmentDoc = new TypedDocumentString(
     id
   }
   updatedAt
+  owner {
+    id
+  }
   project {
     id
   }
@@ -102753,6 +102905,9 @@ export const DocumentSearchResultFragmentDoc = new TypedDocumentString(
     id
   }
   updatedAt
+  owner {
+    id
+  }
   project {
     id
   }
@@ -102817,6 +102972,9 @@ fragment DocumentSearchResult on DocumentSearchResult {
     id
   }
   updatedAt
+  owner {
+    id
+  }
   project {
     id
   }
@@ -108403,6 +108561,7 @@ export const ReleasePipelineFragmentDoc = new TypedDocumentString(
   createdAt
   type
   id
+  rolloverIssuesOnCompletion
   isProduction
   autoGenerateReleaseNotesOnCompletion
 }
@@ -108439,6 +108598,7 @@ export const ReleasePipelineConnectionFragmentDoc = new TypedDocumentString(
   createdAt
   type
   id
+  rolloverIssuesOnCompletion
   isProduction
   autoGenerateReleaseNotesOnCompletion
 }
@@ -112323,6 +112483,9 @@ export const AttachmentIssue_DocumentsDocument = new TypedDocumentString(`
     id
   }
   updatedAt
+  owner {
+    id
+  }
   project {
     id
   }
@@ -114918,6 +115081,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   timelineShowProjectsAside
   reviewFieldOpenedAt
   fieldPullRequests
+  reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
@@ -115581,6 +115745,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   timelineShowProjectsAside
   reviewFieldOpenedAt
   fieldPullRequests
+  reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
@@ -115858,6 +116023,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   timelineShowProjectsAside
   reviewFieldOpenedAt
   fieldPullRequests
+  reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
@@ -116323,6 +116489,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   timelineShowProjectsAside
   reviewFieldOpenedAt
   fieldPullRequests
+  reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
@@ -116600,6 +116767,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   timelineShowProjectsAside
   reviewFieldOpenedAt
   fieldPullRequests
+  reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
@@ -116863,6 +117031,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   timelineShowProjectsAside
   reviewFieldOpenedAt
   fieldPullRequests
+  reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
@@ -117183,6 +117352,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   timelineShowProjectsAside
   reviewFieldOpenedAt
   fieldPullRequests
+  reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
@@ -118364,6 +118534,9 @@ export const DocumentDocument = new TypedDocumentString(`
     id
   }
   updatedAt
+  owner {
+    id
+  }
   project {
     id
   }
@@ -118675,6 +118848,9 @@ export const DocumentsDocument = new TypedDocumentString(`
     id
   }
   updatedAt
+  owner {
+    id
+  }
   project {
     id
   }
@@ -119478,6 +119654,9 @@ export const Initiative_DocumentsDocument = new TypedDocumentString(`
     id
   }
   updatedAt
+  owner {
+    id
+  }
   project {
     id
   }
@@ -122003,6 +122182,9 @@ export const Issue_DocumentsDocument = new TypedDocumentString(`
     id
   }
   updatedAt
+  owner {
+    id
+  }
   project {
     id
   }
@@ -124941,6 +125123,9 @@ export const IssueVcsBranchSearch_DocumentsDocument = new TypedDocumentString(`
     id
   }
   updatedAt
+  owner {
+    id
+  }
   project {
     id
   }
@@ -128869,6 +129054,9 @@ export const Project_DocumentsDocument = new TypedDocumentString(`
     id
   }
   updatedAt
+  owner {
+    id
+  }
   project {
     id
   }
@@ -131891,6 +132079,9 @@ export const Release_DocumentsDocument = new TypedDocumentString(`
     id
   }
   updatedAt
+  owner {
+    id
+  }
   project {
     id
   }
@@ -132597,6 +132788,7 @@ export const ReleasePipelineDocument = new TypedDocumentString(`
   createdAt
   type
   id
+  rolloverIssuesOnCompletion
   isProduction
   autoGenerateReleaseNotesOnCompletion
 }`) as unknown as TypedDocumentString<ReleasePipelineQuery, ReleasePipelineQueryVariables>;
@@ -132968,6 +133160,7 @@ export const ReleasePipelinesDocument = new TypedDocumentString(`
   createdAt
   type
   id
+  rolloverIssuesOnCompletion
   isProduction
   autoGenerateReleaseNotesOnCompletion
 }
@@ -133849,6 +134042,9 @@ fragment DocumentSearchResult on DocumentSearchResult {
     id
   }
   updatedAt
+  owner {
+    id
+  }
   project {
     id
   }
@@ -135396,6 +135592,7 @@ export const Team_ReleasePipelinesDocument = new TypedDocumentString(`
   createdAt
   type
   id
+  rolloverIssuesOnCompletion
   isProduction
   autoGenerateReleaseNotesOnCompletion
 }
@@ -137174,6 +137371,9 @@ export const UserSettingsDocument = new TypedDocumentString(`
   documentChanges {
     ...NotificationChannelPreferences
   }
+  loops {
+    ...NotificationChannelPreferences
+  }
   mentions {
     ...NotificationChannelPreferences
   }
@@ -137335,6 +137535,9 @@ export const UserSettings_NotificationCategoryPreferencesDocument = new TypedDoc
     ...NotificationChannelPreferences
   }
   documentChanges {
+    ...NotificationChannelPreferences
+  }
+  loops {
     ...NotificationChannelPreferences
   }
   mentions {
@@ -137514,6 +137717,26 @@ export const UserSettings_NotificationCategoryPreferences_FeedDocument = new Typ
 }`) as unknown as TypedDocumentString<
   UserSettings_NotificationCategoryPreferences_FeedQuery,
   UserSettings_NotificationCategoryPreferences_FeedQueryVariables
+>;
+export const UserSettings_NotificationCategoryPreferences_LoopsDocument = new TypedDocumentString(`
+    query userSettings_notificationCategoryPreferences_loops {
+  userSettings {
+    notificationCategoryPreferences {
+      loops {
+        ...NotificationChannelPreferences
+      }
+    }
+  }
+}
+    fragment NotificationChannelPreferences on NotificationChannelPreferences {
+  __typename
+  slack
+  desktop
+  email
+  mobile
+}`) as unknown as TypedDocumentString<
+  UserSettings_NotificationCategoryPreferences_LoopsQuery,
+  UserSettings_NotificationCategoryPreferences_LoopsQueryVariables
 >;
 export const UserSettings_NotificationCategoryPreferences_MentionsDocument = new TypedDocumentString(`
     query userSettings_notificationCategoryPreferences_mentions {
@@ -149067,8 +149290,13 @@ export const ArchiveProjectDocument = new TypedDocumentString(`
   success
 }`) as unknown as TypedDocumentString<ArchiveProjectMutation, ArchiveProjectMutationVariables>;
 export const CreateProjectDocument = new TypedDocumentString(`
-    mutation createProject($input: ProjectCreateInput!, $slackChannelName: String) {
-  projectCreate(input: $input, slackChannelName: $slackChannelName) {
+    mutation createProject($aiConversationId: String, $input: ProjectCreateInput!, $projectDraftId: String, $slackChannelName: String) {
+  projectCreate(
+    aiConversationId: $aiConversationId
+    input: $input
+    projectDraftId: $projectDraftId
+    slackChannelName: $slackChannelName
+  ) {
     ...ProjectPayload
   }
 }
@@ -150710,6 +150938,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   timelineShowProjectsAside
   reviewFieldOpenedAt
   fieldPullRequests
+  reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
@@ -151000,6 +151229,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   timelineShowProjectsAside
   reviewFieldOpenedAt
   fieldPullRequests
+  reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
   scheduledPipelineReleaseFieldReleaseDate
   fieldRelease
