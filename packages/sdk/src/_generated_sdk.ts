@@ -6783,6 +6783,7 @@ export class Document extends Request {
   private _initiative?: L.DocumentFragment["initiative"];
   private _issue?: L.DocumentFragment["issue"];
   private _lastAppliedTemplate?: L.DocumentFragment["lastAppliedTemplate"];
+  private _owner?: L.DocumentFragment["owner"];
   private _project?: L.DocumentFragment["project"];
   private _release?: L.DocumentFragment["release"];
   private _updatedBy?: L.DocumentFragment["updatedBy"];
@@ -6807,6 +6808,7 @@ export class Document extends Request {
     this._initiative = data.initiative ?? undefined;
     this._issue = data.issue ?? undefined;
     this._lastAppliedTemplate = data.lastAppliedTemplate ?? undefined;
+    this._owner = data.owner ?? undefined;
     this._project = data.project ?? undefined;
     this._release = data.release ?? undefined;
     this._updatedBy = data.updatedBy ?? undefined;
@@ -6876,6 +6878,14 @@ export class Document extends Request {
   /** The ID of last template that was applied to this document. null if no template has been applied. */
   public get lastAppliedTemplateId(): string | undefined {
     return this._lastAppliedTemplate?.id;
+  }
+  /** The owner of the document. Null if no owner is assigned or the owner's account has been deleted. */
+  public get owner(): LinearFetch<User> | undefined {
+    return this._owner?.id ? new UserQuery(this._request).fetch(this._owner?.id) : undefined;
+  }
+  /** The ID of owner of the document. null if no owner is assigned or the owner's account has been deleted. */
+  public get ownerId(): string | undefined {
+    return this._owner?.id;
   }
   /** The project that the document is associated with. Null if the document belongs to a different parent entity type. */
   public get project(): LinearFetch<Project> | undefined {
@@ -7411,6 +7421,7 @@ export class DocumentSearchResult extends Request {
   private _initiative?: L.DocumentSearchResultFragment["initiative"];
   private _issue?: L.DocumentSearchResultFragment["issue"];
   private _lastAppliedTemplate?: L.DocumentSearchResultFragment["lastAppliedTemplate"];
+  private _owner?: L.DocumentSearchResultFragment["owner"];
   private _project?: L.DocumentSearchResultFragment["project"];
   private _release?: L.DocumentSearchResultFragment["release"];
   private _updatedBy?: L.DocumentSearchResultFragment["updatedBy"];
@@ -7436,6 +7447,7 @@ export class DocumentSearchResult extends Request {
     this._initiative = data.initiative ?? undefined;
     this._issue = data.issue ?? undefined;
     this._lastAppliedTemplate = data.lastAppliedTemplate ?? undefined;
+    this._owner = data.owner ?? undefined;
     this._project = data.project ?? undefined;
     this._release = data.release ?? undefined;
     this._updatedBy = data.updatedBy ?? undefined;
@@ -7507,6 +7519,14 @@ export class DocumentSearchResult extends Request {
   /** The ID of last template that was applied to this document. null if no template has been applied. */
   public get lastAppliedTemplateId(): string | undefined {
     return this._lastAppliedTemplate?.id;
+  }
+  /** The owner of the document. Null if no owner is assigned or the owner's account has been deleted. */
+  public get owner(): LinearFetch<User> | undefined {
+    return this._owner?.id ? new UserQuery(this._request).fetch(this._owner?.id) : undefined;
+  }
+  /** The ID of owner of the document. null if no owner is assigned or the owner's account has been deleted. */
+  public get ownerId(): string | undefined {
+    return this._owner?.id;
   }
   /** The project that the document is associated with. Null if the document belongs to a different parent entity type. */
   public get project(): LinearFetch<Project> | undefined {
@@ -14757,6 +14777,7 @@ export class NotificationCategoryPreferences extends Request {
     this.customers = new NotificationChannelPreferences(request, data.customers);
     this.documentChanges = new NotificationChannelPreferences(request, data.documentChanges);
     this.feed = new NotificationChannelPreferences(request, data.feed);
+    this.loops = new NotificationChannelPreferences(request, data.loops);
     this.mentions = new NotificationChannelPreferences(request, data.mentions);
     this.postsAndUpdates = new NotificationChannelPreferences(request, data.postsAndUpdates);
     this.reactions = new NotificationChannelPreferences(request, data.reactions);
@@ -14782,6 +14803,8 @@ export class NotificationCategoryPreferences extends Request {
   public documentChanges: NotificationChannelPreferences;
   /** The preferences for feed summary notifications. */
   public feed: NotificationChannelPreferences;
+  /** The preferences for notifications about loops. */
+  public loops: NotificationChannelPreferences;
   /** The preferences for notifications about mentions. */
   public mentions: NotificationChannelPreferences;
   /** The preferences for notifications about posts and updates. */
@@ -19861,6 +19884,7 @@ export class ReleasePipeline extends Request {
     this.includePathPatterns = data.includePathPatterns;
     this.isProduction = data.isProduction;
     this.name = data.name;
+    this.rolloverIssuesOnCompletion = data.rolloverIssuesOnCompletion;
     this.slugId = data.slugId;
     this.trashed = data.trashed ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
@@ -19886,6 +19910,8 @@ export class ReleasePipeline extends Request {
   public isProduction: boolean;
   /** The name of the pipeline. */
   public name: string;
+  /** Whether completing a scheduled release moves its open issues to the next release. When false, open issues remain on the completed release. */
+  public rolloverIssuesOnCompletion: boolean;
   /** The pipeline's unique slug identifier, used in URLs and for lookup by human-readable identifier instead of UUID. */
   public slugId: string;
   /** A flag that indicates whether the pipeline is in the trash bin. Trashed pipelines are archived and will be permanently deleted after a retention period. Null when the pipeline is not trashed. */
@@ -24233,6 +24259,7 @@ export class ViewPreferencesValues extends Request {
     this.reviewFieldIdentifier = data.reviewFieldIdentifier ?? undefined;
     this.reviewFieldOpenedAt = data.reviewFieldOpenedAt ?? undefined;
     this.reviewFieldPreviewLinks = data.reviewFieldPreviewLinks ?? undefined;
+    this.reviewFieldQuickToReview = data.reviewFieldQuickToReview ?? undefined;
     this.reviewFieldRepository = data.reviewFieldRepository ?? undefined;
     this.reviewFieldStatusDetails = data.reviewFieldStatusDetails ?? undefined;
     this.reviewGrouping = data.reviewGrouping ?? undefined;
@@ -24652,6 +24679,8 @@ export class ViewPreferencesValues extends Request {
   public reviewFieldOpenedAt?: boolean | null;
   /** No longer used. Previously controlled the review preview links field. */
   public reviewFieldPreviewLinks?: boolean | null;
+  /** Whether to show the quick-to-review badge on review list items. Null if the preference is unset. */
+  public reviewFieldQuickToReview?: boolean | null;
   /** Whether to show the review repository field. */
   public reviewFieldRepository?: boolean | null;
   /** Whether to show review status details on a second line. */
@@ -47678,6 +47707,32 @@ export class UserSettings_NotificationCategoryPreferences_FeedQuery extends Requ
       L.UserSettings_NotificationCategoryPreferences_FeedQueryVariables
     >(L.UserSettings_NotificationCategoryPreferences_FeedDocument.toString(), {});
     const data = response.userSettings.notificationCategoryPreferences.feed;
+
+    return new NotificationChannelPreferences(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UserSettings_NotificationCategoryPreferences_Loops Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationCategoryPreferences_LoopsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationCategoryPreferences_Loops query and return a NotificationChannelPreferences
+   *
+   * @returns parsed response from UserSettings_NotificationCategoryPreferences_LoopsQuery
+   */
+  public async fetch(): LinearFetch<NotificationChannelPreferences> {
+    const response = await this._request<
+      L.UserSettings_NotificationCategoryPreferences_LoopsQuery,
+      L.UserSettings_NotificationCategoryPreferences_LoopsQueryVariables
+    >(L.UserSettings_NotificationCategoryPreferences_LoopsDocument.toString(), {});
+    const data = response.userSettings.notificationCategoryPreferences.loops;
 
     return new NotificationChannelPreferences(this._request, data);
   }

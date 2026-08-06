@@ -1651,6 +1651,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the document.owner query for L.User */
+    it("document.owner", async () => {
+      if (_document) {
+        const document_owner: L.User | undefined | null = await _document.owner;
+        expect(document_owner instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Document found - cannot test document.owner query");
+      }
+    });
+
     /** Test the document.project query for L.Project */
     it("document.project", async () => {
       if (_document) {
@@ -6374,6 +6384,18 @@ describe("generated", () => {
       } else {
         console.warn(
           "codegen-doc:print: No notificationCategoryPreferences found - cannot test _notificationCategoryPreferences.feed query"
+        );
+      }
+    });
+
+    /** Test the userSettings_notificationCategoryPreferences model query for UserSettings_NotificationCategoryPreferences_Loops */
+    it("userSettings_notificationCategoryPreferences.loops", async () => {
+      if (_notificationCategoryPreferences) {
+        const loops: L.NotificationChannelPreferences | undefined | null = _notificationCategoryPreferences.loops;
+        expect(loops instanceof L.NotificationChannelPreferences);
+      } else {
+        console.warn(
+          "codegen-doc:print: No notificationCategoryPreferences found - cannot test _notificationCategoryPreferences.loops query"
         );
       }
     });

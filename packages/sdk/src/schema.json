@@ -5496,7 +5496,7 @@
           },
           {
             "name": "status",
-            "description": "The current processing status of the conversation, indicating whether the AI is actively generating a response or has completed its turn.",
+            "description": "The materialized conversation-level processing summary used by list and gating surfaces. Assistant response lifecycle is recorded on its turn.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -34727,6 +34727,18 @@
             "deprecationReason": null
           },
           {
+            "name": "owner",
+            "description": "The owner of the document. Null if no owner is assigned or the owner's account has been deleted.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "User",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "project",
             "description": "The project that the document is associated with. Null if the document belongs to a different parent entity type.",
             "args": [],
@@ -36237,6 +36249,18 @@
             "deprecationReason": null
           },
           {
+            "name": "ownerId",
+            "description": "The owner of the document. Set to null to create a document without an owner.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "projectId",
             "description": "Related project for the document.",
             "type": {
@@ -36563,6 +36587,18 @@
                   "ofType": null
                 }
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "owner",
+            "description": "Filters that the document's owner must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableUserFilter",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -37604,6 +37640,18 @@
             "deprecationReason": null
           },
           {
+            "name": "owner",
+            "description": "The owner of the document. Null if no owner is assigned or the owner's account has been deleted.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "User",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "project",
             "description": "The project that the document is associated with. Null if the document belongs to a different parent entity type.",
             "args": [],
@@ -38009,6 +38057,18 @@
           {
             "name": "lastAppliedTemplateId",
             "description": "The ID of the last template applied to the document.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "ownerId",
+            "description": "The owner of the document. Set to null to clear.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -91189,6 +91249,18 @@
             "description": "Creates a new project.",
             "args": [
               {
+                "name": "aiConversationId",
+                "description": "[Internal] The identifier of the project draft conversation to attach to this project.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
                 "name": "input",
                 "description": "The project properties to set on the new project.",
                 "type": {
@@ -91199,6 +91271,18 @@
                     "name": "ProjectCreateInput",
                     "ofType": null
                   }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "projectDraftId",
+                "description": "[Internal] The identifier of the project draft that produced this project.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
                 },
                 "defaultValue": null,
                 "isDeprecated": false,
@@ -91317,6 +91401,39 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "ProjectArchivePayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectDismissSlackChannelCreationFailure",
+            "description": "[Internal] Dismisses the Slack channel creation failure notice for a project.",
+            "args": [
+              {
+                "name": "id",
+                "description": "The identifier of the project.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ProjectPayload",
                 "ofType": null
               }
             },
@@ -96874,6 +96991,12 @@
             "deprecationReason": null
           },
           {
+            "name": "loops",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "mentions",
             "description": null,
             "isDeprecated": false,
@@ -97034,6 +97157,22 @@
           {
             "name": "feed",
             "description": "The preferences for feed summary notifications.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "NotificationChannelPreferences",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "loops",
+            "description": "The preferences for notifications about loops.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -97278,6 +97417,18 @@
           {
             "name": "feed",
             "description": "The preferences for notifications about feed summaries.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "PartialNotificationChannelPreferencesInput",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "loops",
+            "description": "The preferences for notifications about loops.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "PartialNotificationChannelPreferencesInput",
@@ -102241,6 +102392,18 @@
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableUserFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "leadTeam",
+            "description": "[ALPHA] Filters that the project's lead team must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableTeamFilter",
               "ofType": null
             },
             "defaultValue": null,
@@ -110463,6 +110626,12 @@
             "deprecationReason": null
           },
           {
+            "name": "documentAddedAsOwner",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "documentCommentMention",
             "description": null,
             "isDeprecated": false,
@@ -110506,6 +110675,12 @@
           },
           {
             "name": "documentReminder",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentRemovedAsOwner",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -117114,6 +117289,18 @@
             "deprecationReason": null
           },
           {
+            "name": "leadTeam",
+            "description": "[ALPHA] Filters that the project's lead team must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableTeamFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "length",
             "description": "Comparator for the collection length.",
             "type": {
@@ -118122,6 +118309,18 @@
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableUserFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "leadTeam",
+            "description": "[ALPHA] Filters that the project's lead team must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableTeamFilter",
               "ofType": null
             },
             "defaultValue": null,
@@ -129783,6 +129982,18 @@
             "deprecationReason": null
           },
           {
+            "name": "closedAt",
+            "description": "The time at which the pull request was closed. Hosting providers also set this when a pull request is merged, so read `status` to tell a closed pull request from a merged one. Null while the pull request is still open.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "commits",
             "description": "[ALPHA] The commits included in the pull request, synced from the hosting provider. Includes metadata such as SHA, message, diff stats, and author information.",
             "args": [],
@@ -129835,6 +130046,22 @@
             "deprecationReason": null
           },
           {
+            "name": "hasConflicts",
+            "description": "Whether the source branch has conflicts with the target branch. When true, the conflicts must be resolved before the pull request can be merged. This is reported separately from `mergeStatus`, which describes whether the pull request is blocked by required approvals or checks.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "headSha",
             "description": "The Git SHA of the latest commit on the source branch. Updated as new commits are pushed. Null if not yet synced.",
             "args": [],
@@ -129856,6 +130083,22 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "ID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "isBehind",
+            "description": "Whether the source branch is behind the target branch. When true, the source branch is missing commits that have landed on the target branch since it was last updated.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
                 "ofType": null
               }
             },
@@ -129903,6 +130146,18 @@
             "deprecationReason": null
           },
           {
+            "name": "mergedAt",
+            "description": "The time at which the pull request was merged. Null if the pull request has not been merged.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "number",
             "description": "The pull request number as assigned by the hosting provider (e.g., #123 on GitHub). Unique within a repository.",
             "args": [],
@@ -129935,6 +130190,30 @@
             "deprecationReason": null
           },
           {
+            "name": "previewLinks",
+            "description": "[Internal] The deploy/build preview links parsed from the pull request description and comments.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PullRequestPreviewLink",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "reactionData",
             "description": "Emoji reaction summary for this pull request, grouped by emoji type. Each entry contains the emoji name, count, and the IDs of users who reacted.",
             "args": [],
@@ -129945,6 +130224,30 @@
                 "kind": "SCALAR",
                 "name": "JSONObject",
                 "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "reactions",
+            "description": "Reactions associated with this pull request.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Reaction",
+                    "ofType": null
+                  }
+                }
               }
             },
             "isDeprecated": false,
@@ -131110,6 +131413,57 @@
             "ofType": null
           }
         ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PullRequestPreviewLink",
+        "description": "[Internal] A deploy or build preview link (e.g., Vercel, Cloudflare Pages, Netlify) parsed from a pull request's description or comments.",
+        "fields": [
+          {
+            "name": "isBuilding",
+            "description": "Whether the preview is still building. Null when the build state is unknown.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "The display name of the preview (e.g., the deploy target). Null if the provider did not supply one.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "url",
+            "description": "The URL of the preview.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -145472,6 +145826,22 @@
             "deprecationReason": null
           },
           {
+            "name": "rolloverIssuesOnCompletion",
+            "description": "Whether completing a scheduled release moves its open issues to the next release. When false, open issues remain on the completed release.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "slugId",
             "description": "The pipeline's unique slug identifier, used in URLs and for lookup by human-readable identifier instead of UUID.",
             "args": [],
@@ -146214,6 +146584,18 @@
             "deprecationReason": null
           },
           {
+            "name": "rolloverIssuesOnCompletion",
+            "description": "Whether completing a scheduled release moves its open issues to the next release. Defaults to true. When false, open issues remain on the completed release.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "slugId",
             "description": "The pipeline's unique slug identifier. If not provided, it will be auto-generated.",
             "type": {
@@ -146723,6 +147105,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rolloverIssuesOnCompletion",
+            "description": "Whether completing a scheduled release moves its open issues to the next release. When false, open issues remain on the completed release.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "defaultValue": null,
@@ -154768,6 +155162,22 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "Project",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pullRequestUpdated",
+            "description": "Triggered when a pull request is updated",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PullRequest",
                 "ofType": null
               }
             },
@@ -171177,6 +171587,18 @@
           {
             "name": "reviewFieldPreviewLinks",
             "description": "No longer used. Previously controlled the review preview links field.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "reviewFieldQuickToReview",
+            "description": "Whether to show the quick-to-review badge on review list items. Null if the preference is unset.",
             "args": [],
             "type": {
               "kind": "SCALAR",
