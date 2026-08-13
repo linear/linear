@@ -457,6 +457,12 @@ export enum AgentAutomationRetryResolutionStatus {
   Scheduled = "scheduled",
 }
 
+/** The scope of the usage limit that blocked a loop run: the loop's own limit or the workspace-wide limit. */
+export enum AgentAutomationUsageLimitScope {
+  Loop = "loop",
+  Workspace = "workspace",
+}
+
 /** A session representing an AI coding agent's work on an issue or conversation. Agent sessions track the lifecycle of an agent's engagement, from creation through active work to completion or dismissal. Each session is associated with an agent user (the bot), optionally a human creator, an issue, and a comment thread where the agent posts updates. Sessions contain activities that record the agent's observable steps and can be linked to pull requests created during the work. */
 export type AgentSession = Node & {
   __typename?: "AgentSession";
@@ -1317,13 +1323,19 @@ export type AiConversationErrorPart = AiConversationBasePart & {
   retryResolution?: Maybe<AgentAutomationRetryResolution>;
   /** The type of the part. */
   type: AiConversationPartType;
+  /** The time when the breached usage limit resets, as an ISO 8601 string. Null when unknown or for other error categories. */
+  usageLimitResetsAt?: Maybe<Scalars["String"]>;
+  /** The scope of the breached limit for usage-limit errors. Null for other error categories. */
+  usageLimitScope?: Maybe<AgentAutomationUsageLimitScope>;
 };
 
 /** The category of an error part in an AI conversation. */
 export enum AiConversationErrorType {
   Billing = "billing",
+  FeatureDisabled = "featureDisabled",
   Unknown = "unknown",
   UntrustedSources = "untrustedSources",
+  UsageLimit = "usageLimit",
 }
 
 /** An event part in an AI conversation. */
@@ -1799,6 +1811,24 @@ export type AiConversationReasoningPart = AiConversationBasePart & {
   type: AiConversationPartType;
 };
 
+export type AiConversationRemoveSpendLimitToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationRemoveSpendLimitToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationRemoveSpendLimitToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationRemoveSpendLimitToolCallArgs = {
+  __typename?: "AiConversationRemoveSpendLimitToolCallArgs";
+  summary?: Maybe<Scalars["String"]>;
+};
+
 export type AiConversationResearchToolCall = AiConversationBaseToolCall & {
   __typename?: "AiConversationResearchToolCall";
   /** The arguments to the tool call. */
@@ -1923,6 +1953,24 @@ export type AiConversationSearchEntitiesToolCallResultEntities = {
   __typename?: "AiConversationSearchEntitiesToolCallResultEntities";
   id: Scalars["String"];
   type: Scalars["String"];
+};
+
+export type AiConversationSetSpendLimitToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationSetSpendLimitToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationSetSpendLimitToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationSetSpendLimitToolCallArgs = {
+  __typename?: "AiConversationSetSpendLimitToolCallArgs";
+  summary?: Maybe<Scalars["String"]>;
 };
 
 export type AiConversationSpawnSubagentToolCall = AiConversationBaseToolCall & {
@@ -2087,12 +2135,14 @@ export enum AiConversationTool {
   QueryView = "QueryView",
   ReadFile = "ReadFile",
   ReadSandboxFile = "ReadSandboxFile",
+  RemoveSpendLimit = "RemoveSpendLimit",
   Research = "Research",
   RestoreEntity = "RestoreEntity",
   RetrieveEntities = "RetrieveEntities",
   RetryPullRequestCheck = "RetryPullRequestCheck",
   SearchDocumentation = "SearchDocumentation",
   SearchEntities = "SearchEntities",
+  SetSpendLimit = "SetSpendLimit",
   SpawnSubagent = "SpawnSubagent",
   StartCodingSession = "StartCodingSession",
   SubscribeToEvent = "SubscribeToEvent",
@@ -2128,12 +2178,14 @@ export type AiConversationToolCall =
   | AiConversationQueryViewToolCall
   | AiConversationReadFileToolCall
   | AiConversationReadSandboxFileToolCall
+  | AiConversationRemoveSpendLimitToolCall
   | AiConversationResearchToolCall
   | AiConversationRestoreEntityToolCall
   | AiConversationRetrieveEntitiesToolCall
   | AiConversationRetryPullRequestCheckToolCall
   | AiConversationSearchDocumentationToolCall
   | AiConversationSearchEntitiesToolCall
+  | AiConversationSetSpendLimitToolCall
   | AiConversationSpawnSubagentToolCall
   | AiConversationStartCodingSessionToolCall
   | AiConversationSubscribeToEventToolCall
@@ -6330,6 +6382,8 @@ export type Draft = Node & {
   project?: Maybe<Project>;
   /** The project update for which this is a draft comment. Null if the draft belongs to a different parent entity type. */
   projectUpdate?: Maybe<ProjectUpdate>;
+  /** The pull request for which this is a draft comment. Null if the draft belongs to a different parent entity type. */
+  pullRequest?: Maybe<PullRequest>;
   /** The team for which this is a draft post. Null if the draft belongs to a different parent entity type. */
   team?: Maybe<Team>;
   /**
@@ -6733,6 +6787,18 @@ export type EntityExternalLinkUpdateInput = {
   url?: InputMaybe<Scalars["String"]>;
 };
 
+/** Comparator for project and initiative identifiers. Accepts UUIDs and human-readable identifiers (e.g. "PROJ-123"). */
+export type EntityIdentifierIdComparator = {
+  /** Equals constraint. */
+  eq?: InputMaybe<Scalars["ID"]>;
+  /** In-array constraint. */
+  in?: InputMaybe<Array<Scalars["ID"]>>;
+  /** Not-equals constraint. */
+  neq?: InputMaybe<Scalars["ID"]>;
+  /** Not-in-array constraint. */
+  nin?: InputMaybe<Array<Scalars["ID"]>>;
+};
+
 /** Payload for entity-related webhook events. */
 export type EntityWebhookPayload = {
   __typename?: "EntityWebhookPayload";
@@ -7028,6 +7094,10 @@ export type Favorite = Node & {
   issue?: Maybe<Issue>;
   /** The favorited label. */
   label?: Maybe<IssueLabel>;
+  /** The versioned lazy root and filter represented by this live favorite folder. */
+  liveFolderDefinition?: Maybe<Scalars["JSONObject"]>;
+  /** The predefined live folder represented by this favorite. */
+  liveFolderPreset?: Maybe<Scalars["String"]>;
   /** The user who owns this favorite. Favorites are personal and only visible to their owner. */
   owner: User;
   /** The parent folder of the favorite. Null if the favorite is at the top level of the sidebar. Only favorites of type 'folder' can be parents. */
@@ -7120,6 +7190,8 @@ export type FavoriteCreateInput = {
   issueId?: InputMaybe<Scalars["String"]>;
   /** The identifier of the label to favorite. */
   labelId?: InputMaybe<Scalars["String"]>;
+  /** The predefined live folder to create. */
+  liveFolderPreset?: InputMaybe<Scalars["String"]>;
   /** The parent folder of the favorite. */
   parentId?: InputMaybe<Scalars["String"]>;
   /** The tab of the release pipeline to favorite. */
@@ -8033,6 +8105,8 @@ export type InitiativeCollectionFilter = {
   createdAt?: InputMaybe<DateComparator>;
   /** Filters that the initiative creator must satisfy. */
   creator?: InputMaybe<NullableUserFilter>;
+  /** [Internal] Comparator for the initiative's custom identifier. */
+  customIdentifier?: InputMaybe<NullableStringComparator>;
   /** Filters that needs to be matched by all initiatives. */
   every?: InputMaybe<InitiativeFilter>;
   /** Comparator for the initiative health: onTrack, atRisk, offTrack */
@@ -8040,7 +8114,7 @@ export type InitiativeCollectionFilter = {
   /** Comparator for the initiative health (with age): onTrack, atRisk, offTrack, outdated, noUpdate */
   healthWithAge?: InputMaybe<StringComparator>;
   /** Comparator for the identifier. */
-  id?: InputMaybe<IdComparator>;
+  id?: InputMaybe<EntityIdentifierIdComparator>;
   /** Filters that the initiative updates must satisfy. */
   initiativeUpdates?: InputMaybe<InitiativeUpdatesCollectionFilter>;
   /** Filters that the initiative labels must satisfy. */
@@ -8145,12 +8219,14 @@ export type InitiativeFilter = {
   createdAt?: InputMaybe<DateComparator>;
   /** Filters that the initiative creator must satisfy. */
   creator?: InputMaybe<NullableUserFilter>;
+  /** [Internal] Comparator for the initiative's custom identifier. */
+  customIdentifier?: InputMaybe<NullableStringComparator>;
   /** Comparator for the initiative health: onTrack, atRisk, offTrack */
   health?: InputMaybe<StringComparator>;
   /** Comparator for the initiative health (with age): onTrack, atRisk, offTrack, outdated, noUpdate */
   healthWithAge?: InputMaybe<StringComparator>;
   /** Comparator for the identifier. */
-  id?: InputMaybe<IdComparator>;
+  id?: InputMaybe<EntityIdentifierIdComparator>;
   /** Filters that the initiative updates must satisfy. */
   initiativeUpdates?: InputMaybe<InitiativeUpdatesCollectionFilter>;
   /** Filters that the initiative labels must satisfy. */
@@ -12429,6 +12505,11 @@ export type IssueWebhookPayload = {
   labels: Array<IssueLabelChildWebhookPayload>;
   /** The ID of the last template that was applied to the issue. */
   lastAppliedTemplateId?: Maybe<Scalars["String"]>;
+  /**
+   * The project milestone that the issue belongs to.
+   * @deprecated Use `projectMilestone` instead.
+   */
+  milestone?: Maybe<ProjectMilestoneChildWebhookPayload>;
   /** The issue's unique number. */
   number: Scalars["Float"];
   /** The ID of the parent issue. */
@@ -12453,6 +12534,8 @@ export type IssueWebhookPayload = {
   reactionData: Scalars["JSONObject"];
   /** The ID of the recurring issue template that created the issue. */
   recurringIssueTemplateId?: Maybe<Scalars["String"]>;
+  /** The releases associated with this issue. */
+  releases: Array<ReleaseChildWebhookPayload>;
   /** The time at which the issue would breach its SLA. */
   slaBreachesAt?: Maybe<Scalars["String"]>;
   /** The time at which the issue would enter SLA high risk. */
@@ -14448,10 +14531,12 @@ export type MutationIntegrationUpdateArgs = {
 };
 
 export type MutationIntegrationZendeskArgs = {
+  accessToken?: InputMaybe<Scalars["String"]>;
   botUserRole?: InputMaybe<Scalars["String"]>;
-  code: Scalars["String"];
-  redirectUri: Scalars["String"];
-  scope: Scalars["String"];
+  code?: InputMaybe<Scalars["String"]>;
+  customApiUrl?: InputMaybe<Scalars["String"]>;
+  redirectUri?: InputMaybe<Scalars["String"]>;
+  scope?: InputMaybe<Scalars["String"]>;
   subdomain: Scalars["String"];
 };
 
@@ -16066,12 +16151,14 @@ export type NullableInitiativeFilter = {
   createdAt?: InputMaybe<DateComparator>;
   /** Filters that the initiative creator must satisfy. */
   creator?: InputMaybe<NullableUserFilter>;
+  /** [Internal] Comparator for the initiative's custom identifier. */
+  customIdentifier?: InputMaybe<NullableStringComparator>;
   /** Comparator for the initiative health: onTrack, atRisk, offTrack */
   health?: InputMaybe<StringComparator>;
   /** Comparator for the initiative health (with age): onTrack, atRisk, offTrack, outdated, noUpdate */
   healthWithAge?: InputMaybe<StringComparator>;
   /** Comparator for the identifier. */
-  id?: InputMaybe<IdComparator>;
+  id?: InputMaybe<EntityIdentifierIdComparator>;
   /** Filters that the initiative updates must satisfy. */
   initiativeUpdates?: InputMaybe<InitiativeUpdatesCollectionFilter>;
   /** Filters that the initiative labels must satisfy. */
@@ -16310,6 +16397,8 @@ export type NullableProjectFilter = {
   createdAt?: InputMaybe<DateComparator>;
   /** Filters that the projects creator must satisfy. */
   creator?: InputMaybe<UserFilter>;
+  /** [Internal] Comparator for the project's custom identifier. */
+  customIdentifier?: InputMaybe<NullableStringComparator>;
   /** Count of customers */
   customerCount?: InputMaybe<NumberComparator>;
   /** Count of important customers */
@@ -16331,7 +16420,7 @@ export type NullableProjectFilter = {
   /** Comparator for the project health (with age): onTrack, atRisk, offTrack, outdated, noUpdate */
   healthWithAge?: InputMaybe<StringComparator>;
   /** Comparator for the identifier. */
-  id?: InputMaybe<IdComparator>;
+  id?: InputMaybe<EntityIdentifierIdComparator>;
   /** Filters that the projects initiatives must satisfy. */
   initiatives?: InputMaybe<InitiativeCollectionFilter>;
   /** Filters that the projects issues must satisfy. */
@@ -18711,6 +18800,8 @@ export type ProjectCollectionFilter = {
   createdAt?: InputMaybe<DateComparator>;
   /** Filters that the projects creator must satisfy. */
   creator?: InputMaybe<UserFilter>;
+  /** [Internal] Comparator for the project's custom identifier. */
+  customIdentifier?: InputMaybe<NullableStringComparator>;
   /** Count of customers */
   customerCount?: InputMaybe<NumberComparator>;
   /** Count of important customers */
@@ -18734,7 +18825,7 @@ export type ProjectCollectionFilter = {
   /** Comparator for the project health (with age): onTrack, atRisk, offTrack, outdated, noUpdate */
   healthWithAge?: InputMaybe<StringComparator>;
   /** Comparator for the identifier. */
-  id?: InputMaybe<IdComparator>;
+  id?: InputMaybe<EntityIdentifierIdComparator>;
   /** Filters that the projects initiatives must satisfy. */
   initiatives?: InputMaybe<InitiativeCollectionFilter>;
   /** Filters that the projects issues must satisfy. */
@@ -18877,6 +18968,8 @@ export type ProjectFilter = {
   createdAt?: InputMaybe<DateComparator>;
   /** Filters that the projects creator must satisfy. */
   creator?: InputMaybe<UserFilter>;
+  /** [Internal] Comparator for the project's custom identifier. */
+  customIdentifier?: InputMaybe<NullableStringComparator>;
   /** Count of customers */
   customerCount?: InputMaybe<NumberComparator>;
   /** Count of important customers */
@@ -18898,7 +18991,7 @@ export type ProjectFilter = {
   /** Comparator for the project health (with age): onTrack, atRisk, offTrack, outdated, noUpdate */
   healthWithAge?: InputMaybe<StringComparator>;
   /** Comparator for the identifier. */
-  id?: InputMaybe<IdComparator>;
+  id?: InputMaybe<EntityIdentifierIdComparator>;
   /** Filters that the projects initiatives must satisfy. */
   initiatives?: InputMaybe<InitiativeCollectionFilter>;
   /** Filters that the projects issues must satisfy. */
@@ -20121,10 +20214,14 @@ export type ProjectStatus = Node & {
   id: Scalars["ID"];
   /** Whether a project can remain in this status indefinitely. When false, projects in this status may trigger reminders or auto-archiving after a period of inactivity. */
   indefinite: Scalars["Boolean"];
+  /** [Internal] The original workspace or parent-team status that this status was inherited from. Null if the status is not inherited. */
+  inheritedFrom?: Maybe<ProjectStatus>;
   /** The name of the status. */
   name: Scalars["String"];
   /** The position of the status within its type group in the workspace's project flow. Used for ordering statuses of the same type. */
   position: Scalars["Float"];
+  /** [Internal] The team that the status is scoped to. If null, the status is a workspace-level status available to all teams in the workspace. */
+  team?: Maybe<Team>;
   /** The category type of the project status (e.g., backlog, planned, started, paused, completed, canceled). Determines the status's behavior and position in the project lifecycle. */
   type: ProjectStatusType;
   /**
@@ -21080,6 +21177,8 @@ export type Query = {
   auditEntries: AuditEntryConnection;
   /** List of audit entry types. */
   auditEntryTypes: Array<AuditEntryType>;
+  /** [INTERNAL] Failure events for an audit log webhook (last 50). */
+  auditLogWebhookFailureEvents: Array<WebhookFailureEvent>;
   /** User's active sessions. */
   authenticationSessions: Array<AuthenticationSessionResponse>;
   /** Fetch users belonging to this user account. */
@@ -21485,6 +21584,10 @@ export type QueryAuditEntriesArgs = {
   includeArchived?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+export type QueryAuditLogWebhookFailureEventsArgs = {
+  webhookId: Scalars["String"];
 };
 
 export type QueryCommentArgs = {
@@ -22649,6 +22752,23 @@ export enum ReleaseChannel {
   PrivateBeta = "privateBeta",
   Public = "public",
 }
+
+/** Certain properties of a release. */
+export type ReleaseChildWebhookPayload = {
+  __typename?: "ReleaseChildWebhookPayload";
+  /** The time at which the release was completed. */
+  completedAt?: Maybe<Scalars["String"]>;
+  /** The ID of the release. */
+  id: Scalars["String"];
+  /** The name of the release. */
+  name: Scalars["String"];
+  /** The pipeline this release belongs to. */
+  pipeline?: Maybe<ReleasePipelineChildWebhookPayload>;
+  /** The current stage of the release. */
+  stage?: Maybe<ReleaseStageChildWebhookPayload>;
+  /** The version of the release. */
+  version?: Maybe<Scalars["String"]>;
+};
 
 /** Release collection filtering options. */
 export type ReleaseCollectionFilter = {
@@ -24283,6 +24403,8 @@ export type SourceMetadataComparator = {
   salesforceMetadata?: InputMaybe<SalesforceMetadataIntegrationComparator>;
   /** Comparator for the sub type. */
   subType?: InputMaybe<SubTypeComparator>;
+  /** Comparator for the workflow definition that created the issue. */
+  workflowDefinitionId?: InputMaybe<WorkflowDefinitionIdComparator>;
 };
 
 /** Comparator for `sourceType` field. */
@@ -24589,6 +24711,8 @@ export type Subscription = {
   teamUpdated: Team;
   /** Triggered when an user is created */
   userCreated: User;
+  /** Triggered when an user settings is updated */
+  userSettingsUpdated: UserSettings;
   /** Triggered when an user is updated */
   userUpdated: User;
   /** Triggered when a workflow state is archived */
@@ -27840,6 +27964,20 @@ export type WorkflowDefinition = Node & {
   userContextViewType?: Maybe<UserContextViewType>;
 };
 
+/** Comparator for the workflow definition that created an issue. */
+export type WorkflowDefinitionIdComparator = {
+  /** Equals constraint. */
+  eq?: InputMaybe<Scalars["ID"]>;
+  /** In-array constraint. */
+  in?: InputMaybe<Array<Scalars["ID"]>>;
+  /** Not-equals constraint. */
+  neq?: InputMaybe<Scalars["ID"]>;
+  /** Not-in-array constraint. */
+  nin?: InputMaybe<Array<Scalars["ID"]>>;
+  /** Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values. */
+  null?: InputMaybe<Scalars["Boolean"]>;
+};
+
 /** A notification related to an automation workflow definition (loop), such as runs that failed to start. */
 export type WorkflowDefinitionNotification = Entity &
   Node &
@@ -27853,6 +27991,8 @@ export type WorkflowDefinitionNotification = Entity &
     actorAvatarUrl?: Maybe<Scalars["String"]>;
     /** [Internal] Notification actor initials if avatar is not available. */
     actorInitials?: Maybe<Scalars["String"]>;
+    /** [Internal] The AI conversation identifier for the related loop run, if one was created. */
+    aiConversationId?: Maybe<Scalars["String"]>;
     /** The time at which the entity was archived. Null if the entity has not been archived. */
     archivedAt?: Maybe<Scalars["DateTime"]>;
     /** The bot that caused the notification. */
@@ -28104,10 +28244,14 @@ export type ZendeskSettingsInput = {
   automateTicketReopeningOnProjectCancellation?: InputMaybe<Scalars["Boolean"]>;
   /** Whether a ticket should be automatically reopened when its linked Linear project is completed. */
   automateTicketReopeningOnProjectCompletion?: InputMaybe<Scalars["Boolean"]>;
+  /** [INTERNAL] Whether API requests authenticate with a user-provided bearer token instead of a Zendesk OAuth token. Only used together with `customApiUrl`. */
+  bearerTokenAuth?: InputMaybe<Scalars["Boolean"]>;
   /** The ID of the Linear bot user. */
   botUserId?: InputMaybe<Scalars["String"]>;
   /** [INTERNAL] Temporary flag indicating if the integration has the necessary scopes for Customers */
   canReadCustomers?: InputMaybe<Scalars["Boolean"]>;
+  /** [INTERNAL] Custom base URL for Zendesk API requests, such as a proxy in front of Zendesk. When unset, API requests use the standard subdomain URL. OAuth requests always use the standard subdomain URL. */
+  customApiUrl?: InputMaybe<Scalars["String"]>;
   /** [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue. */
   disableCustomerRequestsAutoCreation?: InputMaybe<Scalars["Boolean"]>;
   /** Whether Linear Agent should be enabled for this integration. */
@@ -28124,7 +28268,7 @@ export type ZendeskSettingsInput = {
   subdomain: Scalars["String"];
   /** [INTERNAL] Flag indicating if the integration supports OAuth refresh tokens */
   supportsOAuthRefresh?: InputMaybe<Scalars["Boolean"]>;
-  /** The URL of the connected Zendesk organization. */
+  /** The URL of the connected Zendesk organization, used to link into Zendesk. API requests use `customApiUrl` when it is set. */
   url: Scalars["String"];
 };
 
@@ -28192,7 +28336,7 @@ type AiConversationBasePart_AiConversationElicitationPart_Fragment = {
 
 type AiConversationBasePart_AiConversationErrorPart_Fragment = { __typename: "AiConversationErrorPart" } & Pick<
   AiConversationErrorPart,
-  "id" | "type" | "errorType" | "message"
+  "id" | "type" | "errorType" | "usageLimitScope" | "usageLimitResetsAt" | "message"
 > & {
     metadata: { __typename: "AiConversationPartMetadata" } & Pick<
       AiConversationPartMetadata,
@@ -28679,6 +28823,21 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
               "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
             >;
           })
+      | ({ __typename: "AiConversationRemoveSpendLimitToolCall" } & Pick<
+          AiConversationRemoveSpendLimitToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationRemoveSpendLimitToolCallArgs" } & Pick<
+                AiConversationRemoveSpendLimitToolCallArgs,
+                "summary"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
       | ({ __typename: "AiConversationResearchToolCall" } & Pick<
           AiConversationResearchToolCall,
           "rawArgs" | "name" | "rawResult"
@@ -28793,6 +28952,21 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
                   >
                 >;
               }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationSetSpendLimitToolCall" } & Pick<
+          AiConversationSetSpendLimitToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationSetSpendLimitToolCallArgs" } & Pick<
+                AiConversationSetSpendLimitToolCallArgs,
+                "summary"
+              >
             >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
               AiConversationToolDisplayInfo,
@@ -34511,6 +34685,21 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
               "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
             >;
           })
+      | ({ __typename: "AiConversationRemoveSpendLimitToolCall" } & Pick<
+          AiConversationRemoveSpendLimitToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationRemoveSpendLimitToolCallArgs" } & Pick<
+                AiConversationRemoveSpendLimitToolCallArgs,
+                "summary"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
       | ({ __typename: "AiConversationResearchToolCall" } & Pick<
           AiConversationResearchToolCall,
           "rawArgs" | "name" | "rawResult"
@@ -34625,6 +34814,21 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
                   >
                 >;
               }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationSetSpendLimitToolCall" } & Pick<
+          AiConversationSetSpendLimitToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationSetSpendLimitToolCallArgs" } & Pick<
+                AiConversationSetSpendLimitToolCallArgs,
+                "summary"
+              >
             >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
               AiConversationToolDisplayInfo,
@@ -34903,6 +35107,7 @@ export type FavoriteFragment = { __typename: "Favorite" } & Pick<
   | "updatedAt"
   | "folderName"
   | "sortOrder"
+  | "liveFolderPreset"
   | "initiativeTab"
   | "projectTab"
   | "pipelineTab"
@@ -34911,6 +35116,7 @@ export type FavoriteFragment = { __typename: "Favorite" } & Pick<
   | "type"
   | "predefinedViewType"
   | "id"
+  | "liveFolderDefinition"
   | "url"
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
@@ -35533,7 +35739,7 @@ export type IssueSuggestionReasonReferenceFragment = { __typename: "IssueSuggest
 
 export type AiConversationErrorPartFragment = { __typename: "AiConversationErrorPart" } & Pick<
   AiConversationErrorPart,
-  "id" | "errorType" | "type" | "message"
+  "id" | "errorType" | "usageLimitScope" | "usageLimitResetsAt" | "type" | "message"
 > & {
     metadata: { __typename: "AiConversationPartMetadata" } & Pick<
       AiConversationPartMetadata,
@@ -35970,6 +36176,24 @@ export type ReleaseStageChildWebhookPayloadFragment = { __typename: "ReleaseStag
   ReleaseStageChildWebhookPayload,
   "id" | "color" | "name" | "position" | "type"
 >;
+
+export type ReleaseChildWebhookPayloadFragment = { __typename: "ReleaseChildWebhookPayload" } & Pick<
+  ReleaseChildWebhookPayload,
+  "id" | "name" | "completedAt" | "version"
+> & {
+    stage?: Maybe<
+      { __typename: "ReleaseStageChildWebhookPayload" } & Pick<
+        ReleaseStageChildWebhookPayload,
+        "id" | "color" | "name" | "position" | "type"
+      >
+    >;
+    pipeline?: Maybe<
+      { __typename: "ReleasePipelineChildWebhookPayload" } & Pick<
+        ReleasePipelineChildWebhookPayload,
+        "id" | "url" | "name" | "slugId" | "type"
+      >
+    >;
+  };
 
 export type TeamChildWebhookPayloadFragment = { __typename: "TeamChildWebhookPayload" } & Pick<
   TeamChildWebhookPayload,
@@ -37592,6 +37816,12 @@ export type IssueWebhookPayloadFragment = { __typename: "IssueWebhookPayload" } 
         "id" | "color" | "name" | "parentId"
       >
     >;
+    milestone?: Maybe<
+      { __typename: "ProjectMilestoneChildWebhookPayload" } & Pick<
+        ProjectMilestoneChildWebhookPayload,
+        "id" | "name" | "targetDate"
+      >
+    >;
     projectMilestone?: Maybe<
       { __typename: "ProjectMilestoneChildWebhookPayload" } & Pick<
         ProjectMilestoneChildWebhookPayload,
@@ -37600,6 +37830,25 @@ export type IssueWebhookPayloadFragment = { __typename: "IssueWebhookPayload" } 
     >;
     project?: Maybe<
       { __typename: "ProjectChildWebhookPayload" } & Pick<ProjectChildWebhookPayload, "id" | "url" | "name">
+    >;
+    releases: Array<
+      { __typename: "ReleaseChildWebhookPayload" } & Pick<
+        ReleaseChildWebhookPayload,
+        "id" | "name" | "completedAt" | "version"
+      > & {
+          stage?: Maybe<
+            { __typename: "ReleaseStageChildWebhookPayload" } & Pick<
+              ReleaseStageChildWebhookPayload,
+              "id" | "color" | "name" | "position" | "type"
+            >
+          >;
+          pipeline?: Maybe<
+            { __typename: "ReleasePipelineChildWebhookPayload" } & Pick<
+              ReleasePipelineChildWebhookPayload,
+              "id" | "url" | "name" | "slugId" | "type"
+            >
+          >;
+        }
     >;
     team?: Maybe<{ __typename: "TeamChildWebhookPayload" } & Pick<TeamChildWebhookPayload, "id" | "key" | "name">>;
     creator?: Maybe<
@@ -37737,6 +37986,12 @@ export type IssueSlaWebhookPayloadFragment = { __typename: "IssueSlaWebhookPaylo
             "id" | "color" | "name" | "parentId"
           >
         >;
+        milestone?: Maybe<
+          { __typename: "ProjectMilestoneChildWebhookPayload" } & Pick<
+            ProjectMilestoneChildWebhookPayload,
+            "id" | "name" | "targetDate"
+          >
+        >;
         projectMilestone?: Maybe<
           { __typename: "ProjectMilestoneChildWebhookPayload" } & Pick<
             ProjectMilestoneChildWebhookPayload,
@@ -37745,6 +38000,25 @@ export type IssueSlaWebhookPayloadFragment = { __typename: "IssueSlaWebhookPaylo
         >;
         project?: Maybe<
           { __typename: "ProjectChildWebhookPayload" } & Pick<ProjectChildWebhookPayload, "id" | "url" | "name">
+        >;
+        releases: Array<
+          { __typename: "ReleaseChildWebhookPayload" } & Pick<
+            ReleaseChildWebhookPayload,
+            "id" | "name" | "completedAt" | "version"
+          > & {
+              stage?: Maybe<
+                { __typename: "ReleaseStageChildWebhookPayload" } & Pick<
+                  ReleaseStageChildWebhookPayload,
+                  "id" | "color" | "name" | "position" | "type"
+                >
+              >;
+              pipeline?: Maybe<
+                { __typename: "ReleasePipelineChildWebhookPayload" } & Pick<
+                  ReleasePipelineChildWebhookPayload,
+                  "id" | "url" | "name" | "slugId" | "type"
+                >
+              >;
+            }
         >;
         team?: Maybe<{ __typename: "TeamChildWebhookPayload" } & Pick<TeamChildWebhookPayload, "id" | "key" | "name">>;
         creator?: Maybe<
@@ -41425,6 +41699,21 @@ type AiConversationBaseToolCall_AiConversationReadSandboxFileToolCall_Fragment =
     >;
   };
 
+type AiConversationBaseToolCall_AiConversationRemoveSpendLimitToolCall_Fragment = {
+  __typename: "AiConversationRemoveSpendLimitToolCall";
+} & Pick<AiConversationRemoveSpendLimitToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationRemoveSpendLimitToolCallArgs" } & Pick<
+        AiConversationRemoveSpendLimitToolCallArgs,
+        "summary"
+      >
+    >;
+  };
+
 type AiConversationBaseToolCall_AiConversationResearchToolCall_Fragment = {
   __typename: "AiConversationResearchToolCall";
 } & Pick<AiConversationResearchToolCall, "rawArgs" | "name" | "rawResult"> & {
@@ -41539,6 +41828,21 @@ type AiConversationBaseToolCall_AiConversationSearchEntitiesToolCall_Fragment = 
           >
         >;
       }
+    >;
+  };
+
+type AiConversationBaseToolCall_AiConversationSetSpendLimitToolCall_Fragment = {
+  __typename: "AiConversationSetSpendLimitToolCall";
+} & Pick<AiConversationSetSpendLimitToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationSetSpendLimitToolCallArgs" } & Pick<
+        AiConversationSetSpendLimitToolCallArgs,
+        "summary"
+      >
     >;
   };
 
@@ -41747,12 +42051,14 @@ export type AiConversationBaseToolCallFragment =
   | AiConversationBaseToolCall_AiConversationQueryViewToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationReadFileToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationReadSandboxFileToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationRemoveSpendLimitToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationResearchToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationRestoreEntityToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationRetrieveEntitiesToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationRetryPullRequestCheckToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationSearchDocumentationToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationSearchEntitiesToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationSetSpendLimitToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationSpawnSubagentToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationStartCodingSessionToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationSubscribeToEventToolCall_Fragment
@@ -42546,6 +42852,25 @@ export type AiConversationReadSandboxFileToolCallArgsFragment = {
   __typename: "AiConversationReadSandboxFileToolCallArgs";
 } & Pick<AiConversationReadSandboxFileToolCallArgs, "path">;
 
+export type AiConversationRemoveSpendLimitToolCallFragment = {
+  __typename: "AiConversationRemoveSpendLimitToolCall";
+} & Pick<AiConversationRemoveSpendLimitToolCall, "rawArgs" | "name" | "rawResult"> & {
+    args?: Maybe<
+      { __typename: "AiConversationRemoveSpendLimitToolCallArgs" } & Pick<
+        AiConversationRemoveSpendLimitToolCallArgs,
+        "summary"
+      >
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationRemoveSpendLimitToolCallArgsFragment = {
+  __typename: "AiConversationRemoveSpendLimitToolCallArgs";
+} & Pick<AiConversationRemoveSpendLimitToolCallArgs, "summary">;
+
 export type AiConversationResearchToolCallFragment = { __typename: "AiConversationResearchToolCall" } & Pick<
   AiConversationResearchToolCall,
   "rawArgs" | "name" | "rawResult"
@@ -42730,6 +43055,26 @@ export type AiConversationSearchEntitiesToolCallResultFragment = {
 export type AiConversationSearchEntitiesToolCallResultEntitiesFragment = {
   __typename: "AiConversationSearchEntitiesToolCallResultEntities";
 } & Pick<AiConversationSearchEntitiesToolCallResultEntities, "id" | "type">;
+
+export type AiConversationSetSpendLimitToolCallFragment = { __typename: "AiConversationSetSpendLimitToolCall" } & Pick<
+  AiConversationSetSpendLimitToolCall,
+  "rawArgs" | "name" | "rawResult"
+> & {
+    args?: Maybe<
+      { __typename: "AiConversationSetSpendLimitToolCallArgs" } & Pick<
+        AiConversationSetSpendLimitToolCallArgs,
+        "summary"
+      >
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationSetSpendLimitToolCallArgsFragment = {
+  __typename: "AiConversationSetSpendLimitToolCallArgs";
+} & Pick<AiConversationSetSpendLimitToolCallArgs, "summary">;
 
 export type AiConversationSpawnSubagentToolCallFragment = { __typename: "AiConversationSpawnSubagentToolCall" } & Pick<
   AiConversationSpawnSubagentToolCall,
@@ -44547,6 +44892,7 @@ export type FavoriteConnectionFragment = { __typename: "FavoriteConnection" } & 
       | "updatedAt"
       | "folderName"
       | "sortOrder"
+      | "liveFolderPreset"
       | "initiativeTab"
       | "projectTab"
       | "pipelineTab"
@@ -44555,6 +44901,7 @@ export type FavoriteConnectionFragment = { __typename: "FavoriteConnection" } & 
       | "type"
       | "predefinedViewType"
       | "id"
+      | "liveFolderDefinition"
       | "url"
     > & {
         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
@@ -58593,6 +58940,7 @@ export type FavoriteQuery = { __typename?: "Query" } & {
     | "updatedAt"
     | "folderName"
     | "sortOrder"
+    | "liveFolderPreset"
     | "initiativeTab"
     | "projectTab"
     | "pipelineTab"
@@ -58601,6 +58949,7 @@ export type FavoriteQuery = { __typename?: "Query" } & {
     | "type"
     | "predefinedViewType"
     | "id"
+    | "liveFolderDefinition"
     | "url"
   > & {
       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
@@ -58643,6 +58992,7 @@ export type Favorite_ChildrenQuery = { __typename?: "Query" } & {
           | "updatedAt"
           | "folderName"
           | "sortOrder"
+          | "liveFolderPreset"
           | "initiativeTab"
           | "projectTab"
           | "pipelineTab"
@@ -58651,6 +59001,7 @@ export type Favorite_ChildrenQuery = { __typename?: "Query" } & {
           | "type"
           | "predefinedViewType"
           | "id"
+          | "liveFolderDefinition"
           | "url"
         > & {
             customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
@@ -58698,6 +59049,7 @@ export type FavoritesQuery = { __typename?: "Query" } & {
         | "updatedAt"
         | "folderName"
         | "sortOrder"
+        | "liveFolderPreset"
         | "initiativeTab"
         | "projectTab"
         | "pipelineTab"
@@ -58706,6 +59058,7 @@ export type FavoritesQuery = { __typename?: "Query" } & {
         | "type"
         | "predefinedViewType"
         | "id"
+        | "liveFolderDefinition"
         | "url"
       > & {
           customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
@@ -75357,10 +75710,12 @@ export type DeleteIntegrationTemplateMutation = { __typename?: "Mutation" } & {
 };
 
 export type IntegrationZendeskMutationVariables = Exact<{
+  accessToken?: InputMaybe<Scalars["String"]>;
   botUserRole?: InputMaybe<Scalars["String"]>;
-  code: Scalars["String"];
-  redirectUri: Scalars["String"];
-  scope: Scalars["String"];
+  code?: InputMaybe<Scalars["String"]>;
+  customApiUrl?: InputMaybe<Scalars["String"]>;
+  redirectUri?: InputMaybe<Scalars["String"]>;
+  scope?: InputMaybe<Scalars["String"]>;
   subdomain: Scalars["String"];
 }>;
 
@@ -83323,6 +83678,8 @@ export const AiConversationErrorPartFragmentDoc = new TypedDocumentString(
   retryResolution {
     ...AgentAutomationRetryResolution
   }
+  usageLimitScope
+  usageLimitResetsAt
   type
   message
 }
@@ -84599,6 +84956,43 @@ fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
 }`,
   { fragmentName: "AiConversationReadSandboxFileToolCall" }
 ) as unknown as TypedDocumentString<AiConversationReadSandboxFileToolCallFragment, unknown>;
+export const AiConversationRemoveSpendLimitToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationRemoveSpendLimitToolCallArgs on AiConversationRemoveSpendLimitToolCallArgs {
+  __typename
+  summary
+}
+    `,
+  { fragmentName: "AiConversationRemoveSpendLimitToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationRemoveSpendLimitToolCallArgsFragment, unknown>;
+export const AiConversationRemoveSpendLimitToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationRemoveSpendLimitToolCall on AiConversationRemoveSpendLimitToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationRemoveSpendLimitToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationRemoveSpendLimitToolCallArgs on AiConversationRemoveSpendLimitToolCallArgs {
+  __typename
+  summary
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationRemoveSpendLimitToolCall" }
+) as unknown as TypedDocumentString<AiConversationRemoveSpendLimitToolCallFragment, unknown>;
 export const AiConversationResearchToolCallArgsFragmentDoc = new TypedDocumentString(
   `
     fragment AiConversationResearchToolCallArgs on AiConversationResearchToolCallArgs {
@@ -84912,6 +85306,43 @@ fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
 }`,
   { fragmentName: "AiConversationSearchEntitiesToolCall" }
 ) as unknown as TypedDocumentString<AiConversationSearchEntitiesToolCallFragment, unknown>;
+export const AiConversationSetSpendLimitToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationSetSpendLimitToolCallArgs on AiConversationSetSpendLimitToolCallArgs {
+  __typename
+  summary
+}
+    `,
+  { fragmentName: "AiConversationSetSpendLimitToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationSetSpendLimitToolCallArgsFragment, unknown>;
+export const AiConversationSetSpendLimitToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationSetSpendLimitToolCall on AiConversationSetSpendLimitToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationSetSpendLimitToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationSetSpendLimitToolCallArgs on AiConversationSetSpendLimitToolCallArgs {
+  __typename
+  summary
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationSetSpendLimitToolCall" }
+) as unknown as TypedDocumentString<AiConversationSetSpendLimitToolCallFragment, unknown>;
 export const AiConversationSpawnSubagentToolCallArgsFragmentDoc = new TypedDocumentString(
   `
     fragment AiConversationSpawnSubagentToolCallArgs on AiConversationSpawnSubagentToolCallArgs {
@@ -85420,6 +85851,9 @@ export const AiConversationToolCallPartFragmentDoc = new TypedDocumentString(
     ... on AiConversationReadSandboxFileToolCall {
       ...AiConversationReadSandboxFileToolCall
     }
+    ... on AiConversationRemoveSpendLimitToolCall {
+      ...AiConversationRemoveSpendLimitToolCall
+    }
     ... on AiConversationResearchToolCall {
       ...AiConversationResearchToolCall
     }
@@ -85437,6 +85871,9 @@ export const AiConversationToolCallPartFragmentDoc = new TypedDocumentString(
     }
     ... on AiConversationSearchEntitiesToolCall {
       ...AiConversationSearchEntitiesToolCall
+    }
+    ... on AiConversationSetSpendLimitToolCall {
+      ...AiConversationSetSpendLimitToolCall
     }
     ... on AiConversationSpawnSubagentToolCall {
       ...AiConversationSpawnSubagentToolCall
@@ -85913,6 +86350,22 @@ fragment AiConversationReadSandboxFileToolCallArgs on AiConversationReadSandboxF
   __typename
   path
 }
+fragment AiConversationRemoveSpendLimitToolCall on AiConversationRemoveSpendLimitToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationRemoveSpendLimitToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationRemoveSpendLimitToolCallArgs on AiConversationRemoveSpendLimitToolCallArgs {
+  __typename
+  summary
+}
 fragment AiConversationResearchToolCall on AiConversationResearchToolCall {
   __typename
   rawArgs
@@ -86035,6 +86488,22 @@ fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSea
   __typename
   id
   type
+}
+fragment AiConversationSetSpendLimitToolCall on AiConversationSetSpendLimitToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationSetSpendLimitToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationSetSpendLimitToolCallArgs on AiConversationSetSpendLimitToolCallArgs {
+  __typename
+  summary
 }
 fragment AiConversationSpawnSubagentToolCall on AiConversationSpawnSubagentToolCall {
   __typename
@@ -86581,6 +87050,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     ... on AiConversationReadSandboxFileToolCall {
       ...AiConversationReadSandboxFileToolCall
     }
+    ... on AiConversationRemoveSpendLimitToolCall {
+      ...AiConversationRemoveSpendLimitToolCall
+    }
     ... on AiConversationResearchToolCall {
       ...AiConversationResearchToolCall
     }
@@ -86598,6 +87070,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     }
     ... on AiConversationSearchEntitiesToolCall {
       ...AiConversationSearchEntitiesToolCall
+    }
+    ... on AiConversationSetSpendLimitToolCall {
+      ...AiConversationSetSpendLimitToolCall
     }
     ... on AiConversationSpawnSubagentToolCall {
       ...AiConversationSpawnSubagentToolCall
@@ -86658,6 +87133,8 @@ fragment AiConversationErrorPart on AiConversationErrorPart {
   retryResolution {
     ...AgentAutomationRetryResolution
   }
+  usageLimitScope
+  usageLimitResetsAt
   type
   message
 }
@@ -87161,6 +87638,22 @@ fragment AiConversationReadSandboxFileToolCallArgs on AiConversationReadSandboxF
   __typename
   path
 }
+fragment AiConversationRemoveSpendLimitToolCall on AiConversationRemoveSpendLimitToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationRemoveSpendLimitToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationRemoveSpendLimitToolCallArgs on AiConversationRemoveSpendLimitToolCallArgs {
+  __typename
+  summary
+}
 fragment AiConversationResearchToolCall on AiConversationResearchToolCall {
   __typename
   rawArgs
@@ -87283,6 +87776,22 @@ fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSea
   __typename
   id
   type
+}
+fragment AiConversationSetSpendLimitToolCall on AiConversationSetSpendLimitToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationSetSpendLimitToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationSetSpendLimitToolCallArgs on AiConversationSetSpendLimitToolCallArgs {
+  __typename
+  summary
 }
 fragment AiConversationSpawnSubagentToolCall on AiConversationSpawnSubagentToolCall {
   __typename
@@ -94070,6 +94579,39 @@ export const IssueLabelChildWebhookPayloadFragmentDoc = new TypedDocumentString(
     `,
   { fragmentName: "IssueLabelChildWebhookPayload" }
 ) as unknown as TypedDocumentString<IssueLabelChildWebhookPayloadFragment, unknown>;
+export const ReleaseChildWebhookPayloadFragmentDoc = new TypedDocumentString(
+  `
+    fragment ReleaseChildWebhookPayload on ReleaseChildWebhookPayload {
+  __typename
+  id
+  stage {
+    ...ReleaseStageChildWebhookPayload
+  }
+  name
+  pipeline {
+    ...ReleasePipelineChildWebhookPayload
+  }
+  completedAt
+  version
+}
+    fragment ReleasePipelineChildWebhookPayload on ReleasePipelineChildWebhookPayload {
+  __typename
+  id
+  url
+  name
+  slugId
+  type
+}
+fragment ReleaseStageChildWebhookPayload on ReleaseStageChildWebhookPayload {
+  __typename
+  id
+  color
+  name
+  position
+  type
+}`,
+  { fragmentName: "ReleaseChildWebhookPayload" }
+) as unknown as TypedDocumentString<ReleaseChildWebhookPayloadFragment, unknown>;
 export const IssueWebhookPayloadFragmentDoc = new TypedDocumentString(
   `
     fragment IssueWebhookPayload on IssueWebhookPayload {
@@ -94123,6 +94665,9 @@ export const IssueWebhookPayloadFragmentDoc = new TypedDocumentString(
   sortOrder
   subIssueSortOrder
   priority
+  milestone {
+    ...ProjectMilestoneChildWebhookPayload
+  }
   projectMilestone {
     ...ProjectMilestoneChildWebhookPayload
   }
@@ -94130,6 +94675,9 @@ export const IssueWebhookPayloadFragmentDoc = new TypedDocumentString(
     ...ProjectChildWebhookPayload
   }
   reactionData
+  releases {
+    ...ReleaseChildWebhookPayload
+  }
   team {
     ...TeamChildWebhookPayload
   }
@@ -94178,6 +94726,35 @@ fragment ProjectChildWebhookPayload on ProjectChildWebhookPayload {
   id
   url
   name
+}
+fragment ReleasePipelineChildWebhookPayload on ReleasePipelineChildWebhookPayload {
+  __typename
+  id
+  url
+  name
+  slugId
+  type
+}
+fragment ReleaseStageChildWebhookPayload on ReleaseStageChildWebhookPayload {
+  __typename
+  id
+  color
+  name
+  position
+  type
+}
+fragment ReleaseChildWebhookPayload on ReleaseChildWebhookPayload {
+  __typename
+  id
+  stage {
+    ...ReleaseStageChildWebhookPayload
+  }
+  name
+  pipeline {
+    ...ReleasePipelineChildWebhookPayload
+  }
+  completedAt
+  version
 }
 fragment TeamChildWebhookPayload on TeamChildWebhookPayload {
   __typename
@@ -94249,6 +94826,35 @@ fragment ProjectChildWebhookPayload on ProjectChildWebhookPayload {
   id
   url
   name
+}
+fragment ReleasePipelineChildWebhookPayload on ReleasePipelineChildWebhookPayload {
+  __typename
+  id
+  url
+  name
+  slugId
+  type
+}
+fragment ReleaseStageChildWebhookPayload on ReleaseStageChildWebhookPayload {
+  __typename
+  id
+  color
+  name
+  position
+  type
+}
+fragment ReleaseChildWebhookPayload on ReleaseChildWebhookPayload {
+  __typename
+  id
+  stage {
+    ...ReleaseStageChildWebhookPayload
+  }
+  name
+  pipeline {
+    ...ReleasePipelineChildWebhookPayload
+  }
+  completedAt
+  version
 }
 fragment TeamChildWebhookPayload on TeamChildWebhookPayload {
   __typename
@@ -94335,6 +94941,9 @@ fragment IssueWebhookPayload on IssueWebhookPayload {
   sortOrder
   subIssueSortOrder
   priority
+  milestone {
+    ...ProjectMilestoneChildWebhookPayload
+  }
   projectMilestone {
     ...ProjectMilestoneChildWebhookPayload
   }
@@ -94342,6 +94951,9 @@ fragment IssueWebhookPayload on IssueWebhookPayload {
     ...ProjectChildWebhookPayload
   }
   reactionData
+  releases {
+    ...ReleaseChildWebhookPayload
+  }
   team {
     ...TeamChildWebhookPayload
   }
@@ -99874,6 +100486,9 @@ export const AiConversationBaseToolCallFragmentDoc = new TypedDocumentString(
   ... on AiConversationReadSandboxFileToolCall {
     ...AiConversationReadSandboxFileToolCall
   }
+  ... on AiConversationRemoveSpendLimitToolCall {
+    ...AiConversationRemoveSpendLimitToolCall
+  }
   ... on AiConversationResearchToolCall {
     ...AiConversationResearchToolCall
   }
@@ -99891,6 +100506,9 @@ export const AiConversationBaseToolCallFragmentDoc = new TypedDocumentString(
   }
   ... on AiConversationSearchEntitiesToolCall {
     ...AiConversationSearchEntitiesToolCall
+  }
+  ... on AiConversationSetSpendLimitToolCall {
+    ...AiConversationSetSpendLimitToolCall
   }
   ... on AiConversationSpawnSubagentToolCall {
     ...AiConversationSpawnSubagentToolCall
@@ -100356,6 +100974,22 @@ fragment AiConversationReadSandboxFileToolCallArgs on AiConversationReadSandboxF
   __typename
   path
 }
+fragment AiConversationRemoveSpendLimitToolCall on AiConversationRemoveSpendLimitToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationRemoveSpendLimitToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationRemoveSpendLimitToolCallArgs on AiConversationRemoveSpendLimitToolCallArgs {
+  __typename
+  summary
+}
 fragment AiConversationResearchToolCall on AiConversationResearchToolCall {
   __typename
   rawArgs
@@ -100478,6 +101112,22 @@ fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSea
   __typename
   id
   type
+}
+fragment AiConversationSetSpendLimitToolCall on AiConversationSetSpendLimitToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationSetSpendLimitToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationSetSpendLimitToolCallArgs on AiConversationSetSpendLimitToolCallArgs {
+  __typename
+  summary
 }
 fragment AiConversationSpawnSubagentToolCall on AiConversationSpawnSubagentToolCall {
   __typename
@@ -103409,6 +104059,7 @@ export const FavoriteFragmentDoc = new TypedDocumentString(
     id
   }
   sortOrder
+  liveFolderPreset
   initiativeTab
   projectTab
   pipelineTab
@@ -103423,6 +104074,7 @@ export const FavoriteFragmentDoc = new TypedDocumentString(
   owner {
     id
   }
+  liveFolderDefinition
   url
   projectTeam {
     id
@@ -103492,6 +104144,7 @@ export const FavoriteConnectionFragmentDoc = new TypedDocumentString(
     id
   }
   sortOrder
+  liveFolderPreset
   initiativeTab
   projectTab
   pipelineTab
@@ -103506,6 +104159,7 @@ export const FavoriteConnectionFragmentDoc = new TypedDocumentString(
   owner {
     id
   }
+  liveFolderDefinition
   url
   projectTeam {
     id
@@ -119185,6 +119839,7 @@ export const FavoriteDocument = new TypedDocumentString(`
     id
   }
   sortOrder
+  liveFolderPreset
   initiativeTab
   projectTab
   pipelineTab
@@ -119199,6 +119854,7 @@ export const FavoriteDocument = new TypedDocumentString(`
   owner {
     id
   }
+  liveFolderDefinition
   url
   projectTeam {
     id
@@ -119269,6 +119925,7 @@ export const Favorite_ChildrenDocument = new TypedDocumentString(`
     id
   }
   sortOrder
+  liveFolderPreset
   initiativeTab
   projectTab
   pipelineTab
@@ -119283,6 +119940,7 @@ export const Favorite_ChildrenDocument = new TypedDocumentString(`
   owner {
     id
   }
+  liveFolderDefinition
   url
   projectTeam {
     id
@@ -119367,6 +120025,7 @@ export const FavoritesDocument = new TypedDocumentString(`
     id
   }
   sortOrder
+  liveFolderPreset
   initiativeTab
   projectTab
   pipelineTab
@@ -119381,6 +120040,7 @@ export const FavoritesDocument = new TypedDocumentString(`
   owner {
     id
   }
+  liveFolderDefinition
   url
   projectTeam {
     id
@@ -142661,10 +143321,12 @@ export const DeleteIntegrationTemplateDocument = new TypedDocumentString(`
   success
 }`) as unknown as TypedDocumentString<DeleteIntegrationTemplateMutation, DeleteIntegrationTemplateMutationVariables>;
 export const IntegrationZendeskDocument = new TypedDocumentString(`
-    mutation integrationZendesk($botUserRole: String, $code: String!, $redirectUri: String!, $scope: String!, $subdomain: String!) {
+    mutation integrationZendesk($accessToken: String, $botUserRole: String, $code: String, $customApiUrl: String, $redirectUri: String, $scope: String, $subdomain: String!) {
   integrationZendesk(
+    accessToken: $accessToken
     botUserRole: $botUserRole
     code: $code
+    customApiUrl: $customApiUrl
     redirectUri: $redirectUri
     scope: $scope
     subdomain: $subdomain

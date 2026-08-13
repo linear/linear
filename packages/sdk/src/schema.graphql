@@ -703,6 +703,14 @@ enum AgentAutomationRetryResolutionStatus {
 }
 
 """
+The scope of the usage limit that blocked a loop run: the loop's own limit or the workspace-wide limit.
+"""
+enum AgentAutomationUsageLimitScope {
+  loop
+  workspace
+}
+
+"""
 A session representing an AI coding agent's work on an issue or conversation. Agent sessions track the lifecycle of an agent's engagement, from creation through active work to completion or dismissal. Each session is associated with an agent user (the bot), optionally a human creator, an issue, and a comment thread where the agent posts updates. Sessions contain activities that record the agent's observable steps and can be linked to pull requests created during the work.
 """
 type AgentSession implements Node {
@@ -2073,6 +2081,14 @@ type AiConversationErrorPart implements AiConversationBasePart {
   The type of the part.
   """
   type: AiConversationPartType!
+  """
+  The time when the breached usage limit resets, as an ISO 8601 string. Null when unknown or for other error categories.
+  """
+  usageLimitResetsAt: String
+  """
+  The scope of the breached limit for usage-limit errors. Null for other error categories.
+  """
+  usageLimitScope: AgentAutomationUsageLimitScope
 }
 
 """
@@ -2080,8 +2096,10 @@ The category of an error part in an AI conversation.
 """
 enum AiConversationErrorType {
   billing
+  featureDisabled
   unknown
   untrustedSources
+  usageLimit
 }
 
 """
@@ -2709,6 +2727,30 @@ type AiConversationReasoningPart implements AiConversationBasePart {
   type: AiConversationPartType!
 }
 
+type AiConversationRemoveSpendLimitToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationRemoveSpendLimitToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationRemoveSpendLimitToolCallArgs {
+  summary: String
+}
+
 type AiConversationResearchToolCall implements AiConversationBaseToolCall {
   """
   The arguments to the tool call.
@@ -2869,6 +2911,30 @@ type AiConversationSearchEntitiesToolCallResult {
 type AiConversationSearchEntitiesToolCallResultEntities {
   id: String!
   type: String!
+}
+
+type AiConversationSetSpendLimitToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationSetSpendLimitToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationSetSpendLimitToolCallArgs {
+  summary: String
 }
 
 type AiConversationSpawnSubagentToolCall implements AiConversationBaseToolCall {
@@ -3079,12 +3145,14 @@ enum AiConversationTool {
   QueryView
   ReadFile
   ReadSandboxFile
+  RemoveSpendLimit
   Research
   RestoreEntity
   RetrieveEntities
   RetryPullRequestCheck
   SearchDocumentation
   SearchEntities
+  SetSpendLimit
   SpawnSubagent
   StartCodingSession
   SubscribeToEvent
@@ -3122,12 +3190,14 @@ union AiConversationToolCall =
   | AiConversationQueryViewToolCall
   | AiConversationReadFileToolCall
   | AiConversationReadSandboxFileToolCall
+  | AiConversationRemoveSpendLimitToolCall
   | AiConversationResearchToolCall
   | AiConversationRestoreEntityToolCall
   | AiConversationRetrieveEntitiesToolCall
   | AiConversationRetryPullRequestCheckToolCall
   | AiConversationSearchDocumentationToolCall
   | AiConversationSearchEntitiesToolCall
+  | AiConversationSetSpendLimitToolCall
   | AiConversationSpawnSubagentToolCall
   | AiConversationStartCodingSessionToolCall
   | AiConversationSubscribeToEventToolCall
@@ -10607,6 +10677,10 @@ type Draft implements Node {
   """
   projectUpdate: ProjectUpdate
   """
+  The pull request for which this is a draft comment. Null if the draft belongs to a different parent entity type.
+  """
+  pullRequest: PullRequest
+  """
   The team for which this is a draft post. Null if the draft belongs to a different parent entity type.
   """
   team: Team
@@ -11282,6 +11356,28 @@ input EntityExternalLinkUpdateInput {
 }
 
 """
+Comparator for project and initiative identifiers. Accepts UUIDs and human-readable identifiers (e.g. "PROJ-123").
+"""
+input EntityIdentifierIDComparator {
+  """
+  Equals constraint.
+  """
+  eq: ID
+  """
+  In-array constraint.
+  """
+  in: [ID!]
+  """
+  Not-equals constraint.
+  """
+  neq: ID
+  """
+  Not-in-array constraint.
+  """
+  nin: [ID!]
+}
+
+"""
 Payload for entity-related webhook events.
 """
 type EntityWebhookPayload {
@@ -11793,6 +11889,14 @@ type Favorite implements Node {
   """
   label: IssueLabel
   """
+  The versioned lazy root and filter represented by this live favorite folder.
+  """
+  liveFolderDefinition: JSONObject
+  """
+  The predefined live folder represented by this favorite.
+  """
+  liveFolderPreset: String
+  """
   The user who owns this favorite. Favorites are personal and only visible to their owner.
   """
   owner: User!
@@ -11941,6 +12045,10 @@ input FavoriteCreateInput {
   The identifier of the label to favorite.
   """
   labelId: String
+  """
+  The predefined live folder to create.
+  """
+  liveFolderPreset: String
   """
   The parent folder of the favorite.
   """
@@ -13584,6 +13692,10 @@ input InitiativeCollectionFilter {
   """
   creator: NullableUserFilter
   """
+  [Internal] Comparator for the initiative's custom identifier.
+  """
+  customIdentifier: NullableStringComparator
+  """
   Filters that needs to be matched by all initiatives.
   """
   every: InitiativeFilter
@@ -13598,7 +13710,7 @@ input InitiativeCollectionFilter {
   """
   Comparator for the identifier.
   """
-  id: IDComparator
+  id: EntityIdentifierIDComparator
   """
   Filters that the initiative updates must satisfy.
   """
@@ -13788,6 +13900,10 @@ input InitiativeFilter {
   """
   creator: NullableUserFilter
   """
+  [Internal] Comparator for the initiative's custom identifier.
+  """
+  customIdentifier: NullableStringComparator
+  """
   Comparator for the initiative health: onTrack, atRisk, offTrack
   """
   health: StringComparator
@@ -13798,7 +13914,7 @@ input InitiativeFilter {
   """
   Comparator for the identifier.
   """
-  id: IDComparator
+  id: EntityIdentifierIDComparator
   """
   Filters that the initiative updates must satisfy.
   """
@@ -21760,6 +21876,10 @@ type IssueWebhookPayload {
   """
   lastAppliedTemplateId: String
   """
+  The project milestone that the issue belongs to.
+  """
+  milestone: ProjectMilestoneChildWebhookPayload @deprecated(reason: "Use `projectMilestone` instead.")
+  """
   The issue's unique number.
   """
   number: Float!
@@ -21807,6 +21927,10 @@ type IssueWebhookPayload {
   The ID of the recurring issue template that created the issue.
   """
   recurringIssueTemplateId: String
+  """
+  The releases associated with this issue.
+  """
+  releases: [ReleaseChildWebhookPayload!]!
   """
   The time at which the issue would breach its SLA.
   """
@@ -24687,21 +24811,29 @@ type Mutation {
   """
   integrationZendesk(
     """
+    [INTERNAL] Bearer token that authenticates API requests instead of a Zendesk OAuth token. Requires `customApiUrl`; no OAuth exchange is performed.
+    """
+    accessToken: String
+    """
     The role to assign to the Linear bot user in Zendesk.
     """
     botUserRole: String
     """
-    The Zendesk OAuth code.
+    The Zendesk OAuth code. Required unless connecting with `accessToken`.
     """
-    code: String!
+    code: String
     """
-    The Zendesk OAuth redirect URI.
+    [INTERNAL] Custom base URL for Zendesk API requests, such as a proxy in front of Zendesk. OAuth requests always use the standard subdomain URL.
     """
-    redirectUri: String!
+    customApiUrl: String
     """
-    The Zendesk OAuth scopes.
+    The Zendesk OAuth redirect URI. Required when connecting with `code`.
     """
-    scope: String!
+    redirectUri: String
+    """
+    The Zendesk OAuth scopes. Required when connecting with `code`.
+    """
+    scope: String
     """
     The Zendesk installation subdomain.
     """
@@ -28185,6 +28317,10 @@ input NullableInitiativeFilter {
   """
   creator: NullableUserFilter
   """
+  [Internal] Comparator for the initiative's custom identifier.
+  """
+  customIdentifier: NullableStringComparator
+  """
   Comparator for the initiative health: onTrack, atRisk, offTrack
   """
   health: StringComparator
@@ -28195,7 +28331,7 @@ input NullableInitiativeFilter {
   """
   Comparator for the identifier.
   """
-  id: IDComparator
+  id: EntityIdentifierIDComparator
   """
   Filters that the initiative updates must satisfy.
   """
@@ -28665,6 +28801,10 @@ input NullableProjectFilter {
   """
   creator: UserFilter
   """
+  [Internal] Comparator for the project's custom identifier.
+  """
+  customIdentifier: NullableStringComparator
+  """
   Count of customers
   """
   customerCount: NumberComparator
@@ -28707,7 +28847,7 @@ input NullableProjectFilter {
   """
   Comparator for the identifier.
   """
-  id: IDComparator
+  id: EntityIdentifierIDComparator
   """
   Filters that the projects initiatives must satisfy.
   """
@@ -33015,6 +33155,10 @@ input ProjectCollectionFilter {
   """
   creator: UserFilter
   """
+  [Internal] Comparator for the project's custom identifier.
+  """
+  customIdentifier: NullableStringComparator
+  """
   Count of customers
   """
   customerCount: NumberComparator
@@ -33061,7 +33205,7 @@ input ProjectCollectionFilter {
   """
   Comparator for the identifier.
   """
-  id: IDComparator
+  id: EntityIdentifierIDComparator
   """
   Filters that the projects initiatives must satisfy.
   """
@@ -33327,6 +33471,10 @@ input ProjectFilter {
   """
   creator: UserFilter
   """
+  [Internal] Comparator for the project's custom identifier.
+  """
+  customIdentifier: NullableStringComparator
+  """
   Count of customers
   """
   customerCount: NumberComparator
@@ -33369,7 +33517,7 @@ input ProjectFilter {
   """
   Comparator for the identifier.
   """
-  id: IDComparator
+  id: EntityIdentifierIDComparator
   """
   Filters that the projects initiatives must satisfy.
   """
@@ -35706,6 +35854,10 @@ type ProjectStatus implements Node {
   """
   indefinite: Boolean!
   """
+  [Internal] The original workspace or parent-team status that this status was inherited from. Null if the status is not inherited.
+  """
+  inheritedFrom: ProjectStatus
+  """
   The name of the status.
   """
   name: String!
@@ -35713,6 +35865,10 @@ type ProjectStatus implements Node {
   The position of the status within its type group in the workspace's project flow. Used for ordering statuses of the same type.
   """
   position: Float!
+  """
+  [Internal] The team that the status is scoped to. If null, the status is a workspace-level status available to all teams in the workspace.
+  """
+  team: Team
   """
   The category type of the project status (e.g., backlog, planned, started, paused, completed, canceled). Determines the status's behavior and position in the project lifecycle.
   """
@@ -37622,6 +37778,15 @@ type Query {
   List of audit entry types.
   """
   auditEntryTypes: [AuditEntryType!]!
+  """
+  [INTERNAL] Failure events for an audit log webhook (last 50).
+  """
+  auditLogWebhookFailureEvents(
+    """
+    The identifier of the audit log webhook.
+    """
+    webhookId: String!
+  ): [WebhookFailureEvent!]!
   """
   User's active sessions.
   """
@@ -40652,6 +40817,36 @@ enum ReleaseChannel {
 }
 
 """
+Certain properties of a release.
+"""
+type ReleaseChildWebhookPayload {
+  """
+  The time at which the release was completed.
+  """
+  completedAt: String
+  """
+  The ID of the release.
+  """
+  id: String!
+  """
+  The name of the release.
+  """
+  name: String!
+  """
+  The pipeline this release belongs to.
+  """
+  pipeline: ReleasePipelineChildWebhookPayload
+  """
+  The current stage of the release.
+  """
+  stage: ReleaseStageChildWebhookPayload
+  """
+  The version of the release.
+  """
+  version: String
+}
+
+"""
 Release collection filtering options.
 """
 input ReleaseCollectionFilter {
@@ -43531,6 +43726,10 @@ input SourceMetadataComparator {
   Comparator for the sub type.
   """
   subType: SubTypeComparator
+  """
+  Comparator for the workflow definition that created the issue.
+  """
+  workflowDefinitionId: WorkflowDefinitionIdComparator
 }
 
 """
@@ -44141,6 +44340,10 @@ type Subscription {
   Triggered when an user is created
   """
   userCreated: User!
+  """
+  Triggered when an user settings is updated
+  """
+  userSettingsUpdated: UserSettings!
   """
   Triggered when an user is updated
   """
@@ -49886,6 +50089,32 @@ type WorkflowDefinition implements Node {
 }
 
 """
+Comparator for the workflow definition that created an issue.
+"""
+input WorkflowDefinitionIdComparator {
+  """
+  Equals constraint.
+  """
+  eq: ID
+  """
+  In-array constraint.
+  """
+  in: [ID!]
+  """
+  Not-equals constraint.
+  """
+  neq: ID
+  """
+  Not-in-array constraint.
+  """
+  nin: [ID!]
+  """
+  Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.
+  """
+  null: Boolean
+}
+
+"""
 A notification related to an automation workflow definition (loop), such as runs that failed to start.
 """
 type WorkflowDefinitionNotification implements Entity & Node & Notification {
@@ -49905,6 +50134,10 @@ type WorkflowDefinitionNotification implements Entity & Node & Notification {
   [Internal] Notification actor initials if avatar is not available.
   """
   actorInitials: String
+  """
+  [Internal] The AI conversation identifier for the related loop run, if one was created.
+  """
+  aiConversationId: String
   """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
@@ -50337,6 +50570,10 @@ input ZendeskSettingsInput {
   """
   automateTicketReopeningOnProjectCompletion: Boolean
   """
+  [INTERNAL] Whether API requests authenticate with a user-provided bearer token instead of a Zendesk OAuth token. Only used together with `customApiUrl`.
+  """
+  bearerTokenAuth: Boolean
+  """
   The ID of the Linear bot user.
   """
   botUserId: String
@@ -50344,6 +50581,10 @@ input ZendeskSettingsInput {
   [INTERNAL] Temporary flag indicating if the integration has the necessary scopes for Customers
   """
   canReadCustomers: Boolean
+  """
+  [INTERNAL] Custom base URL for Zendesk API requests, such as a proxy in front of Zendesk. When unset, API requests use the standard subdomain URL. OAuth requests always use the standard subdomain URL.
+  """
+  customApiUrl: String
   """
   [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue.
   """
@@ -50377,7 +50618,7 @@ input ZendeskSettingsInput {
   """
   supportsOAuthRefresh: Boolean
   """
-  The URL of the connected Zendesk organization.
+  The URL of the connected Zendesk organization, used to link into Zendesk. API requests use `customApiUrl` when it is set.
   """
   url: String!
 }

@@ -4464,6 +4464,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     ... on AiConversationReadSandboxFileToolCall {
       ...AiConversationReadSandboxFileToolCall
     }
+    ... on AiConversationRemoveSpendLimitToolCall {
+      ...AiConversationRemoveSpendLimitToolCall
+    }
     ... on AiConversationResearchToolCall {
       ...AiConversationResearchToolCall
     }
@@ -4481,6 +4484,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     }
     ... on AiConversationSearchEntitiesToolCall {
       ...AiConversationSearchEntitiesToolCall
+    }
+    ... on AiConversationSetSpendLimitToolCall {
+      ...AiConversationSetSpendLimitToolCall
     }
     ... on AiConversationSpawnSubagentToolCall {
       ...AiConversationSpawnSubagentToolCall
@@ -4711,6 +4717,8 @@ fragment Favorite on Favorite {
   }
   # The position of this item in the user's favorites list. Lower values appear first. Used to maintain user-defined ordering within the sidebar.
   sortOrder
+  # The predefined live folder represented by this favorite.
+  liveFolderPreset
   # The targeted tab of the initiative.
   initiativeTab
   # The targeted tab of the project.
@@ -4735,6 +4743,8 @@ fragment Favorite on Favorite {
   owner {
     id
   }
+  # The versioned lazy root and filter represented by this live favorite folder.
+  liveFolderDefinition
   # URL of the favorited entity. Folders return 'null' value.
   url
   # [DEPRECATED] The favorited team of the project.
@@ -5757,6 +5767,10 @@ fragment AiConversationErrorPart on AiConversationErrorPart {
   retryResolution {
     ...AgentAutomationRetryResolution
   }
+  # The scope of the breached limit for usage-limit errors. Null for other error categories.
+  usageLimitScope
+  # The time when the breached usage limit resets, as an ISO 8601 string. Null when unknown or for other error categories.
+  usageLimitResetsAt
   # The type of the part.
   type
   # The user-facing error message for the failed AI response.
@@ -6515,6 +6529,27 @@ fragment ReleaseStageChildWebhookPayload on ReleaseStageChildWebhookPayload {
   position
   # The type of the stage.
   type
+}
+
+# Certain properties of a release.
+fragment ReleaseChildWebhookPayload on ReleaseChildWebhookPayload {
+  __typename
+  # The ID of the release.
+  id
+  # The current stage of the release.
+  stage {
+    ...ReleaseStageChildWebhookPayload
+  }
+  # The name of the release.
+  name
+  # The pipeline this release belongs to.
+  pipeline {
+    ...ReleasePipelineChildWebhookPayload
+  }
+  # The time at which the release was completed.
+  completedAt
+  # The version of the release.
+  version
 }
 
 # Certain properties of a team.
@@ -8620,6 +8655,10 @@ fragment IssueWebhookPayload on IssueWebhookPayload {
   # The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
   priority
   # The project milestone that the issue belongs to.
+  milestone {
+    ...ProjectMilestoneChildWebhookPayload
+  }
+  # The project milestone that the issue belongs to.
   projectMilestone {
     ...ProjectMilestoneChildWebhookPayload
   }
@@ -8629,6 +8668,10 @@ fragment IssueWebhookPayload on IssueWebhookPayload {
   }
   # The reaction data for this issue.
   reactionData
+  # The releases associated with this issue.
+  releases {
+    ...ReleaseChildWebhookPayload
+  }
   # The team that the issue belongs to.
   team {
     ...TeamChildWebhookPayload
@@ -11044,6 +11087,10 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
     ...AiConversationReadSandboxFileToolCall
   }
 
+  ... on AiConversationRemoveSpendLimitToolCall {
+    ...AiConversationRemoveSpendLimitToolCall
+  }
+
   ... on AiConversationResearchToolCall {
     ...AiConversationResearchToolCall
   }
@@ -11066,6 +11113,10 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
 
   ... on AiConversationSearchEntitiesToolCall {
     ...AiConversationSearchEntitiesToolCall
+  }
+
+  ... on AiConversationSetSpendLimitToolCall {
+    ...AiConversationSetSpendLimitToolCall
   }
 
   ... on AiConversationSpawnSubagentToolCall {
@@ -11760,6 +11811,28 @@ fragment AiConversationReadSandboxFileToolCallArgs on AiConversationReadSandboxF
   path
 }
 
+fragment AiConversationRemoveSpendLimitToolCall on AiConversationRemoveSpendLimitToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationRemoveSpendLimitToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationRemoveSpendLimitToolCallArgs on AiConversationRemoveSpendLimitToolCallArgs {
+  __typename
+  summary
+}
+
 fragment AiConversationResearchToolCall on AiConversationResearchToolCall {
   __typename
   # The arguments of the tool call.
@@ -11920,6 +11993,28 @@ fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSea
   __typename
   id
   type
+}
+
+fragment AiConversationSetSpendLimitToolCall on AiConversationSetSpendLimitToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationSetSpendLimitToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationSetSpendLimitToolCallArgs on AiConversationSetSpendLimitToolCallArgs {
+  __typename
+  summary
 }
 
 fragment AiConversationSpawnSubagentToolCall on AiConversationSpawnSubagentToolCall {
@@ -22904,20 +22999,26 @@ mutation deleteIntegrationTemplate(
 }
 # Integrates the workspace with Zendesk.
 mutation integrationZendesk(
+  # [INTERNAL] Bearer token that authenticates API requests instead of a Zendesk OAuth token. Requires `customApiUrl`; no OAuth exchange is performed.
+  $accessToken: String
   # The role to assign to the Linear bot user in Zendesk.
   $botUserRole: String
-  # The Zendesk OAuth code.
-  $code: String!
-  # The Zendesk OAuth redirect URI.
-  $redirectUri: String!
-  # The Zendesk OAuth scopes.
-  $scope: String!
+  # The Zendesk OAuth code. Required unless connecting with `accessToken`.
+  $code: String
+  # [INTERNAL] Custom base URL for Zendesk API requests, such as a proxy in front of Zendesk. OAuth requests always use the standard subdomain URL.
+  $customApiUrl: String
+  # The Zendesk OAuth redirect URI. Required when connecting with `code`.
+  $redirectUri: String
+  # The Zendesk OAuth scopes. Required when connecting with `code`.
+  $scope: String
   # The Zendesk installation subdomain.
   $subdomain: String!
 ) {
   integrationZendesk(
+    accessToken: $accessToken
     botUserRole: $botUserRole
     code: $code
+    customApiUrl: $customApiUrl
     redirectUri: $redirectUri
     scope: $scope
     subdomain: $subdomain
