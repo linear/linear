@@ -1638,18 +1638,22 @@ export class AiConversationErrorPart extends Request {
     super(request);
     this.id = data.id;
     this.message = data.message;
+    this.usageLimitResetsAt = data.usageLimitResetsAt ?? undefined;
     this.metadata = new AiConversationPartMetadata(request, data.metadata);
     this.retryResolution = data.retryResolution
       ? new AgentAutomationRetryResolution(request, data.retryResolution)
       : undefined;
     this.errorType = data.errorType ?? undefined;
     this.type = data.type;
+    this.usageLimitScope = data.usageLimitScope ?? undefined;
   }
 
   /** The ID of the part. */
   public id: string;
   /** The user-facing error message for the failed AI response. */
   public message: string;
+  /** The time when the breached usage limit resets, as an ISO 8601 string. Null when unknown or for other error categories. */
+  public usageLimitResetsAt?: string | null;
   /** The metadata of the part. */
   public metadata: AiConversationPartMetadata;
   /** The outcome of retrying this error's loop run. Null when the run has not been reconsidered. */
@@ -1658,6 +1662,8 @@ export class AiConversationErrorPart extends Request {
   public errorType?: L.AiConversationErrorType | null;
   /** The type of the part. */
   public type: L.AiConversationPartType;
+  /** The scope of the breached limit for usage-limit errors. Null for other error categories. */
+  public usageLimitScope?: L.AgentAutomationUsageLimitScope | null;
 }
 /**
  * An event part in an AI conversation.
@@ -2583,6 +2589,46 @@ export class AiConversationReasoningPart extends Request {
   public type: L.AiConversationPartType;
 }
 /**
+ * AiConversationRemoveSpendLimitToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationRemoveSpendLimitToolCallFragment response data
+ */
+export class AiConversationRemoveSpendLimitToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationRemoveSpendLimitToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationRemoveSpendLimitToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationRemoveSpendLimitToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationRemoveSpendLimitToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationRemoveSpendLimitToolCallArgsFragment response data
+ */
+export class AiConversationRemoveSpendLimitToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationRemoveSpendLimitToolCallArgsFragment) {
+    super(request);
+    this.summary = data.summary ?? undefined;
+  }
+
+  public summary?: string | null;
+}
+/**
  * AiConversationResearchToolCall model
  *
  * @param request - function to call the graphql client
@@ -2866,6 +2912,46 @@ export class AiConversationSearchEntitiesToolCallResultEntities extends Request 
 
   public id: string;
   public type: string;
+}
+/**
+ * AiConversationSetSpendLimitToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSetSpendLimitToolCallFragment response data
+ */
+export class AiConversationSetSpendLimitToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSetSpendLimitToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationSetSpendLimitToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationSetSpendLimitToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationSetSpendLimitToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSetSpendLimitToolCallArgsFragment response data
+ */
+export class AiConversationSetSpendLimitToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSetSpendLimitToolCallArgsFragment) {
+    super(request);
+    this.summary = data.summary ?? undefined;
+  }
+
+  public summary?: string | null;
 }
 /**
  * AiConversationSpawnSubagentToolCall model
@@ -8636,6 +8722,8 @@ export class Favorite extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.folderName = data.folderName ?? undefined;
     this.id = data.id;
+    this.liveFolderDefinition = data.liveFolderDefinition ?? undefined;
+    this.liveFolderPreset = data.liveFolderPreset ?? undefined;
     this.predefinedViewType = data.predefinedViewType ?? undefined;
     this.sortOrder = data.sortOrder;
     this.type = data.type;
@@ -8672,6 +8760,10 @@ export class Favorite extends Request {
   public folderName?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
+  /** The versioned lazy root and filter represented by this live favorite folder. */
+  public liveFolderDefinition?: L.Scalars["JSONObject"] | null;
+  /** The predefined live folder represented by this favorite. */
+  public liveFolderPreset?: string | null;
   /** The type of favorited predefined view (e.g., 'allIssues', 'activeCycle', 'backlog', 'triage'). Only populated when the favorite type is 'predefinedView'. */
   public predefinedViewType?: string | null;
   /** The position of this item in the user's favorites list. Lower values appear first. Used to maintain user-defined ordering within the sidebar. */
@@ -14201,6 +14293,7 @@ export class IssueWebhookPayload {
     this.externalUserCreator = data.externalUserCreator
       ? new ExternalUserChildWebhookPayload(data.externalUserCreator)
       : undefined;
+    this.milestone = data.milestone ? new ProjectMilestoneChildWebhookPayload(data.milestone) : undefined;
     this.project = data.project ? new ProjectChildWebhookPayload(data.project) : undefined;
     this.projectMilestone = data.projectMilestone
       ? new ProjectMilestoneChildWebhookPayload(data.projectMilestone)
@@ -14208,6 +14301,7 @@ export class IssueWebhookPayload {
     this.state = new WorkflowStateChildWebhookPayload(data.state);
     this.team = data.team ? new TeamChildWebhookPayload(data.team) : undefined;
     this.labels = data.labels.map(node => new IssueLabelChildWebhookPayload(node));
+    this.releases = data.releases.map(node => new ReleaseChildWebhookPayload(node));
   }
 
   /** The time at which the issue was added to a cycle. */
@@ -14320,6 +14414,8 @@ export class IssueWebhookPayload {
   public url: string;
   /** The labels associated with this issue. */
   public labels: IssueLabelChildWebhookPayload[];
+  /** The releases associated with this issue. */
+  public releases: ReleaseChildWebhookPayload[];
   /** The user that is assigned to the issue. */
   public assignee?: UserChildWebhookPayload | null;
   /** The user that created the issue. */
@@ -14330,6 +14426,8 @@ export class IssueWebhookPayload {
   public delegate?: UserChildWebhookPayload | null;
   /** The external user that created the issue. */
   public externalUserCreator?: ExternalUserChildWebhookPayload | null;
+  /** The project milestone that the issue belongs to. */
+  public milestone?: ProjectMilestoneChildWebhookPayload | null;
   /** The project that the issue belongs to. */
   public project?: ProjectChildWebhookPayload | null;
   /** The project milestone that the issue belongs to. */
@@ -19561,6 +19659,34 @@ export class ReleaseArchivePayload extends Request {
   }
 }
 /**
+ * Certain properties of a release.
+ *
+ * @param data - L.ReleaseChildWebhookPayloadFragment response data
+ */
+export class ReleaseChildWebhookPayload {
+  public constructor(data: L.ReleaseChildWebhookPayloadFragment) {
+    this.completedAt = data.completedAt ?? undefined;
+    this.id = data.id;
+    this.name = data.name;
+    this.version = data.version ?? undefined;
+    this.pipeline = data.pipeline ? new ReleasePipelineChildWebhookPayload(data.pipeline) : undefined;
+    this.stage = data.stage ? new ReleaseStageChildWebhookPayload(data.stage) : undefined;
+  }
+
+  /** The time at which the release was completed. */
+  public completedAt?: string | null;
+  /** The ID of the release. */
+  public id: string;
+  /** The name of the release. */
+  public name: string;
+  /** The version of the release. */
+  public version?: string | null;
+  /** The pipeline this release belongs to. */
+  public pipeline?: ReleasePipelineChildWebhookPayload | null;
+  /** The current stage of the release. */
+  public stage?: ReleaseStageChildWebhookPayload | null;
+}
+/**
  * ReleaseConnection model
  *
  * @param request - function to call the graphql client
@@ -21546,6 +21672,10 @@ export class Subscription extends Request {
   /** The ID of triggered when an user is created */
   public get userCreatedId(): string | undefined {
     return this._userCreated?.id;
+  }
+  /** Triggered when an user settings is updated */
+  public get userSettingsUpdated(): LinearFetch<UserSettings> {
+    return new UserSettingsQuery(this._request).fetch();
   }
   /** Triggered when an user is updated */
   public get userUpdated(): LinearFetch<User> | undefined {
@@ -35010,26 +35140,17 @@ export class IntegrationZendeskMutation extends Request {
   /**
    * Call the IntegrationZendesk mutation and return a IntegrationPayload
    *
-   * @param code - required code to pass to integrationZendesk
-   * @param redirectUri - required redirectUri to pass to integrationZendesk
-   * @param scope - required scope to pass to integrationZendesk
    * @param subdomain - required subdomain to pass to integrationZendesk
-   * @param variables - variables without 'code', 'redirectUri', 'scope', 'subdomain' to pass into the IntegrationZendeskMutation
+   * @param variables - variables without 'subdomain' to pass into the IntegrationZendeskMutation
    * @returns parsed response from IntegrationZendeskMutation
    */
   public async fetch(
-    code: string,
-    redirectUri: string,
-    scope: string,
     subdomain: string,
-    variables?: Omit<L.IntegrationZendeskMutationVariables, "code" | "redirectUri" | "scope" | "subdomain">
+    variables?: Omit<L.IntegrationZendeskMutationVariables, "subdomain">
   ): LinearFetch<IntegrationPayload> {
     const response = await this._request<L.IntegrationZendeskMutation, L.IntegrationZendeskMutationVariables>(
       L.IntegrationZendeskDocument.toString(),
       {
-        code,
-        redirectUri,
-        scope,
         subdomain,
         ...variables,
       }
@@ -51626,21 +51747,15 @@ export class LinearSdk extends Request {
   /**
    * Integrates the workspace with Zendesk.
    *
-   * @param code - required code to pass to integrationZendesk
-   * @param redirectUri - required redirectUri to pass to integrationZendesk
-   * @param scope - required scope to pass to integrationZendesk
    * @param subdomain - required subdomain to pass to integrationZendesk
-   * @param variables - variables without 'code', 'redirectUri', 'scope', 'subdomain' to pass into the IntegrationZendeskMutation
+   * @param variables - variables without 'subdomain' to pass into the IntegrationZendeskMutation
    * @returns IntegrationPayload
    */
   public integrationZendesk(
-    code: string,
-    redirectUri: string,
-    scope: string,
     subdomain: string,
-    variables?: Omit<L.IntegrationZendeskMutationVariables, "code" | "redirectUri" | "scope" | "subdomain">
+    variables?: Omit<L.IntegrationZendeskMutationVariables, "subdomain">
   ): LinearFetch<IntegrationPayload> {
-    return new IntegrationZendeskMutation(this._request).fetch(code, redirectUri, scope, subdomain, variables);
+    return new IntegrationZendeskMutation(this._request).fetch(subdomain, variables);
   }
   /**
    * Creates new Slack notification settings for a team, project, initiative, or custom view.
@@ -53400,6 +53515,7 @@ export {
   AgentActivitySignal,
   AgentActivityType,
   AgentAutomationRetryResolutionStatus,
+  AgentAutomationUsageLimitScope,
   AgentSessionStatus,
   AgentSessionType,
   AiConversationAckKind,

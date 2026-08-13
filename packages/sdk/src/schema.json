@@ -2358,6 +2358,29 @@
         "possibleTypes": null
       },
       {
+        "kind": "ENUM",
+        "name": "AgentAutomationUsageLimitScope",
+        "description": "The scope of the usage limit that blocked a loop run: the loop's own limit or the workspace-wide limit.",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "loop",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "workspace",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "AgentSession",
         "description": "A session representing an AI coding agent's work on an issue or conversation. Agent sessions track the lifecycle of an agent's engagement, from creation through active work to completion or dismissal. Each session is associated with an agent user (the bot), optionally a human creator, an issue, and a comment thread where the agent posts updates. Sessions contain activities that record the agent's observable steps and can be linked to pull requests created during the work.",
@@ -5998,6 +6021,11 @@
           },
           {
             "kind": "OBJECT",
+            "name": "AiConversationRemoveSpendLimitToolCall",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
             "name": "AiConversationResearchToolCall",
             "ofType": null
           },
@@ -6024,6 +6052,11 @@
           {
             "kind": "OBJECT",
             "name": "AiConversationSearchEntitiesToolCall",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "AiConversationSetSpendLimitToolCall",
             "ofType": null
           },
           {
@@ -7740,6 +7773,30 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "usageLimitResetsAt",
+            "description": "The time when the breached usage limit resets, as an ISO 8601 string. Null when unknown or for other error categories.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "usageLimitScope",
+            "description": "The scope of the breached limit for usage-limit errors. Null for other error categories.",
+            "args": [],
+            "type": {
+              "kind": "ENUM",
+              "name": "AgentAutomationUsageLimitScope",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -7768,6 +7825,12 @@
             "deprecationReason": null
           },
           {
+            "name": "featureDisabled",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "unknown",
             "description": null,
             "isDeprecated": false,
@@ -7775,6 +7838,12 @@
           },
           {
             "name": "untrustedSources",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "usageLimit",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -10830,6 +10899,114 @@
       },
       {
         "kind": "OBJECT",
+        "name": "AiConversationRemoveSpendLimitToolCall",
+        "description": null,
+        "fields": [
+          {
+            "name": "args",
+            "description": "The arguments to the tool call.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "AiConversationRemoveSpendLimitToolCallArgs",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "displayInfo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AiConversationToolDisplayInfo",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "The name of the tool that was called.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "AiConversationTool",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rawArgs",
+            "description": "The arguments of the tool call.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rawResult",
+            "description": "The result of the tool call.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "AiConversationBaseToolCall",
+            "ofType": null
+          }
+        ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AiConversationRemoveSpendLimitToolCallArgs",
+        "description": null,
+        "fields": [
+          {
+            "name": "summary",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "AiConversationResearchToolCall",
         "description": null,
         "fields": [
@@ -11668,6 +11845,114 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AiConversationSetSpendLimitToolCall",
+        "description": null,
+        "fields": [
+          {
+            "name": "args",
+            "description": "The arguments to the tool call.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "AiConversationSetSpendLimitToolCallArgs",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "displayInfo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AiConversationToolDisplayInfo",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "The name of the tool that was called.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "AiConversationTool",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rawArgs",
+            "description": "The arguments of the tool call.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rawResult",
+            "description": "The result of the tool call.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "AiConversationBaseToolCall",
+            "ofType": null
+          }
+        ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AiConversationSetSpendLimitToolCallArgs",
+        "description": null,
+        "fields": [
+          {
+            "name": "summary",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -12702,6 +12987,12 @@
             "deprecationReason": null
           },
           {
+            "name": "RemoveSpendLimit",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "Research",
             "description": null,
             "isDeprecated": false,
@@ -12733,6 +13024,12 @@
           },
           {
             "name": "SearchEntities",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "SetSpendLimit",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -12916,6 +13213,11 @@
           },
           {
             "kind": "OBJECT",
+            "name": "AiConversationRemoveSpendLimitToolCall",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
             "name": "AiConversationResearchToolCall",
             "ofType": null
           },
@@ -12942,6 +13244,11 @@
           {
             "kind": "OBJECT",
             "name": "AiConversationSearchEntitiesToolCall",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "AiConversationSetSpendLimitToolCall",
             "ofType": null
           },
           {
@@ -38707,6 +39014,18 @@
             "deprecationReason": null
           },
           {
+            "name": "pullRequest",
+            "description": "The pull request for which this is a draft comment. Null if the draft belongs to a different parent entity type.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "PullRequest",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "team",
             "description": "The team for which this is a draft post. Null if the draft belongs to a different parent entity type.",
             "args": [],
@@ -41193,6 +41512,81 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "EntityIdentifierIDComparator",
+        "description": "Comparator for project and initiative identifiers. Accepts UUIDs and human-readable identifiers (e.g. \"PROJ-123\").",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "eq",
+            "description": "Equals constraint.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "ID",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "in",
+            "description": "In-array constraint.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "neq",
+            "description": "Not-equals constraint.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "ID",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nin",
+            "description": "Not-in-array constraint.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "EntityWebhookPayload",
         "description": "Payload for entity-related webhook events.",
@@ -42980,6 +43374,30 @@
             "deprecationReason": null
           },
           {
+            "name": "liveFolderDefinition",
+            "description": "The versioned lazy root and filter represented by this live favorite folder.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "liveFolderPreset",
+            "description": "The predefined live folder represented by this favorite.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "owner",
             "description": "The user who owns this favorite. Favorites are personal and only visible to their owner.",
             "args": [],
@@ -43491,6 +43909,18 @@
           {
             "name": "labelId",
             "description": "The identifier of the label to favorite.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "liveFolderPreset",
+            "description": "The predefined live folder to create.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -49079,6 +49509,18 @@
             "deprecationReason": null
           },
           {
+            "name": "customIdentifier",
+            "description": "[Internal] Comparator for the initiative's custom identifier.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableStringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "every",
             "description": "Filters that needs to be matched by all initiatives.",
             "type": {
@@ -49119,7 +49561,7 @@
             "description": "Comparator for the identifier.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "IDComparator",
+              "name": "EntityIdentifierIDComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -49774,6 +50216,18 @@
             "deprecationReason": null
           },
           {
+            "name": "customIdentifier",
+            "description": "[Internal] Comparator for the initiative's custom identifier.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableStringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "health",
             "description": "Comparator for the initiative health: onTrack, atRisk, offTrack",
             "type": {
@@ -49802,7 +50256,7 @@
             "description": "Comparator for the identifier.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "IDComparator",
+              "name": "EntityIdentifierIDComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -77000,6 +77454,18 @@
             "deprecationReason": null
           },
           {
+            "name": "milestone",
+            "description": "The project milestone that the issue belongs to.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "ProjectMilestoneChildWebhookPayload",
+              "ofType": null
+            },
+            "isDeprecated": true,
+            "deprecationReason": "Use `projectMilestone` instead."
+          },
+          {
             "name": "number",
             "description": "The issue's unique number.",
             "args": [],
@@ -77171,6 +77637,30 @@
               "kind": "SCALAR",
               "name": "String",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "releases",
+            "description": "The releases associated with this issue.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "ReleaseChildWebhookPayload",
+                    "ofType": null
+                  }
+                }
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -87525,6 +88015,18 @@
             "description": "Integrates the workspace with Zendesk.",
             "args": [
               {
+                "name": "accessToken",
+                "description": "[INTERNAL] Bearer token that authenticates API requests instead of a Zendesk OAuth token. Requires `customApiUrl`; no OAuth exchange is performed.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
                 "name": "botUserRole",
                 "description": "The role to assign to the Linear bot user in Zendesk.",
                 "type": {
@@ -87538,15 +88040,23 @@
               },
               {
                 "name": "code",
-                "description": "The Zendesk OAuth code.",
+                "description": "The Zendesk OAuth code. Required unless connecting with `accessToken`.",
                 "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "customApiUrl",
+                "description": "[INTERNAL] Custom base URL for Zendesk API requests, such as a proxy in front of Zendesk. OAuth requests always use the standard subdomain URL.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
                 },
                 "defaultValue": null,
                 "isDeprecated": false,
@@ -87554,15 +88064,11 @@
               },
               {
                 "name": "redirectUri",
-                "description": "The Zendesk OAuth redirect URI.",
+                "description": "The Zendesk OAuth redirect URI. Required when connecting with `code`.",
                 "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
                 },
                 "defaultValue": null,
                 "isDeprecated": false,
@@ -87570,15 +88076,11 @@
               },
               {
                 "name": "scope",
-                "description": "The Zendesk OAuth scopes.",
+                "description": "The Zendesk OAuth scopes. Required when connecting with `code`.",
                 "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
                 },
                 "defaultValue": null,
                 "isDeprecated": false,
@@ -100731,6 +101233,18 @@
             "deprecationReason": null
           },
           {
+            "name": "customIdentifier",
+            "description": "[Internal] Comparator for the initiative's custom identifier.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableStringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "health",
             "description": "Comparator for the initiative health: onTrack, atRisk, offTrack",
             "type": {
@@ -100759,7 +101273,7 @@
             "description": "Comparator for the identifier.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "IDComparator",
+              "name": "EntityIdentifierIDComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -102207,6 +102721,18 @@
             "deprecationReason": null
           },
           {
+            "name": "customIdentifier",
+            "description": "[Internal] Comparator for the project's custom identifier.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableStringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "customerCount",
             "description": "Count of customers",
             "type": {
@@ -102331,7 +102857,7 @@
             "description": "Comparator for the identifier.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "IDComparator",
+              "name": "EntityIdentifierIDComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -117085,6 +117611,18 @@
             "deprecationReason": null
           },
           {
+            "name": "customIdentifier",
+            "description": "[Internal] Comparator for the project's custom identifier.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableStringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "customerCount",
             "description": "Count of customers",
             "type": {
@@ -117221,7 +117759,7 @@
             "description": "Comparator for the identifier.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "IDComparator",
+              "name": "EntityIdentifierIDComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -118124,6 +118662,18 @@
             "deprecationReason": null
           },
           {
+            "name": "customIdentifier",
+            "description": "[Internal] Comparator for the project's custom identifier.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableStringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "customerCount",
             "description": "Count of customers",
             "type": {
@@ -118248,7 +118798,7 @@
             "description": "Comparator for the identifier.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "IDComparator",
+              "name": "EntityIdentifierIDComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -126206,6 +126756,18 @@
             "deprecationReason": null
           },
           {
+            "name": "inheritedFrom",
+            "description": "[Internal] The original workspace or parent-team status that this status was inherited from. Null if the status is not inherited.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "ProjectStatus",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "name",
             "description": "The name of the status.",
             "args": [],
@@ -126233,6 +126795,18 @@
                 "name": "Float",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "team",
+            "description": "[Internal] The team that the status is scoped to. If null, the status is a workspace-level status available to all teams in the workspace.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Team",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -132885,6 +133459,47 @@
                   "ofType": {
                     "kind": "OBJECT",
                     "name": "AuditEntryType",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "auditLogWebhookFailureEvents",
+            "description": "[INTERNAL] Failure events for an audit log webhook (last 50).",
+            "args": [
+              {
+                "name": "webhookId",
+                "description": "The identifier of the audit log webhook.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "WebhookFailureEvent",
                     "ofType": null
                   }
                 }
@@ -143212,6 +143827,97 @@
         "possibleTypes": null
       },
       {
+        "kind": "OBJECT",
+        "name": "ReleaseChildWebhookPayload",
+        "description": "Certain properties of a release.",
+        "fields": [
+          {
+            "name": "completedAt",
+            "description": "The time at which the release was completed.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "id",
+            "description": "The ID of the release.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "The name of the release.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pipeline",
+            "description": "The pipeline this release belongs to.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "ReleasePipelineChildWebhookPayload",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "stage",
+            "description": "The current stage of the release.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "ReleaseStageChildWebhookPayload",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "version",
+            "description": "The version of the release.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "INPUT_OBJECT",
         "name": "ReleaseCollectionFilter",
         "description": "Release collection filtering options.",
@@ -153170,6 +153876,18 @@
             "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "workflowDefinitionId",
+            "description": "Comparator for the workflow definition that created the issue.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "WorkflowDefinitionIdComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "interfaces": null,
@@ -155338,6 +156056,22 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "User",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "userSettingsUpdated",
+            "description": "Triggered when an user settings is updated",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "UserSettings",
                 "ofType": null
               }
             },
@@ -174901,6 +175635,93 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "WorkflowDefinitionIdComparator",
+        "description": "Comparator for the workflow definition that created an issue.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "eq",
+            "description": "Equals constraint.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "ID",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "in",
+            "description": "In-array constraint.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "neq",
+            "description": "Not-equals constraint.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "ID",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nin",
+            "description": "Not-in-array constraint.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "null",
+            "description": "Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "WorkflowDefinitionNotification",
         "description": "A notification related to an automation workflow definition (loop), such as runs that failed to start.",
@@ -174948,6 +175769,18 @@
           {
             "name": "actorInitials",
             "description": "[Internal] Notification actor initials if avatar is not available.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "aiConversationId",
+            "description": "[Internal] The AI conversation identifier for the related loop run, if one was created.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -176518,6 +177351,18 @@
             "deprecationReason": null
           },
           {
+            "name": "bearerTokenAuth",
+            "description": "[INTERNAL] Whether API requests authenticate with a user-provided bearer token instead of a Zendesk OAuth token. Only used together with `customApiUrl`.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "botUserId",
             "description": "The ID of the Linear bot user.",
             "type": {
@@ -176535,6 +177380,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "customApiUrl",
+            "description": "[INTERNAL] Custom base URL for Zendesk API requests, such as a proxy in front of Zendesk. When unset, API requests use the standard subdomain URL. OAuth requests always use the standard subdomain URL.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "defaultValue": null,
@@ -176651,7 +177508,7 @@
           },
           {
             "name": "url",
-            "description": "The URL of the connected Zendesk organization.",
+            "description": "The URL of the connected Zendesk organization, used to link into Zendesk. API requests use `customApiUrl` when it is set.",
             "type": {
               "kind": "NON_NULL",
               "name": null,
