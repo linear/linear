@@ -2933,23 +2933,23 @@
           },
           {
             "name": "workspaceDiff",
-            "description": "[Internal] The coding agent's live working-tree diff metadata (changes not yet pushed to origin), reported by the sandbox. Per-file content is fetched on demand from the workspace-diff-blob route. Null when in sync.",
+            "description": "[Internal] Legacy live working-tree diff metadata. Null when the sandbox is in sync.",
             "args": [],
             "type": {
               "kind": "SCALAR",
               "name": "JSON",
               "ofType": null
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Use the session's Diff model instead."
           },
           {
             "name": "workspaceDiffFiles",
-            "description": "[Internal] Per-file list of the agent's live working-tree diff at the given content hash. Served behind a repository-read-access gate (the synced summary carries only aggregate counts); null when the requester lacks repository access or there is no current diff.",
+            "description": "[Internal] Legacy per-file metadata for the agent session's live working-tree diff.",
             "args": [
               {
                 "name": "contentHash",
-                "description": "The diff's content hash, from the session's `workspaceDiff`.",
+                "description": "The diff content hash from workspaceDiff.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -5813,6 +5813,11 @@
           },
           {
             "kind": "OBJECT",
+            "name": "AiConversationElicitationResponsePart",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
             "name": "AiConversationErrorPart",
             "ofType": null
           },
@@ -6826,6 +6831,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "mcpServerConnection",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "multipleChoice",
             "description": null,
             "isDeprecated": false,
@@ -6857,7 +6868,7 @@
           },
           {
             "name": "prompt",
-            "description": "The prompt sent as a normal user reply when selected.",
+            "description": "The user prompt rendered to the agent when this option is selected.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -6880,7 +6891,7 @@
       {
         "kind": "OBJECT",
         "name": "AiConversationElicitationPart",
-        "description": "A lightweight question or choice prompt shown with an AI conversation.",
+        "description": "A structured request for user input shown with an AI conversation.",
         "fields": [
           {
             "name": "id",
@@ -6894,6 +6905,18 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "integrationId",
+            "description": "The existing MCP integration to reconnect. Null when creating a new connection.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -6955,6 +6978,30 @@
             "deprecationReason": null
           },
           {
+            "name": "scope",
+            "description": "The requested owner of the MCP server connection. Null for other elicitation kinds.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "AiConversationMcpServerConnectionScope",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "serverUrl",
+            "description": "The MCP server URL for a new connection. Null for reconnects and other elicitation kinds.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "title",
             "description": "The title shown above the elicitation choices.",
             "args": [],
@@ -6978,6 +7025,136 @@
                 "name": "AiConversationPartType",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "AiConversationBasePart",
+            "ofType": null
+          }
+        ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "UNION",
+        "name": "AiConversationElicitationResponseData",
+        "description": "The kind-specific data recorded when a user answers an AI conversation elicitation.",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "AiConversationMcpServerConnectionElicitationResponseData",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "AiConversationMultipleChoiceElicitationResponseData",
+            "ofType": null
+          }
+        ]
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AiConversationElicitationResponsePart",
+        "description": "A structured user response to an elicitation in an AI conversation.",
+        "fields": [
+          {
+            "name": "data",
+            "description": "The kind-specific response data.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "UNION",
+                "name": "AiConversationElicitationResponseData",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "elicitationId",
+            "description": "The identifier of the elicitation that was answered.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "id",
+            "description": "The ID of the part.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "metadata",
+            "description": "The metadata of the part.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AiConversationPartMetadata",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "type",
+            "description": "The type of the part.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "AiConversationPartType",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "user",
+            "description": "The user who answered the elicitation.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "User",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -7193,6 +7370,12 @@
           },
           {
             "name": "AiPrompt",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "AiPromptRules",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -7559,6 +7742,12 @@
             "deprecationReason": null
           },
           {
+            "name": "AiPromptRules",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "CustomView",
             "description": null,
             "isDeprecated": false,
@@ -7820,12 +8009,6 @@
         "enumValues": [
           {
             "name": "billing",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "featureDisabled",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -9143,6 +9326,172 @@
       },
       {
         "kind": "OBJECT",
+        "name": "AiConversationMcpServerConnectionElicitationResponseData",
+        "description": "The integration connected by an MCP server connection elicitation.",
+        "fields": [
+          {
+            "name": "integrationId",
+            "description": "The identifier of the MCP server integration that was connected.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "kind",
+            "description": "The kind of elicitation that was answered.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "AiConversationElicitationKind",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AiConversationMcpServerConnectionScope",
+        "description": "The owner scope for an MCP server connection requested in an AI conversation.",
+        "fields": [
+          {
+            "name": "teamId",
+            "description": "The identifier of the team that will own the connection. Null for other scope types.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "type",
+            "description": "The type of owner that will receive the MCP server connection.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "AiConversationMcpServerConnectionScopeType",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "workflowDefinitionId",
+            "description": "The identifier of the Loop that will own the connection. Null for other scope types.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "AiConversationMcpServerConnectionScopeType",
+        "description": "The owner scope for an MCP server connection requested in an AI conversation.",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "team",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "user",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "workflowDefinition",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AiConversationMultipleChoiceElicitationResponseData",
+        "description": "The selected option in a multiple-choice AI conversation elicitation.",
+        "fields": [
+          {
+            "name": "kind",
+            "description": "The kind of elicitation that was answered.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "AiConversationElicitationKind",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "selectedOptionIndex",
+            "description": "The zero-based index of the selected option.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "AiConversationNavigateToPageToolCall",
         "description": null,
         "fields": [
@@ -9504,6 +9853,11 @@
           },
           {
             "kind": "OBJECT",
+            "name": "AiConversationElicitationResponsePart",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
             "name": "AiConversationErrorPart",
             "ofType": null
           },
@@ -9665,6 +10019,12 @@
           },
           {
             "name": "elicitation",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "elicitationResponse",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -35102,6 +35462,119 @@
             "deprecationReason": null
           },
           {
+            "name": "subscribers",
+            "description": "Users who are subscribed to the document.",
+            "args": [
+              {
+                "name": "after",
+                "description": "A cursor to be used with first for forward pagination",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "before",
+                "description": "A cursor to be used with last for backward pagination.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "filter",
+                "description": "Filter returned subscribers.",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "UserFilter",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "first",
+                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "includeArchived",
+                "description": "Should archived resources be included (default: false)",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "includeDisabled",
+                "description": "Should query return disabled/suspended users (default: false).",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "last",
+                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "orderBy",
+                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "PaginationOrderBy",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "UserConnection",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "summary",
             "description": "[Internal] A one-sentence AI-generated summary of the document content. Null if no summary has been generated.",
             "args": [],
@@ -36936,6 +37409,18 @@
             "deprecationReason": null
           },
           {
+            "name": "searchableContent",
+            "description": "[Internal] Comparator for the document's searchable content.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "ContentComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "slugId",
             "description": "Comparator for the document slug ID.",
             "type": {
@@ -38008,6 +38493,119 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "subscribers",
+            "description": "Users who are subscribed to the document.",
+            "args": [
+              {
+                "name": "after",
+                "description": "A cursor to be used with first for forward pagination",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "before",
+                "description": "A cursor to be used with last for backward pagination.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "filter",
+                "description": "Filter returned subscribers.",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "UserFilter",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "first",
+                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "includeArchived",
+                "description": "Should archived resources be included (default: false)",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "includeDisabled",
+                "description": "Should query return disabled/suspended users (default: false).",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "last",
+                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "orderBy",
+                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "PaginationOrderBy",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "UserConnection",
                 "ofType": null
               }
             },
@@ -46190,6 +46788,30 @@
             "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "repositoriesSyncedAt",
+            "description": "The date the repository list was last loaded from GitHub. Unset while the first load is still in progress.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "repositoryCount",
+            "description": "The number of repositories the installation can access, as reported by GitHub. Known before the repository list itself has loaded.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "interfaces": null,
@@ -47829,6 +48451,18 @@
             "deprecationReason": null
           },
           {
+            "name": "projectStatuses",
+            "description": "[Internal] Mapping of the ProjectStatus ID to the workspace or parent team ProjectStatus ID its projects move to.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "workflowStates",
             "description": "Mapping of the WorkflowState ID to the new WorkflowState ID.",
             "type": {
@@ -48500,7 +49134,7 @@
           },
           {
             "name": "leadTeam",
-            "description": "[ALPHA] The team that leads the initiative. Null if no lead team is assigned.",
+            "description": "The team that leads the initiative. Null if no lead team is assigned.",
             "args": [],
             "type": {
               "kind": "OBJECT",
@@ -49264,7 +49898,7 @@
           },
           {
             "name": "visibility",
-            "description": "[ALPHA] The visibility of the initiative, derived from its lead team. Public when no lead team is assigned.",
+            "description": "The visibility of the initiative, derived from its lead team. Public when no lead team is assigned.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -49594,7 +50228,7 @@
           },
           {
             "name": "leadTeam",
-            "description": "[ALPHA] Filters that the initiative lead team must satisfy.",
+            "description": "Filters that the initiative lead team must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableTeamFilter",
@@ -49924,7 +50558,7 @@
           },
           {
             "name": "leadTeamId",
-            "description": "[ALPHA] The team that leads the initiative.",
+            "description": "The team that leads the initiative.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -50289,7 +50923,7 @@
           },
           {
             "name": "leadTeam",
-            "description": "[ALPHA] Filters that the initiative lead team must satisfy.",
+            "description": "Filters that the initiative lead team must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableTeamFilter",
@@ -55299,7 +55933,7 @@
           },
           {
             "name": "leadTeamId",
-            "description": "[ALPHA] The team that leads the initiative. Set to null to clear.",
+            "description": "The team that leads the initiative. Set to null to clear.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -78505,6 +79139,65 @@
         "possibleTypes": null
       },
       {
+        "kind": "OBJECT",
+        "name": "JiraProjectStatusesPayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "issueStatuses",
+            "description": "The Jira project's issue statuses (non-Epic).",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectStatuses",
+            "description": "The Jira project's project statuses (Epic).",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "INPUT_OBJECT",
         "name": "JiraSettingsInput",
         "description": null,
@@ -78632,18 +79325,6 @@
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "statusNamesPerIssueType",
-            "description": "Jira status names grouped by project, separated into issue statuses (non-Epic) and project statuses (Epic). Structure: projectId -> { issueStatuses: string[], projectStatuses: string[] }",
-            "type": {
-              "kind": "SCALAR",
-              "name": "JSONObject",
               "ofType": null
             },
             "defaultValue": null,
@@ -86143,7 +86824,7 @@
           },
           {
             "name": "integrationJiraFetchProjectStatuses",
-            "description": "[INTERNAL] Fetches Jira project statuses and stores them in integration settings.",
+            "description": "[INTERNAL] Fetches Jira project statuses for the status mapping settings UI.",
             "args": [
               {
                 "name": "input",
@@ -86171,8 +86852,8 @@
                 "ofType": null
               }
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Use the `integrationJiraProjectStatuses` query instead."
           },
           {
             "name": "integrationJiraPersonal",
@@ -101306,7 +101987,7 @@
           },
           {
             "name": "leadTeam",
-            "description": "[ALPHA] Filters that the initiative lead team must satisfy.",
+            "description": "Filters that the initiative lead team must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableTeamFilter",
@@ -110253,6 +110934,18 @@
         "fields": null,
         "inputFields": [
           {
+            "name": "adminManagementRole",
+            "description": "The minimum role required to grant or revoke the workspace admin role.",
+            "type": {
+              "kind": "ENUM",
+              "name": "UserRoleType",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "agentGuidanceRole",
             "description": "The minimum role required to manage agent guidance prompts and settings.",
             "type": {
@@ -112734,6 +113427,35 @@
         "possibleTypes": null
       },
       {
+        "kind": "ENUM",
+        "name": "PartnerOfferCategory",
+        "description": "The kind of partner program an offer belongs to.",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "accelerator",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "investor",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "startup_community",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "PartnerOfferDetailsPayload",
         "description": "[Internal] Public details of an active partner-program offer.",
@@ -113003,6 +113725,49 @@
                     "ofType": null
                   }
                 }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PartnerProgramPartnerPayload",
+        "description": "[Internal] A partner listed in the Linear Startup Program.",
+        "fields": [
+          {
+            "name": "category",
+            "description": "The kind of partner program the offer belongs to.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "PartnerOfferCategory",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "partnerName",
+            "description": "Display name of the partner.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
               }
             },
             "isDeprecated": false,
@@ -126801,7 +127566,7 @@
           },
           {
             "name": "team",
-            "description": "[Internal] The team that the status is scoped to. If null, the status is a workspace-level status available to all teams in the workspace.",
+            "description": "[Internal] The team that the status is scoped to. If null, the status is a workspace-level status.",
             "args": [],
             "type": {
               "kind": "OBJECT",
@@ -127210,6 +127975,18 @@
                 "name": "Float",
                 "ofType": null
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "teamId",
+            "description": "[Internal] The identifier of the team to scope the status to. If not given, the status is a workspace-level status.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -130732,6 +131509,66 @@
             "deprecationReason": null
           },
           {
+            "name": "nativeStackId",
+            "description": "[Internal] The host-qualified external ID of the native stack that contains this pull request. Null if the pull request is not in a native stack or stack data is unavailable.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nativeStackNumber",
+            "description": "[Internal] The number the hosting provider assigns to the native stack within its repository. Null if the pull request is not in a native stack or stack data is unavailable.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nativeStackPosition",
+            "description": "[Internal] The pull request's one-based position in its native stack, where 1 is closest to the target branch. Null if the pull request is not in a native stack or stack data is unavailable.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nativeStackSize",
+            "description": "[Internal] The total number of pull requests in the native stack. Null if the pull request is not in a native stack or stack data is unavailable.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nativeStackTargetBranch",
+            "description": "[Internal] The target branch shared by the native stack. Null if the pull request is not in a native stack or stack data is unavailable.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "number",
             "description": "The pull request number as assigned by the hosting provider (e.g., #123 on GitHub). Unique within a repository.",
             "args": [],
@@ -131194,6 +132031,30 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "committerExternalUserId",
+            "description": "The external user ID for the commit's committer. Null if no matching external user is available.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "committerUserId",
+            "description": "The Linear user ID for the commit's committer. Null if no matching Linear user is available.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -136243,6 +137104,55 @@
             "deprecationReason": null
           },
           {
+            "name": "integrationJiraProjectStatuses",
+            "description": "[INTERNAL] Fetches a Jira project's status names, split into issue (non-Epic) and project (Epic) statuses.",
+            "args": [
+              {
+                "name": "integrationId",
+                "description": "The id of the Jira integration.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "projectId",
+                "description": "The Jira project ID to fetch statuses for.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "JiraProjectStatusesPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "integrationTemplate",
             "description": "Retrieves a single integration template connection by its identifier.",
             "args": [
@@ -138304,6 +139214,30 @@
               "kind": "OBJECT",
               "name": "PartnerOfferWorkspacesPayload",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "partnerProgramPartners",
+            "description": "[Internal] Lists every partner with an active partner-program offer, ordered by display name. Backs the partner directory on the marketing website.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PartnerProgramPartnerPayload",
+                    "ofType": null
+                  }
+                }
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -153288,6 +154222,18 @@
             "deprecationReason": null
           },
           {
+            "name": "postAssignmentUpdates",
+            "description": "Whether or not synced Slack threads should be updated with a message when their Ask has an updated assignee.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "postCancellationUpdates",
             "description": "Whether or not synced Slack threads should be updated with a message and emoji when their Ask is canceled.",
             "args": [],
@@ -153302,6 +154248,18 @@
           {
             "name": "postCompletionUpdates",
             "description": "Whether or not synced Slack threads should be updated with a message and emoji when their Ask is completed.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "postSlaUpdates",
+            "description": "Whether or not synced Slack threads should be updated with a message when their Ask's SLA is at risk or breached.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -153488,6 +154446,18 @@
             "deprecationReason": null
           },
           {
+            "name": "postAssignmentUpdates",
+            "description": "Whether or not synced Slack threads should be updated with a message when their Ask has an updated assignee.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "postCancellationUpdates",
             "description": "Whether or not synced Slack threads should be updated with a message and emoji when their Ask is canceled.",
             "type": {
@@ -153502,6 +154472,18 @@
           {
             "name": "postCompletionUpdates",
             "description": "Whether or not synced Slack threads should be updated with a message and emoji when their Ask is completed.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "postSlaUpdates",
+            "description": "Whether or not synced Slack threads should be updated with a message when their Ask's SLA is at risk or breached.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -157303,6 +158285,22 @@
             "deprecationReason": null
           },
           {
+            "name": "inheritProjectStatuses",
+            "description": "[Internal] Whether the team should inherit its project statuses from its parent team, or from the workspace when it has no parent.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "inheritSlackAutoCreateProjectChannel",
             "description": "[Internal] Whether the team should inherit its Slack auto-create project channel setting from its parent. Only applies to sub-teams.",
             "args": [],
@@ -157336,7 +158334,7 @@
           },
           {
             "name": "initiativesEnabled",
-            "description": "[ALPHA] Whether team initiatives are enabled and shown in the team's sidebar.",
+            "description": "Whether team initiatives are enabled and shown in the team's sidebar.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -159642,6 +160640,18 @@
             "deprecationReason": null
           },
           {
+            "name": "inheritProjectStatuses",
+            "description": "[Internal] Whether the team should inherit project statuses from its parent team, or from the workspace when it has no parent.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "inheritSlackAutoCreateProjectChannel",
             "description": "[Internal] Whether the team should inherit its Slack auto-create project channel setting from its parent. Only applies to sub-teams.",
             "type": {
@@ -159667,7 +160677,7 @@
           },
           {
             "name": "initiativesEnabled",
-            "description": "[ALPHA] Whether initiatives are shown in the team's sidebar.",
+            "description": "Whether initiatives are shown in the team's sidebar.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -161794,6 +162804,18 @@
             "deprecationReason": null
           },
           {
+            "name": "inheritProjectStatuses",
+            "description": "[Internal] Whether the team should inherit project statuses from its parent team, or from the workspace when it has no parent.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "inheritSlackAutoCreateProjectChannel",
             "description": "[Internal] Whether the team should inherit its Slack auto-create project channel setting from its parent. Only applies to sub-teams.",
             "type": {
@@ -161819,7 +162841,7 @@
           },
           {
             "name": "initiativesEnabled",
-            "description": "[ALPHA] Whether initiatives are shown in the team's sidebar.",
+            "description": "Whether initiatives are shown in the team's sidebar.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -163085,6 +164107,18 @@
             "deprecationReason": null
           },
           {
+            "name": "config",
+            "description": "[ALPHA] The schedule configuration.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "TimeScheduleConfig",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "createdAt",
             "description": "The time at which the entity was created.",
             "args": [],
@@ -163234,6 +164268,60 @@
       },
       {
         "kind": "OBJECT",
+        "name": "TimeScheduleConfig",
+        "description": "[ALPHA] The configuration of a time schedule.",
+        "fields": [
+          {
+            "name": "nextShiftByUserId",
+            "description": "Record of the next on-call shift keyed by Linear user id, e.g. `{ \"<linearUserId>\": { \"startsAt\": \"X\", \"endsAt\": \"Y\" } }`.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "JSONObject",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "TimeScheduleConfigInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "nextShiftByUserId",
+            "description": "Record of the next on-call shift keyed by Linear user id, e.g. `{ \"<linearUserId>\": { \"startsAt\": \"X\", \"endsAt\": \"Y\" } }`.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "JSONObject",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "TimeScheduleConnection",
         "description": null,
         "fields": [
@@ -163313,6 +164401,18 @@
         "description": "Input for creating a new time schedule.",
         "fields": null,
         "inputFields": [
+          {
+            "name": "config",
+            "description": "[ALPHA] The schedule configuration.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "TimeScheduleConfigInput",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "entries",
             "description": "The schedule entries.",
@@ -163636,6 +164736,18 @@
         "description": "Input for updating an existing time schedule.",
         "fields": null,
         "inputFields": [
+          {
+            "name": "config",
+            "description": "[ALPHA] The schedule configuration. Pass null to clear it.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "TimeScheduleConfigInput",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "entries",
             "description": "The schedule entries.",
@@ -164766,6 +165878,18 @@
                 "name": "JSONObject",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "resolvedAt",
+            "description": "The time when the usage alert was resolved or archived. Null if the alert is still active.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -167628,6 +168752,12 @@
             "deprecationReason": null
           },
           {
+            "name": "loopEditRestrictionSpeedbumpShown",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "migrateThemePreference",
             "description": null,
             "isDeprecated": false,
@@ -169089,6 +170219,18 @@
             "deprecationReason": null
           },
           {
+            "name": "priorityInboxEnabled",
+            "description": "[Internal] Whether the Priority Inbox is enabled for the user.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "settings",
             "description": "The user's settings. Merged key by key into the existing settings: keys missing from the object are left unchanged, and a key set to null is removed.",
             "type": {
@@ -170187,6 +171329,30 @@
             "deprecationReason": null
           },
           {
+            "name": "automationRunHistoryShowDuration",
+            "description": "Whether to show the run duration in Loop run history.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "automationRunHistoryShowIssueIdentifier",
+            "description": "Whether to show the issue identifier in Loop run history.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "automationShowDescendants",
             "description": "Whether to show sub-team loops.",
             "args": [],
@@ -170635,6 +171801,66 @@
             "deprecationReason": null
           },
           {
+            "name": "documentFieldCreator",
+            "description": "Whether to show the creator field for documents.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentFieldDateCreated",
+            "description": "Whether to show the created date field for documents.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentFieldDateUpdated",
+            "description": "Whether to show the updated date field for documents.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentFieldOwner",
+            "description": "Whether to show the owner field for documents.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentFieldParent",
+            "description": "Whether to show the parent field for documents.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "embeddedCustomerNeedsShowImportantFirst",
             "description": "Whether to show important embedded customer needs first.",
             "args": [],
@@ -170943,8 +172169,8 @@
               "name": "String",
               "ofType": null
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "No longer available"
           },
           {
             "name": "focusViewOrdering",
@@ -170955,8 +172181,8 @@
               "name": "String",
               "ofType": null
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "No longer available"
           },
           {
             "name": "focusViewOrderingDirection",
@@ -170967,8 +172193,8 @@
               "name": "String",
               "ofType": null
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "No longer available"
           },
           {
             "name": "groupOrderingMode",
@@ -172776,7 +174002,7 @@
           },
           {
             "name": "showTeamInitiatives",
-            "description": "[ALPHA] Whether to show team-level initiatives in the workspace.",
+            "description": "Whether to show team-level initiatives in the workspace.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -173085,6 +174311,12 @@
             "deprecationReason": null
           },
           {
+            "name": "automationRunHistory",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "automations",
             "description": null,
             "isDeprecated": false,
@@ -173189,8 +174421,8 @@
           {
             "name": "focus",
             "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "No longer available"
           },
           {
             "name": "inbox",
@@ -175446,6 +176678,22 @@
               "kind": "OBJECT",
               "name": "Project",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "restrictEditing",
+            "description": "Whether editing the workflow is restricted to its owner, team owners, and workspace administrators.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null

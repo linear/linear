@@ -1484,11 +1484,11 @@ export class AiConversationElicitationOption extends Request {
 
   /** The short label shown for the option. */
   public label: string;
-  /** The prompt sent as a normal user reply when selected. */
+  /** The user prompt rendered to the agent when this option is selected. */
   public prompt: string;
 }
 /**
- * A lightweight question or choice prompt shown with an AI conversation.
+ * A structured request for user input shown with an AI conversation.
  *
  * @param request - function to call the graphql client
  * @param data - L.AiConversationElicitationPartFragment response data
@@ -1497,8 +1497,11 @@ export class AiConversationElicitationPart extends Request {
   public constructor(request: LinearRequest, data: L.AiConversationElicitationPartFragment) {
     super(request);
     this.id = data.id;
+    this.integrationId = data.integrationId ?? undefined;
+    this.serverUrl = data.serverUrl ?? undefined;
     this.title = data.title ?? undefined;
     this.metadata = new AiConversationPartMetadata(request, data.metadata);
+    this.scope = data.scope ? new AiConversationMcpServerConnectionScope(request, data.scope) : undefined;
     this.options = data.options.map(node => new AiConversationElicitationOption(request, node));
     this.kind = data.kind;
     this.type = data.type;
@@ -1506,16 +1509,60 @@ export class AiConversationElicitationPart extends Request {
 
   /** The ID of the part. */
   public id: string;
+  /** The existing MCP integration to reconnect. Null when creating a new connection. */
+  public integrationId?: string | null;
+  /** The MCP server URL for a new connection. Null for reconnects and other elicitation kinds. */
+  public serverUrl?: string | null;
   /** The title shown above the elicitation choices. */
   public title?: string | null;
   /** Selectable prompt options for multiple-choice elicitations. */
   public options: AiConversationElicitationOption[];
   /** The metadata of the part. */
   public metadata: AiConversationPartMetadata;
+  /** The requested owner of the MCP server connection. Null for other elicitation kinds. */
+  public scope?: AiConversationMcpServerConnectionScope | null;
   /** The kind of input this elicitation asks for. */
   public kind: L.AiConversationElicitationKind;
   /** The type of the part. */
   public type: L.AiConversationPartType;
+}
+/**
+ * A structured user response to an elicitation in an AI conversation.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationElicitationResponsePartFragment response data
+ */
+export class AiConversationElicitationResponsePart extends Request {
+  private _user?: L.AiConversationElicitationResponsePartFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.AiConversationElicitationResponsePartFragment) {
+    super(request);
+    this.elicitationId = data.elicitationId;
+    this.id = data.id;
+    this.metadata = new AiConversationPartMetadata(request, data.metadata);
+    this.type = data.type;
+    this.data = data.data;
+    this._user = data.user ?? undefined;
+  }
+
+  /** The identifier of the elicitation that was answered. */
+  public elicitationId: string;
+  /** The ID of the part. */
+  public id: string;
+  /** The metadata of the part. */
+  public metadata: AiConversationPartMetadata;
+  /** The type of the part. */
+  public type: L.AiConversationPartType;
+  /** The kind-specific response data. */
+  public data: L.AiConversationElicitationResponsePartFragment["data"];
+  /** The user who answered the elicitation. */
+  public get user(): LinearFetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+  /** The ID of user who answered the elicitation. */
+  public get userId(): string | undefined {
+    return this._user?.id;
+  }
 }
 /**
  * AiConversationEntityCardWidget model
@@ -2073,6 +2120,63 @@ export class AiConversationListCodingSessionsToolCallResultAgentSessions extends
   public id: string;
   public type: string;
   public pullRequests?: AiConversationSearchEntitiesToolCallResultEntities[] | null;
+}
+/**
+ * The integration connected by an MCP server connection elicitation.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationMcpServerConnectionElicitationResponseDataFragment response data
+ */
+export class AiConversationMcpServerConnectionElicitationResponseData extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationMcpServerConnectionElicitationResponseDataFragment) {
+    super(request);
+    this.integrationId = data.integrationId;
+    this.kind = data.kind;
+  }
+
+  /** The identifier of the MCP server integration that was connected. */
+  public integrationId: string;
+  /** The kind of elicitation that was answered. */
+  public kind: L.AiConversationElicitationKind;
+}
+/**
+ * The owner scope for an MCP server connection requested in an AI conversation.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationMcpServerConnectionScopeFragment response data
+ */
+export class AiConversationMcpServerConnectionScope extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationMcpServerConnectionScopeFragment) {
+    super(request);
+    this.teamId = data.teamId ?? undefined;
+    this.workflowDefinitionId = data.workflowDefinitionId ?? undefined;
+    this.type = data.type;
+  }
+
+  /** The identifier of the team that will own the connection. Null for other scope types. */
+  public teamId?: string | null;
+  /** The identifier of the Loop that will own the connection. Null for other scope types. */
+  public workflowDefinitionId?: string | null;
+  /** The type of owner that will receive the MCP server connection. */
+  public type: L.AiConversationMcpServerConnectionScopeType;
+}
+/**
+ * The selected option in a multiple-choice AI conversation elicitation.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationMultipleChoiceElicitationResponseDataFragment response data
+ */
+export class AiConversationMultipleChoiceElicitationResponseData extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationMultipleChoiceElicitationResponseDataFragment) {
+    super(request);
+    this.selectedOptionIndex = data.selectedOptionIndex;
+    this.kind = data.kind;
+  }
+
+  /** The zero-based index of the selected option. */
+  public selectedOptionIndex: number;
+  /** The kind of elicitation that was answered. */
+  public kind: L.AiConversationElicitationKind;
 }
 /**
  * AiConversationNavigateToPageToolCall model
@@ -7001,6 +7105,10 @@ export class Document extends Request {
   public comments(variables?: Omit<L.Document_CommentsQueryVariables, "id">) {
     return new Document_CommentsQuery(this._request, this.id, variables).fetch(variables);
   }
+  /** Users who are subscribed to the document. */
+  public subscribers(variables?: Omit<L.Document_SubscribersQueryVariables, "id">) {
+    return new Document_SubscribersQuery(this._request, this.id, variables).fetch(variables);
+  }
   /** Creates a new document. */
   public create(input: L.DocumentCreateInput) {
     return new CreateDocumentMutation(this._request).fetch(input);
@@ -9561,6 +9669,7 @@ export class Initiative extends Request {
   private _creator?: L.InitiativeFragment["creator"];
   private _integrationsSettings?: L.InitiativeFragment["integrationsSettings"];
   private _lastUpdate?: L.InitiativeFragment["lastUpdate"];
+  private _leadTeam?: L.InitiativeFragment["leadTeam"];
   private _owner?: L.InitiativeFragment["owner"];
   private _parentInitiative?: L.InitiativeFragment["parentInitiative"];
 
@@ -9595,9 +9704,11 @@ export class Initiative extends Request {
     this.status = data.status;
     this.targetDateResolution = data.targetDateResolution ?? undefined;
     this.updateRemindersDay = data.updateRemindersDay ?? undefined;
+    this.visibility = data.visibility;
     this._creator = data.creator ?? undefined;
     this._integrationsSettings = data.integrationsSettings ?? undefined;
     this._lastUpdate = data.lastUpdate ?? undefined;
+    this._leadTeam = data.leadTeam ?? undefined;
     this._owner = data.owner ?? undefined;
     this._parentInitiative = data.parentInitiative ?? undefined;
   }
@@ -9663,6 +9774,8 @@ export class Initiative extends Request {
   public targetDateResolution?: L.DateResolutionType | null;
   /** The day at which to prompt for updates. */
   public updateRemindersDay?: L.Day | null;
+  /** The visibility of the initiative, derived from its lead team. Public when no lead team is assigned. */
+  public visibility: L.InitiativeVisibility;
   /** The user who created the initiative. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
@@ -9688,6 +9801,14 @@ export class Initiative extends Request {
   /** The ID of most recent status update posted for this initiative. null if no updates have been posted. */
   public get lastUpdateId(): string | undefined {
     return this._lastUpdate?.id;
+  }
+  /** The team that leads the initiative. Null if no lead team is assigned. */
+  public get leadTeam(): LinearFetch<Team> | undefined {
+    return this._leadTeam?.id ? new TeamQuery(this._request).fetch(this._leadTeam?.id) : undefined;
+  }
+  /** The ID of team that leads the initiative. null if no lead team is assigned. */
+  public get leadTeamId(): string | undefined {
+    return this._leadTeam?.id;
   }
   /** The workspace of the initiative. */
   public get organization(): LinearFetch<Organization> {
@@ -14505,6 +14626,24 @@ export class JiraFetchProjectStatusesPayload extends Request {
   public get integrationId(): string | undefined {
     return this._integration?.id;
   }
+}
+/**
+ * JiraProjectStatusesPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.JiraProjectStatusesPayloadFragment response data
+ */
+export class JiraProjectStatusesPayload extends Request {
+  public constructor(request: LinearRequest, data: L.JiraProjectStatusesPayloadFragment) {
+    super(request);
+    this.issueStatuses = data.issueStatuses;
+    this.projectStatuses = data.projectStatuses;
+  }
+
+  /** The Jira project's issue statuses (non-Epic). */
+  public issueStatuses: string[];
+  /** The Jira project's project statuses (Epic). */
+  public projectStatuses: string[];
 }
 /**
  * A notification subscription scoped to a specific issue label. The subscriber receives notifications for events related to issues with this label.
@@ -21048,8 +21187,10 @@ export class SlackChannelNameMapping extends Request {
     this.isShared = data.isShared ?? undefined;
     this.name = data.name;
     this.postAcceptedFromTriageUpdates = data.postAcceptedFromTriageUpdates ?? undefined;
+    this.postAssignmentUpdates = data.postAssignmentUpdates ?? undefined;
     this.postCancellationUpdates = data.postCancellationUpdates ?? undefined;
     this.postCompletionUpdates = data.postCompletionUpdates ?? undefined;
+    this.postSlaUpdates = data.postSlaUpdates ?? undefined;
     this.teams = data.teams.map(node => new SlackAsksTeamSettings(request, node));
   }
 
@@ -21075,10 +21216,14 @@ export class SlackChannelNameMapping extends Request {
   public name: string;
   /** Whether or not synced Slack threads should be updated with a message when their Ask is accepted from triage. */
   public postAcceptedFromTriageUpdates?: boolean | null;
+  /** Whether or not synced Slack threads should be updated with a message when their Ask has an updated assignee. */
+  public postAssignmentUpdates?: boolean | null;
   /** Whether or not synced Slack threads should be updated with a message and emoji when their Ask is canceled. */
   public postCancellationUpdates?: boolean | null;
   /** Whether or not synced Slack threads should be updated with a message and emoji when their Ask is completed. */
   public postCompletionUpdates?: boolean | null;
+  /** Whether or not synced Slack threads should be updated with a message when their Ask's SLA is at risk or breached. */
+  public postSlaUpdates?: boolean | null;
   /** Which teams are connected to the channel and settings for those teams. */
   public teams: SlackAsksTeamSettings[];
 }
@@ -21871,6 +22016,7 @@ export class Team extends Request {
     this.id = data.id;
     this.inheritIssueEstimation = data.inheritIssueEstimation;
     this.inheritWorkflowStatuses = data.inheritWorkflowStatuses;
+    this.initiativesEnabled = data.initiativesEnabled;
     this.inviteHash = data.inviteHash;
     this.issueCount = data.issueCount;
     this.issueEstimationAllowZero = data.issueEstimationAllowZero;
@@ -21971,6 +22117,8 @@ export class Team extends Request {
   public inheritIssueEstimation: boolean;
   /** Whether the team should inherit its workflow statuses from its parent. Only applies to sub-teams. */
   public inheritWorkflowStatuses: boolean;
+  /** Whether team initiatives are enabled and shown in the team's sidebar. */
+  public initiativesEnabled: boolean;
   /** [DEPRECATED] Unique hash for the team to be used in invite URLs. */
   public inviteHash: string;
   /** The total number of issues in the team. By default excludes archived issues; use the includeArchived argument to include them. */
@@ -23304,6 +23452,7 @@ export class UsageAlert extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
     this.metadata = data.metadata;
+    this.resolvedAt = parseDate(data.resolvedAt) ?? undefined;
     this.type = data.type;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
   }
@@ -23316,6 +23465,8 @@ export class UsageAlert extends Request {
   public id: string;
   /** Type-specific metadata captured when the alert was triggered. */
   public metadata: L.Scalars["JSONObject"];
+  /** The time when the usage alert was resolved or archived. Null if the alert is still active. */
+  public resolvedAt?: Date | null;
   /** The kind of usage alert that was triggered. */
   public type: string;
   /**
@@ -24216,6 +24367,8 @@ export class ViewPreferencesValues extends Request {
     this.automationFieldTrigger = data.automationFieldTrigger ?? undefined;
     this.automationGrouping = data.automationGrouping ?? undefined;
     this.automationOrdering = data.automationOrdering ?? undefined;
+    this.automationRunHistoryShowDuration = data.automationRunHistoryShowDuration ?? undefined;
+    this.automationRunHistoryShowIssueIdentifier = data.automationRunHistoryShowIssueIdentifier ?? undefined;
     this.automationShowDescendants = data.automationShowDescendants ?? undefined;
     this.automationShowDisabled = data.automationShowDisabled ?? undefined;
     this.automationStatsPeriod = data.automationStatsPeriod ?? undefined;
@@ -24253,6 +24406,11 @@ export class ViewPreferencesValues extends Request {
     this.dashboardFieldDateUpdated = data.dashboardFieldDateUpdated ?? undefined;
     this.dashboardFieldOwner = data.dashboardFieldOwner ?? undefined;
     this.dashboardsOrdering = data.dashboardsOrdering ?? undefined;
+    this.documentFieldCreator = data.documentFieldCreator ?? undefined;
+    this.documentFieldDateCreated = data.documentFieldDateCreated ?? undefined;
+    this.documentFieldDateUpdated = data.documentFieldDateUpdated ?? undefined;
+    this.documentFieldOwner = data.documentFieldOwner ?? undefined;
+    this.documentFieldParent = data.documentFieldParent ?? undefined;
     this.embeddedCustomerNeedsShowImportantFirst = data.embeddedCustomerNeedsShowImportantFirst ?? undefined;
     this.embeddedCustomerNeedsViewOrdering = data.embeddedCustomerNeedsViewOrdering ?? undefined;
     this.fieldAssignee = data.fieldAssignee ?? undefined;
@@ -24425,6 +24583,7 @@ export class ViewPreferencesValues extends Request {
     this.showSubTeamIssues = data.showSubTeamIssues ?? undefined;
     this.showSubTeamProjects = data.showSubTeamProjects ?? undefined;
     this.showSupervisedIssues = data.showSupervisedIssues ?? undefined;
+    this.showTeamInitiatives = data.showTeamInitiatives ?? undefined;
     this.showTeamReviews = data.showTeamReviews ?? undefined;
     this.showTriageIssues = data.showTriageIssues ?? undefined;
     this.showUnreadItemsFirst = data.showUnreadItemsFirst ?? undefined;
@@ -24465,6 +24624,10 @@ export class ViewPreferencesValues extends Request {
   public automationGrouping?: string | null;
   /** The loop ordering. */
   public automationOrdering?: string | null;
+  /** Whether to show the run duration in Loop run history. */
+  public automationRunHistoryShowDuration?: boolean | null;
+  /** Whether to show the issue identifier in Loop run history. */
+  public automationRunHistoryShowIssueIdentifier?: boolean | null;
   /** Whether to show sub-team loops. */
   public automationShowDescendants?: boolean | null;
   /** Whether to show disabled loops. */
@@ -24537,6 +24700,16 @@ export class ViewPreferencesValues extends Request {
   public dashboardFieldOwner?: boolean | null;
   /** The dashboards ordering. */
   public dashboardsOrdering?: string | null;
+  /** Whether to show the creator field for documents. */
+  public documentFieldCreator?: boolean | null;
+  /** Whether to show the created date field for documents. */
+  public documentFieldDateCreated?: boolean | null;
+  /** Whether to show the updated date field for documents. */
+  public documentFieldDateUpdated?: boolean | null;
+  /** Whether to show the owner field for documents. */
+  public documentFieldOwner?: boolean | null;
+  /** Whether to show the parent field for documents. */
+  public documentFieldParent?: boolean | null;
   /** Whether to show important embedded customer needs first. */
   public embeddedCustomerNeedsShowImportantFirst?: boolean | null;
   /** The embedded customer needs view ordering. */
@@ -24881,6 +25054,8 @@ export class ViewPreferencesValues extends Request {
   public showSubTeamProjects?: boolean | null;
   /** Whether to show supervised issues. */
   public showSupervisedIssues?: boolean | null;
+  /** Whether to show team-level initiatives in the workspace. */
+  public showTeamInitiatives?: boolean | null;
   /** Whether team reviews are shown in the reviews list. */
   public showTeamReviews?: boolean | null;
   /** Whether to show triage issues. */
@@ -25348,6 +25523,7 @@ export class WorkflowDefinition extends Request {
     this.id = data.id;
     this.lastExecutedAt = parseDate(data.lastExecutedAt) ?? undefined;
     this.name = data.name;
+    this.restrictEditing = data.restrictEditing;
     this.runOnce = data.runOnce;
     this.schedule = data.schedule ?? undefined;
     this.slugId = data.slugId;
@@ -25397,6 +25573,8 @@ export class WorkflowDefinition extends Request {
   public lastExecutedAt?: Date | null;
   /** The name of the workflow. */
   public name: string;
+  /** Whether editing the workflow is restricted to its owner, team owners, and workspace administrators. */
+  public restrictEditing: boolean;
   /** Whether the workflow should only execute once per entity. When true, the workflow is excluded from matching automations for an entity if it has already been executed for that entity. */
   public runOnce: boolean;
   /** Recurring schedule which is used to execute the workflow. */
@@ -42001,6 +42179,55 @@ export class Document_CommentsQuery extends Request {
 }
 
 /**
+ * A fetchable Document_Subscribers Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to document
+ * @param variables - variables without 'id' to pass into the Document_SubscribersQuery
+ */
+export class Document_SubscribersQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Document_SubscribersQueryVariables, "id">;
+
+  public constructor(request: LinearRequest, id: string, variables?: Omit<L.Document_SubscribersQueryVariables, "id">) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Document_Subscribers query and return a UserConnection
+   *
+   * @param variables - variables without 'id' to pass into the Document_SubscribersQuery
+   * @returns parsed response from Document_SubscribersQuery
+   */
+  public async fetch(variables?: Omit<L.Document_SubscribersQueryVariables, "id">): LinearFetch<UserConnection> {
+    const response = await this._request<L.Document_SubscribersQuery, L.Document_SubscribersQueryVariables>(
+      L.Document_SubscribersDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.document.subscribers;
+
+    return new UserConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable EmailIntakeAddress_SesDomainIdentity Query
  *
  * @param request - function to call the graphql client
@@ -53527,6 +53754,7 @@ export {
   AiConversationEntityListWidgetArgsEntitiesType,
   AiConversationErrorType,
   AiConversationInitialSource,
+  AiConversationMcpServerConnectionScopeType,
   AiConversationPartPhase,
   AiConversationPartType,
   AiConversationQueryUpdatesToolCallArgsUpdateType,
@@ -53584,6 +53812,7 @@ export {
   PaginationOrderBy,
   PaginationSortOrder,
   PartnerDiscountType,
+  PartnerOfferCategory,
   PartnerOfferIneligibilityReason,
   PipelineTab,
   PostType,

@@ -882,15 +882,15 @@ type AgentSession implements Node {
   """
   url: String
   """
-  [Internal] The coding agent's live working-tree diff metadata (changes not yet pushed to origin), reported by the sandbox. Per-file content is fetched on demand from the workspace-diff-blob route. Null when in sync.
+  [Internal] Legacy live working-tree diff metadata. Null when the sandbox is in sync.
   """
-  workspaceDiff: JSON
+  workspaceDiff: JSON @deprecated(reason: "Use the session's Diff model instead.")
   """
-  [Internal] Per-file list of the agent's live working-tree diff at the given content hash. Served behind a repository-read-access gate (the synced summary carries only aggregate counts); null when the requester lacks repository access or there is no current diff.
+  [Internal] Legacy per-file metadata for the agent session's live working-tree diff.
   """
   workspaceDiffFiles(
     """
-    The diff's content hash, from the session's `workspaceDiff`.
+    The diff content hash from workspaceDiff.
     """
     contentHash: String!
   ): [AgentSessionWorkspaceDiffFile!] @deprecated(reason: "Use Diff.files instead.")
@@ -1838,6 +1838,7 @@ type AiConversationDeleteEntityToolCallArgs {
 The kind of input an AI conversation elicitation asks for.
 """
 enum AiConversationElicitationKind {
+  mcpServerConnection
   multipleChoice
 }
 
@@ -1850,19 +1851,23 @@ type AiConversationElicitationOption {
   """
   label: String!
   """
-  The prompt sent as a normal user reply when selected.
+  The user prompt rendered to the agent when this option is selected.
   """
   prompt: String!
 }
 
 """
-A lightweight question or choice prompt shown with an AI conversation.
+A structured request for user input shown with an AI conversation.
 """
 type AiConversationElicitationPart implements AiConversationBasePart {
   """
   The ID of the part.
   """
   id: String!
+  """
+  The existing MCP integration to reconnect. Null when creating a new connection.
+  """
+  integrationId: String
   """
   The kind of input this elicitation asks for.
   """
@@ -1876,6 +1881,14 @@ type AiConversationElicitationPart implements AiConversationBasePart {
   """
   options: [AiConversationElicitationOption!]!
   """
+  The requested owner of the MCP server connection. Null for other elicitation kinds.
+  """
+  scope: AiConversationMcpServerConnectionScope
+  """
+  The MCP server URL for a new connection. Null for reconnects and other elicitation kinds.
+  """
+  serverUrl: String
+  """
   The title shown above the elicitation choices.
   """
   title: String
@@ -1883,6 +1896,43 @@ type AiConversationElicitationPart implements AiConversationBasePart {
   The type of the part.
   """
   type: AiConversationPartType!
+}
+
+"""
+The kind-specific data recorded when a user answers an AI conversation elicitation.
+"""
+union AiConversationElicitationResponseData =
+  | AiConversationMcpServerConnectionElicitationResponseData
+  | AiConversationMultipleChoiceElicitationResponseData
+
+"""
+A structured user response to an elicitation in an AI conversation.
+"""
+type AiConversationElicitationResponsePart implements AiConversationBasePart {
+  """
+  The kind-specific response data.
+  """
+  data: AiConversationElicitationResponseData!
+  """
+  The identifier of the elicitation that was answered.
+  """
+  elicitationId: String!
+  """
+  The ID of the part.
+  """
+  id: String!
+  """
+  The metadata of the part.
+  """
+  metadata: AiConversationPartMetadata!
+  """
+  The type of the part.
+  """
+  type: AiConversationPartType!
+  """
+  The user who answered the elicitation.
+  """
+  user: User
 }
 
 type AiConversationEntityCardWidget implements AiConversationBaseWidget {
@@ -1945,6 +1995,7 @@ enum AiConversationEntityCardWidgetArgsAction {
 enum AiConversationEntityCardWidgetArgsType {
   AgentSession
   AiPrompt
+  AiPromptRules
   CustomView
   Customer
   CustomerNeed
@@ -2031,6 +2082,7 @@ type AiConversationEntityListWidgetArgsEntities {
 """
 enum AiConversationEntityListWidgetArgsEntitiesType {
   AiPrompt
+  AiPromptRules
   CustomView
   Customer
   CustomerNeed
@@ -2096,7 +2148,6 @@ The category of an error part in an AI conversation.
 """
 enum AiConversationErrorType {
   billing
-  featureDisabled
   unknown
   untrustedSources
   usageLimit
@@ -2355,6 +2406,61 @@ type AiConversationListCodingSessionsToolCallResultAgentSessions {
   type: String!
 }
 
+"""
+The integration connected by an MCP server connection elicitation.
+"""
+type AiConversationMcpServerConnectionElicitationResponseData {
+  """
+  The identifier of the MCP server integration that was connected.
+  """
+  integrationId: String!
+  """
+  The kind of elicitation that was answered.
+  """
+  kind: AiConversationElicitationKind!
+}
+
+"""
+The owner scope for an MCP server connection requested in an AI conversation.
+"""
+type AiConversationMcpServerConnectionScope {
+  """
+  The identifier of the team that will own the connection. Null for other scope types.
+  """
+  teamId: String
+  """
+  The type of owner that will receive the MCP server connection.
+  """
+  type: AiConversationMcpServerConnectionScopeType!
+  """
+  The identifier of the Loop that will own the connection. Null for other scope types.
+  """
+  workflowDefinitionId: String
+}
+
+"""
+The owner scope for an MCP server connection requested in an AI conversation.
+"""
+enum AiConversationMcpServerConnectionScopeType {
+  team
+  user
+  workflowDefinition
+}
+
+"""
+The selected option in a multiple-choice AI conversation elicitation.
+"""
+type AiConversationMultipleChoiceElicitationResponseData {
+  """
+  The kind of elicitation that was answered.
+  """
+  kind: AiConversationElicitationKind!
+  """
+  The zero-based index of the selected option.
+  """
+  selectedOptionIndex: Int!
+}
+
 type AiConversationNavigateToPageToolCall implements AiConversationBaseToolCall {
   """
   The arguments to the tool call.
@@ -2423,6 +2529,7 @@ A part in an AI conversation.
 union AiConversationPart =
   | AiConversationAckPart
   | AiConversationElicitationPart
+  | AiConversationElicitationResponsePart
   | AiConversationErrorPart
   | AiConversationEventPart
   | AiConversationPromptPart
@@ -2475,6 +2582,7 @@ The type of a part in an AI conversation.
 enum AiConversationPartType {
   ack
   elicitation
+  elicitationResponse
   error
   event
   prompt
@@ -9523,6 +9631,43 @@ type Document implements Node {
   """
   sortOrder: Float!
   """
+  Users who are subscribed to the document.
+  """
+  subscribers(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned subscribers.
+    """
+    filter: UserFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    Should query return disabled/suspended users (default: false).
+    """
+    includeDisabled: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): UserConnection!
+  """
   [Internal] A one-sentence AI-generated summary of the document content. Null if no summary has been generated.
   """
   summary: String
@@ -10051,6 +10196,10 @@ input DocumentFilter {
   """
   release: ReleaseFilter
   """
+  [Internal] Comparator for the document's searchable content.
+  """
+  searchableContent: ContentComparator
+  """
   Comparator for the document slug ID.
   """
   slugId: StringComparator
@@ -10359,6 +10508,43 @@ type DocumentSearchResult implements Node {
   The sort order of the document in its parent entity's resources list. This order is shared with other resource types such as external links.
   """
   sortOrder: Float!
+  """
+  Users who are subscribed to the document.
+  """
+  subscribers(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned subscribers.
+    """
+    filter: UserFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    Should query return disabled/suspended users (default: false).
+    """
+    includeDisabled: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): UserConnection!
   """
   [Internal] A one-sentence AI-generated summary of the document content. Null if no summary has been generated.
   """
@@ -12695,6 +12881,14 @@ input GitHubImportSettingsInput {
   The names of the repositories connected for the GitHub integration.
   """
   repositories: [GitHubRepoInput!]!
+  """
+  The date the repository list was last loaded from GitHub. Unset while the first load is still in progress.
+  """
+  repositoriesSyncedAt: DateTime
+  """
+  The number of repositories the installation can access, as reported by GitHub. Known before the repository list itself has loaded.
+  """
+  repositoryCount: Float
 }
 
 """
@@ -13179,6 +13373,10 @@ input InheritanceEntityMapping {
   """
   projectLabels: JSONObject
   """
+  [Internal] Mapping of the ProjectStatus ID to the workspace or parent team ProjectStatus ID its projects move to.
+  """
+  projectStatuses: JSONObject
+  """
   Mapping of the WorkflowState ID to the new WorkflowState ID.
   """
   workflowStates: JSONObject!
@@ -13389,7 +13587,7 @@ type Initiative implements Node {
   """
   lastUpdate: InitiativeUpdate
   """
-  [ALPHA] The team that leads the initiative. Null if no lead team is assigned.
+  The team that leads the initiative. Null if no lead team is assigned.
   """
   leadTeam: Team
   """
@@ -13618,7 +13816,7 @@ type Initiative implements Node {
   """
   url: String!
   """
-  [ALPHA] The visibility of the initiative, derived from its lead team. Public when no lead team is assigned.
+  The visibility of the initiative, derived from its lead team. Public when no lead team is assigned.
   """
   visibility: InitiativeVisibility!
 }
@@ -13720,7 +13918,7 @@ input InitiativeCollectionFilter {
   """
   labels: InitiativeLabelCollectionFilter
   """
-  [ALPHA] Filters that the initiative lead team must satisfy.
+  Filters that the initiative lead team must satisfy.
   """
   leadTeam: NullableTeamFilter
   """
@@ -13808,7 +14006,7 @@ input InitiativeCreateInput {
   """
   labelIds: [String!]
   """
-  [ALPHA] The team that leads the initiative.
+  The team that leads the initiative.
   """
   leadTeamId: String
   """
@@ -13924,7 +14122,7 @@ input InitiativeFilter {
   """
   labels: InitiativeLabelCollectionFilter
   """
-  [ALPHA] Filters that the initiative lead team must satisfy.
+  Filters that the initiative lead team must satisfy.
   """
   leadTeam: NullableTeamFilter
   """
@@ -15364,7 +15562,7 @@ input InitiativeUpdateInput {
   """
   labelIds: [String!]
   """
-  [ALPHA] The team that leads the initiative. Set to null to clear.
+  The team that leads the initiative. Set to null to clear.
   """
   leadTeamId: String
   """
@@ -22167,6 +22365,17 @@ input JiraProjectDataInput {
   name: String!
 }
 
+type JiraProjectStatusesPayload {
+  """
+  The Jira project's issue statuses (non-Epic).
+  """
+  issueStatuses: [String!]!
+  """
+  The Jira project's project statuses (Epic).
+  """
+  projectStatuses: [String!]!
+}
+
 input JiraSettingsInput {
   """
   The custom OAuth server token endpoint URL (enterprise SSO).
@@ -22204,10 +22413,6 @@ input JiraSettingsInput {
   Whether the user needs to provide setup information about the webhook to complete the integration setup. Only relevant for integrations that use a manual setup flow
   """
   setupPending: Boolean
-  """
-  Jira status names grouped by project, separated into issue statuses (non-Epic) and project statuses (Epic). Structure: projectId -> { issueStatuses: string[], projectStatuses: string[] }
-  """
-  statusNamesPerIssueType: JSONObject
 }
 
 input JiraUpdateInput {
@@ -24310,14 +24515,14 @@ type Mutation {
   ): IntegrationPayload!
     @deprecated(reason: "This mutation is deprecated, please use `integrationSettingsUpdate` instead")
   """
-  [INTERNAL] Fetches Jira project statuses and stores them in integration settings.
+  [INTERNAL] Fetches Jira project statuses for the status mapping settings UI.
   """
   integrationJiraFetchProjectStatuses(
     """
     Input for fetching Jira project statuses.
     """
     input: JiraFetchProjectStatusesInput!
-  ): JiraFetchProjectStatusesPayload!
+  ): JiraFetchProjectStatusesPayload! @deprecated(reason: "Use the `integrationJiraProjectStatuses` query instead.")
   """
   Connect your Jira account to Linear.
   """
@@ -28341,7 +28546,7 @@ input NullableInitiativeFilter {
   """
   labels: InitiativeLabelCollectionFilter
   """
-  [ALPHA] Filters that the initiative lead team must satisfy.
+  Filters that the initiative lead team must satisfy.
   """
   leadTeam: NullableTeamFilter
   """
@@ -31008,6 +31213,10 @@ Input for updating workspace security settings such as role-based access control
 """
 input OrganizationSecuritySettingsInput {
   """
+  The minimum role required to grant or revoke the workspace admin role.
+  """
+  adminManagementRole: UserRoleType
+  """
   The minimum role required to manage agent guidance prompts and settings.
   """
   agentGuidanceRole: UserRoleType
@@ -31717,6 +31926,15 @@ enum PartnerDiscountType {
 }
 
 """
+The kind of partner program an offer belongs to.
+"""
+enum PartnerOfferCategory {
+  accelerator
+  investor
+  startup_community
+}
+
+"""
 [Internal] Public details of an active partner-program offer.
 """
 type PartnerOfferDetailsPayload {
@@ -31799,6 +32017,20 @@ type PartnerOfferWorkspacesPayload {
   The viewer's workspaces hosted in the cell that served this request. Workspaces hosted in other cells are not included; query each cell to assemble the full list.
   """
   workspaces: [PartnerOfferWorkspacePayload!]!
+}
+
+"""
+[Internal] A partner listed in the Linear Startup Program.
+"""
+type PartnerProgramPartnerPayload {
+  """
+  The kind of partner program the offer belongs to.
+  """
+  category: PartnerOfferCategory!
+  """
+  Display name of the partner.
+  """
+  partnerName: String!
 }
 
 type PasskeyLoginStartResponse {
@@ -35866,7 +36098,7 @@ type ProjectStatus implements Node {
   """
   position: Float!
   """
-  [Internal] The team that the status is scoped to. If null, the status is a workspace-level status available to all teams in the workspace.
+  [Internal] The team that the status is scoped to. If null, the status is a workspace-level status.
   """
   team: Team
   """
@@ -35972,6 +36204,10 @@ input ProjectStatusCreateInput {
   The position of the status in the workspace's project flow.
   """
   position: Float!
+  """
+  [Internal] The identifier of the team to scope the status to. If not given, the status is a workspace-level status.
+  """
+  teamId: String
   """
   The type of the project status.
   """
@@ -36984,6 +37220,26 @@ type PullRequest implements Node {
   """
   mergedAt: DateTime
   """
+  [Internal] The host-qualified external ID of the native stack that contains this pull request. Null if the pull request is not in a native stack or stack data is unavailable.
+  """
+  nativeStackId: String
+  """
+  [Internal] The number the hosting provider assigns to the native stack within its repository. Null if the pull request is not in a native stack or stack data is unavailable.
+  """
+  nativeStackNumber: Float
+  """
+  [Internal] The pull request's one-based position in its native stack, where 1 is closest to the target branch. Null if the pull request is not in a native stack or stack data is unavailable.
+  """
+  nativeStackPosition: Float
+  """
+  [Internal] The total number of pull requests in the native stack. Null if the pull request is not in a native stack or stack data is unavailable.
+  """
+  nativeStackSize: Float
+  """
+  [Internal] The target branch shared by the native stack. Null if the pull request is not in a native stack or stack data is unavailable.
+  """
+  nativeStackTargetBranch: String
+  """
   The pull request number as assigned by the hosting provider (e.g., #123 on GitHub). Unique within a repository.
   """
   number: Float!
@@ -37106,6 +37362,14 @@ type PullRequestCommit {
   The timestamp when the commit was committed, as an ISO 8601 string.
   """
   committedAt: String!
+  """
+  The external user ID for the commit's committer. Null if no matching external user is available.
+  """
+  committerExternalUserId: String
+  """
+  The Linear user ID for the commit's committer. Null if no matching Linear user is available.
+  """
+  committerUserId: String
   """
   Number of deletions in this commit. 0 when the hosting provider did not report per-commit diff stats.
   """
@@ -38580,6 +38844,19 @@ type Query {
     scopes: [String!]!
   ): IntegrationHasScopesPayload!
   """
+  [INTERNAL] Fetches a Jira project's status names, split into issue (non-Epic) and project (Epic) statuses.
+  """
+  integrationJiraProjectStatuses(
+    """
+    The id of the Jira integration.
+    """
+    integrationId: String!
+    """
+    The Jira project ID to fetch statuses for.
+    """
+    projectId: String!
+  ): JiraProjectStatusesPayload!
+  """
   Retrieves a single integration template connection by its identifier.
   """
   integrationTemplate(
@@ -39193,6 +39470,10 @@ type Query {
     """
     token: String!
   ): PartnerOfferWorkspacesPayload
+  """
+  [Internal] Lists every partner with an active partner-program offer, ordered by display name. Backs the partner directory on the marketing website.
+  """
+  partnerProgramPartners: [PartnerProgramPartnerPayload!]!
   """
   Returns a single project by its identifier or URL slug.
   """
@@ -43552,6 +43833,10 @@ type SlackChannelNameMapping {
   """
   postAcceptedFromTriageUpdates: Boolean
   """
+  Whether or not synced Slack threads should be updated with a message when their Ask has an updated assignee.
+  """
+  postAssignmentUpdates: Boolean
+  """
   Whether or not synced Slack threads should be updated with a message and emoji when their Ask is canceled.
   """
   postCancellationUpdates: Boolean
@@ -43559,6 +43844,10 @@ type SlackChannelNameMapping {
   Whether or not synced Slack threads should be updated with a message and emoji when their Ask is completed.
   """
   postCompletionUpdates: Boolean
+  """
+  Whether or not synced Slack threads should be updated with a message when their Ask's SLA is at risk or breached.
+  """
+  postSlaUpdates: Boolean
   """
   Which teams are connected to the channel and settings for those teams.
   """
@@ -43611,6 +43900,10 @@ input SlackChannelNameMappingInput {
   """
   postAcceptedFromTriageUpdates: Boolean
   """
+  Whether or not synced Slack threads should be updated with a message when their Ask has an updated assignee.
+  """
+  postAssignmentUpdates: Boolean
+  """
   Whether or not synced Slack threads should be updated with a message and emoji when their Ask is canceled.
   """
   postCancellationUpdates: Boolean
@@ -43618,6 +43911,10 @@ input SlackChannelNameMappingInput {
   Whether or not synced Slack threads should be updated with a message and emoji when their Ask is completed.
   """
   postCompletionUpdates: Boolean
+  """
+  Whether or not synced Slack threads should be updated with a message when their Ask's SLA is at risk or breached.
+  """
+  postSlaUpdates: Boolean
   """
   Which teams are connected to the channel and settings for those teams.
   """
@@ -44700,6 +44997,10 @@ type Team implements Node {
   """
   inheritIssueEstimation: Boolean!
   """
+  [Internal] Whether the team should inherit its project statuses from its parent team, or from the workspace when it has no parent.
+  """
+  inheritProjectStatuses: Boolean!
+  """
   [Internal] Whether the team should inherit its Slack auto-create project channel setting from its parent. Only applies to sub-teams.
   """
   inheritSlackAutoCreateProjectChannel: Boolean!
@@ -44708,7 +45009,7 @@ type Team implements Node {
   """
   inheritWorkflowStatuses: Boolean!
   """
-  [ALPHA] Whether team initiatives are enabled and shown in the team's sidebar.
+  Whether team initiatives are enabled and shown in the team's sidebar.
   """
   initiativesEnabled: Boolean!
   """
@@ -45392,6 +45693,10 @@ input TeamCreateInput {
   """
   inheritProductIntelligenceScope: Boolean
   """
+  [Internal] Whether the team should inherit project statuses from its parent team, or from the workspace when it has no parent.
+  """
+  inheritProjectStatuses: Boolean
+  """
   [Internal] Whether the team should inherit its Slack auto-create project channel setting from its parent. Only applies to sub-teams.
   """
   inheritSlackAutoCreateProjectChannel: Boolean
@@ -45400,7 +45705,7 @@ input TeamCreateInput {
   """
   inheritWorkflowStatuses: Boolean
   """
-  [ALPHA] Whether initiatives are shown in the team's sidebar.
+  Whether initiatives are shown in the team's sidebar.
   """
   initiativesEnabled: Boolean
   """
@@ -46042,6 +46347,10 @@ input TeamUpdateInput {
   """
   inheritProductIntelligenceScope: Boolean
   """
+  [Internal] Whether the team should inherit project statuses from its parent team, or from the workspace when it has no parent.
+  """
+  inheritProjectStatuses: Boolean
+  """
   [Internal] Whether the team should inherit its Slack auto-create project channel setting from its parent. Only applies to sub-teams.
   """
   inheritSlackAutoCreateProjectChannel: Boolean
@@ -46050,7 +46359,7 @@ input TeamUpdateInput {
   """
   inheritWorkflowStatuses: Boolean
   """
-  [ALPHA] Whether initiatives are shown in the team's sidebar.
+  Whether initiatives are shown in the team's sidebar.
   """
   initiativesEnabled: Boolean
   """
@@ -46436,6 +46745,10 @@ type TimeSchedule implements Node {
   """
   archivedAt: DateTime
   """
+  [ALPHA] The schedule configuration.
+  """
+  config: TimeScheduleConfig
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
@@ -46474,6 +46787,23 @@ type TimeSchedule implements Node {
   updatedAt: DateTime!
 }
 
+"""
+[ALPHA] The configuration of a time schedule.
+"""
+type TimeScheduleConfig {
+  """
+  Record of the next on-call shift keyed by Linear user id, e.g. `{ "<linearUserId>": { "startsAt": "X", "endsAt": "Y" } }`.
+  """
+  nextShiftByUserId: JSONObject!
+}
+
+input TimeScheduleConfigInput {
+  """
+  Record of the next on-call shift keyed by Linear user id, e.g. `{ "<linearUserId>": { "startsAt": "X", "endsAt": "Y" } }`.
+  """
+  nextShiftByUserId: JSONObject!
+}
+
 type TimeScheduleConnection {
   edges: [TimeScheduleEdge!]!
   nodes: [TimeSchedule!]!
@@ -46484,6 +46814,10 @@ type TimeScheduleConnection {
 Input for creating a new time schedule.
 """
 input TimeScheduleCreateInput {
+  """
+  [ALPHA] The schedule configuration.
+  """
+  config: TimeScheduleConfigInput
   """
   The schedule entries.
   """
@@ -46577,6 +46911,10 @@ type TimeSchedulePayload {
 Input for updating an existing time schedule.
 """
 input TimeScheduleUpdateInput {
+  """
+  [ALPHA] The schedule configuration. Pass null to clear it.
+  """
+  config: TimeScheduleConfigInput
   """
   The schedule entries.
   """
@@ -46906,6 +47244,10 @@ type UsageAlert implements Node {
   Type-specific metadata captured when the alert was triggered.
   """
   metadata: JSONObject!
+  """
+  The time when the usage alert was resolved or archived. Null if the alert is still active.
+  """
+  resolvedAt: DateTime
   """
   The kind of usage alert that was triggered.
   """
@@ -47727,6 +48069,7 @@ enum UserFlagType {
   issueMovePromptCompleted
   joinTeamIntroductionDismissed
   listSelectionTip
+  loopEditRestrictionSpeedbumpShown
   migrateThemePreference
   milestoneOnboardingIsSeenAndDismissed
   projectBacklogWelcomeDismissed
@@ -48135,6 +48478,10 @@ input UserSettingsUpdateInput {
   """
   notificationDeliveryPreferences: NotificationDeliveryPreferencesInput
   """
+  [Internal] Whether the Priority Inbox is enabled for the user.
+  """
+  priorityInboxEnabled: Boolean
+  """
   The user's settings. Merged key by key into the existing settings: keys missing from the object are left unchanged, and a key set to null is removed.
   """
   settings: JSONObject
@@ -48488,6 +48835,14 @@ type ViewPreferencesValues {
   """
   automationOrdering: String
   """
+  Whether to show the run duration in Loop run history.
+  """
+  automationRunHistoryShowDuration: Boolean
+  """
+  Whether to show the issue identifier in Loop run history.
+  """
+  automationRunHistoryShowIssueIdentifier: Boolean
+  """
   Whether to show sub-team loops.
   """
   automationShowDescendants: Boolean
@@ -48632,6 +48987,26 @@ type ViewPreferencesValues {
   """
   dashboardsOrdering: String
   """
+  Whether to show the creator field for documents.
+  """
+  documentFieldCreator: Boolean
+  """
+  Whether to show the created date field for documents.
+  """
+  documentFieldDateCreated: Boolean
+  """
+  Whether to show the updated date field for documents.
+  """
+  documentFieldDateUpdated: Boolean
+  """
+  Whether to show the owner field for documents.
+  """
+  documentFieldOwner: Boolean
+  """
+  Whether to show the parent field for documents.
+  """
+  documentFieldParent: Boolean
+  """
   Whether to show important embedded customer needs first.
   """
   embeddedCustomerNeedsShowImportantFirst: Boolean
@@ -48734,15 +49109,15 @@ type ViewPreferencesValues {
   """
   The focus view grouping.
   """
-  focusViewGrouping: String
+  focusViewGrouping: String @deprecated(reason: "No longer available")
   """
   The focus view ordering.
   """
-  focusViewOrdering: String
+  focusViewOrdering: String @deprecated(reason: "No longer available")
   """
   The focus view ordering direction.
   """
-  focusViewOrderingDirection: String
+  focusViewOrderingDirection: String @deprecated(reason: "No longer available")
   """
   The ordering mode for groups. Supersedes projectGroupOrdering.
   """
@@ -49332,7 +49707,7 @@ type ViewPreferencesValues {
   """
   showSupervisedIssues: Boolean
   """
-  [ALPHA] Whether to show team-level initiatives in the workspace.
+  Whether to show team-level initiatives in the workspace.
   """
   showTeamInitiatives: Boolean
   """
@@ -49429,6 +49804,7 @@ enum ViewType {
   agents
   allIssues
   archive
+  automationRunHistory
   automations
   backlog
   board
@@ -49446,7 +49822,7 @@ enum ViewType {
   feedCreated
   feedFollowing
   feedPopular
-  focus
+  focus @deprecated(reason: "No longer available")
   inbox
   inboxOther
   inboxPriority
@@ -50037,6 +50413,10 @@ type WorkflowDefinition implements Node {
   The contextual project view associated with the workflow.
   """
   project: Project
+  """
+  Whether editing the workflow is restricted to its owner, team owners, and workspace administrators.
+  """
+  restrictEditing: Boolean!
   """
   Whether the workflow should only execute once per entity. When true, the workflow is excluded from matching automations for an entity if it has already been executed for that entity.
   """
