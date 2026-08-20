@@ -107,6 +107,10 @@ fragment AiConversationBasePart on AiConversationBasePart {
     ...AiConversationElicitationPart
   }
 
+  ... on AiConversationElicitationResponsePart {
+    ...AiConversationElicitationResponsePart
+  }
+
   ... on AiConversationErrorPart {
     ...AiConversationErrorPart
   }
@@ -1257,27 +1261,6 @@ fragment ProjectLabel on ProjectLabel {
   }
   # Whether the label is a group. When true, this label acts as a container for child labels and cannot be directly applied to issues or projects. When false, the label can be directly applied.
   isGroup
-}
-
-# A lightweight question or choice prompt shown with an AI conversation.
-fragment AiConversationElicitationPart on AiConversationElicitationPart {
-  __typename
-  # Selectable prompt options for multiple-choice elicitations.
-  options {
-    ...AiConversationElicitationOption
-  }
-  # The ID of the part.
-  id
-  # The kind of input this elicitation asks for.
-  kind
-  # The metadata of the part.
-  metadata {
-    ...AiConversationPartMetadata
-  }
-  # The title shown above the elicitation choices.
-  title
-  # The type of the part.
-  type
 }
 
 # A link between an agent session and a pull request created or associated during that session. This
@@ -3628,10 +3611,10 @@ fragment Document on Document {
 # A selectable option shown in an AI conversation elicitation.
 fragment AiConversationElicitationOption on AiConversationElicitationOption {
   __typename
-  # The prompt sent as a normal user reply when selected.
-  prompt
   # The short label shown for the option.
   label
+  # The user prompt rendered to the agent when this option is selected.
+  prompt
 }
 
 # A session representing an AI coding agent's work on an issue or conversation. Agent sessions track
@@ -3903,6 +3886,63 @@ fragment InitiativeUpdate on InitiativeUpdate {
   isStale
 }
 
+# A structured request for user input shown with an AI conversation.
+fragment AiConversationElicitationPart on AiConversationElicitationPart {
+  __typename
+  # Selectable prompt options for multiple-choice elicitations.
+  options {
+    ...AiConversationElicitationOption
+  }
+  # The ID of the part.
+  id
+  # The MCP server URL for a new connection. Null for reconnects and other elicitation kinds.
+  serverUrl
+  # The existing MCP integration to reconnect. Null when creating a new connection.
+  integrationId
+  # The kind of input this elicitation asks for.
+  kind
+  # The metadata of the part.
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  # The requested owner of the MCP server connection. Null for other elicitation kinds.
+  scope {
+    ...AiConversationMcpServerConnectionScope
+  }
+  # The title shown above the elicitation choices.
+  title
+  # The type of the part.
+  type
+}
+
+# A structured user response to an elicitation in an AI conversation.
+fragment AiConversationElicitationResponsePart on AiConversationElicitationResponsePart {
+  __typename
+  # The ID of the part.
+  id
+  # The identifier of the elicitation that was answered.
+  elicitationId
+  # The kind-specific response data.
+  data {
+    ... on AiConversationMcpServerConnectionElicitationResponseData {
+      ...AiConversationMcpServerConnectionElicitationResponseData
+    }
+    ... on AiConversationMultipleChoiceElicitationResponseData {
+      ...AiConversationMultipleChoiceElicitationResponseData
+    }
+  }
+  # The metadata of the part.
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  # The type of the part.
+  type
+  # The user who answered the elicitation.
+  user {
+    id
+  }
+}
+
 # A subscription that controls which notifications a user receives for a specific entity such as a
 # team, project, cycle, label, custom view, initiative, or user. This is not a billing subscription --
 # it determines notification preferences. Each subscription is scoped to exactly one target entity and
@@ -4137,6 +4177,8 @@ fragment Team on Team {
   autoCloseChildIssues
   # Whether parent issues should automatically close when all child issues are closed
   autoCloseParentIssues
+  # Whether team initiatives are enabled and shown in the team's sidebar.
+  initiativesEnabled
   # Whether the team is managed by a SCIM integration. SCIM-managed teams have their membership controlled by the identity provider.
   scimManaged
   # Whether the team is private. Private teams are only visible to their members and require an explicit invitation to join.
@@ -4535,6 +4577,8 @@ fragment UsageAlert on UsageAlert {
   archivedAt
   # The time at which the entity was created.
   createdAt
+  # The time when the usage alert was resolved or archived. Null if the alert is still active.
+  resolvedAt
   # The unique identifier of the entity.
   id
   # Type-specific metadata captured when the alert was triggered.
@@ -5623,6 +5667,8 @@ fragment WorkflowDefinition on WorkflowDefinition {
   }
   # The workflow definition's unique URL slug.
   slugId
+  # Whether editing the workflow is restricted to its owner, team owners, and workspace administrators.
+  restrictEditing
   # Whether the workflow is enabled and will execute when its trigger conditions are met.
   enabled
   # Whether the workflow should apply to sub teams.
@@ -6028,6 +6074,10 @@ fragment Initiative on Initiative {
   prioritySortOrder
   # The sort order of the initiative within the workspace.
   sortOrder
+  # The team that leads the initiative. Null if no lead team is assigned.
+  leadTeam {
+    id
+  }
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
@@ -6048,6 +6098,8 @@ fragment Initiative on Initiative {
   owner {
     id
   }
+  # The visibility of the initiative, derived from its lead team. Public when no lead team is assigned.
+  visibility
 }
 
 # An integration with an external service. Integrations connect Linear to tools like Slack, GitHub,
@@ -6737,8 +6789,12 @@ fragment SlackChannelNameMapping on SlackChannelNameMapping {
   postCancellationUpdates
   # Whether or not synced Slack threads should be updated with a message and emoji when their Ask is completed.
   postCompletionUpdates
+  # Whether or not synced Slack threads should be updated with a message when their Ask has an updated assignee.
+  postAssignmentUpdates
   # Whether or not synced Slack threads should be updated with a message when their Ask is accepted from triage.
   postAcceptedFromTriageUpdates
+  # Whether or not synced Slack threads should be updated with a message when their Ask's SLA is at risk or breached.
+  postSlaUpdates
   # Whether or not the Linear Asks bot has been added to this Slack channel.
   botAdded
   # Whether or not the Slack channel is private.
@@ -9445,12 +9501,18 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showSubTeamProjects
   # Whether to show supervised issues.
   showSupervisedIssues
+  # Whether to show team-level initiatives in the workspace.
+  showTeamInitiatives
   # Whether to show the SLA field.
   fieldSla
   # Whether to show the Sentry issues field.
   fieldSentryIssues
   # Whether to show the completion field for scheduled pipeline releases.
   scheduledPipelineReleaseFieldCompletion
+  # Whether to show the created date field for documents.
+  documentFieldDateCreated
+  # Whether to show the creator field for documents.
+  documentFieldCreator
   # Whether to show the custom view creation date field.
   customViewFieldDateCreated
   # Whether to show the custom view owner field.
@@ -9539,6 +9601,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   customerPageNeedsFieldIssueIdentifier
   # Whether to show the issue identifier field.
   fieldId
+  # Whether to show the issue identifier in Loop run history.
+  automationRunHistoryShowIssueIdentifier
   # Whether to show the issue last activity date field.
   fieldDateMyActivity
   # Whether to show the issue priority field in the customer page.
@@ -9573,6 +9637,10 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldTeams
   # Whether to show the milestone field.
   fieldMilestone
+  # Whether to show the owner field for documents.
+  documentFieldOwner
+  # Whether to show the parent field for documents.
+  documentFieldParent
   # Whether to show the project activity field.
   projectFieldActivity
   # Whether to show the project completion date field.
@@ -9683,6 +9751,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   reviewFieldIdentifier
   # Whether to show the review repository field.
   reviewFieldRepository
+  # Whether to show the run duration in Loop run history.
+  automationRunHistoryShowDuration
   # Whether to show the team creation date field.
   teamFieldDateCreated
   # Whether to show the team cycle field.
@@ -9705,6 +9775,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldTimeInCurrentStatus
   # Whether to show the type field for release pipelines.
   releasePipelineFieldType
+  # Whether to show the updated date field for documents.
+  documentFieldDateUpdated
   # Whether to show the version field for continuous pipeline releases.
   continuousPipelineReleaseFieldVersion
   # Whether to show the version field for scheduled pipeline releases.
@@ -9823,6 +9895,15 @@ fragment ViewPreferences on ViewPreferences {
   }
 }
 
+# The integration connected by an MCP server connection elicitation.
+fragment AiConversationMcpServerConnectionElicitationResponseData on AiConversationMcpServerConnectionElicitationResponseData {
+  __typename
+  # The identifier of the MCP server integration that was connected.
+  integrationId
+  # The kind of elicitation that was answered.
+  kind
+}
+
 # The join entity linking a project to an initiative. A project can only appear once in an initiative
 # hierarchy -- it cannot be on both an initiative and one of its ancestor or descendant initiatives.
 fragment InitiativeToProject on InitiativeToProject {
@@ -9855,6 +9936,17 @@ fragment AgentAutomationRetryResolution on AgentAutomationRetryResolution {
   aiConversationId
   # Whether a replacement run was scheduled or the loop could no longer be retried.
   status
+}
+
+# The owner scope for an MCP server connection requested in an AI conversation.
+fragment AiConversationMcpServerConnectionScope on AiConversationMcpServerConnectionScope {
+  __typename
+  # The identifier of the Loop that will own the connection. Null for other scope types.
+  workflowDefinitionId
+  # The identifier of the team that will own the connection. Null for other scope types.
+  teamId
+  # The type of owner that will receive the MCP server connection.
+  type
 }
 
 # The payload returned by cycle mutations.
@@ -10738,6 +10830,15 @@ fragment DocumentContent on DocumentContent {
   welcomeMessage {
     ...WelcomeMessage
   }
+}
+
+# The selected option in a multiple-choice AI conversation elicitation.
+fragment AiConversationMultipleChoiceElicitationResponseData on AiConversationMultipleChoiceElicitationResponseData {
+  __typename
+  # The kind of elicitation that was answered.
+  kind
+  # The zero-based index of the selected option.
+  selectedOptionIndex
 }
 
 # The state of a specific rate limit type, including remaining quota and reset timing.
@@ -13144,6 +13245,14 @@ fragment JiraFetchProjectStatusesPayload on JiraFetchProjectStatusesPayload {
   success
 }
 
+fragment JiraProjectStatusesPayload on JiraProjectStatusesPayload {
+  __typename
+  # The Jira project's issue statuses (non-Epic).
+  issueStatuses
+  # The Jira project's project statuses (Epic).
+  projectStatuses
+}
+
 fragment LogoutResponse on LogoutResponse {
   __typename
   # Whether the operation was successful.
@@ -15524,6 +15633,42 @@ query document_comments(
       orderBy: $orderBy
     ) {
       ...CommentConnection
+    }
+  }
+}
+# Users who are subscribed to the document.
+query document_subscribers(
+  # The identifier or slug of the document to retrieve.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned subscribers.
+  $filter: UserFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # Should query return disabled/suspended users (default: false).
+  $includeDisabled: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  document(id: $id) {
+    subscribers(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      includeDisabled: $includeDisabled
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...UserConnection
     }
   }
 }

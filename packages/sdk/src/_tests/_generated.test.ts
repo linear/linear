@@ -1611,6 +1611,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the document connection query for the User */
+    it("document.subscribers", async () => {
+      if (_document) {
+        const subscribers: L.UserConnection | undefined | null = await _document.subscribers();
+        expect(subscribers instanceof L.UserConnection);
+      } else {
+        console.warn("codegen-doc:print: No document found - cannot test _document.subscribers query");
+      }
+    });
+
     /** Test the document.creator query for L.User */
     it("document.creator", async () => {
       if (_document) {
@@ -2445,6 +2455,16 @@ describe("generated", () => {
         expect(initiative_lastUpdate instanceof L.InitiativeUpdate);
       } else {
         console.warn("codegen-doc:print: No Initiative found - cannot test initiative.lastUpdate query");
+      }
+    });
+
+    /** Test the initiative.leadTeam query for L.Team */
+    it("initiative.leadTeam", async () => {
+      if (_initiative) {
+        const initiative_leadTeam: L.Team | undefined | null = await _initiative.leadTeam;
+        expect(initiative_leadTeam instanceof L.Team);
+      } else {
+        console.warn("codegen-doc:print: No Initiative found - cannot test initiative.leadTeam query");
       }
     });
 

@@ -534,10 +534,13 @@ export type AgentSession = Node & {
   updatedAt: Scalars["DateTime"];
   /** The URL to the agent session page in the Linear app. Null when no issue is associated. */
   url?: Maybe<Scalars["String"]>;
-  /** [Internal] The coding agent's live working-tree diff metadata (changes not yet pushed to origin), reported by the sandbox. Per-file content is fetched on demand from the workspace-diff-blob route. Null when in sync. */
+  /**
+   * [Internal] Legacy live working-tree diff metadata. Null when the sandbox is in sync.
+   * @deprecated Use the session's Diff model instead.
+   */
   workspaceDiff?: Maybe<Scalars["JSON"]>;
   /**
-   * [Internal] Per-file list of the agent's live working-tree diff at the given content hash. Served behind a repository-read-access gate (the synced summary carries only aggregate counts); null when the requester lacks repository access or there is no current diff.
+   * [Internal] Legacy per-file metadata for the agent session's live working-tree diff.
    * @deprecated Use Diff.files instead.
    */
   workspaceDiffFiles?: Maybe<Array<AgentSessionWorkspaceDiffFile>>;
@@ -1148,6 +1151,7 @@ export type AiConversationDeleteEntityToolCallArgs = {
 
 /** The kind of input an AI conversation elicitation asks for. */
 export enum AiConversationElicitationKind {
+  McpServerConnection = "mcpServerConnection",
   MultipleChoice = "multipleChoice",
 }
 
@@ -1156,25 +1160,53 @@ export type AiConversationElicitationOption = {
   __typename?: "AiConversationElicitationOption";
   /** The short label shown for the option. */
   label: Scalars["String"];
-  /** The prompt sent as a normal user reply when selected. */
+  /** The user prompt rendered to the agent when this option is selected. */
   prompt: Scalars["String"];
 };
 
-/** A lightweight question or choice prompt shown with an AI conversation. */
+/** A structured request for user input shown with an AI conversation. */
 export type AiConversationElicitationPart = AiConversationBasePart & {
   __typename?: "AiConversationElicitationPart";
   /** The ID of the part. */
   id: Scalars["String"];
+  /** The existing MCP integration to reconnect. Null when creating a new connection. */
+  integrationId?: Maybe<Scalars["String"]>;
   /** The kind of input this elicitation asks for. */
   kind: AiConversationElicitationKind;
   /** The metadata of the part. */
   metadata: AiConversationPartMetadata;
   /** Selectable prompt options for multiple-choice elicitations. */
   options: Array<AiConversationElicitationOption>;
+  /** The requested owner of the MCP server connection. Null for other elicitation kinds. */
+  scope?: Maybe<AiConversationMcpServerConnectionScope>;
+  /** The MCP server URL for a new connection. Null for reconnects and other elicitation kinds. */
+  serverUrl?: Maybe<Scalars["String"]>;
   /** The title shown above the elicitation choices. */
   title?: Maybe<Scalars["String"]>;
   /** The type of the part. */
   type: AiConversationPartType;
+};
+
+/** The kind-specific data recorded when a user answers an AI conversation elicitation. */
+export type AiConversationElicitationResponseData =
+  | AiConversationMcpServerConnectionElicitationResponseData
+  | AiConversationMultipleChoiceElicitationResponseData;
+
+/** A structured user response to an elicitation in an AI conversation. */
+export type AiConversationElicitationResponsePart = AiConversationBasePart & {
+  __typename?: "AiConversationElicitationResponsePart";
+  /** The kind-specific response data. */
+  data: AiConversationElicitationResponseData;
+  /** The identifier of the elicitation that was answered. */
+  elicitationId: Scalars["String"];
+  /** The ID of the part. */
+  id: Scalars["String"];
+  /** The metadata of the part. */
+  metadata: AiConversationPartMetadata;
+  /** The type of the part. */
+  type: AiConversationPartType;
+  /** The user who answered the elicitation. */
+  user?: Maybe<User>;
 };
 
 export type AiConversationEntityCardWidget = AiConversationBaseWidget & {
@@ -1218,6 +1250,7 @@ export enum AiConversationEntityCardWidgetArgsAction {
 export enum AiConversationEntityCardWidgetArgsType {
   AgentSession = "AgentSession",
   AiPrompt = "AiPrompt",
+  AiPromptRules = "AiPromptRules",
   CustomView = "CustomView",
   Customer = "Customer",
   CustomerNeed = "CustomerNeed",
@@ -1286,6 +1319,7 @@ export type AiConversationEntityListWidgetArgsEntities = {
 /** [Internal] The entity type */
 export enum AiConversationEntityListWidgetArgsEntitiesType {
   AiPrompt = "AiPrompt",
+  AiPromptRules = "AiPromptRules",
   CustomView = "CustomView",
   Customer = "Customer",
   CustomerNeed = "CustomerNeed",
@@ -1332,7 +1366,6 @@ export type AiConversationErrorPart = AiConversationBasePart & {
 /** The category of an error part in an AI conversation. */
 export enum AiConversationErrorType {
   Billing = "billing",
-  FeatureDisabled = "featureDisabled",
   Unknown = "unknown",
   UntrustedSources = "untrustedSources",
   UsageLimit = "usageLimit",
@@ -1532,6 +1565,42 @@ export type AiConversationListCodingSessionsToolCallResultAgentSessions = {
   type: Scalars["String"];
 };
 
+/** The integration connected by an MCP server connection elicitation. */
+export type AiConversationMcpServerConnectionElicitationResponseData = {
+  __typename?: "AiConversationMcpServerConnectionElicitationResponseData";
+  /** The identifier of the MCP server integration that was connected. */
+  integrationId: Scalars["String"];
+  /** The kind of elicitation that was answered. */
+  kind: AiConversationElicitationKind;
+};
+
+/** The owner scope for an MCP server connection requested in an AI conversation. */
+export type AiConversationMcpServerConnectionScope = {
+  __typename?: "AiConversationMcpServerConnectionScope";
+  /** The identifier of the team that will own the connection. Null for other scope types. */
+  teamId?: Maybe<Scalars["String"]>;
+  /** The type of owner that will receive the MCP server connection. */
+  type: AiConversationMcpServerConnectionScopeType;
+  /** The identifier of the Loop that will own the connection. Null for other scope types. */
+  workflowDefinitionId?: Maybe<Scalars["String"]>;
+};
+
+/** The owner scope for an MCP server connection requested in an AI conversation. */
+export enum AiConversationMcpServerConnectionScopeType {
+  Team = "team",
+  User = "user",
+  WorkflowDefinition = "workflowDefinition",
+}
+
+/** The selected option in a multiple-choice AI conversation elicitation. */
+export type AiConversationMultipleChoiceElicitationResponseData = {
+  __typename?: "AiConversationMultipleChoiceElicitationResponseData";
+  /** The kind of elicitation that was answered. */
+  kind: AiConversationElicitationKind;
+  /** The zero-based index of the selected option. */
+  selectedOptionIndex: Scalars["Int"];
+};
+
 export type AiConversationNavigateToPageToolCall = AiConversationBaseToolCall & {
   __typename?: "AiConversationNavigateToPageToolCall";
   /** The arguments to the tool call. */
@@ -1586,6 +1655,7 @@ export type AiConversationNotifyUsersToolCallArgs = {
 export type AiConversationPart =
   | AiConversationAckPart
   | AiConversationElicitationPart
+  | AiConversationElicitationResponsePart
   | AiConversationErrorPart
   | AiConversationEventPart
   | AiConversationPromptPart
@@ -1621,6 +1691,7 @@ export enum AiConversationPartPhase {
 export enum AiConversationPartType {
   Ack = "ack",
   Elicitation = "elicitation",
+  ElicitationResponse = "elicitationResponse",
   Error = "error",
   Event = "event",
   Prompt = "prompt",
@@ -5722,6 +5793,8 @@ export type Document = Node & {
   slugId: Scalars["String"];
   /** The sort order of the document in its parent entity's resources list. This order is shared with other resource types such as external links. */
   sortOrder: Scalars["Float"];
+  /** Users who are subscribed to the document. */
+  subscribers: UserConnection;
   /** [Internal] A one-sentence AI-generated summary of the document content. Null if no summary has been generated. */
   summary?: Maybe<Scalars["String"]>;
   /** [Internal] The team that the document is associated with. Null if the document belongs to a different parent entity type. */
@@ -5748,6 +5821,18 @@ export type DocumentCommentsArgs = {
   filter?: InputMaybe<CommentFilter>;
   first?: InputMaybe<Scalars["Int"]>;
   includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+/** A rich-text document that lives within a project, initiative, team, issue, release, or cycle. Documents support collaborative editing via ProseMirror/Yjs and store their content in a separate DocumentContent entity. Each document is associated with exactly one parent entity. */
+export type DocumentSubscribersArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  filter?: InputMaybe<UserFilter>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  includeDisabled?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<PaginationOrderBy>;
 };
@@ -6041,6 +6126,8 @@ export type DocumentFilter = {
   project?: InputMaybe<ProjectFilter>;
   /** Filters that the document's release must satisfy. */
   release?: InputMaybe<ReleaseFilter>;
+  /** [Internal] Comparator for the document's searchable content. */
+  searchableContent?: InputMaybe<ContentComparator>;
   /** Comparator for the document slug ID. */
   slugId?: InputMaybe<StringComparator>;
   /** Filters that the document's team must satisfy. */
@@ -6197,6 +6284,8 @@ export type DocumentSearchResult = Node & {
   slugId: Scalars["String"];
   /** The sort order of the document in its parent entity's resources list. This order is shared with other resource types such as external links. */
   sortOrder: Scalars["Float"];
+  /** Users who are subscribed to the document. */
+  subscribers: UserConnection;
   /** [Internal] A one-sentence AI-generated summary of the document content. Null if no summary has been generated. */
   summary?: Maybe<Scalars["String"]>;
   /** [Internal] The team that the document is associated with. Null if the document belongs to a different parent entity type. */
@@ -6222,6 +6311,17 @@ export type DocumentSearchResultCommentsArgs = {
   filter?: InputMaybe<CommentFilter>;
   first?: InputMaybe<Scalars["Int"]>;
   includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+export type DocumentSearchResultSubscribersArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  filter?: InputMaybe<UserFilter>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  includeDisabled?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<PaginationOrderBy>;
 };
@@ -7583,6 +7683,10 @@ export type GitHubImportSettingsInput = {
   orgType: GithubOrgType;
   /** The names of the repositories connected for the GitHub integration. */
   repositories: Array<GitHubRepoInput>;
+  /** The date the repository list was last loaded from GitHub. Unset while the first load is still in progress. */
+  repositoriesSyncedAt?: InputMaybe<Scalars["DateTime"]>;
+  /** The number of repositories the installation can access, as reported by GitHub. Known before the repository list itself has loaded. */
+  repositoryCount?: InputMaybe<Scalars["Float"]>;
 };
 
 /** GitHub-specific details that some integration mutations may return alongside the standard payload. Populated only by GitHub-related mutations. */
@@ -7868,6 +7972,8 @@ export type InheritanceEntityMapping = {
   issueLabels?: InputMaybe<Scalars["JSONObject"]>;
   /** Mapping of the ProjectLabel ID to the new ProjectLabel name. */
   projectLabels?: InputMaybe<Scalars["JSONObject"]>;
+  /** [Internal] Mapping of the ProjectStatus ID to the workspace or parent team ProjectStatus ID its projects move to. */
+  projectStatuses?: InputMaybe<Scalars["JSONObject"]>;
   /** Mapping of the WorkflowState ID to the new WorkflowState ID. */
   workflowStates: Scalars["JSONObject"];
 };
@@ -7921,7 +8027,7 @@ export type Initiative = Node & {
   labels: InitiativeLabelConnection;
   /** The most recent status update posted for this initiative. Null if no updates have been posted. */
   lastUpdate?: Maybe<InitiativeUpdate>;
-  /** [ALPHA] The team that leads the initiative. Null if no lead team is assigned. */
+  /** The team that leads the initiative. Null if no lead team is assigned. */
   leadTeam?: Maybe<Team>;
   /** Links associated with the initiative. */
   links: EntityExternalLinkConnection;
@@ -7974,7 +8080,7 @@ export type Initiative = Node & {
   updatedAt: Scalars["DateTime"];
   /** Initiative URL. */
   url: Scalars["String"];
-  /** [ALPHA] The visibility of the initiative, derived from its lead team. Public when no lead team is assigned. */
+  /** The visibility of the initiative, derived from its lead team. Public when no lead team is assigned. */
   visibility: InitiativeVisibility;
 };
 
@@ -8119,7 +8225,7 @@ export type InitiativeCollectionFilter = {
   initiativeUpdates?: InputMaybe<InitiativeUpdatesCollectionFilter>;
   /** Filters that the initiative labels must satisfy. */
   labels?: InputMaybe<InitiativeLabelCollectionFilter>;
-  /** [ALPHA] Filters that the initiative lead team must satisfy. */
+  /** Filters that the initiative lead team must satisfy. */
   leadTeam?: InputMaybe<NullableTeamFilter>;
   /** Comparator for the collection length. */
   length?: InputMaybe<NumberComparator>;
@@ -8168,7 +8274,7 @@ export type InitiativeCreateInput = {
   id?: InputMaybe<Scalars["String"]>;
   /** The identifiers of the initiative labels associated with this initiative. */
   labelIds?: InputMaybe<Array<Scalars["String"]>>;
-  /** [ALPHA] The team that leads the initiative. */
+  /** The team that leads the initiative. */
   leadTeamId?: InputMaybe<Scalars["String"]>;
   /** The name of the initiative. */
   name: Scalars["String"];
@@ -8231,7 +8337,7 @@ export type InitiativeFilter = {
   initiativeUpdates?: InputMaybe<InitiativeUpdatesCollectionFilter>;
   /** Filters that the initiative labels must satisfy. */
   labels?: InputMaybe<InitiativeLabelCollectionFilter>;
-  /** [ALPHA] Filters that the initiative lead team must satisfy. */
+  /** Filters that the initiative lead team must satisfy. */
   leadTeam?: InputMaybe<NullableTeamFilter>;
   /** Comparator for the initiative name. */
   name?: InputMaybe<StringComparator>;
@@ -9062,7 +9168,7 @@ export type InitiativeUpdateInput = {
   icon?: InputMaybe<Scalars["String"]>;
   /** The identifiers of the initiative labels associated with this initiative. */
   labelIds?: InputMaybe<Array<Scalars["String"]>>;
-  /** [ALPHA] The team that leads the initiative. Set to null to clear. */
+  /** The team that leads the initiative. Set to null to clear. */
   leadTeamId?: InputMaybe<Scalars["String"]>;
   /** The name of the initiative. */
   name?: InputMaybe<Scalars["String"]>;
@@ -12662,6 +12768,14 @@ export type JiraProjectDataInput = {
   name: Scalars["String"];
 };
 
+export type JiraProjectStatusesPayload = {
+  __typename?: "JiraProjectStatusesPayload";
+  /** The Jira project's issue statuses (non-Epic). */
+  issueStatuses: Array<Scalars["String"]>;
+  /** The Jira project's project statuses (Epic). */
+  projectStatuses: Array<Scalars["String"]>;
+};
+
 export type JiraSettingsInput = {
   /** The custom OAuth server token endpoint URL (enterprise SSO). */
   customOAuthServerUrl?: InputMaybe<Scalars["String"]>;
@@ -12681,8 +12795,6 @@ export type JiraSettingsInput = {
   projects: Array<JiraProjectDataInput>;
   /** Whether the user needs to provide setup information about the webhook to complete the integration setup. Only relevant for integrations that use a manual setup flow */
   setupPending?: InputMaybe<Scalars["Boolean"]>;
-  /** Jira status names grouped by project, separated into issue statuses (non-Epic) and project statuses (Epic). Structure: projectId -> { issueStatuses: string[], projectStatuses: string[] } */
-  statusNamesPerIssueType?: InputMaybe<Scalars["JSONObject"]>;
 };
 
 export type JiraUpdateInput = {
@@ -13167,7 +13279,10 @@ export type Mutation = {
    * @deprecated This mutation is deprecated, please use `integrationSettingsUpdate` instead
    */
   integrationIntercomSettingsUpdate: IntegrationPayload;
-  /** [INTERNAL] Fetches Jira project statuses and stores them in integration settings. */
+  /**
+   * [INTERNAL] Fetches Jira project statuses for the status mapping settings UI.
+   * @deprecated Use the `integrationJiraProjectStatuses` query instead.
+   */
   integrationJiraFetchProjectStatuses: JiraFetchProjectStatusesPayload;
   /** Connect your Jira account to Linear. */
   integrationJiraPersonal: IntegrationPayload;
@@ -16163,7 +16278,7 @@ export type NullableInitiativeFilter = {
   initiativeUpdates?: InputMaybe<InitiativeUpdatesCollectionFilter>;
   /** Filters that the initiative labels must satisfy. */
   labels?: InputMaybe<InitiativeLabelCollectionFilter>;
-  /** [ALPHA] Filters that the initiative lead team must satisfy. */
+  /** Filters that the initiative lead team must satisfy. */
   leadTeam?: InputMaybe<NullableTeamFilter>;
   /** Comparator for the initiative name. */
   name?: InputMaybe<StringComparator>;
@@ -17624,6 +17739,8 @@ export type OrganizationPayload = {
 
 /** Input for updating workspace security settings such as role-based access controls. */
 export type OrganizationSecuritySettingsInput = {
+  /** The minimum role required to grant or revoke the workspace admin role. */
+  adminManagementRole?: InputMaybe<UserRoleType>;
   /** The minimum role required to manage agent guidance prompts and settings. */
   agentGuidanceRole?: InputMaybe<UserRoleType>;
   /** The minimum role required to manage API settings. */
@@ -18053,6 +18170,13 @@ export enum PartnerDiscountType {
   PercentOff = "percent_off",
 }
 
+/** The kind of partner program an offer belongs to. */
+export enum PartnerOfferCategory {
+  Accelerator = "accelerator",
+  Investor = "investor",
+  StartupCommunity = "startup_community",
+}
+
 /** [Internal] Public details of an active partner-program offer. */
 export type PartnerOfferDetailsPayload = {
   __typename?: "PartnerOfferDetailsPayload";
@@ -18104,6 +18228,15 @@ export type PartnerOfferWorkspacesPayload = {
   offer: PartnerOfferDetailsPayload;
   /** The viewer's workspaces hosted in the cell that served this request. Workspaces hosted in other cells are not included; query each cell to assemble the full list. */
   workspaces: Array<PartnerOfferWorkspacePayload>;
+};
+
+/** [Internal] A partner listed in the Linear Startup Program. */
+export type PartnerProgramPartnerPayload = {
+  __typename?: "PartnerProgramPartnerPayload";
+  /** The kind of partner program the offer belongs to. */
+  category: PartnerOfferCategory;
+  /** Display name of the partner. */
+  partnerName: Scalars["String"];
 };
 
 export type PasskeyLoginStartResponse = {
@@ -20220,7 +20353,7 @@ export type ProjectStatus = Node & {
   name: Scalars["String"];
   /** The position of the status within its type group in the workspace's project flow. Used for ordering statuses of the same type. */
   position: Scalars["Float"];
-  /** [Internal] The team that the status is scoped to. If null, the status is a workspace-level status available to all teams in the workspace. */
+  /** [Internal] The team that the status is scoped to. If null, the status is a workspace-level status. */
   team?: Maybe<Team>;
   /** The category type of the project status (e.g., backlog, planned, started, paused, completed, canceled). Determines the status's behavior and position in the project lifecycle. */
   type: ProjectStatusType;
@@ -20287,6 +20420,8 @@ export type ProjectStatusCreateInput = {
   name: Scalars["String"];
   /** The position of the status in the workspace's project flow. */
   position: Scalars["Float"];
+  /** [Internal] The identifier of the team to scope the status to. If not given, the status is a workspace-level status. */
+  teamId?: InputMaybe<Scalars["String"]>;
   /** The type of the project status. */
   type: ProjectStatusType;
 };
@@ -20842,6 +20977,16 @@ export type PullRequest = Node & {
   mergeStatus: Scalars["String"];
   /** The time at which the pull request was merged. Null if the pull request has not been merged. */
   mergedAt?: Maybe<Scalars["DateTime"]>;
+  /** [Internal] The host-qualified external ID of the native stack that contains this pull request. Null if the pull request is not in a native stack or stack data is unavailable. */
+  nativeStackId?: Maybe<Scalars["String"]>;
+  /** [Internal] The number the hosting provider assigns to the native stack within its repository. Null if the pull request is not in a native stack or stack data is unavailable. */
+  nativeStackNumber?: Maybe<Scalars["Float"]>;
+  /** [Internal] The pull request's one-based position in its native stack, where 1 is closest to the target branch. Null if the pull request is not in a native stack or stack data is unavailable. */
+  nativeStackPosition?: Maybe<Scalars["Float"]>;
+  /** [Internal] The total number of pull requests in the native stack. Null if the pull request is not in a native stack or stack data is unavailable. */
+  nativeStackSize?: Maybe<Scalars["Float"]>;
+  /** [Internal] The target branch shared by the native stack. Null if the pull request is not in a native stack or stack data is unavailable. */
+  nativeStackTargetBranch?: Maybe<Scalars["String"]>;
   /** The pull request number as assigned by the hosting provider (e.g., #123 on GitHub). Unique within a repository. */
   number: Scalars["Float"];
   /** The time at which the pull request was opened. */
@@ -20913,6 +21058,10 @@ export type PullRequestCommit = {
   changedFiles?: Maybe<Scalars["Float"]>;
   /** The timestamp when the commit was committed, as an ISO 8601 string. */
   committedAt: Scalars["String"];
+  /** The external user ID for the commit's committer. Null if no matching external user is available. */
+  committerExternalUserId?: Maybe<Scalars["String"]>;
+  /** The Linear user ID for the commit's committer. Null if no matching Linear user is available. */
+  committerUserId?: Maybe<Scalars["String"]>;
   /** Number of deletions in this commit. 0 when the hosting provider did not report per-commit diff stats. */
   deletions: Scalars["Float"];
   /** Whether this commit is a merge commit (has multiple parents). Merge commits are typically filtered out when counting diff stats. */
@@ -21275,6 +21424,8 @@ export type Query = {
   integration: Integration;
   /** Checks if the integration has all required scopes. */
   integrationHasScopes: IntegrationHasScopesPayload;
+  /** [INTERNAL] Fetches a Jira project's status names, split into issue (non-Epic) and project (Epic) statuses. */
+  integrationJiraProjectStatuses: JiraProjectStatusesPayload;
   /** Retrieves a single integration template connection by its identifier. */
   integrationTemplate: IntegrationTemplate;
   /** All integration template connections for the workspace, linking templates to integrations. */
@@ -21355,6 +21506,8 @@ export type Query = {
   partnerOfferDetails?: Maybe<PartnerOfferDetailsPayload>;
   /** [Internal] Fetches the viewer's workspaces hosted in the serving cell, with each workspace's eligibility to redeem the given partner-offer token. Returns null when the token is invalid or the offer is no longer available. */
   partnerOfferWorkspaces?: Maybe<PartnerOfferWorkspacesPayload>;
+  /** [Internal] Lists every partner with an active partner-program offer, ordered by display name. Backs the partner directory on the marketing website. */
+  partnerProgramPartners: Array<PartnerProgramPartnerPayload>;
   /** Returns a single project by its identifier or URL slug. */
   project: Project;
   /** Suggests filters for a project view based on a text prompt. */
@@ -21871,6 +22024,11 @@ export type QueryIntegrationArgs = {
 export type QueryIntegrationHasScopesArgs = {
   integrationId: Scalars["String"];
   scopes: Array<Scalars["String"]>;
+};
+
+export type QueryIntegrationJiraProjectStatusesArgs = {
+  integrationId: Scalars["String"];
+  projectId: Scalars["String"];
 };
 
 export type QueryIntegrationTemplateArgs = {
@@ -24306,10 +24464,14 @@ export type SlackChannelNameMapping = {
   name: Scalars["String"];
   /** Whether or not synced Slack threads should be updated with a message when their Ask is accepted from triage. */
   postAcceptedFromTriageUpdates?: Maybe<Scalars["Boolean"]>;
+  /** Whether or not synced Slack threads should be updated with a message when their Ask has an updated assignee. */
+  postAssignmentUpdates?: Maybe<Scalars["Boolean"]>;
   /** Whether or not synced Slack threads should be updated with a message and emoji when their Ask is canceled. */
   postCancellationUpdates?: Maybe<Scalars["Boolean"]>;
   /** Whether or not synced Slack threads should be updated with a message and emoji when their Ask is completed. */
   postCompletionUpdates?: Maybe<Scalars["Boolean"]>;
+  /** Whether or not synced Slack threads should be updated with a message when their Ask's SLA is at risk or breached. */
+  postSlaUpdates?: Maybe<Scalars["Boolean"]>;
   /** Which teams are connected to the channel and settings for those teams. */
   teams: Array<SlackAsksTeamSettings>;
 };
@@ -24337,10 +24499,14 @@ export type SlackChannelNameMappingInput = {
   name: Scalars["String"];
   /** Whether or not synced Slack threads should be updated with a message when their Ask is accepted from triage. */
   postAcceptedFromTriageUpdates?: InputMaybe<Scalars["Boolean"]>;
+  /** Whether or not synced Slack threads should be updated with a message when their Ask has an updated assignee. */
+  postAssignmentUpdates?: InputMaybe<Scalars["Boolean"]>;
   /** Whether or not synced Slack threads should be updated with a message and emoji when their Ask is canceled. */
   postCancellationUpdates?: InputMaybe<Scalars["Boolean"]>;
   /** Whether or not synced Slack threads should be updated with a message and emoji when their Ask is completed. */
   postCompletionUpdates?: InputMaybe<Scalars["Boolean"]>;
+  /** Whether or not synced Slack threads should be updated with a message when their Ask's SLA is at risk or breached. */
+  postSlaUpdates?: InputMaybe<Scalars["Boolean"]>;
   /** Which teams are connected to the channel and settings for those teams. */
   teams: Array<SlackAsksTeamSettingsInput>;
 };
@@ -24903,11 +25069,13 @@ export type Team = Node & {
   id: Scalars["ID"];
   /** Whether the team should inherit its estimation settings from its parent. Only applies to sub-teams. */
   inheritIssueEstimation: Scalars["Boolean"];
+  /** [Internal] Whether the team should inherit its project statuses from its parent team, or from the workspace when it has no parent. */
+  inheritProjectStatuses: Scalars["Boolean"];
   /** [Internal] Whether the team should inherit its Slack auto-create project channel setting from its parent. Only applies to sub-teams. */
   inheritSlackAutoCreateProjectChannel: Scalars["Boolean"];
   /** Whether the team should inherit its workflow statuses from its parent. Only applies to sub-teams. */
   inheritWorkflowStatuses: Scalars["Boolean"];
-  /** [ALPHA] Whether team initiatives are enabled and shown in the team's sidebar. */
+  /** Whether team initiatives are enabled and shown in the team's sidebar. */
   initiativesEnabled: Scalars["Boolean"];
   /** Settings for all integrations associated with that team. */
   integrationsSettings?: Maybe<IntegrationsSettings>;
@@ -25295,11 +25463,13 @@ export type TeamCreateInput = {
   inheritIssueEstimation?: InputMaybe<Scalars["Boolean"]>;
   /** [Internal] Whether the team should inherit its product intelligence scope from its parent. Only applies to sub-teams. */
   inheritProductIntelligenceScope?: InputMaybe<Scalars["Boolean"]>;
+  /** [Internal] Whether the team should inherit project statuses from its parent team, or from the workspace when it has no parent. */
+  inheritProjectStatuses?: InputMaybe<Scalars["Boolean"]>;
   /** [Internal] Whether the team should inherit its Slack auto-create project channel setting from its parent. Only applies to sub-teams. */
   inheritSlackAutoCreateProjectChannel?: InputMaybe<Scalars["Boolean"]>;
   /** [Internal] Whether the team should inherit workflow statuses from its parent. */
   inheritWorkflowStatuses?: InputMaybe<Scalars["Boolean"]>;
-  /** [ALPHA] Whether initiatives are shown in the team's sidebar. */
+  /** Whether initiatives are shown in the team's sidebar. */
   initiativesEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** Whether to allow zeros in issues estimates. */
   issueEstimationAllowZero?: InputMaybe<Scalars["Boolean"]>;
@@ -25667,11 +25837,13 @@ export type TeamUpdateInput = {
   inheritIssueEstimation?: InputMaybe<Scalars["Boolean"]>;
   /** [Internal] Whether the team should inherit its product intelligence scope from its parent. Only applies to sub-teams. */
   inheritProductIntelligenceScope?: InputMaybe<Scalars["Boolean"]>;
+  /** [Internal] Whether the team should inherit project statuses from its parent team, or from the workspace when it has no parent. */
+  inheritProjectStatuses?: InputMaybe<Scalars["Boolean"]>;
   /** [Internal] Whether the team should inherit its Slack auto-create project channel setting from its parent. Only applies to sub-teams. */
   inheritSlackAutoCreateProjectChannel?: InputMaybe<Scalars["Boolean"]>;
   /** [Internal] Whether the team should inherit workflow statuses from its parent. */
   inheritWorkflowStatuses?: InputMaybe<Scalars["Boolean"]>;
-  /** [ALPHA] Whether initiatives are shown in the team's sidebar. */
+  /** Whether initiatives are shown in the team's sidebar. */
   initiativesEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** Whether to allow zeros in issues estimates. */
   issueEstimationAllowZero?: InputMaybe<Scalars["Boolean"]>;
@@ -25889,6 +26061,8 @@ export type TimeSchedule = Node & {
   __typename?: "TimeSchedule";
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** [ALPHA] The schedule configuration. */
+  config?: Maybe<TimeScheduleConfig>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /** The schedule entries. */
@@ -25912,6 +26086,18 @@ export type TimeSchedule = Node & {
   updatedAt: Scalars["DateTime"];
 };
 
+/** [ALPHA] The configuration of a time schedule. */
+export type TimeScheduleConfig = {
+  __typename?: "TimeScheduleConfig";
+  /** Record of the next on-call shift keyed by Linear user id, e.g. `{ "<linearUserId>": { "startsAt": "X", "endsAt": "Y" } }`. */
+  nextShiftByUserId: Scalars["JSONObject"];
+};
+
+export type TimeScheduleConfigInput = {
+  /** Record of the next on-call shift keyed by Linear user id, e.g. `{ "<linearUserId>": { "startsAt": "X", "endsAt": "Y" } }`. */
+  nextShiftByUserId: Scalars["JSONObject"];
+};
+
 export type TimeScheduleConnection = {
   __typename?: "TimeScheduleConnection";
   edges: Array<TimeScheduleEdge>;
@@ -25921,6 +26107,8 @@ export type TimeScheduleConnection = {
 
 /** Input for creating a new time schedule. */
 export type TimeScheduleCreateInput = {
+  /** [ALPHA] The schedule configuration. */
+  config?: InputMaybe<TimeScheduleConfigInput>;
   /** The schedule entries. */
   entries: Array<TimeScheduleEntryInput>;
   /** The unique identifier of the external schedule. */
@@ -25977,6 +26165,8 @@ export type TimeSchedulePayload = {
 
 /** Input for updating an existing time schedule. */
 export type TimeScheduleUpdateInput = {
+  /** [ALPHA] The schedule configuration. Pass null to clear it. */
+  config?: InputMaybe<TimeScheduleConfigInput>;
   /** The schedule entries. */
   entries?: InputMaybe<Array<TimeScheduleEntryInput>>;
   /** The unique identifier of the external schedule. */
@@ -26170,6 +26360,8 @@ export type UsageAlert = Node & {
   id: Scalars["ID"];
   /** Type-specific metadata captured when the alert was triggered. */
   metadata: Scalars["JSONObject"];
+  /** The time when the usage alert was resolved or archived. Null if the alert is still active. */
+  resolvedAt?: Maybe<Scalars["DateTime"]>;
   /** The kind of usage alert that was triggered. */
   type: Scalars["String"];
   /**
@@ -26609,6 +26801,7 @@ export enum UserFlagType {
   IssueMovePromptCompleted = "issueMovePromptCompleted",
   JoinTeamIntroductionDismissed = "joinTeamIntroductionDismissed",
   ListSelectionTip = "listSelectionTip",
+  LoopEditRestrictionSpeedbumpShown = "loopEditRestrictionSpeedbumpShown",
   MigrateThemePreference = "migrateThemePreference",
   MilestoneOnboardingIsSeenAndDismissed = "milestoneOnboardingIsSeenAndDismissed",
   ProjectBacklogWelcomeDismissed = "projectBacklogWelcomeDismissed",
@@ -26872,6 +27065,8 @@ export type UserSettingsUpdateInput = {
   notificationChannelPreferences?: InputMaybe<PartialNotificationChannelPreferencesInput>;
   /** The user's notification delivery preferences. */
   notificationDeliveryPreferences?: InputMaybe<NotificationDeliveryPreferencesInput>;
+  /** [Internal] Whether the Priority Inbox is enabled for the user. */
+  priorityInboxEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** The user's settings. Merged key by key into the existing settings: keys missing from the object are left unchanged, and a key set to null is removed. */
   settings?: InputMaybe<Scalars["JSONObject"]>;
   /** Whether this user is subscribed to changelog email or not. */
@@ -27069,6 +27264,10 @@ export type ViewPreferencesValues = {
   automationGrouping?: Maybe<Scalars["String"]>;
   /** The loop ordering. */
   automationOrdering?: Maybe<Scalars["String"]>;
+  /** Whether to show the run duration in Loop run history. */
+  automationRunHistoryShowDuration?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show the issue identifier in Loop run history. */
+  automationRunHistoryShowIssueIdentifier?: Maybe<Scalars["Boolean"]>;
   /** Whether to show sub-team loops. */
   automationShowDescendants?: Maybe<Scalars["Boolean"]>;
   /** Whether to show disabled loops. */
@@ -27141,6 +27340,16 @@ export type ViewPreferencesValues = {
   dashboardFieldOwner?: Maybe<Scalars["Boolean"]>;
   /** The dashboards ordering. */
   dashboardsOrdering?: Maybe<Scalars["String"]>;
+  /** Whether to show the creator field for documents. */
+  documentFieldCreator?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show the created date field for documents. */
+  documentFieldDateCreated?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show the updated date field for documents. */
+  documentFieldDateUpdated?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show the owner field for documents. */
+  documentFieldOwner?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show the parent field for documents. */
+  documentFieldParent?: Maybe<Scalars["Boolean"]>;
   /** Whether to show important embedded customer needs first. */
   embeddedCustomerNeedsShowImportantFirst?: Maybe<Scalars["Boolean"]>;
   /** The embedded customer needs view ordering. */
@@ -27191,11 +27400,20 @@ export type ViewPreferencesValues = {
   fieldStatus?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the time in current status field. */
   fieldTimeInCurrentStatus?: Maybe<Scalars["Boolean"]>;
-  /** The focus view grouping. */
+  /**
+   * The focus view grouping.
+   * @deprecated No longer available
+   */
   focusViewGrouping?: Maybe<Scalars["String"]>;
-  /** The focus view ordering. */
+  /**
+   * The focus view ordering.
+   * @deprecated No longer available
+   */
   focusViewOrdering?: Maybe<Scalars["String"]>;
-  /** The focus view ordering direction. */
+  /**
+   * The focus view ordering direction.
+   * @deprecated No longer available
+   */
   focusViewOrderingDirection?: Maybe<Scalars["String"]>;
   /** The ordering mode for groups. Supersedes projectGroupOrdering. */
   groupOrderingMode?: Maybe<Scalars["String"]>;
@@ -27497,7 +27715,7 @@ export type ViewPreferencesValues = {
   showSubTeamProjects?: Maybe<Scalars["Boolean"]>;
   /** Whether to show supervised issues. */
   showSupervisedIssues?: Maybe<Scalars["Boolean"]>;
-  /** [ALPHA] Whether to show team-level initiatives in the workspace. */
+  /** Whether to show team-level initiatives in the workspace. */
   showTeamInitiatives?: Maybe<Scalars["Boolean"]>;
   /** Whether team reviews are shown in the reviews list. */
   showTeamReviews?: Maybe<Scalars["Boolean"]>;
@@ -27549,6 +27767,7 @@ export enum ViewType {
   Agents = "agents",
   AllIssues = "allIssues",
   Archive = "archive",
+  AutomationRunHistory = "automationRunHistory",
   Automations = "automations",
   Backlog = "backlog",
   Board = "board",
@@ -27566,6 +27785,7 @@ export enum ViewType {
   FeedCreated = "feedCreated",
   FeedFollowing = "feedFollowing",
   FeedPopular = "feedPopular",
+  /** @deprecated No longer available */
   Focus = "focus",
   Inbox = "inbox",
   InboxOther = "inboxOther",
@@ -27935,6 +28155,8 @@ export type WorkflowDefinition = Node & {
   owner?: Maybe<User>;
   /** The contextual project view associated with the workflow. */
   project?: Maybe<Project>;
+  /** Whether editing the workflow is restricted to its owner, team owners, and workspace administrators. */
+  restrictEditing: Scalars["Boolean"];
   /** Whether the workflow should only execute once per entity. When true, the workflow is excluded from matching automations for an entity if it has already been executed for that entity. */
   runOnce: Scalars["Boolean"];
   /** Recurring schedule which is used to execute the workflow. */
@@ -28324,14 +28546,39 @@ type AiConversationBasePart_AiConversationAckPart_Fragment = { __typename: "AiCo
 
 type AiConversationBasePart_AiConversationElicitationPart_Fragment = {
   __typename: "AiConversationElicitationPart";
-} & Pick<AiConversationElicitationPart, "id" | "type" | "kind" | "title"> & {
+} & Pick<AiConversationElicitationPart, "id" | "type" | "serverUrl" | "integrationId" | "kind" | "title"> & {
     metadata: { __typename: "AiConversationPartMetadata" } & Pick<
       AiConversationPartMetadata,
       "feedback" | "evalLogId" | "phase" | "endedAt" | "startedAt" | "turnId"
     >;
     options: Array<
-      { __typename: "AiConversationElicitationOption" } & Pick<AiConversationElicitationOption, "prompt" | "label">
+      { __typename: "AiConversationElicitationOption" } & Pick<AiConversationElicitationOption, "label" | "prompt">
     >;
+    scope?: Maybe<
+      { __typename: "AiConversationMcpServerConnectionScope" } & Pick<
+        AiConversationMcpServerConnectionScope,
+        "workflowDefinitionId" | "teamId" | "type"
+      >
+    >;
+  };
+
+type AiConversationBasePart_AiConversationElicitationResponsePart_Fragment = {
+  __typename: "AiConversationElicitationResponsePart";
+} & Pick<AiConversationElicitationResponsePart, "id" | "type" | "elicitationId"> & {
+    metadata: { __typename: "AiConversationPartMetadata" } & Pick<
+      AiConversationPartMetadata,
+      "feedback" | "evalLogId" | "phase" | "endedAt" | "startedAt" | "turnId"
+    >;
+    data:
+      | ({ __typename: "AiConversationMcpServerConnectionElicitationResponseData" } & Pick<
+          AiConversationMcpServerConnectionElicitationResponseData,
+          "integrationId" | "kind"
+        >)
+      | ({ __typename: "AiConversationMultipleChoiceElicitationResponseData" } & Pick<
+          AiConversationMultipleChoiceElicitationResponseData,
+          "kind" | "selectedOptionIndex"
+        >);
+    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
 
 type AiConversationBasePart_AiConversationErrorPart_Fragment = { __typename: "AiConversationErrorPart" } & Pick<
@@ -29210,6 +29457,7 @@ type AiConversationBasePart_AiConversationWidgetPart_Fragment = { __typename: "A
 export type AiConversationBasePartFragment =
   | AiConversationBasePart_AiConversationAckPart_Fragment
   | AiConversationBasePart_AiConversationElicitationPart_Fragment
+  | AiConversationBasePart_AiConversationElicitationResponsePart_Fragment
   | AiConversationBasePart_AiConversationErrorPart_Fragment
   | AiConversationBasePart_AiConversationEventPart_Fragment
   | AiConversationBasePart_AiConversationPromptPart_Fragment
@@ -29621,9 +29869,12 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "automationShowDescendants"
         | "showSubTeamProjects"
         | "showSupervisedIssues"
+        | "showTeamInitiatives"
         | "fieldSla"
         | "fieldSentryIssues"
         | "scheduledPipelineReleaseFieldCompletion"
+        | "documentFieldDateCreated"
+        | "documentFieldCreator"
         | "customViewFieldDateCreated"
         | "customViewFieldOwner"
         | "customViewFieldDateUpdated"
@@ -29668,6 +29919,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "fieldEstimate"
         | "customerPageNeedsFieldIssueIdentifier"
         | "fieldId"
+        | "automationRunHistoryShowIssueIdentifier"
         | "fieldDateMyActivity"
         | "customerPageNeedsFieldIssuePriority"
         | "fieldPriority"
@@ -29685,6 +29937,8 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "memberFieldStatus"
         | "memberFieldTeams"
         | "fieldMilestone"
+        | "documentFieldOwner"
+        | "documentFieldParent"
         | "projectFieldActivity"
         | "projectFieldDateCompleted"
         | "projectFieldDateCreated"
@@ -29740,6 +29994,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "reviewFieldAvatar"
         | "reviewFieldIdentifier"
         | "reviewFieldRepository"
+        | "automationRunHistoryShowDuration"
         | "teamFieldDateCreated"
         | "teamFieldCycle"
         | "teamFieldIdentifier"
@@ -29751,6 +30006,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "releasePipelineFieldTeams"
         | "fieldTimeInCurrentStatus"
         | "releasePipelineFieldType"
+        | "documentFieldDateUpdated"
         | "continuousPipelineReleaseFieldVersion"
         | "scheduledPipelineReleaseFieldVersion"
         | "showTriageIssues"
@@ -29881,9 +30137,12 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "automationShowDescendants"
             | "showSubTeamProjects"
             | "showSupervisedIssues"
+            | "showTeamInitiatives"
             | "fieldSla"
             | "fieldSentryIssues"
             | "scheduledPipelineReleaseFieldCompletion"
+            | "documentFieldDateCreated"
+            | "documentFieldCreator"
             | "customViewFieldDateCreated"
             | "customViewFieldOwner"
             | "customViewFieldDateUpdated"
@@ -29928,6 +30187,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "fieldEstimate"
             | "customerPageNeedsFieldIssueIdentifier"
             | "fieldId"
+            | "automationRunHistoryShowIssueIdentifier"
             | "fieldDateMyActivity"
             | "customerPageNeedsFieldIssuePriority"
             | "fieldPriority"
@@ -29945,6 +30205,8 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "memberFieldStatus"
             | "memberFieldTeams"
             | "fieldMilestone"
+            | "documentFieldOwner"
+            | "documentFieldParent"
             | "projectFieldActivity"
             | "projectFieldDateCompleted"
             | "projectFieldDateCreated"
@@ -30000,6 +30262,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "reviewFieldAvatar"
             | "reviewFieldIdentifier"
             | "reviewFieldRepository"
+            | "automationRunHistoryShowDuration"
             | "teamFieldDateCreated"
             | "teamFieldCycle"
             | "teamFieldIdentifier"
@@ -30011,6 +30274,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "releasePipelineFieldTeams"
             | "fieldTimeInCurrentStatus"
             | "releasePipelineFieldType"
+            | "documentFieldDateUpdated"
             | "continuousPipelineReleaseFieldVersion"
             | "scheduledPipelineReleaseFieldVersion"
             | "showTriageIssues"
@@ -30146,9 +30410,12 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "automationShowDescendants"
             | "showSubTeamProjects"
             | "showSupervisedIssues"
+            | "showTeamInitiatives"
             | "fieldSla"
             | "fieldSentryIssues"
             | "scheduledPipelineReleaseFieldCompletion"
+            | "documentFieldDateCreated"
+            | "documentFieldCreator"
             | "customViewFieldDateCreated"
             | "customViewFieldOwner"
             | "customViewFieldDateUpdated"
@@ -30193,6 +30460,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "fieldEstimate"
             | "customerPageNeedsFieldIssueIdentifier"
             | "fieldId"
+            | "automationRunHistoryShowIssueIdentifier"
             | "fieldDateMyActivity"
             | "customerPageNeedsFieldIssuePriority"
             | "fieldPriority"
@@ -30210,6 +30478,8 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "memberFieldStatus"
             | "memberFieldTeams"
             | "fieldMilestone"
+            | "documentFieldOwner"
+            | "documentFieldParent"
             | "projectFieldActivity"
             | "projectFieldDateCompleted"
             | "projectFieldDateCreated"
@@ -30265,6 +30535,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "reviewFieldAvatar"
             | "reviewFieldIdentifier"
             | "reviewFieldRepository"
+            | "automationRunHistoryShowDuration"
             | "teamFieldDateCreated"
             | "teamFieldCycle"
             | "teamFieldIdentifier"
@@ -30276,6 +30547,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "releasePipelineFieldTeams"
             | "fieldTimeInCurrentStatus"
             | "releasePipelineFieldType"
+            | "documentFieldDateUpdated"
             | "continuousPipelineReleaseFieldVersion"
             | "scheduledPipelineReleaseFieldVersion"
             | "showTriageIssues"
@@ -30982,7 +31254,7 @@ export type NotificationArchivePayloadFragment = { __typename: "NotificationArch
             actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             usageAlert: { __typename: "UsageAlert" } & Pick<
               UsageAlert,
-              "type" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "metadata"
+              "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
             >;
           })
       | ({ __typename: "WelcomeMessageNotification" } & Pick<
@@ -31055,6 +31327,7 @@ export type NotificationArchivePayloadFragment = { __typename: "NotificationArch
               | "contextViewType"
               | "id"
               | "slugId"
+              | "restrictEditing"
               | "enabled"
               | "applyToSubTeams"
               | "runOnce"
@@ -31652,7 +31925,7 @@ type ArchivePayload_NotificationArchivePayload_Fragment = { __typename: "Notific
             actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             usageAlert: { __typename: "UsageAlert" } & Pick<
               UsageAlert,
-              "type" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "metadata"
+              "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
             >;
           })
       | ({ __typename: "WelcomeMessageNotification" } & Pick<
@@ -31725,6 +31998,7 @@ type ArchivePayload_NotificationArchivePayload_Fragment = { __typename: "Notific
               | "contextViewType"
               | "id"
               | "slugId"
+              | "restrictEditing"
               | "enabled"
               | "applyToSubTeams"
               | "runOnce"
@@ -31857,19 +32131,6 @@ export type ProjectLabelFragment = { __typename: "ProjectLabel" } & Pick<
     parent?: Maybe<{ __typename?: "ProjectLabel" } & Pick<ProjectLabel, "id">>;
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     retiredBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-  };
-
-export type AiConversationElicitationPartFragment = { __typename: "AiConversationElicitationPart" } & Pick<
-  AiConversationElicitationPart,
-  "id" | "kind" | "title" | "type"
-> & {
-    options: Array<
-      { __typename: "AiConversationElicitationOption" } & Pick<AiConversationElicitationOption, "prompt" | "label">
-    >;
-    metadata: { __typename: "AiConversationPartMetadata" } & Pick<
-      AiConversationPartMetadata,
-      "feedback" | "evalLogId" | "phase" | "endedAt" | "startedAt" | "turnId"
-    >;
   };
 
 export type AgentSessionToPullRequestFragment = { __typename: "AgentSessionToPullRequest" } & Pick<
@@ -32389,7 +32650,7 @@ type Notification_UsageAlertNotification_Fragment = { __typename: "UsageAlertNot
     actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     usageAlert: { __typename: "UsageAlert" } & Pick<
       UsageAlert,
-      "type" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "metadata"
+      "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
     >;
   };
 
@@ -32458,6 +32719,7 @@ type Notification_WorkflowDefinitionNotification_Fragment = { __typename: "Workf
       | "contextViewType"
       | "id"
       | "slugId"
+      | "restrictEditing"
       | "enabled"
       | "applyToSubTeams"
       | "runOnce"
@@ -32690,7 +32952,7 @@ export type UsageAlertNotificationFragment = { __typename: "UsageAlertNotificati
     user: { __typename?: "User" } & Pick<User, "id">;
     usageAlert: { __typename: "UsageAlert" } & Pick<
       UsageAlert,
-      "type" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "metadata"
+      "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
     >;
     actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
@@ -32775,6 +33037,7 @@ export type WorkflowDefinitionNotificationFragment = { __typename: "WorkflowDefi
       | "contextViewType"
       | "id"
       | "slugId"
+      | "restrictEditing"
       | "enabled"
       | "applyToSubTeams"
       | "runOnce"
@@ -33813,7 +34076,7 @@ export type DocumentFragment = { __typename: "Document" } & Pick<
 
 export type AiConversationElicitationOptionFragment = { __typename: "AiConversationElicitationOption" } & Pick<
   AiConversationElicitationOption,
-  "prompt" | "label"
+  "label" | "prompt"
 >;
 
 export type AgentSessionFragment = { __typename: "AgentSession" } & Pick<
@@ -33935,6 +34198,44 @@ export type InitiativeUpdateFragment = { __typename: "InitiativeUpdate" } & Pick
     >;
     initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
     user: { __typename?: "User" } & Pick<User, "id">;
+  };
+
+export type AiConversationElicitationPartFragment = { __typename: "AiConversationElicitationPart" } & Pick<
+  AiConversationElicitationPart,
+  "id" | "serverUrl" | "integrationId" | "kind" | "title" | "type"
+> & {
+    options: Array<
+      { __typename: "AiConversationElicitationOption" } & Pick<AiConversationElicitationOption, "label" | "prompt">
+    >;
+    metadata: { __typename: "AiConversationPartMetadata" } & Pick<
+      AiConversationPartMetadata,
+      "feedback" | "evalLogId" | "phase" | "endedAt" | "startedAt" | "turnId"
+    >;
+    scope?: Maybe<
+      { __typename: "AiConversationMcpServerConnectionScope" } & Pick<
+        AiConversationMcpServerConnectionScope,
+        "workflowDefinitionId" | "teamId" | "type"
+      >
+    >;
+  };
+
+export type AiConversationElicitationResponsePartFragment = {
+  __typename: "AiConversationElicitationResponsePart";
+} & Pick<AiConversationElicitationResponsePart, "id" | "elicitationId" | "type"> & {
+    data:
+      | ({ __typename: "AiConversationMcpServerConnectionElicitationResponseData" } & Pick<
+          AiConversationMcpServerConnectionElicitationResponseData,
+          "integrationId" | "kind"
+        >)
+      | ({ __typename: "AiConversationMultipleChoiceElicitationResponseData" } & Pick<
+          AiConversationMultipleChoiceElicitationResponseData,
+          "kind" | "selectedOptionIndex"
+        >);
+    metadata: { __typename: "AiConversationPartMetadata" } & Pick<
+      AiConversationPartMetadata,
+      "feedback" | "evalLogId" | "phase" | "endedAt" | "startedAt" | "turnId"
+    >;
+    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
 
 type NotificationSubscription_CustomViewNotificationSubscription_Fragment = {
@@ -34132,6 +34433,7 @@ export type TeamFragment = { __typename: "Team" } & Pick<
   | "requirePriorityToLeaveTriage"
   | "autoCloseChildIssues"
   | "autoCloseParentIssues"
+  | "initiativesEnabled"
   | "scimManaged"
   | "private"
   | "inheritIssueEstimation"
@@ -35025,7 +35327,7 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
 
 export type UsageAlertFragment = { __typename: "UsageAlert" } & Pick<
   UsageAlert,
-  "type" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "metadata"
+  "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
 >;
 
 export type UserFragment = { __typename: "User" } & Pick<
@@ -35662,6 +35964,7 @@ export type WorkflowDefinitionFragment = { __typename: "WorkflowDefinition" } & 
   | "contextViewType"
   | "id"
   | "slugId"
+  | "restrictEditing"
   | "enabled"
   | "applyToSubTeams"
   | "runOnce"
@@ -35878,6 +36181,7 @@ export type InitiativeFragment = { __typename: "Initiative" } & Pick<
   | "startedAt"
   | "completedAt"
   | "id"
+  | "visibility"
 > & {
     parentInitiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     integrationsSettings?: Maybe<{ __typename?: "IntegrationsSettings" } & Pick<IntegrationsSettings, "id">>;
@@ -35905,6 +36209,7 @@ export type InitiativeFragment = { __typename: "Initiative" } & Pick<
         }
     >;
     lastUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
+    leadTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
@@ -36269,7 +36574,9 @@ export type SlackChannelNameMappingFragment = { __typename: "SlackChannelNameMap
   | "autoCreateOnBotMention"
   | "postCancellationUpdates"
   | "postCompletionUpdates"
+  | "postAssignmentUpdates"
   | "postAcceptedFromTriageUpdates"
+  | "postSlaUpdates"
   | "botAdded"
   | "isPrivate"
   | "isShared"
@@ -36546,6 +36853,7 @@ export type IssueHistoryWorkflowMetadataFragment = { __typename: "IssueHistoryWo
       | "contextViewType"
       | "id"
       | "slugId"
+      | "restrictEditing"
       | "enabled"
       | "applyToSubTeams"
       | "runOnce"
@@ -36625,6 +36933,7 @@ export type IssueHistoryTriageRuleMetadataFragment = { __typename: "IssueHistory
       | "contextViewType"
       | "id"
       | "slugId"
+      | "restrictEditing"
       | "enabled"
       | "applyToSubTeams"
       | "runOnce"
@@ -38729,7 +39038,7 @@ export type NotificationBatchActionPayloadFragment = { __typename: "Notification
             actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             usageAlert: { __typename: "UsageAlert" } & Pick<
               UsageAlert,
-              "type" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "metadata"
+              "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
             >;
           })
       | ({ __typename: "WelcomeMessageNotification" } & Pick<
@@ -38802,6 +39111,7 @@ export type NotificationBatchActionPayloadFragment = { __typename: "Notification
               | "contextViewType"
               | "id"
               | "slugId"
+              | "restrictEditing"
               | "enabled"
               | "applyToSubTeams"
               | "runOnce"
@@ -39382,7 +39692,7 @@ export type NotificationPayloadFragment = { __typename: "NotificationPayload" } 
             actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             usageAlert: { __typename: "UsageAlert" } & Pick<
               UsageAlert,
-              "type" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "metadata"
+              "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
             >;
           })
       | ({ __typename: "WelcomeMessageNotification" } & Pick<
@@ -39455,6 +39765,7 @@ export type NotificationPayloadFragment = { __typename: "NotificationPayload" } 
               | "contextViewType"
               | "id"
               | "slugId"
+              | "restrictEditing"
               | "enabled"
               | "applyToSubTeams"
               | "runOnce"
@@ -39635,9 +39946,12 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "automationShowDescendants"
   | "showSubTeamProjects"
   | "showSupervisedIssues"
+  | "showTeamInitiatives"
   | "fieldSla"
   | "fieldSentryIssues"
   | "scheduledPipelineReleaseFieldCompletion"
+  | "documentFieldDateCreated"
+  | "documentFieldCreator"
   | "customViewFieldDateCreated"
   | "customViewFieldOwner"
   | "customViewFieldDateUpdated"
@@ -39682,6 +39996,7 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "fieldEstimate"
   | "customerPageNeedsFieldIssueIdentifier"
   | "fieldId"
+  | "automationRunHistoryShowIssueIdentifier"
   | "fieldDateMyActivity"
   | "customerPageNeedsFieldIssuePriority"
   | "fieldPriority"
@@ -39699,6 +40014,8 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "memberFieldStatus"
   | "memberFieldTeams"
   | "fieldMilestone"
+  | "documentFieldOwner"
+  | "documentFieldParent"
   | "projectFieldActivity"
   | "projectFieldDateCompleted"
   | "projectFieldDateCreated"
@@ -39754,6 +40071,7 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "reviewFieldAvatar"
   | "reviewFieldIdentifier"
   | "reviewFieldRepository"
+  | "automationRunHistoryShowDuration"
   | "teamFieldDateCreated"
   | "teamFieldCycle"
   | "teamFieldIdentifier"
@@ -39765,6 +40083,7 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "releasePipelineFieldTeams"
   | "fieldTimeInCurrentStatus"
   | "releasePipelineFieldType"
+  | "documentFieldDateUpdated"
   | "continuousPipelineReleaseFieldVersion"
   | "scheduledPipelineReleaseFieldVersion"
   | "showTriageIssues"
@@ -39937,9 +40256,12 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "automationShowDescendants"
       | "showSubTeamProjects"
       | "showSupervisedIssues"
+      | "showTeamInitiatives"
       | "fieldSla"
       | "fieldSentryIssues"
       | "scheduledPipelineReleaseFieldCompletion"
+      | "documentFieldDateCreated"
+      | "documentFieldCreator"
       | "customViewFieldDateCreated"
       | "customViewFieldOwner"
       | "customViewFieldDateUpdated"
@@ -39984,6 +40306,7 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "fieldEstimate"
       | "customerPageNeedsFieldIssueIdentifier"
       | "fieldId"
+      | "automationRunHistoryShowIssueIdentifier"
       | "fieldDateMyActivity"
       | "customerPageNeedsFieldIssuePriority"
       | "fieldPriority"
@@ -40001,6 +40324,8 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "memberFieldStatus"
       | "memberFieldTeams"
       | "fieldMilestone"
+      | "documentFieldOwner"
+      | "documentFieldParent"
       | "projectFieldActivity"
       | "projectFieldDateCompleted"
       | "projectFieldDateCreated"
@@ -40056,6 +40381,7 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "reviewFieldAvatar"
       | "reviewFieldIdentifier"
       | "reviewFieldRepository"
+      | "automationRunHistoryShowDuration"
       | "teamFieldDateCreated"
       | "teamFieldCycle"
       | "teamFieldIdentifier"
@@ -40067,6 +40393,7 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "releasePipelineFieldTeams"
       | "fieldTimeInCurrentStatus"
       | "releasePipelineFieldType"
+      | "documentFieldDateUpdated"
       | "continuousPipelineReleaseFieldVersion"
       | "scheduledPipelineReleaseFieldVersion"
       | "showTriageIssues"
@@ -40092,6 +40419,10 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       };
   };
 
+export type AiConversationMcpServerConnectionElicitationResponseDataFragment = {
+  __typename: "AiConversationMcpServerConnectionElicitationResponseData";
+} & Pick<AiConversationMcpServerConnectionElicitationResponseData, "integrationId" | "kind">;
+
 export type InitiativeToProjectFragment = { __typename: "InitiativeToProject" } & Pick<
   InitiativeToProject,
   "updatedAt" | "sortOrder" | "archivedAt" | "createdAt" | "id"
@@ -40104,6 +40435,10 @@ export type AgentAutomationRetryResolutionFragment = { __typename: "AgentAutomat
   AgentAutomationRetryResolution,
   "aiConversationId" | "status"
 >;
+
+export type AiConversationMcpServerConnectionScopeFragment = {
+  __typename: "AiConversationMcpServerConnectionScope";
+} & Pick<AiConversationMcpServerConnectionScope, "workflowDefinitionId" | "teamId" | "type">;
 
 export type CyclePayloadFragment = { __typename: "CyclePayload" } & Pick<CyclePayload, "lastSyncId" | "success"> & {
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
@@ -40696,9 +41031,12 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "automationShowDescendants"
           | "showSubTeamProjects"
           | "showSupervisedIssues"
+          | "showTeamInitiatives"
           | "fieldSla"
           | "fieldSentryIssues"
           | "scheduledPipelineReleaseFieldCompletion"
+          | "documentFieldDateCreated"
+          | "documentFieldCreator"
           | "customViewFieldDateCreated"
           | "customViewFieldOwner"
           | "customViewFieldDateUpdated"
@@ -40743,6 +41081,7 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "fieldEstimate"
           | "customerPageNeedsFieldIssueIdentifier"
           | "fieldId"
+          | "automationRunHistoryShowIssueIdentifier"
           | "fieldDateMyActivity"
           | "customerPageNeedsFieldIssuePriority"
           | "fieldPriority"
@@ -40760,6 +41099,8 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "memberFieldStatus"
           | "memberFieldTeams"
           | "fieldMilestone"
+          | "documentFieldOwner"
+          | "documentFieldParent"
           | "projectFieldActivity"
           | "projectFieldDateCompleted"
           | "projectFieldDateCreated"
@@ -40815,6 +41156,7 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "reviewFieldAvatar"
           | "reviewFieldIdentifier"
           | "reviewFieldRepository"
+          | "automationRunHistoryShowDuration"
           | "teamFieldDateCreated"
           | "teamFieldCycle"
           | "teamFieldIdentifier"
@@ -40826,6 +41168,7 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "releasePipelineFieldTeams"
           | "fieldTimeInCurrentStatus"
           | "releasePipelineFieldType"
+          | "documentFieldDateUpdated"
           | "continuousPipelineReleaseFieldVersion"
           | "scheduledPipelineReleaseFieldVersion"
           | "showTriageIssues"
@@ -41077,6 +41420,10 @@ export type DocumentContentFragment = { __typename: "DocumentContent" } & Pick<
       > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
     >;
   };
+
+export type AiConversationMultipleChoiceElicitationResponseDataFragment = {
+  __typename: "AiConversationMultipleChoiceElicitationResponseData";
+} & Pick<AiConversationMultipleChoiceElicitationResponseData, "kind" | "selectedOptionIndex">;
 
 export type RateLimitResultPayloadFragment = { __typename: "RateLimitResultPayload" } & Pick<
   RateLimitResultPayload,
@@ -43375,7 +43722,9 @@ export type AsksChannelConnectPayloadFragment = { __typename: "AsksChannelConnec
       | "autoCreateOnBotMention"
       | "postCancellationUpdates"
       | "postCompletionUpdates"
+      | "postAssignmentUpdates"
       | "postAcceptedFromTriageUpdates"
+      | "postSlaUpdates"
       | "botAdded"
       | "isPrivate"
       | "isShared"
@@ -43811,9 +44160,12 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "automationShowDescendants"
             | "showSubTeamProjects"
             | "showSupervisedIssues"
+            | "showTeamInitiatives"
             | "fieldSla"
             | "fieldSentryIssues"
             | "scheduledPipelineReleaseFieldCompletion"
+            | "documentFieldDateCreated"
+            | "documentFieldCreator"
             | "customViewFieldDateCreated"
             | "customViewFieldOwner"
             | "customViewFieldDateUpdated"
@@ -43858,6 +44210,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "fieldEstimate"
             | "customerPageNeedsFieldIssueIdentifier"
             | "fieldId"
+            | "automationRunHistoryShowIssueIdentifier"
             | "fieldDateMyActivity"
             | "customerPageNeedsFieldIssuePriority"
             | "fieldPriority"
@@ -43875,6 +44228,8 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "memberFieldStatus"
             | "memberFieldTeams"
             | "fieldMilestone"
+            | "documentFieldOwner"
+            | "documentFieldParent"
             | "projectFieldActivity"
             | "projectFieldDateCompleted"
             | "projectFieldDateCreated"
@@ -43930,6 +44285,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "reviewFieldAvatar"
             | "reviewFieldIdentifier"
             | "reviewFieldRepository"
+            | "automationRunHistoryShowDuration"
             | "teamFieldDateCreated"
             | "teamFieldCycle"
             | "teamFieldIdentifier"
@@ -43941,6 +44297,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "releasePipelineFieldTeams"
             | "fieldTimeInCurrentStatus"
             | "releasePipelineFieldType"
+            | "documentFieldDateUpdated"
             | "continuousPipelineReleaseFieldVersion"
             | "scheduledPipelineReleaseFieldVersion"
             | "showTriageIssues"
@@ -44071,9 +44428,12 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "automationShowDescendants"
                 | "showSubTeamProjects"
                 | "showSupervisedIssues"
+                | "showTeamInitiatives"
                 | "fieldSla"
                 | "fieldSentryIssues"
                 | "scheduledPipelineReleaseFieldCompletion"
+                | "documentFieldDateCreated"
+                | "documentFieldCreator"
                 | "customViewFieldDateCreated"
                 | "customViewFieldOwner"
                 | "customViewFieldDateUpdated"
@@ -44118,6 +44478,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "fieldEstimate"
                 | "customerPageNeedsFieldIssueIdentifier"
                 | "fieldId"
+                | "automationRunHistoryShowIssueIdentifier"
                 | "fieldDateMyActivity"
                 | "customerPageNeedsFieldIssuePriority"
                 | "fieldPriority"
@@ -44135,6 +44496,8 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "memberFieldStatus"
                 | "memberFieldTeams"
                 | "fieldMilestone"
+                | "documentFieldOwner"
+                | "documentFieldParent"
                 | "projectFieldActivity"
                 | "projectFieldDateCompleted"
                 | "projectFieldDateCreated"
@@ -44190,6 +44553,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "reviewFieldAvatar"
                 | "reviewFieldIdentifier"
                 | "reviewFieldRepository"
+                | "automationRunHistoryShowDuration"
                 | "teamFieldDateCreated"
                 | "teamFieldCycle"
                 | "teamFieldIdentifier"
@@ -44201,6 +44565,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "releasePipelineFieldTeams"
                 | "fieldTimeInCurrentStatus"
                 | "releasePipelineFieldType"
+                | "documentFieldDateUpdated"
                 | "continuousPipelineReleaseFieldVersion"
                 | "scheduledPipelineReleaseFieldVersion"
                 | "showTriageIssues"
@@ -44336,9 +44701,12 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "automationShowDescendants"
                 | "showSubTeamProjects"
                 | "showSupervisedIssues"
+                | "showTeamInitiatives"
                 | "fieldSla"
                 | "fieldSentryIssues"
                 | "scheduledPipelineReleaseFieldCompletion"
+                | "documentFieldDateCreated"
+                | "documentFieldCreator"
                 | "customViewFieldDateCreated"
                 | "customViewFieldOwner"
                 | "customViewFieldDateUpdated"
@@ -44383,6 +44751,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "fieldEstimate"
                 | "customerPageNeedsFieldIssueIdentifier"
                 | "fieldId"
+                | "automationRunHistoryShowIssueIdentifier"
                 | "fieldDateMyActivity"
                 | "customerPageNeedsFieldIssuePriority"
                 | "fieldPriority"
@@ -44400,6 +44769,8 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "memberFieldStatus"
                 | "memberFieldTeams"
                 | "fieldMilestone"
+                | "documentFieldOwner"
+                | "documentFieldParent"
                 | "projectFieldActivity"
                 | "projectFieldDateCompleted"
                 | "projectFieldDateCreated"
@@ -44455,6 +44826,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "reviewFieldAvatar"
                 | "reviewFieldIdentifier"
                 | "reviewFieldRepository"
+                | "automationRunHistoryShowDuration"
                 | "teamFieldDateCreated"
                 | "teamFieldCycle"
                 | "teamFieldIdentifier"
@@ -44466,6 +44838,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "releasePipelineFieldTeams"
                 | "fieldTimeInCurrentStatus"
                 | "releasePipelineFieldType"
+                | "documentFieldDateUpdated"
                 | "continuousPipelineReleaseFieldVersion"
                 | "scheduledPipelineReleaseFieldVersion"
                 | "showTriageIssues"
@@ -45038,6 +45411,7 @@ export type InitiativeConnectionFragment = { __typename: "InitiativeConnection" 
       | "startedAt"
       | "completedAt"
       | "id"
+      | "visibility"
     > & {
         parentInitiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
         integrationsSettings?: Maybe<{ __typename?: "IntegrationsSettings" } & Pick<IntegrationsSettings, "id">>;
@@ -45066,6 +45440,7 @@ export type InitiativeConnectionFragment = { __typename: "InitiativeConnection" 
             }
         >;
         lastUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
+        leadTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
         creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
         owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
       }
@@ -46026,6 +46401,11 @@ export type JiraFetchProjectStatusesPayloadFragment = { __typename: "JiraFetchPr
     integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">>;
   };
 
+export type JiraProjectStatusesPayloadFragment = { __typename: "JiraProjectStatusesPayload" } & Pick<
+  JiraProjectStatusesPayload,
+  "issueStatuses" | "projectStatuses"
+>;
+
 export type LogoutResponseFragment = { __typename: "LogoutResponse" } & Pick<LogoutResponse, "success">;
 
 export type MicrosoftTeamsChannelFragment = { __typename: "MicrosoftTeamsChannel" } & Pick<
@@ -46921,7 +47301,7 @@ export type NotificationConnectionFragment = { __typename: "NotificationConnecti
           actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           usageAlert: { __typename: "UsageAlert" } & Pick<
             UsageAlert,
-            "type" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "metadata"
+            "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
           >;
         })
     | ({ __typename: "WelcomeMessageNotification" } & Pick<
@@ -46994,6 +47374,7 @@ export type NotificationConnectionFragment = { __typename: "NotificationConnecti
             | "contextViewType"
             | "id"
             | "slugId"
+            | "restrictEditing"
             | "enabled"
             | "applyToSubTeams"
             | "runOnce"
@@ -48400,7 +48781,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
           actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           usageAlert: { __typename: "UsageAlert" } & Pick<
             UsageAlert,
-            "type" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "metadata"
+            "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
           >;
         })
     | ({ __typename: "WelcomeMessageNotification" } & Pick<
@@ -48473,6 +48854,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "contextViewType"
             | "id"
             | "slugId"
+            | "restrictEditing"
             | "enabled"
             | "applyToSubTeams"
             | "runOnce"
@@ -49223,7 +49605,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
           actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           usageAlert: { __typename: "UsageAlert" } & Pick<
             UsageAlert,
-            "type" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "metadata"
+            "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
           >;
         })
     | ({ __typename: "WelcomeMessageNotification" } & Pick<
@@ -49296,6 +49678,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "contextViewType"
             | "id"
             | "slugId"
+            | "restrictEditing"
             | "enabled"
             | "applyToSubTeams"
             | "runOnce"
@@ -49758,7 +50141,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
           actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           usageAlert: { __typename: "UsageAlert" } & Pick<
             UsageAlert,
-            "type" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "metadata"
+            "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
           >;
         })
     | ({ __typename: "WelcomeMessageNotification" } & Pick<
@@ -49831,6 +50214,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "contextViewType"
             | "id"
             | "slugId"
+            | "restrictEditing"
             | "enabled"
             | "applyToSubTeams"
             | "runOnce"
@@ -50293,7 +50677,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
           actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           usageAlert: { __typename: "UsageAlert" } & Pick<
             UsageAlert,
-            "type" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "metadata"
+            "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
           >;
         })
     | ({ __typename: "WelcomeMessageNotification" } & Pick<
@@ -50366,6 +50750,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "contextViewType"
             | "id"
             | "slugId"
+            | "restrictEditing"
             | "enabled"
             | "applyToSubTeams"
             | "runOnce"
@@ -50828,7 +51213,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
           actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           usageAlert: { __typename: "UsageAlert" } & Pick<
             UsageAlert,
-            "type" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "metadata"
+            "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
           >;
         })
     | ({ __typename: "WelcomeMessageNotification" } & Pick<
@@ -50901,6 +51286,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "contextViewType"
             | "id"
             | "slugId"
+            | "restrictEditing"
             | "enabled"
             | "applyToSubTeams"
             | "runOnce"
@@ -51528,6 +51914,7 @@ export type TeamConnectionFragment = { __typename: "TeamConnection" } & {
       | "requirePriorityToLeaveTriage"
       | "autoCloseChildIssues"
       | "autoCloseParentIssues"
+      | "initiativesEnabled"
       | "scimManaged"
       | "private"
       | "inheritIssueEstimation"
@@ -51804,6 +52191,7 @@ export type AdministrableTeamsQuery = { __typename?: "Query" } & {
         | "requirePriorityToLeaveTriage"
         | "autoCloseChildIssues"
         | "autoCloseParentIssues"
+        | "initiativesEnabled"
         | "scimManaged"
         | "private"
         | "inheritIssueEstimation"
@@ -54563,9 +54951,12 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "automationShowDescendants"
           | "showSubTeamProjects"
           | "showSupervisedIssues"
+          | "showTeamInitiatives"
           | "fieldSla"
           | "fieldSentryIssues"
           | "scheduledPipelineReleaseFieldCompletion"
+          | "documentFieldDateCreated"
+          | "documentFieldCreator"
           | "customViewFieldDateCreated"
           | "customViewFieldOwner"
           | "customViewFieldDateUpdated"
@@ -54610,6 +55001,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "fieldEstimate"
           | "customerPageNeedsFieldIssueIdentifier"
           | "fieldId"
+          | "automationRunHistoryShowIssueIdentifier"
           | "fieldDateMyActivity"
           | "customerPageNeedsFieldIssuePriority"
           | "fieldPriority"
@@ -54627,6 +55019,8 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "memberFieldStatus"
           | "memberFieldTeams"
           | "fieldMilestone"
+          | "documentFieldOwner"
+          | "documentFieldParent"
           | "projectFieldActivity"
           | "projectFieldDateCompleted"
           | "projectFieldDateCreated"
@@ -54682,6 +55076,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "reviewFieldAvatar"
           | "reviewFieldIdentifier"
           | "reviewFieldRepository"
+          | "automationRunHistoryShowDuration"
           | "teamFieldDateCreated"
           | "teamFieldCycle"
           | "teamFieldIdentifier"
@@ -54693,6 +55088,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "releasePipelineFieldTeams"
           | "fieldTimeInCurrentStatus"
           | "releasePipelineFieldType"
+          | "documentFieldDateUpdated"
           | "continuousPipelineReleaseFieldVersion"
           | "scheduledPipelineReleaseFieldVersion"
           | "showTriageIssues"
@@ -54823,9 +55219,12 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "automationShowDescendants"
               | "showSubTeamProjects"
               | "showSupervisedIssues"
+              | "showTeamInitiatives"
               | "fieldSla"
               | "fieldSentryIssues"
               | "scheduledPipelineReleaseFieldCompletion"
+              | "documentFieldDateCreated"
+              | "documentFieldCreator"
               | "customViewFieldDateCreated"
               | "customViewFieldOwner"
               | "customViewFieldDateUpdated"
@@ -54870,6 +55269,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "fieldEstimate"
               | "customerPageNeedsFieldIssueIdentifier"
               | "fieldId"
+              | "automationRunHistoryShowIssueIdentifier"
               | "fieldDateMyActivity"
               | "customerPageNeedsFieldIssuePriority"
               | "fieldPriority"
@@ -54887,6 +55287,8 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "memberFieldStatus"
               | "memberFieldTeams"
               | "fieldMilestone"
+              | "documentFieldOwner"
+              | "documentFieldParent"
               | "projectFieldActivity"
               | "projectFieldDateCompleted"
               | "projectFieldDateCreated"
@@ -54942,6 +55344,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "reviewFieldAvatar"
               | "reviewFieldIdentifier"
               | "reviewFieldRepository"
+              | "automationRunHistoryShowDuration"
               | "teamFieldDateCreated"
               | "teamFieldCycle"
               | "teamFieldIdentifier"
@@ -54953,6 +55356,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "releasePipelineFieldTeams"
               | "fieldTimeInCurrentStatus"
               | "releasePipelineFieldType"
+              | "documentFieldDateUpdated"
               | "continuousPipelineReleaseFieldVersion"
               | "scheduledPipelineReleaseFieldVersion"
               | "showTriageIssues"
@@ -55088,9 +55492,12 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "automationShowDescendants"
               | "showSubTeamProjects"
               | "showSupervisedIssues"
+              | "showTeamInitiatives"
               | "fieldSla"
               | "fieldSentryIssues"
               | "scheduledPipelineReleaseFieldCompletion"
+              | "documentFieldDateCreated"
+              | "documentFieldCreator"
               | "customViewFieldDateCreated"
               | "customViewFieldOwner"
               | "customViewFieldDateUpdated"
@@ -55135,6 +55542,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "fieldEstimate"
               | "customerPageNeedsFieldIssueIdentifier"
               | "fieldId"
+              | "automationRunHistoryShowIssueIdentifier"
               | "fieldDateMyActivity"
               | "customerPageNeedsFieldIssuePriority"
               | "fieldPriority"
@@ -55152,6 +55560,8 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "memberFieldStatus"
               | "memberFieldTeams"
               | "fieldMilestone"
+              | "documentFieldOwner"
+              | "documentFieldParent"
               | "projectFieldActivity"
               | "projectFieldDateCompleted"
               | "projectFieldDateCreated"
@@ -55207,6 +55617,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "reviewFieldAvatar"
               | "reviewFieldIdentifier"
               | "reviewFieldRepository"
+              | "automationRunHistoryShowDuration"
               | "teamFieldDateCreated"
               | "teamFieldCycle"
               | "teamFieldIdentifier"
@@ -55218,6 +55629,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "releasePipelineFieldTeams"
               | "fieldTimeInCurrentStatus"
               | "releasePipelineFieldType"
+              | "documentFieldDateUpdated"
               | "continuousPipelineReleaseFieldVersion"
               | "scheduledPipelineReleaseFieldVersion"
               | "showTriageIssues"
@@ -55291,6 +55703,7 @@ export type CustomView_InitiativesQuery = { __typename?: "Query" } & {
           | "startedAt"
           | "completedAt"
           | "id"
+          | "visibility"
         > & {
             parentInitiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
             integrationsSettings?: Maybe<{ __typename?: "IntegrationsSettings" } & Pick<IntegrationsSettings, "id">>;
@@ -55319,6 +55732,7 @@ export type CustomView_InitiativesQuery = { __typename?: "Query" } & {
                 }
             >;
             lastUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
+            leadTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
             creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           }
@@ -55610,9 +56024,12 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "automationShowDescendants"
             | "showSubTeamProjects"
             | "showSupervisedIssues"
+            | "showTeamInitiatives"
             | "fieldSla"
             | "fieldSentryIssues"
             | "scheduledPipelineReleaseFieldCompletion"
+            | "documentFieldDateCreated"
+            | "documentFieldCreator"
             | "customViewFieldDateCreated"
             | "customViewFieldOwner"
             | "customViewFieldDateUpdated"
@@ -55657,6 +56074,7 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "fieldEstimate"
             | "customerPageNeedsFieldIssueIdentifier"
             | "fieldId"
+            | "automationRunHistoryShowIssueIdentifier"
             | "fieldDateMyActivity"
             | "customerPageNeedsFieldIssuePriority"
             | "fieldPriority"
@@ -55674,6 +56092,8 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "memberFieldStatus"
             | "memberFieldTeams"
             | "fieldMilestone"
+            | "documentFieldOwner"
+            | "documentFieldParent"
             | "projectFieldActivity"
             | "projectFieldDateCompleted"
             | "projectFieldDateCreated"
@@ -55729,6 +56149,7 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "reviewFieldAvatar"
             | "reviewFieldIdentifier"
             | "reviewFieldRepository"
+            | "automationRunHistoryShowDuration"
             | "teamFieldDateCreated"
             | "teamFieldCycle"
             | "teamFieldIdentifier"
@@ -55740,6 +56161,7 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "releasePipelineFieldTeams"
             | "fieldTimeInCurrentStatus"
             | "releasePipelineFieldType"
+            | "documentFieldDateUpdated"
             | "continuousPipelineReleaseFieldVersion"
             | "scheduledPipelineReleaseFieldVersion"
             | "showTriageIssues"
@@ -55877,9 +56299,12 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "automationShowDescendants"
           | "showSubTeamProjects"
           | "showSupervisedIssues"
+          | "showTeamInitiatives"
           | "fieldSla"
           | "fieldSentryIssues"
           | "scheduledPipelineReleaseFieldCompletion"
+          | "documentFieldDateCreated"
+          | "documentFieldCreator"
           | "customViewFieldDateCreated"
           | "customViewFieldOwner"
           | "customViewFieldDateUpdated"
@@ -55924,6 +56349,7 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "fieldEstimate"
           | "customerPageNeedsFieldIssueIdentifier"
           | "fieldId"
+          | "automationRunHistoryShowIssueIdentifier"
           | "fieldDateMyActivity"
           | "customerPageNeedsFieldIssuePriority"
           | "fieldPriority"
@@ -55941,6 +56367,8 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "memberFieldStatus"
           | "memberFieldTeams"
           | "fieldMilestone"
+          | "documentFieldOwner"
+          | "documentFieldParent"
           | "projectFieldActivity"
           | "projectFieldDateCompleted"
           | "projectFieldDateCreated"
@@ -55996,6 +56424,7 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "reviewFieldAvatar"
           | "reviewFieldIdentifier"
           | "reviewFieldRepository"
+          | "automationRunHistoryShowDuration"
           | "teamFieldDateCreated"
           | "teamFieldCycle"
           | "teamFieldIdentifier"
@@ -56007,6 +56436,7 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "releasePipelineFieldTeams"
           | "fieldTimeInCurrentStatus"
           | "releasePipelineFieldType"
+          | "documentFieldDateUpdated"
           | "continuousPipelineReleaseFieldVersion"
           | "scheduledPipelineReleaseFieldVersion"
           | "showTriageIssues"
@@ -56276,9 +56706,12 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "automationShowDescendants"
             | "showSubTeamProjects"
             | "showSupervisedIssues"
+            | "showTeamInitiatives"
             | "fieldSla"
             | "fieldSentryIssues"
             | "scheduledPipelineReleaseFieldCompletion"
+            | "documentFieldDateCreated"
+            | "documentFieldCreator"
             | "customViewFieldDateCreated"
             | "customViewFieldOwner"
             | "customViewFieldDateUpdated"
@@ -56323,6 +56756,7 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "fieldEstimate"
             | "customerPageNeedsFieldIssueIdentifier"
             | "fieldId"
+            | "automationRunHistoryShowIssueIdentifier"
             | "fieldDateMyActivity"
             | "customerPageNeedsFieldIssuePriority"
             | "fieldPriority"
@@ -56340,6 +56774,8 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "memberFieldStatus"
             | "memberFieldTeams"
             | "fieldMilestone"
+            | "documentFieldOwner"
+            | "documentFieldParent"
             | "projectFieldActivity"
             | "projectFieldDateCompleted"
             | "projectFieldDateCreated"
@@ -56395,6 +56831,7 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "reviewFieldAvatar"
             | "reviewFieldIdentifier"
             | "reviewFieldRepository"
+            | "automationRunHistoryShowDuration"
             | "teamFieldDateCreated"
             | "teamFieldCycle"
             | "teamFieldIdentifier"
@@ -56406,6 +56843,7 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "releasePipelineFieldTeams"
             | "fieldTimeInCurrentStatus"
             | "releasePipelineFieldType"
+            | "documentFieldDateUpdated"
             | "continuousPipelineReleaseFieldVersion"
             | "scheduledPipelineReleaseFieldVersion"
             | "showTriageIssues"
@@ -56543,9 +56981,12 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "automationShowDescendants"
           | "showSubTeamProjects"
           | "showSupervisedIssues"
+          | "showTeamInitiatives"
           | "fieldSla"
           | "fieldSentryIssues"
           | "scheduledPipelineReleaseFieldCompletion"
+          | "documentFieldDateCreated"
+          | "documentFieldCreator"
           | "customViewFieldDateCreated"
           | "customViewFieldOwner"
           | "customViewFieldDateUpdated"
@@ -56590,6 +57031,7 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "fieldEstimate"
           | "customerPageNeedsFieldIssueIdentifier"
           | "fieldId"
+          | "automationRunHistoryShowIssueIdentifier"
           | "fieldDateMyActivity"
           | "customerPageNeedsFieldIssuePriority"
           | "fieldPriority"
@@ -56607,6 +57049,8 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "memberFieldStatus"
           | "memberFieldTeams"
           | "fieldMilestone"
+          | "documentFieldOwner"
+          | "documentFieldParent"
           | "projectFieldActivity"
           | "projectFieldDateCompleted"
           | "projectFieldDateCreated"
@@ -56662,6 +57106,7 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "reviewFieldAvatar"
           | "reviewFieldIdentifier"
           | "reviewFieldRepository"
+          | "automationRunHistoryShowDuration"
           | "teamFieldDateCreated"
           | "teamFieldCycle"
           | "teamFieldIdentifier"
@@ -56673,6 +57118,7 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "releasePipelineFieldTeams"
           | "fieldTimeInCurrentStatus"
           | "releasePipelineFieldType"
+          | "documentFieldDateUpdated"
           | "continuousPipelineReleaseFieldVersion"
           | "scheduledPipelineReleaseFieldVersion"
           | "showTriageIssues"
@@ -56809,9 +57255,12 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "automationShowDescendants"
         | "showSubTeamProjects"
         | "showSupervisedIssues"
+        | "showTeamInitiatives"
         | "fieldSla"
         | "fieldSentryIssues"
         | "scheduledPipelineReleaseFieldCompletion"
+        | "documentFieldDateCreated"
+        | "documentFieldCreator"
         | "customViewFieldDateCreated"
         | "customViewFieldOwner"
         | "customViewFieldDateUpdated"
@@ -56856,6 +57305,7 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "fieldEstimate"
         | "customerPageNeedsFieldIssueIdentifier"
         | "fieldId"
+        | "automationRunHistoryShowIssueIdentifier"
         | "fieldDateMyActivity"
         | "customerPageNeedsFieldIssuePriority"
         | "fieldPriority"
@@ -56873,6 +57323,8 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "memberFieldStatus"
         | "memberFieldTeams"
         | "fieldMilestone"
+        | "documentFieldOwner"
+        | "documentFieldParent"
         | "projectFieldActivity"
         | "projectFieldDateCompleted"
         | "projectFieldDateCreated"
@@ -56928,6 +57380,7 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "reviewFieldAvatar"
         | "reviewFieldIdentifier"
         | "reviewFieldRepository"
+        | "automationRunHistoryShowDuration"
         | "teamFieldDateCreated"
         | "teamFieldCycle"
         | "teamFieldIdentifier"
@@ -56939,6 +57392,7 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "releasePipelineFieldTeams"
         | "fieldTimeInCurrentStatus"
         | "releasePipelineFieldType"
+        | "documentFieldDateUpdated"
         | "continuousPipelineReleaseFieldVersion"
         | "scheduledPipelineReleaseFieldVersion"
         | "showTriageIssues"
@@ -57112,9 +57566,12 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "automationShowDescendants"
               | "showSubTeamProjects"
               | "showSupervisedIssues"
+              | "showTeamInitiatives"
               | "fieldSla"
               | "fieldSentryIssues"
               | "scheduledPipelineReleaseFieldCompletion"
+              | "documentFieldDateCreated"
+              | "documentFieldCreator"
               | "customViewFieldDateCreated"
               | "customViewFieldOwner"
               | "customViewFieldDateUpdated"
@@ -57159,6 +57616,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "fieldEstimate"
               | "customerPageNeedsFieldIssueIdentifier"
               | "fieldId"
+              | "automationRunHistoryShowIssueIdentifier"
               | "fieldDateMyActivity"
               | "customerPageNeedsFieldIssuePriority"
               | "fieldPriority"
@@ -57176,6 +57634,8 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "memberFieldStatus"
               | "memberFieldTeams"
               | "fieldMilestone"
+              | "documentFieldOwner"
+              | "documentFieldParent"
               | "projectFieldActivity"
               | "projectFieldDateCompleted"
               | "projectFieldDateCreated"
@@ -57231,6 +57691,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "reviewFieldAvatar"
               | "reviewFieldIdentifier"
               | "reviewFieldRepository"
+              | "automationRunHistoryShowDuration"
               | "teamFieldDateCreated"
               | "teamFieldCycle"
               | "teamFieldIdentifier"
@@ -57242,6 +57703,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "releasePipelineFieldTeams"
               | "fieldTimeInCurrentStatus"
               | "releasePipelineFieldType"
+              | "documentFieldDateUpdated"
               | "continuousPipelineReleaseFieldVersion"
               | "scheduledPipelineReleaseFieldVersion"
               | "showTriageIssues"
@@ -57372,9 +57834,12 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "automationShowDescendants"
                   | "showSubTeamProjects"
                   | "showSupervisedIssues"
+                  | "showTeamInitiatives"
                   | "fieldSla"
                   | "fieldSentryIssues"
                   | "scheduledPipelineReleaseFieldCompletion"
+                  | "documentFieldDateCreated"
+                  | "documentFieldCreator"
                   | "customViewFieldDateCreated"
                   | "customViewFieldOwner"
                   | "customViewFieldDateUpdated"
@@ -57419,6 +57884,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "fieldEstimate"
                   | "customerPageNeedsFieldIssueIdentifier"
                   | "fieldId"
+                  | "automationRunHistoryShowIssueIdentifier"
                   | "fieldDateMyActivity"
                   | "customerPageNeedsFieldIssuePriority"
                   | "fieldPriority"
@@ -57436,6 +57902,8 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "memberFieldStatus"
                   | "memberFieldTeams"
                   | "fieldMilestone"
+                  | "documentFieldOwner"
+                  | "documentFieldParent"
                   | "projectFieldActivity"
                   | "projectFieldDateCompleted"
                   | "projectFieldDateCreated"
@@ -57491,6 +57959,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "reviewFieldAvatar"
                   | "reviewFieldIdentifier"
                   | "reviewFieldRepository"
+                  | "automationRunHistoryShowDuration"
                   | "teamFieldDateCreated"
                   | "teamFieldCycle"
                   | "teamFieldIdentifier"
@@ -57502,6 +57971,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "releasePipelineFieldTeams"
                   | "fieldTimeInCurrentStatus"
                   | "releasePipelineFieldType"
+                  | "documentFieldDateUpdated"
                   | "continuousPipelineReleaseFieldVersion"
                   | "scheduledPipelineReleaseFieldVersion"
                   | "showTriageIssues"
@@ -57637,9 +58107,12 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "automationShowDescendants"
                   | "showSubTeamProjects"
                   | "showSupervisedIssues"
+                  | "showTeamInitiatives"
                   | "fieldSla"
                   | "fieldSentryIssues"
                   | "scheduledPipelineReleaseFieldCompletion"
+                  | "documentFieldDateCreated"
+                  | "documentFieldCreator"
                   | "customViewFieldDateCreated"
                   | "customViewFieldOwner"
                   | "customViewFieldDateUpdated"
@@ -57684,6 +58157,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "fieldEstimate"
                   | "customerPageNeedsFieldIssueIdentifier"
                   | "fieldId"
+                  | "automationRunHistoryShowIssueIdentifier"
                   | "fieldDateMyActivity"
                   | "customerPageNeedsFieldIssuePriority"
                   | "fieldPriority"
@@ -57701,6 +58175,8 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "memberFieldStatus"
                   | "memberFieldTeams"
                   | "fieldMilestone"
+                  | "documentFieldOwner"
+                  | "documentFieldParent"
                   | "projectFieldActivity"
                   | "projectFieldDateCompleted"
                   | "projectFieldDateCreated"
@@ -57756,6 +58232,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "reviewFieldAvatar"
                   | "reviewFieldIdentifier"
                   | "reviewFieldRepository"
+                  | "automationRunHistoryShowDuration"
                   | "teamFieldDateCreated"
                   | "teamFieldCycle"
                   | "teamFieldIdentifier"
@@ -57767,6 +58244,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "releasePipelineFieldTeams"
                   | "fieldTimeInCurrentStatus"
                   | "releasePipelineFieldType"
+                  | "documentFieldDateUpdated"
                   | "continuousPipelineReleaseFieldVersion"
                   | "scheduledPipelineReleaseFieldVersion"
                   | "showTriageIssues"
@@ -58708,6 +59186,67 @@ export type Document_CommentsQuery = { __typename?: "Query" } & {
   };
 };
 
+export type Document_SubscribersQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  filter?: InputMaybe<UserFilter>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  includeDisabled?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+}>;
+
+export type Document_SubscribersQuery = { __typename?: "Query" } & {
+  document: { __typename?: "Document" } & {
+    subscribers: { __typename: "UserConnection" } & {
+      nodes: Array<
+        { __typename: "User" } & Pick<
+          User,
+          | "description"
+          | "avatarUrl"
+          | "createdIssueCount"
+          | "avatarBackgroundColor"
+          | "statusUntilAt"
+          | "statusEmoji"
+          | "initials"
+          | "updatedAt"
+          | "lastSeen"
+          | "timezone"
+          | "disableReason"
+          | "statusLabel"
+          | "archivedAt"
+          | "createdAt"
+          | "id"
+          | "gitHubUserId"
+          | "displayName"
+          | "email"
+          | "name"
+          | "title"
+          | "url"
+          | "active"
+          | "isAssignable"
+          | "guest"
+          | "admin"
+          | "owner"
+          | "app"
+          | "isMentionable"
+          | "isMe"
+          | "supportsAgentSessions"
+          | "canAccessAnyPublicTeam"
+          | "calendarHash"
+          | "inviteHash"
+        >
+      >;
+      pageInfo: { __typename: "PageInfo" } & Pick<
+        PageInfo,
+        "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
+      >;
+    };
+  };
+};
+
 export type DocumentContentHistoryQueryVariables = Exact<{
   id: Scalars["String"];
 }>;
@@ -59123,6 +59662,7 @@ export type InitiativeQuery = { __typename?: "Query" } & {
     | "startedAt"
     | "completedAt"
     | "id"
+    | "visibility"
   > & {
       parentInitiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
       integrationsSettings?: Maybe<{ __typename?: "IntegrationsSettings" } & Pick<IntegrationsSettings, "id">>;
@@ -59150,6 +59690,7 @@ export type InitiativeQuery = { __typename?: "Query" } & {
           }
       >;
       lastUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
+      leadTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
       creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
       owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     };
@@ -59601,6 +60142,7 @@ export type Initiative_SubInitiativesQuery = { __typename?: "Query" } & {
           | "startedAt"
           | "completedAt"
           | "id"
+          | "visibility"
         > & {
             parentInitiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
             integrationsSettings?: Maybe<{ __typename?: "IntegrationsSettings" } & Pick<IntegrationsSettings, "id">>;
@@ -59629,6 +60171,7 @@ export type Initiative_SubInitiativesQuery = { __typename?: "Query" } & {
                 }
             >;
             lastUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
+            leadTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
             creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           }
@@ -59754,6 +60297,7 @@ export type InitiativeLabel_InitiativesQuery = { __typename?: "Query" } & {
           | "startedAt"
           | "completedAt"
           | "id"
+          | "visibility"
         > & {
             parentInitiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
             integrationsSettings?: Maybe<{ __typename?: "IntegrationsSettings" } & Pick<IntegrationsSettings, "id">>;
@@ -59782,6 +60326,7 @@ export type InitiativeLabel_InitiativesQuery = { __typename?: "Query" } & {
                 }
             >;
             lastUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
+            leadTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
             creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           }
@@ -60172,6 +60717,7 @@ export type InitiativesQuery = { __typename?: "Query" } & {
         | "startedAt"
         | "completedAt"
         | "id"
+        | "visibility"
       > & {
           parentInitiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
           integrationsSettings?: Maybe<{ __typename?: "IntegrationsSettings" } & Pick<IntegrationsSettings, "id">>;
@@ -60200,6 +60746,7 @@ export type InitiativesQuery = { __typename?: "Query" } & {
               }
           >;
           lastUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
+          leadTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
           creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
         }
@@ -64387,7 +64934,7 @@ export type NotificationQuery = { __typename?: "Query" } & {
           actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           usageAlert: { __typename: "UsageAlert" } & Pick<
             UsageAlert,
-            "type" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "metadata"
+            "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
           >;
         })
     | ({ __typename: "WelcomeMessageNotification" } & Pick<
@@ -64460,6 +65007,7 @@ export type NotificationQuery = { __typename?: "Query" } & {
             | "contextViewType"
             | "id"
             | "slugId"
+            | "restrictEditing"
             | "enabled"
             | "applyToSubTeams"
             | "runOnce"
@@ -65236,7 +65784,7 @@ export type NotificationsQuery = { __typename?: "Query" } & {
             actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             usageAlert: { __typename: "UsageAlert" } & Pick<
               UsageAlert,
-              "type" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "metadata"
+              "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
             >;
           })
       | ({ __typename: "WelcomeMessageNotification" } & Pick<
@@ -65309,6 +65857,7 @@ export type NotificationsQuery = { __typename?: "Query" } & {
               | "contextViewType"
               | "id"
               | "slugId"
+              | "restrictEditing"
               | "enabled"
               | "applyToSubTeams"
               | "runOnce"
@@ -65616,6 +66165,7 @@ export type Organization_TeamsQuery = { __typename?: "Query" } & {
           | "requirePriorityToLeaveTriage"
           | "autoCloseChildIssues"
           | "autoCloseParentIssues"
+          | "initiativesEnabled"
           | "scimManaged"
           | "private"
           | "inheritIssueEstimation"
@@ -66359,6 +66909,7 @@ export type Project_InitiativesQuery = { __typename?: "Query" } & {
           | "startedAt"
           | "completedAt"
           | "id"
+          | "visibility"
         > & {
             parentInitiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
             integrationsSettings?: Maybe<{ __typename?: "IntegrationsSettings" } & Pick<IntegrationsSettings, "id">>;
@@ -66387,6 +66938,7 @@ export type Project_InitiativesQuery = { __typename?: "Query" } & {
                 }
             >;
             lastUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
+            leadTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
             creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           }
@@ -66953,6 +67505,7 @@ export type Project_TeamsQuery = { __typename?: "Query" } & {
           | "requirePriorityToLeaveTriage"
           | "autoCloseChildIssues"
           | "autoCloseParentIssues"
+          | "initiativesEnabled"
           | "scimManaged"
           | "private"
           | "inheritIssueEstimation"
@@ -68759,6 +69312,7 @@ export type ReleasePipeline_TeamsQuery = { __typename?: "Query" } & {
           | "requirePriorityToLeaveTriage"
           | "autoCloseChildIssues"
           | "autoCloseParentIssues"
+          | "initiativesEnabled"
           | "scimManaged"
           | "private"
           | "inheritIssueEstimation"
@@ -69877,6 +70431,7 @@ export type TeamQuery = { __typename?: "Query" } & {
     | "requirePriorityToLeaveTriage"
     | "autoCloseChildIssues"
     | "autoCloseParentIssues"
+    | "initiativesEnabled"
     | "scimManaged"
     | "private"
     | "inheritIssueEstimation"
@@ -70673,6 +71228,7 @@ export type TeamsQuery = { __typename?: "Query" } & {
         | "requirePriorityToLeaveTriage"
         | "autoCloseChildIssues"
         | "autoCloseParentIssues"
+        | "initiativesEnabled"
         | "scimManaged"
         | "private"
         | "inheritIssueEstimation"
@@ -71570,6 +72126,7 @@ export type User_TeamsQuery = { __typename?: "Query" } & {
           | "requirePriorityToLeaveTriage"
           | "autoCloseChildIssues"
           | "autoCloseParentIssues"
+          | "initiativesEnabled"
           | "scimManaged"
           | "private"
           | "inheritIssueEstimation"
@@ -73227,6 +73784,7 @@ export type Viewer_TeamsQuery = { __typename?: "Query" } & {
           | "requirePriorityToLeaveTriage"
           | "autoCloseChildIssues"
           | "autoCloseParentIssues"
+          | "initiativesEnabled"
           | "scimManaged"
           | "private"
           | "inheritIssueEstimation"
@@ -75139,7 +75697,9 @@ export type IntegrationAsksConnectChannelMutation = { __typename?: "Mutation" } 
         | "autoCreateOnBotMention"
         | "postCancellationUpdates"
         | "postCompletionUpdates"
+        | "postAssignmentUpdates"
         | "postAcceptedFromTriageUpdates"
+        | "postSlaUpdates"
         | "botAdded"
         | "isPrivate"
         | "isShared"
@@ -77119,7 +77679,7 @@ export type ArchiveNotificationMutation = { __typename?: "Mutation" } & {
               actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               usageAlert: { __typename: "UsageAlert" } & Pick<
                 UsageAlert,
-                "type" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "metadata"
+                "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
               >;
             })
         | ({ __typename: "WelcomeMessageNotification" } & Pick<
@@ -77192,6 +77752,7 @@ export type ArchiveNotificationMutation = { __typename?: "Mutation" } & {
                 | "contextViewType"
                 | "id"
                 | "slugId"
+                | "restrictEditing"
                 | "enabled"
                 | "applyToSubTeams"
                 | "runOnce"
@@ -77715,7 +78276,7 @@ export type NotificationArchiveAllMutation = { __typename?: "Mutation" } & {
               actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               usageAlert: { __typename: "UsageAlert" } & Pick<
                 UsageAlert,
-                "type" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "metadata"
+                "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
               >;
             })
         | ({ __typename: "WelcomeMessageNotification" } & Pick<
@@ -77788,6 +78349,7 @@ export type NotificationArchiveAllMutation = { __typename?: "Mutation" } & {
                 | "contextViewType"
                 | "id"
                 | "slugId"
+                | "restrictEditing"
                 | "enabled"
                 | "applyToSubTeams"
                 | "runOnce"
@@ -78325,7 +78887,7 @@ export type NotificationMarkReadAllMutation = { __typename?: "Mutation" } & {
               actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               usageAlert: { __typename: "UsageAlert" } & Pick<
                 UsageAlert,
-                "type" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "metadata"
+                "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
               >;
             })
         | ({ __typename: "WelcomeMessageNotification" } & Pick<
@@ -78398,6 +78960,7 @@ export type NotificationMarkReadAllMutation = { __typename?: "Mutation" } & {
                 | "contextViewType"
                 | "id"
                 | "slugId"
+                | "restrictEditing"
                 | "enabled"
                 | "applyToSubTeams"
                 | "runOnce"
@@ -78921,7 +79484,7 @@ export type NotificationMarkUnreadAllMutation = { __typename?: "Mutation" } & {
               actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               usageAlert: { __typename: "UsageAlert" } & Pick<
                 UsageAlert,
-                "type" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "metadata"
+                "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
               >;
             })
         | ({ __typename: "WelcomeMessageNotification" } & Pick<
@@ -78994,6 +79557,7 @@ export type NotificationMarkUnreadAllMutation = { __typename?: "Mutation" } & {
                 | "contextViewType"
                 | "id"
                 | "slugId"
+                | "restrictEditing"
                 | "enabled"
                 | "applyToSubTeams"
                 | "runOnce"
@@ -79518,7 +80082,7 @@ export type NotificationSnoozeAllMutation = { __typename?: "Mutation" } & {
               actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               usageAlert: { __typename: "UsageAlert" } & Pick<
                 UsageAlert,
-                "type" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "metadata"
+                "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
               >;
             })
         | ({ __typename: "WelcomeMessageNotification" } & Pick<
@@ -79591,6 +80155,7 @@ export type NotificationSnoozeAllMutation = { __typename?: "Mutation" } & {
                 | "contextViewType"
                 | "id"
                 | "slugId"
+                | "restrictEditing"
                 | "enabled"
                 | "applyToSubTeams"
                 | "runOnce"
@@ -80376,7 +80941,7 @@ export type UnarchiveNotificationMutation = { __typename?: "Mutation" } & {
               actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               usageAlert: { __typename: "UsageAlert" } & Pick<
                 UsageAlert,
-                "type" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "metadata"
+                "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
               >;
             })
         | ({ __typename: "WelcomeMessageNotification" } & Pick<
@@ -80449,6 +81014,7 @@ export type UnarchiveNotificationMutation = { __typename?: "Mutation" } & {
                 | "contextViewType"
                 | "id"
                 | "slugId"
+                | "restrictEditing"
                 | "enabled"
                 | "applyToSubTeams"
                 | "runOnce"
@@ -80973,7 +81539,7 @@ export type NotificationUnsnoozeAllMutation = { __typename?: "Mutation" } & {
               actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               usageAlert: { __typename: "UsageAlert" } & Pick<
                 UsageAlert,
-                "type" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "metadata"
+                "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
               >;
             })
         | ({ __typename: "WelcomeMessageNotification" } & Pick<
@@ -81046,6 +81612,7 @@ export type NotificationUnsnoozeAllMutation = { __typename?: "Mutation" } & {
                 | "contextViewType"
                 | "id"
                 | "slugId"
+                | "restrictEditing"
                 | "enabled"
                 | "applyToSubTeams"
                 | "runOnce"
@@ -81567,7 +82134,7 @@ export type UpdateNotificationMutation = { __typename?: "Mutation" } & {
               actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               usageAlert: { __typename: "UsageAlert" } & Pick<
                 UsageAlert,
-                "type" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "metadata"
+                "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
               >;
             })
         | ({ __typename: "WelcomeMessageNotification" } & Pick<
@@ -81640,6 +82207,7 @@ export type UpdateNotificationMutation = { __typename?: "Mutation" } & {
                 | "contextViewType"
                 | "id"
                 | "slugId"
+                | "restrictEditing"
                 | "enabled"
                 | "applyToSubTeams"
                 | "runOnce"
@@ -83052,9 +83620,12 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "automationShowDescendants"
             | "showSubTeamProjects"
             | "showSupervisedIssues"
+            | "showTeamInitiatives"
             | "fieldSla"
             | "fieldSentryIssues"
             | "scheduledPipelineReleaseFieldCompletion"
+            | "documentFieldDateCreated"
+            | "documentFieldCreator"
             | "customViewFieldDateCreated"
             | "customViewFieldOwner"
             | "customViewFieldDateUpdated"
@@ -83099,6 +83670,7 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "fieldEstimate"
             | "customerPageNeedsFieldIssueIdentifier"
             | "fieldId"
+            | "automationRunHistoryShowIssueIdentifier"
             | "fieldDateMyActivity"
             | "customerPageNeedsFieldIssuePriority"
             | "fieldPriority"
@@ -83116,6 +83688,8 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "memberFieldStatus"
             | "memberFieldTeams"
             | "fieldMilestone"
+            | "documentFieldOwner"
+            | "documentFieldParent"
             | "projectFieldActivity"
             | "projectFieldDateCompleted"
             | "projectFieldDateCreated"
@@ -83171,6 +83745,7 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "reviewFieldAvatar"
             | "reviewFieldIdentifier"
             | "reviewFieldRepository"
+            | "automationRunHistoryShowDuration"
             | "teamFieldDateCreated"
             | "teamFieldCycle"
             | "teamFieldIdentifier"
@@ -83182,6 +83757,7 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "releasePipelineFieldTeams"
             | "fieldTimeInCurrentStatus"
             | "releasePipelineFieldType"
+            | "documentFieldDateUpdated"
             | "continuousPipelineReleaseFieldVersion"
             | "scheduledPipelineReleaseFieldVersion"
             | "showTriageIssues"
@@ -83332,9 +83908,12 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "automationShowDescendants"
             | "showSubTeamProjects"
             | "showSupervisedIssues"
+            | "showTeamInitiatives"
             | "fieldSla"
             | "fieldSentryIssues"
             | "scheduledPipelineReleaseFieldCompletion"
+            | "documentFieldDateCreated"
+            | "documentFieldCreator"
             | "customViewFieldDateCreated"
             | "customViewFieldOwner"
             | "customViewFieldDateUpdated"
@@ -83379,6 +83958,7 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "fieldEstimate"
             | "customerPageNeedsFieldIssueIdentifier"
             | "fieldId"
+            | "automationRunHistoryShowIssueIdentifier"
             | "fieldDateMyActivity"
             | "customerPageNeedsFieldIssuePriority"
             | "fieldPriority"
@@ -83396,6 +83976,8 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "memberFieldStatus"
             | "memberFieldTeams"
             | "fieldMilestone"
+            | "documentFieldOwner"
+            | "documentFieldParent"
             | "projectFieldActivity"
             | "projectFieldDateCompleted"
             | "projectFieldDateCreated"
@@ -83451,6 +84033,7 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "reviewFieldAvatar"
             | "reviewFieldIdentifier"
             | "reviewFieldRepository"
+            | "automationRunHistoryShowDuration"
             | "teamFieldDateCreated"
             | "teamFieldCycle"
             | "teamFieldIdentifier"
@@ -83462,6 +84045,7 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "releasePipelineFieldTeams"
             | "fieldTimeInCurrentStatus"
             | "releasePipelineFieldType"
+            | "documentFieldDateUpdated"
             | "continuousPipelineReleaseFieldVersion"
             | "scheduledPipelineReleaseFieldVersion"
             | "showTriageIssues"
@@ -83619,12 +84203,23 @@ export const AiConversationElicitationOptionFragmentDoc = new TypedDocumentStrin
   `
     fragment AiConversationElicitationOption on AiConversationElicitationOption {
   __typename
-  prompt
   label
+  prompt
 }
     `,
   { fragmentName: "AiConversationElicitationOption" }
 ) as unknown as TypedDocumentString<AiConversationElicitationOptionFragment, unknown>;
+export const AiConversationMcpServerConnectionScopeFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationMcpServerConnectionScope on AiConversationMcpServerConnectionScope {
+  __typename
+  workflowDefinitionId
+  teamId
+  type
+}
+    `,
+  { fragmentName: "AiConversationMcpServerConnectionScope" }
+) as unknown as TypedDocumentString<AiConversationMcpServerConnectionScopeFragment, unknown>;
 export const AiConversationElicitationPartFragmentDoc = new TypedDocumentString(
   `
     fragment AiConversationElicitationPart on AiConversationElicitationPart {
@@ -83633,17 +84228,22 @@ export const AiConversationElicitationPartFragmentDoc = new TypedDocumentString(
     ...AiConversationElicitationOption
   }
   id
+  serverUrl
+  integrationId
   kind
   metadata {
     ...AiConversationPartMetadata
+  }
+  scope {
+    ...AiConversationMcpServerConnectionScope
   }
   title
   type
 }
     fragment AiConversationElicitationOption on AiConversationElicitationOption {
   __typename
-  prompt
   label
+  prompt
 }
 fragment AiConversationPartMetadata on AiConversationPartMetadata {
   __typename
@@ -83653,9 +84253,78 @@ fragment AiConversationPartMetadata on AiConversationPartMetadata {
   endedAt
   startedAt
   turnId
+}
+fragment AiConversationMcpServerConnectionScope on AiConversationMcpServerConnectionScope {
+  __typename
+  workflowDefinitionId
+  teamId
+  type
 }`,
   { fragmentName: "AiConversationElicitationPart" }
 ) as unknown as TypedDocumentString<AiConversationElicitationPartFragment, unknown>;
+export const AiConversationMcpServerConnectionElicitationResponseDataFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationMcpServerConnectionElicitationResponseData on AiConversationMcpServerConnectionElicitationResponseData {
+  __typename
+  integrationId
+  kind
+}
+    `,
+  { fragmentName: "AiConversationMcpServerConnectionElicitationResponseData" }
+) as unknown as TypedDocumentString<AiConversationMcpServerConnectionElicitationResponseDataFragment, unknown>;
+export const AiConversationMultipleChoiceElicitationResponseDataFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationMultipleChoiceElicitationResponseData on AiConversationMultipleChoiceElicitationResponseData {
+  __typename
+  kind
+  selectedOptionIndex
+}
+    `,
+  { fragmentName: "AiConversationMultipleChoiceElicitationResponseData" }
+) as unknown as TypedDocumentString<AiConversationMultipleChoiceElicitationResponseDataFragment, unknown>;
+export const AiConversationElicitationResponsePartFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationElicitationResponsePart on AiConversationElicitationResponsePart {
+  __typename
+  id
+  elicitationId
+  data {
+    ... on AiConversationMcpServerConnectionElicitationResponseData {
+      ...AiConversationMcpServerConnectionElicitationResponseData
+    }
+    ... on AiConversationMultipleChoiceElicitationResponseData {
+      ...AiConversationMultipleChoiceElicitationResponseData
+    }
+  }
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  type
+  user {
+    id
+  }
+}
+    fragment AiConversationPartMetadata on AiConversationPartMetadata {
+  __typename
+  feedback
+  evalLogId
+  phase
+  endedAt
+  startedAt
+  turnId
+}
+fragment AiConversationMcpServerConnectionElicitationResponseData on AiConversationMcpServerConnectionElicitationResponseData {
+  __typename
+  integrationId
+  kind
+}
+fragment AiConversationMultipleChoiceElicitationResponseData on AiConversationMultipleChoiceElicitationResponseData {
+  __typename
+  kind
+  selectedOptionIndex
+}`,
+  { fragmentName: "AiConversationElicitationResponsePart" }
+) as unknown as TypedDocumentString<AiConversationElicitationResponsePartFragment, unknown>;
 export const AgentAutomationRetryResolutionFragmentDoc = new TypedDocumentString(
   `
     fragment AgentAutomationRetryResolution on AgentAutomationRetryResolution {
@@ -86897,6 +87566,9 @@ export const AiConversationBasePartFragmentDoc = new TypedDocumentString(
   ... on AiConversationElicitationPart {
     ...AiConversationElicitationPart
   }
+  ... on AiConversationElicitationResponsePart {
+    ...AiConversationElicitationResponsePart
+  }
   ... on AiConversationErrorPart {
     ...AiConversationErrorPart
   }
@@ -86919,20 +87591,7 @@ export const AiConversationBasePartFragmentDoc = new TypedDocumentString(
     ...AiConversationWidgetPart
   }
 }
-    fragment AiConversationElicitationPart on AiConversationElicitationPart {
-  __typename
-  options {
-    ...AiConversationElicitationOption
-  }
-  id
-  kind
-  metadata {
-    ...AiConversationPartMetadata
-  }
-  title
-  type
-}
-fragment AiConversationPromptPart on AiConversationPromptPart {
+    fragment AiConversationPromptPart on AiConversationPromptPart {
   __typename
   id
   body
@@ -86958,8 +87617,8 @@ fragment AiConversationReasoningPart on AiConversationReasoningPart {
 }
 fragment AiConversationElicitationOption on AiConversationElicitationOption {
   __typename
-  prompt
   label
+  prompt
 }
 fragment AiConversationAckPart on AiConversationAckPart {
   __typename
@@ -86969,6 +87628,44 @@ fragment AiConversationAckPart on AiConversationAckPart {
     ...AiConversationPartMetadata
   }
   type
+}
+fragment AiConversationElicitationPart on AiConversationElicitationPart {
+  __typename
+  options {
+    ...AiConversationElicitationOption
+  }
+  id
+  serverUrl
+  integrationId
+  kind
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  scope {
+    ...AiConversationMcpServerConnectionScope
+  }
+  title
+  type
+}
+fragment AiConversationElicitationResponsePart on AiConversationElicitationResponsePart {
+  __typename
+  id
+  elicitationId
+  data {
+    ... on AiConversationMcpServerConnectionElicitationResponseData {
+      ...AiConversationMcpServerConnectionElicitationResponseData
+    }
+    ... on AiConversationMultipleChoiceElicitationResponseData {
+      ...AiConversationMultipleChoiceElicitationResponseData
+    }
+  }
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  type
+  user {
+    id
+  }
 }
 fragment AiConversationTextPart on AiConversationTextPart {
   __typename
@@ -87158,10 +87855,26 @@ fragment AiConversationPartMetadata on AiConversationPartMetadata {
   startedAt
   turnId
 }
+fragment AiConversationMcpServerConnectionElicitationResponseData on AiConversationMcpServerConnectionElicitationResponseData {
+  __typename
+  integrationId
+  kind
+}
 fragment AgentAutomationRetryResolution on AgentAutomationRetryResolution {
   __typename
   aiConversationId
   status
+}
+fragment AiConversationMcpServerConnectionScope on AiConversationMcpServerConnectionScope {
+  __typename
+  workflowDefinitionId
+  teamId
+  type
+}
+fragment AiConversationMultipleChoiceElicitationResponseData on AiConversationMultipleChoiceElicitationResponseData {
+  __typename
+  kind
+  selectedOptionIndex
 }
 fragment AiConversationBashToolCall on AiConversationBashToolCall {
   __typename
@@ -88728,6 +89441,7 @@ export const UsageAlertFragmentDoc = new TypedDocumentString(
   updatedAt
   archivedAt
   createdAt
+  resolvedAt
   id
   metadata
 }
@@ -88780,6 +89494,7 @@ fragment UsageAlert on UsageAlert {
   updatedAt
   archivedAt
   createdAt
+  resolvedAt
   id
   metadata
 }`,
@@ -88879,6 +89594,7 @@ export const WorkflowDefinitionFragmentDoc = new TypedDocumentString(
     id
   }
   slugId
+  restrictEditing
   enabled
   applyToSubTeams
   runOnce
@@ -88979,6 +89695,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
     id
   }
   slugId
+  restrictEditing
   enabled
   applyToSubTeams
   runOnce
@@ -89556,6 +90273,7 @@ fragment UsageAlert on UsageAlert {
   updatedAt
   archivedAt
   createdAt
+  resolvedAt
   id
   metadata
 }
@@ -89612,6 +90330,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
     id
   }
   slugId
+  restrictEditing
   enabled
   applyToSubTeams
   runOnce
@@ -90197,6 +90916,7 @@ fragment UsageAlert on UsageAlert {
   updatedAt
   archivedAt
   createdAt
+  resolvedAt
   id
   metadata
 }
@@ -90253,6 +90973,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
     id
   }
   slugId
+  restrictEditing
   enabled
   applyToSubTeams
   runOnce
@@ -91137,6 +91858,7 @@ fragment UsageAlert on UsageAlert {
   updatedAt
   archivedAt
   createdAt
+  resolvedAt
   id
   metadata
 }
@@ -91193,6 +91915,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
     id
   }
   slugId
+  restrictEditing
   enabled
   applyToSubTeams
   runOnce
@@ -92485,6 +93208,7 @@ export const IssueHistoryWorkflowMetadataFragmentDoc = new TypedDocumentString(
     id
   }
   slugId
+  restrictEditing
   enabled
   applyToSubTeams
   runOnce
@@ -92633,6 +93357,7 @@ export const IssueHistoryTriageRuleMetadataFragmentDoc = new TypedDocumentString
     id
   }
   slugId
+  restrictEditing
   enabled
   applyToSubTeams
   runOnce
@@ -96097,6 +96822,7 @@ fragment UsageAlert on UsageAlert {
   updatedAt
   archivedAt
   createdAt
+  resolvedAt
   id
   metadata
 }
@@ -96153,6 +96879,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
     id
   }
   slugId
+  restrictEditing
   enabled
   applyToSubTeams
   runOnce
@@ -96954,6 +97681,7 @@ fragment UsageAlert on UsageAlert {
   updatedAt
   archivedAt
   createdAt
+  resolvedAt
   id
   metadata
 }
@@ -97010,6 +97738,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
     id
   }
   slugId
+  restrictEditing
   enabled
   applyToSubTeams
   runOnce
@@ -98646,9 +99375,12 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   automationShowDescendants
   showSubTeamProjects
   showSupervisedIssues
+  showTeamInitiatives
   fieldSla
   fieldSentryIssues
   scheduledPipelineReleaseFieldCompletion
+  documentFieldDateCreated
+  documentFieldCreator
   customViewFieldDateCreated
   customViewFieldOwner
   customViewFieldDateUpdated
@@ -98693,6 +99425,7 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   fieldEstimate
   customerPageNeedsFieldIssueIdentifier
   fieldId
+  automationRunHistoryShowIssueIdentifier
   fieldDateMyActivity
   customerPageNeedsFieldIssuePriority
   fieldPriority
@@ -98710,6 +99443,8 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  documentFieldOwner
+  documentFieldParent
   projectFieldActivity
   projectFieldDateCompleted
   projectFieldDateCreated
@@ -98765,6 +99500,7 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   reviewFieldAvatar
   reviewFieldIdentifier
   reviewFieldRepository
+  automationRunHistoryShowDuration
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -98776,6 +99512,7 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   releasePipelineFieldTeams
   fieldTimeInCurrentStatus
   releasePipelineFieldType
+  documentFieldDateUpdated
   continuousPipelineReleaseFieldVersion
   scheduledPipelineReleaseFieldVersion
   showTriageIssues
@@ -98925,9 +99662,12 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   automationShowDescendants
   showSubTeamProjects
   showSupervisedIssues
+  showTeamInitiatives
   fieldSla
   fieldSentryIssues
   scheduledPipelineReleaseFieldCompletion
+  documentFieldDateCreated
+  documentFieldCreator
   customViewFieldDateCreated
   customViewFieldOwner
   customViewFieldDateUpdated
@@ -98972,6 +99712,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldEstimate
   customerPageNeedsFieldIssueIdentifier
   fieldId
+  automationRunHistoryShowIssueIdentifier
   fieldDateMyActivity
   customerPageNeedsFieldIssuePriority
   fieldPriority
@@ -98989,6 +99730,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  documentFieldOwner
+  documentFieldParent
   projectFieldActivity
   projectFieldDateCompleted
   projectFieldDateCreated
@@ -99044,6 +99787,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   reviewFieldAvatar
   reviewFieldIdentifier
   reviewFieldRepository
+  automationRunHistoryShowDuration
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -99055,6 +99799,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelineFieldTeams
   fieldTimeInCurrentStatus
   releasePipelineFieldType
+  documentFieldDateUpdated
   continuousPipelineReleaseFieldVersion
   scheduledPipelineReleaseFieldVersion
   showTriageIssues
@@ -99190,9 +99935,12 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   automationShowDescendants
   showSubTeamProjects
   showSupervisedIssues
+  showTeamInitiatives
   fieldSla
   fieldSentryIssues
   scheduledPipelineReleaseFieldCompletion
+  documentFieldDateCreated
+  documentFieldCreator
   customViewFieldDateCreated
   customViewFieldOwner
   customViewFieldDateUpdated
@@ -99237,6 +99985,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldEstimate
   customerPageNeedsFieldIssueIdentifier
   fieldId
+  automationRunHistoryShowIssueIdentifier
   fieldDateMyActivity
   customerPageNeedsFieldIssuePriority
   fieldPriority
@@ -99254,6 +100003,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  documentFieldOwner
+  documentFieldParent
   projectFieldActivity
   projectFieldDateCompleted
   projectFieldDateCreated
@@ -99309,6 +100060,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   reviewFieldAvatar
   reviewFieldIdentifier
   reviewFieldRepository
+  automationRunHistoryShowDuration
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -99320,6 +100072,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelineFieldTeams
   fieldTimeInCurrentStatus
   releasePipelineFieldType
+  documentFieldDateUpdated
   continuousPipelineReleaseFieldVersion
   scheduledPipelineReleaseFieldVersion
   showTriageIssues
@@ -101415,7 +102168,9 @@ export const SlackChannelNameMappingFragmentDoc = new TypedDocumentString(
   autoCreateOnBotMention
   postCancellationUpdates
   postCompletionUpdates
+  postAssignmentUpdates
   postAcceptedFromTriageUpdates
+  postSlaUpdates
   botAdded
   isPrivate
   isShared
@@ -101463,7 +102218,9 @@ fragment SlackChannelNameMapping on SlackChannelNameMapping {
   autoCreateOnBotMention
   postCancellationUpdates
   postCompletionUpdates
+  postAssignmentUpdates
   postAcceptedFromTriageUpdates
+  postSlaUpdates
   botAdded
   isPrivate
   isShared
@@ -102455,9 +103212,12 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   automationShowDescendants
   showSubTeamProjects
   showSupervisedIssues
+  showTeamInitiatives
   fieldSla
   fieldSentryIssues
   scheduledPipelineReleaseFieldCompletion
+  documentFieldDateCreated
+  documentFieldCreator
   customViewFieldDateCreated
   customViewFieldOwner
   customViewFieldDateUpdated
@@ -102502,6 +103262,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldEstimate
   customerPageNeedsFieldIssueIdentifier
   fieldId
+  automationRunHistoryShowIssueIdentifier
   fieldDateMyActivity
   customerPageNeedsFieldIssuePriority
   fieldPriority
@@ -102519,6 +103280,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  documentFieldOwner
+  documentFieldParent
   projectFieldActivity
   projectFieldDateCompleted
   projectFieldDateCreated
@@ -102574,6 +103337,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   reviewFieldAvatar
   reviewFieldIdentifier
   reviewFieldRepository
+  automationRunHistoryShowDuration
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -102585,6 +103349,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelineFieldTeams
   fieldTimeInCurrentStatus
   releasePipelineFieldType
+  documentFieldDateUpdated
   continuousPipelineReleaseFieldVersion
   scheduledPipelineReleaseFieldVersion
   showTriageIssues
@@ -102773,9 +103538,12 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   automationShowDescendants
   showSubTeamProjects
   showSupervisedIssues
+  showTeamInitiatives
   fieldSla
   fieldSentryIssues
   scheduledPipelineReleaseFieldCompletion
+  documentFieldDateCreated
+  documentFieldCreator
   customViewFieldDateCreated
   customViewFieldOwner
   customViewFieldDateUpdated
@@ -102820,6 +103588,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldEstimate
   customerPageNeedsFieldIssueIdentifier
   fieldId
+  automationRunHistoryShowIssueIdentifier
   fieldDateMyActivity
   customerPageNeedsFieldIssuePriority
   fieldPriority
@@ -102837,6 +103606,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  documentFieldOwner
+  documentFieldParent
   projectFieldActivity
   projectFieldDateCompleted
   projectFieldDateCreated
@@ -102892,6 +103663,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   reviewFieldAvatar
   reviewFieldIdentifier
   reviewFieldRepository
+  automationRunHistoryShowDuration
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -102903,6 +103675,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelineFieldTeams
   fieldTimeInCurrentStatus
   releasePipelineFieldType
+  documentFieldDateUpdated
   continuousPipelineReleaseFieldVersion
   scheduledPipelineReleaseFieldVersion
   showTriageIssues
@@ -104380,6 +105153,9 @@ export const InitiativeFragmentDoc = new TypedDocumentString(
   frequencyResolution
   prioritySortOrder
   sortOrder
+  leadTeam {
+    id
+  }
   archivedAt
   createdAt
   healthUpdatedAt
@@ -104392,6 +105168,7 @@ export const InitiativeFragmentDoc = new TypedDocumentString(
   owner {
     id
   }
+  visibility
 }
     fragment WelcomeMessage on WelcomeMessage {
   __typename
@@ -104507,6 +105284,9 @@ fragment Initiative on Initiative {
   frequencyResolution
   prioritySortOrder
   sortOrder
+  leadTeam {
+    id
+  }
   archivedAt
   createdAt
   healthUpdatedAt
@@ -104519,6 +105299,7 @@ fragment Initiative on Initiative {
   owner {
     id
   }
+  visibility
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -106533,6 +107314,16 @@ export const JiraFetchProjectStatusesPayloadFragmentDoc = new TypedDocumentStrin
 }`,
   { fragmentName: "JiraFetchProjectStatusesPayload" }
 ) as unknown as TypedDocumentString<JiraFetchProjectStatusesPayloadFragment, unknown>;
+export const JiraProjectStatusesPayloadFragmentDoc = new TypedDocumentString(
+  `
+    fragment JiraProjectStatusesPayload on JiraProjectStatusesPayload {
+  __typename
+  issueStatuses
+  projectStatuses
+}
+    `,
+  { fragmentName: "JiraProjectStatusesPayload" }
+) as unknown as TypedDocumentString<JiraProjectStatusesPayloadFragment, unknown>;
 export const LogoutResponseFragmentDoc = new TypedDocumentString(
   `
     fragment LogoutResponse on LogoutResponse {
@@ -107185,6 +107976,7 @@ fragment UsageAlert on UsageAlert {
   updatedAt
   archivedAt
   createdAt
+  resolvedAt
   id
   metadata
 }
@@ -107241,6 +108033,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
     id
   }
   slugId
+  restrictEditing
   enabled
   applyToSubTeams
   runOnce
@@ -110614,6 +111407,7 @@ fragment UsageAlert on UsageAlert {
   updatedAt
   archivedAt
   createdAt
+  resolvedAt
   id
   metadata
 }
@@ -110718,6 +111512,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
     id
   }
   slugId
+  restrictEditing
   enabled
   applyToSubTeams
   runOnce
@@ -110908,6 +111703,7 @@ export const TeamFragmentDoc = new TypedDocumentString(
   requirePriorityToLeaveTriage
   autoCloseChildIssues
   autoCloseParentIssues
+  initiativesEnabled
   scimManaged
   private
   inheritIssueEstimation
@@ -111024,6 +111820,7 @@ export const TeamConnectionFragmentDoc = new TypedDocumentString(
   requirePriorityToLeaveTriage
   autoCloseChildIssues
   autoCloseParentIssues
+  initiativesEnabled
   scimManaged
   private
   inheritIssueEstimation
@@ -111692,6 +112489,7 @@ export const AdministrableTeamsDocument = new TypedDocumentString(`
   requirePriorityToLeaveTriage
   autoCloseChildIssues
   autoCloseParentIssues
+  initiativesEnabled
   scimManaged
   private
   inheritIssueEstimation
@@ -115627,9 +116425,12 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   automationShowDescendants
   showSubTeamProjects
   showSupervisedIssues
+  showTeamInitiatives
   fieldSla
   fieldSentryIssues
   scheduledPipelineReleaseFieldCompletion
+  documentFieldDateCreated
+  documentFieldCreator
   customViewFieldDateCreated
   customViewFieldOwner
   customViewFieldDateUpdated
@@ -115674,6 +116475,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldEstimate
   customerPageNeedsFieldIssueIdentifier
   fieldId
+  automationRunHistoryShowIssueIdentifier
   fieldDateMyActivity
   customerPageNeedsFieldIssuePriority
   fieldPriority
@@ -115691,6 +116493,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  documentFieldOwner
+  documentFieldParent
   projectFieldActivity
   projectFieldDateCompleted
   projectFieldDateCreated
@@ -115746,6 +116550,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   reviewFieldAvatar
   reviewFieldIdentifier
   reviewFieldRepository
+  automationRunHistoryShowDuration
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -115757,6 +116562,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelineFieldTeams
   fieldTimeInCurrentStatus
   releasePipelineFieldType
+  documentFieldDateUpdated
   continuousPipelineReleaseFieldVersion
   scheduledPipelineReleaseFieldVersion
   showTriageIssues
@@ -115839,6 +116645,9 @@ fragment Initiative on Initiative {
   frequencyResolution
   prioritySortOrder
   sortOrder
+  leadTeam {
+    id
+  }
   archivedAt
   createdAt
   healthUpdatedAt
@@ -115851,6 +116660,7 @@ fragment Initiative on Initiative {
   owner {
     id
   }
+  visibility
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -116291,9 +117101,12 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   automationShowDescendants
   showSubTeamProjects
   showSupervisedIssues
+  showTeamInitiatives
   fieldSla
   fieldSentryIssues
   scheduledPipelineReleaseFieldCompletion
+  documentFieldDateCreated
+  documentFieldCreator
   customViewFieldDateCreated
   customViewFieldOwner
   customViewFieldDateUpdated
@@ -116338,6 +117151,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldEstimate
   customerPageNeedsFieldIssueIdentifier
   fieldId
+  automationRunHistoryShowIssueIdentifier
   fieldDateMyActivity
   customerPageNeedsFieldIssuePriority
   fieldPriority
@@ -116355,6 +117169,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  documentFieldOwner
+  documentFieldParent
   projectFieldActivity
   projectFieldDateCompleted
   projectFieldDateCreated
@@ -116410,6 +117226,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   reviewFieldAvatar
   reviewFieldIdentifier
   reviewFieldRepository
+  automationRunHistoryShowDuration
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -116421,6 +117238,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelineFieldTeams
   fieldTimeInCurrentStatus
   releasePipelineFieldType
+  documentFieldDateUpdated
   continuousPipelineReleaseFieldVersion
   scheduledPipelineReleaseFieldVersion
   showTriageIssues
@@ -116569,9 +117387,12 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   automationShowDescendants
   showSubTeamProjects
   showSupervisedIssues
+  showTeamInitiatives
   fieldSla
   fieldSentryIssues
   scheduledPipelineReleaseFieldCompletion
+  documentFieldDateCreated
+  documentFieldCreator
   customViewFieldDateCreated
   customViewFieldOwner
   customViewFieldDateUpdated
@@ -116616,6 +117437,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldEstimate
   customerPageNeedsFieldIssueIdentifier
   fieldId
+  automationRunHistoryShowIssueIdentifier
   fieldDateMyActivity
   customerPageNeedsFieldIssuePriority
   fieldPriority
@@ -116633,6 +117455,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  documentFieldOwner
+  documentFieldParent
   projectFieldActivity
   projectFieldDateCompleted
   projectFieldDateCreated
@@ -116688,6 +117512,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   reviewFieldAvatar
   reviewFieldIdentifier
   reviewFieldRepository
+  automationRunHistoryShowDuration
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -116699,6 +117524,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelineFieldTeams
   fieldTimeInCurrentStatus
   releasePipelineFieldType
+  documentFieldDateUpdated
   continuousPipelineReleaseFieldVersion
   scheduledPipelineReleaseFieldVersion
   showTriageIssues
@@ -117035,9 +117861,12 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   automationShowDescendants
   showSubTeamProjects
   showSupervisedIssues
+  showTeamInitiatives
   fieldSla
   fieldSentryIssues
   scheduledPipelineReleaseFieldCompletion
+  documentFieldDateCreated
+  documentFieldCreator
   customViewFieldDateCreated
   customViewFieldOwner
   customViewFieldDateUpdated
@@ -117082,6 +117911,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldEstimate
   customerPageNeedsFieldIssueIdentifier
   fieldId
+  automationRunHistoryShowIssueIdentifier
   fieldDateMyActivity
   customerPageNeedsFieldIssuePriority
   fieldPriority
@@ -117099,6 +117929,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  documentFieldOwner
+  documentFieldParent
   projectFieldActivity
   projectFieldDateCompleted
   projectFieldDateCreated
@@ -117154,6 +117986,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   reviewFieldAvatar
   reviewFieldIdentifier
   reviewFieldRepository
+  automationRunHistoryShowDuration
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -117165,6 +117998,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelineFieldTeams
   fieldTimeInCurrentStatus
   releasePipelineFieldType
+  documentFieldDateUpdated
   continuousPipelineReleaseFieldVersion
   scheduledPipelineReleaseFieldVersion
   showTriageIssues
@@ -117313,9 +118147,12 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   automationShowDescendants
   showSubTeamProjects
   showSupervisedIssues
+  showTeamInitiatives
   fieldSla
   fieldSentryIssues
   scheduledPipelineReleaseFieldCompletion
+  documentFieldDateCreated
+  documentFieldCreator
   customViewFieldDateCreated
   customViewFieldOwner
   customViewFieldDateUpdated
@@ -117360,6 +118197,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldEstimate
   customerPageNeedsFieldIssueIdentifier
   fieldId
+  automationRunHistoryShowIssueIdentifier
   fieldDateMyActivity
   customerPageNeedsFieldIssuePriority
   fieldPriority
@@ -117377,6 +118215,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  documentFieldOwner
+  documentFieldParent
   projectFieldActivity
   projectFieldDateCompleted
   projectFieldDateCreated
@@ -117432,6 +118272,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   reviewFieldAvatar
   reviewFieldIdentifier
   reviewFieldRepository
+  automationRunHistoryShowDuration
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -117443,6 +118284,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelineFieldTeams
   fieldTimeInCurrentStatus
   releasePipelineFieldType
+  documentFieldDateUpdated
   continuousPipelineReleaseFieldVersion
   scheduledPipelineReleaseFieldVersion
   showTriageIssues
@@ -117577,9 +118419,12 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   automationShowDescendants
   showSubTeamProjects
   showSupervisedIssues
+  showTeamInitiatives
   fieldSla
   fieldSentryIssues
   scheduledPipelineReleaseFieldCompletion
+  documentFieldDateCreated
+  documentFieldCreator
   customViewFieldDateCreated
   customViewFieldOwner
   customViewFieldDateUpdated
@@ -117624,6 +118469,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldEstimate
   customerPageNeedsFieldIssueIdentifier
   fieldId
+  automationRunHistoryShowIssueIdentifier
   fieldDateMyActivity
   customerPageNeedsFieldIssuePriority
   fieldPriority
@@ -117641,6 +118487,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  documentFieldOwner
+  documentFieldParent
   projectFieldActivity
   projectFieldDateCompleted
   projectFieldDateCreated
@@ -117696,6 +118544,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   reviewFieldAvatar
   reviewFieldIdentifier
   reviewFieldRepository
+  automationRunHistoryShowDuration
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -117707,6 +118556,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelineFieldTeams
   fieldTimeInCurrentStatus
   releasePipelineFieldType
+  documentFieldDateUpdated
   continuousPipelineReleaseFieldVersion
   scheduledPipelineReleaseFieldVersion
   showTriageIssues
@@ -117898,9 +118748,12 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   automationShowDescendants
   showSubTeamProjects
   showSupervisedIssues
+  showTeamInitiatives
   fieldSla
   fieldSentryIssues
   scheduledPipelineReleaseFieldCompletion
+  documentFieldDateCreated
+  documentFieldCreator
   customViewFieldDateCreated
   customViewFieldOwner
   customViewFieldDateUpdated
@@ -117945,6 +118798,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldEstimate
   customerPageNeedsFieldIssueIdentifier
   fieldId
+  automationRunHistoryShowIssueIdentifier
   fieldDateMyActivity
   customerPageNeedsFieldIssuePriority
   fieldPriority
@@ -117962,6 +118816,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  documentFieldOwner
+  documentFieldParent
   projectFieldActivity
   projectFieldDateCompleted
   projectFieldDateCreated
@@ -118017,6 +118873,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   reviewFieldAvatar
   reviewFieldIdentifier
   reviewFieldRepository
+  automationRunHistoryShowDuration
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -118028,6 +118885,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelineFieldTeams
   fieldTimeInCurrentStatus
   releasePipelineFieldType
+  documentFieldDateUpdated
   continuousPipelineReleaseFieldVersion
   scheduledPipelineReleaseFieldVersion
   showTriageIssues
@@ -119446,6 +120304,75 @@ fragment PageInfo on PageInfo {
   hasPreviousPage
   hasNextPage
 }`) as unknown as TypedDocumentString<Document_CommentsQuery, Document_CommentsQueryVariables>;
+export const Document_SubscribersDocument = new TypedDocumentString(`
+    query document_subscribers($id: String!, $after: String, $before: String, $filter: UserFilter, $first: Int, $includeArchived: Boolean, $includeDisabled: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  document(id: $id) {
+    subscribers(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      includeDisabled: $includeDisabled
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...UserConnection
+    }
+  }
+}
+    fragment User on User {
+  __typename
+  description
+  avatarUrl
+  createdIssueCount
+  avatarBackgroundColor
+  statusUntilAt
+  statusEmoji
+  initials
+  updatedAt
+  lastSeen
+  timezone
+  disableReason
+  statusLabel
+  archivedAt
+  createdAt
+  id
+  gitHubUserId
+  displayName
+  email
+  name
+  title
+  url
+  active
+  isAssignable
+  guest
+  admin
+  owner
+  app
+  isMentionable
+  isMe
+  supportsAgentSessions
+  canAccessAnyPublicTeam
+  calendarHash
+  inviteHash
+}
+fragment PageInfo on PageInfo {
+  __typename
+  startCursor
+  endCursor
+  hasPreviousPage
+  hasNextPage
+}
+fragment UserConnection on UserConnection {
+  __typename
+  nodes {
+    ...User
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}`) as unknown as TypedDocumentString<Document_SubscribersQuery, Document_SubscribersQueryVariables>;
 export const DocumentContentHistoryDocument = new TypedDocumentString(`
     query documentContentHistory($id: String!) {
   documentContentHistory(id: $id) {
@@ -120116,6 +121043,9 @@ fragment Initiative on Initiative {
   frequencyResolution
   prioritySortOrder
   sortOrder
+  leadTeam {
+    id
+  }
   archivedAt
   createdAt
   healthUpdatedAt
@@ -120128,6 +121058,7 @@ fragment Initiative on Initiative {
   owner {
     id
   }
+  visibility
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -120848,6 +121779,9 @@ fragment Initiative on Initiative {
   frequencyResolution
   prioritySortOrder
   sortOrder
+  leadTeam {
+    id
+  }
   archivedAt
   createdAt
   healthUpdatedAt
@@ -120860,6 +121794,7 @@ fragment Initiative on Initiative {
   owner {
     id
   }
+  visibility
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -121074,6 +122009,9 @@ fragment Initiative on Initiative {
   frequencyResolution
   prioritySortOrder
   sortOrder
+  leadTeam {
+    id
+  }
   archivedAt
   createdAt
   healthUpdatedAt
@@ -121086,6 +122024,7 @@ fragment Initiative on Initiative {
   owner {
     id
   }
+  visibility
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -121768,6 +122707,9 @@ fragment Initiative on Initiative {
   frequencyResolution
   prioritySortOrder
   sortOrder
+  leadTeam {
+    id
+  }
   archivedAt
   createdAt
   healthUpdatedAt
@@ -121780,6 +122722,7 @@ fragment Initiative on Initiative {
   owner {
     id
   }
+  visibility
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -127650,6 +128593,7 @@ fragment UsageAlert on UsageAlert {
   updatedAt
   archivedAt
   createdAt
+  resolvedAt
   id
   metadata
 }
@@ -127706,6 +128650,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
     id
   }
   slugId
+  restrictEditing
   enabled
   applyToSubTeams
   runOnce
@@ -128402,6 +129347,7 @@ fragment UsageAlert on UsageAlert {
   updatedAt
   archivedAt
   createdAt
+  resolvedAt
   id
   metadata
 }
@@ -128458,6 +129404,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
     id
   }
   slugId
+  restrictEditing
   enabled
   applyToSubTeams
   runOnce
@@ -128862,6 +129809,7 @@ export const Organization_TeamsDocument = new TypedDocumentString(`
   requirePriorityToLeaveTriage
   autoCloseChildIssues
   autoCloseParentIssues
+  initiativesEnabled
   scimManaged
   private
   inheritIssueEstimation
@@ -129952,6 +130900,9 @@ fragment Initiative on Initiative {
   frequencyResolution
   prioritySortOrder
   sortOrder
+  leadTeam {
+    id
+  }
   archivedAt
   createdAt
   healthUpdatedAt
@@ -129964,6 +130915,7 @@ fragment Initiative on Initiative {
   owner {
     id
   }
+  visibility
 }
 fragment AiPromptRules on AiPromptRules {
   __typename
@@ -130879,6 +131831,7 @@ export const Project_TeamsDocument = new TypedDocumentString(`
   requirePriorityToLeaveTriage
   autoCloseChildIssues
   autoCloseParentIssues
+  initiativesEnabled
   scimManaged
   private
   inheritIssueEstimation
@@ -133738,6 +134691,7 @@ export const ReleasePipeline_TeamsDocument = new TypedDocumentString(`
   requirePriorityToLeaveTriage
   autoCloseChildIssues
   autoCloseParentIssues
+  initiativesEnabled
   scimManaged
   private
   inheritIssueEstimation
@@ -135439,6 +136393,7 @@ export const TeamDocument = new TypedDocumentString(`
   requirePriorityToLeaveTriage
   autoCloseChildIssues
   autoCloseParentIssues
+  initiativesEnabled
   scimManaged
   private
   inheritIssueEstimation
@@ -136594,6 +137549,7 @@ export const TeamsDocument = new TypedDocumentString(`
   requirePriorityToLeaveTriage
   autoCloseChildIssues
   autoCloseParentIssues
+  initiativesEnabled
   scimManaged
   private
   inheritIssueEstimation
@@ -137936,6 +138892,7 @@ export const User_TeamsDocument = new TypedDocumentString(`
   requirePriorityToLeaveTriage
   autoCloseChildIssues
   autoCloseParentIssues
+  initiativesEnabled
   scimManaged
   private
   inheritIssueEstimation
@@ -140074,6 +141031,7 @@ export const Viewer_TeamsDocument = new TypedDocumentString(`
   requirePriorityToLeaveTriage
   autoCloseChildIssues
   autoCloseParentIssues
+  initiativesEnabled
   scimManaged
   private
   inheritIssueEstimation
@@ -142450,7 +143408,9 @@ fragment SlackChannelNameMapping on SlackChannelNameMapping {
   autoCreateOnBotMention
   postCancellationUpdates
   postCompletionUpdates
+  postAssignmentUpdates
   postAcceptedFromTriageUpdates
+  postSlaUpdates
   botAdded
   isPrivate
   isShared
@@ -145102,6 +146062,7 @@ fragment UsageAlert on UsageAlert {
   updatedAt
   archivedAt
   createdAt
+  resolvedAt
   id
   metadata
 }
@@ -145158,6 +146119,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
     id
   }
   slugId
+  restrictEditing
   enabled
   applyToSubTeams
   runOnce
@@ -145737,6 +146699,7 @@ fragment UsageAlert on UsageAlert {
   updatedAt
   archivedAt
   createdAt
+  resolvedAt
   id
   metadata
 }
@@ -145793,6 +146756,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
     id
   }
   slugId
+  restrictEditing
   enabled
   applyToSubTeams
   runOnce
@@ -146398,6 +147362,7 @@ fragment UsageAlert on UsageAlert {
   updatedAt
   archivedAt
   createdAt
+  resolvedAt
   id
   metadata
 }
@@ -146454,6 +147419,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
     id
   }
   slugId
+  restrictEditing
   enabled
   applyToSubTeams
   runOnce
@@ -147041,6 +148007,7 @@ fragment UsageAlert on UsageAlert {
   updatedAt
   archivedAt
   createdAt
+  resolvedAt
   id
   metadata
 }
@@ -147097,6 +148064,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
     id
   }
   slugId
+  restrictEditing
   enabled
   applyToSubTeams
   runOnce
@@ -147684,6 +148652,7 @@ fragment UsageAlert on UsageAlert {
   updatedAt
   archivedAt
   createdAt
+  resolvedAt
   id
   metadata
 }
@@ -147740,6 +148709,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
     id
   }
   slugId
+  restrictEditing
   enabled
   applyToSubTeams
   runOnce
@@ -148458,6 +149428,7 @@ fragment UsageAlert on UsageAlert {
   updatedAt
   archivedAt
   createdAt
+  resolvedAt
   id
   metadata
 }
@@ -148514,6 +149485,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
     id
   }
   slugId
+  restrictEditing
   enabled
   applyToSubTeams
   runOnce
@@ -149093,6 +150065,7 @@ fragment UsageAlert on UsageAlert {
   updatedAt
   archivedAt
   createdAt
+  resolvedAt
   id
   metadata
 }
@@ -149149,6 +150122,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
     id
   }
   slugId
+  restrictEditing
   enabled
   applyToSubTeams
   runOnce
@@ -149736,6 +150710,7 @@ fragment UsageAlert on UsageAlert {
   updatedAt
   archivedAt
   createdAt
+  resolvedAt
   id
   metadata
 }
@@ -149792,6 +150767,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
     id
   }
   slugId
+  restrictEditing
   enabled
   applyToSubTeams
   runOnce
@@ -151492,9 +152468,12 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   automationShowDescendants
   showSubTeamProjects
   showSupervisedIssues
+  showTeamInitiatives
   fieldSla
   fieldSentryIssues
   scheduledPipelineReleaseFieldCompletion
+  documentFieldDateCreated
+  documentFieldCreator
   customViewFieldDateCreated
   customViewFieldOwner
   customViewFieldDateUpdated
@@ -151539,6 +152518,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldEstimate
   customerPageNeedsFieldIssueIdentifier
   fieldId
+  automationRunHistoryShowIssueIdentifier
   fieldDateMyActivity
   customerPageNeedsFieldIssuePriority
   fieldPriority
@@ -151556,6 +152536,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  documentFieldOwner
+  documentFieldParent
   projectFieldActivity
   projectFieldDateCompleted
   projectFieldDateCreated
@@ -151611,6 +152593,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   reviewFieldAvatar
   reviewFieldIdentifier
   reviewFieldRepository
+  automationRunHistoryShowDuration
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -151622,6 +152605,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelineFieldTeams
   fieldTimeInCurrentStatus
   releasePipelineFieldType
+  documentFieldDateUpdated
   continuousPipelineReleaseFieldVersion
   scheduledPipelineReleaseFieldVersion
   showTriageIssues
@@ -151783,9 +152767,12 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   automationShowDescendants
   showSubTeamProjects
   showSupervisedIssues
+  showTeamInitiatives
   fieldSla
   fieldSentryIssues
   scheduledPipelineReleaseFieldCompletion
+  documentFieldDateCreated
+  documentFieldCreator
   customViewFieldDateCreated
   customViewFieldOwner
   customViewFieldDateUpdated
@@ -151830,6 +152817,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldEstimate
   customerPageNeedsFieldIssueIdentifier
   fieldId
+  automationRunHistoryShowIssueIdentifier
   fieldDateMyActivity
   customerPageNeedsFieldIssuePriority
   fieldPriority
@@ -151847,6 +152835,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  documentFieldOwner
+  documentFieldParent
   projectFieldActivity
   projectFieldDateCompleted
   projectFieldDateCreated
@@ -151902,6 +152892,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   reviewFieldAvatar
   reviewFieldIdentifier
   reviewFieldRepository
+  automationRunHistoryShowDuration
   teamFieldDateCreated
   teamFieldCycle
   teamFieldIdentifier
@@ -151913,6 +152904,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   releasePipelineFieldTeams
   fieldTimeInCurrentStatus
   releasePipelineFieldType
+  documentFieldDateUpdated
   continuousPipelineReleaseFieldVersion
   scheduledPipelineReleaseFieldVersion
   showTriageIssues
