@@ -504,6 +504,8 @@ export type AgentSession = Node & {
   id: Scalars["ID"];
   /** The issue this agent session is associated with. */
   issue?: Maybe<Issue>;
+  /** [Internal] How Adaptive selected the model route used by this coding session. */
+  modelSelection?: Maybe<Scalars["JSON"]>;
   /** A dynamically updated plan describing the agent's execution strategy, including steps to be taken and their current status. Updated as the agent progresses through its work. Null if no plan has been set. */
   plan?: Maybe<Scalars["JSON"]>;
   /** The pull request this agent session is anchored to, when started from a pull request. */
@@ -1011,6 +1013,8 @@ export type AiConversationAckPart = AiConversationBasePart & {
   kind: AiConversationAckKind;
   /** The metadata of the part. */
   metadata: AiConversationPartMetadata;
+  /** [Internal] A one-line, third-person summary of the action the agent completed. Null when the agent acknowledged without describing an action. */
+  summary?: Maybe<Scalars["String"]>;
   /** The type of the part. */
   type: AiConversationPartType;
 };
@@ -1110,6 +1114,7 @@ export type AiConversationCreateEntityToolCallArgs = {
 
 export type AiConversationCreateEntityToolCallResult = {
   __typename?: "AiConversationCreateEntityToolCallResult";
+  createdEntities?: Maybe<Array<AiConversationSearchEntitiesToolCallResultEntities>>;
   startedAgentSessions?: Maybe<Array<AiConversationSearchEntitiesToolCallResultEntities>>;
 };
 
@@ -1318,6 +1323,7 @@ export type AiConversationEntityListWidgetArgsEntities = {
 
 /** [Internal] The entity type */
 export enum AiConversationEntityListWidgetArgsEntitiesType {
+  AgentSession = "AgentSession",
   AiPrompt = "AiPrompt",
   AiPromptRules = "AiPromptRules",
   CustomView = "CustomView",
@@ -1702,6 +1708,29 @@ export enum AiConversationPartType {
   WidgetPlaceholder = "widgetPlaceholder",
 }
 
+export type AiConversationPostChatMessageToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationPostChatMessageToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationPostChatMessageToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationPostChatMessageToolCallArgs = {
+  __typename?: "AiConversationPostChatMessageToolCallArgs";
+  platform: AiConversationPostChatMessageToolCallArgsPlatform;
+};
+
+export enum AiConversationPostChatMessageToolCallArgsPlatform {
+  MicrosoftTeams = "microsoftTeams",
+  Slack = "slack",
+}
+
 export type AiConversationPromptCodingSessionToolCall = AiConversationBaseToolCall & {
   __typename?: "AiConversationPromptCodingSessionToolCall";
   /** The arguments to the tool call. */
@@ -1865,6 +1894,24 @@ export type AiConversationReadSandboxFileToolCallArgs = {
   path: Scalars["String"];
 };
 
+export type AiConversationReadSettingToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationReadSettingToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationReadSettingToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationReadSettingToolCallArgs = {
+  __typename?: "AiConversationReadSettingToolCallArgs";
+  id: Scalars["String"];
+};
+
 /** A reasoning part in an AI conversation. */
 export type AiConversationReasoningPart = AiConversationBasePart & {
   __typename?: "AiConversationReasoningPart";
@@ -2026,6 +2073,25 @@ export type AiConversationSearchEntitiesToolCallResultEntities = {
   type: Scalars["String"];
 };
 
+export type AiConversationSearchSettingsToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationSearchSettingsToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationSearchSettingsToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationSearchSettingsToolCallArgs = {
+  __typename?: "AiConversationSearchSettingsToolCallArgs";
+  parentId?: Maybe<Scalars["String"]>;
+  query?: Maybe<Scalars["String"]>;
+};
+
 export type AiConversationSetSpendLimitToolCall = AiConversationBaseToolCall & {
   __typename?: "AiConversationSetSpendLimitToolCall";
   /** The arguments to the tool call. */
@@ -2042,6 +2108,34 @@ export type AiConversationSetSpendLimitToolCall = AiConversationBaseToolCall & {
 export type AiConversationSetSpendLimitToolCallArgs = {
   __typename?: "AiConversationSetSpendLimitToolCallArgs";
   summary?: Maybe<Scalars["String"]>;
+};
+
+export type AiConversationSettingWidget = AiConversationBaseWidget & {
+  __typename?: "AiConversationSettingWidget";
+  /** The arguments to the widget. */
+  args?: Maybe<AiConversationSettingWidgetArgs>;
+  /** Display information for the widget, including ProseMirror and Markdown representations. */
+  displayInfo?: Maybe<AiConversationWidgetDisplayInfo>;
+  /** The name of the widget. */
+  name: AiConversationWidgetName;
+  /** The arguments of the widget. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationSettingWidgetArgs = {
+  __typename?: "AiConversationSettingWidgetArgs";
+  /** The stable semantic setting ID returned by SearchSettings */
+  id: Scalars["String"];
+  /** The resolved settings target returned by ReadSetting */
+  target?: Maybe<AiConversationSettingWidgetArgsTarget>;
+};
+
+export type AiConversationSettingWidgetArgsTarget = {
+  __typename?: "AiConversationSettingWidgetArgsTarget";
+  /** The settings target UUID, when the scope does not imply it */
+  id?: Maybe<Scalars["String"]>;
+  /** The settings target entity type */
+  type: Scalars["String"];
 };
 
 export type AiConversationSpawnSubagentToolCall = AiConversationBaseToolCall & {
@@ -2200,12 +2294,14 @@ export enum AiConversationTool {
   ListCodingSessions = "ListCodingSessions",
   NavigateToPage = "NavigateToPage",
   NotifyUsers = "NotifyUsers",
+  PostChatMessage = "PostChatMessage",
   PromptCodingSession = "PromptCodingSession",
   QueryActivity = "QueryActivity",
   QueryUpdates = "QueryUpdates",
   QueryView = "QueryView",
   ReadFile = "ReadFile",
   ReadSandboxFile = "ReadSandboxFile",
+  ReadSetting = "ReadSetting",
   RemoveSpendLimit = "RemoveSpendLimit",
   Research = "Research",
   RestoreEntity = "RestoreEntity",
@@ -2213,6 +2309,7 @@ export enum AiConversationTool {
   RetryPullRequestCheck = "RetryPullRequestCheck",
   SearchDocumentation = "SearchDocumentation",
   SearchEntities = "SearchEntities",
+  SearchSettings = "SearchSettings",
   SetSpendLimit = "SetSpendLimit",
   SpawnSubagent = "SpawnSubagent",
   StartCodingSession = "StartCodingSession",
@@ -2243,12 +2340,14 @@ export type AiConversationToolCall =
   | AiConversationListCodingSessionsToolCall
   | AiConversationNavigateToPageToolCall
   | AiConversationNotifyUsersToolCall
+  | AiConversationPostChatMessageToolCall
   | AiConversationPromptCodingSessionToolCall
   | AiConversationQueryActivityToolCall
   | AiConversationQueryUpdatesToolCall
   | AiConversationQueryViewToolCall
   | AiConversationReadFileToolCall
   | AiConversationReadSandboxFileToolCall
+  | AiConversationReadSettingToolCall
   | AiConversationRemoveSpendLimitToolCall
   | AiConversationResearchToolCall
   | AiConversationRestoreEntityToolCall
@@ -2256,6 +2355,7 @@ export type AiConversationToolCall =
   | AiConversationRetryPullRequestCheckToolCall
   | AiConversationSearchDocumentationToolCall
   | AiConversationSearchEntitiesToolCall
+  | AiConversationSearchSettingsToolCall
   | AiConversationSetSpendLimitToolCall
   | AiConversationSpawnSubagentToolCall
   | AiConversationStartCodingSessionToolCall
@@ -2388,7 +2488,10 @@ export type AiConversationWebSearchToolCallArgs = {
 };
 
 /** The widget. */
-export type AiConversationWidget = AiConversationEntityCardWidget | AiConversationEntityListWidget;
+export type AiConversationWidget =
+  | AiConversationEntityCardWidget
+  | AiConversationEntityListWidget
+  | AiConversationSettingWidget;
 
 export type AiConversationWidgetDisplayInfo = {
   __typename?: "AiConversationWidgetDisplayInfo";
@@ -2402,6 +2505,7 @@ export type AiConversationWidgetDisplayInfo = {
 export enum AiConversationWidgetName {
   EntityCard = "EntityCard",
   EntityList = "EntityList",
+  Setting = "Setting",
 }
 
 /** A widget part in an AI conversation. */
@@ -4135,7 +4239,7 @@ export type CustomViewUpdatedAtSort = {
 /** A customer organization tracked in Linear's customer management system. Customers represent external companies or organizations whose product requests and feedback are captured as customer needs, which can be linked to issues and projects. Customers can be associated with domains, external system IDs, Slack channels, and managed by integrations such as Intercom or Salesforce. */
 export type Customer = Node & {
   __typename?: "Customer";
-  /** The approximate count of customer needs (requests) associated with this customer. This is a denormalized counter and may not reflect the exact count at all times. */
+  /** The approximate number of distinct requests associated with this customer, deduplicated per issue or project. This is a denormalized counter and may not reflect the exact count at all times. */
   approximateNeedCount: Scalars["Float"];
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
@@ -4478,6 +4582,8 @@ export type CustomerNeedNotification = Entity &
     actorAvatarColor: Scalars["String"];
     /** [Internal] Notification avatar URL. */
     actorAvatarUrl?: Maybe<Scalars["String"]>;
+    /** [Internal] Whether the notification's user actor is deactivated in the workspace. */
+    actorInactive: Scalars["Boolean"];
     /** [Internal] Notification actor initials if avatar is not available. */
     actorInitials?: Maybe<Scalars["String"]>;
     /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -4639,6 +4745,8 @@ export type CustomerNotification = Entity &
     actorAvatarColor: Scalars["String"];
     /** [Internal] Notification avatar URL. */
     actorAvatarUrl?: Maybe<Scalars["String"]>;
+    /** [Internal] Whether the notification's user actor is deactivated in the workspace. */
+    actorInactive: Scalars["Boolean"];
     /** [Internal] Notification actor initials if avatar is not available. */
     actorInitials?: Maybe<Scalars["String"]>;
     /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -5113,7 +5221,7 @@ export enum CustomerVisibilityMode {
 /** Payload for a customer webhook. */
 export type CustomerWebhookPayload = {
   __typename?: "CustomerWebhookPayload";
-  /** The approximate number of needs of the customer. */
+  /** The approximate number of distinct requests associated with this customer, deduplicated per issue or project. This is a denormalized counter and may not reflect the exact count at all times. */
   approximateNeedCount: Scalars["Float"];
   /** The time at which the entity was archived. */
   archivedAt?: Maybe<Scalars["String"]>;
@@ -5893,6 +6001,8 @@ export type DocumentContent = Node & {
   initiative?: Maybe<Initiative>;
   /** The issue that the content is associated with. Null if the content belongs to a different parent entity type. */
   issue?: Maybe<Issue>;
+  /** [Internal] The meeting that the content is associated with. Null if the content belongs to a different parent entity type. */
+  meeting?: Maybe<Meeting>;
   /** The project that the content is associated with. Null if the content belongs to a different parent entity type. */
   project?: Maybe<Project>;
   /** The project milestone that the content is associated with. Null if the content belongs to a different parent entity type. */
@@ -5971,7 +6081,7 @@ export type DocumentContentHistoryCheckpointType = {
   /** Whether this checkpoint belongs to draft-only or live document content. */
   mode: DocumentContentAgentCheckpointMode;
   /** [Internal] Source metadata associated with the AI document checkpoint. */
-  sourceMetadata?: Maybe<Scalars["JSON"]>;
+  sourceMetadata?: Maybe<Scalars["JSONObject"]>;
 };
 
 export type DocumentContentHistoryPayload = {
@@ -5998,7 +6108,7 @@ export type DocumentContentHistoryType = {
   /** IDs of users whose edits are included in this history entry. */
   actorIds?: Maybe<Array<Scalars["String"]>>;
   /** [Internal] The document content as a ProseMirror document at the time this history entry was captured. */
-  contentData?: Maybe<Scalars["JSON"]>;
+  contentData?: Maybe<Scalars["JSONObject"]>;
   /** The timestamp of the document content state when this snapshot was captured. This can differ from createdAt because the content is captured from its state at the previously known updatedAt timestamp in the case of an update. On document creation, these timestamps can be identical. */
   contentDataSnapshotAt: Scalars["DateTime"];
   /** The date when this document content history entry record was created. */
@@ -6008,7 +6118,7 @@ export type DocumentContentHistoryType = {
   /** The unique identifier of the document content history entry. */
   id: Scalars["String"];
   /** Metadata associated with the history entry, including content diffs and AI-generated change summaries. */
-  metadata?: Maybe<Scalars["JSON"]>;
+  metadata?: Maybe<Scalars["JSONObject"]>;
 };
 
 /** A pending revision of document content. Revisions are seeded from the live document state and stored as base64-encoded Yjs state updates, allowing automation edits to accumulate without affecting the published document until the changes are explicitly applied. */
@@ -6149,6 +6259,8 @@ export type DocumentNotification = Entity &
     actorAvatarColor: Scalars["String"];
     /** [Internal] Notification avatar URL. */
     actorAvatarUrl?: Maybe<Scalars["String"]>;
+    /** [Internal] Whether the notification's user actor is deactivated in the workspace. */
+    actorInactive: Scalars["Boolean"];
     /** [Internal] Notification actor initials if avatar is not available. */
     actorInitials?: Maybe<Scalars["String"]>;
     /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -6461,6 +6573,8 @@ export type Draft = Node & {
   customerNeed?: Maybe<CustomerNeed>;
   /** Additional properties for the draft, such as generation metadata for AI-generated drafts, health status for project updates, or post titles. */
   data?: Maybe<Scalars["JSONObject"]>;
+  /** Metadata about the AI generation of the draft. Null when the draft was not auto-generated. This is a computed field derived from 'data', so clients can read the generation metadata without parsing that payload. */
+  generationMetadata?: Maybe<DraftGenerationMetadata>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /** The initiative for which this is a draft comment or initiative update. Null if the draft belongs to a different parent entity type. */
@@ -6469,7 +6583,7 @@ export type Draft = Node & {
   initiativeUpdate?: Maybe<InitiativeUpdate>;
   /**
    * Whether the draft was autogenerated for the user.
-   * @deprecated Use 'data.generationMetadata' instead
+   * @deprecated Use 'generationMetadata' instead
    */
   isAutogenerated: Scalars["Boolean"];
   /** The issue for which this is a draft comment. Null if the draft belongs to a different parent entity type. */
@@ -6486,6 +6600,8 @@ export type Draft = Node & {
   pullRequest?: Maybe<PullRequest>;
   /** The team for which this is a draft post. Null if the draft belongs to a different parent entity type. */
   team?: Maybe<Team>;
+  /** The health status carried by a project update or initiative update draft. Possible values are onTrack, atRisk, or offTrack. Null for other draft types. This is a computed field derived from 'data', so clients can read the health without parsing that payload. */
+  updateHealth?: Maybe<DraftUpdateHealthType>;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -6510,6 +6626,24 @@ export type DraftEdge = {
   cursor: Scalars["String"];
   node: Draft;
 };
+
+/** Metadata about AI-generated draft content. */
+export type DraftGenerationMetadata = {
+  __typename?: "DraftGenerationMetadata";
+  /** The time at which the draft content was generated. */
+  generatedAt: Scalars["DateTime"];
+  /** The generated text content as a ProseMirror document. */
+  generatedContent: Scalars["JSONObject"];
+  /** The number of times the draft content has been generated. */
+  generationCount: Scalars["Int"];
+};
+
+/** The health status carried by a project update or initiative update draft. */
+export enum DraftUpdateHealthType {
+  AtRisk = "atRisk",
+  OffTrack = "offTrack",
+  OnTrack = "onTrack",
+}
 
 /** Issue due date sorting options. */
 export type DueDateSort = {
@@ -7425,19 +7559,6 @@ export enum FeedSummarySchedule {
   Weekly = "weekly",
 }
 
-/** The result of a data fetch query using natural language. */
-export type FetchDataPayload = {
-  __typename?: "FetchDataPayload";
-  /** The fetched data as a JSON object. The shape depends on the natural language query and the resolved GraphQL query. Null if the query returned no results. */
-  data?: Maybe<Scalars["JSONObject"]>;
-  /** The filter variables that were generated and applied to the GraphQL query. Null if no filters were needed. */
-  filters?: Maybe<Scalars["JSONObject"]>;
-  /** The GraphQL query that was generated from the natural language input and executed to produce the data. Useful for debugging or reusing the query directly. */
-  query?: Maybe<Scalars["String"]>;
-  /** Whether the fetch operation was successful. */
-  success: Scalars["Boolean"];
-};
-
 export type FileUploadDeletePayload = {
   __typename?: "FileUploadDeletePayload";
   /** Whether the operation was successful. */
@@ -7966,6 +8087,13 @@ export type ImageUploadFromUrlPayload = {
   /** The URL containing the image. */
   url?: Maybe<Scalars["String"]>;
 };
+
+/** Which Inbox notifications contribute to Inbox badges. */
+export enum InboxBadgeScope {
+  All = "all",
+  None = "none",
+  Priority = "priority",
+}
 
 export type InheritanceEntityMapping = {
   /** Mapping of the IssueLabel ID to the new IssueLabel name. */
@@ -8687,6 +8815,8 @@ export type InitiativeNotification = Entity &
     actorAvatarColor: Scalars["String"];
     /** [Internal] Notification avatar URL. */
     actorAvatarUrl?: Maybe<Scalars["String"]>;
+    /** [Internal] Whether the notification's user actor is deactivated in the workspace. */
+    actorInactive: Scalars["Boolean"];
     /** [Internal] Notification actor initials if avatar is not available. */
     actorInitials?: Maybe<Scalars["String"]>;
     /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -10619,6 +10749,8 @@ export type IssueDraft = Node & {
   projectId?: Maybe<Scalars["String"]>;
   /** Identifier of the project milestone associated with the draft. Can be used to query the project milestone directly. Null if no milestone is assigned. */
   projectMilestoneId?: Maybe<Scalars["String"]>;
+  /** Serialized issue relations to recreate when the draft is published. */
+  relations: Scalars["JSONObject"];
   /** Identifiers of the releases associated with the draft. These releases will be linked to the issue when the draft is published. */
   releaseIds: Array<Scalars["String"]>;
   /** Serialized array of JSONs representing the recurring issue's schedule. */
@@ -11472,6 +11604,8 @@ export type IssueNotification = Entity &
     actorAvatarColor: Scalars["String"];
     /** [Internal] Notification avatar URL. */
     actorAvatarUrl?: Maybe<Scalars["String"]>;
+    /** [Internal] Whether the notification's user actor is deactivated in the workspace. */
+    actorInactive: Scalars["Boolean"];
     /** [Internal] Notification actor initials if avatar is not available. */
     actorInitials?: Maybe<Scalars["String"]>;
     /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -12934,6 +13068,48 @@ export type McpServerCustomHeaderInput = {
   value: Scalars["String"];
 };
 
+/** [Internal] A meeting attached to one project or initiative. Its transcript is stored in related document content. */
+export type Meeting = Node & {
+  __typename?: "Meeting";
+  /** [Internal] The transcript analysis state: `pending` while analysis runs and `completed` after it finishes. Null before analysis starts. */
+  analysisStatus?: Maybe<MeetingAnalysisStatus>;
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** [Internal] The meeting attendees. Each entry has a name and may include an active workspace user identifier. */
+  attendees?: Maybe<Array<Scalars["JSONObject"]>>;
+  /** [Internal] The source that owns the attendee list. Null when attendees have not been set. */
+  attendeesSource?: Maybe<Scalars["String"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** [Internal] The user who created the meeting. Null if the user was deleted. */
+  creator?: Maybe<User>;
+  /** [Internal] The date when the meeting occurred. Null when clients should use the creation date. */
+  date?: Maybe<Scalars["TimelessDate"]>;
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** [Internal] The initiative that contains the meeting. Null when the meeting belongs to a project. */
+  initiative?: Maybe<Initiative>;
+  /** [Internal] The project that contains the meeting. Null when the meeting belongs to an initiative. */
+  project?: Maybe<Project>;
+  /** [Internal] The meeting's unique URL slug. */
+  slugId: Scalars["String"];
+  /** [Internal] The meeting summary in markdown format. Null before a summary exists. */
+  summary?: Maybe<Scalars["String"]>;
+  /** [Internal] The meeting summary as a Prosemirror document. Null before a summary exists. */
+  summaryData?: Maybe<Scalars["String"]>;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+};
+
+/** [Internal] The analysis state of a meeting transcript. */
+export enum MeetingAnalysisStatus {
+  Completed = "completed",
+  Pending = "pending",
+}
+
 export type MicrosoftTeamsChannel = {
   __typename?: "MicrosoftTeamsChannel";
   /** The display name of the channel. */
@@ -13370,7 +13546,7 @@ export type Mutation = {
   issueAddLabel: IssuePayload;
   /** Archives an issue. */
   issueArchive: IssueArchivePayload;
-  /** Creates a list of issues in one transaction. */
+  /** Creates a list of issues atomically. */
   issueBatchCreate: IssueBatchPayload;
   /** Updates multiple issues at once. */
   issueBatchUpdate: IssueBatchPayload;
@@ -15561,6 +15737,8 @@ export type Notification = {
   actorAvatarColor: Scalars["String"];
   /** [Internal] Notification avatar URL. */
   actorAvatarUrl?: Maybe<Scalars["String"]>;
+  /** [Internal] Whether the notification's user actor is deactivated in the workspace. */
+  actorInactive: Scalars["Boolean"];
   /** [Internal] Notification actor initials if avatar is not available. */
   actorInitials?: Maybe<Scalars["String"]>;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -16008,6 +16186,7 @@ export enum NotificationSubscriptionType {
   PullRequest = "pullRequest",
   Team = "team",
   User = "user",
+  WorkflowDefinition = "workflowDefinition",
 }
 
 /** Comparator for notification subscription type. */
@@ -17063,6 +17242,8 @@ export type OauthClientApprovalNotification = Entity &
     actorAvatarColor: Scalars["String"];
     /** [Internal] Notification avatar URL. */
     actorAvatarUrl?: Maybe<Scalars["String"]>;
+    /** [Internal] Whether the notification's user actor is deactivated in the workspace. */
+    actorInactive: Scalars["Boolean"];
     /** [Internal] Notification actor initials if avatar is not available. */
     actorInitials?: Maybe<Scalars["String"]>;
     /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -18310,6 +18491,8 @@ export type PostNotification = Entity &
     actorAvatarColor: Scalars["String"];
     /** [Internal] Notification avatar URL. */
     actorAvatarUrl?: Maybe<Scalars["String"]>;
+    /** [Internal] Whether the notification's user actor is deactivated in the workspace. */
+    actorInactive: Scalars["Boolean"];
     /** [Internal] Notification actor initials if avatar is not available. */
     actorInitials?: Maybe<Scalars["String"]>;
     /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -18435,6 +18618,8 @@ export type ProductAnnouncementNotification = Entity &
     actorAvatarColor: Scalars["String"];
     /** [Internal] Notification avatar URL. */
     actorAvatarUrl?: Maybe<Scalars["String"]>;
+    /** [Internal] Whether the notification's user actor is deactivated in the workspace. */
+    actorInactive: Scalars["Boolean"];
     /** [Internal] Notification actor initials if avatar is not available. */
     actorInitials?: Maybe<Scalars["String"]>;
     /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -18557,7 +18742,7 @@ export type Project = Node & {
   icon?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
-  /** [Internal] The human-readable identifier of the project. Returns the custom identifier override when set, otherwise the workspace default `<prefix>-<number>`. Null for legacy projects that have not been backfilled. */
+  /** [Internal] The human-readable identifier of the project. Returns the custom identifier override when set, otherwise the default `P-<leadTeamKey>-<number>`. Null for projects without a lead team and for legacy projects that have not been backfilled. */
   identifier?: Maybe<Scalars["String"]>;
   /** The number of in-progress estimation points at the end of each week since project creation. Each entry represents one week. */
   inProgressScopeHistory: Array<Scalars["Float"]>;
@@ -19713,6 +19898,8 @@ export type ProjectNotification = Entity &
     actorAvatarColor: Scalars["String"];
     /** [Internal] Notification avatar URL. */
     actorAvatarUrl?: Maybe<Scalars["String"]>;
+    /** [Internal] Whether the notification's user actor is deactivated in the workspace. */
+    actorInactive: Scalars["Boolean"];
     /** [Internal] Notification actor initials if avatar is not available. */
     actorInitials?: Maybe<Scalars["String"]>;
     /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -20015,7 +20202,7 @@ export type ProjectSearchResult = Node & {
   icon?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
-  /** [Internal] The human-readable identifier of the project. Returns the custom identifier override when set, otherwise the workspace default `<prefix>-<number>`. Null for legacy projects that have not been backfilled. */
+  /** [Internal] The human-readable identifier of the project. Returns the custom identifier override when set, otherwise the default `P-<leadTeamKey>-<number>`. Null for projects without a lead team and for legacy projects that have not been backfilled. */
   identifier?: Maybe<Scalars["String"]>;
   /** The number of in-progress estimation points at the end of each week since project creation. Each entry represents one week. */
   inProgressScopeHistory: Array<Scalars["Float"]>;
@@ -20451,6 +20638,8 @@ export type ProjectStatusFilter = {
   position?: InputMaybe<NumberComparator>;
   /** Filters that the project status projects must satisfy. */
   projects?: InputMaybe<ProjectCollectionFilter>;
+  /** Filters that the project status's team must satisfy. Use `{ null: true }` to filter workspace-level statuses. */
+  team?: InputMaybe<NullableTeamFilter>;
   /** Comparator for the project status type. */
   type?: InputMaybe<StringComparator>;
   /** Comparator for the updated at date. */
@@ -20977,6 +21166,10 @@ export type PullRequest = Node & {
   mergeStatus: Scalars["String"];
   /** The time at which the pull request was merged. Null if the pull request has not been merged. */
   mergedAt?: Maybe<Scalars["DateTime"]>;
+  /** [Internal] The external user who merged the pull request, when the person who merged it is not mapped to a Linear account. Null if the pull request has not been merged or the merger is a Linear user. */
+  mergedByExternalUser?: Maybe<ExternalUser>;
+  /** [Internal] The Linear user who merged the pull request. This is the person who merged it, which the hosting provider reports separately from the merge commit's author. Null if the pull request has not been merged, was merged by an external user not mapped to a Linear account, or if that account has been deleted. */
+  mergedByUser?: Maybe<User>;
   /** [Internal] The host-qualified external ID of the native stack that contains this pull request. Null if the pull request is not in a native stack or stack data is unavailable. */
   nativeStackId?: Maybe<Scalars["String"]>;
   /** [Internal] The number the hosting provider assigns to the native stack within its repository. Null if the pull request is not in a native stack or stack data is unavailable. */
@@ -21130,6 +21323,8 @@ export type PullRequestNotification = Entity &
     actorAvatarColor: Scalars["String"];
     /** [Internal] Notification avatar URL. */
     actorAvatarUrl?: Maybe<Scalars["String"]>;
+    /** [Internal] Whether the notification's user actor is deactivated in the workspace. */
+    actorInactive: Scalars["Boolean"];
     /** [Internal] Notification actor initials if avatar is not available. */
     actorInitials?: Maybe<Scalars["String"]>;
     /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -21394,8 +21589,6 @@ export type Query = {
   favorite: Favorite;
   /** The authenticated user's favorites. Returns all bookmarked items that appear in the user's sidebar. */
   favorites: FavoriteConnection;
-  /** [Internal] Fetch an arbitrary set of data using natural language query. Be specific about what you want including properties for each entity, sort order, filters, limit and properties. */
-  fetchData: FetchDataPayload;
   /** Returns a single initiative by its identifier or URL slug. */
   initiative: Initiative;
   /** Suggests filters for an initiative view based on a text prompt. */
@@ -21616,6 +21809,10 @@ export type Query = {
   triageResponsibilities: TriageResponsibilityConnection;
   /** A specific triage responsibility. */
   triageResponsibility: TriageResponsibility;
+  /** One usage-based billing alert, by its identifier. */
+  usageAlert: UsageAlert;
+  /** The workspace's usage-based billing alerts, such as a low or exhausted usage credit balance. Alerts for expired promotional credits are archived and excluded unless archived resources are requested. Use resolvedAt to tell an open alert from one whose condition has since cleared. */
+  usageAlerts: UsageAlertConnection;
   /** Fetches a specific user by their ID. */
   user: User;
   /** Lists all active authentication sessions for a user. Can only be called by a workspace admin or owner. */
@@ -21932,10 +22129,6 @@ export type QueryFavoritesArgs = {
   includeArchived?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<PaginationOrderBy>;
-};
-
-export type QueryFetchDataArgs = {
-  query: Scalars["String"];
 };
 
 export type QueryInitiativeArgs = {
@@ -22544,6 +22737,20 @@ export type QueryTriageResponsibilitiesArgs = {
 
 export type QueryTriageResponsibilityArgs = {
   id: Scalars["String"];
+};
+
+export type QueryUsageAlertArgs = {
+  id: Scalars["String"];
+};
+
+export type QueryUsageAlertsArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  filter?: InputMaybe<UsageAlertFilter>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
 };
 
 export type QueryUserArgs = {
@@ -24541,6 +24748,8 @@ export type SlackSettingsInput = {
   enableCodeIntelligence?: InputMaybe<Scalars["Boolean"]>;
   /** Whether Linear Agent should be given Org-wide access within Slack workflows. */
   enableLinearAgentWorkflowAccess?: InputMaybe<Scalars["Boolean"]>;
+  /** Whether Loops may read and send messages through this Slack integration. */
+  enableLoops?: InputMaybe<Scalars["Boolean"]>;
   /** Enterprise id of the connected Slack enterprise */
   enterpriseId?: InputMaybe<Scalars["String"]>;
   /** Enterprise name of the connected Slack enterprise */
@@ -26358,7 +26567,7 @@ export type UsageAlert = Node & {
   createdAt: Scalars["DateTime"];
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
-  /** Type-specific metadata captured when the alert was triggered. */
+  /** Type-specific snapshot captured when the alert was triggered, keyed by the alert type — for example the credit balance and threshold for a lowBalance alert. A resolution entry is added once new usage credits have landed and cleared the alert's condition. */
   metadata: Scalars["JSONObject"];
   /** The time when the usage alert was resolved or archived. Null if the alert is still active. */
   resolvedAt?: Maybe<Scalars["DateTime"]>;
@@ -26369,6 +26578,36 @@ export type UsageAlert = Node & {
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
+};
+
+export type UsageAlertConnection = {
+  __typename?: "UsageAlertConnection";
+  edges: Array<UsageAlertEdge>;
+  nodes: Array<UsageAlert>;
+  pageInfo: PageInfo;
+};
+
+export type UsageAlertEdge = {
+  __typename?: "UsageAlertEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: UsageAlert;
+};
+
+/** Usage alert filtering options. */
+export type UsageAlertFilter = {
+  /** Compound filters, all of which need to be matched by the alert. */
+  and?: InputMaybe<Array<UsageAlertFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: InputMaybe<DateComparator>;
+  /** Comparator for the identifier. */
+  id?: InputMaybe<IdComparator>;
+  /** Compound filters, one of which need to be matched by the alert. */
+  or?: InputMaybe<Array<UsageAlertFilter>>;
+  /** Comparator for the condition the alert was triggered by. */
+  type?: InputMaybe<UsageAlertTypeComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: InputMaybe<DateComparator>;
 };
 
 /** A notification related to a usage alert, sent to workspace billing admins. */
@@ -26382,6 +26621,8 @@ export type UsageAlertNotification = Entity &
     actorAvatarColor: Scalars["String"];
     /** [Internal] Notification avatar URL. */
     actorAvatarUrl?: Maybe<Scalars["String"]>;
+    /** [Internal] Whether the notification's user actor is deactivated in the workspace. */
+    actorInactive: Scalars["Boolean"];
     /** [Internal] Notification actor initials if avatar is not available. */
     actorInitials?: Maybe<Scalars["String"]>;
     /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -26438,6 +26679,28 @@ export type UsageAlertNotification = Entity &
     /** The recipient user of this notification. */
     user: User;
   };
+
+/** The condition a usage alert was triggered by. */
+export enum UsageAlertType {
+  /** Usage credits ran out. */
+  Exhausted = "exhausted",
+  /** A promotional usage credit grant is nearing its expiration. */
+  ExpiringPromoCredit = "expiringPromoCredit",
+  /** Prepaid usage credits crossed below the low-balance threshold. */
+  LowBalance = "lowBalance",
+}
+
+/** Comparator for the condition a usage alert was triggered by. */
+export type UsageAlertTypeComparator = {
+  /** Equals constraint. */
+  eq?: InputMaybe<UsageAlertType>;
+  /** In-array constraint. */
+  in?: InputMaybe<Array<UsageAlertType>>;
+  /** Not-equals constraint. */
+  neq?: InputMaybe<UsageAlertType>;
+  /** Not-in-array constraint. */
+  nin?: InputMaybe<Array<UsageAlertType>>;
+};
 
 /** A user that belongs to a workspace. Users can have different roles (admin, member, guest, or app) that determine their level of access. Users can be members of multiple teams, and can be active or deactivated. Guest users have limited access scoped to specific teams they are invited to. */
 export type User = Node & {
@@ -27059,6 +27322,8 @@ export type UserSettingsUpdateInput = {
   feedLastSeenTime?: InputMaybe<Scalars["DateTime"]>;
   /** [Internal] How often to generate a feed summary. */
   feedSummarySchedule?: InputMaybe<FeedSummarySchedule>;
+  /** [Internal] Which Inbox notifications contribute to Inbox badges. 'all' includes all unread notifications; 'priority' includes only Priority Inbox notifications; 'none' hides the count. */
+  inboxBadgeScope?: InputMaybe<InboxBadgeScope>;
   /** The user's notification category preferences. */
   notificationCategoryPreferences?: InputMaybe<NotificationCategoryPreferencesInput>;
   /** The user's notification channel preferences. */
@@ -28021,6 +28286,8 @@ export type WelcomeMessageNotification = Entity &
     actorAvatarColor: Scalars["String"];
     /** [Internal] Notification avatar URL. */
     actorAvatarUrl?: Maybe<Scalars["String"]>;
+    /** [Internal] Whether the notification's user actor is deactivated in the workspace. */
+    actorInactive: Scalars["Boolean"];
     /** [Internal] Notification actor initials if avatar is not available. */
     actorInitials?: Maybe<Scalars["String"]>;
     /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -28133,6 +28400,8 @@ export type WorkflowDefinition = Node & {
   cycle?: Maybe<Cycle>;
   /** The description of the workflow. */
   description?: Maybe<Scalars["String"]>;
+  /** The edit access setting for this workflow definition. When unset, access is derived from restrictEditing. */
+  editAccess?: Maybe<WorkflowDefinitionEditAccess>;
   /** Whether the workflow is enabled and will execute when its trigger conditions are met. */
   enabled: Scalars["Boolean"];
   /** The name of the group that the workflow belongs to. */
@@ -28155,7 +28424,10 @@ export type WorkflowDefinition = Node & {
   owner?: Maybe<User>;
   /** The contextual project view associated with the workflow. */
   project?: Maybe<Project>;
-  /** Whether editing the workflow is restricted to its owner, team owners, and workspace administrators. */
+  /**
+   * Whether editing the workflow is restricted to its owner, team owners, and workspace administrators.
+   * @deprecated Use editAccess instead.
+   */
   restrictEditing: Scalars["Boolean"];
   /** Whether the workflow should only execute once per entity. When true, the workflow is excluded from matching automations for an entity if it has already been executed for that entity. */
   runOnce: Scalars["Boolean"];
@@ -28186,6 +28458,13 @@ export type WorkflowDefinition = Node & {
   userContextViewType?: Maybe<UserContextViewType>;
 };
 
+export enum WorkflowDefinitionEditAccess {
+  Everyone = "everyone",
+  Owner = "owner",
+  TeamOwners = "teamOwners",
+  WorkspaceAdmins = "workspaceAdmins",
+}
+
 /** Comparator for the workflow definition that created an issue. */
 export type WorkflowDefinitionIdComparator = {
   /** Equals constraint. */
@@ -28211,6 +28490,8 @@ export type WorkflowDefinitionNotification = Entity &
     actorAvatarColor: Scalars["String"];
     /** [Internal] Notification avatar URL. */
     actorAvatarUrl?: Maybe<Scalars["String"]>;
+    /** [Internal] Whether the notification's user actor is deactivated in the workspace. */
+    actorInactive: Scalars["Boolean"];
     /** [Internal] Notification actor initials if avatar is not available. */
     actorInitials?: Maybe<Scalars["String"]>;
     /** [Internal] The AI conversation identifier for the related loop run, if one was created. */
@@ -28429,6 +28710,8 @@ export type WorkflowStateUpdateInput = {
 };
 
 export enum WorkflowTrigger {
+  CycleEnded = "cycleEnded",
+  CycleStarted = "cycleStarted",
   EntityCreated = "entityCreated",
   EntityCreatedOrUpdated = "entityCreatedOrUpdated",
   EntityRemoved = "entityRemoved",
@@ -28437,6 +28720,7 @@ export enum WorkflowTrigger {
 }
 
 export enum WorkflowTriggerType {
+  Cycle = "cycle",
   Document = "document",
   Initiative = "initiative",
   Issue = "issue",
@@ -28686,6 +28970,14 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
             >;
             result?: Maybe<
               { __typename: "AiConversationCreateEntityToolCallResult" } & {
+                createdEntities?: Maybe<
+                  Array<
+                    { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                      AiConversationSearchEntitiesToolCallResultEntities,
+                      "id" | "type"
+                    >
+                  >
+                >;
                 startedAgentSessions?: Maybe<
                   Array<
                     { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
@@ -28931,6 +29223,21 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
               "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
             >;
           })
+      | ({ __typename: "AiConversationPostChatMessageToolCall" } & Pick<
+          AiConversationPostChatMessageToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationPostChatMessageToolCallArgs" } & Pick<
+                AiConversationPostChatMessageToolCallArgs,
+                "platform"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
       | ({ __typename: "AiConversationPromptCodingSessionToolCall" } & Pick<
           AiConversationPromptCodingSessionToolCall,
           "rawArgs" | "name" | "rawResult"
@@ -29070,6 +29377,21 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
               "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
             >;
           })
+      | ({ __typename: "AiConversationReadSettingToolCall" } & Pick<
+          AiConversationReadSettingToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationReadSettingToolCallArgs" } & Pick<
+                AiConversationReadSettingToolCallArgs,
+                "id"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
       | ({ __typename: "AiConversationRemoveSpendLimitToolCall" } & Pick<
           AiConversationRemoveSpendLimitToolCall,
           "rawArgs" | "name" | "rawResult"
@@ -29199,6 +29521,21 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
                   >
                 >;
               }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationSearchSettingsToolCall" } & Pick<
+          AiConversationSearchSettingsToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationSearchSettingsToolCallArgs" } & Pick<
+                AiConversationSearchSettingsToolCallArgs,
+                "parentId" | "query"
+              >
             >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
               AiConversationToolDisplayInfo,
@@ -29447,6 +29784,24 @@ type AiConversationBasePart_AiConversationWidgetPart_Fragment = { __typename: "A
                     { __typename: "AiConversationEntityListWidgetArgsEntities" } & Pick<
                       AiConversationEntityListWidgetArgsEntities,
                       "note" | "id"
+                    >
+                  >;
+                }
+            >;
+          })
+      | ({ __typename: "AiConversationSettingWidget" } & Pick<AiConversationSettingWidget, "rawArgs" | "name"> & {
+            displayInfo?: Maybe<
+              { __typename: "AiConversationWidgetDisplayInfo" } & Pick<
+                AiConversationWidgetDisplayInfo,
+                "body" | "bodyData"
+              >
+            >;
+            args?: Maybe<
+              { __typename: "AiConversationSettingWidgetArgs" } & Pick<AiConversationSettingWidgetArgs, "id"> & {
+                  target?: Maybe<
+                    { __typename: "AiConversationSettingWidgetArgsTarget" } & Pick<
+                      AiConversationSettingWidgetArgsTarget,
+                      "id" | "type"
                     >
                   >;
                 }
@@ -30713,8 +31068,14 @@ export type FacetFragment = { __typename: "Facet" } & Pick<
 
 export type DraftFragment = { __typename: "Draft" } & Pick<
   Draft,
-  "data" | "bodyData" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "isAutogenerated"
+  "data" | "bodyData" | "updateHealth" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "isAutogenerated"
 > & {
+    generationMetadata?: Maybe<
+      { __typename: "DraftGenerationMetadata" } & Pick<
+        DraftGenerationMetadata,
+        "generatedContent" | "generationCount" | "generatedAt"
+      >
+    >;
     customerNeed?: Maybe<{ __typename?: "CustomerNeed" } & Pick<CustomerNeed, "id">>;
     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     initiativeUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
@@ -31252,10 +31613,7 @@ export type NotificationArchivePayloadFragment = { __typename: "NotificationArch
             externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
             user: { __typename?: "User" } & Pick<User, "id">;
             actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-            usageAlert: { __typename: "UsageAlert" } & Pick<
-              UsageAlert,
-              "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
-            >;
+            usageAlert: { __typename?: "UsageAlert" } & Pick<UsageAlert, "id">;
           })
       | ({ __typename: "WelcomeMessageNotification" } & Pick<
           WelcomeMessageNotification,
@@ -31311,6 +31669,7 @@ export type NotificationArchivePayloadFragment = { __typename: "NotificationArch
               | "color"
               | "lastExecutedAt"
               | "description"
+              | "editAccess"
               | "triggerType"
               | "trigger"
               | "conditions"
@@ -31923,10 +32282,7 @@ type ArchivePayload_NotificationArchivePayload_Fragment = { __typename: "Notific
             externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
             user: { __typename?: "User" } & Pick<User, "id">;
             actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-            usageAlert: { __typename: "UsageAlert" } & Pick<
-              UsageAlert,
-              "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
-            >;
+            usageAlert: { __typename?: "UsageAlert" } & Pick<UsageAlert, "id">;
           })
       | ({ __typename: "WelcomeMessageNotification" } & Pick<
           WelcomeMessageNotification,
@@ -31982,6 +32338,7 @@ type ArchivePayload_NotificationArchivePayload_Fragment = { __typename: "Notific
               | "color"
               | "lastExecutedAt"
               | "description"
+              | "editAccess"
               | "triggerType"
               | "trigger"
               | "conditions"
@@ -32648,10 +33005,7 @@ type Notification_UsageAlertNotification_Fragment = { __typename: "UsageAlertNot
     externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
     user: { __typename?: "User" } & Pick<User, "id">;
     actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-    usageAlert: { __typename: "UsageAlert" } & Pick<
-      UsageAlert,
-      "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
-    >;
+    usageAlert: { __typename?: "UsageAlert" } & Pick<UsageAlert, "id">;
   };
 
 type Notification_WelcomeMessageNotification_Fragment = { __typename: "WelcomeMessageNotification" } & Pick<
@@ -32703,6 +33057,7 @@ type Notification_WorkflowDefinitionNotification_Fragment = { __typename: "Workf
       | "color"
       | "lastExecutedAt"
       | "description"
+      | "editAccess"
       | "triggerType"
       | "trigger"
       | "conditions"
@@ -32950,10 +33305,7 @@ export type UsageAlertNotificationFragment = { __typename: "UsageAlertNotificati
     >;
     externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
     user: { __typename?: "User" } & Pick<User, "id">;
-    usageAlert: { __typename: "UsageAlert" } & Pick<
-      UsageAlert,
-      "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
-    >;
+    usageAlert: { __typename?: "UsageAlert" } & Pick<UsageAlert, "id">;
     actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
 
@@ -33021,6 +33373,7 @@ export type WorkflowDefinitionNotificationFragment = { __typename: "WorkflowDefi
       | "color"
       | "lastExecutedAt"
       | "description"
+      | "editAccess"
       | "triggerType"
       | "trigger"
       | "conditions"
@@ -34603,6 +34956,14 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
             >;
             result?: Maybe<
               { __typename: "AiConversationCreateEntityToolCallResult" } & {
+                createdEntities?: Maybe<
+                  Array<
+                    { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                      AiConversationSearchEntitiesToolCallResultEntities,
+                      "id" | "type"
+                    >
+                  >
+                >;
                 startedAgentSessions?: Maybe<
                   Array<
                     { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
@@ -34848,6 +35209,21 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
               "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
             >;
           })
+      | ({ __typename: "AiConversationPostChatMessageToolCall" } & Pick<
+          AiConversationPostChatMessageToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationPostChatMessageToolCallArgs" } & Pick<
+                AiConversationPostChatMessageToolCallArgs,
+                "platform"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
       | ({ __typename: "AiConversationPromptCodingSessionToolCall" } & Pick<
           AiConversationPromptCodingSessionToolCall,
           "rawArgs" | "name" | "rawResult"
@@ -34987,6 +35363,21 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
               "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
             >;
           })
+      | ({ __typename: "AiConversationReadSettingToolCall" } & Pick<
+          AiConversationReadSettingToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationReadSettingToolCallArgs" } & Pick<
+                AiConversationReadSettingToolCallArgs,
+                "id"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
       | ({ __typename: "AiConversationRemoveSpendLimitToolCall" } & Pick<
           AiConversationRemoveSpendLimitToolCall,
           "rawArgs" | "name" | "rawResult"
@@ -35116,6 +35507,21 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
                   >
                 >;
               }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationSearchSettingsToolCall" } & Pick<
+          AiConversationSearchSettingsToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationSearchSettingsToolCallArgs" } & Pick<
+                AiConversationSearchSettingsToolCallArgs,
+                "parentId" | "query"
+              >
             >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
               AiConversationToolDisplayInfo,
@@ -35739,6 +36145,24 @@ export type AiConversationWidgetPartFragment = { __typename: "AiConversationWidg
                   >;
                 }
             >;
+          })
+      | ({ __typename: "AiConversationSettingWidget" } & Pick<AiConversationSettingWidget, "rawArgs" | "name"> & {
+            displayInfo?: Maybe<
+              { __typename: "AiConversationWidgetDisplayInfo" } & Pick<
+                AiConversationWidgetDisplayInfo,
+                "body" | "bodyData"
+              >
+            >;
+            args?: Maybe<
+              { __typename: "AiConversationSettingWidgetArgs" } & Pick<AiConversationSettingWidgetArgs, "id"> & {
+                  target?: Maybe<
+                    { __typename: "AiConversationSettingWidgetArgsTarget" } & Pick<
+                      AiConversationSettingWidgetArgsTarget,
+                      "id" | "type"
+                    >
+                  >;
+                }
+            >;
           });
   };
 
@@ -35948,6 +36372,7 @@ export type WorkflowDefinitionFragment = { __typename: "WorkflowDefinition" } & 
   | "color"
   | "lastExecutedAt"
   | "description"
+  | "editAccess"
   | "triggerType"
   | "trigger"
   | "conditions"
@@ -36828,6 +37253,11 @@ export type TriageResponsibilityManualSelectionFragment = { __typename: "TriageR
   "userIds"
 >;
 
+export type DraftGenerationMetadataFragment = { __typename: "DraftGenerationMetadata" } & Pick<
+  DraftGenerationMetadata,
+  "generatedContent" | "generationCount" | "generatedAt"
+>;
+
 export type IssueHistoryWorkflowMetadataFragment = { __typename: "IssueHistoryWorkflowMetadata" } & {
   workflowDefinition?: Maybe<
     { __typename: "WorkflowDefinition" } & Pick<
@@ -36837,6 +37267,7 @@ export type IssueHistoryWorkflowMetadataFragment = { __typename: "IssueHistoryWo
       | "color"
       | "lastExecutedAt"
       | "description"
+      | "editAccess"
       | "triggerType"
       | "trigger"
       | "conditions"
@@ -36917,6 +37348,7 @@ export type IssueHistoryTriageRuleMetadataFragment = { __typename: "IssueHistory
       | "color"
       | "lastExecutedAt"
       | "description"
+      | "editAccess"
       | "triggerType"
       | "trigger"
       | "conditions"
@@ -39036,10 +39468,7 @@ export type NotificationBatchActionPayloadFragment = { __typename: "Notification
             externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
             user: { __typename?: "User" } & Pick<User, "id">;
             actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-            usageAlert: { __typename: "UsageAlert" } & Pick<
-              UsageAlert,
-              "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
-            >;
+            usageAlert: { __typename?: "UsageAlert" } & Pick<UsageAlert, "id">;
           })
       | ({ __typename: "WelcomeMessageNotification" } & Pick<
           WelcomeMessageNotification,
@@ -39095,6 +39524,7 @@ export type NotificationBatchActionPayloadFragment = { __typename: "Notification
               | "color"
               | "lastExecutedAt"
               | "description"
+              | "editAccess"
               | "triggerType"
               | "trigger"
               | "conditions"
@@ -39690,10 +40120,7 @@ export type NotificationPayloadFragment = { __typename: "NotificationPayload" } 
             externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
             user: { __typename?: "User" } & Pick<User, "id">;
             actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-            usageAlert: { __typename: "UsageAlert" } & Pick<
-              UsageAlert,
-              "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
-            >;
+            usageAlert: { __typename?: "UsageAlert" } & Pick<UsageAlert, "id">;
           })
       | ({ __typename: "WelcomeMessageNotification" } & Pick<
           WelcomeMessageNotification,
@@ -39749,6 +40176,7 @@ export type NotificationPayloadFragment = { __typename: "NotificationPayload" } 
               | "color"
               | "lastExecutedAt"
               | "description"
+              | "editAccess"
               | "triggerType"
               | "trigger"
               | "conditions"
@@ -40644,11 +41072,6 @@ export type CustomViewHasSubscribersPayloadFragment = { __typename: "CustomViewH
 export type CustomViewSuggestionPayloadFragment = { __typename: "CustomViewSuggestionPayload" } & Pick<
   CustomViewSuggestionPayload,
   "description" | "icon" | "name"
->;
-
-export type FetchDataPayloadFragment = { __typename: "FetchDataPayload" } & Pick<
-  FetchDataPayload,
-  "query" | "data" | "filters" | "success"
 >;
 
 export type DocumentPayloadFragment = { __typename: "DocumentPayload" } & Pick<
@@ -41665,6 +42088,14 @@ type AiConversationBaseToolCall_AiConversationCreateEntityToolCall_Fragment = {
     >;
     result?: Maybe<
       { __typename: "AiConversationCreateEntityToolCallResult" } & {
+        createdEntities?: Maybe<
+          Array<
+            { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+              AiConversationSearchEntitiesToolCallResultEntities,
+              "id" | "type"
+            >
+          >
+        >;
         startedAgentSessions?: Maybe<
           Array<
             { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
@@ -41907,6 +42338,21 @@ type AiConversationBaseToolCall_AiConversationNotifyUsersToolCall_Fragment = {
     >;
   };
 
+type AiConversationBaseToolCall_AiConversationPostChatMessageToolCall_Fragment = {
+  __typename: "AiConversationPostChatMessageToolCall";
+} & Pick<AiConversationPostChatMessageToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationPostChatMessageToolCallArgs" } & Pick<
+        AiConversationPostChatMessageToolCallArgs,
+        "platform"
+      >
+    >;
+  };
+
 type AiConversationBaseToolCall_AiConversationPromptCodingSessionToolCall_Fragment = {
   __typename: "AiConversationPromptCodingSessionToolCall";
 } & Pick<AiConversationPromptCodingSessionToolCall, "rawArgs" | "name" | "rawResult"> & {
@@ -42046,6 +42492,18 @@ type AiConversationBaseToolCall_AiConversationReadSandboxFileToolCall_Fragment =
     >;
   };
 
+type AiConversationBaseToolCall_AiConversationReadSettingToolCall_Fragment = {
+  __typename: "AiConversationReadSettingToolCall";
+} & Pick<AiConversationReadSettingToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationReadSettingToolCallArgs" } & Pick<AiConversationReadSettingToolCallArgs, "id">
+    >;
+  };
+
 type AiConversationBaseToolCall_AiConversationRemoveSpendLimitToolCall_Fragment = {
   __typename: "AiConversationRemoveSpendLimitToolCall";
 } & Pick<AiConversationRemoveSpendLimitToolCall, "rawArgs" | "name" | "rawResult"> & {
@@ -42175,6 +42633,21 @@ type AiConversationBaseToolCall_AiConversationSearchEntitiesToolCall_Fragment = 
           >
         >;
       }
+    >;
+  };
+
+type AiConversationBaseToolCall_AiConversationSearchSettingsToolCall_Fragment = {
+  __typename: "AiConversationSearchSettingsToolCall";
+} & Pick<AiConversationSearchSettingsToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationSearchSettingsToolCallArgs" } & Pick<
+        AiConversationSearchSettingsToolCallArgs,
+        "parentId" | "query"
+      >
     >;
   };
 
@@ -42392,12 +42865,14 @@ export type AiConversationBaseToolCallFragment =
   | AiConversationBaseToolCall_AiConversationListCodingSessionsToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationNavigateToPageToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationNotifyUsersToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationPostChatMessageToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationPromptCodingSessionToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationQueryActivityToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationQueryUpdatesToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationQueryViewToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationReadFileToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationReadSandboxFileToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationReadSettingToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationRemoveSpendLimitToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationResearchToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationRestoreEntityToolCall_Fragment
@@ -42405,6 +42880,7 @@ export type AiConversationBaseToolCallFragment =
   | AiConversationBaseToolCall_AiConversationRetryPullRequestCheckToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationSearchDocumentationToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationSearchEntitiesToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationSearchSettingsToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationSetSpendLimitToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationSpawnSubagentToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationStartCodingSessionToolCall_Fragment
@@ -42452,9 +42928,28 @@ type AiConversationBaseWidget_AiConversationEntityListWidget_Fragment = {
     >;
   };
 
+type AiConversationBaseWidget_AiConversationSettingWidget_Fragment = {
+  __typename: "AiConversationSettingWidget";
+} & Pick<AiConversationSettingWidget, "rawArgs" | "name"> & {
+    displayInfo?: Maybe<
+      { __typename: "AiConversationWidgetDisplayInfo" } & Pick<AiConversationWidgetDisplayInfo, "body" | "bodyData">
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationSettingWidgetArgs" } & Pick<AiConversationSettingWidgetArgs, "id"> & {
+          target?: Maybe<
+            { __typename: "AiConversationSettingWidgetArgsTarget" } & Pick<
+              AiConversationSettingWidgetArgsTarget,
+              "id" | "type"
+            >
+          >;
+        }
+    >;
+  };
+
 export type AiConversationBaseWidgetFragment =
   | AiConversationBaseWidget_AiConversationEntityCardWidget_Fragment
-  | AiConversationBaseWidget_AiConversationEntityListWidget_Fragment;
+  | AiConversationBaseWidget_AiConversationEntityListWidget_Fragment
+  | AiConversationBaseWidget_AiConversationSettingWidget_Fragment;
 
 export type AiConversationBashToolCallFragment = { __typename: "AiConversationBashToolCall" } & Pick<
   AiConversationBashToolCall,
@@ -42503,6 +42998,14 @@ export type AiConversationCreateEntityToolCallFragment = { __typename: "AiConver
     >;
     result?: Maybe<
       { __typename: "AiConversationCreateEntityToolCallResult" } & {
+        createdEntities?: Maybe<
+          Array<
+            { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+              AiConversationSearchEntitiesToolCallResultEntities,
+              "id" | "type"
+            >
+          >
+        >;
         startedAgentSessions?: Maybe<
           Array<
             { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
@@ -42526,6 +43029,14 @@ export type AiConversationCreateEntityToolCallArgsFragment = {
 export type AiConversationCreateEntityToolCallResultFragment = {
   __typename: "AiConversationCreateEntityToolCallResult";
 } & {
+  createdEntities?: Maybe<
+    Array<
+      { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+        AiConversationSearchEntitiesToolCallResultEntities,
+        "id" | "type"
+      >
+    >
+  >;
   startedAgentSessions?: Maybe<
     Array<
       { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
@@ -42966,6 +43477,25 @@ export type AiConversationNotifyUsersToolCallArgsFragment = {
   __typename: "AiConversationNotifyUsersToolCallArgs";
 } & Pick<AiConversationNotifyUsersToolCallArgs, "summary" | "userIds">;
 
+export type AiConversationPostChatMessageToolCallFragment = {
+  __typename: "AiConversationPostChatMessageToolCall";
+} & Pick<AiConversationPostChatMessageToolCall, "rawArgs" | "name" | "rawResult"> & {
+    args?: Maybe<
+      { __typename: "AiConversationPostChatMessageToolCallArgs" } & Pick<
+        AiConversationPostChatMessageToolCallArgs,
+        "platform"
+      >
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationPostChatMessageToolCallArgsFragment = {
+  __typename: "AiConversationPostChatMessageToolCallArgs";
+} & Pick<AiConversationPostChatMessageToolCallArgs, "platform">;
+
 export type AiConversationPromptCodingSessionToolCallFragment = {
   __typename: "AiConversationPromptCodingSessionToolCall";
 } & Pick<AiConversationPromptCodingSessionToolCall, "rawArgs" | "name" | "rawResult"> & {
@@ -43199,6 +43729,23 @@ export type AiConversationReadSandboxFileToolCallArgsFragment = {
   __typename: "AiConversationReadSandboxFileToolCallArgs";
 } & Pick<AiConversationReadSandboxFileToolCallArgs, "path">;
 
+export type AiConversationReadSettingToolCallFragment = { __typename: "AiConversationReadSettingToolCall" } & Pick<
+  AiConversationReadSettingToolCall,
+  "rawArgs" | "name" | "rawResult"
+> & {
+    args?: Maybe<
+      { __typename: "AiConversationReadSettingToolCallArgs" } & Pick<AiConversationReadSettingToolCallArgs, "id">
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationReadSettingToolCallArgsFragment = {
+  __typename: "AiConversationReadSettingToolCallArgs";
+} & Pick<AiConversationReadSettingToolCallArgs, "id">;
+
 export type AiConversationRemoveSpendLimitToolCallFragment = {
   __typename: "AiConversationRemoveSpendLimitToolCall";
 } & Pick<AiConversationRemoveSpendLimitToolCall, "rawArgs" | "name" | "rawResult"> & {
@@ -43403,6 +43950,25 @@ export type AiConversationSearchEntitiesToolCallResultEntitiesFragment = {
   __typename: "AiConversationSearchEntitiesToolCallResultEntities";
 } & Pick<AiConversationSearchEntitiesToolCallResultEntities, "id" | "type">;
 
+export type AiConversationSearchSettingsToolCallFragment = {
+  __typename: "AiConversationSearchSettingsToolCall";
+} & Pick<AiConversationSearchSettingsToolCall, "rawArgs" | "name" | "rawResult"> & {
+    args?: Maybe<
+      { __typename: "AiConversationSearchSettingsToolCallArgs" } & Pick<
+        AiConversationSearchSettingsToolCallArgs,
+        "parentId" | "query"
+      >
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationSearchSettingsToolCallArgsFragment = {
+  __typename: "AiConversationSearchSettingsToolCallArgs";
+} & Pick<AiConversationSearchSettingsToolCallArgs, "parentId" | "query">;
+
 export type AiConversationSetSpendLimitToolCallFragment = { __typename: "AiConversationSetSpendLimitToolCall" } & Pick<
   AiConversationSetSpendLimitToolCall,
   "rawArgs" | "name" | "rawResult"
@@ -43422,6 +43988,41 @@ export type AiConversationSetSpendLimitToolCallFragment = { __typename: "AiConve
 export type AiConversationSetSpendLimitToolCallArgsFragment = {
   __typename: "AiConversationSetSpendLimitToolCallArgs";
 } & Pick<AiConversationSetSpendLimitToolCallArgs, "summary">;
+
+export type AiConversationSettingWidgetFragment = { __typename: "AiConversationSettingWidget" } & Pick<
+  AiConversationSettingWidget,
+  "rawArgs" | "name"
+> & {
+    displayInfo?: Maybe<
+      { __typename: "AiConversationWidgetDisplayInfo" } & Pick<AiConversationWidgetDisplayInfo, "body" | "bodyData">
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationSettingWidgetArgs" } & Pick<AiConversationSettingWidgetArgs, "id"> & {
+          target?: Maybe<
+            { __typename: "AiConversationSettingWidgetArgsTarget" } & Pick<
+              AiConversationSettingWidgetArgsTarget,
+              "id" | "type"
+            >
+          >;
+        }
+    >;
+  };
+
+export type AiConversationSettingWidgetArgsFragment = { __typename: "AiConversationSettingWidgetArgs" } & Pick<
+  AiConversationSettingWidgetArgs,
+  "id"
+> & {
+    target?: Maybe<
+      { __typename: "AiConversationSettingWidgetArgsTarget" } & Pick<
+        AiConversationSettingWidgetArgsTarget,
+        "id" | "type"
+      >
+    >;
+  };
+
+export type AiConversationSettingWidgetArgsTargetFragment = {
+  __typename: "AiConversationSettingWidgetArgsTarget";
+} & Pick<AiConversationSettingWidgetArgsTarget, "id" | "type">;
 
 export type AiConversationSpawnSubagentToolCallFragment = { __typename: "AiConversationSpawnSubagentToolCall" } & Pick<
   AiConversationSpawnSubagentToolCall,
@@ -45168,8 +45769,14 @@ export type DraftConnectionFragment = { __typename: "DraftConnection" } & {
   nodes: Array<
     { __typename: "Draft" } & Pick<
       Draft,
-      "data" | "bodyData" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "isAutogenerated"
+      "data" | "bodyData" | "updateHealth" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "isAutogenerated"
     > & {
+        generationMetadata?: Maybe<
+          { __typename: "DraftGenerationMetadata" } & Pick<
+            DraftGenerationMetadata,
+            "generatedContent" | "generationCount" | "generatedAt"
+          >
+        >;
         customerNeed?: Maybe<{ __typename?: "CustomerNeed" } & Pick<CustomerNeed, "id">>;
         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
         initiativeUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
@@ -46592,6 +47199,8 @@ type Node_LabelNotificationSubscription_Fragment = { __typename: "LabelNotificat
   "id"
 >;
 
+type Node_Meeting_Fragment = { __typename: "Meeting" } & Pick<Meeting, "id">;
+
 type Node_OauthClientApproval_Fragment = { __typename: "OauthClientApproval" } & Pick<OauthClientApproval, "id">;
 
 type Node_OauthClientApprovalNotification_Fragment = { __typename: "OauthClientApprovalNotification" } & Pick<
@@ -46797,6 +47406,7 @@ export type NodeFragment =
   | Node_IssueSuggestion_Fragment
   | Node_IssueToRelease_Fragment
   | Node_LabelNotificationSubscription_Fragment
+  | Node_Meeting_Fragment
   | Node_OauthClientApproval_Fragment
   | Node_OauthClientApprovalNotification_Fragment
   | Node_Organization_Fragment
@@ -47299,10 +47909,7 @@ export type NotificationConnectionFragment = { __typename: "NotificationConnecti
           externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
           user: { __typename?: "User" } & Pick<User, "id">;
           actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-          usageAlert: { __typename: "UsageAlert" } & Pick<
-            UsageAlert,
-            "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
-          >;
+          usageAlert: { __typename?: "UsageAlert" } & Pick<UsageAlert, "id">;
         })
     | ({ __typename: "WelcomeMessageNotification" } & Pick<
         WelcomeMessageNotification,
@@ -47358,6 +47965,7 @@ export type NotificationConnectionFragment = { __typename: "NotificationConnecti
             | "color"
             | "lastExecutedAt"
             | "description"
+            | "editAccess"
             | "triggerType"
             | "trigger"
             | "conditions"
@@ -48779,10 +49387,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
           externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
           user: { __typename?: "User" } & Pick<User, "id">;
           actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-          usageAlert: { __typename: "UsageAlert" } & Pick<
-            UsageAlert,
-            "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
-          >;
+          usageAlert: { __typename?: "UsageAlert" } & Pick<UsageAlert, "id">;
         })
     | ({ __typename: "WelcomeMessageNotification" } & Pick<
         WelcomeMessageNotification,
@@ -48838,6 +49443,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "color"
             | "lastExecutedAt"
             | "description"
+            | "editAccess"
             | "triggerType"
             | "trigger"
             | "conditions"
@@ -49116,8 +49722,14 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
   documentUpdated: { __typename?: "Document" } & Pick<Document, "id">;
   draftCreated: { __typename: "Draft" } & Pick<
     Draft,
-    "data" | "bodyData" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "isAutogenerated"
+    "data" | "bodyData" | "updateHealth" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "isAutogenerated"
   > & {
+      generationMetadata?: Maybe<
+        { __typename: "DraftGenerationMetadata" } & Pick<
+          DraftGenerationMetadata,
+          "generatedContent" | "generationCount" | "generatedAt"
+        >
+      >;
       customerNeed?: Maybe<{ __typename?: "CustomerNeed" } & Pick<CustomerNeed, "id">>;
       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
       initiativeUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
@@ -49130,8 +49742,14 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
     };
   draftDeleted: { __typename: "Draft" } & Pick<
     Draft,
-    "data" | "bodyData" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "isAutogenerated"
+    "data" | "bodyData" | "updateHealth" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "isAutogenerated"
   > & {
+      generationMetadata?: Maybe<
+        { __typename: "DraftGenerationMetadata" } & Pick<
+          DraftGenerationMetadata,
+          "generatedContent" | "generationCount" | "generatedAt"
+        >
+      >;
       customerNeed?: Maybe<{ __typename?: "CustomerNeed" } & Pick<CustomerNeed, "id">>;
       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
       initiativeUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
@@ -49144,8 +49762,14 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
     };
   draftUpdated: { __typename: "Draft" } & Pick<
     Draft,
-    "data" | "bodyData" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "isAutogenerated"
+    "data" | "bodyData" | "updateHealth" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "isAutogenerated"
   > & {
+      generationMetadata?: Maybe<
+        { __typename: "DraftGenerationMetadata" } & Pick<
+          DraftGenerationMetadata,
+          "generatedContent" | "generationCount" | "generatedAt"
+        >
+      >;
       customerNeed?: Maybe<{ __typename?: "CustomerNeed" } & Pick<CustomerNeed, "id">>;
       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
       initiativeUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
@@ -49603,10 +50227,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
           externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
           user: { __typename?: "User" } & Pick<User, "id">;
           actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-          usageAlert: { __typename: "UsageAlert" } & Pick<
-            UsageAlert,
-            "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
-          >;
+          usageAlert: { __typename?: "UsageAlert" } & Pick<UsageAlert, "id">;
         })
     | ({ __typename: "WelcomeMessageNotification" } & Pick<
         WelcomeMessageNotification,
@@ -49662,6 +50283,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "color"
             | "lastExecutedAt"
             | "description"
+            | "editAccess"
             | "triggerType"
             | "trigger"
             | "conditions"
@@ -50139,10 +50761,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
           externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
           user: { __typename?: "User" } & Pick<User, "id">;
           actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-          usageAlert: { __typename: "UsageAlert" } & Pick<
-            UsageAlert,
-            "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
-          >;
+          usageAlert: { __typename?: "UsageAlert" } & Pick<UsageAlert, "id">;
         })
     | ({ __typename: "WelcomeMessageNotification" } & Pick<
         WelcomeMessageNotification,
@@ -50198,6 +50817,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "color"
             | "lastExecutedAt"
             | "description"
+            | "editAccess"
             | "triggerType"
             | "trigger"
             | "conditions"
@@ -50675,10 +51295,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
           externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
           user: { __typename?: "User" } & Pick<User, "id">;
           actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-          usageAlert: { __typename: "UsageAlert" } & Pick<
-            UsageAlert,
-            "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
-          >;
+          usageAlert: { __typename?: "UsageAlert" } & Pick<UsageAlert, "id">;
         })
     | ({ __typename: "WelcomeMessageNotification" } & Pick<
         WelcomeMessageNotification,
@@ -50734,6 +51351,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "color"
             | "lastExecutedAt"
             | "description"
+            | "editAccess"
             | "triggerType"
             | "trigger"
             | "conditions"
@@ -51211,10 +51829,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
           externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
           user: { __typename?: "User" } & Pick<User, "id">;
           actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-          usageAlert: { __typename: "UsageAlert" } & Pick<
-            UsageAlert,
-            "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
-          >;
+          usageAlert: { __typename?: "UsageAlert" } & Pick<UsageAlert, "id">;
         })
     | ({ __typename: "WelcomeMessageNotification" } & Pick<
         WelcomeMessageNotification,
@@ -51270,6 +51885,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "color"
             | "lastExecutedAt"
             | "description"
+            | "editAccess"
             | "triggerType"
             | "trigger"
             | "conditions"
@@ -52052,6 +52668,19 @@ export type UploadPayloadFragment = { __typename: "UploadPayload" } & Pick<Uploa
       > & { headers: Array<{ __typename: "UploadFileHeader" } & Pick<UploadFileHeader, "key" | "value">> }
     >;
   };
+
+export type UsageAlertConnectionFragment = { __typename: "UsageAlertConnection" } & {
+  nodes: Array<
+    { __typename: "UsageAlert" } & Pick<
+      UsageAlert,
+      "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
+    >
+  >;
+  pageInfo: { __typename: "PageInfo" } & Pick<
+    PageInfo,
+    "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
+  >;
+};
 
 export type UserConnectionFragment = { __typename: "UserConnection" } & {
   nodes: Array<
@@ -64932,10 +65561,7 @@ export type NotificationQuery = { __typename?: "Query" } & {
           externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
           user: { __typename?: "User" } & Pick<User, "id">;
           actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-          usageAlert: { __typename: "UsageAlert" } & Pick<
-            UsageAlert,
-            "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
-          >;
+          usageAlert: { __typename?: "UsageAlert" } & Pick<UsageAlert, "id">;
         })
     | ({ __typename: "WelcomeMessageNotification" } & Pick<
         WelcomeMessageNotification,
@@ -64991,6 +65617,7 @@ export type NotificationQuery = { __typename?: "Query" } & {
             | "color"
             | "lastExecutedAt"
             | "description"
+            | "editAccess"
             | "triggerType"
             | "trigger"
             | "conditions"
@@ -65782,10 +66409,7 @@ export type NotificationsQuery = { __typename?: "Query" } & {
             externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
             user: { __typename?: "User" } & Pick<User, "id">;
             actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-            usageAlert: { __typename: "UsageAlert" } & Pick<
-              UsageAlert,
-              "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
-            >;
+            usageAlert: { __typename?: "UsageAlert" } & Pick<UsageAlert, "id">;
           })
       | ({ __typename: "WelcomeMessageNotification" } & Pick<
           WelcomeMessageNotification,
@@ -65841,6 +66465,7 @@ export type NotificationsQuery = { __typename?: "Query" } & {
               | "color"
               | "lastExecutedAt"
               | "description"
+              | "editAccess"
               | "triggerType"
               | "trigger"
               | "conditions"
@@ -71470,6 +72095,42 @@ export type TriageResponsibility_ManualSelectionQuery = { __typename?: "Query" }
   };
 };
 
+export type UsageAlertQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type UsageAlertQuery = { __typename?: "Query" } & {
+  usageAlert: { __typename: "UsageAlert" } & Pick<
+    UsageAlert,
+    "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
+  >;
+};
+
+export type UsageAlertsQueryVariables = Exact<{
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  filter?: InputMaybe<UsageAlertFilter>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+}>;
+
+export type UsageAlertsQuery = { __typename?: "Query" } & {
+  usageAlerts: { __typename: "UsageAlertConnection" } & {
+    nodes: Array<
+      { __typename: "UsageAlert" } & Pick<
+        UsageAlert,
+        "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
+      >
+    >;
+    pageInfo: { __typename: "PageInfo" } & Pick<
+      PageInfo,
+      "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
+    >;
+  };
+};
+
 export type UserQueryVariables = Exact<{
   id: Scalars["String"];
 }>;
@@ -72024,8 +72685,14 @@ export type User_DraftsQuery = { __typename?: "Query" } & {
       nodes: Array<
         { __typename: "Draft" } & Pick<
           Draft,
-          "data" | "bodyData" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "isAutogenerated"
+          "data" | "bodyData" | "updateHealth" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "isAutogenerated"
         > & {
+            generationMetadata?: Maybe<
+              { __typename: "DraftGenerationMetadata" } & Pick<
+                DraftGenerationMetadata,
+                "generatedContent" | "generationCount" | "generatedAt"
+              >
+            >;
             customerNeed?: Maybe<{ __typename?: "CustomerNeed" } & Pick<CustomerNeed, "id">>;
             initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
             initiativeUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
@@ -73684,8 +74351,14 @@ export type Viewer_DraftsQuery = { __typename?: "Query" } & {
       nodes: Array<
         { __typename: "Draft" } & Pick<
           Draft,
-          "data" | "bodyData" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "isAutogenerated"
+          "data" | "bodyData" | "updateHealth" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "isAutogenerated"
         > & {
+            generationMetadata?: Maybe<
+              { __typename: "DraftGenerationMetadata" } & Pick<
+                DraftGenerationMetadata,
+                "generatedContent" | "generationCount" | "generatedAt"
+              >
+            >;
             customerNeed?: Maybe<{ __typename?: "CustomerNeed" } & Pick<CustomerNeed, "id">>;
             initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
             initiativeUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
@@ -77677,10 +78350,7 @@ export type ArchiveNotificationMutation = { __typename?: "Mutation" } & {
               externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
               user: { __typename?: "User" } & Pick<User, "id">;
               actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-              usageAlert: { __typename: "UsageAlert" } & Pick<
-                UsageAlert,
-                "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
-              >;
+              usageAlert: { __typename?: "UsageAlert" } & Pick<UsageAlert, "id">;
             })
         | ({ __typename: "WelcomeMessageNotification" } & Pick<
             WelcomeMessageNotification,
@@ -77736,6 +78406,7 @@ export type ArchiveNotificationMutation = { __typename?: "Mutation" } & {
                 | "color"
                 | "lastExecutedAt"
                 | "description"
+                | "editAccess"
                 | "triggerType"
                 | "trigger"
                 | "conditions"
@@ -78274,10 +78945,7 @@ export type NotificationArchiveAllMutation = { __typename?: "Mutation" } & {
               externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
               user: { __typename?: "User" } & Pick<User, "id">;
               actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-              usageAlert: { __typename: "UsageAlert" } & Pick<
-                UsageAlert,
-                "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
-              >;
+              usageAlert: { __typename?: "UsageAlert" } & Pick<UsageAlert, "id">;
             })
         | ({ __typename: "WelcomeMessageNotification" } & Pick<
             WelcomeMessageNotification,
@@ -78333,6 +79001,7 @@ export type NotificationArchiveAllMutation = { __typename?: "Mutation" } & {
                 | "color"
                 | "lastExecutedAt"
                 | "description"
+                | "editAccess"
                 | "triggerType"
                 | "trigger"
                 | "conditions"
@@ -78885,10 +79554,7 @@ export type NotificationMarkReadAllMutation = { __typename?: "Mutation" } & {
               externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
               user: { __typename?: "User" } & Pick<User, "id">;
               actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-              usageAlert: { __typename: "UsageAlert" } & Pick<
-                UsageAlert,
-                "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
-              >;
+              usageAlert: { __typename?: "UsageAlert" } & Pick<UsageAlert, "id">;
             })
         | ({ __typename: "WelcomeMessageNotification" } & Pick<
             WelcomeMessageNotification,
@@ -78944,6 +79610,7 @@ export type NotificationMarkReadAllMutation = { __typename?: "Mutation" } & {
                 | "color"
                 | "lastExecutedAt"
                 | "description"
+                | "editAccess"
                 | "triggerType"
                 | "trigger"
                 | "conditions"
@@ -79482,10 +80149,7 @@ export type NotificationMarkUnreadAllMutation = { __typename?: "Mutation" } & {
               externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
               user: { __typename?: "User" } & Pick<User, "id">;
               actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-              usageAlert: { __typename: "UsageAlert" } & Pick<
-                UsageAlert,
-                "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
-              >;
+              usageAlert: { __typename?: "UsageAlert" } & Pick<UsageAlert, "id">;
             })
         | ({ __typename: "WelcomeMessageNotification" } & Pick<
             WelcomeMessageNotification,
@@ -79541,6 +80205,7 @@ export type NotificationMarkUnreadAllMutation = { __typename?: "Mutation" } & {
                 | "color"
                 | "lastExecutedAt"
                 | "description"
+                | "editAccess"
                 | "triggerType"
                 | "trigger"
                 | "conditions"
@@ -80080,10 +80745,7 @@ export type NotificationSnoozeAllMutation = { __typename?: "Mutation" } & {
               externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
               user: { __typename?: "User" } & Pick<User, "id">;
               actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-              usageAlert: { __typename: "UsageAlert" } & Pick<
-                UsageAlert,
-                "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
-              >;
+              usageAlert: { __typename?: "UsageAlert" } & Pick<UsageAlert, "id">;
             })
         | ({ __typename: "WelcomeMessageNotification" } & Pick<
             WelcomeMessageNotification,
@@ -80139,6 +80801,7 @@ export type NotificationSnoozeAllMutation = { __typename?: "Mutation" } & {
                 | "color"
                 | "lastExecutedAt"
                 | "description"
+                | "editAccess"
                 | "triggerType"
                 | "trigger"
                 | "conditions"
@@ -80939,10 +81602,7 @@ export type UnarchiveNotificationMutation = { __typename?: "Mutation" } & {
               externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
               user: { __typename?: "User" } & Pick<User, "id">;
               actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-              usageAlert: { __typename: "UsageAlert" } & Pick<
-                UsageAlert,
-                "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
-              >;
+              usageAlert: { __typename?: "UsageAlert" } & Pick<UsageAlert, "id">;
             })
         | ({ __typename: "WelcomeMessageNotification" } & Pick<
             WelcomeMessageNotification,
@@ -80998,6 +81658,7 @@ export type UnarchiveNotificationMutation = { __typename?: "Mutation" } & {
                 | "color"
                 | "lastExecutedAt"
                 | "description"
+                | "editAccess"
                 | "triggerType"
                 | "trigger"
                 | "conditions"
@@ -81537,10 +82198,7 @@ export type NotificationUnsnoozeAllMutation = { __typename?: "Mutation" } & {
               externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
               user: { __typename?: "User" } & Pick<User, "id">;
               actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-              usageAlert: { __typename: "UsageAlert" } & Pick<
-                UsageAlert,
-                "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
-              >;
+              usageAlert: { __typename?: "UsageAlert" } & Pick<UsageAlert, "id">;
             })
         | ({ __typename: "WelcomeMessageNotification" } & Pick<
             WelcomeMessageNotification,
@@ -81596,6 +82254,7 @@ export type NotificationUnsnoozeAllMutation = { __typename?: "Mutation" } & {
                 | "color"
                 | "lastExecutedAt"
                 | "description"
+                | "editAccess"
                 | "triggerType"
                 | "trigger"
                 | "conditions"
@@ -82132,10 +82791,7 @@ export type UpdateNotificationMutation = { __typename?: "Mutation" } & {
               externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
               user: { __typename?: "User" } & Pick<User, "id">;
               actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-              usageAlert: { __typename: "UsageAlert" } & Pick<
-                UsageAlert,
-                "type" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "id" | "metadata"
-              >;
+              usageAlert: { __typename?: "UsageAlert" } & Pick<UsageAlert, "id">;
             })
         | ({ __typename: "WelcomeMessageNotification" } & Pick<
             WelcomeMessageNotification,
@@ -82191,6 +82847,7 @@ export type UpdateNotificationMutation = { __typename?: "Mutation" } & {
                 | "color"
                 | "lastExecutedAt"
                 | "description"
+                | "editAccess"
                 | "triggerType"
                 | "trigger"
                 | "conditions"
@@ -84576,6 +85233,9 @@ export const AiConversationCreateEntityToolCallResultFragmentDoc = new TypedDocu
   `
     fragment AiConversationCreateEntityToolCallResult on AiConversationCreateEntityToolCallResult {
   __typename
+  createdEntities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
   startedAgentSessions {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
@@ -84611,6 +85271,9 @@ export const AiConversationCreateEntityToolCallFragmentDoc = new TypedDocumentSt
 }
 fragment AiConversationCreateEntityToolCallResult on AiConversationCreateEntityToolCallResult {
   __typename
+  createdEntities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
   startedAgentSessions {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
@@ -85276,6 +85939,43 @@ fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
 }`,
   { fragmentName: "AiConversationNotifyUsersToolCall" }
 ) as unknown as TypedDocumentString<AiConversationNotifyUsersToolCallFragment, unknown>;
+export const AiConversationPostChatMessageToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationPostChatMessageToolCallArgs on AiConversationPostChatMessageToolCallArgs {
+  __typename
+  platform
+}
+    `,
+  { fragmentName: "AiConversationPostChatMessageToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationPostChatMessageToolCallArgsFragment, unknown>;
+export const AiConversationPostChatMessageToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationPostChatMessageToolCall on AiConversationPostChatMessageToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationPostChatMessageToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationPostChatMessageToolCallArgs on AiConversationPostChatMessageToolCallArgs {
+  __typename
+  platform
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationPostChatMessageToolCall" }
+) as unknown as TypedDocumentString<AiConversationPostChatMessageToolCallFragment, unknown>;
 export const AiConversationPromptCodingSessionToolCallArgsFragmentDoc = new TypedDocumentString(
   `
     fragment AiConversationPromptCodingSessionToolCallArgs on AiConversationPromptCodingSessionToolCallArgs {
@@ -85625,6 +86325,43 @@ fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
 }`,
   { fragmentName: "AiConversationReadSandboxFileToolCall" }
 ) as unknown as TypedDocumentString<AiConversationReadSandboxFileToolCallFragment, unknown>;
+export const AiConversationReadSettingToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationReadSettingToolCallArgs on AiConversationReadSettingToolCallArgs {
+  __typename
+  id
+}
+    `,
+  { fragmentName: "AiConversationReadSettingToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationReadSettingToolCallArgsFragment, unknown>;
+export const AiConversationReadSettingToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationReadSettingToolCall on AiConversationReadSettingToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationReadSettingToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationReadSettingToolCallArgs on AiConversationReadSettingToolCallArgs {
+  __typename
+  id
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationReadSettingToolCall" }
+) as unknown as TypedDocumentString<AiConversationReadSettingToolCallFragment, unknown>;
 export const AiConversationRemoveSpendLimitToolCallArgsFragmentDoc = new TypedDocumentString(
   `
     fragment AiConversationRemoveSpendLimitToolCallArgs on AiConversationRemoveSpendLimitToolCallArgs {
@@ -85975,6 +86712,45 @@ fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
 }`,
   { fragmentName: "AiConversationSearchEntitiesToolCall" }
 ) as unknown as TypedDocumentString<AiConversationSearchEntitiesToolCallFragment, unknown>;
+export const AiConversationSearchSettingsToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationSearchSettingsToolCallArgs on AiConversationSearchSettingsToolCallArgs {
+  __typename
+  parentId
+  query
+}
+    `,
+  { fragmentName: "AiConversationSearchSettingsToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationSearchSettingsToolCallArgsFragment, unknown>;
+export const AiConversationSearchSettingsToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationSearchSettingsToolCall on AiConversationSearchSettingsToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationSearchSettingsToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationSearchSettingsToolCallArgs on AiConversationSearchSettingsToolCallArgs {
+  __typename
+  parentId
+  query
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationSearchSettingsToolCall" }
+) as unknown as TypedDocumentString<AiConversationSearchSettingsToolCallFragment, unknown>;
 export const AiConversationSetSpendLimitToolCallArgsFragmentDoc = new TypedDocumentString(
   `
     fragment AiConversationSetSpendLimitToolCallArgs on AiConversationSetSpendLimitToolCallArgs {
@@ -86502,6 +87278,9 @@ export const AiConversationToolCallPartFragmentDoc = new TypedDocumentString(
     ... on AiConversationNotifyUsersToolCall {
       ...AiConversationNotifyUsersToolCall
     }
+    ... on AiConversationPostChatMessageToolCall {
+      ...AiConversationPostChatMessageToolCall
+    }
     ... on AiConversationPromptCodingSessionToolCall {
       ...AiConversationPromptCodingSessionToolCall
     }
@@ -86519,6 +87298,9 @@ export const AiConversationToolCallPartFragmentDoc = new TypedDocumentString(
     }
     ... on AiConversationReadSandboxFileToolCall {
       ...AiConversationReadSandboxFileToolCall
+    }
+    ... on AiConversationReadSettingToolCall {
+      ...AiConversationReadSettingToolCall
     }
     ... on AiConversationRemoveSpendLimitToolCall {
       ...AiConversationRemoveSpendLimitToolCall
@@ -86540,6 +87322,9 @@ export const AiConversationToolCallPartFragmentDoc = new TypedDocumentString(
     }
     ... on AiConversationSearchEntitiesToolCall {
       ...AiConversationSearchEntitiesToolCall
+    }
+    ... on AiConversationSearchSettingsToolCall {
+      ...AiConversationSearchSettingsToolCall
     }
     ... on AiConversationSetSpendLimitToolCall {
       ...AiConversationSetSpendLimitToolCall
@@ -86640,6 +87425,9 @@ fragment AiConversationCreateEntityToolCallArgs on AiConversationCreateEntityToo
 }
 fragment AiConversationCreateEntityToolCallResult on AiConversationCreateEntityToolCallResult {
   __typename
+  createdEntities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
   startedAgentSessions {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
@@ -86887,6 +87675,22 @@ fragment AiConversationNotifyUsersToolCallArgs on AiConversationNotifyUsersToolC
   summary
   userIds
 }
+fragment AiConversationPostChatMessageToolCall on AiConversationPostChatMessageToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationPostChatMessageToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationPostChatMessageToolCallArgs on AiConversationPostChatMessageToolCallArgs {
+  __typename
+  platform
+}
 fragment AiConversationPromptCodingSessionToolCall on AiConversationPromptCodingSessionToolCall {
   __typename
   rawArgs
@@ -87018,6 +87822,22 @@ fragment AiConversationReadSandboxFileToolCall on AiConversationReadSandboxFileT
 fragment AiConversationReadSandboxFileToolCallArgs on AiConversationReadSandboxFileToolCallArgs {
   __typename
   path
+}
+fragment AiConversationReadSettingToolCall on AiConversationReadSettingToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationReadSettingToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationReadSettingToolCallArgs on AiConversationReadSettingToolCallArgs {
+  __typename
+  id
 }
 fragment AiConversationRemoveSpendLimitToolCall on AiConversationRemoveSpendLimitToolCall {
   __typename
@@ -87157,6 +87977,23 @@ fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSea
   __typename
   id
   type
+}
+fragment AiConversationSearchSettingsToolCall on AiConversationSearchSettingsToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationSearchSettingsToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationSearchSettingsToolCallArgs on AiConversationSearchSettingsToolCallArgs {
+  __typename
+  parentId
+  query
 }
 fragment AiConversationSetSpendLimitToolCall on AiConversationSetSpendLimitToolCall {
   __typename
@@ -87475,6 +88312,64 @@ fragment AiConversationWidgetDisplayInfo on AiConversationWidgetDisplayInfo {
 }`,
   { fragmentName: "AiConversationEntityListWidget" }
 ) as unknown as TypedDocumentString<AiConversationEntityListWidgetFragment, unknown>;
+export const AiConversationSettingWidgetArgsTargetFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationSettingWidgetArgsTarget on AiConversationSettingWidgetArgsTarget {
+  __typename
+  id
+  type
+}
+    `,
+  { fragmentName: "AiConversationSettingWidgetArgsTarget" }
+) as unknown as TypedDocumentString<AiConversationSettingWidgetArgsTargetFragment, unknown>;
+export const AiConversationSettingWidgetArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationSettingWidgetArgs on AiConversationSettingWidgetArgs {
+  __typename
+  target {
+    ...AiConversationSettingWidgetArgsTarget
+  }
+  id
+}
+    fragment AiConversationSettingWidgetArgsTarget on AiConversationSettingWidgetArgsTarget {
+  __typename
+  id
+  type
+}`,
+  { fragmentName: "AiConversationSettingWidgetArgs" }
+) as unknown as TypedDocumentString<AiConversationSettingWidgetArgsFragment, unknown>;
+export const AiConversationSettingWidgetFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationSettingWidget on AiConversationSettingWidget {
+  __typename
+  displayInfo {
+    ...AiConversationWidgetDisplayInfo
+  }
+  rawArgs
+  args {
+    ...AiConversationSettingWidgetArgs
+  }
+  name
+}
+    fragment AiConversationSettingWidgetArgs on AiConversationSettingWidgetArgs {
+  __typename
+  target {
+    ...AiConversationSettingWidgetArgsTarget
+  }
+  id
+}
+fragment AiConversationSettingWidgetArgsTarget on AiConversationSettingWidgetArgsTarget {
+  __typename
+  id
+  type
+}
+fragment AiConversationWidgetDisplayInfo on AiConversationWidgetDisplayInfo {
+  __typename
+  body
+  bodyData
+}`,
+  { fragmentName: "AiConversationSettingWidget" }
+) as unknown as TypedDocumentString<AiConversationSettingWidgetFragment, unknown>;
 export const AiConversationWidgetPartFragmentDoc = new TypedDocumentString(
   `
     fragment AiConversationWidgetPart on AiConversationWidgetPart {
@@ -87490,6 +88385,9 @@ export const AiConversationWidgetPartFragmentDoc = new TypedDocumentString(
     }
     ... on AiConversationEntityListWidget {
       ...AiConversationEntityListWidget
+    }
+    ... on AiConversationSettingWidget {
+      ...AiConversationSettingWidget
     }
   }
 }
@@ -87543,6 +88441,29 @@ fragment AiConversationEntityListWidgetArgsEntities on AiConversationEntityListW
   __typename
   note
   id
+}
+fragment AiConversationSettingWidget on AiConversationSettingWidget {
+  __typename
+  displayInfo {
+    ...AiConversationWidgetDisplayInfo
+  }
+  rawArgs
+  args {
+    ...AiConversationSettingWidgetArgs
+  }
+  name
+}
+fragment AiConversationSettingWidgetArgs on AiConversationSettingWidgetArgs {
+  __typename
+  target {
+    ...AiConversationSettingWidgetArgsTarget
+  }
+  id
+}
+fragment AiConversationSettingWidgetArgsTarget on AiConversationSettingWidgetArgsTarget {
+  __typename
+  id
+  type
 }
 fragment AiConversationWidgetDisplayInfo on AiConversationWidgetDisplayInfo {
   __typename
@@ -87729,6 +88650,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     ... on AiConversationNotifyUsersToolCall {
       ...AiConversationNotifyUsersToolCall
     }
+    ... on AiConversationPostChatMessageToolCall {
+      ...AiConversationPostChatMessageToolCall
+    }
     ... on AiConversationPromptCodingSessionToolCall {
       ...AiConversationPromptCodingSessionToolCall
     }
@@ -87746,6 +88670,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     }
     ... on AiConversationReadSandboxFileToolCall {
       ...AiConversationReadSandboxFileToolCall
+    }
+    ... on AiConversationReadSettingToolCall {
+      ...AiConversationReadSettingToolCall
     }
     ... on AiConversationRemoveSpendLimitToolCall {
       ...AiConversationRemoveSpendLimitToolCall
@@ -87767,6 +88694,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     }
     ... on AiConversationSearchEntitiesToolCall {
       ...AiConversationSearchEntitiesToolCall
+    }
+    ... on AiConversationSearchSettingsToolCall {
+      ...AiConversationSearchSettingsToolCall
     }
     ... on AiConversationSetSpendLimitToolCall {
       ...AiConversationSetSpendLimitToolCall
@@ -87817,6 +88747,9 @@ fragment AiConversationWidgetPart on AiConversationWidgetPart {
     }
     ... on AiConversationEntityListWidget {
       ...AiConversationEntityListWidget
+    }
+    ... on AiConversationSettingWidget {
+      ...AiConversationSettingWidget
     }
   }
 }
@@ -87930,6 +88863,9 @@ fragment AiConversationCreateEntityToolCallArgs on AiConversationCreateEntityToo
 }
 fragment AiConversationCreateEntityToolCallResult on AiConversationCreateEntityToolCallResult {
   __typename
+  createdEntities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
   startedAgentSessions {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
@@ -88219,6 +89155,22 @@ fragment AiConversationNotifyUsersToolCallArgs on AiConversationNotifyUsersToolC
   summary
   userIds
 }
+fragment AiConversationPostChatMessageToolCall on AiConversationPostChatMessageToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationPostChatMessageToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationPostChatMessageToolCallArgs on AiConversationPostChatMessageToolCallArgs {
+  __typename
+  platform
+}
 fragment AiConversationPromptCodingSessionToolCall on AiConversationPromptCodingSessionToolCall {
   __typename
   rawArgs
@@ -88350,6 +89302,22 @@ fragment AiConversationReadSandboxFileToolCall on AiConversationReadSandboxFileT
 fragment AiConversationReadSandboxFileToolCallArgs on AiConversationReadSandboxFileToolCallArgs {
   __typename
   path
+}
+fragment AiConversationReadSettingToolCall on AiConversationReadSettingToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationReadSettingToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationReadSettingToolCallArgs on AiConversationReadSettingToolCallArgs {
+  __typename
+  id
 }
 fragment AiConversationRemoveSpendLimitToolCall on AiConversationRemoveSpendLimitToolCall {
   __typename
@@ -88490,6 +89458,23 @@ fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSea
   id
   type
 }
+fragment AiConversationSearchSettingsToolCall on AiConversationSearchSettingsToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationSearchSettingsToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationSearchSettingsToolCallArgs on AiConversationSearchSettingsToolCallArgs {
+  __typename
+  parentId
+  query
+}
 fragment AiConversationSetSpendLimitToolCall on AiConversationSetSpendLimitToolCall {
   __typename
   rawArgs
@@ -88505,6 +89490,29 @@ fragment AiConversationSetSpendLimitToolCall on AiConversationSetSpendLimitToolC
 fragment AiConversationSetSpendLimitToolCallArgs on AiConversationSetSpendLimitToolCallArgs {
   __typename
   summary
+}
+fragment AiConversationSettingWidget on AiConversationSettingWidget {
+  __typename
+  displayInfo {
+    ...AiConversationWidgetDisplayInfo
+  }
+  rawArgs
+  args {
+    ...AiConversationSettingWidgetArgs
+  }
+  name
+}
+fragment AiConversationSettingWidgetArgs on AiConversationSettingWidgetArgs {
+  __typename
+  target {
+    ...AiConversationSettingWidgetArgsTarget
+  }
+  id
+}
+fragment AiConversationSettingWidgetArgsTarget on AiConversationSettingWidgetArgsTarget {
+  __typename
+  id
+  type
 }
 fragment AiConversationSpawnSubagentToolCall on AiConversationSpawnSubagentToolCall {
   __typename
@@ -89433,21 +90441,6 @@ export const PullRequestNotificationFragmentDoc = new TypedDocumentString(
 }`,
   { fragmentName: "PullRequestNotification" }
 ) as unknown as TypedDocumentString<PullRequestNotificationFragment, unknown>;
-export const UsageAlertFragmentDoc = new TypedDocumentString(
-  `
-    fragment UsageAlert on UsageAlert {
-  __typename
-  type
-  updatedAt
-  archivedAt
-  createdAt
-  resolvedAt
-  id
-  metadata
-}
-    `,
-  { fragmentName: "UsageAlert" }
-) as unknown as TypedDocumentString<UsageAlertFragment, unknown>;
 export const UsageAlertNotificationFragmentDoc = new TypedDocumentString(
   `
     fragment UsageAlertNotification on UsageAlertNotification {
@@ -89473,7 +90466,7 @@ export const UsageAlertNotificationFragmentDoc = new TypedDocumentString(
   snoozedUntilAt
   id
   usageAlert {
-    ...UsageAlert
+    id
   }
   actor {
     id
@@ -89487,16 +90480,6 @@ export const UsageAlertNotificationFragmentDoc = new TypedDocumentString(
   name
   userDisplayName
   type
-}
-fragment UsageAlert on UsageAlert {
-  __typename
-  type
-  updatedAt
-  archivedAt
-  createdAt
-  resolvedAt
-  id
-  metadata
 }`,
   { fragmentName: "UsageAlertNotification" }
 ) as unknown as TypedDocumentString<UsageAlertNotificationFragment, unknown>;
@@ -89566,6 +90549,7 @@ export const WorkflowDefinitionFragmentDoc = new TypedDocumentString(
   }
   lastExecutedAt
   description
+  editAccess
   triggerType
   trigger
   conditions
@@ -89667,6 +90651,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   }
   lastExecutedAt
   description
+  editAccess
   triggerType
   trigger
   conditions
@@ -90050,7 +91035,7 @@ fragment UsageAlertNotification on UsageAlertNotification {
   snoozedUntilAt
   id
   usageAlert {
-    ...UsageAlert
+    id
   }
   actor {
     id
@@ -90267,16 +91252,6 @@ fragment NotificationSubscription on NotificationSubscription {
   }
   active
 }
-fragment UsageAlert on UsageAlert {
-  __typename
-  type
-  updatedAt
-  archivedAt
-  createdAt
-  resolvedAt
-  id
-  metadata
-}
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
   stats
@@ -90302,6 +91277,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   }
   lastExecutedAt
   description
+  editAccess
   triggerType
   trigger
   conditions
@@ -90693,7 +91669,7 @@ fragment UsageAlertNotification on UsageAlertNotification {
   snoozedUntilAt
   id
   usageAlert {
-    ...UsageAlert
+    id
   }
   actor {
     id
@@ -90910,16 +91886,6 @@ fragment NotificationSubscription on NotificationSubscription {
   }
   active
 }
-fragment UsageAlert on UsageAlert {
-  __typename
-  type
-  updatedAt
-  archivedAt
-  createdAt
-  resolvedAt
-  id
-  metadata
-}
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
   stats
@@ -90945,6 +91911,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   }
   lastExecutedAt
   description
+  editAccess
   triggerType
   trigger
   conditions
@@ -91635,7 +92602,7 @@ fragment UsageAlertNotification on UsageAlertNotification {
   snoozedUntilAt
   id
   usageAlert {
-    ...UsageAlert
+    id
   }
   actor {
     id
@@ -91852,16 +92819,6 @@ fragment NotificationSubscription on NotificationSubscription {
   }
   active
 }
-fragment UsageAlert on UsageAlert {
-  __typename
-  type
-  updatedAt
-  archivedAt
-  createdAt
-  resolvedAt
-  id
-  metadata
-}
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
   stats
@@ -91887,6 +92844,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   }
   lastExecutedAt
   description
+  editAccess
   triggerType
   trigger
   conditions
@@ -93180,6 +94138,7 @@ export const IssueHistoryWorkflowMetadataFragmentDoc = new TypedDocumentString(
   }
   lastExecutedAt
   description
+  editAccess
   triggerType
   trigger
   conditions
@@ -93329,6 +94288,7 @@ export const IssueHistoryTriageRuleMetadataFragmentDoc = new TypedDocumentString
   }
   lastExecutedAt
   description
+  editAccess
   triggerType
   trigger
   conditions
@@ -96599,7 +97559,7 @@ fragment UsageAlertNotification on UsageAlertNotification {
   snoozedUntilAt
   id
   usageAlert {
-    ...UsageAlert
+    id
   }
   actor {
     id
@@ -96816,16 +97776,6 @@ fragment NotificationSubscription on NotificationSubscription {
   }
   active
 }
-fragment UsageAlert on UsageAlert {
-  __typename
-  type
-  updatedAt
-  archivedAt
-  createdAt
-  resolvedAt
-  id
-  metadata
-}
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
   stats
@@ -96851,6 +97801,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   }
   lastExecutedAt
   description
+  editAccess
   triggerType
   trigger
   conditions
@@ -97458,7 +98409,7 @@ fragment UsageAlertNotification on UsageAlertNotification {
   snoozedUntilAt
   id
   usageAlert {
-    ...UsageAlert
+    id
   }
   actor {
     id
@@ -97675,16 +98626,6 @@ fragment NotificationSubscription on NotificationSubscription {
   }
   active
 }
-fragment UsageAlert on UsageAlert {
-  __typename
-  type
-  updatedAt
-  archivedAt
-  createdAt
-  resolvedAt
-  id
-  metadata
-}
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
   stats
@@ -97710,6 +98651,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   }
   lastExecutedAt
   description
+  editAccess
   triggerType
   trigger
   conditions
@@ -98752,18 +99694,6 @@ export const CustomViewSuggestionPayloadFragmentDoc = new TypedDocumentString(
     `,
   { fragmentName: "CustomViewSuggestionPayload" }
 ) as unknown as TypedDocumentString<CustomViewSuggestionPayloadFragment, unknown>;
-export const FetchDataPayloadFragmentDoc = new TypedDocumentString(
-  `
-    fragment FetchDataPayload on FetchDataPayload {
-  __typename
-  query
-  data
-  filters
-  success
-}
-    `,
-  { fragmentName: "FetchDataPayload" }
-) as unknown as TypedDocumentString<FetchDataPayloadFragment, unknown>;
 export const DocumentPayloadFragmentDoc = new TypedDocumentString(
   `
     fragment DocumentPayload on DocumentPayload {
@@ -101221,6 +102151,9 @@ export const AiConversationBaseToolCallFragmentDoc = new TypedDocumentString(
   ... on AiConversationNotifyUsersToolCall {
     ...AiConversationNotifyUsersToolCall
   }
+  ... on AiConversationPostChatMessageToolCall {
+    ...AiConversationPostChatMessageToolCall
+  }
   ... on AiConversationPromptCodingSessionToolCall {
     ...AiConversationPromptCodingSessionToolCall
   }
@@ -101238,6 +102171,9 @@ export const AiConversationBaseToolCallFragmentDoc = new TypedDocumentString(
   }
   ... on AiConversationReadSandboxFileToolCall {
     ...AiConversationReadSandboxFileToolCall
+  }
+  ... on AiConversationReadSettingToolCall {
+    ...AiConversationReadSettingToolCall
   }
   ... on AiConversationRemoveSpendLimitToolCall {
     ...AiConversationRemoveSpendLimitToolCall
@@ -101259,6 +102195,9 @@ export const AiConversationBaseToolCallFragmentDoc = new TypedDocumentString(
   }
   ... on AiConversationSearchEntitiesToolCall {
     ...AiConversationSearchEntitiesToolCall
+  }
+  ... on AiConversationSearchSettingsToolCall {
+    ...AiConversationSearchSettingsToolCall
   }
   ... on AiConversationSetSpendLimitToolCall {
     ...AiConversationSetSpendLimitToolCall
@@ -101348,6 +102287,9 @@ fragment AiConversationCreateEntityToolCallArgs on AiConversationCreateEntityToo
 }
 fragment AiConversationCreateEntityToolCallResult on AiConversationCreateEntityToolCallResult {
   __typename
+  createdEntities {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
   startedAgentSessions {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
@@ -101595,6 +102537,22 @@ fragment AiConversationNotifyUsersToolCallArgs on AiConversationNotifyUsersToolC
   summary
   userIds
 }
+fragment AiConversationPostChatMessageToolCall on AiConversationPostChatMessageToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationPostChatMessageToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationPostChatMessageToolCallArgs on AiConversationPostChatMessageToolCallArgs {
+  __typename
+  platform
+}
 fragment AiConversationPromptCodingSessionToolCall on AiConversationPromptCodingSessionToolCall {
   __typename
   rawArgs
@@ -101726,6 +102684,22 @@ fragment AiConversationReadSandboxFileToolCall on AiConversationReadSandboxFileT
 fragment AiConversationReadSandboxFileToolCallArgs on AiConversationReadSandboxFileToolCallArgs {
   __typename
   path
+}
+fragment AiConversationReadSettingToolCall on AiConversationReadSettingToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationReadSettingToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationReadSettingToolCallArgs on AiConversationReadSettingToolCallArgs {
+  __typename
+  id
 }
 fragment AiConversationRemoveSpendLimitToolCall on AiConversationRemoveSpendLimitToolCall {
   __typename
@@ -101865,6 +102839,23 @@ fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSea
   __typename
   id
   type
+}
+fragment AiConversationSearchSettingsToolCall on AiConversationSearchSettingsToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationSearchSettingsToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationSearchSettingsToolCallArgs on AiConversationSearchSettingsToolCallArgs {
+  __typename
+  parentId
+  query
 }
 fragment AiConversationSetSpendLimitToolCall on AiConversationSetSpendLimitToolCall {
   __typename
@@ -102089,6 +103080,9 @@ export const AiConversationBaseWidgetFragmentDoc = new TypedDocumentString(
   ... on AiConversationEntityListWidget {
     ...AiConversationEntityListWidget
   }
+  ... on AiConversationSettingWidget {
+    ...AiConversationSettingWidget
+  }
 }
     fragment AiConversationEntityCardWidget on AiConversationEntityCardWidget {
   __typename
@@ -102131,6 +103125,29 @@ fragment AiConversationEntityListWidgetArgsEntities on AiConversationEntityListW
   __typename
   note
   id
+}
+fragment AiConversationSettingWidget on AiConversationSettingWidget {
+  __typename
+  displayInfo {
+    ...AiConversationWidgetDisplayInfo
+  }
+  rawArgs
+  args {
+    ...AiConversationSettingWidgetArgs
+  }
+  name
+}
+fragment AiConversationSettingWidgetArgs on AiConversationSettingWidgetArgs {
+  __typename
+  target {
+    ...AiConversationSettingWidgetArgsTarget
+  }
+  id
+}
+fragment AiConversationSettingWidgetArgsTarget on AiConversationSettingWidgetArgsTarget {
+  __typename
+  id
+  type
 }
 fragment AiConversationWidgetDisplayInfo on AiConversationWidgetDisplayInfo {
   __typename
@@ -104426,15 +105443,30 @@ fragment PageInfo on PageInfo {
 }`,
   { fragmentName: "DocumentSearchPayload" }
 ) as unknown as TypedDocumentString<DocumentSearchPayloadFragment, unknown>;
+export const DraftGenerationMetadataFragmentDoc = new TypedDocumentString(
+  `
+    fragment DraftGenerationMetadata on DraftGenerationMetadata {
+  __typename
+  generatedContent
+  generationCount
+  generatedAt
+}
+    `,
+  { fragmentName: "DraftGenerationMetadata" }
+) as unknown as TypedDocumentString<DraftGenerationMetadataFragment, unknown>;
 export const DraftFragmentDoc = new TypedDocumentString(
   `
     fragment Draft on Draft {
   __typename
   data
+  generationMetadata {
+    ...DraftGenerationMetadata
+  }
   customerNeed {
     id
   }
   bodyData
+  updateHealth
   initiative {
     id
   }
@@ -104465,7 +105497,12 @@ export const DraftFragmentDoc = new TypedDocumentString(
   }
   isAutogenerated
 }
-    `,
+    fragment DraftGenerationMetadata on DraftGenerationMetadata {
+  __typename
+  generatedContent
+  generationCount
+  generatedAt
+}`,
   { fragmentName: "Draft" }
 ) as unknown as TypedDocumentString<DraftFragment, unknown>;
 export const DraftConnectionFragmentDoc = new TypedDocumentString(
@@ -104482,10 +105519,14 @@ export const DraftConnectionFragmentDoc = new TypedDocumentString(
     fragment Draft on Draft {
   __typename
   data
+  generationMetadata {
+    ...DraftGenerationMetadata
+  }
   customerNeed {
     id
   }
   bodyData
+  updateHealth
   initiative {
     id
   }
@@ -104515,6 +105556,12 @@ export const DraftConnectionFragmentDoc = new TypedDocumentString(
     id
   }
   isAutogenerated
+}
+fragment DraftGenerationMetadata on DraftGenerationMetadata {
+  __typename
+  generatedContent
+  generationCount
+  generatedAt
 }
 fragment PageInfo on PageInfo {
   __typename
@@ -107753,7 +108800,7 @@ fragment UsageAlertNotification on UsageAlertNotification {
   snoozedUntilAt
   id
   usageAlert {
-    ...UsageAlert
+    id
   }
   actor {
     id
@@ -107970,16 +109017,6 @@ fragment NotificationSubscription on NotificationSubscription {
   }
   active
 }
-fragment UsageAlert on UsageAlert {
-  __typename
-  type
-  updatedAt
-  archivedAt
-  createdAt
-  resolvedAt
-  id
-  metadata
-}
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
   stats
@@ -108005,6 +109042,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   }
   lastExecutedAt
   description
+  editAccess
   triggerType
   trigger
   conditions
@@ -110660,10 +111698,14 @@ fragment DocumentContentDraft on DocumentContentDraft {
 fragment Draft on Draft {
   __typename
   data
+  generationMetadata {
+    ...DraftGenerationMetadata
+  }
   customerNeed {
     id
   }
   bodyData
+  updateHealth
   initiative {
     id
   }
@@ -111031,7 +112073,7 @@ fragment UsageAlertNotification on UsageAlertNotification {
   snoozedUntilAt
   id
   usageAlert {
-    ...UsageAlert
+    id
   }
   actor {
     id
@@ -111401,16 +112443,6 @@ fragment NotificationSubscription on NotificationSubscription {
   }
   active
 }
-fragment UsageAlert on UsageAlert {
-  __typename
-  type
-  updatedAt
-  archivedAt
-  createdAt
-  resolvedAt
-  id
-  metadata
-}
 fragment User on User {
   __typename
   description
@@ -111484,6 +112516,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   }
   lastExecutedAt
   description
+  editAccess
   triggerType
   trigger
   conditions
@@ -111571,6 +112604,12 @@ fragment IssueLabel on IssueLabel {
     id
   }
   isGroup
+}
+fragment DraftGenerationMetadata on DraftGenerationMetadata {
+  __typename
+  generatedContent
+  generationCount
+  generatedAt
 }
 fragment IssueRelationHistoryPayload on IssueRelationHistoryPayload {
   __typename
@@ -112214,6 +113253,51 @@ fragment UploadFileHeader on UploadFileHeader {
 }`,
   { fragmentName: "UploadPayload" }
 ) as unknown as TypedDocumentString<UploadPayloadFragment, unknown>;
+export const UsageAlertFragmentDoc = new TypedDocumentString(
+  `
+    fragment UsageAlert on UsageAlert {
+  __typename
+  type
+  updatedAt
+  archivedAt
+  createdAt
+  resolvedAt
+  id
+  metadata
+}
+    `,
+  { fragmentName: "UsageAlert" }
+) as unknown as TypedDocumentString<UsageAlertFragment, unknown>;
+export const UsageAlertConnectionFragmentDoc = new TypedDocumentString(
+  `
+    fragment UsageAlertConnection on UsageAlertConnection {
+  __typename
+  nodes {
+    ...UsageAlert
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+    fragment UsageAlert on UsageAlert {
+  __typename
+  type
+  updatedAt
+  archivedAt
+  createdAt
+  resolvedAt
+  id
+  metadata
+}
+fragment PageInfo on PageInfo {
+  __typename
+  startCursor
+  endCursor
+  hasPreviousPage
+  hasNextPage
+}`,
+  { fragmentName: "UsageAlertConnection" }
+) as unknown as TypedDocumentString<UsageAlertConnectionFragment, unknown>;
 export const UserConnectionFragmentDoc = new TypedDocumentString(
   `
     fragment UserConnection on UserConnection {
@@ -128370,7 +129454,7 @@ fragment UsageAlertNotification on UsageAlertNotification {
   snoozedUntilAt
   id
   usageAlert {
-    ...UsageAlert
+    id
   }
   actor {
     id
@@ -128587,16 +129671,6 @@ fragment NotificationSubscription on NotificationSubscription {
   }
   active
 }
-fragment UsageAlert on UsageAlert {
-  __typename
-  type
-  updatedAt
-  archivedAt
-  createdAt
-  resolvedAt
-  id
-  metadata
-}
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
   stats
@@ -128622,6 +129696,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   }
   lastExecutedAt
   description
+  editAccess
   triggerType
   trigger
   conditions
@@ -129124,7 +130199,7 @@ fragment UsageAlertNotification on UsageAlertNotification {
   snoozedUntilAt
   id
   usageAlert {
-    ...UsageAlert
+    id
   }
   actor {
     id
@@ -129341,16 +130416,6 @@ fragment NotificationSubscription on NotificationSubscription {
   }
   active
 }
-fragment UsageAlert on UsageAlert {
-  __typename
-  type
-  updatedAt
-  archivedAt
-  createdAt
-  resolvedAt
-  id
-  metadata
-}
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
   stats
@@ -129376,6 +130441,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   }
   lastExecutedAt
   description
+  editAccess
   triggerType
   trigger
   conditions
@@ -137874,6 +138940,62 @@ export const TriageResponsibility_ManualSelectionDocument = new TypedDocumentStr
   TriageResponsibility_ManualSelectionQuery,
   TriageResponsibility_ManualSelectionQueryVariables
 >;
+export const UsageAlertDocument = new TypedDocumentString(`
+    query usageAlert($id: String!) {
+  usageAlert(id: $id) {
+    ...UsageAlert
+  }
+}
+    fragment UsageAlert on UsageAlert {
+  __typename
+  type
+  updatedAt
+  archivedAt
+  createdAt
+  resolvedAt
+  id
+  metadata
+}`) as unknown as TypedDocumentString<UsageAlertQuery, UsageAlertQueryVariables>;
+export const UsageAlertsDocument = new TypedDocumentString(`
+    query usageAlerts($after: String, $before: String, $filter: UsageAlertFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  usageAlerts(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...UsageAlertConnection
+  }
+}
+    fragment UsageAlert on UsageAlert {
+  __typename
+  type
+  updatedAt
+  archivedAt
+  createdAt
+  resolvedAt
+  id
+  metadata
+}
+fragment PageInfo on PageInfo {
+  __typename
+  startCursor
+  endCursor
+  hasPreviousPage
+  hasNextPage
+}
+fragment UsageAlertConnection on UsageAlertConnection {
+  __typename
+  nodes {
+    ...UsageAlert
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}`) as unknown as TypedDocumentString<UsageAlertsQuery, UsageAlertsQueryVariables>;
 export const UserDocument = new TypedDocumentString(`
     query user($id: String!) {
   user(id: $id) {
@@ -138699,10 +139821,14 @@ export const User_DraftsDocument = new TypedDocumentString(`
     fragment Draft on Draft {
   __typename
   data
+  generationMetadata {
+    ...DraftGenerationMetadata
+  }
   customerNeed {
     id
   }
   bodyData
+  updateHealth
   initiative {
     id
   }
@@ -138732,6 +139858,12 @@ export const User_DraftsDocument = new TypedDocumentString(`
     id
   }
   isAutogenerated
+}
+fragment DraftGenerationMetadata on DraftGenerationMetadata {
+  __typename
+  generatedContent
+  generationCount
+  generatedAt
 }
 fragment DraftConnection on DraftConnection {
   __typename
@@ -140838,10 +141970,14 @@ export const Viewer_DraftsDocument = new TypedDocumentString(`
     fragment Draft on Draft {
   __typename
   data
+  generationMetadata {
+    ...DraftGenerationMetadata
+  }
   customerNeed {
     id
   }
   bodyData
+  updateHealth
   initiative {
     id
   }
@@ -140871,6 +142007,12 @@ export const Viewer_DraftsDocument = new TypedDocumentString(`
     id
   }
   isAutogenerated
+}
+fragment DraftGenerationMetadata on DraftGenerationMetadata {
+  __typename
+  generatedContent
+  generationCount
+  generatedAt
 }
 fragment DraftConnection on DraftConnection {
   __typename
@@ -145839,7 +146981,7 @@ fragment UsageAlertNotification on UsageAlertNotification {
   snoozedUntilAt
   id
   usageAlert {
-    ...UsageAlert
+    id
   }
   actor {
     id
@@ -146056,16 +147198,6 @@ fragment NotificationSubscription on NotificationSubscription {
   }
   active
 }
-fragment UsageAlert on UsageAlert {
-  __typename
-  type
-  updatedAt
-  archivedAt
-  createdAt
-  resolvedAt
-  id
-  metadata
-}
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
   stats
@@ -146091,6 +147223,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   }
   lastExecutedAt
   description
+  editAccess
   triggerType
   trigger
   conditions
@@ -146476,7 +147609,7 @@ fragment UsageAlertNotification on UsageAlertNotification {
   snoozedUntilAt
   id
   usageAlert {
-    ...UsageAlert
+    id
   }
   actor {
     id
@@ -146693,16 +147826,6 @@ fragment NotificationSubscription on NotificationSubscription {
   }
   active
 }
-fragment UsageAlert on UsageAlert {
-  __typename
-  type
-  updatedAt
-  archivedAt
-  createdAt
-  resolvedAt
-  id
-  metadata
-}
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
   stats
@@ -146728,6 +147851,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   }
   lastExecutedAt
   description
+  editAccess
   triggerType
   trigger
   conditions
@@ -147139,7 +148263,7 @@ fragment UsageAlertNotification on UsageAlertNotification {
   snoozedUntilAt
   id
   usageAlert {
-    ...UsageAlert
+    id
   }
   actor {
     id
@@ -147356,16 +148480,6 @@ fragment NotificationSubscription on NotificationSubscription {
   }
   active
 }
-fragment UsageAlert on UsageAlert {
-  __typename
-  type
-  updatedAt
-  archivedAt
-  createdAt
-  resolvedAt
-  id
-  metadata
-}
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
   stats
@@ -147391,6 +148505,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   }
   lastExecutedAt
   description
+  editAccess
   triggerType
   trigger
   conditions
@@ -147784,7 +148899,7 @@ fragment UsageAlertNotification on UsageAlertNotification {
   snoozedUntilAt
   id
   usageAlert {
-    ...UsageAlert
+    id
   }
   actor {
     id
@@ -148001,16 +149116,6 @@ fragment NotificationSubscription on NotificationSubscription {
   }
   active
 }
-fragment UsageAlert on UsageAlert {
-  __typename
-  type
-  updatedAt
-  archivedAt
-  createdAt
-  resolvedAt
-  id
-  metadata
-}
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
   stats
@@ -148036,6 +149141,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   }
   lastExecutedAt
   description
+  editAccess
   triggerType
   trigger
   conditions
@@ -148429,7 +149535,7 @@ fragment UsageAlertNotification on UsageAlertNotification {
   snoozedUntilAt
   id
   usageAlert {
-    ...UsageAlert
+    id
   }
   actor {
     id
@@ -148646,16 +149752,6 @@ fragment NotificationSubscription on NotificationSubscription {
   }
   active
 }
-fragment UsageAlert on UsageAlert {
-  __typename
-  type
-  updatedAt
-  archivedAt
-  createdAt
-  resolvedAt
-  id
-  metadata
-}
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
   stats
@@ -148681,6 +149777,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   }
   lastExecutedAt
   description
+  editAccess
   triggerType
   trigger
   conditions
@@ -149205,7 +150302,7 @@ fragment UsageAlertNotification on UsageAlertNotification {
   snoozedUntilAt
   id
   usageAlert {
-    ...UsageAlert
+    id
   }
   actor {
     id
@@ -149422,16 +150519,6 @@ fragment NotificationSubscription on NotificationSubscription {
   }
   active
 }
-fragment UsageAlert on UsageAlert {
-  __typename
-  type
-  updatedAt
-  archivedAt
-  createdAt
-  resolvedAt
-  id
-  metadata
-}
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
   stats
@@ -149457,6 +150544,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   }
   lastExecutedAt
   description
+  editAccess
   triggerType
   trigger
   conditions
@@ -149842,7 +150930,7 @@ fragment UsageAlertNotification on UsageAlertNotification {
   snoozedUntilAt
   id
   usageAlert {
-    ...UsageAlert
+    id
   }
   actor {
     id
@@ -150059,16 +151147,6 @@ fragment NotificationSubscription on NotificationSubscription {
   }
   active
 }
-fragment UsageAlert on UsageAlert {
-  __typename
-  type
-  updatedAt
-  archivedAt
-  createdAt
-  resolvedAt
-  id
-  metadata
-}
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
   stats
@@ -150094,6 +151172,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   }
   lastExecutedAt
   description
+  editAccess
   triggerType
   trigger
   conditions
@@ -150487,7 +151566,7 @@ fragment UsageAlertNotification on UsageAlertNotification {
   snoozedUntilAt
   id
   usageAlert {
-    ...UsageAlert
+    id
   }
   actor {
     id
@@ -150704,16 +151783,6 @@ fragment NotificationSubscription on NotificationSubscription {
   }
   active
 }
-fragment UsageAlert on UsageAlert {
-  __typename
-  type
-  updatedAt
-  archivedAt
-  createdAt
-  resolvedAt
-  id
-  metadata
-}
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
   stats
@@ -150739,6 +151808,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   }
   lastExecutedAt
   description
+  editAccess
   triggerType
   trigger
   conditions

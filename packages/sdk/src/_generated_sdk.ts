@@ -1382,11 +1382,15 @@ export class AiConversationCreateEntityToolCallArgs extends Request {
 export class AiConversationCreateEntityToolCallResult extends Request {
   public constructor(request: LinearRequest, data: L.AiConversationCreateEntityToolCallResultFragment) {
     super(request);
+    this.createdEntities = data.createdEntities
+      ? data.createdEntities.map(node => new AiConversationSearchEntitiesToolCallResultEntities(request, node))
+      : undefined;
     this.startedAgentSessions = data.startedAgentSessions
       ? data.startedAgentSessions.map(node => new AiConversationSearchEntitiesToolCallResultEntities(request, node))
       : undefined;
   }
 
+  public createdEntities?: AiConversationSearchEntitiesToolCallResultEntities[] | null;
   public startedAgentSessions?: AiConversationSearchEntitiesToolCallResultEntities[] | null;
 }
 /**
@@ -2324,6 +2328,46 @@ export class AiConversationPartMetadata extends Request {
   public phase?: L.AiConversationPartPhase | null;
 }
 /**
+ * AiConversationPostChatMessageToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationPostChatMessageToolCallFragment response data
+ */
+export class AiConversationPostChatMessageToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationPostChatMessageToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationPostChatMessageToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationPostChatMessageToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationPostChatMessageToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationPostChatMessageToolCallArgsFragment response data
+ */
+export class AiConversationPostChatMessageToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationPostChatMessageToolCallArgsFragment) {
+    super(request);
+    this.platform = data.platform;
+  }
+
+  public platform: L.AiConversationPostChatMessageToolCallArgsPlatform;
+}
+/**
  * AiConversationPromptCodingSessionToolCall model
  *
  * @param request - function to call the graphql client
@@ -2661,6 +2705,46 @@ export class AiConversationReadSandboxFileToolCallArgs extends Request {
   }
 
   public path: string;
+}
+/**
+ * AiConversationReadSettingToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationReadSettingToolCallFragment response data
+ */
+export class AiConversationReadSettingToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationReadSettingToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationReadSettingToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationReadSettingToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationReadSettingToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationReadSettingToolCallArgsFragment response data
+ */
+export class AiConversationReadSettingToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationReadSettingToolCallArgsFragment) {
+    super(request);
+    this.id = data.id;
+  }
+
+  public id: string;
 }
 /**
  * A reasoning part in an AI conversation.
@@ -3018,6 +3102,48 @@ export class AiConversationSearchEntitiesToolCallResultEntities extends Request 
   public type: string;
 }
 /**
+ * AiConversationSearchSettingsToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSearchSettingsToolCallFragment response data
+ */
+export class AiConversationSearchSettingsToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSearchSettingsToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationSearchSettingsToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationSearchSettingsToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationSearchSettingsToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSearchSettingsToolCallArgsFragment response data
+ */
+export class AiConversationSearchSettingsToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSearchSettingsToolCallArgsFragment) {
+    super(request);
+    this.parentId = data.parentId ?? undefined;
+    this.query = data.query ?? undefined;
+  }
+
+  public parentId?: string | null;
+  public query?: string | null;
+}
+/**
  * AiConversationSetSpendLimitToolCall model
  *
  * @param request - function to call the graphql client
@@ -3056,6 +3182,66 @@ export class AiConversationSetSpendLimitToolCallArgs extends Request {
   }
 
   public summary?: string | null;
+}
+/**
+ * AiConversationSettingWidget model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSettingWidgetFragment response data
+ */
+export class AiConversationSettingWidget extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSettingWidgetFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.args = data.args ? new AiConversationSettingWidgetArgs(request, data.args) : undefined;
+    this.displayInfo = data.displayInfo ? new AiConversationWidgetDisplayInfo(request, data.displayInfo) : undefined;
+    this.name = data.name;
+  }
+
+  /** The arguments of the widget. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The arguments to the widget. */
+  public args?: AiConversationSettingWidgetArgs | null;
+  /** Display information for the widget, including ProseMirror and Markdown representations. */
+  public displayInfo?: AiConversationWidgetDisplayInfo | null;
+  /** The name of the widget. */
+  public name: L.AiConversationWidgetName;
+}
+/**
+ * AiConversationSettingWidgetArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSettingWidgetArgsFragment response data
+ */
+export class AiConversationSettingWidgetArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSettingWidgetArgsFragment) {
+    super(request);
+    this.id = data.id;
+    this.target = data.target ? new AiConversationSettingWidgetArgsTarget(request, data.target) : undefined;
+  }
+
+  /** The stable semantic setting ID returned by SearchSettings */
+  public id: string;
+  /** The resolved settings target returned by ReadSetting */
+  public target?: AiConversationSettingWidgetArgsTarget | null;
+}
+/**
+ * AiConversationSettingWidgetArgsTarget model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSettingWidgetArgsTargetFragment response data
+ */
+export class AiConversationSettingWidgetArgsTarget extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSettingWidgetArgsTargetFragment) {
+    super(request);
+    this.id = data.id ?? undefined;
+    this.type = data.type;
+  }
+
+  /** The settings target UUID, when the scope does not imply it */
+  public id?: string | null;
+  /** The settings target entity type */
+  public type: string;
 }
 /**
  * AiConversationSpawnSubagentToolCall model
@@ -5360,7 +5546,7 @@ export class Customer extends Request {
     this._tier = data.tier ?? undefined;
   }
 
-  /** The approximate count of customer needs (requests) associated with this customer. This is a denormalized counter and may not reflect the exact count at all times. */
+  /** The approximate number of distinct requests associated with this customer, deduplicated per issue or project. This is a denormalized counter and may not reflect the exact count at all times. */
   public approximateNeedCount: number;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
@@ -6477,7 +6663,7 @@ export class CustomerWebhookPayload {
     this.tier = data.tier ? new CustomerTierChildWebhookPayload(data.tier) : undefined;
   }
 
-  /** The approximate number of needs of the customer. */
+  /** The approximate number of distinct requests associated with this customer, deduplicated per issue or project. This is a denormalized counter and may not reflect the exact count at all times. */
   public approximateNeedCount: number;
   /** The time at which the entity was archived. */
   public archivedAt?: string | null;
@@ -7393,7 +7579,7 @@ export class DocumentContentHistoryType extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.documentContentId = data.documentContentId;
     this.id = data.id;
-    this.metadata = parseJson(data.metadata) ?? undefined;
+    this.metadata = data.metadata ?? undefined;
   }
 
   /** IDs of users whose edits are included in this history entry. */
@@ -7407,7 +7593,7 @@ export class DocumentContentHistoryType extends Request {
   /** The unique identifier of the document content history entry. */
   public id: string;
   /** Metadata associated with the history entry, including content diffs and AI-generated change summaries. */
-  public metadata?: Record<string, unknown> | null;
+  public metadata?: L.Scalars["JSONObject"] | null;
 }
 /**
  * A pending revision of document content. Revisions are seeded from the live document state and stored as base64-encoded Yjs state updates, allowing automation edits to accumulate without affecting the published document until the changes are explicitly applied.
@@ -7843,6 +8029,10 @@ export class Draft extends Request {
     this.id = data.id;
     this.isAutogenerated = data.isAutogenerated;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.generationMetadata = data.generationMetadata
+      ? new DraftGenerationMetadata(request, data.generationMetadata)
+      : undefined;
+    this.updateHealth = data.updateHealth ?? undefined;
     this._customerNeed = data.customerNeed ?? undefined;
     this._initiative = data.initiative ?? undefined;
     this._initiativeUpdate = data.initiativeUpdate ?? undefined;
@@ -7871,6 +8061,10 @@ export class Draft extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** Metadata about the AI generation of the draft. Null when the draft was not auto-generated. This is a computed field derived from 'data', so clients can read the generation metadata without parsing that payload. */
+  public generationMetadata?: DraftGenerationMetadata | null;
+  /** The health status carried by a project update or initiative update draft. Possible values are onTrack, atRisk, or offTrack. Null for other draft types. This is a computed field derived from 'data', so clients can read the health without parsing that payload. */
+  public updateHealth?: L.DraftUpdateHealthType | null;
   /** The customer need that this draft is referencing. Null if the draft belongs to a different parent entity type. */
   public get customerNeed(): LinearFetch<CustomerNeed> | undefined {
     return this._customerNeed?.id
@@ -7968,6 +8162,27 @@ export class DraftConnection extends Connection<Draft> {
       new PageInfo(request, data.pageInfo)
     );
   }
+}
+/**
+ * Metadata about AI-generated draft content.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.DraftGenerationMetadataFragment response data
+ */
+export class DraftGenerationMetadata extends Request {
+  public constructor(request: LinearRequest, data: L.DraftGenerationMetadataFragment) {
+    super(request);
+    this.generatedAt = parseDate(data.generatedAt) ?? new Date();
+    this.generatedContent = data.generatedContent;
+    this.generationCount = data.generationCount;
+  }
+
+  /** The time at which the draft content was generated. */
+  public generatedAt: Date;
+  /** The generated text content as a ProseMirror document. */
+  public generatedContent: L.Scalars["JSONObject"];
+  /** The number of times the draft content has been generated. */
+  public generationCount: number;
 }
 /**
  * An email address that creates Linear issues when emails are sent to it. Email intake addresses can be scoped to a specific team or issue template, and support configurable auto-reply messages for issue creation, completion, and cancellation events. They can also be configured for the Asks web form feature, enabling external users to submit requests via email.
@@ -9103,30 +9318,6 @@ export class FavoritePayload extends Request {
   public get favoriteId(): string | undefined {
     return this._favorite?.id;
   }
-}
-/**
- * The result of a data fetch query using natural language.
- *
- * @param request - function to call the graphql client
- * @param data - L.FetchDataPayloadFragment response data
- */
-export class FetchDataPayload extends Request {
-  public constructor(request: LinearRequest, data: L.FetchDataPayloadFragment) {
-    super(request);
-    this.data = data.data ?? undefined;
-    this.filters = data.filters ?? undefined;
-    this.query = data.query ?? undefined;
-    this.success = data.success;
-  }
-
-  /** The fetched data as a JSON object. The shape depends on the natural language query and the resolved GraphQL query. Null if the query returned no results. */
-  public data?: L.Scalars["JSONObject"] | null;
-  /** The filter variables that were generated and applied to the GraphQL query. Null if no filters were needed. */
-  public filters?: L.Scalars["JSONObject"] | null;
-  /** The GraphQL query that was generated from the natural language input and executed to produce the data. Useful for debugging or reusing the query directly. */
-  public query?: string | null;
-  /** Whether the fetch operation was successful. */
-  public success: boolean;
 }
 /**
  * FileUploadDeletePayload model
@@ -23463,7 +23654,7 @@ export class UsageAlert extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** Type-specific metadata captured when the alert was triggered. */
+  /** Type-specific snapshot captured when the alert was triggered, keyed by the alert type — for example the credit balance and threshold for a lowBalance alert. A resolution entry is added once new usage credits have landed and cleared the alert's condition. */
   public metadata: L.Scalars["JSONObject"];
   /** The time when the usage alert was resolved or archived. Null if the alert is still active. */
   public resolvedAt?: Date | null;
@@ -23476,6 +23667,27 @@ export class UsageAlert extends Request {
   public updatedAt: Date;
 }
 /**
+ * UsageAlertConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this UsageAlertConnection model
+ * @param data - UsageAlertConnection response data
+ */
+export class UsageAlertConnection extends Connection<UsageAlert> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<UsageAlert> | undefined>,
+    data: L.UsageAlertConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new UsageAlert(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
  * A notification related to a usage alert, sent to workspace billing admins.
  *
  * @param request - function to call the graphql client
@@ -23484,6 +23696,7 @@ export class UsageAlert extends Request {
 export class UsageAlertNotification extends Request {
   private _actor?: L.UsageAlertNotificationFragment["actor"];
   private _externalUserActor?: L.UsageAlertNotificationFragment["externalUserActor"];
+  private _usageAlert: L.UsageAlertNotificationFragment["usageAlert"];
   private _user: L.UsageAlertNotificationFragment["user"];
 
   public constructor(request: LinearRequest, data: L.UsageAlertNotificationFragment) {
@@ -23499,10 +23712,10 @@ export class UsageAlertNotification extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.usageAlertId = data.usageAlertId;
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
-    this.usageAlert = new UsageAlert(request, data.usageAlert);
     this.category = data.category;
     this._actor = data.actor ?? undefined;
     this._externalUserActor = data.externalUserActor ?? undefined;
+    this._usageAlert = data.usageAlert;
     this._user = data.user;
   }
 
@@ -23531,8 +23744,6 @@ export class UsageAlertNotification extends Request {
   public usageAlertId: string;
   /** The bot that caused the notification. */
   public botActor?: ActorBot | null;
-  /** The usage alert related to the notification. */
-  public usageAlert: UsageAlert;
   /** The category of the notification. */
   public category: L.NotificationCategory;
   /** The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
@@ -23552,6 +23763,10 @@ export class UsageAlertNotification extends Request {
   /** The ID of external user that caused the notification. populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like slack or github) rather than a linear workspace member. */
   public get externalUserActorId(): string | undefined {
     return this._externalUserActor?.id;
+  }
+  /** The usage alert related to the notification. */
+  public get usageAlert(): LinearFetch<UsageAlert> | undefined {
+    return new UsageAlertQuery(this._request).fetch(this._usageAlert.id);
   }
   /** The recipient user of this notification. */
   public get user(): LinearFetch<User> | undefined {
@@ -25531,6 +25746,7 @@ export class WorkflowDefinition extends Request {
     this.stats = data.stats ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.contextViewType = data.contextViewType ?? undefined;
+    this.editAccess = data.editAccess ?? undefined;
     this.trigger = data.trigger;
     this.triggerType = data.triggerType;
     this.type = data.type;
@@ -25592,6 +25808,8 @@ export class WorkflowDefinition extends Request {
   public updatedAt: Date;
   /** The type of view to which this workflow's context is associated with. */
   public contextViewType?: L.ContextViewType | null;
+  /** The edit access setting for this workflow definition. When unset, access is derived from restrictEditing. */
+  public editAccess?: L.WorkflowDefinitionEditAccess | null;
   /** The event that triggers the workflow, such as entity creation, update, or a specific state change. */
   public trigger: L.WorkflowTrigger;
   /** The entity type that triggers this workflow, such as Issue, Project, or Release. */
@@ -30338,6 +30556,72 @@ export class TriageResponsibilityQuery extends Request {
     const data = response.triageResponsibility;
 
     return new TriageResponsibility(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UsageAlert Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UsageAlertQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UsageAlert query and return a UsageAlert
+   *
+   * @param id - required id to pass to usageAlert
+   * @returns parsed response from UsageAlertQuery
+   */
+  public async fetch(id: string): LinearFetch<UsageAlert> {
+    const response = await this._request<L.UsageAlertQuery, L.UsageAlertQueryVariables>(
+      L.UsageAlertDocument.toString(),
+      {
+        id,
+      }
+    );
+    const data = response.usageAlert;
+
+    return new UsageAlert(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UsageAlerts Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UsageAlertsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UsageAlerts query and return a UsageAlertConnection
+   *
+   * @param variables - variables to pass into the UsageAlertsQuery
+   * @returns parsed response from UsageAlertsQuery
+   */
+  public async fetch(variables?: L.UsageAlertsQueryVariables): LinearFetch<UsageAlertConnection> {
+    const response = await this._request<L.UsageAlertsQuery, L.UsageAlertsQueryVariables>(
+      L.UsageAlertsDocument.toString(),
+      variables
+    );
+    const data = response.usageAlerts;
+
+    return new UsageAlertConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -50247,6 +50531,24 @@ export class LinearSdk extends Request {
     return new TriageResponsibilityQuery(this._request).fetch(id);
   }
   /**
+   * One usage-based billing alert, by its identifier.
+   *
+   * @param id - required id to pass to usageAlert
+   * @returns UsageAlert
+   */
+  public usageAlert(id: string): LinearFetch<UsageAlert> {
+    return new UsageAlertQuery(this._request).fetch(id);
+  }
+  /**
+   * The workspace's usage-based billing alerts, such as a low or exhausted usage credit balance. Alerts for expired promotional credits are archived and excluded unless archived resources are requested. Use resolvedAt to tell an open alert from one whose condition has since cleared.
+   *
+   * @param variables - variables to pass into the UsageAlertsQuery
+   * @returns UsageAlertConnection
+   */
+  public usageAlerts(variables?: L.UsageAlertsQueryVariables): LinearFetch<UsageAlertConnection> {
+    return new UsageAlertsQuery(this._request).fetch(variables);
+  }
+  /**
    * Fetches a specific user by their ID.
    *
    * @param id - required id to pass to user
@@ -52032,7 +52334,7 @@ export class LinearSdk extends Request {
     return new ArchiveIssueMutation(this._request).fetch(id, variables);
   }
   /**
-   * Creates a list of issues in one transaction.
+   * Creates a list of issues atomically.
    *
    * @param input - required input to pass to createIssueBatch
    * @returns IssueBatchPayload
@@ -53757,6 +54059,7 @@ export {
   AiConversationMcpServerConnectionScopeType,
   AiConversationPartPhase,
   AiConversationPartType,
+  AiConversationPostChatMessageToolCallArgsPlatform,
   AiConversationQueryUpdatesToolCallArgsUpdateType,
   AiConversationQueryViewToolCallArgsMode,
   AiConversationReadFileToolCallArgsMode,
@@ -53776,6 +54079,7 @@ export {
   Day,
   DiffFileState,
   DocumentContentAgentCheckpointMode,
+  DraftUpdateHealthType,
   EmailIntakeAddressType,
   ExternalSyncService,
   FacetPageSource,
@@ -53786,6 +54090,7 @@ export {
   GitLinkKind,
   GithubOrgType,
   IdentityProviderType,
+  InboxBadgeScope,
   InitiativeLeadTeamChangeMode,
   InitiativeStatus,
   InitiativeTab,
@@ -53799,6 +54104,7 @@ export {
   IssueSuggestionType,
   LinearAgentMcpServersMode,
   LinearAgentTrustedSourcesMode,
+  MeetingAnalysisStatus,
   NotificationCategory,
   NotificationChannel,
   NotificationSubscriptionType,
@@ -53842,6 +54148,7 @@ export {
   TeamVisibility,
   TriageResponsibilityAction,
   TriageRuleErrorType,
+  UsageAlertType,
   UserContextViewType,
   UserFlagType,
   UserFlagUpdateOperation,
@@ -53852,6 +54159,7 @@ export {
   ViewPreferencesType,
   ViewType,
   WebhookResourceType,
+  WorkflowDefinitionEditAccess,
   WorkflowTrigger,
   WorkflowTriggerType,
   WorkflowType,

@@ -6283,6 +6283,30 @@ describe("generated", () => {
     });
   });
 
+  /** Test all UsageAlert queries */
+  describe("UsageAlerts", () => {
+    let _usageAlert: L.UsageAlert | undefined | null;
+    let _usageAlert_id: string | undefined | null;
+
+    /** Test the root connection query for the UsageAlert */
+    it("usageAlerts", async () => {
+      const usageAlerts: L.UsageAlertConnection | undefined | null = await client.usageAlerts();
+      const usageAlert = usageAlerts?.nodes?.[0];
+      _usageAlert_id = usageAlert?.id;
+      expect(usageAlerts instanceof L.UsageAlertConnection);
+    });
+
+    /** Test the root query for a single UsageAlert */
+    it("usageAlert", async () => {
+      if (_usageAlert_id) {
+        const usageAlert: L.UsageAlert | undefined | null = await client.usageAlert(_usageAlert_id);
+        expect(usageAlert instanceof L.UsageAlert);
+      } else {
+        console.warn("codegen-doc:print: No first UsageAlert found in connection - cannot test usageAlert query");
+      }
+    });
+  });
+
   /** Test UserSessions query */
   describe("UserSessions", () => {
     /** Test the root model query for UserSessions */
