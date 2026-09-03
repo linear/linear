@@ -8,7 +8,7 @@ catalog:
   "@graphql-tools/apollo-engine-loader": ^8.0.27
   "@graphql-tools/graphql-file-loader": ^7.5.13
   "@graphql-tools/load": ^7.8.8
-  "@types/node": ^24
+  "@types/node": ^24.13.3
   auto-bind: ^4.0.0
   graphql: ^15.4.0
   lodash: 4.18.1
@@ -16,7 +16,7 @@ catalog:
   rimraf: ^3.0.2
   ts-node: ^10.9.1
   tsdown: ^0.17.2
-  typescript: ^5.9
+  typescript: ^5.9.3
 
 allowBuilds:
   esbuild: true

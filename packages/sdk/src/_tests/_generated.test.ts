@@ -3577,9 +3577,8 @@ describe("generated", () => {
     /** Test the root model query for IssueTitleSuggestionFromCustomerRequest */
     it("issueTitleSuggestionFromCustomerRequest", async () => {
       const issueTitleSuggestionFromCustomerRequest:
-        | L.IssueTitleSuggestionFromCustomerRequestPayload
-        | undefined
-        | null = await client.issueTitleSuggestionFromCustomerRequest("mock-request");
+        L.IssueTitleSuggestionFromCustomerRequestPayload | undefined | null =
+        await client.issueTitleSuggestionFromCustomerRequest("mock-request");
       expect(issueTitleSuggestionFromCustomerRequest instanceof L.IssueTitleSuggestionFromCustomerRequestPayload);
     });
   });
@@ -6748,9 +6747,8 @@ describe("generated", () => {
     /** Test the root model query for VerifyGitHubEnterpriseServerInstallation */
     it("verifyGitHubEnterpriseServerInstallation", async () => {
       const verifyGitHubEnterpriseServerInstallation:
-        | L.GitHubEnterpriseServerInstallVerificationPayload
-        | undefined
-        | null = await client.verifyGitHubEnterpriseServerInstallation("mock-integrationId");
+        L.GitHubEnterpriseServerInstallVerificationPayload | undefined | null =
+        await client.verifyGitHubEnterpriseServerInstallation("mock-integrationId");
       expect(verifyGitHubEnterpriseServerInstallation instanceof L.GitHubEnterpriseServerInstallVerificationPayload);
     });
   });
