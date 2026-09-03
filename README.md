@@ -57,7 +57,7 @@ Open source packages:
 
 ### Get Started
 
-Make sure you have Node 18+ and Corepack enabled (`corepack enable`).
+Make sure you have Node 18+ and pnpm installed.
 
 ```shell
 # install dependencies
