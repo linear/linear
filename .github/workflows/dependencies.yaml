@@ -31,6 +31,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Build dependency update prerequisites
+        # Changeset generation imports utilities from @linear/codegen-doc.
+        run: pnpm --filter @linear/codegen-doc build:codegen-doc
+
       - name: Update dependencies
         run: pnpm update:dependencies
 
