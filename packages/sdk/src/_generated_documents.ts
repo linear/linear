@@ -2545,9 +2545,7 @@ export type AiConversationWebSearchToolCallArgs = {
 
 /** The widget. */
 export type AiConversationWidget =
-  | AiConversationEntityCardWidget
-  | AiConversationEntityListWidget
-  | AiConversationSettingWidget;
+  AiConversationEntityCardWidget | AiConversationEntityListWidget | AiConversationSettingWidget;
 
 export type AiConversationWidgetDisplayInfo = {
   __typename?: "AiConversationWidgetDisplayInfo";
@@ -7228,9 +7226,7 @@ export type ExternalEntityInfoJiraMetadata = {
 };
 
 export type ExternalEntityInfoMetadata =
-  | ExternalEntityInfoGithubMetadata
-  | ExternalEntityInfoJiraMetadata
-  | ExternalEntitySlackMetadata;
+  ExternalEntityInfoGithubMetadata | ExternalEntityInfoJiraMetadata | ExternalEntitySlackMetadata;
 
 /** Metadata about the external Slack entity. */
 export type ExternalEntitySlackMetadata = {
@@ -17884,8 +17880,7 @@ export type OrganizationInviteCreateInput = {
 };
 
 export type OrganizationInviteDetailsPayload =
-  | OrganizationAcceptedOrExpiredInviteDetailsPayload
-  | OrganizationInviteFullDetailsPayload;
+  OrganizationAcceptedOrExpiredInviteDetailsPayload | OrganizationInviteFullDetailsPayload;
 
 export type OrganizationInviteEdge = {
   __typename?: "OrganizationInviteEdge";
