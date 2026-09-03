@@ -57,7 +57,11 @@ Open source packages:
 
 ### Get Started
 
-Make sure you have Node 18+ and Corepack enabled (`corepack enable`).
+Make sure you have Node 18+ and install pnpm 12.3.1 with the [pnpm 12 standalone installer](https://pnpm.io/installation#installing-pnpm-12):
+
+```shell
+curl -fsSL https://get.pnpm.io/install.sh | env PNPM_VERSION=12.3.1 sh -
+```
 
 ```shell
 # install dependencies
