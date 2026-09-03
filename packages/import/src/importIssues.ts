@@ -65,6 +65,11 @@ export const importIssues = async (
   const client = new LinearClient({ apiKey, apiUrl });
   const importData = await importer.import();
 
+  // Resolve and validate dependency references against the source batch before any workspace mutation
+  // (team creation, label creation, or issue creation). A bad reference must abort before anything is
+  // created, otherwise a re-run would duplicate issues or strand a half-mutated workspace.
+  const resolvedDependencies = resolveDependencies(importData.issues);
+
   const viewerQuery = await client.viewer;
 
   let spinner = ora("Fetching teams and users").start();
@@ -308,11 +313,8 @@ export const importIssues = async (
   issuesProgressBar.start(importData.issues.length, 0);
   let issueCursor = 0;
 
-  // Resolve and validate dependency references against the source batch before creating anything.
-  // A bad reference must abort before any issue is created, otherwise a re-run would duplicate issues.
-  const resolvedDependencies = resolveDependencies(importData.issues);
-
-  const createdIssueIds: CreatedIssueIds = new Map();
+  // Only track created ids when dependencies need to be linked afterwards.
+  const createdIssueIds: CreatedIssueIds | undefined = resolvedDependencies.length > 0 ? new Map() : undefined;
 
   // Create issues
   for (const issue of importData.issues) {
@@ -370,27 +372,35 @@ export const importIssues = async (
     const formattedDueDate = issue.dueDate ? format(issue.dueDate, "yyyy-MM-dd") : undefined;
 
     try {
-      const createdIssue = await createIssueWithRetries(client, {
-        teamId,
-        projectId,
-        title: issue.title,
-        description,
-        priority: issue.priority,
-        labelIds,
-        stateId,
-        assigneeId,
-        createdAt: issue.createdAt,
-        completedAt: issue.completedAt,
-        dueDate: formattedDueDate,
-        estimate: issue.estimate,
-      });
+      const createdIssue = await withRateLimitRetries(() =>
+        client.createIssue({
+          teamId,
+          projectId,
+          title: issue.title,
+          description,
+          priority: issue.priority,
+          labelIds,
+          stateId,
+          assigneeId,
+          createdAt: issue.createdAt,
+          completedAt: issue.completedAt,
+          dueDate: formattedDueDate,
+          estimate: issue.estimate,
+        })
+      );
 
       if (issue.archived) {
         await (await createdIssue.issue)?.archive();
       }
 
-      const createdIssueId = (await createdIssue.issue)?.id;
-      if (createdIssueId) {
+      const createdIssueId = createdIssue.issueId;
+      if (createdIssue.success === false || !createdIssueId) {
+        issuesProgressBar.stop();
+        throw new Error(
+          `Failed to create issue "${issue.title}": the API rejected the creation (no issue id returned).`
+        );
+      }
+      if (createdIssueIds) {
         createdIssueIds.set(issue, createdIssueId);
       }
 
@@ -404,7 +414,7 @@ export const importIssues = async (
 
   issuesProgressBar.stop();
 
-  if (resolvedDependencies.length > 0) {
+  if (resolvedDependencies.length > 0 && createdIssueIds) {
     spinner = ora("Creating issue dependencies").start();
     try {
       await createRelations(client, resolvedDependencies, createdIssueIds);
@@ -436,19 +446,19 @@ const buildComments = async (
   return `${description}\n\n---\n\n${newComments.join("\n\n")}`;
 };
 
-const createIssueWithRetries = async (
-  client: LinearClient,
-  input: Parameters<LinearClient["createIssue"]>[0],
-  retries = 3
-): ReturnType<LinearClient["createIssue"]> => {
+/**
+ * Run a Linear request, retrying up to `retries` times when the API rate-limits the caller. Both issue
+ * creation and relation creation ride this wrapper so a rate-limited import does not fail midway.
+ */
+const withRateLimitRetries = async <T>(request: () => Promise<T>, retries = 3): Promise<T> => {
   try {
-    return await client.createIssue(input);
+    return await request();
   } catch (error) {
     if (error.type === "Ratelimited" && retries > 0) {
       // Hard-coded to 1 minute for now; when we do LIN-17685, we can use the X-RateLimit-Endpoint-Requests-Remaining
       // header to find out how long to wait.
       await new Promise(resolve => setTimeout(resolve, 60000));
-      return createIssueWithRetries(client, input, retries - 1);
+      return withRateLimitRetries(request, retries - 1);
     } else {
       throw error;
     }
@@ -460,39 +470,42 @@ const createIssueWithRetries = async (
  * dependency pairs to create. Each reference is matched, in order, against:
  *
  * 1. a source issue's externalId (its row `Id`),
- * 2. an issue identifier in the batch (a bare identifier string is also matched case-insensitively
- *    against titles as the final fallback),
- * 3. a case-insensitive, trimmed title match.
+ * 2. a case-insensitive, trimmed title match.
  *
  * A reference that matches zero issues or more than one issue aborts the import before any issue is created.
  * Pairs are canonicalized (the blocking issue first) and deduplicated so one dependency expressed in both
  * the `Blocks` and `Blocked By` columns is created only once.
  */
 export const resolveDependencies = (issues: Issue[]): ResolvedDependency[] => {
-  const byExternalId = new Map<string, Issue>();
+  const byExternalId = new Map<string, Issue[]>();
   const byLowerTitle = new Map<string, Issue[]>();
 
   for (const issue of issues) {
     if (issue.externalId) {
-      byExternalId.set(issue.externalId, issue);
+      const idMatches = byExternalId.get(issue.externalId) ?? [];
+      idMatches.push(issue);
+      byExternalId.set(issue.externalId, idMatches);
     }
-    const lowerTitle = issue.title?.trim().toLowerCase();
-    if (lowerTitle) {
-      const existing = byLowerTitle.get(lowerTitle) ?? [];
-      existing.push(issue);
-      byLowerTitle.set(lowerTitle, existing);
-    }
+    const lowerTitle = issue.title.trim().toLowerCase();
+    const titleMatches = byLowerTitle.get(lowerTitle) ?? [];
+    titleMatches.push(issue);
+    byLowerTitle.set(lowerTitle, titleMatches);
   }
 
   const match = (reference: string): Issue => {
     const trimmed = reference.trim();
-    const byId = byExternalId.get(trimmed);
-    if (byId) {
-      return byId;
+    const idMatches = byExternalId.get(trimmed);
+    if (idMatches) {
+      if (idMatches.length > 1) {
+        throw new Error(
+          `dependency reference "${reference}" matched ${idMatches.length} issues in this import (row Ids must be unique)`
+        );
+      }
+      return idMatches[0];
     }
 
     const titleMatches = byLowerTitle.get(trimmed.toLowerCase());
-    if (!titleMatches || titleMatches.length === 0) {
+    if (!titleMatches) {
       throw new Error(`dependency reference "${reference}" matched 0 issues in this import`);
     }
     if (titleMatches.length > 1) {
@@ -503,29 +516,53 @@ export const resolveDependencies = (issues: Issue[]): ResolvedDependency[] => {
     return titleMatches[0];
   };
 
-  // Collect raw pairs first so the row/column context survives resolution errors.
-  const resolved: ResolvedDependency[] = [];
-  for (const issue of issues) {
-    for (const reference of issue.blocks ?? []) {
-      const target = match(reference);
-      resolved.push({ blocker: issue, blocked: target });
-    }
-    for (const reference of issue.blockedBy ?? []) {
-      const target = match(reference);
-      resolved.push({ blocker: target, blocked: issue });
-    }
-  }
+  // Two issues can only share one `blocks` relation regardless of which column expressed it, so key the
+  // seen-set on the ordered pair of issue indices and keep first-occurrence order. A pair declared in both
+  // directions (row A blocks B and row B blocks A) is rejected rather than silently collapsed, and a
+  // self-reference is rejected too, so malformed graphs fail before any issue is created.
+  const indexByIdentity = new Map<Issue, number>();
+  issues.forEach((issue, index) => indexByIdentity.set(issue, index));
 
-  // Canonicalize and dedupe. Two issues can only share one `blocks` relation regardless of which column
-  // expressed it, so key on the unordered pair of issues.
   const seen = new Set<string>();
   const unique: ResolvedDependency[] = [];
-  for (const dep of resolved) {
-    const pair = [dep.blocker, dep.blocked].sort((a, b) => (a.title < b.title ? -1 : 1));
-    const key = `${pair[0].title}\u0000${pair[1].title}`;
-    if (!seen.has(key)) {
-      seen.add(key);
-      unique.push(dep);
+  for (const issue of issues) {
+    for (const reference of issue.blocks ?? []) {
+      const blocked = match(reference);
+      if (blocked === issue) {
+        throw new Error(`dependency reference "${reference}" refers to the issue itself in Blocks`);
+      }
+      const blockerIdx = indexByIdentity.get(issue)!;
+      const blockedIdx = indexByIdentity.get(blocked)!;
+      const key = `${blockerIdx}:${blockedIdx}`;
+      const reverseKey = `${blockedIdx}:${blockerIdx}`;
+      if (seen.has(reverseKey)) {
+        throw new Error(
+          `dependency reference "${reference}" declares a blocks relation in both directions (rows reference each other)`
+        );
+      }
+      if (!seen.has(key)) {
+        seen.add(key);
+        unique.push({ blocker: issue, blocked });
+      }
+    }
+    for (const reference of issue.blockedBy ?? []) {
+      const blocker = match(reference);
+      if (blocker === issue) {
+        throw new Error(`dependency reference "${reference}" refers to the issue itself in Blocked By`);
+      }
+      const blockerIdx = indexByIdentity.get(issue)!;
+      const blockedIdx = indexByIdentity.get(blocker)!;
+      const key = `${blockedIdx}:${blockerIdx}`;
+      const reverseKey = `${blockerIdx}:${blockedIdx}`;
+      if (seen.has(reverseKey)) {
+        throw new Error(
+          `dependency reference "${reference}" declares a blocks relation in both directions (rows reference each other)`
+        );
+      }
+      if (!seen.has(key)) {
+        seen.add(key);
+        unique.push({ blocker, blocked: issue });
+      }
     }
   }
   return unique;
@@ -555,32 +592,17 @@ const createRelations = async (
       continue;
     }
 
-    const result = await createIssueRelationWithRetries(client, {
-      issueId,
-      relatedIssueId,
-      type: IssueRelationType.Blocks,
-    });
+    const result = await withRateLimitRetries(() =>
+      client.createIssueRelation({
+        issueId,
+        relatedIssueId,
+        type: IssueRelationType.Blocks,
+      })
+    );
     if (result.success === false) {
       throw new Error(
         `Failed to create dependency between "${dep.blocker.title}" and "${dep.blocked.title}": the API rejected the relation.`
       );
-    }
-  }
-};
-
-const createIssueRelationWithRetries = async (
-  client: LinearClient,
-  input: Parameters<LinearClient["createIssueRelation"]>[0],
-  retries = 3
-): ReturnType<LinearClient["createIssueRelation"]> => {
-  try {
-    return await client.createIssueRelation(input);
-  } catch (error) {
-    if (error.type === "Ratelimited" && retries > 0) {
-      await new Promise(resolve => setTimeout(resolve, 60000));
-      return createIssueRelationWithRetries(client, input, retries - 1);
-    } else {
-      throw error;
     }
   }
 };

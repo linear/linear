@@ -33,15 +33,6 @@ describe("resolveDependencies", () => {
     expect(pairs(resolveDependencies(issues))).toEqual([["Login page", "Auth"]]);
   });
 
-  it("deduplicates one dependency expressed in both columns", () => {
-    const issues = [
-      issue({ title: "Auth", blocks: ["Login page"], blockedBy: ["Login page"] }),
-      issue({ title: "Login page" }),
-    ];
-
-    expect(pairs(resolveDependencies(issues))).toEqual([["Auth", "Login page"]]);
-  });
-
   it("deduplicates the same dependency referenced from two rows", () => {
     const issues = [
       issue({ title: "Auth", blocks: ["Login page"] }),
@@ -49,6 +40,37 @@ describe("resolveDependencies", () => {
     ];
 
     expect(pairs(resolveDependencies(issues))).toEqual([["Auth", "Login page"]]);
+  });
+
+  it("throws when one row declares the same dependency in both columns", () => {
+    const issues = [
+      issue({ title: "Auth", blocks: ["Login page"], blockedBy: ["Login page"] }),
+      issue({ title: "Login page" }),
+    ];
+
+    expect(() => resolveDependencies(issues)).toThrow(/both directions/);
+  });
+
+  it("throws when two rows declare opposing blocks relations", () => {
+    const issues = [issue({ title: "Auth", blocks: ["Login page"] }), issue({ title: "Login page", blocks: ["Auth"] })];
+
+    expect(() => resolveDependencies(issues)).toThrow(/both directions/);
+  });
+
+  it("throws when a row declares a self-reference", () => {
+    const issues = [issue({ title: "Auth", blocks: ["Auth"] })];
+
+    expect(() => resolveDependencies(issues)).toThrow(/refers to the issue itself/);
+  });
+
+  it("throws when a row Id is duplicated and referenced", () => {
+    const issues = [
+      issue({ title: "Auth", blocks: ["CSV-7"] }),
+      issue({ title: "Login page", externalId: "CSV-7" }),
+      issue({ title: "Signup", externalId: "CSV-7" }),
+    ];
+
+    expect(() => resolveDependencies(issues)).toThrow(/row Ids must be unique/);
   });
 
   it("resolves a chain of dependencies order-independently", () => {

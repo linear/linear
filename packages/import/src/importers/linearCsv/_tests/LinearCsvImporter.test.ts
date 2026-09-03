@@ -29,8 +29,9 @@ describe("LinearCsvImporter", () => {
     const result = await importCsv(
       HEADER,
       'CSV-1,ENG,Auth,"","","","",Project,,,,"","","","","","","","","","","CSV-2, CSV-3",""',
-      'CSV-2,ENG,Login page,"","","","",Project,,,,"","","","","","","","","","","",""',
-      'CSV-3,ENG,Onboarding,"","","","",Project,,,,"","","","","","","","","","","Login page",""'
+      'CSV-2,ENG,Login page,"","","","",Project,,,,"","","","","","","","","","","","CSV-4"',
+      'CSV-3,ENG,Onboarding,"","","","",Project,,,,"","","","","","","","","","","Login page","CSV-1"',
+      'CSV-4,ENG,Signup,"","","","",Project,,,,"","","","","","","","","","","",""'
     );
 
     const [auth, login, onboarding] = result.issues;
@@ -38,7 +39,9 @@ describe("LinearCsvImporter", () => {
     expect(auth.blocks).toEqual(["CSV-2", "CSV-3"]);
     expect(auth.blockedBy).toBeUndefined();
     expect(login.blocks).toBeUndefined();
+    expect(login.blockedBy).toEqual(["CSV-4"]);
     expect(onboarding.blocks).toEqual(["Login page"]);
+    expect(onboarding.blockedBy).toEqual(["CSV-1"]);
   });
 
   it("maps the row Id onto externalId even without dependency values", async () => {
