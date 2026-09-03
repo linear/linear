@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { LinearClient } from "@linear/sdk";
+import { IssueRelationType, LinearClient } from "@linear/sdk";
 import chalk from "chalk";
 import { Presets, SingleBar } from "cli-progress";
 import { format } from "date-fns";
@@ -7,7 +7,7 @@ import inquirer from "inquirer";
 import uniq from "lodash/uniq.js";
 import ora from "ora";
 import { handleLabels } from "./helpers/labelManager.ts";
-import type { Comment, Importer, ImportResult } from "./types.ts";
+import type { Comment, Importer, ImportResult, Issue } from "./types.ts";
 import { replaceImagesInMarkdown } from "./utils/replaceImages.ts";
 
 type Id = string;
@@ -40,6 +40,17 @@ interface NonInteractiveFlags {
   includeComments?: boolean;
   selfAssign?: boolean;
 }
+
+/** One resolved dependency between two source-batch issues. Holds the source issues until creation maps them to Linear ids. */
+interface ResolvedDependency {
+  /** The issue that blocks. */
+  blocker: Issue;
+  /** The issue that is blocked. */
+  blocked: Issue;
+}
+
+/** Maps a source issue to the Linear id created for it during the import loop. */
+type CreatedIssueIds = Map<Issue, string>;
 
 /**
  * Import issues into Linear via the API.
@@ -297,6 +308,12 @@ export const importIssues = async (
   issuesProgressBar.start(importData.issues.length, 0);
   let issueCursor = 0;
 
+  // Resolve and validate dependency references against the source batch before creating anything.
+  // A bad reference must abort before any issue is created, otherwise a re-run would duplicate issues.
+  const resolvedDependencies = resolveDependencies(importData.issues);
+
+  const createdIssueIds: CreatedIssueIds = new Map();
+
   // Create issues
   for (const issue of importData.issues) {
     const issueDescription = issue.description
@@ -372,6 +389,11 @@ export const importIssues = async (
         await (await createdIssue.issue)?.archive();
       }
 
+      const createdIssueId = (await createdIssue.issue)?.id;
+      if (createdIssueId) {
+        createdIssueIds.set(issue, createdIssueId);
+      }
+
       issueCursor++;
       issuesProgressBar.update(issueCursor);
     } catch (error) {
@@ -381,6 +403,15 @@ export const importIssues = async (
   }
 
   issuesProgressBar.stop();
+
+  if (resolvedDependencies.length > 0) {
+    spinner = ora("Creating issue dependencies").start();
+    try {
+      await createRelations(client, resolvedDependencies, createdIssueIds);
+    } finally {
+      spinner.stop();
+    }
+  }
 
   console.info(chalk.green(`${importer.name} issues imported to your team: https://linear.app/team/${teamKey}/all`));
 };
@@ -418,6 +449,136 @@ const createIssueWithRetries = async (
       // header to find out how long to wait.
       await new Promise(resolve => setTimeout(resolve, 60000));
       return createIssueWithRetries(client, input, retries - 1);
+    } else {
+      throw error;
+    }
+  }
+};
+
+/**
+ * Resolve every `blocks` / `blockedBy` reference against the source batch and return the deduplicated
+ * dependency pairs to create. Each reference is matched, in order, against:
+ *
+ * 1. a source issue's externalId (its row `Id`),
+ * 2. an issue identifier in the batch (a bare identifier string is also matched case-insensitively
+ *    against titles as the final fallback),
+ * 3. a case-insensitive, trimmed title match.
+ *
+ * A reference that matches zero issues or more than one issue aborts the import before any issue is created.
+ * Pairs are canonicalized (the blocking issue first) and deduplicated so one dependency expressed in both
+ * the `Blocks` and `Blocked By` columns is created only once.
+ */
+export const resolveDependencies = (issues: Issue[]): ResolvedDependency[] => {
+  const byExternalId = new Map<string, Issue>();
+  const byLowerTitle = new Map<string, Issue[]>();
+
+  for (const issue of issues) {
+    if (issue.externalId) {
+      byExternalId.set(issue.externalId, issue);
+    }
+    const lowerTitle = issue.title?.trim().toLowerCase();
+    if (lowerTitle) {
+      const existing = byLowerTitle.get(lowerTitle) ?? [];
+      existing.push(issue);
+      byLowerTitle.set(lowerTitle, existing);
+    }
+  }
+
+  const match = (reference: string): Issue => {
+    const trimmed = reference.trim();
+    const byId = byExternalId.get(trimmed);
+    if (byId) {
+      return byId;
+    }
+
+    const titleMatches = byLowerTitle.get(trimmed.toLowerCase());
+    if (!titleMatches || titleMatches.length === 0) {
+      throw new Error(`dependency reference "${reference}" matched 0 issues in this import`);
+    }
+    if (titleMatches.length > 1) {
+      throw new Error(
+        `dependency reference "${reference}" matched ${titleMatches.length} issues in this import (titles must be unique)`
+      );
+    }
+    return titleMatches[0];
+  };
+
+  // Collect raw pairs first so the row/column context survives resolution errors.
+  const resolved: ResolvedDependency[] = [];
+  for (const issue of issues) {
+    for (const reference of issue.blocks ?? []) {
+      const target = match(reference);
+      resolved.push({ blocker: issue, blocked: target });
+    }
+    for (const reference of issue.blockedBy ?? []) {
+      const target = match(reference);
+      resolved.push({ blocker: target, blocked: issue });
+    }
+  }
+
+  // Canonicalize and dedupe. Two issues can only share one `blocks` relation regardless of which column
+  // expressed it, so key on the unordered pair of issues.
+  const seen = new Set<string>();
+  const unique: ResolvedDependency[] = [];
+  for (const dep of resolved) {
+    const pair = [dep.blocker, dep.blocked].sort((a, b) => (a.title < b.title ? -1 : 1));
+    const key = `${pair[0].title}\u0000${pair[1].title}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      unique.push(dep);
+    }
+  }
+  return unique;
+};
+
+/**
+ * Create the resolved `blocks` relations once every issue in the batch has been created. The source issues
+ * resolved at validation time are mapped to their created Linear ids; any issue whose creation did not return
+ * an id is skipped and reported. Each relation creation is retried on rate limits, and its `success` flag is
+ * checked so a silent partial graph is never reported as a successful import.
+ */
+const createRelations = async (
+  client: LinearClient,
+  dependencies: ResolvedDependency[],
+  createdIssueIds: CreatedIssueIds
+): Promise<void> => {
+  for (const dep of dependencies) {
+    const issueId = createdIssueIds.get(dep.blocker);
+    const relatedIssueId = createdIssueIds.get(dep.blocked);
+
+    if (!issueId || !relatedIssueId) {
+      console.error(
+        chalk.yellow(
+          `Skipped dependency "${dep.blocked.title}" blocked by "${dep.blocker.title}": a referenced issue could not be matched to a created issue.`
+        )
+      );
+      continue;
+    }
+
+    const result = await createIssueRelationWithRetries(client, {
+      issueId,
+      relatedIssueId,
+      type: IssueRelationType.Blocks,
+    });
+    if (result.success === false) {
+      throw new Error(
+        `Failed to create dependency between "${dep.blocker.title}" and "${dep.blocked.title}": the API rejected the relation.`
+      );
+    }
+  }
+};
+
+const createIssueRelationWithRetries = async (
+  client: LinearClient,
+  input: Parameters<LinearClient["createIssueRelation"]>[0],
+  retries = 3
+): ReturnType<LinearClient["createIssueRelation"]> => {
+  try {
+    return await client.createIssueRelation(input);
+  } catch (error) {
+    if (error.type === "Ratelimited" && retries > 0) {
+      await new Promise(resolve => setTimeout(resolve, 60000));
+      return createIssueRelationWithRetries(client, input, retries - 1);
     } else {
       throw error;
     }
