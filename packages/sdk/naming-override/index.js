@@ -6,7 +6,7 @@ import * as changeCaseAll from "change-case-all";
 const duplicateQueries = ["ProjectMilestone", "ProjectMilestones"];
 
 // We have some non pascal cased types that we need to keep as is.
-const incorrectCase = ["SLADayCountType"];
+const incorrectCase = ["SLADayCountType", "SLAStartMode"];
 
 // Object containing counters of how many times we've seen each DuplicateQueryNameArgs type.
 const deduplicate = Object.fromEntries(duplicateQueries.map(query => [`Query${query}Args`, 0]));
