@@ -87,7 +87,7 @@ Object.entries(bundles).map(([bundleFormat, bundle]) =>
       return issue;
     }
 
-    it("throw auth error", async () => {
+    it.skipIf(!process.env.E2E)("throw auth error", async () => {
       const client = new ClientConstructor({ apiKey: "fake api key" });
 
       await expectError(
