@@ -57,11 +57,7 @@ Open source packages:
 
 ### Get Started
 
-Make sure you have Node 18+, then install the pnpm version pinned by this repository with the [standalone installer](https://pnpm.io/installation#using-a-standalone-script):
-
-```shell
-curl -fsSL https://get.pnpm.io/install.sh | env PNPM_VERSION="$(node -p "require('./package.json').packageManager.split('@')[1]")" sh -
-```
+Make sure you have Node 18+ and pnpm installed.
 
 ```shell
 # install dependencies
