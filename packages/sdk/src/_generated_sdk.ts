@@ -266,10 +266,13 @@ export class AccessKeyReleaseStage extends Request {
   public constructor(request: LinearRequest, data: L.AccessKeyReleaseStageFragment) {
     super(request);
     this.name = data.name;
+    this.type = data.type;
   }
 
   /** The name of the release stage. */
   public name: string;
+  /** The type of the release stage. */
+  public type: L.ReleaseStageType;
 }
 /**
  * A bot actor representing a non-human entity that performed an action, such as an integration (GitHub, Slack, Zendesk), an AI assistant, or an automated workflow. Bot actors are displayed in activity feeds and history to indicate when changes were made by applications rather than users.
@@ -1329,6 +1332,24 @@ export class AiConversationCodeIntelligenceToolCallArgs extends Request {
   public question: string;
 }
 /**
+ * The affirmative response recorded for a confirmation elicitation.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationConfirmationElicitationResponseDataFragment response data
+ */
+export class AiConversationConfirmationElicitationResponseData extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationConfirmationElicitationResponseDataFragment) {
+    super(request);
+    this.confirmed = data.confirmed;
+    this.kind = data.kind;
+  }
+
+  /** True when the user confirmed the action. */
+  public confirmed: boolean;
+  /** The kind of elicitation that was answered. */
+  public kind: L.AiConversationElicitationKind;
+}
+/**
  * AiConversationCreateEntityToolCall model
  *
  * @param request - function to call the graphql client
@@ -1383,15 +1404,37 @@ export class AiConversationCreateEntityToolCallResult extends Request {
   public constructor(request: LinearRequest, data: L.AiConversationCreateEntityToolCallResultFragment) {
     super(request);
     this.createdEntities = data.createdEntities
-      ? data.createdEntities.map(node => new AiConversationSearchEntitiesToolCallResultEntities(request, node))
+      ? data.createdEntities.map(node => new AiConversationCreateEntityToolCallResultCreatedEntities(request, node))
       : undefined;
     this.startedAgentSessions = data.startedAgentSessions
       ? data.startedAgentSessions.map(node => new AiConversationSearchEntitiesToolCallResultEntities(request, node))
       : undefined;
   }
 
-  public createdEntities?: AiConversationSearchEntitiesToolCallResultEntities[] | null;
+  public createdEntities?: AiConversationCreateEntityToolCallResultCreatedEntities[] | null;
   public startedAgentSessions?: AiConversationSearchEntitiesToolCallResultEntities[] | null;
+}
+/**
+ * AiConversationCreateEntityToolCallResultCreatedEntities model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationCreateEntityToolCallResultCreatedEntitiesFragment response data
+ */
+export class AiConversationCreateEntityToolCallResultCreatedEntities extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationCreateEntityToolCallResultCreatedEntitiesFragment) {
+    super(request);
+    this.id = data.id;
+    this.label = data.label ?? undefined;
+    this.type = data.type;
+    this.parent = data.parent
+      ? new AiConversationSearchEntitiesToolCallResultEntities(request, data.parent)
+      : undefined;
+  }
+
+  public id: string;
+  public label?: string | null;
+  public type: string;
+  public parent?: AiConversationSearchEntitiesToolCallResultEntities | null;
 }
 /**
  * AiConversationCreateSandboxToolCall model
@@ -1446,6 +1489,7 @@ export class AiConversationDeleteEntityToolCall extends Request {
     this.rawResult = parseJson(data.rawResult) ?? undefined;
     this.args = data.args ? new AiConversationDeleteEntityToolCallArgs(request, data.args) : undefined;
     this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.result = data.result ? new AiConversationDeleteEntityToolCallResult(request, data.result) : undefined;
     this.name = data.name;
   }
 
@@ -1456,6 +1500,8 @@ export class AiConversationDeleteEntityToolCall extends Request {
   /** The arguments to the tool call. */
   public args?: AiConversationDeleteEntityToolCallArgs | null;
   public displayInfo: AiConversationToolDisplayInfo;
+  /** The result of the tool call. */
+  public result?: AiConversationDeleteEntityToolCallResult | null;
   /** The name of the tool that was called. */
   public name: L.AiConversationTool;
 }
@@ -1474,6 +1520,22 @@ export class AiConversationDeleteEntityToolCallArgs extends Request {
   public entity: AiConversationSearchEntitiesToolCallResultEntities;
 }
 /**
+ * AiConversationDeleteEntityToolCallResult model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationDeleteEntityToolCallResultFragment response data
+ */
+export class AiConversationDeleteEntityToolCallResult extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationDeleteEntityToolCallResultFragment) {
+    super(request);
+    this.deletedEntities = data.deletedEntities
+      ? data.deletedEntities.map(node => new AiConversationCreateEntityToolCallResultCreatedEntities(request, node))
+      : undefined;
+  }
+
+  public deletedEntities?: AiConversationCreateEntityToolCallResultCreatedEntities[] | null;
+}
+/**
  * A selectable option shown in an AI conversation elicitation.
  *
  * @param request - function to call the graphql client
@@ -1483,13 +1545,13 @@ export class AiConversationElicitationOption extends Request {
   public constructor(request: LinearRequest, data: L.AiConversationElicitationOptionFragment) {
     super(request);
     this.label = data.label;
-    this.prompt = data.prompt;
+    this.prompt = data.prompt ?? undefined;
   }
 
   /** The short label shown for the option. */
   public label: string;
-  /** The user prompt rendered to the agent when this option is selected. */
-  public prompt: string;
+  /** The user prompt rendered to the agent when this option is selected. Null when selecting the option only dismisses the elicitation without replying. */
+  public prompt?: string | null;
 }
 /**
  * A structured request for user input shown with an AI conversation.
@@ -1517,9 +1579,9 @@ export class AiConversationElicitationPart extends Request {
   public integrationId?: string | null;
   /** The MCP server URL for a new connection. Null for reconnects and other elicitation kinds. */
   public serverUrl?: string | null;
-  /** The title shown above the elicitation choices. */
+  /** The optional title shown above the elicitation choices. */
   public title?: string | null;
-  /** Selectable prompt options for multiple-choice elicitations. */
+  /** The selectable actions for multiple-choice and confirmation elicitations. */
   public options: AiConversationElicitationOption[];
   /** The metadata of the part. */
   public metadata: AiConversationPartMetadata;
@@ -1541,6 +1603,7 @@ export class AiConversationElicitationResponsePart extends Request {
 
   public constructor(request: LinearRequest, data: L.AiConversationElicitationResponsePartFragment) {
     super(request);
+    this.bodyData = data.bodyData ?? undefined;
     this.elicitationId = data.elicitationId;
     this.id = data.id;
     this.metadata = new AiConversationPartMetadata(request, data.metadata);
@@ -1549,6 +1612,8 @@ export class AiConversationElicitationResponsePart extends Request {
     this._user = data.user ?? undefined;
   }
 
+  /** Additional user-authored commentary submitted with the response. For a response batch, only the first response contains it. Null when none was provided. */
+  public bodyData?: L.Scalars["JSONObject"] | null;
   /** The identifier of the elicitation that was answered. */
   public elicitationId: string;
   /** The ID of the part. */
@@ -2268,6 +2333,7 @@ export class AiConversationNotifyUsersToolCall extends Request {
     this.rawResult = parseJson(data.rawResult) ?? undefined;
     this.args = data.args ? new AiConversationNotifyUsersToolCallArgs(request, data.args) : undefined;
     this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.result = data.result ? new AiConversationNotifyUsersToolCallResult(request, data.result) : undefined;
     this.name = data.name;
   }
 
@@ -2278,6 +2344,8 @@ export class AiConversationNotifyUsersToolCall extends Request {
   /** The arguments to the tool call. */
   public args?: AiConversationNotifyUsersToolCallArgs | null;
   public displayInfo: AiConversationToolDisplayInfo;
+  /** The result of the tool call. */
+  public result?: AiConversationNotifyUsersToolCallResult | null;
   /** The name of the tool that was called. */
   public name: L.AiConversationTool;
 }
@@ -2290,12 +2358,30 @@ export class AiConversationNotifyUsersToolCall extends Request {
 export class AiConversationNotifyUsersToolCallArgs extends Request {
   public constructor(request: LinearRequest, data: L.AiConversationNotifyUsersToolCallArgsFragment) {
     super(request);
+    this.message = data.message ?? undefined;
     this.summary = data.summary ?? undefined;
     this.userIds = data.userIds;
   }
 
+  public message?: string | null;
   public summary?: string | null;
   public userIds: string[];
+}
+/**
+ * AiConversationNotifyUsersToolCallResult model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationNotifyUsersToolCallResultFragment response data
+ */
+export class AiConversationNotifyUsersToolCallResult extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationNotifyUsersToolCallResultFragment) {
+    super(request);
+    this.notifiedUserIds = data.notifiedUserIds ?? undefined;
+    this.skippedUserIds = data.skippedUserIds ?? undefined;
+  }
+
+  public notifiedUserIds?: string[] | null;
+  public skippedUserIds?: string[] | null;
 }
 /**
  * Metadata about a part in an AI conversation.
@@ -2421,6 +2507,8 @@ export class AiConversationPromptCodingSessionToolCallArgs extends Request {
 export class AiConversationPromptCodingSessionToolCallResult extends Request {
   public constructor(request: LinearRequest, data: L.AiConversationPromptCodingSessionToolCallResultFragment) {
     super(request);
+    this.created = data.created ?? undefined;
+    this.quotaBlocked = data.quotaBlocked ?? undefined;
     this.agentSession = new AiConversationSearchEntitiesToolCallResultEntities(request, data.agentSession);
     this.entities = data.entities
       ? data.entities.map(node => new AiConversationSearchEntitiesToolCallResultEntities(request, node))
@@ -2430,6 +2518,8 @@ export class AiConversationPromptCodingSessionToolCallResult extends Request {
       : undefined;
   }
 
+  public created?: boolean | null;
+  public quotaBlocked?: boolean | null;
   public entities?: AiConversationSearchEntitiesToolCallResultEntities[] | null;
   public pullRequests?: AiConversationSearchEntitiesToolCallResultEntities[] | null;
   public agentSession: AiConversationSearchEntitiesToolCallResultEntities;
@@ -2892,6 +2982,7 @@ export class AiConversationRestoreEntityToolCall extends Request {
     this.rawResult = parseJson(data.rawResult) ?? undefined;
     this.args = data.args ? new AiConversationRestoreEntityToolCallArgs(request, data.args) : undefined;
     this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.result = data.result ? new AiConversationRestoreEntityToolCallResult(request, data.result) : undefined;
     this.name = data.name;
   }
 
@@ -2902,6 +2993,8 @@ export class AiConversationRestoreEntityToolCall extends Request {
   /** The arguments to the tool call. */
   public args?: AiConversationRestoreEntityToolCallArgs | null;
   public displayInfo: AiConversationToolDisplayInfo;
+  /** The result of the tool call. */
+  public result?: AiConversationRestoreEntityToolCallResult | null;
   /** The name of the tool that was called. */
   public name: L.AiConversationTool;
 }
@@ -2918,6 +3011,22 @@ export class AiConversationRestoreEntityToolCallArgs extends Request {
   }
 
   public entity: AiConversationSearchEntitiesToolCallResultEntities;
+}
+/**
+ * AiConversationRestoreEntityToolCallResult model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationRestoreEntityToolCallResultFragment response data
+ */
+export class AiConversationRestoreEntityToolCallResult extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationRestoreEntityToolCallResultFragment) {
+    super(request);
+    this.restoredEntities = data.restoredEntities
+      ? data.restoredEntities.map(node => new AiConversationCreateEntityToolCallResultCreatedEntities(request, node))
+      : undefined;
+  }
+
+  public restoredEntities?: AiConversationCreateEntityToolCallResultCreatedEntities[] | null;
 }
 /**
  * AiConversationRetrieveEntitiesToolCall model
@@ -3222,7 +3331,7 @@ export class AiConversationSettingWidgetArgs extends Request {
 
   /** The stable semantic setting ID returned by SearchSettings */
   public id: string;
-  /** The resolved settings target returned by ReadSetting */
+  /** The settings target when the setting scope does not imply it */
   public target?: AiConversationSettingWidgetArgsTarget | null;
 }
 /**
@@ -3700,9 +3809,13 @@ export class AiConversationUpdateEntityToolCallResult extends Request {
     this.startedAgentSessions = data.startedAgentSessions
       ? data.startedAgentSessions.map(node => new AiConversationSearchEntitiesToolCallResultEntities(request, node))
       : undefined;
+    this.updatedEntities = data.updatedEntities
+      ? data.updatedEntities.map(node => new AiConversationCreateEntityToolCallResultCreatedEntities(request, node))
+      : undefined;
   }
 
   public startedAgentSessions?: AiConversationSearchEntitiesToolCallResultEntities[] | null;
+  public updatedEntities?: AiConversationCreateEntityToolCallResultCreatedEntities[] | null;
 }
 /**
  * AiConversationWebSearchToolCall model
@@ -9052,6 +9165,9 @@ export class Favorite extends Request {
     this.type = data.type;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url ?? undefined;
+    this.workflowDefinition = data.workflowDefinition
+      ? new WorkflowDefinition(request, data.workflowDefinition)
+      : undefined;
     this.initiativeTab = data.initiativeTab ?? undefined;
     this.pipelineTab = data.pipelineTab ?? undefined;
     this.projectTab = data.projectTab ?? undefined;
@@ -9100,6 +9216,8 @@ export class Favorite extends Request {
   public updatedAt: Date;
   /** URL of the favorited entity. Folders return 'null' value. */
   public url?: string | null;
+  /** The favorited loop. */
+  public workflowDefinition?: WorkflowDefinition | null;
   /** The targeted tab of the initiative. */
   public initiativeTab?: L.InitiativeTab | null;
   /** The targeted tab of the release pipeline. */
@@ -21284,6 +21402,7 @@ export class SlaConfiguration extends Request {
     this.removesSla = data.removesSla;
     this.sla = data.sla ?? undefined;
     this.slaType = data.slaType ?? undefined;
+    this.startMode = data.startMode ?? undefined;
   }
 
   /** The workflow conditions that determine when this SLA rule applies. */
@@ -21298,6 +21417,8 @@ export class SlaConfiguration extends Request {
   public sla?: number | null;
   /** The SLA type used when the rule sets an SLA. */
   public slaType?: L.SLADayCountType | null;
+  /** When SLA timing begins. Null when the rule removes an SLA. */
+  public startMode?: L.SLAStartMode | null;
 }
 /**
  * Configuration for a Linear team within a Slack Asks channel mapping. Controls whether the default Asks template is enabled for the team in a given Slack channel.
@@ -23121,6 +23242,7 @@ export class Template extends Request {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.color = data.color ?? undefined;
+    this.content = data.content ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.description = data.description ?? undefined;
     this.icon = data.icon ?? undefined;
@@ -23142,6 +23264,8 @@ export class Template extends Request {
   public archivedAt?: Date | null;
   /** The hex color of the template icon. Null if no custom color has been set. */
   public color?: string | null;
+  /** The template's content in markdown format: the body it pre-fills on the entity it creates. Distinct from `description`, which says what the template is for. Form templates serialize their form fields as markdown placeholders instead. Null when the template has no content. */
+  public content?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** A description of what the template is used for. */
@@ -24764,6 +24888,7 @@ export class ViewPreferencesValues extends Request {
     this.reviewFieldPreviewLinks = data.reviewFieldPreviewLinks ?? undefined;
     this.reviewFieldQuickToReview = data.reviewFieldQuickToReview ?? undefined;
     this.reviewFieldRepository = data.reviewFieldRepository ?? undefined;
+    this.reviewFieldSla = data.reviewFieldSla ?? undefined;
     this.reviewFieldStatusDetails = data.reviewFieldStatusDetails ?? undefined;
     this.reviewGrouping = data.reviewGrouping ?? undefined;
     this.reviewViewOrdering = data.reviewViewOrdering ?? undefined;
@@ -25201,6 +25326,8 @@ export class ViewPreferencesValues extends Request {
   public reviewFieldQuickToReview?: boolean | null;
   /** Whether to show the review repository field. */
   public reviewFieldRepository?: boolean | null;
+  /** Whether to show the most pressing SLA from connected issues on review list items. Null if the preference is unset. */
+  public reviewFieldSla?: boolean | null;
   /** Whether to show review status details on a second line. */
   public reviewFieldStatusDetails?: boolean | null;
   /** The review grouping. */
@@ -25745,6 +25872,7 @@ export class WorkflowDefinition extends Request {
     this.sortOrder = data.sortOrder;
     this.stats = data.stats ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.activationMode = data.activationMode ?? undefined;
     this.contextViewType = data.contextViewType ?? undefined;
     this.editAccess = data.editAccess ?? undefined;
     this.trigger = data.trigger;
@@ -25806,6 +25934,8 @@ export class WorkflowDefinition extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The explicit activation semantics for entity updates. When null, the mode is inferred from the legacy trigger fields. */
+  public activationMode?: L.WorkflowActivationMode | null;
   /** The type of view to which this workflow's context is associated with. */
   public contextViewType?: L.ContextViewType | null;
   /** The edit access setting for this workflow definition. When unset, access is derived from restrictEditing. */
@@ -30365,6 +30495,35 @@ export class TemplateQuery extends Request {
     const data = response.template;
 
     return new Template(this._request, data);
+  }
+}
+
+/**
+ * A fetchable TemplateSearch Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class TemplateSearchQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the TemplateSearch query and return a Template list
+   *
+   * @param variables - variables to pass into the TemplateSearchQuery
+   * @returns parsed response from TemplateSearchQuery
+   */
+  public async fetch(variables?: L.TemplateSearchQueryVariables): LinearFetch<Template[]> {
+    const response = await this._request<L.TemplateSearchQuery, L.TemplateSearchQueryVariables>(
+      L.TemplateSearchDocument.toString(),
+      variables
+    );
+    const data = response.templateSearch;
+
+    return data.map(node => {
+      return new Template(this._request, node);
+    });
   }
 }
 
@@ -42593,6 +42752,38 @@ export class Favorite_ChildrenQuery extends Request {
 }
 
 /**
+ * A fetchable Favorite_WorkflowDefinition Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to favorite
+ */
+export class Favorite_WorkflowDefinitionQuery extends Request {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the Favorite_WorkflowDefinition query and return a WorkflowDefinition
+   *
+   * @returns parsed response from Favorite_WorkflowDefinitionQuery
+   */
+  public async fetch(): LinearFetch<WorkflowDefinition | undefined> {
+    const response = await this._request<
+      L.Favorite_WorkflowDefinitionQuery,
+      L.Favorite_WorkflowDefinitionQueryVariables
+    >(L.Favorite_WorkflowDefinitionDocument.toString(), {
+      id: this._id,
+    });
+    const data = response.favorite.workflowDefinition;
+
+    return data ? new WorkflowDefinition(this._request, data) : undefined;
+  }
+}
+
+/**
  * A fetchable Initiative_DocumentContent Query
  *
  * @param request - function to call the graphql client
@@ -49966,7 +50157,7 @@ export class LinearSdk extends Request {
     return new IssuesQuery(this._request).fetch(variables);
   }
   /**
-   * Returns the latest release for the pipeline associated with the access key.
+   * Returns the most recently completed or updated release for the pipeline associated with the access key.
    *
    * @returns AccessKeyRelease
    */
@@ -50219,7 +50410,7 @@ export class LinearSdk extends Request {
     return new RateLimitStatusQuery(this._request).fetch();
   }
   /**
-   * Returns recent releases for the pipeline associated with the access key, ordered with in-progress releases first, followed by the most recently completed releases.
+   * Returns releases for the pipeline associated with the access key, ordered with the most recently completed or updated first.
    *
    * @param variables - variables to pass into the RecentReleasesByAccessKeyQuery
    * @returns AccessKeyRelease[]
@@ -50474,6 +50665,15 @@ export class LinearSdk extends Request {
    */
   public template(id: string): LinearFetch<Template> {
     return new TemplateQuery(this._request).fetch(id);
+  }
+  /**
+   * Templates matching a filter, in the order they appear in the app. Filter on a null team to return only workspace-level templates.
+   *
+   * @param variables - variables to pass into the TemplateSearchQuery
+   * @returns Template[]
+   */
+  public templateSearch(variables?: L.TemplateSearchQueryVariables): LinearFetch<Template[]> {
+    return new TemplateSearchQuery(this._request).fetch(variables);
   }
   /**
    * All templates in the workspace, including both team-scoped and workspace-level templates.
@@ -54041,6 +54241,7 @@ export class LinearSdk extends Request {
   }
 }
 export {
+  AgentActivityExecutionSkippedReason,
   AgentActivitySignal,
   AgentActivityType,
   AgentAutomationRetryResolutionStatus,
@@ -54138,6 +54339,7 @@ export {
   ReleasePipelineType,
   ReleaseStageType,
   SLADayCountType,
+  SLAStartMode,
   SemanticSearchResultType,
   SendStrategy,
   SlaStatus,
@@ -54159,6 +54361,7 @@ export {
   ViewPreferencesType,
   ViewType,
   WebhookResourceType,
+  WorkflowActivationMode,
   WorkflowDefinitionEditAccess,
   WorkflowTrigger,
   WorkflowTriggerType,

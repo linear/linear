@@ -279,6 +279,22 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "type",
+            "description": "The type of the release stage.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "ReleaseStageType",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -696,6 +712,18 @@
                 "name": "Boolean",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "executionSkippedReason",
+            "description": "[Internal] The reason this activity was persisted without being sent to the agent runtime.",
+            "args": [],
+            "type": {
+              "kind": "ENUM",
+              "name": "AgentActivityExecutionSkippedReason",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -1436,6 +1464,23 @@
         "inputFields": null,
         "interfaces": [],
         "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "AgentActivityExecutionSkippedReason",
+        "description": "The reason an agent activity was persisted without being sent to the agent runtime.",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "quotaExceeded",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
         "possibleTypes": null
       },
       {
@@ -6477,6 +6522,49 @@
       },
       {
         "kind": "OBJECT",
+        "name": "AiConversationConfirmationElicitationResponseData",
+        "description": "The affirmative response recorded for a confirmation elicitation.",
+        "fields": [
+          {
+            "name": "confirmed",
+            "description": "True when the user confirmed the action.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "kind",
+            "description": "The kind of elicitation that was answered.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "AiConversationElicitationKind",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "AiConversationCreateEntityToolCall",
         "description": null,
         "fields": [
@@ -6628,7 +6716,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "OBJECT",
-                  "name": "AiConversationSearchEntitiesToolCallResultEntities",
+                  "name": "AiConversationCreateEntityToolCallResultCreatedEntities",
                   "ofType": null
                 }
               }
@@ -6651,6 +6739,73 @@
                   "name": "AiConversationSearchEntitiesToolCallResultEntities",
                   "ofType": null
                 }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AiConversationCreateEntityToolCallResultCreatedEntities",
+        "description": null,
+        "fields": [
+          {
+            "name": "id",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "label",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "parent",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "AiConversationSearchEntitiesToolCallResultEntities",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "type",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
               }
             },
             "isDeprecated": false,
@@ -6846,6 +7001,18 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "result",
+            "description": "The result of the tool call.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "AiConversationDeleteEntityToolCallResult",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -6887,6 +7054,37 @@
         "possibleTypes": null
       },
       {
+        "kind": "OBJECT",
+        "name": "AiConversationDeleteEntityToolCallResult",
+        "description": null,
+        "fields": [
+          {
+            "name": "deletedEntities",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "AiConversationCreateEntityToolCallResultCreatedEntities",
+                  "ofType": null
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "ENUM",
         "name": "AiConversationElicitationKind",
         "description": "The kind of input an AI conversation elicitation asks for.",
@@ -6894,6 +7092,12 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
+          {
+            "name": "confirmation",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "mcpServerConnection",
             "description": null,
@@ -6932,16 +7136,12 @@
           },
           {
             "name": "prompt",
-            "description": "The user prompt rendered to the agent when this option is selected.",
+            "description": "The user prompt rendered to the agent when this option is selected. Null when selecting the option only dismisses the elicitation without replying.",
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -7019,7 +7219,7 @@
           },
           {
             "name": "options",
-            "description": "Selectable prompt options for multiple-choice elicitations.",
+            "description": "The selectable actions for multiple-choice and confirmation elicitations.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -7067,7 +7267,7 @@
           },
           {
             "name": "title",
-            "description": "The title shown above the elicitation choices.",
+            "description": "The optional title shown above the elicitation choices.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -7116,6 +7316,11 @@
         "possibleTypes": [
           {
             "kind": "OBJECT",
+            "name": "AiConversationConfirmationElicitationResponseData",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
             "name": "AiConversationMcpServerConnectionElicitationResponseData",
             "ofType": null
           },
@@ -7131,6 +7336,18 @@
         "name": "AiConversationElicitationResponsePart",
         "description": "A structured user response to an elicitation in an AI conversation.",
         "fields": [
+          {
+            "name": "bodyData",
+            "description": "Additional user-authored commentary submitted with the response. For a response batch, only the first response contains it. Null when none was provided.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "data",
             "description": "The kind-specific response data.",
@@ -9842,6 +10059,18 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "result",
+            "description": "The result of the tool call.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "AiConversationNotifyUsersToolCallResult",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -9860,6 +10089,18 @@
         "name": "AiConversationNotifyUsersToolCallArgs",
         "description": null,
         "fields": [
+          {
+            "name": "message",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "summary",
             "description": null,
@@ -9890,6 +10131,57 @@
                     "name": "String",
                     "ofType": null
                   }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AiConversationNotifyUsersToolCallResult",
+        "description": null,
+        "fields": [
+          {
+            "name": "notifiedUserIds",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "skippedUserIds",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
                 }
               }
             },
@@ -10443,6 +10735,18 @@
             "deprecationReason": null
           },
           {
+            "name": "created",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "entities",
             "description": null,
             "args": [],
@@ -10478,6 +10782,18 @@
                   "ofType": null
                 }
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "quotaBlocked",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -11937,6 +12253,18 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "result",
+            "description": "The result of the tool call.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "AiConversationRestoreEntityToolCallResult",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -11966,6 +12294,37 @@
                 "kind": "OBJECT",
                 "name": "AiConversationSearchEntitiesToolCallResultEntities",
                 "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AiConversationRestoreEntityToolCallResult",
+        "description": null,
+        "fields": [
+          {
+            "name": "restoredEntities",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "AiConversationCreateEntityToolCallResultCreatedEntities",
+                  "ofType": null
+                }
               }
             },
             "isDeprecated": false,
@@ -12852,7 +13211,7 @@
           },
           {
             "name": "target",
-            "description": "The resolved settings target returned by ReadSetting",
+            "description": "The settings target when the setting scope does not imply it",
             "args": [],
             "type": {
               "kind": "OBJECT",
@@ -14872,6 +15231,26 @@
                 "ofType": {
                   "kind": "OBJECT",
                   "name": "AiConversationSearchEntitiesToolCallResultEntities",
+                  "ofType": null
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedEntities",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "AiConversationCreateEntityToolCallResultCreatedEntities",
                   "ofType": null
                 }
               }
@@ -42058,6 +42437,41 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "EmojiCreatedAtSort",
+        "description": "Emoji creation date sorting options.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "nulls",
+            "description": "Whether nulls should be sorted first or last",
+            "type": {
+              "kind": "ENUM",
+              "name": "PaginationNulls",
+              "ofType": null
+            },
+            "defaultValue": "last",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "order",
+            "description": "The order for the individual sort",
+            "type": {
+              "kind": "ENUM",
+              "name": "PaginationSortOrder",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "EmojiEdge",
         "description": null,
@@ -42097,6 +42511,105 @@
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "EmojiFilter",
+        "description": "Custom emoji filtering options.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "and",
+            "description": "Compound filters, all of which need to be matched by the emoji.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "EmojiFilter",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdAt",
+            "description": "Comparator for the created at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "DateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "id",
+            "description": "Comparator for the identifier.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IDComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "Comparator for the emoji name.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "StringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "or",
+            "description": "Compound filters, one of which needs to be matched by the emoji.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "EmojiFilter",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedAt",
+            "description": "Comparator for the updated at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "DateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -42156,6 +42669,29 @@
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "EmojiSortInput",
+        "description": "Custom emoji sorting options.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "createdAt",
+            "description": "Sort by emoji creation date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "EmojiCreatedAtSort",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -45054,6 +45590,18 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "workflowDefinition",
+            "description": "The favorited loop.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "WorkflowDefinition",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -45487,6 +46035,18 @@
           {
             "name": "userId",
             "description": "The identifier of the user to favorite.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "workflowDefinitionId",
+            "description": "The identifier of the loop to favorite.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -79570,7 +80130,7 @@
         "inputFields": [
           {
             "name": "accessToken",
-            "description": "The Jira personal access token.",
+            "description": "The Jira personal access token, or the API key of a Jira Cloud service account.",
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -79619,6 +80179,18 @@
           {
             "name": "manualSetup",
             "description": "Whether this integration will be setup using the manual webhook flow.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "serviceAccount",
+            "description": "Whether the access token is the API key of a Jira Cloud service account. Defaults to detecting the service account key prefix. The site's cloudId is resolved from the hostname, and webhooks are always set up manually.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -79887,6 +80459,18 @@
             "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "workspaceIntegrationId",
+            "description": "The id of the workspace Jira integration this personal integration authenticates through.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "interfaces": null,
@@ -80030,6 +80614,18 @@
             "deprecationReason": null
           },
           {
+            "name": "isCloudServiceAccount",
+            "description": "Whether this integration authenticates with a Jira Cloud service account API key.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "isCustomOAuth",
             "description": "Whether this integration uses custom OAuth authentication (enterprise SSO).",
             "type": {
@@ -80158,7 +80754,7 @@
         "inputFields": [
           {
             "name": "accessToken",
-            "description": "The Jira personal access token.",
+            "description": "The Jira personal access token, or the API key of a Jira Cloud service account.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -80182,7 +80778,7 @@
           },
           {
             "name": "email",
-            "description": "The Jira user email address associated with the personal access token.",
+            "description": "The Jira user email address associated with the access token.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -81696,6 +82292,39 @@
                   "ofType": {
                     "kind": "INPUT_OBJECT",
                     "name": "AgentSessionCreateOnIssue",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AgentSessionPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "agentSessionRestartWithDefaultModel",
+            "description": "[Internal] Restarts a routed coding session with the default model.",
+            "args": [
+              {
+                "name": "id",
+                "description": "The identifier of the agent session to restart.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
                     "ofType": null
                   }
                 },
@@ -84664,8 +85293,8 @@
                 "ofType": null
               }
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Cycle creation is not supported."
           },
           {
             "name": "cycleShiftAll",
@@ -105788,6 +106417,18 @@
                   "ofType": null
                 }
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "team",
+            "description": "Filters that the template's team must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableTeamFilter",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -137035,6 +137676,18 @@
                 "deprecationReason": null
               },
               {
+                "name": "filter",
+                "description": "Filter returned emojis.",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "EmojiFilter",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
                 "name": "first",
                 "description": "The number of items to forward paginate (used with after). Defaults to 50.",
                 "type": {
@@ -137077,6 +137730,26 @@
                   "kind": "ENUM",
                   "name": "PaginationOrderBy",
                   "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "sort",
+                "description": "[INTERNAL] Sort returned emojis.",
+                "type": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "EmojiSortInput",
+                      "ofType": null
+                    }
+                  }
                 },
                 "defaultValue": null,
                 "isDeprecated": false,
@@ -139695,7 +140368,7 @@
           },
           {
             "name": "latestReleaseByAccessKey",
-            "description": "Returns the latest release for the pipeline associated with the access key.",
+            "description": "Returns the most recently completed or updated release for the pipeline associated with the access key.",
             "args": [],
             "type": {
               "kind": "OBJECT",
@@ -141347,7 +142020,7 @@
           },
           {
             "name": "recentReleasesByAccessKey",
-            "description": "Returns recent releases for the pipeline associated with the access key, ordered with in-progress releases first, followed by the most recently completed releases.",
+            "description": "Returns releases for the pipeline associated with the access key, ordered with the most recently completed or updated first.",
             "args": [
               {
                 "name": "limit",
@@ -143153,6 +143826,67 @@
                 "kind": "OBJECT",
                 "name": "Template",
                 "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "templateSearch",
+            "description": "Templates matching a filter, in the order they appear in the app. Filter on a null team to return only workspace-level templates.",
+            "args": [
+              {
+                "name": "filter",
+                "description": "Filter to apply to the template results.",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "TemplateFilter",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "first",
+                "description": "Maximum results. Capped at 250.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": "50",
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "includeArchived",
+                "description": "Should archived resources be included (default: false).",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": "false",
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Template",
+                    "ofType": null
+                  }
+                }
               }
             },
             "isDeprecated": false,
@@ -151316,6 +152050,18 @@
             "deprecationReason": null
           },
           {
+            "name": "preserveStoredCommitSha",
+            "description": "When true, an existing scheduled release keeps its stored commit SHA instead of taking this sync's commit. Set by CLI syncs from a checkout behind the stored commit, so the scan baseline does not move backwards. Has no effect on continuous pipelines, which identify releases by commit SHA.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "pullRequestReferences",
             "description": "Pull request references to look up. Issues linked to found PRs will be associated with this release.",
             "type": {
@@ -151503,6 +152249,18 @@
             "deprecationReason": null
           },
           {
+            "name": "preserveStoredCommitSha",
+            "description": "When true, an existing scheduled release keeps its stored commit SHA instead of taking this sync's commit. Set by CLI syncs from a checkout behind the stored commit, so the scan baseline does not move backwards. Has no effect on continuous pipelines, which identify releases by commit SHA.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "pullRequestReferences",
             "description": "Pull request references to look up. Issues linked to found PRs will be associated with this release.",
             "type": {
@@ -151589,6 +152347,18 @@
         "description": "Input for updating a release by pipeline identifier. Extends the base update input with the target pipeline identifier.",
         "fields": null,
         "inputFields": [
+          {
+            "name": "description",
+            "description": "Optional release description to apply when updating the release. Pass null to clear it.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "documents",
             "description": "Documents to attach to the updated release. Existing documents with the same title are updated.",
@@ -151704,6 +152474,18 @@
         "description": "Base input for updating a release by pipeline. Contains optional version and stage name. The pipeline ID is provided separately or inferred from the access key.",
         "fields": null,
         "inputFields": [
+          {
+            "name": "description",
+            "description": "Optional release description to apply when updating the release. Pass null to clear it.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "documents",
             "description": "Documents to attach to the updated release. Existing documents with the same title are updated.",
@@ -153898,6 +154680,29 @@
         "possibleTypes": null
       },
       {
+        "kind": "ENUM",
+        "name": "SLAStartMode",
+        "description": "Determines when timing begins for an SLA applied by a rule.",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "issueCreation",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "ruleMatch",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
         "kind": "INPUT_OBJECT",
         "name": "SalesforceMetadataIntegrationComparator",
         "description": "[INTERNAL] Comparator for Salesforce metadata.",
@@ -154826,6 +155631,18 @@
             "type": {
               "kind": "ENUM",
               "name": "SLADayCountType",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "startMode",
+            "description": "When SLA timing begins. Null when the rule removes an SLA.",
+            "args": [],
+            "type": {
+              "kind": "ENUM",
+              "name": "SLAStartMode",
               "ofType": null
             },
             "isDeprecated": false,
@@ -156127,7 +156944,7 @@
         "inputFields": [
           {
             "name": "null",
-            "description": "Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.",
+            "description": "Null constraint. When true, matches issues without an external source: issues with no source metadata and issues created through the API, an OAuth application, or a loop. When false, matches issues created by an integration or an intake source such as email.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -164655,6 +165472,18 @@
             "deprecationReason": null
           },
           {
+            "name": "content",
+            "description": "The template's content in markdown format: the body it pre-fills on the entity it creates. Distinct from `description`, which says what the template is for. Form templates serialize their form fields as markdown placeholders instead. Null when the template has no content.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "createdAt",
             "description": "The time at which the entity was created.",
             "args": [],
@@ -165164,6 +165993,141 @@
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "TemplateFilter",
+        "description": "Template filtering options.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "and",
+            "description": "Compound filters, all of which need to be matched by the template.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "TemplateFilter",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdAt",
+            "description": "Comparator for the created at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "DateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "id",
+            "description": "Comparator for the identifier.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IDComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "inheritedFromId",
+            "description": "Comparator for the inherited template's ID.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IDComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "Comparator for the template's name.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "StringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "or",
+            "description": "Compound filters, one of which need to be matched by the template.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "TemplateFilter",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "team",
+            "description": "Filters that the template's team must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableTeamFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "type",
+            "description": "Comparator for the template's type.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "StringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedAt",
+            "description": "Comparator for the updated at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "DateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -171138,6 +172102,18 @@
             "deprecationReason": null
           },
           {
+            "name": "pullRequestMergeStrategyPreference",
+            "description": "[Internal] The user's preferred merge method for pull requests. Null if the user chooses a method for each pull request.",
+            "args": [],
+            "type": {
+              "kind": "ENUM",
+              "name": "PullRequestMergeMethod",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "showFullUserNames",
             "description": "Whether to show full user names instead of display names.",
             "args": [],
@@ -175232,6 +176208,18 @@
             "deprecationReason": null
           },
           {
+            "name": "reviewFieldSla",
+            "description": "Whether to show the most pressing SLA from connected issues on review list items. Null if the preference is unset.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "reviewFieldStatusDetails",
             "description": "Whether to show review status details on a second line.",
             "args": [],
@@ -177856,6 +178844,35 @@
         "possibleTypes": null
       },
       {
+        "kind": "ENUM",
+        "name": "WorkflowActivationMode",
+        "description": null,
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "anyUpdate",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "conditionsStartedMatching",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "watchedPropertyChanged",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "WorkflowCronJobDefinition",
         "description": "A time-triggered automation workflow definition that executes on a recurring schedule. Cron job definitions are scoped to a team and contain a set of activities (actions) that run automatically according to the configured cron schedule, such as periodically assigning issues or sending notifications.",
@@ -178057,6 +179074,18 @@
         "name": "WorkflowDefinition",
         "description": "An automation workflow definition that executes a set of activities when triggered by specific events. Workflows can be scoped to a team, project, cycle, label, custom view, initiative, or user context. They are triggered by entity changes (e.g., issue status change, new comment) and can include conditions that filter which events actually execute the workflow. Activities define the actions taken, such as updating issue properties, sending notifications, or posting to Slack.",
         "fields": [
+          {
+            "name": "activationMode",
+            "description": "The explicit activation semantics for entity updates. When null, the mode is inferred from the legacy trigger fields.",
+            "args": [],
+            "type": {
+              "kind": "ENUM",
+              "name": "WorkflowActivationMode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "activities",
             "description": "The ordered list of activities (actions) that are executed when the workflow triggers, such as updating issue properties, sending notifications, or calling webhooks.",
