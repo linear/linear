@@ -1,5 +1,13 @@
 # Change Log
 
+## 3.2.11
+
+### Patch Changes
+
+- a88ff07: chore(deps): update dependency patch versions
+- Updated dependencies [a88ff07]
+  - @linear/sdk@93.0.1
+
 ## 3.2.10
 
 ### Patch Changes

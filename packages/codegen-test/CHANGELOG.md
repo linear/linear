@@ -1,5 +1,14 @@
 # Change Log
 
+## 2.2.5
+
+### Patch Changes
+
+- a88ff07: chore(deps): update dependency patch versions
+- Updated dependencies [a88ff07]
+  - @linear/codegen-doc@3.3.4
+  - @linear/codegen-sdk@4.0.5
+
 ## 2.2.4
 
 ### Patch Changes
