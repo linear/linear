@@ -1849,6 +1849,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the favorite model query for Favorite_WorkflowDefinition */
+    it("favorite.workflowDefinition", async () => {
+      if (_favorite) {
+        const workflowDefinition: L.WorkflowDefinition | undefined | null = _favorite.workflowDefinition;
+        expect(workflowDefinition instanceof L.WorkflowDefinition);
+      } else {
+        console.warn("codegen-doc:print: No favorite found - cannot test _favorite.workflowDefinition query");
+      }
+    });
+
     /** Test the favorite.customView query for L.CustomView */
     it("favorite.customView", async () => {
       if (_favorite) {
@@ -6139,6 +6149,15 @@ describe("generated", () => {
     it("template", async () => {
       const template: L.Template | undefined | null = await client.template("mock-id");
       expect(template instanceof L.Template);
+    });
+  });
+
+  /** Test TemplateSearch query */
+  describe("TemplateSearch", () => {
+    /** Test the root model query for TemplateSearch */
+    it("templateSearch", async () => {
+      const templateSearch: L.Template[] | undefined | null = await client.templateSearch();
+      templateSearch?.map(node => expect(node instanceof L.Template));
     });
   });
 

@@ -93,6 +93,8 @@ export type AccessKeyReleaseStage = {
   __typename?: "AccessKeyReleaseStage";
   /** The name of the release stage. */
   name: Scalars["String"];
+  /** The type of the release stage. */
+  type: ReleaseStageType;
 };
 
 /** Activity collection filtering options. */
@@ -165,6 +167,8 @@ export type AgentActivity = Node & {
   createdAt: Scalars["DateTime"];
   /** Whether the activity is ephemeral, and should disappear after the next agent activity. */
   ephemeral: Scalars["Boolean"];
+  /** [Internal] The reason this activity was persisted without being sent to the agent runtime. */
+  executionSkippedReason?: Maybe<AgentActivityExecutionSkippedReason>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /** [Internal] What the turn pushed to its branch, captured in the sandbox at push time. Only set on the activity for a successful push. */
@@ -292,6 +296,11 @@ export type AgentActivityErrorContent = {
   /** The type of activity. */
   type: AgentActivityType;
 };
+
+/** The reason an agent activity was persisted without being sent to the agent runtime. */
+export enum AgentActivityExecutionSkippedReason {
+  QuotaExceeded = "quotaExceeded",
+}
 
 /** Agent activity filtering options. */
 export type AgentActivityFilter = {
@@ -1091,6 +1100,15 @@ export type AiConversationCodeIntelligenceToolCallArgs = {
   question: Scalars["String"];
 };
 
+/** The affirmative response recorded for a confirmation elicitation. */
+export type AiConversationConfirmationElicitationResponseData = {
+  __typename?: "AiConversationConfirmationElicitationResponseData";
+  /** True when the user confirmed the action. */
+  confirmed: Scalars["Boolean"];
+  /** The kind of elicitation that was answered. */
+  kind: AiConversationElicitationKind;
+};
+
 export type AiConversationCreateEntityToolCall = AiConversationBaseToolCall & {
   __typename?: "AiConversationCreateEntityToolCall";
   /** The arguments to the tool call. */
@@ -1114,8 +1132,16 @@ export type AiConversationCreateEntityToolCallArgs = {
 
 export type AiConversationCreateEntityToolCallResult = {
   __typename?: "AiConversationCreateEntityToolCallResult";
-  createdEntities?: Maybe<Array<AiConversationSearchEntitiesToolCallResultEntities>>;
+  createdEntities?: Maybe<Array<AiConversationCreateEntityToolCallResultCreatedEntities>>;
   startedAgentSessions?: Maybe<Array<AiConversationSearchEntitiesToolCallResultEntities>>;
+};
+
+export type AiConversationCreateEntityToolCallResultCreatedEntities = {
+  __typename?: "AiConversationCreateEntityToolCallResultCreatedEntities";
+  id: Scalars["String"];
+  label?: Maybe<Scalars["String"]>;
+  parent?: Maybe<AiConversationSearchEntitiesToolCallResultEntities>;
+  type: Scalars["String"];
 };
 
 export type AiConversationCreateSandboxToolCall = AiConversationBaseToolCall & {
@@ -1147,6 +1173,8 @@ export type AiConversationDeleteEntityToolCall = AiConversationBaseToolCall & {
   rawArgs?: Maybe<Scalars["JSON"]>;
   /** The result of the tool call. */
   rawResult?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  result?: Maybe<AiConversationDeleteEntityToolCallResult>;
 };
 
 export type AiConversationDeleteEntityToolCallArgs = {
@@ -1154,8 +1182,14 @@ export type AiConversationDeleteEntityToolCallArgs = {
   entity: AiConversationSearchEntitiesToolCallResultEntities;
 };
 
+export type AiConversationDeleteEntityToolCallResult = {
+  __typename?: "AiConversationDeleteEntityToolCallResult";
+  deletedEntities?: Maybe<Array<AiConversationCreateEntityToolCallResultCreatedEntities>>;
+};
+
 /** The kind of input an AI conversation elicitation asks for. */
 export enum AiConversationElicitationKind {
+  Confirmation = "confirmation",
   McpServerConnection = "mcpServerConnection",
   MultipleChoice = "multipleChoice",
 }
@@ -1165,8 +1199,8 @@ export type AiConversationElicitationOption = {
   __typename?: "AiConversationElicitationOption";
   /** The short label shown for the option. */
   label: Scalars["String"];
-  /** The user prompt rendered to the agent when this option is selected. */
-  prompt: Scalars["String"];
+  /** The user prompt rendered to the agent when this option is selected. Null when selecting the option only dismisses the elicitation without replying. */
+  prompt?: Maybe<Scalars["String"]>;
 };
 
 /** A structured request for user input shown with an AI conversation. */
@@ -1180,13 +1214,13 @@ export type AiConversationElicitationPart = AiConversationBasePart & {
   kind: AiConversationElicitationKind;
   /** The metadata of the part. */
   metadata: AiConversationPartMetadata;
-  /** Selectable prompt options for multiple-choice elicitations. */
+  /** The selectable actions for multiple-choice and confirmation elicitations. */
   options: Array<AiConversationElicitationOption>;
   /** The requested owner of the MCP server connection. Null for other elicitation kinds. */
   scope?: Maybe<AiConversationMcpServerConnectionScope>;
   /** The MCP server URL for a new connection. Null for reconnects and other elicitation kinds. */
   serverUrl?: Maybe<Scalars["String"]>;
-  /** The title shown above the elicitation choices. */
+  /** The optional title shown above the elicitation choices. */
   title?: Maybe<Scalars["String"]>;
   /** The type of the part. */
   type: AiConversationPartType;
@@ -1194,12 +1228,15 @@ export type AiConversationElicitationPart = AiConversationBasePart & {
 
 /** The kind-specific data recorded when a user answers an AI conversation elicitation. */
 export type AiConversationElicitationResponseData =
+  | AiConversationConfirmationElicitationResponseData
   | AiConversationMcpServerConnectionElicitationResponseData
   | AiConversationMultipleChoiceElicitationResponseData;
 
 /** A structured user response to an elicitation in an AI conversation. */
 export type AiConversationElicitationResponsePart = AiConversationBasePart & {
   __typename?: "AiConversationElicitationResponsePart";
+  /** Additional user-authored commentary submitted with the response. For a response batch, only the first response contains it. Null when none was provided. */
+  bodyData?: Maybe<Scalars["JSONObject"]>;
   /** The kind-specific response data. */
   data: AiConversationElicitationResponseData;
   /** The identifier of the elicitation that was answered. */
@@ -1649,12 +1686,21 @@ export type AiConversationNotifyUsersToolCall = AiConversationBaseToolCall & {
   rawArgs?: Maybe<Scalars["JSON"]>;
   /** The result of the tool call. */
   rawResult?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  result?: Maybe<AiConversationNotifyUsersToolCallResult>;
 };
 
 export type AiConversationNotifyUsersToolCallArgs = {
   __typename?: "AiConversationNotifyUsersToolCallArgs";
+  message?: Maybe<Scalars["String"]>;
   summary?: Maybe<Scalars["String"]>;
   userIds: Array<Scalars["String"]>;
+};
+
+export type AiConversationNotifyUsersToolCallResult = {
+  __typename?: "AiConversationNotifyUsersToolCallResult";
+  notifiedUserIds?: Maybe<Array<Scalars["String"]>>;
+  skippedUserIds?: Maybe<Array<Scalars["String"]>>;
 };
 
 /** A part in an AI conversation. */
@@ -1755,8 +1801,10 @@ export type AiConversationPromptCodingSessionToolCallArgs = {
 export type AiConversationPromptCodingSessionToolCallResult = {
   __typename?: "AiConversationPromptCodingSessionToolCallResult";
   agentSession: AiConversationSearchEntitiesToolCallResultEntities;
+  created?: Maybe<Scalars["Boolean"]>;
   entities?: Maybe<Array<AiConversationSearchEntitiesToolCallResultEntities>>;
   pullRequests?: Maybe<Array<AiConversationSearchEntitiesToolCallResultEntities>>;
+  quotaBlocked?: Maybe<Scalars["Boolean"]>;
 };
 
 /** A prompt part in an AI conversation. */
@@ -1985,11 +2033,18 @@ export type AiConversationRestoreEntityToolCall = AiConversationBaseToolCall & {
   rawArgs?: Maybe<Scalars["JSON"]>;
   /** The result of the tool call. */
   rawResult?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  result?: Maybe<AiConversationRestoreEntityToolCallResult>;
 };
 
 export type AiConversationRestoreEntityToolCallArgs = {
   __typename?: "AiConversationRestoreEntityToolCallArgs";
   entity: AiConversationSearchEntitiesToolCallResultEntities;
+};
+
+export type AiConversationRestoreEntityToolCallResult = {
+  __typename?: "AiConversationRestoreEntityToolCallResult";
+  restoredEntities?: Maybe<Array<AiConversationCreateEntityToolCallResultCreatedEntities>>;
 };
 
 export type AiConversationRetrieveEntitiesToolCall = AiConversationBaseToolCall & {
@@ -2126,7 +2181,7 @@ export type AiConversationSettingWidgetArgs = {
   __typename?: "AiConversationSettingWidgetArgs";
   /** The stable semantic setting ID returned by SearchSettings */
   id: Scalars["String"];
-  /** The resolved settings target returned by ReadSetting */
+  /** The settings target when the setting scope does not imply it */
   target?: Maybe<AiConversationSettingWidgetArgsTarget>;
 };
 
@@ -2455,6 +2510,7 @@ export type AiConversationUpdateEntityToolCallArgs = {
 export type AiConversationUpdateEntityToolCallResult = {
   __typename?: "AiConversationUpdateEntityToolCallResult";
   startedAgentSessions?: Maybe<Array<AiConversationSearchEntitiesToolCallResultEntities>>;
+  updatedEntities?: Maybe<Array<AiConversationCreateEntityToolCallResultCreatedEntities>>;
 };
 
 /** [Internal] Per-user state for an AI conversation, tracking read status and other user-specific data. */
@@ -6892,11 +6948,35 @@ export type EmojiCreateInput = {
   url: Scalars["String"];
 };
 
+/** Emoji creation date sorting options. */
+export type EmojiCreatedAtSort = {
+  /** Whether nulls should be sorted first or last */
+  nulls?: InputMaybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: InputMaybe<PaginationSortOrder>;
+};
+
 export type EmojiEdge = {
   __typename?: "EmojiEdge";
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: Emoji;
+};
+
+/** Custom emoji filtering options. */
+export type EmojiFilter = {
+  /** Compound filters, all of which need to be matched by the emoji. */
+  and?: InputMaybe<Array<EmojiFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: InputMaybe<DateComparator>;
+  /** Comparator for the identifier. */
+  id?: InputMaybe<IdComparator>;
+  /** Comparator for the emoji name. */
+  name?: InputMaybe<StringComparator>;
+  /** Compound filters, one of which needs to be matched by the emoji. */
+  or?: InputMaybe<Array<EmojiFilter>>;
+  /** Comparator for the updated at date. */
+  updatedAt?: InputMaybe<DateComparator>;
 };
 
 /** The result of a custom emoji mutation. */
@@ -6908,6 +6988,12 @@ export type EmojiPayload = {
   lastSyncId: Scalars["Float"];
   /** Whether the operation was successful. */
   success: Scalars["Boolean"];
+};
+
+/** Custom emoji sorting options. */
+export type EmojiSortInput = {
+  /** Sort by emoji creation date. */
+  createdAt?: InputMaybe<EmojiCreatedAtSort>;
 };
 
 /** A basic entity. */
@@ -7375,6 +7461,8 @@ export type Favorite = Node & {
   url?: Maybe<Scalars["String"]>;
   /** The favorited user. */
   user?: Maybe<User>;
+  /** The favorited loop. */
+  workflowDefinition?: Maybe<WorkflowDefinition>;
 };
 
 /** A user's bookmarked item that appears in their sidebar for quick access. Favorites can reference various entity types including issues, projects, cycles, views, documents, initiatives, labels, users, customers, dashboards, pull requests, and Agent conversations. Favorites can be organized into folders and ordered by the user. Each favorite is owned by a single user and links to exactly one target entity (or is a folder containing other favorites). */
@@ -7454,6 +7542,8 @@ export type FavoriteCreateInput = {
   teamId?: InputMaybe<Scalars["String"]>;
   /** The identifier of the user to favorite. */
   userId?: InputMaybe<Scalars["String"]>;
+  /** The identifier of the loop to favorite. */
+  workflowDefinitionId?: InputMaybe<Scalars["String"]>;
 };
 
 export type FavoriteEdge = {
@@ -12842,7 +12932,7 @@ export type IssueWithDescriptionChildWebhookPayload = {
 };
 
 export type JiraConfigurationInput = {
-  /** The Jira personal access token. */
+  /** The Jira personal access token, or the API key of a Jira Cloud service account. */
   accessToken: Scalars["String"];
   /** The Jira user's email address. A username is also accepted on Jira Server / DC. */
   email: Scalars["String"];
@@ -12850,6 +12940,8 @@ export type JiraConfigurationInput = {
   hostname: Scalars["String"];
   /** Whether this integration will be setup using the manual webhook flow. */
   manualSetup?: InputMaybe<Scalars["Boolean"]>;
+  /** Whether the access token is the API key of a Jira Cloud service account. Defaults to detecting the service account key prefix. The site's cloudId is resolved from the hostname, and webhooks are always set up manually. */
+  serviceAccount?: InputMaybe<Scalars["Boolean"]>;
 };
 
 export type JiraFetchProjectStatusesInput = {
@@ -12891,6 +12983,8 @@ export type JiraLinearMappingInput = {
 export type JiraPersonalSettingsInput = {
   /** The name of the Jira site currently authorized through the integration. */
   siteName?: InputMaybe<Scalars["String"]>;
+  /** The id of the workspace Jira integration this personal integration authenticates through. */
+  workspaceIntegrationId?: InputMaybe<Scalars["String"]>;
 };
 
 export type JiraProjectDataInput = {
@@ -12913,6 +13007,8 @@ export type JiraProjectStatusesPayload = {
 export type JiraSettingsInput = {
   /** The custom OAuth server token endpoint URL (enterprise SSO). */
   customOAuthServerUrl?: InputMaybe<Scalars["String"]>;
+  /** Whether this integration authenticates with a Jira Cloud service account API key. */
+  isCloudServiceAccount?: InputMaybe<Scalars["Boolean"]>;
   /** Whether this integration uses custom OAuth authentication (enterprise SSO). */
   isCustomOAuth?: InputMaybe<Scalars["Boolean"]>;
   /** Whether this integration is for Jira Server or not. */
@@ -12932,11 +13028,11 @@ export type JiraSettingsInput = {
 };
 
 export type JiraUpdateInput = {
-  /** The Jira personal access token. */
+  /** The Jira personal access token, or the API key of a Jira Cloud service account. */
   accessToken?: InputMaybe<Scalars["String"]>;
   /** Whether to delete the current manual webhook configuration. */
   deleteWebhook?: InputMaybe<Scalars["Boolean"]>;
-  /** The Jira user email address associated with the personal access token. */
+  /** The Jira user email address associated with the access token. */
   email?: InputMaybe<Scalars["String"]>;
   /** The id of the integration to update. */
   id: Scalars["String"];
@@ -13184,6 +13280,8 @@ export type Mutation = {
   agentSessionCreateOnComment: AgentSessionPayload;
   /** Creates a new agent session on an issue. */
   agentSessionCreateOnIssue: AgentSessionPayload;
+  /** [Internal] Restarts a routed coding session with the default model. */
+  agentSessionRestartWithDefaultModel: AgentSessionPayload;
   /** Updates an agent session. */
   agentSessionUpdate: AgentSessionPayload;
   /** Updates the externalUrl of an agent session, which is an agent-hosted page associated with this session. */
@@ -13292,7 +13390,10 @@ export type Mutation = {
   customerUpsert: CustomerPayload;
   /** Archives a cycle. All issues currently assigned to the cycle are unlinked from it before archiving. */
   cycleArchive: CycleArchivePayload;
-  /** Creates a new cycle. */
+  /**
+   * Creates a new cycle.
+   * @deprecated Cycle creation is not supported.
+   */
   cycleCreate: CyclePayload;
   /** Shifts all cycles starts and ends by a certain number of days, starting from the provided cycle onwards. */
   cycleShiftAll: CyclePayload;
@@ -13984,6 +14085,10 @@ export type MutationAgentSessionCreateOnCommentArgs = {
 
 export type MutationAgentSessionCreateOnIssueArgs = {
   input: AgentSessionCreateOnIssue;
+};
+
+export type MutationAgentSessionRestartWithDefaultModelArgs = {
+  id: Scalars["String"];
 };
 
 export type MutationAgentSessionUpdateArgs = {
@@ -16907,6 +17012,8 @@ export type NullableTemplateFilter = {
   null?: InputMaybe<Scalars["Boolean"]>;
   /** Compound filters, one of which need to be matched by the template. */
   or?: InputMaybe<Array<NullableTemplateFilter>>;
+  /** Filters that the template's team must satisfy. */
+  team?: InputMaybe<NullableTeamFilter>;
   /** Comparator for the template's type. */
   type?: InputMaybe<StringComparator>;
   /** Comparator for the updated at date. */
@@ -21663,7 +21770,7 @@ export type Query = {
   issueVcsBranchSearch?: Maybe<Issue>;
   /** All issues. Returns a paginated list of issues visible to the authenticated user. Can be filtered by various criteria including team, assignee, state, labels, project, and cycle. */
   issues: IssueConnection;
-  /** Returns the latest release for the pipeline associated with the access key. */
+  /** Returns the most recently completed or updated release for the pipeline associated with the access key. */
   latestReleaseByAccessKey?: Maybe<AccessKeyRelease>;
   /** [Internal] Lists Microsoft Teams teams and channels accessible to the connecting user. Uses the user's microsoftPersonal integration for auth. Used by the project channel picker dialog to populate the team/channel dropdowns. */
   microsoftTeamsChannels: MicrosoftTeamsChannelsPayload;
@@ -21733,7 +21840,7 @@ export type Query = {
   pushSubscriptionTest: PushSubscriptionTestPayload;
   /** The current rate limit status for the authenticated client, including remaining quota and reset timing for each limit type. */
   rateLimitStatus: RateLimitPayload;
-  /** Returns recent releases for the pipeline associated with the access key, ordered with in-progress releases first, followed by the most recently completed releases. */
+  /** Returns releases for the pipeline associated with the access key, ordered with the most recently completed or updated first. */
   recentReleasesByAccessKey: Array<AccessKeyRelease>;
   /** Fetch a single release by its UUID or slug identifier. */
   release: Release;
@@ -21797,6 +21904,8 @@ export type Query = {
   teams: TeamConnection;
   /** A specific template. */
   template: Template;
+  /** Templates matching a filter, in the order they appear in the app. Filter on a null team to return only workspace-level templates. */
+  templateSearch: Array<Template>;
   /** All templates in the workspace, including both team-scoped and workspace-level templates. */
   templates: Array<Template>;
   /** Returns all templates that are associated with the integration type. */
@@ -22091,10 +22200,12 @@ export type QueryEmojiArgs = {
 export type QueryEmojisArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
+  filter?: InputMaybe<EmojiFilter>;
   first?: InputMaybe<Scalars["Int"]>;
   includeArchived?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<PaginationOrderBy>;
+  sort?: InputMaybe<Array<EmojiSortInput>>;
 };
 
 export type QueryEntityExternalLinkArgs = {
@@ -22707,6 +22818,12 @@ export type QueryTeamsArgs = {
 
 export type QueryTemplateArgs = {
   id: Scalars["String"];
+};
+
+export type QueryTemplateSearchArgs = {
+  filter?: InputMaybe<TemplateFilter>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
 };
 
 export type QueryTemplatesForIntegrationArgs = {
@@ -23961,6 +24078,8 @@ export type ReleaseSyncInput = {
   name?: InputMaybe<Scalars["String"]>;
   /** The identifier of the pipeline this release belongs to. */
   pipelineId: Scalars["String"];
+  /** When true, an existing scheduled release keeps its stored commit SHA instead of taking this sync's commit. Set by CLI syncs from a checkout behind the stored commit, so the scan baseline does not move backwards. Has no effect on continuous pipelines, which identify releases by commit SHA. */
+  preserveStoredCommitSha?: InputMaybe<Scalars["Boolean"]>;
   /** Pull request references to look up. Issues linked to found PRs will be associated with this release. */
   pullRequestReferences?: InputMaybe<Array<PullRequestReferenceInput>>;
   /** Release notes covering this release. Upserts the existing release notes that cover only this release. */
@@ -23987,6 +24106,8 @@ export type ReleaseSyncInputBase = {
   links?: InputMaybe<Array<ReleaseLinkInput>>;
   /** The name of the release. */
   name?: InputMaybe<Scalars["String"]>;
+  /** When true, an existing scheduled release keeps its stored commit SHA instead of taking this sync's commit. Set by CLI syncs from a checkout behind the stored commit, so the scan baseline does not move backwards. Has no effect on continuous pipelines, which identify releases by commit SHA. */
+  preserveStoredCommitSha?: InputMaybe<Scalars["Boolean"]>;
   /** Pull request references to look up. Issues linked to found PRs will be associated with this release. */
   pullRequestReferences?: InputMaybe<Array<PullRequestReferenceInput>>;
   /** Release notes covering this release. Upserts the existing release notes that cover only this release. */
@@ -24001,6 +24122,8 @@ export type ReleaseSyncInputBase = {
 
 /** Input for updating a release by pipeline identifier. Extends the base update input with the target pipeline identifier. */
 export type ReleaseUpdateByPipelineInput = {
+  /** Optional release description to apply when updating the release. Pass null to clear it. */
+  description?: InputMaybe<Scalars["String"]>;
   /** Documents to attach to the updated release. Existing documents with the same title are updated. */
   documents?: InputMaybe<Array<ReleaseDocumentInput>>;
   /** External links to attach to the updated release. */
@@ -24019,6 +24142,8 @@ export type ReleaseUpdateByPipelineInput = {
 
 /** Base input for updating a release by pipeline. Contains optional version and stage name. The pipeline ID is provided separately or inferred from the access key. */
 export type ReleaseUpdateByPipelineInputBase = {
+  /** Optional release description to apply when updating the release. Pass null to clear it. */
+  description?: InputMaybe<Scalars["String"]>;
   /** Documents to attach to the updated release. Existing documents with the same title are updated. */
   documents?: InputMaybe<Array<ReleaseDocumentInput>>;
   /** External links to attach to the updated release. */
@@ -24384,6 +24509,12 @@ export enum SLADayCountType {
   OnlyBusinessDays = "onlyBusinessDays",
 }
 
+/** Determines when timing begins for an SLA applied by a rule. */
+export enum SLAStartMode {
+  IssueCreation = "issueCreation",
+  RuleMatch = "ruleMatch",
+}
+
 /** [INTERNAL] Comparator for Salesforce metadata. */
 export type SalesforceMetadataIntegrationComparator = {
   /** Salesforce Case metadata filter */
@@ -24552,6 +24683,8 @@ export type SlaConfiguration = {
   sla?: Maybe<Scalars["Float"]>;
   /** The SLA type used when the rule sets an SLA. */
   slaType?: Maybe<SLADayCountType>;
+  /** When SLA timing begins. Null when the rule removes an SLA. */
+  startMode?: Maybe<SLAStartMode>;
 };
 
 export enum SlaStatus {
@@ -24772,7 +24905,7 @@ export type SlackSettingsInput = {
 
 /** Comparator for issue source type. */
 export type SourceMetadataComparator = {
-  /** Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values. */
+  /** Null constraint. When true, matches issues without an external source: issues with no source metadata and issues created through the API, an OAuth application, or a loop. When false, matches issues created by an integration or an intake source such as email. */
   null?: InputMaybe<Scalars["Boolean"]>;
   /** [INTERNAL] Comparator for the salesforce metadata. */
   salesforceMetadata?: InputMaybe<SalesforceMetadataIntegrationComparator>;
@@ -26143,6 +26276,8 @@ export type Template = Node & {
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The hex color of the template icon. Null if no custom color has been set. */
   color?: Maybe<Scalars["String"]>;
+  /** The template's content in markdown format: the body it pre-fills on the entity it creates. Distinct from `description`, which says what the template is for. Form templates serialize their form fields as markdown placeholders instead. Null when the template has no content. */
+  content?: Maybe<Scalars["String"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /** The user who created the template. Null if the creator's account has been deleted. */
@@ -26218,6 +26353,28 @@ export type TemplateEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: Template;
+};
+
+/** Template filtering options. */
+export type TemplateFilter = {
+  /** Compound filters, all of which need to be matched by the template. */
+  and?: InputMaybe<Array<TemplateFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: InputMaybe<DateComparator>;
+  /** Comparator for the identifier. */
+  id?: InputMaybe<IdComparator>;
+  /** Comparator for the inherited template's ID. */
+  inheritedFromId?: InputMaybe<IdComparator>;
+  /** Comparator for the template's name. */
+  name?: InputMaybe<StringComparator>;
+  /** Compound filters, one of which need to be matched by the template. */
+  or?: InputMaybe<Array<TemplateFilter>>;
+  /** Filters that the template's team must satisfy. */
+  team?: InputMaybe<NullableTeamFilter>;
+  /** Comparator for the template's type. */
+  type?: InputMaybe<StringComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: InputMaybe<DateComparator>;
 };
 
 /** The result of a template mutation. */
@@ -27196,6 +27353,8 @@ export type UserSettings = Node & {
   notificationChannelPreferences: NotificationChannelPreferences;
   /** The notification delivery preferences for the user. Note: notificationDisabled field is deprecated in favor of notificationChannelPreferences. */
   notificationDeliveryPreferences: NotificationDeliveryPreferences;
+  /** [Internal] The user's preferred merge method for pull requests. Null if the user chooses a method for each pull request. */
+  pullRequestMergeStrategyPreference?: Maybe<PullRequestMergeMethod>;
   /** Whether to show full user names instead of display names. */
   showFullUserNames: Scalars["Boolean"];
   /** Whether this user is subscribed to receive changelog emails about Linear product updates. */
@@ -27910,6 +28069,8 @@ export type ViewPreferencesValues = {
   reviewFieldQuickToReview?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the review repository field. */
   reviewFieldRepository?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show the most pressing SLA from connected issues on review list items. Null if the preference is unset. */
+  reviewFieldSla?: Maybe<Scalars["Boolean"]>;
   /** Whether to show review status details on a second line. */
   reviewFieldStatusDetails?: Maybe<Scalars["Boolean"]>;
   /** The review grouping. */
@@ -28343,6 +28504,12 @@ export type WelcomeMessageNotification = Entity &
     welcomeMessageId: Scalars["String"];
   };
 
+export enum WorkflowActivationMode {
+  AnyUpdate = "anyUpdate",
+  ConditionsStartedMatching = "conditionsStartedMatching",
+  WatchedPropertyChanged = "watchedPropertyChanged",
+}
+
 /** A time-triggered automation workflow definition that executes on a recurring schedule. Cron job definitions are scoped to a team and contain a set of activities (actions) that run automatically according to the configured cron schedule, such as periodically assigning issues or sending notifications. */
 export type WorkflowCronJobDefinition = Node & {
   __typename?: "WorkflowCronJobDefinition";
@@ -28378,6 +28545,8 @@ export type WorkflowCronJobDefinition = Node & {
 /** An automation workflow definition that executes a set of activities when triggered by specific events. Workflows can be scoped to a team, project, cycle, label, custom view, initiative, or user context. They are triggered by entity changes (e.g., issue status change, new comment) and can include conditions that filter which events actually execute the workflow. Activities define the actions taken, such as updating issue properties, sending notifications, or posting to Slack. */
 export type WorkflowDefinition = Node & {
   __typename?: "WorkflowDefinition";
+  /** The explicit activation semantics for entity updates. When null, the mode is inferred from the legacy trigger fields. */
+  activationMode?: Maybe<WorkflowActivationMode>;
   /** The ordered list of activities (actions) that are executed when the workflow triggers, such as updating issue properties, sending notifications, or calling webhooks. */
   activities: Scalars["JSONObject"];
   /** Whether the workflow should apply to sub teams. */
@@ -28835,25 +29004,29 @@ type AiConversationBasePart_AiConversationElicitationPart_Fragment = {
       AiConversationPartMetadata,
       "feedback" | "evalLogId" | "phase" | "endedAt" | "startedAt" | "turnId"
     >;
-    options: Array<
-      { __typename: "AiConversationElicitationOption" } & Pick<AiConversationElicitationOption, "label" | "prompt">
-    >;
     scope?: Maybe<
       { __typename: "AiConversationMcpServerConnectionScope" } & Pick<
         AiConversationMcpServerConnectionScope,
         "workflowDefinitionId" | "teamId" | "type"
       >
     >;
+    options: Array<
+      { __typename: "AiConversationElicitationOption" } & Pick<AiConversationElicitationOption, "label" | "prompt">
+    >;
   };
 
 type AiConversationBasePart_AiConversationElicitationResponsePart_Fragment = {
   __typename: "AiConversationElicitationResponsePart";
-} & Pick<AiConversationElicitationResponsePart, "id" | "type" | "elicitationId"> & {
+} & Pick<AiConversationElicitationResponsePart, "id" | "type" | "bodyData" | "elicitationId"> & {
     metadata: { __typename: "AiConversationPartMetadata" } & Pick<
       AiConversationPartMetadata,
       "feedback" | "evalLogId" | "phase" | "endedAt" | "startedAt" | "turnId"
     >;
     data:
+      | ({ __typename: "AiConversationConfirmationElicitationResponseData" } & Pick<
+          AiConversationConfirmationElicitationResponseData,
+          "kind" | "confirmed"
+        >)
       | ({ __typename: "AiConversationMcpServerConnectionElicitationResponseData" } & Pick<
           AiConversationMcpServerConnectionElicitationResponseData,
           "integrationId" | "kind"
@@ -28972,10 +29145,17 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
               { __typename: "AiConversationCreateEntityToolCallResult" } & {
                 createdEntities?: Maybe<
                   Array<
-                    { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
-                      AiConversationSearchEntitiesToolCallResultEntities,
-                      "id" | "type"
-                    >
+                    { __typename: "AiConversationCreateEntityToolCallResultCreatedEntities" } & Pick<
+                      AiConversationCreateEntityToolCallResultCreatedEntities,
+                      "id" | "label" | "type"
+                    > & {
+                        parent?: Maybe<
+                          { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                            AiConversationSearchEntitiesToolCallResultEntities,
+                            "id" | "type"
+                          >
+                        >;
+                      }
                   >
                 >;
                 startedAgentSessions?: Maybe<
@@ -29017,6 +29197,25 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
                 entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
                   AiConversationSearchEntitiesToolCallResultEntities,
                   "id" | "type"
+                >;
+              }
+            >;
+            result?: Maybe<
+              { __typename: "AiConversationDeleteEntityToolCallResult" } & {
+                deletedEntities?: Maybe<
+                  Array<
+                    { __typename: "AiConversationCreateEntityToolCallResultCreatedEntities" } & Pick<
+                      AiConversationCreateEntityToolCallResultCreatedEntities,
+                      "id" | "label" | "type"
+                    > & {
+                        parent?: Maybe<
+                          { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                            AiConversationSearchEntitiesToolCallResultEntities,
+                            "id" | "type"
+                          >
+                        >;
+                      }
+                  >
                 >;
               }
             >;
@@ -29215,7 +29414,13 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
             args?: Maybe<
               { __typename: "AiConversationNotifyUsersToolCallArgs" } & Pick<
                 AiConversationNotifyUsersToolCallArgs,
-                "summary" | "userIds"
+                "message" | "summary" | "userIds"
+              >
+            >;
+            result?: Maybe<
+              { __typename: "AiConversationNotifyUsersToolCallResult" } & Pick<
+                AiConversationNotifyUsersToolCallResult,
+                "notifiedUserIds" | "skippedUserIds"
               >
             >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
@@ -29249,28 +29454,31 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
               >
             >;
             result?: Maybe<
-              { __typename: "AiConversationPromptCodingSessionToolCallResult" } & {
-                agentSession: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
-                  AiConversationSearchEntitiesToolCallResultEntities,
-                  "id" | "type"
-                >;
-                entities?: Maybe<
-                  Array<
-                    { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
-                      AiConversationSearchEntitiesToolCallResultEntities,
-                      "id" | "type"
+              { __typename: "AiConversationPromptCodingSessionToolCallResult" } & Pick<
+                AiConversationPromptCodingSessionToolCallResult,
+                "created" | "quotaBlocked"
+              > & {
+                  agentSession: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                    AiConversationSearchEntitiesToolCallResultEntities,
+                    "id" | "type"
+                  >;
+                  entities?: Maybe<
+                    Array<
+                      { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                        AiConversationSearchEntitiesToolCallResultEntities,
+                        "id" | "type"
+                      >
                     >
-                  >
-                >;
-                pullRequests?: Maybe<
-                  Array<
-                    { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
-                      AiConversationSearchEntitiesToolCallResultEntities,
-                      "id" | "type"
+                  >;
+                  pullRequests?: Maybe<
+                    Array<
+                      { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                        AiConversationSearchEntitiesToolCallResultEntities,
+                        "id" | "type"
+                      >
                     >
-                  >
-                >;
-              }
+                  >;
+                }
             >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
               AiConversationToolDisplayInfo,
@@ -29446,6 +29654,25 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
                 entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
                   AiConversationSearchEntitiesToolCallResultEntities,
                   "id" | "type"
+                >;
+              }
+            >;
+            result?: Maybe<
+              { __typename: "AiConversationRestoreEntityToolCallResult" } & {
+                restoredEntities?: Maybe<
+                  Array<
+                    { __typename: "AiConversationCreateEntityToolCallResultCreatedEntities" } & Pick<
+                      AiConversationCreateEntityToolCallResultCreatedEntities,
+                      "id" | "label" | "type"
+                    > & {
+                        parent?: Maybe<
+                          { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                            AiConversationSearchEntitiesToolCallResultEntities,
+                            "id" | "type"
+                          >
+                        >;
+                      }
+                  >
                 >;
               }
             >;
@@ -29719,6 +29946,21 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
                       AiConversationSearchEntitiesToolCallResultEntities,
                       "id" | "type"
                     >
+                  >
+                >;
+                updatedEntities?: Maybe<
+                  Array<
+                    { __typename: "AiConversationCreateEntityToolCallResultCreatedEntities" } & Pick<
+                      AiConversationCreateEntityToolCallResultCreatedEntities,
+                      "id" | "label" | "type"
+                    > & {
+                        parent?: Maybe<
+                          { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                            AiConversationSearchEntitiesToolCallResultEntities,
+                            "id" | "type"
+                          >
+                        >;
+                      }
                   >
                 >;
               }
@@ -30292,6 +30534,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "memberFieldStatus"
         | "memberFieldTeams"
         | "fieldMilestone"
+        | "reviewFieldSla"
         | "documentFieldOwner"
         | "documentFieldParent"
         | "projectFieldActivity"
@@ -30560,6 +30803,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "memberFieldStatus"
             | "memberFieldTeams"
             | "fieldMilestone"
+            | "reviewFieldSla"
             | "documentFieldOwner"
             | "documentFieldParent"
             | "projectFieldActivity"
@@ -30833,6 +31077,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "memberFieldStatus"
             | "memberFieldTeams"
             | "fieldMilestone"
+            | "reviewFieldSla"
             | "documentFieldOwner"
             | "documentFieldParent"
             | "projectFieldActivity"
@@ -31672,6 +31917,7 @@ export type NotificationArchivePayloadFragment = { __typename: "NotificationArch
               | "editAccess"
               | "triggerType"
               | "trigger"
+              | "activationMode"
               | "conditions"
               | "icon"
               | "updatedAt"
@@ -32341,6 +32587,7 @@ type ArchivePayload_NotificationArchivePayload_Fragment = { __typename: "Notific
               | "editAccess"
               | "triggerType"
               | "trigger"
+              | "activationMode"
               | "conditions"
               | "icon"
               | "updatedAt"
@@ -33060,6 +33307,7 @@ type Notification_WorkflowDefinitionNotification_Fragment = { __typename: "Workf
       | "editAccess"
       | "triggerType"
       | "trigger"
+      | "activationMode"
       | "conditions"
       | "icon"
       | "updatedAt"
@@ -33376,6 +33624,7 @@ export type WorkflowDefinitionNotificationFragment = { __typename: "WorkflowDefi
       | "editAccess"
       | "triggerType"
       | "trigger"
+      | "activationMode"
       | "conditions"
       | "icon"
       | "updatedAt"
@@ -34285,11 +34534,11 @@ export type ReleasePipelineFragment = { __typename: "ReleasePipeline" } & Pick<
 export type AccessKeyReleaseFragment = { __typename: "AccessKeyRelease" } & Pick<
   AccessKeyRelease,
   "commitSha" | "url" | "name" | "archivedAt" | "completedAt" | "createdAt" | "id" | "version"
-> & { stage: { __typename: "AccessKeyReleaseStage" } & Pick<AccessKeyReleaseStage, "name"> };
+> & { stage: { __typename: "AccessKeyReleaseStage" } & Pick<AccessKeyReleaseStage, "name" | "type"> };
 
 export type AccessKeyReleaseStageFragment = { __typename: "AccessKeyReleaseStage" } & Pick<
   AccessKeyReleaseStage,
-  "name"
+  "name" | "type"
 >;
 
 export type ReleaseFragment = { __typename: "Release" } & Pick<
@@ -34389,6 +34638,7 @@ export type TemplateFragment = { __typename: "Template" } & Pick<
   | "name"
   | "sortOrder"
   | "templateData"
+  | "content"
   | "archivedAt"
   | "createdAt"
   | "id"
@@ -34557,9 +34807,6 @@ export type AiConversationElicitationPartFragment = { __typename: "AiConversatio
   AiConversationElicitationPart,
   "id" | "serverUrl" | "integrationId" | "kind" | "title" | "type"
 > & {
-    options: Array<
-      { __typename: "AiConversationElicitationOption" } & Pick<AiConversationElicitationOption, "label" | "prompt">
-    >;
     metadata: { __typename: "AiConversationPartMetadata" } & Pick<
       AiConversationPartMetadata,
       "feedback" | "evalLogId" | "phase" | "endedAt" | "startedAt" | "turnId"
@@ -34570,12 +34817,19 @@ export type AiConversationElicitationPartFragment = { __typename: "AiConversatio
         "workflowDefinitionId" | "teamId" | "type"
       >
     >;
+    options: Array<
+      { __typename: "AiConversationElicitationOption" } & Pick<AiConversationElicitationOption, "label" | "prompt">
+    >;
   };
 
 export type AiConversationElicitationResponsePartFragment = {
   __typename: "AiConversationElicitationResponsePart";
-} & Pick<AiConversationElicitationResponsePart, "id" | "elicitationId" | "type"> & {
+} & Pick<AiConversationElicitationResponsePart, "bodyData" | "id" | "elicitationId" | "type"> & {
     data:
+      | ({ __typename: "AiConversationConfirmationElicitationResponseData" } & Pick<
+          AiConversationConfirmationElicitationResponseData,
+          "kind" | "confirmed"
+        >)
       | ({ __typename: "AiConversationMcpServerConnectionElicitationResponseData" } & Pick<
           AiConversationMcpServerConnectionElicitationResponseData,
           "integrationId" | "kind"
@@ -34958,10 +35212,17 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
               { __typename: "AiConversationCreateEntityToolCallResult" } & {
                 createdEntities?: Maybe<
                   Array<
-                    { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
-                      AiConversationSearchEntitiesToolCallResultEntities,
-                      "id" | "type"
-                    >
+                    { __typename: "AiConversationCreateEntityToolCallResultCreatedEntities" } & Pick<
+                      AiConversationCreateEntityToolCallResultCreatedEntities,
+                      "id" | "label" | "type"
+                    > & {
+                        parent?: Maybe<
+                          { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                            AiConversationSearchEntitiesToolCallResultEntities,
+                            "id" | "type"
+                          >
+                        >;
+                      }
                   >
                 >;
                 startedAgentSessions?: Maybe<
@@ -35003,6 +35264,25 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
                 entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
                   AiConversationSearchEntitiesToolCallResultEntities,
                   "id" | "type"
+                >;
+              }
+            >;
+            result?: Maybe<
+              { __typename: "AiConversationDeleteEntityToolCallResult" } & {
+                deletedEntities?: Maybe<
+                  Array<
+                    { __typename: "AiConversationCreateEntityToolCallResultCreatedEntities" } & Pick<
+                      AiConversationCreateEntityToolCallResultCreatedEntities,
+                      "id" | "label" | "type"
+                    > & {
+                        parent?: Maybe<
+                          { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                            AiConversationSearchEntitiesToolCallResultEntities,
+                            "id" | "type"
+                          >
+                        >;
+                      }
+                  >
                 >;
               }
             >;
@@ -35201,7 +35481,13 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
             args?: Maybe<
               { __typename: "AiConversationNotifyUsersToolCallArgs" } & Pick<
                 AiConversationNotifyUsersToolCallArgs,
-                "summary" | "userIds"
+                "message" | "summary" | "userIds"
+              >
+            >;
+            result?: Maybe<
+              { __typename: "AiConversationNotifyUsersToolCallResult" } & Pick<
+                AiConversationNotifyUsersToolCallResult,
+                "notifiedUserIds" | "skippedUserIds"
               >
             >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
@@ -35235,28 +35521,31 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
               >
             >;
             result?: Maybe<
-              { __typename: "AiConversationPromptCodingSessionToolCallResult" } & {
-                agentSession: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
-                  AiConversationSearchEntitiesToolCallResultEntities,
-                  "id" | "type"
-                >;
-                entities?: Maybe<
-                  Array<
-                    { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
-                      AiConversationSearchEntitiesToolCallResultEntities,
-                      "id" | "type"
+              { __typename: "AiConversationPromptCodingSessionToolCallResult" } & Pick<
+                AiConversationPromptCodingSessionToolCallResult,
+                "created" | "quotaBlocked"
+              > & {
+                  agentSession: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                    AiConversationSearchEntitiesToolCallResultEntities,
+                    "id" | "type"
+                  >;
+                  entities?: Maybe<
+                    Array<
+                      { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                        AiConversationSearchEntitiesToolCallResultEntities,
+                        "id" | "type"
+                      >
                     >
-                  >
-                >;
-                pullRequests?: Maybe<
-                  Array<
-                    { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
-                      AiConversationSearchEntitiesToolCallResultEntities,
-                      "id" | "type"
+                  >;
+                  pullRequests?: Maybe<
+                    Array<
+                      { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                        AiConversationSearchEntitiesToolCallResultEntities,
+                        "id" | "type"
+                      >
                     >
-                  >
-                >;
-              }
+                  >;
+                }
             >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
               AiConversationToolDisplayInfo,
@@ -35432,6 +35721,25 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
                 entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
                   AiConversationSearchEntitiesToolCallResultEntities,
                   "id" | "type"
+                >;
+              }
+            >;
+            result?: Maybe<
+              { __typename: "AiConversationRestoreEntityToolCallResult" } & {
+                restoredEntities?: Maybe<
+                  Array<
+                    { __typename: "AiConversationCreateEntityToolCallResultCreatedEntities" } & Pick<
+                      AiConversationCreateEntityToolCallResultCreatedEntities,
+                      "id" | "label" | "type"
+                    > & {
+                        parent?: Maybe<
+                          { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                            AiConversationSearchEntitiesToolCallResultEntities,
+                            "id" | "type"
+                          >
+                        >;
+                      }
+                  >
                 >;
               }
             >;
@@ -35707,6 +36015,21 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
                     >
                   >
                 >;
+                updatedEntities?: Maybe<
+                  Array<
+                    { __typename: "AiConversationCreateEntityToolCallResultCreatedEntities" } & Pick<
+                      AiConversationCreateEntityToolCallResultCreatedEntities,
+                      "id" | "label" | "type"
+                    > & {
+                        parent?: Maybe<
+                          { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                            AiConversationSearchEntitiesToolCallResultEntities,
+                            "id" | "type"
+                          >
+                        >;
+                      }
+                  >
+                >;
               }
             >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
@@ -35834,6 +36157,49 @@ export type FavoriteFragment = { __typename: "Favorite" } & Pick<
     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+    workflowDefinition?: Maybe<
+      { __typename: "WorkflowDefinition" } & Pick<
+        WorkflowDefinition,
+        | "stats"
+        | "schedule"
+        | "color"
+        | "lastExecutedAt"
+        | "description"
+        | "editAccess"
+        | "triggerType"
+        | "trigger"
+        | "activationMode"
+        | "conditions"
+        | "icon"
+        | "updatedAt"
+        | "groupName"
+        | "name"
+        | "activities"
+        | "sortOrder"
+        | "archivedAt"
+        | "createdAt"
+        | "type"
+        | "userContextViewType"
+        | "contextViewType"
+        | "id"
+        | "slugId"
+        | "restrictEditing"
+        | "enabled"
+        | "applyToSubTeams"
+        | "runOnce"
+      > & {
+          customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+          cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+          initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+          label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+          project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+          user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+          creator: { __typename?: "User" } & Pick<User, "id">;
+          lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+        }
+    >;
     projectLabel?: Maybe<{ __typename?: "ProjectLabel" } & Pick<ProjectLabel, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
     releaseNote?: Maybe<{ __typename?: "ReleaseNote" } & Pick<ReleaseNote, "id">>;
@@ -36317,7 +36683,7 @@ export type OAuthApplicationFragment = { __typename: "OAuthApplication" } & Pick
 
 export type SlaConfigurationFragment = { __typename: "SlaConfiguration" } & Pick<
   SlaConfiguration,
-  "slaType" | "sla" | "id" | "name" | "conditions" | "removesSla"
+  "slaType" | "sla" | "id" | "name" | "conditions" | "startMode" | "removesSla"
 >;
 
 export type AgentActivityFragment = { __typename: "AgentActivity" } & Pick<
@@ -36375,6 +36741,7 @@ export type WorkflowDefinitionFragment = { __typename: "WorkflowDefinition" } & 
   | "editAccess"
   | "triggerType"
   | "trigger"
+  | "activationMode"
   | "conditions"
   | "icon"
   | "updatedAt"
@@ -37270,6 +37637,7 @@ export type IssueHistoryWorkflowMetadataFragment = { __typename: "IssueHistoryWo
       | "editAccess"
       | "triggerType"
       | "trigger"
+      | "activationMode"
       | "conditions"
       | "icon"
       | "updatedAt"
@@ -37351,6 +37719,7 @@ export type IssueHistoryTriageRuleMetadataFragment = { __typename: "IssueHistory
       | "editAccess"
       | "triggerType"
       | "trigger"
+      | "activationMode"
       | "conditions"
       | "icon"
       | "updatedAt"
@@ -39527,6 +39896,7 @@ export type NotificationBatchActionPayloadFragment = { __typename: "Notification
               | "editAccess"
               | "triggerType"
               | "trigger"
+              | "activationMode"
               | "conditions"
               | "icon"
               | "updatedAt"
@@ -40179,6 +40549,7 @@ export type NotificationPayloadFragment = { __typename: "NotificationPayload" } 
               | "editAccess"
               | "triggerType"
               | "trigger"
+              | "activationMode"
               | "conditions"
               | "icon"
               | "updatedAt"
@@ -40255,6 +40626,10 @@ export type TeamWithParentWebhookPayloadFragment = { __typename: "TeamWithParent
   TeamWithParentWebhookPayload,
   "id" | "key" | "name" | "parentId" | "displayName"
 >;
+
+export type AiConversationConfirmationElicitationResponseDataFragment = {
+  __typename: "AiConversationConfirmationElicitationResponseData";
+} & Pick<AiConversationConfirmationElicitationResponseData, "kind" | "confirmed">;
 
 export type PaidSubscriptionFragment = { __typename: "PaidSubscription" } & Pick<
   PaidSubscription,
@@ -40442,6 +40817,7 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "memberFieldStatus"
   | "memberFieldTeams"
   | "fieldMilestone"
+  | "reviewFieldSla"
   | "documentFieldOwner"
   | "documentFieldParent"
   | "projectFieldActivity"
@@ -40752,6 +41128,7 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "memberFieldStatus"
       | "memberFieldTeams"
       | "fieldMilestone"
+      | "reviewFieldSla"
       | "documentFieldOwner"
       | "documentFieldParent"
       | "projectFieldActivity"
@@ -41522,6 +41899,7 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "memberFieldStatus"
           | "memberFieldTeams"
           | "fieldMilestone"
+          | "reviewFieldSla"
           | "documentFieldOwner"
           | "documentFieldParent"
           | "projectFieldActivity"
@@ -42090,10 +42468,17 @@ type AiConversationBaseToolCall_AiConversationCreateEntityToolCall_Fragment = {
       { __typename: "AiConversationCreateEntityToolCallResult" } & {
         createdEntities?: Maybe<
           Array<
-            { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
-              AiConversationSearchEntitiesToolCallResultEntities,
-              "id" | "type"
-            >
+            { __typename: "AiConversationCreateEntityToolCallResultCreatedEntities" } & Pick<
+              AiConversationCreateEntityToolCallResultCreatedEntities,
+              "id" | "label" | "type"
+            > & {
+                parent?: Maybe<
+                  { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                    AiConversationSearchEntitiesToolCallResultEntities,
+                    "id" | "type"
+                  >
+                >;
+              }
           >
         >;
         startedAgentSessions?: Maybe<
@@ -42135,6 +42520,25 @@ type AiConversationBaseToolCall_AiConversationDeleteEntityToolCall_Fragment = {
         entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
           AiConversationSearchEntitiesToolCallResultEntities,
           "id" | "type"
+        >;
+      }
+    >;
+    result?: Maybe<
+      { __typename: "AiConversationDeleteEntityToolCallResult" } & {
+        deletedEntities?: Maybe<
+          Array<
+            { __typename: "AiConversationCreateEntityToolCallResultCreatedEntities" } & Pick<
+              AiConversationCreateEntityToolCallResultCreatedEntities,
+              "id" | "label" | "type"
+            > & {
+                parent?: Maybe<
+                  { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                    AiConversationSearchEntitiesToolCallResultEntities,
+                    "id" | "type"
+                  >
+                >;
+              }
+          >
         >;
       }
     >;
@@ -42333,7 +42737,13 @@ type AiConversationBaseToolCall_AiConversationNotifyUsersToolCall_Fragment = {
     args?: Maybe<
       { __typename: "AiConversationNotifyUsersToolCallArgs" } & Pick<
         AiConversationNotifyUsersToolCallArgs,
-        "summary" | "userIds"
+        "message" | "summary" | "userIds"
+      >
+    >;
+    result?: Maybe<
+      { __typename: "AiConversationNotifyUsersToolCallResult" } & Pick<
+        AiConversationNotifyUsersToolCallResult,
+        "notifiedUserIds" | "skippedUserIds"
       >
     >;
   };
@@ -42367,28 +42777,31 @@ type AiConversationBaseToolCall_AiConversationPromptCodingSessionToolCall_Fragme
       >
     >;
     result?: Maybe<
-      { __typename: "AiConversationPromptCodingSessionToolCallResult" } & {
-        agentSession: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
-          AiConversationSearchEntitiesToolCallResultEntities,
-          "id" | "type"
-        >;
-        entities?: Maybe<
-          Array<
-            { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
-              AiConversationSearchEntitiesToolCallResultEntities,
-              "id" | "type"
+      { __typename: "AiConversationPromptCodingSessionToolCallResult" } & Pick<
+        AiConversationPromptCodingSessionToolCallResult,
+        "created" | "quotaBlocked"
+      > & {
+          agentSession: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+            AiConversationSearchEntitiesToolCallResultEntities,
+            "id" | "type"
+          >;
+          entities?: Maybe<
+            Array<
+              { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                AiConversationSearchEntitiesToolCallResultEntities,
+                "id" | "type"
+              >
             >
-          >
-        >;
-        pullRequests?: Maybe<
-          Array<
-            { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
-              AiConversationSearchEntitiesToolCallResultEntities,
-              "id" | "type"
+          >;
+          pullRequests?: Maybe<
+            Array<
+              { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                AiConversationSearchEntitiesToolCallResultEntities,
+                "id" | "type"
+              >
             >
-          >
-        >;
-      }
+          >;
+        }
     >;
   };
 
@@ -42558,6 +42971,25 @@ type AiConversationBaseToolCall_AiConversationRestoreEntityToolCall_Fragment = {
         entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
           AiConversationSearchEntitiesToolCallResultEntities,
           "id" | "type"
+        >;
+      }
+    >;
+    result?: Maybe<
+      { __typename: "AiConversationRestoreEntityToolCallResult" } & {
+        restoredEntities?: Maybe<
+          Array<
+            { __typename: "AiConversationCreateEntityToolCallResultCreatedEntities" } & Pick<
+              AiConversationCreateEntityToolCallResultCreatedEntities,
+              "id" | "label" | "type"
+            > & {
+                parent?: Maybe<
+                  { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                    AiConversationSearchEntitiesToolCallResultEntities,
+                    "id" | "type"
+                  >
+                >;
+              }
+          >
         >;
       }
     >;
@@ -42833,6 +43265,21 @@ type AiConversationBaseToolCall_AiConversationUpdateEntityToolCall_Fragment = {
             >
           >
         >;
+        updatedEntities?: Maybe<
+          Array<
+            { __typename: "AiConversationCreateEntityToolCallResultCreatedEntities" } & Pick<
+              AiConversationCreateEntityToolCallResultCreatedEntities,
+              "id" | "label" | "type"
+            > & {
+                parent?: Maybe<
+                  { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                    AiConversationSearchEntitiesToolCallResultEntities,
+                    "id" | "type"
+                  >
+                >;
+              }
+          >
+        >;
       }
     >;
   };
@@ -43000,10 +43447,17 @@ export type AiConversationCreateEntityToolCallFragment = { __typename: "AiConver
       { __typename: "AiConversationCreateEntityToolCallResult" } & {
         createdEntities?: Maybe<
           Array<
-            { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
-              AiConversationSearchEntitiesToolCallResultEntities,
-              "id" | "type"
-            >
+            { __typename: "AiConversationCreateEntityToolCallResultCreatedEntities" } & Pick<
+              AiConversationCreateEntityToolCallResultCreatedEntities,
+              "id" | "label" | "type"
+            > & {
+                parent?: Maybe<
+                  { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                    AiConversationSearchEntitiesToolCallResultEntities,
+                    "id" | "type"
+                  >
+                >;
+              }
           >
         >;
         startedAgentSessions?: Maybe<
@@ -43031,10 +43485,17 @@ export type AiConversationCreateEntityToolCallResultFragment = {
 } & {
   createdEntities?: Maybe<
     Array<
-      { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
-        AiConversationSearchEntitiesToolCallResultEntities,
-        "id" | "type"
-      >
+      { __typename: "AiConversationCreateEntityToolCallResultCreatedEntities" } & Pick<
+        AiConversationCreateEntityToolCallResultCreatedEntities,
+        "id" | "label" | "type"
+      > & {
+          parent?: Maybe<
+            { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+              AiConversationSearchEntitiesToolCallResultEntities,
+              "id" | "type"
+            >
+          >;
+        }
     >
   >;
   startedAgentSessions?: Maybe<
@@ -43046,6 +43507,17 @@ export type AiConversationCreateEntityToolCallResultFragment = {
     >
   >;
 };
+
+export type AiConversationCreateEntityToolCallResultCreatedEntitiesFragment = {
+  __typename: "AiConversationCreateEntityToolCallResultCreatedEntities";
+} & Pick<AiConversationCreateEntityToolCallResultCreatedEntities, "id" | "label" | "type"> & {
+    parent?: Maybe<
+      { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+        AiConversationSearchEntitiesToolCallResultEntities,
+        "id" | "type"
+      >
+    >;
+  };
 
 export type AiConversationCreateSandboxToolCallFragment = { __typename: "AiConversationCreateSandboxToolCall" } & Pick<
   AiConversationCreateSandboxToolCall,
@@ -43079,6 +43551,25 @@ export type AiConversationDeleteEntityToolCallFragment = { __typename: "AiConver
         >;
       }
     >;
+    result?: Maybe<
+      { __typename: "AiConversationDeleteEntityToolCallResult" } & {
+        deletedEntities?: Maybe<
+          Array<
+            { __typename: "AiConversationCreateEntityToolCallResultCreatedEntities" } & Pick<
+              AiConversationCreateEntityToolCallResultCreatedEntities,
+              "id" | "label" | "type"
+            > & {
+                parent?: Maybe<
+                  { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                    AiConversationSearchEntitiesToolCallResultEntities,
+                    "id" | "type"
+                  >
+                >;
+              }
+          >
+        >;
+      }
+    >;
     displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
       AiConversationToolDisplayInfo,
       "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
@@ -43091,6 +43582,26 @@ export type AiConversationDeleteEntityToolCallArgsFragment = {
   entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
     AiConversationSearchEntitiesToolCallResultEntities,
     "id" | "type"
+  >;
+};
+
+export type AiConversationDeleteEntityToolCallResultFragment = {
+  __typename: "AiConversationDeleteEntityToolCallResult";
+} & {
+  deletedEntities?: Maybe<
+    Array<
+      { __typename: "AiConversationCreateEntityToolCallResultCreatedEntities" } & Pick<
+        AiConversationCreateEntityToolCallResultCreatedEntities,
+        "id" | "label" | "type"
+      > & {
+          parent?: Maybe<
+            { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+              AiConversationSearchEntitiesToolCallResultEntities,
+              "id" | "type"
+            >
+          >;
+        }
+    >
   >;
 };
 
@@ -43464,7 +43975,13 @@ export type AiConversationNotifyUsersToolCallFragment = { __typename: "AiConvers
     args?: Maybe<
       { __typename: "AiConversationNotifyUsersToolCallArgs" } & Pick<
         AiConversationNotifyUsersToolCallArgs,
-        "summary" | "userIds"
+        "message" | "summary" | "userIds"
+      >
+    >;
+    result?: Maybe<
+      { __typename: "AiConversationNotifyUsersToolCallResult" } & Pick<
+        AiConversationNotifyUsersToolCallResult,
+        "notifiedUserIds" | "skippedUserIds"
       >
     >;
     displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
@@ -43475,7 +43992,11 @@ export type AiConversationNotifyUsersToolCallFragment = { __typename: "AiConvers
 
 export type AiConversationNotifyUsersToolCallArgsFragment = {
   __typename: "AiConversationNotifyUsersToolCallArgs";
-} & Pick<AiConversationNotifyUsersToolCallArgs, "summary" | "userIds">;
+} & Pick<AiConversationNotifyUsersToolCallArgs, "message" | "summary" | "userIds">;
+
+export type AiConversationNotifyUsersToolCallResultFragment = {
+  __typename: "AiConversationNotifyUsersToolCallResult";
+} & Pick<AiConversationNotifyUsersToolCallResult, "notifiedUserIds" | "skippedUserIds">;
 
 export type AiConversationPostChatMessageToolCallFragment = {
   __typename: "AiConversationPostChatMessageToolCall";
@@ -43506,28 +44027,31 @@ export type AiConversationPromptCodingSessionToolCallFragment = {
       >
     >;
     result?: Maybe<
-      { __typename: "AiConversationPromptCodingSessionToolCallResult" } & {
-        agentSession: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
-          AiConversationSearchEntitiesToolCallResultEntities,
-          "id" | "type"
-        >;
-        entities?: Maybe<
-          Array<
-            { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
-              AiConversationSearchEntitiesToolCallResultEntities,
-              "id" | "type"
+      { __typename: "AiConversationPromptCodingSessionToolCallResult" } & Pick<
+        AiConversationPromptCodingSessionToolCallResult,
+        "created" | "quotaBlocked"
+      > & {
+          agentSession: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+            AiConversationSearchEntitiesToolCallResultEntities,
+            "id" | "type"
+          >;
+          entities?: Maybe<
+            Array<
+              { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                AiConversationSearchEntitiesToolCallResultEntities,
+                "id" | "type"
+              >
             >
-          >
-        >;
-        pullRequests?: Maybe<
-          Array<
-            { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
-              AiConversationSearchEntitiesToolCallResultEntities,
-              "id" | "type"
+          >;
+          pullRequests?: Maybe<
+            Array<
+              { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                AiConversationSearchEntitiesToolCallResultEntities,
+                "id" | "type"
+              >
             >
-          >
-        >;
-      }
+          >;
+        }
     >;
     displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
       AiConversationToolDisplayInfo,
@@ -43541,28 +44065,28 @@ export type AiConversationPromptCodingSessionToolCallArgsFragment = {
 
 export type AiConversationPromptCodingSessionToolCallResultFragment = {
   __typename: "AiConversationPromptCodingSessionToolCallResult";
-} & {
-  agentSession: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
-    AiConversationSearchEntitiesToolCallResultEntities,
-    "id" | "type"
-  >;
-  entities?: Maybe<
-    Array<
-      { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
-        AiConversationSearchEntitiesToolCallResultEntities,
-        "id" | "type"
+} & Pick<AiConversationPromptCodingSessionToolCallResult, "created" | "quotaBlocked"> & {
+    agentSession: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+      AiConversationSearchEntitiesToolCallResultEntities,
+      "id" | "type"
+    >;
+    entities?: Maybe<
+      Array<
+        { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+          AiConversationSearchEntitiesToolCallResultEntities,
+          "id" | "type"
+        >
       >
-    >
-  >;
-  pullRequests?: Maybe<
-    Array<
-      { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
-        AiConversationSearchEntitiesToolCallResultEntities,
-        "id" | "type"
+    >;
+    pullRequests?: Maybe<
+      Array<
+        { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+          AiConversationSearchEntitiesToolCallResultEntities,
+          "id" | "type"
+        >
       >
-    >
-  >;
-};
+    >;
+  };
 
 export type AiConversationQueryActivityToolCallFragment = { __typename: "AiConversationQueryActivityToolCall" } & Pick<
   AiConversationQueryActivityToolCall,
@@ -43823,6 +44347,25 @@ export type AiConversationRestoreEntityToolCallFragment = { __typename: "AiConve
         >;
       }
     >;
+    result?: Maybe<
+      { __typename: "AiConversationRestoreEntityToolCallResult" } & {
+        restoredEntities?: Maybe<
+          Array<
+            { __typename: "AiConversationCreateEntityToolCallResultCreatedEntities" } & Pick<
+              AiConversationCreateEntityToolCallResultCreatedEntities,
+              "id" | "label" | "type"
+            > & {
+                parent?: Maybe<
+                  { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                    AiConversationSearchEntitiesToolCallResultEntities,
+                    "id" | "type"
+                  >
+                >;
+              }
+          >
+        >;
+      }
+    >;
     displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
       AiConversationToolDisplayInfo,
       "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
@@ -43835,6 +44378,26 @@ export type AiConversationRestoreEntityToolCallArgsFragment = {
   entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
     AiConversationSearchEntitiesToolCallResultEntities,
     "id" | "type"
+  >;
+};
+
+export type AiConversationRestoreEntityToolCallResultFragment = {
+  __typename: "AiConversationRestoreEntityToolCallResult";
+} & {
+  restoredEntities?: Maybe<
+    Array<
+      { __typename: "AiConversationCreateEntityToolCallResultCreatedEntities" } & Pick<
+        AiConversationCreateEntityToolCallResultCreatedEntities,
+        "id" | "label" | "type"
+      > & {
+          parent?: Maybe<
+            { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+              AiConversationSearchEntitiesToolCallResultEntities,
+              "id" | "type"
+            >
+          >;
+        }
+    >
   >;
 };
 
@@ -44244,6 +44807,21 @@ export type AiConversationUpdateEntityToolCallFragment = { __typename: "AiConver
             >
           >
         >;
+        updatedEntities?: Maybe<
+          Array<
+            { __typename: "AiConversationCreateEntityToolCallResultCreatedEntities" } & Pick<
+              AiConversationCreateEntityToolCallResultCreatedEntities,
+              "id" | "label" | "type"
+            > & {
+                parent?: Maybe<
+                  { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                    AiConversationSearchEntitiesToolCallResultEntities,
+                    "id" | "type"
+                  >
+                >;
+              }
+          >
+        >;
       }
     >;
     displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
@@ -44280,6 +44858,21 @@ export type AiConversationUpdateEntityToolCallResultFragment = {
         AiConversationSearchEntitiesToolCallResultEntities,
         "id" | "type"
       >
+    >
+  >;
+  updatedEntities?: Maybe<
+    Array<
+      { __typename: "AiConversationCreateEntityToolCallResultCreatedEntities" } & Pick<
+        AiConversationCreateEntityToolCallResultCreatedEntities,
+        "id" | "label" | "type"
+      > & {
+          parent?: Maybe<
+            { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+              AiConversationSearchEntitiesToolCallResultEntities,
+              "id" | "type"
+            >
+          >;
+        }
     >
   >;
 };
@@ -44829,6 +45422,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "memberFieldStatus"
             | "memberFieldTeams"
             | "fieldMilestone"
+            | "reviewFieldSla"
             | "documentFieldOwner"
             | "documentFieldParent"
             | "projectFieldActivity"
@@ -45097,6 +45691,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "memberFieldStatus"
                 | "memberFieldTeams"
                 | "fieldMilestone"
+                | "reviewFieldSla"
                 | "documentFieldOwner"
                 | "documentFieldParent"
                 | "projectFieldActivity"
@@ -45370,6 +45965,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "memberFieldStatus"
                 | "memberFieldTeams"
                 | "fieldMilestone"
+                | "reviewFieldSla"
                 | "documentFieldOwner"
                 | "documentFieldParent"
                 | "projectFieldActivity"
@@ -45891,6 +46487,49 @@ export type FavoriteConnectionFragment = { __typename: "FavoriteConnection" } & 
         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
         issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+        workflowDefinition?: Maybe<
+          { __typename: "WorkflowDefinition" } & Pick<
+            WorkflowDefinition,
+            | "stats"
+            | "schedule"
+            | "color"
+            | "lastExecutedAt"
+            | "description"
+            | "editAccess"
+            | "triggerType"
+            | "trigger"
+            | "activationMode"
+            | "conditions"
+            | "icon"
+            | "updatedAt"
+            | "groupName"
+            | "name"
+            | "activities"
+            | "sortOrder"
+            | "archivedAt"
+            | "createdAt"
+            | "type"
+            | "userContextViewType"
+            | "contextViewType"
+            | "id"
+            | "slugId"
+            | "restrictEditing"
+            | "enabled"
+            | "applyToSubTeams"
+            | "runOnce"
+          > & {
+              customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+              cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+              initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+              label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+              project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+              user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+              team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+              creator: { __typename?: "User" } & Pick<User, "id">;
+              lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+              owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            }
+        >;
         projectLabel?: Maybe<{ __typename?: "ProjectLabel" } & Pick<ProjectLabel, "id">>;
         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
         releaseNote?: Maybe<{ __typename?: "ReleaseNote" } & Pick<ReleaseNote, "id">>;
@@ -47968,6 +48607,7 @@ export type NotificationConnectionFragment = { __typename: "NotificationConnecti
             | "editAccess"
             | "triggerType"
             | "trigger"
+            | "activationMode"
             | "conditions"
             | "icon"
             | "updatedAt"
@@ -49446,6 +50086,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "editAccess"
             | "triggerType"
             | "trigger"
+            | "activationMode"
             | "conditions"
             | "icon"
             | "updatedAt"
@@ -50286,6 +50927,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "editAccess"
             | "triggerType"
             | "trigger"
+            | "activationMode"
             | "conditions"
             | "icon"
             | "updatedAt"
@@ -50820,6 +51462,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "editAccess"
             | "triggerType"
             | "trigger"
+            | "activationMode"
             | "conditions"
             | "icon"
             | "updatedAt"
@@ -51354,6 +51997,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "editAccess"
             | "triggerType"
             | "trigger"
+            | "activationMode"
             | "conditions"
             | "icon"
             | "updatedAt"
@@ -51888,6 +52532,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "editAccess"
             | "triggerType"
             | "trigger"
+            | "activationMode"
             | "conditions"
             | "icon"
             | "updatedAt"
@@ -52598,6 +53243,7 @@ export type TemplateConnectionFragment = { __typename: "TemplateConnection" } & 
       | "name"
       | "sortOrder"
       | "templateData"
+      | "content"
       | "archivedAt"
       | "createdAt"
       | "id"
@@ -55648,6 +56294,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "memberFieldStatus"
           | "memberFieldTeams"
           | "fieldMilestone"
+          | "reviewFieldSla"
           | "documentFieldOwner"
           | "documentFieldParent"
           | "projectFieldActivity"
@@ -55916,6 +56563,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "memberFieldStatus"
               | "memberFieldTeams"
               | "fieldMilestone"
+              | "reviewFieldSla"
               | "documentFieldOwner"
               | "documentFieldParent"
               | "projectFieldActivity"
@@ -56189,6 +56837,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "memberFieldStatus"
               | "memberFieldTeams"
               | "fieldMilestone"
+              | "reviewFieldSla"
               | "documentFieldOwner"
               | "documentFieldParent"
               | "projectFieldActivity"
@@ -56721,6 +57370,7 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "memberFieldStatus"
             | "memberFieldTeams"
             | "fieldMilestone"
+            | "reviewFieldSla"
             | "documentFieldOwner"
             | "documentFieldParent"
             | "projectFieldActivity"
@@ -56996,6 +57646,7 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "memberFieldStatus"
           | "memberFieldTeams"
           | "fieldMilestone"
+          | "reviewFieldSla"
           | "documentFieldOwner"
           | "documentFieldParent"
           | "projectFieldActivity"
@@ -57403,6 +58054,7 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "memberFieldStatus"
             | "memberFieldTeams"
             | "fieldMilestone"
+            | "reviewFieldSla"
             | "documentFieldOwner"
             | "documentFieldParent"
             | "projectFieldActivity"
@@ -57678,6 +58330,7 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "memberFieldStatus"
           | "memberFieldTeams"
           | "fieldMilestone"
+          | "reviewFieldSla"
           | "documentFieldOwner"
           | "documentFieldParent"
           | "projectFieldActivity"
@@ -57952,6 +58605,7 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "memberFieldStatus"
         | "memberFieldTeams"
         | "fieldMilestone"
+        | "reviewFieldSla"
         | "documentFieldOwner"
         | "documentFieldParent"
         | "projectFieldActivity"
@@ -58263,6 +58917,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "memberFieldStatus"
               | "memberFieldTeams"
               | "fieldMilestone"
+              | "reviewFieldSla"
               | "documentFieldOwner"
               | "documentFieldParent"
               | "projectFieldActivity"
@@ -58531,6 +59186,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "memberFieldStatus"
                   | "memberFieldTeams"
                   | "fieldMilestone"
+                  | "reviewFieldSla"
                   | "documentFieldOwner"
                   | "documentFieldParent"
                   | "projectFieldActivity"
@@ -58804,6 +59460,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "memberFieldStatus"
                   | "memberFieldTeams"
                   | "fieldMilestone"
+                  | "reviewFieldSla"
                   | "documentFieldOwner"
                   | "documentFieldParent"
                   | "projectFieldActivity"
@@ -60027,10 +60684,12 @@ export type EmojiQuery = { __typename?: "Query" } & {
 export type EmojisQueryVariables = Exact<{
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
+  filter?: InputMaybe<EmojiFilter>;
   first?: InputMaybe<Scalars["Int"]>;
   includeArchived?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<PaginationOrderBy>;
+  sort?: InputMaybe<Array<EmojiSortInput> | EmojiSortInput>;
 }>;
 
 export type EmojisQuery = { __typename?: "Query" } & {
@@ -60127,6 +60786,49 @@ export type FavoriteQuery = { __typename?: "Query" } & {
       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
       issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+      workflowDefinition?: Maybe<
+        { __typename: "WorkflowDefinition" } & Pick<
+          WorkflowDefinition,
+          | "stats"
+          | "schedule"
+          | "color"
+          | "lastExecutedAt"
+          | "description"
+          | "editAccess"
+          | "triggerType"
+          | "trigger"
+          | "activationMode"
+          | "conditions"
+          | "icon"
+          | "updatedAt"
+          | "groupName"
+          | "name"
+          | "activities"
+          | "sortOrder"
+          | "archivedAt"
+          | "createdAt"
+          | "type"
+          | "userContextViewType"
+          | "contextViewType"
+          | "id"
+          | "slugId"
+          | "restrictEditing"
+          | "enabled"
+          | "applyToSubTeams"
+          | "runOnce"
+        > & {
+            customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+            cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+            initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+            label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+            project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+            user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+            creator: { __typename?: "User" } & Pick<User, "id">;
+            lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          }
+      >;
       projectLabel?: Maybe<{ __typename?: "ProjectLabel" } & Pick<ProjectLabel, "id">>;
       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
       releaseNote?: Maybe<{ __typename?: "ReleaseNote" } & Pick<ReleaseNote, "id">>;
@@ -60179,6 +60881,49 @@ export type Favorite_ChildrenQuery = { __typename?: "Query" } & {
             initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
             issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
             label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+            workflowDefinition?: Maybe<
+              { __typename: "WorkflowDefinition" } & Pick<
+                WorkflowDefinition,
+                | "stats"
+                | "schedule"
+                | "color"
+                | "lastExecutedAt"
+                | "description"
+                | "editAccess"
+                | "triggerType"
+                | "trigger"
+                | "activationMode"
+                | "conditions"
+                | "icon"
+                | "updatedAt"
+                | "groupName"
+                | "name"
+                | "activities"
+                | "sortOrder"
+                | "archivedAt"
+                | "createdAt"
+                | "type"
+                | "userContextViewType"
+                | "contextViewType"
+                | "id"
+                | "slugId"
+                | "restrictEditing"
+                | "enabled"
+                | "applyToSubTeams"
+                | "runOnce"
+              > & {
+                  customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                  cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                  initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                  label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                  project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                  user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                  creator: { __typename?: "User" } & Pick<User, "id">;
+                  lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                  owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                }
+            >;
             projectLabel?: Maybe<{ __typename?: "ProjectLabel" } & Pick<ProjectLabel, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
             releaseNote?: Maybe<{ __typename?: "ReleaseNote" } & Pick<ReleaseNote, "id">>;
@@ -60197,6 +60942,58 @@ export type Favorite_ChildrenQuery = { __typename?: "Query" } & {
         "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
       >;
     };
+  };
+};
+
+export type Favorite_WorkflowDefinitionQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type Favorite_WorkflowDefinitionQuery = { __typename?: "Query" } & {
+  favorite: { __typename?: "Favorite" } & {
+    workflowDefinition?: Maybe<
+      { __typename: "WorkflowDefinition" } & Pick<
+        WorkflowDefinition,
+        | "stats"
+        | "schedule"
+        | "color"
+        | "lastExecutedAt"
+        | "description"
+        | "editAccess"
+        | "triggerType"
+        | "trigger"
+        | "activationMode"
+        | "conditions"
+        | "icon"
+        | "updatedAt"
+        | "groupName"
+        | "name"
+        | "activities"
+        | "sortOrder"
+        | "archivedAt"
+        | "createdAt"
+        | "type"
+        | "userContextViewType"
+        | "contextViewType"
+        | "id"
+        | "slugId"
+        | "restrictEditing"
+        | "enabled"
+        | "applyToSubTeams"
+        | "runOnce"
+      > & {
+          customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+          cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+          initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+          label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+          project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+          user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+          creator: { __typename?: "User" } & Pick<User, "id">;
+          lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+        }
+    >;
   };
 };
 
@@ -60236,6 +61033,49 @@ export type FavoritesQuery = { __typename?: "Query" } & {
           initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
           issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
           label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+          workflowDefinition?: Maybe<
+            { __typename: "WorkflowDefinition" } & Pick<
+              WorkflowDefinition,
+              | "stats"
+              | "schedule"
+              | "color"
+              | "lastExecutedAt"
+              | "description"
+              | "editAccess"
+              | "triggerType"
+              | "trigger"
+              | "activationMode"
+              | "conditions"
+              | "icon"
+              | "updatedAt"
+              | "groupName"
+              | "name"
+              | "activities"
+              | "sortOrder"
+              | "archivedAt"
+              | "createdAt"
+              | "type"
+              | "userContextViewType"
+              | "contextViewType"
+              | "id"
+              | "slugId"
+              | "restrictEditing"
+              | "enabled"
+              | "applyToSubTeams"
+              | "runOnce"
+            > & {
+                customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+                cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+                initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+                label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+                project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+                user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+                creator: { __typename?: "User" } & Pick<User, "id">;
+                lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+              }
+          >;
           projectLabel?: Maybe<{ __typename?: "ProjectLabel" } & Pick<ProjectLabel, "id">>;
           project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
           releaseNote?: Maybe<{ __typename?: "ReleaseNote" } & Pick<ReleaseNote, "id">>;
@@ -65098,7 +65938,7 @@ export type LatestReleaseByAccessKeyQuery = { __typename?: "Query" } & {
     { __typename: "AccessKeyRelease" } & Pick<
       AccessKeyRelease,
       "commitSha" | "url" | "name" | "archivedAt" | "completedAt" | "createdAt" | "id" | "version"
-    > & { stage: { __typename: "AccessKeyReleaseStage" } & Pick<AccessKeyReleaseStage, "name"> }
+    > & { stage: { __typename: "AccessKeyReleaseStage" } & Pick<AccessKeyReleaseStage, "name" | "type"> }
   >;
 };
 
@@ -65107,7 +65947,7 @@ export type LatestReleaseByAccessKey_StageQueryVariables = Exact<{ [key: string]
 export type LatestReleaseByAccessKey_StageQuery = { __typename?: "Query" } & {
   latestReleaseByAccessKey?: Maybe<
     { __typename?: "AccessKeyRelease" } & {
-      stage: { __typename: "AccessKeyReleaseStage" } & Pick<AccessKeyReleaseStage, "name">;
+      stage: { __typename: "AccessKeyReleaseStage" } & Pick<AccessKeyReleaseStage, "name" | "type">;
     }
   >;
 };
@@ -65620,6 +66460,7 @@ export type NotificationQuery = { __typename?: "Query" } & {
             | "editAccess"
             | "triggerType"
             | "trigger"
+            | "activationMode"
             | "conditions"
             | "icon"
             | "updatedAt"
@@ -66468,6 +67309,7 @@ export type NotificationsQuery = { __typename?: "Query" } & {
               | "editAccess"
               | "triggerType"
               | "trigger"
+              | "activationMode"
               | "conditions"
               | "icon"
               | "updatedAt"
@@ -66859,6 +67701,7 @@ export type Organization_TemplatesQuery = { __typename?: "Query" } & {
           | "name"
           | "sortOrder"
           | "templateData"
+          | "content"
           | "archivedAt"
           | "createdAt"
           | "id"
@@ -69216,7 +70059,7 @@ export type RecentReleasesByAccessKeyQuery = { __typename?: "Query" } & {
     { __typename: "AccessKeyRelease" } & Pick<
       AccessKeyRelease,
       "commitSha" | "url" | "name" | "archivedAt" | "completedAt" | "createdAt" | "id" | "version"
-    > & { stage: { __typename: "AccessKeyReleaseStage" } & Pick<AccessKeyReleaseStage, "name"> }
+    > & { stage: { __typename: "AccessKeyReleaseStage" } & Pick<AccessKeyReleaseStage, "name" | "type"> }
   >;
 };
 
@@ -70997,7 +71840,7 @@ export type SlaConfigurationsQuery = { __typename?: "Query" } & {
   slaConfigurations: Array<
     { __typename: "SlaConfiguration" } & Pick<
       SlaConfiguration,
-      "slaType" | "sla" | "id" | "name" | "conditions" | "removesSla"
+      "slaType" | "sla" | "id" | "name" | "conditions" | "startMode" | "removesSla"
     >
   >;
 };
@@ -71708,6 +72551,7 @@ export type Team_TemplatesQuery = { __typename?: "Query" } & {
           | "name"
           | "sortOrder"
           | "templateData"
+          | "content"
           | "archivedAt"
           | "createdAt"
           | "id"
@@ -71912,6 +72756,7 @@ export type TemplateQuery = { __typename?: "Query" } & {
     | "name"
     | "sortOrder"
     | "templateData"
+    | "content"
     | "archivedAt"
     | "createdAt"
     | "id"
@@ -71922,6 +72767,39 @@ export type TemplateQuery = { __typename?: "Query" } & {
       creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
       lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     };
+};
+
+export type TemplateSearchQueryVariables = Exact<{
+  filter?: InputMaybe<TemplateFilter>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+}>;
+
+export type TemplateSearchQuery = { __typename?: "Query" } & {
+  templateSearch: Array<
+    { __typename: "Template" } & Pick<
+      Template,
+      | "description"
+      | "lastAppliedAt"
+      | "type"
+      | "color"
+      | "icon"
+      | "updatedAt"
+      | "name"
+      | "sortOrder"
+      | "templateData"
+      | "content"
+      | "archivedAt"
+      | "createdAt"
+      | "id"
+    > & {
+        inheritedFrom?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
+        pipeline?: Maybe<{ __typename?: "ReleasePipeline" } & Pick<ReleasePipeline, "id">>;
+        team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+        creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+        lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+      }
+  >;
 };
 
 export type TemplatesQueryVariables = Exact<{ [key: string]: never }>;
@@ -71939,6 +72817,7 @@ export type TemplatesQuery = { __typename?: "Query" } & {
       | "name"
       | "sortOrder"
       | "templateData"
+      | "content"
       | "archivedAt"
       | "createdAt"
       | "id"
@@ -71969,6 +72848,7 @@ export type TemplatesForIntegrationQuery = { __typename?: "Query" } & {
       | "name"
       | "sortOrder"
       | "templateData"
+      | "content"
       | "archivedAt"
       | "createdAt"
       | "id"
@@ -78409,6 +79289,7 @@ export type ArchiveNotificationMutation = { __typename?: "Mutation" } & {
                 | "editAccess"
                 | "triggerType"
                 | "trigger"
+                | "activationMode"
                 | "conditions"
                 | "icon"
                 | "updatedAt"
@@ -79004,6 +79885,7 @@ export type NotificationArchiveAllMutation = { __typename?: "Mutation" } & {
                 | "editAccess"
                 | "triggerType"
                 | "trigger"
+                | "activationMode"
                 | "conditions"
                 | "icon"
                 | "updatedAt"
@@ -79613,6 +80495,7 @@ export type NotificationMarkReadAllMutation = { __typename?: "Mutation" } & {
                 | "editAccess"
                 | "triggerType"
                 | "trigger"
+                | "activationMode"
                 | "conditions"
                 | "icon"
                 | "updatedAt"
@@ -80208,6 +81091,7 @@ export type NotificationMarkUnreadAllMutation = { __typename?: "Mutation" } & {
                 | "editAccess"
                 | "triggerType"
                 | "trigger"
+                | "activationMode"
                 | "conditions"
                 | "icon"
                 | "updatedAt"
@@ -80804,6 +81688,7 @@ export type NotificationSnoozeAllMutation = { __typename?: "Mutation" } & {
                 | "editAccess"
                 | "triggerType"
                 | "trigger"
+                | "activationMode"
                 | "conditions"
                 | "icon"
                 | "updatedAt"
@@ -81661,6 +82546,7 @@ export type UnarchiveNotificationMutation = { __typename?: "Mutation" } & {
                 | "editAccess"
                 | "triggerType"
                 | "trigger"
+                | "activationMode"
                 | "conditions"
                 | "icon"
                 | "updatedAt"
@@ -82257,6 +83143,7 @@ export type NotificationUnsnoozeAllMutation = { __typename?: "Mutation" } & {
                 | "editAccess"
                 | "triggerType"
                 | "trigger"
+                | "activationMode"
                 | "conditions"
                 | "icon"
                 | "updatedAt"
@@ -82850,6 +83737,7 @@ export type UpdateNotificationMutation = { __typename?: "Mutation" } & {
                 | "editAccess"
                 | "triggerType"
                 | "trigger"
+                | "activationMode"
                 | "conditions"
                 | "icon"
                 | "updatedAt"
@@ -84345,6 +85233,7 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "memberFieldStatus"
             | "memberFieldTeams"
             | "fieldMilestone"
+            | "reviewFieldSla"
             | "documentFieldOwner"
             | "documentFieldParent"
             | "projectFieldActivity"
@@ -84633,6 +85522,7 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "memberFieldStatus"
             | "memberFieldTeams"
             | "fieldMilestone"
+            | "reviewFieldSla"
             | "documentFieldOwner"
             | "documentFieldParent"
             | "projectFieldActivity"
@@ -84856,16 +85746,6 @@ export const AiConversationAckPartFragmentDoc = new TypedDocumentString(
 }`,
   { fragmentName: "AiConversationAckPart" }
 ) as unknown as TypedDocumentString<AiConversationAckPartFragment, unknown>;
-export const AiConversationElicitationOptionFragmentDoc = new TypedDocumentString(
-  `
-    fragment AiConversationElicitationOption on AiConversationElicitationOption {
-  __typename
-  label
-  prompt
-}
-    `,
-  { fragmentName: "AiConversationElicitationOption" }
-) as unknown as TypedDocumentString<AiConversationElicitationOptionFragment, unknown>;
 export const AiConversationMcpServerConnectionScopeFragmentDoc = new TypedDocumentString(
   `
     fragment AiConversationMcpServerConnectionScope on AiConversationMcpServerConnectionScope {
@@ -84877,13 +85757,20 @@ export const AiConversationMcpServerConnectionScopeFragmentDoc = new TypedDocume
     `,
   { fragmentName: "AiConversationMcpServerConnectionScope" }
 ) as unknown as TypedDocumentString<AiConversationMcpServerConnectionScopeFragment, unknown>;
+export const AiConversationElicitationOptionFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationElicitationOption on AiConversationElicitationOption {
+  __typename
+  label
+  prompt
+}
+    `,
+  { fragmentName: "AiConversationElicitationOption" }
+) as unknown as TypedDocumentString<AiConversationElicitationOptionFragment, unknown>;
 export const AiConversationElicitationPartFragmentDoc = new TypedDocumentString(
   `
     fragment AiConversationElicitationPart on AiConversationElicitationPart {
   __typename
-  options {
-    ...AiConversationElicitationOption
-  }
   id
   serverUrl
   integrationId
@@ -84891,10 +85778,13 @@ export const AiConversationElicitationPartFragmentDoc = new TypedDocumentString(
   metadata {
     ...AiConversationPartMetadata
   }
+  title
   scope {
     ...AiConversationMcpServerConnectionScope
   }
-  title
+  options {
+    ...AiConversationElicitationOption
+  }
   type
 }
     fragment AiConversationElicitationOption on AiConversationElicitationOption {
@@ -84919,6 +85809,16 @@ fragment AiConversationMcpServerConnectionScope on AiConversationMcpServerConnec
 }`,
   { fragmentName: "AiConversationElicitationPart" }
 ) as unknown as TypedDocumentString<AiConversationElicitationPartFragment, unknown>;
+export const AiConversationConfirmationElicitationResponseDataFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationConfirmationElicitationResponseData on AiConversationConfirmationElicitationResponseData {
+  __typename
+  kind
+  confirmed
+}
+    `,
+  { fragmentName: "AiConversationConfirmationElicitationResponseData" }
+) as unknown as TypedDocumentString<AiConversationConfirmationElicitationResponseDataFragment, unknown>;
 export const AiConversationMcpServerConnectionElicitationResponseDataFragmentDoc = new TypedDocumentString(
   `
     fragment AiConversationMcpServerConnectionElicitationResponseData on AiConversationMcpServerConnectionElicitationResponseData {
@@ -84943,9 +85843,13 @@ export const AiConversationElicitationResponsePartFragmentDoc = new TypedDocumen
   `
     fragment AiConversationElicitationResponsePart on AiConversationElicitationResponsePart {
   __typename
+  bodyData
   id
   elicitationId
   data {
+    ... on AiConversationConfirmationElicitationResponseData {
+      ...AiConversationConfirmationElicitationResponseData
+    }
     ... on AiConversationMcpServerConnectionElicitationResponseData {
       ...AiConversationMcpServerConnectionElicitationResponseData
     }
@@ -84969,6 +85873,11 @@ export const AiConversationElicitationResponsePartFragmentDoc = new TypedDocumen
   endedAt
   startedAt
   turnId
+}
+fragment AiConversationConfirmationElicitationResponseData on AiConversationConfirmationElicitationResponseData {
+  __typename
+  kind
+  confirmed
 }
 fragment AiConversationMcpServerConnectionElicitationResponseData on AiConversationMcpServerConnectionElicitationResponseData {
   __typename
@@ -85229,18 +86138,45 @@ export const AiConversationSearchEntitiesToolCallResultEntitiesFragmentDoc = new
     `,
   { fragmentName: "AiConversationSearchEntitiesToolCallResultEntities" }
 ) as unknown as TypedDocumentString<AiConversationSearchEntitiesToolCallResultEntitiesFragment, unknown>;
+export const AiConversationCreateEntityToolCallResultCreatedEntitiesFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationCreateEntityToolCallResultCreatedEntities on AiConversationCreateEntityToolCallResultCreatedEntities {
+  __typename
+  id
+  label
+  parent {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  type
+}
+    fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}`,
+  { fragmentName: "AiConversationCreateEntityToolCallResultCreatedEntities" }
+) as unknown as TypedDocumentString<AiConversationCreateEntityToolCallResultCreatedEntitiesFragment, unknown>;
 export const AiConversationCreateEntityToolCallResultFragmentDoc = new TypedDocumentString(
   `
     fragment AiConversationCreateEntityToolCallResult on AiConversationCreateEntityToolCallResult {
   __typename
   createdEntities {
-    ...AiConversationSearchEntitiesToolCallResultEntities
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
   }
   startedAgentSessions {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
 }
-    fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+    fragment AiConversationCreateEntityToolCallResultCreatedEntities on AiConversationCreateEntityToolCallResultCreatedEntities {
+  __typename
+  id
+  label
+  parent {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  type
+}
+fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
   __typename
   id
   type
@@ -85272,11 +86208,20 @@ export const AiConversationCreateEntityToolCallFragmentDoc = new TypedDocumentSt
 fragment AiConversationCreateEntityToolCallResult on AiConversationCreateEntityToolCallResult {
   __typename
   createdEntities {
-    ...AiConversationSearchEntitiesToolCallResultEntities
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
   }
   startedAgentSessions {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
+}
+fragment AiConversationCreateEntityToolCallResultCreatedEntities on AiConversationCreateEntityToolCallResultCreatedEntities {
+  __typename
+  id
+  label
+  parent {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  type
 }
 fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
   __typename
@@ -85345,6 +86290,30 @@ export const AiConversationDeleteEntityToolCallArgsFragmentDoc = new TypedDocume
 }`,
   { fragmentName: "AiConversationDeleteEntityToolCallArgs" }
 ) as unknown as TypedDocumentString<AiConversationDeleteEntityToolCallArgsFragment, unknown>;
+export const AiConversationDeleteEntityToolCallResultFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationDeleteEntityToolCallResult on AiConversationDeleteEntityToolCallResult {
+  __typename
+  deletedEntities {
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
+  }
+}
+    fragment AiConversationCreateEntityToolCallResultCreatedEntities on AiConversationCreateEntityToolCallResultCreatedEntities {
+  __typename
+  id
+  label
+  parent {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  type
+}
+fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}`,
+  { fragmentName: "AiConversationDeleteEntityToolCallResult" }
+) as unknown as TypedDocumentString<AiConversationDeleteEntityToolCallResultFragment, unknown>;
 export const AiConversationDeleteEntityToolCallFragmentDoc = new TypedDocumentString(
   `
     fragment AiConversationDeleteEntityToolCall on AiConversationDeleteEntityToolCall {
@@ -85355,14 +86324,32 @@ export const AiConversationDeleteEntityToolCallFragmentDoc = new TypedDocumentSt
   }
   name
   rawResult
+  result {
+    ...AiConversationDeleteEntityToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
 }
-    fragment AiConversationDeleteEntityToolCallArgs on AiConversationDeleteEntityToolCallArgs {
+    fragment AiConversationCreateEntityToolCallResultCreatedEntities on AiConversationCreateEntityToolCallResultCreatedEntities {
+  __typename
+  id
+  label
+  parent {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  type
+}
+fragment AiConversationDeleteEntityToolCallArgs on AiConversationDeleteEntityToolCallArgs {
   __typename
   entity {
     ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationDeleteEntityToolCallResult on AiConversationDeleteEntityToolCallResult {
+  __typename
+  deletedEntities {
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
   }
 }
 fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
@@ -85904,12 +86891,23 @@ export const AiConversationNotifyUsersToolCallArgsFragmentDoc = new TypedDocumen
   `
     fragment AiConversationNotifyUsersToolCallArgs on AiConversationNotifyUsersToolCallArgs {
   __typename
+  message
   summary
   userIds
 }
     `,
   { fragmentName: "AiConversationNotifyUsersToolCallArgs" }
 ) as unknown as TypedDocumentString<AiConversationNotifyUsersToolCallArgsFragment, unknown>;
+export const AiConversationNotifyUsersToolCallResultFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationNotifyUsersToolCallResult on AiConversationNotifyUsersToolCallResult {
+  __typename
+  notifiedUserIds
+  skippedUserIds
+}
+    `,
+  { fragmentName: "AiConversationNotifyUsersToolCallResult" }
+) as unknown as TypedDocumentString<AiConversationNotifyUsersToolCallResultFragment, unknown>;
 export const AiConversationNotifyUsersToolCallFragmentDoc = new TypedDocumentString(
   `
     fragment AiConversationNotifyUsersToolCall on AiConversationNotifyUsersToolCall {
@@ -85920,14 +86918,23 @@ export const AiConversationNotifyUsersToolCallFragmentDoc = new TypedDocumentStr
   }
   name
   rawResult
+  result {
+    ...AiConversationNotifyUsersToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
 }
     fragment AiConversationNotifyUsersToolCallArgs on AiConversationNotifyUsersToolCallArgs {
   __typename
+  message
   summary
   userIds
+}
+fragment AiConversationNotifyUsersToolCallResult on AiConversationNotifyUsersToolCallResult {
+  __typename
+  notifiedUserIds
+  skippedUserIds
 }
 fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
   __typename
@@ -85993,12 +87000,14 @@ export const AiConversationPromptCodingSessionToolCallResultFragmentDoc = new Ty
   agentSession {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
+  created
   entities {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
   pullRequests {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
+  quotaBlocked
 }
     fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
   __typename
@@ -86034,12 +87043,14 @@ fragment AiConversationPromptCodingSessionToolCallResult on AiConversationPrompt
   agentSession {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
+  created
   entities {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
   pullRequests {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
+  quotaBlocked
 }
 fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
   __typename
@@ -86484,6 +87495,30 @@ export const AiConversationRestoreEntityToolCallArgsFragmentDoc = new TypedDocum
 }`,
   { fragmentName: "AiConversationRestoreEntityToolCallArgs" }
 ) as unknown as TypedDocumentString<AiConversationRestoreEntityToolCallArgsFragment, unknown>;
+export const AiConversationRestoreEntityToolCallResultFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationRestoreEntityToolCallResult on AiConversationRestoreEntityToolCallResult {
+  __typename
+  restoredEntities {
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
+  }
+}
+    fragment AiConversationCreateEntityToolCallResultCreatedEntities on AiConversationCreateEntityToolCallResultCreatedEntities {
+  __typename
+  id
+  label
+  parent {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  type
+}
+fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}`,
+  { fragmentName: "AiConversationRestoreEntityToolCallResult" }
+) as unknown as TypedDocumentString<AiConversationRestoreEntityToolCallResultFragment, unknown>;
 export const AiConversationRestoreEntityToolCallFragmentDoc = new TypedDocumentString(
   `
     fragment AiConversationRestoreEntityToolCall on AiConversationRestoreEntityToolCall {
@@ -86494,14 +87529,32 @@ export const AiConversationRestoreEntityToolCallFragmentDoc = new TypedDocumentS
   }
   name
   rawResult
+  result {
+    ...AiConversationRestoreEntityToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
 }
-    fragment AiConversationRestoreEntityToolCallArgs on AiConversationRestoreEntityToolCallArgs {
+    fragment AiConversationCreateEntityToolCallResultCreatedEntities on AiConversationCreateEntityToolCallResultCreatedEntities {
+  __typename
+  id
+  label
+  parent {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  type
+}
+fragment AiConversationRestoreEntityToolCallArgs on AiConversationRestoreEntityToolCallArgs {
   __typename
   entity {
     ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationRestoreEntityToolCallResult on AiConversationRestoreEntityToolCallResult {
+  __typename
+  restoredEntities {
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
   }
 }
 fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
@@ -87130,8 +88183,20 @@ export const AiConversationUpdateEntityToolCallResultFragmentDoc = new TypedDocu
   startedAgentSessions {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
+  updatedEntities {
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
+  }
 }
-    fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+    fragment AiConversationCreateEntityToolCallResultCreatedEntities on AiConversationCreateEntityToolCallResultCreatedEntities {
+  __typename
+  id
+  label
+  parent {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  type
+}
+fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
   __typename
   id
   type
@@ -87155,7 +88220,16 @@ export const AiConversationUpdateEntityToolCallFragmentDoc = new TypedDocumentSt
     ...AiConversationToolDisplayInfo
   }
 }
-    fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+    fragment AiConversationCreateEntityToolCallResultCreatedEntities on AiConversationCreateEntityToolCallResultCreatedEntities {
+  __typename
+  id
+  label
+  parent {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  type
+}
+fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
   __typename
   id
   type
@@ -87181,6 +88255,9 @@ fragment AiConversationUpdateEntityToolCallResult on AiConversationUpdateEntityT
   __typename
   startedAgentSessions {
     ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  updatedEntities {
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
   }
 }`,
   { fragmentName: "AiConversationUpdateEntityToolCall" }
@@ -87426,11 +88503,20 @@ fragment AiConversationCreateEntityToolCallArgs on AiConversationCreateEntityToo
 fragment AiConversationCreateEntityToolCallResult on AiConversationCreateEntityToolCallResult {
   __typename
   createdEntities {
-    ...AiConversationSearchEntitiesToolCallResultEntities
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
   }
   startedAgentSessions {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
+}
+fragment AiConversationCreateEntityToolCallResultCreatedEntities on AiConversationCreateEntityToolCallResultCreatedEntities {
+  __typename
+  id
+  label
+  parent {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  type
 }
 fragment AiConversationCreateSandboxToolCall on AiConversationCreateSandboxToolCall {
   __typename
@@ -87456,6 +88542,9 @@ fragment AiConversationDeleteEntityToolCall on AiConversationDeleteEntityToolCal
   }
   name
   rawResult
+  result {
+    ...AiConversationDeleteEntityToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
@@ -87464,6 +88553,12 @@ fragment AiConversationDeleteEntityToolCallArgs on AiConversationDeleteEntityToo
   __typename
   entity {
     ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationDeleteEntityToolCallResult on AiConversationDeleteEntityToolCallResult {
+  __typename
+  deletedEntities {
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
   }
 }
 fragment AiConversationGetMicrosoftTeamsConversationHistoryToolCall on AiConversationGetMicrosoftTeamsConversationHistoryToolCall {
@@ -87666,14 +88761,23 @@ fragment AiConversationNotifyUsersToolCall on AiConversationNotifyUsersToolCall 
   }
   name
   rawResult
+  result {
+    ...AiConversationNotifyUsersToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
 }
 fragment AiConversationNotifyUsersToolCallArgs on AiConversationNotifyUsersToolCallArgs {
   __typename
+  message
   summary
   userIds
+}
+fragment AiConversationNotifyUsersToolCallResult on AiConversationNotifyUsersToolCallResult {
+  __typename
+  notifiedUserIds
+  skippedUserIds
 }
 fragment AiConversationPostChatMessageToolCall on AiConversationPostChatMessageToolCall {
   __typename
@@ -87716,12 +88820,14 @@ fragment AiConversationPromptCodingSessionToolCallResult on AiConversationPrompt
   agentSession {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
+  created
   entities {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
   pullRequests {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
+  quotaBlocked
 }
 fragment AiConversationQueryActivityToolCall on AiConversationQueryActivityToolCall {
   __typename
@@ -87890,6 +88996,9 @@ fragment AiConversationRestoreEntityToolCall on AiConversationRestoreEntityToolC
   }
   name
   rawResult
+  result {
+    ...AiConversationRestoreEntityToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
@@ -87898,6 +89007,12 @@ fragment AiConversationRestoreEntityToolCallArgs on AiConversationRestoreEntityT
   __typename
   entity {
     ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationRestoreEntityToolCallResult on AiConversationRestoreEntityToolCallResult {
+  __typename
+  restoredEntities {
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
   }
 }
 fragment AiConversationRetrieveEntitiesToolCall on AiConversationRetrieveEntitiesToolCall {
@@ -88182,6 +89297,9 @@ fragment AiConversationUpdateEntityToolCallResult on AiConversationUpdateEntityT
   __typename
   startedAgentSessions {
     ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  updatedEntities {
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
   }
 }
 fragment AiConversationWebSearchToolCall on AiConversationWebSearchToolCall {
@@ -88552,9 +89670,6 @@ fragment AiConversationAckPart on AiConversationAckPart {
 }
 fragment AiConversationElicitationPart on AiConversationElicitationPart {
   __typename
-  options {
-    ...AiConversationElicitationOption
-  }
   id
   serverUrl
   integrationId
@@ -88562,17 +89677,24 @@ fragment AiConversationElicitationPart on AiConversationElicitationPart {
   metadata {
     ...AiConversationPartMetadata
   }
+  title
   scope {
     ...AiConversationMcpServerConnectionScope
   }
-  title
+  options {
+    ...AiConversationElicitationOption
+  }
   type
 }
 fragment AiConversationElicitationResponsePart on AiConversationElicitationResponsePart {
   __typename
+  bodyData
   id
   elicitationId
   data {
+    ... on AiConversationConfirmationElicitationResponseData {
+      ...AiConversationConfirmationElicitationResponseData
+    }
     ... on AiConversationMcpServerConnectionElicitationResponseData {
       ...AiConversationMcpServerConnectionElicitationResponseData
     }
@@ -88788,6 +89910,11 @@ fragment AiConversationPartMetadata on AiConversationPartMetadata {
   startedAt
   turnId
 }
+fragment AiConversationConfirmationElicitationResponseData on AiConversationConfirmationElicitationResponseData {
+  __typename
+  kind
+  confirmed
+}
 fragment AiConversationMcpServerConnectionElicitationResponseData on AiConversationMcpServerConnectionElicitationResponseData {
   __typename
   integrationId
@@ -88864,11 +89991,20 @@ fragment AiConversationCreateEntityToolCallArgs on AiConversationCreateEntityToo
 fragment AiConversationCreateEntityToolCallResult on AiConversationCreateEntityToolCallResult {
   __typename
   createdEntities {
-    ...AiConversationSearchEntitiesToolCallResultEntities
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
   }
   startedAgentSessions {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
+}
+fragment AiConversationCreateEntityToolCallResultCreatedEntities on AiConversationCreateEntityToolCallResultCreatedEntities {
+  __typename
+  id
+  label
+  parent {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  type
 }
 fragment AiConversationCreateSandboxToolCall on AiConversationCreateSandboxToolCall {
   __typename
@@ -88894,6 +90030,9 @@ fragment AiConversationDeleteEntityToolCall on AiConversationDeleteEntityToolCal
   }
   name
   rawResult
+  result {
+    ...AiConversationDeleteEntityToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
@@ -88902,6 +90041,12 @@ fragment AiConversationDeleteEntityToolCallArgs on AiConversationDeleteEntityToo
   __typename
   entity {
     ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationDeleteEntityToolCallResult on AiConversationDeleteEntityToolCallResult {
+  __typename
+  deletedEntities {
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
   }
 }
 fragment AiConversationEntityCardWidget on AiConversationEntityCardWidget {
@@ -89146,14 +90291,23 @@ fragment AiConversationNotifyUsersToolCall on AiConversationNotifyUsersToolCall 
   }
   name
   rawResult
+  result {
+    ...AiConversationNotifyUsersToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
 }
 fragment AiConversationNotifyUsersToolCallArgs on AiConversationNotifyUsersToolCallArgs {
   __typename
+  message
   summary
   userIds
+}
+fragment AiConversationNotifyUsersToolCallResult on AiConversationNotifyUsersToolCallResult {
+  __typename
+  notifiedUserIds
+  skippedUserIds
 }
 fragment AiConversationPostChatMessageToolCall on AiConversationPostChatMessageToolCall {
   __typename
@@ -89196,12 +90350,14 @@ fragment AiConversationPromptCodingSessionToolCallResult on AiConversationPrompt
   agentSession {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
+  created
   entities {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
   pullRequests {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
+  quotaBlocked
 }
 fragment AiConversationQueryActivityToolCall on AiConversationQueryActivityToolCall {
   __typename
@@ -89370,6 +90526,9 @@ fragment AiConversationRestoreEntityToolCall on AiConversationRestoreEntityToolC
   }
   name
   rawResult
+  result {
+    ...AiConversationRestoreEntityToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
@@ -89378,6 +90537,12 @@ fragment AiConversationRestoreEntityToolCallArgs on AiConversationRestoreEntityT
   __typename
   entity {
     ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationRestoreEntityToolCallResult on AiConversationRestoreEntityToolCallResult {
+  __typename
+  restoredEntities {
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
   }
 }
 fragment AiConversationRetrieveEntitiesToolCall on AiConversationRetrieveEntitiesToolCall {
@@ -89685,6 +90850,9 @@ fragment AiConversationUpdateEntityToolCallResult on AiConversationUpdateEntityT
   __typename
   startedAgentSessions {
     ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  updatedEntities {
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
   }
 }
 fragment AiConversationWebSearchToolCall on AiConversationWebSearchToolCall {
@@ -90552,6 +91720,7 @@ export const WorkflowDefinitionFragmentDoc = new TypedDocumentString(
   editAccess
   triggerType
   trigger
+  activationMode
   conditions
   icon
   updatedAt
@@ -90654,6 +91823,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   editAccess
   triggerType
   trigger
+  activationMode
   conditions
   icon
   updatedAt
@@ -91280,6 +92450,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   editAccess
   triggerType
   trigger
+  activationMode
   conditions
   icon
   updatedAt
@@ -91914,6 +93085,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   editAccess
   triggerType
   trigger
+  activationMode
   conditions
   icon
   updatedAt
@@ -92847,6 +94019,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   editAccess
   triggerType
   trigger
+  activationMode
   conditions
   icon
   updatedAt
@@ -93312,6 +94485,7 @@ export const AccessKeyReleaseStageFragmentDoc = new TypedDocumentString(
     fragment AccessKeyReleaseStage on AccessKeyReleaseStage {
   __typename
   name
+  type
 }
     `,
   { fragmentName: "AccessKeyReleaseStage" }
@@ -93335,6 +94509,7 @@ export const AccessKeyReleaseFragmentDoc = new TypedDocumentString(
     fragment AccessKeyReleaseStage on AccessKeyReleaseStage {
   __typename
   name
+  type
 }`,
   { fragmentName: "AccessKeyRelease" }
 ) as unknown as TypedDocumentString<AccessKeyReleaseFragment, unknown>;
@@ -93624,6 +94799,7 @@ export const SlaConfigurationFragmentDoc = new TypedDocumentString(
   id
   name
   conditions
+  startMode
   removesSla
 }
     `,
@@ -94141,6 +95317,7 @@ export const IssueHistoryWorkflowMetadataFragmentDoc = new TypedDocumentString(
   editAccess
   triggerType
   trigger
+  activationMode
   conditions
   icon
   updatedAt
@@ -94291,6 +95468,7 @@ export const IssueHistoryTriageRuleMetadataFragmentDoc = new TypedDocumentString
   editAccess
   triggerType
   trigger
+  activationMode
   conditions
   icon
   updatedAt
@@ -97804,6 +98982,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   editAccess
   triggerType
   trigger
+  activationMode
   conditions
   icon
   updatedAt
@@ -98654,6 +99833,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   editAccess
   triggerType
   trigger
+  activationMode
   conditions
   icon
   updatedAt
@@ -100373,6 +101553,7 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  reviewFieldSla
   documentFieldOwner
   documentFieldParent
   projectFieldActivity
@@ -100660,6 +101841,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  reviewFieldSla
   documentFieldOwner
   documentFieldParent
   projectFieldActivity
@@ -100933,6 +102115,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  reviewFieldSla
   documentFieldOwner
   documentFieldParent
   projectFieldActivity
@@ -102288,11 +103471,20 @@ fragment AiConversationCreateEntityToolCallArgs on AiConversationCreateEntityToo
 fragment AiConversationCreateEntityToolCallResult on AiConversationCreateEntityToolCallResult {
   __typename
   createdEntities {
-    ...AiConversationSearchEntitiesToolCallResultEntities
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
   }
   startedAgentSessions {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
+}
+fragment AiConversationCreateEntityToolCallResultCreatedEntities on AiConversationCreateEntityToolCallResultCreatedEntities {
+  __typename
+  id
+  label
+  parent {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  type
 }
 fragment AiConversationCreateSandboxToolCall on AiConversationCreateSandboxToolCall {
   __typename
@@ -102318,6 +103510,9 @@ fragment AiConversationDeleteEntityToolCall on AiConversationDeleteEntityToolCal
   }
   name
   rawResult
+  result {
+    ...AiConversationDeleteEntityToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
@@ -102326,6 +103521,12 @@ fragment AiConversationDeleteEntityToolCallArgs on AiConversationDeleteEntityToo
   __typename
   entity {
     ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationDeleteEntityToolCallResult on AiConversationDeleteEntityToolCallResult {
+  __typename
+  deletedEntities {
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
   }
 }
 fragment AiConversationGetMicrosoftTeamsConversationHistoryToolCall on AiConversationGetMicrosoftTeamsConversationHistoryToolCall {
@@ -102528,14 +103729,23 @@ fragment AiConversationNotifyUsersToolCall on AiConversationNotifyUsersToolCall 
   }
   name
   rawResult
+  result {
+    ...AiConversationNotifyUsersToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
 }
 fragment AiConversationNotifyUsersToolCallArgs on AiConversationNotifyUsersToolCallArgs {
   __typename
+  message
   summary
   userIds
+}
+fragment AiConversationNotifyUsersToolCallResult on AiConversationNotifyUsersToolCallResult {
+  __typename
+  notifiedUserIds
+  skippedUserIds
 }
 fragment AiConversationPostChatMessageToolCall on AiConversationPostChatMessageToolCall {
   __typename
@@ -102578,12 +103788,14 @@ fragment AiConversationPromptCodingSessionToolCallResult on AiConversationPrompt
   agentSession {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
+  created
   entities {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
   pullRequests {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
+  quotaBlocked
 }
 fragment AiConversationQueryActivityToolCall on AiConversationQueryActivityToolCall {
   __typename
@@ -102752,6 +103964,9 @@ fragment AiConversationRestoreEntityToolCall on AiConversationRestoreEntityToolC
   }
   name
   rawResult
+  result {
+    ...AiConversationRestoreEntityToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
@@ -102760,6 +103975,12 @@ fragment AiConversationRestoreEntityToolCallArgs on AiConversationRestoreEntityT
   __typename
   entity {
     ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+fragment AiConversationRestoreEntityToolCallResult on AiConversationRestoreEntityToolCallResult {
+  __typename
+  restoredEntities {
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
   }
 }
 fragment AiConversationRetrieveEntitiesToolCall on AiConversationRetrieveEntitiesToolCall {
@@ -103044,6 +104265,9 @@ fragment AiConversationUpdateEntityToolCallResult on AiConversationUpdateEntityT
   __typename
   startedAgentSessions {
     ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  updatedEntities {
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
   }
 }
 fragment AiConversationWebSearchToolCall on AiConversationWebSearchToolCall {
@@ -104297,6 +105521,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  reviewFieldSla
   documentFieldOwner
   documentFieldParent
   projectFieldActivity
@@ -104623,6 +105848,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  reviewFieldSla
   documentFieldOwner
   documentFieldParent
   projectFieldActivity
@@ -105852,6 +107078,9 @@ export const FavoriteFragmentDoc = new TypedDocumentString(
   label {
     id
   }
+  workflowDefinition {
+    ...WorkflowDefinition
+  }
   projectLabel {
     id
   }
@@ -105900,7 +107129,66 @@ export const FavoriteFragmentDoc = new TypedDocumentString(
     id
   }
 }
-    `,
+    fragment WorkflowDefinition on WorkflowDefinition {
+  __typename
+  stats
+  schedule
+  color
+  customView {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  project {
+    id
+  }
+  user {
+    id
+  }
+  lastExecutedAt
+  description
+  editAccess
+  triggerType
+  trigger
+  activationMode
+  conditions
+  icon
+  updatedAt
+  groupName
+  name
+  activities
+  sortOrder
+  team {
+    id
+  }
+  archivedAt
+  createdAt
+  type
+  userContextViewType
+  contextViewType
+  id
+  creator {
+    id
+  }
+  lastUpdatedBy {
+    id
+  }
+  owner {
+    id
+  }
+  slugId
+  restrictEditing
+  enabled
+  applyToSubTeams
+  runOnce
+}`,
   { fragmentName: "Favorite" }
 ) as unknown as TypedDocumentString<FavoriteFragment, unknown>;
 export const FavoriteConnectionFragmentDoc = new TypedDocumentString(
@@ -105937,6 +107225,9 @@ export const FavoriteConnectionFragmentDoc = new TypedDocumentString(
   label {
     id
   }
+  workflowDefinition {
+    ...WorkflowDefinition
+  }
   projectLabel {
     id
   }
@@ -105984,6 +107275,66 @@ export const FavoriteConnectionFragmentDoc = new TypedDocumentString(
   projectTeam {
     id
   }
+}
+fragment WorkflowDefinition on WorkflowDefinition {
+  __typename
+  stats
+  schedule
+  color
+  customView {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  project {
+    id
+  }
+  user {
+    id
+  }
+  lastExecutedAt
+  description
+  editAccess
+  triggerType
+  trigger
+  activationMode
+  conditions
+  icon
+  updatedAt
+  groupName
+  name
+  activities
+  sortOrder
+  team {
+    id
+  }
+  archivedAt
+  createdAt
+  type
+  userContextViewType
+  contextViewType
+  id
+  creator {
+    id
+  }
+  lastUpdatedBy {
+    id
+  }
+  owner {
+    id
+  }
+  slugId
+  restrictEditing
+  enabled
+  applyToSubTeams
+  runOnce
 }
 fragment PageInfo on PageInfo {
   __typename
@@ -109045,6 +110396,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   editAccess
   triggerType
   trigger
+  activationMode
   conditions
   icon
   updatedAt
@@ -112519,6 +113871,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   editAccess
   triggerType
   trigger
+  activationMode
   conditions
   icon
   updatedAt
@@ -112967,6 +114320,7 @@ export const TemplateFragmentDoc = new TypedDocumentString(
     id
   }
   templateData
+  content
   archivedAt
   createdAt
   id
@@ -113011,6 +114365,7 @@ export const TemplateConnectionFragmentDoc = new TypedDocumentString(
     id
   }
   templateData
+  content
   archivedAt
   createdAt
   id
@@ -117577,6 +118932,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  reviewFieldSla
   documentFieldOwner
   documentFieldParent
   projectFieldActivity
@@ -118253,6 +119609,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  reviewFieldSla
   documentFieldOwner
   documentFieldParent
   projectFieldActivity
@@ -118539,6 +119896,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  reviewFieldSla
   documentFieldOwner
   documentFieldParent
   projectFieldActivity
@@ -119013,6 +120371,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  reviewFieldSla
   documentFieldOwner
   documentFieldParent
   projectFieldActivity
@@ -119299,6 +120658,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  reviewFieldSla
   documentFieldOwner
   documentFieldParent
   projectFieldActivity
@@ -119571,6 +120931,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  reviewFieldSla
   documentFieldOwner
   documentFieldParent
   projectFieldActivity
@@ -119900,6 +121261,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  reviewFieldSla
   documentFieldOwner
   documentFieldParent
   projectFieldActivity
@@ -121669,14 +123031,16 @@ export const EmojiDocument = new TypedDocumentString(`
   }
 }`) as unknown as TypedDocumentString<EmojiQuery, EmojiQueryVariables>;
 export const EmojisDocument = new TypedDocumentString(`
-    query emojis($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+    query emojis($after: String, $before: String, $filter: EmojiFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy, $sort: [EmojiSortInput!]) {
   emojis(
     after: $after
     before: $before
+    filter: $filter
     first: $first
     includeArchived: $includeArchived
     last: $last
     orderBy: $orderBy
+    sort: $sort
   ) {
     ...EmojiConnection
   }
@@ -121823,6 +123187,9 @@ export const FavoriteDocument = new TypedDocumentString(`
   label {
     id
   }
+  workflowDefinition {
+    ...WorkflowDefinition
+  }
   projectLabel {
     id
   }
@@ -121870,6 +123237,66 @@ export const FavoriteDocument = new TypedDocumentString(`
   projectTeam {
     id
   }
+}
+fragment WorkflowDefinition on WorkflowDefinition {
+  __typename
+  stats
+  schedule
+  color
+  customView {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  project {
+    id
+  }
+  user {
+    id
+  }
+  lastExecutedAt
+  description
+  editAccess
+  triggerType
+  trigger
+  activationMode
+  conditions
+  icon
+  updatedAt
+  groupName
+  name
+  activities
+  sortOrder
+  team {
+    id
+  }
+  archivedAt
+  createdAt
+  type
+  userContextViewType
+  contextViewType
+  id
+  creator {
+    id
+  }
+  lastUpdatedBy {
+    id
+  }
+  owner {
+    id
+  }
+  slugId
+  restrictEditing
+  enabled
+  applyToSubTeams
+  runOnce
 }`) as unknown as TypedDocumentString<FavoriteQuery, FavoriteQueryVariables>;
 export const Favorite_ChildrenDocument = new TypedDocumentString(`
     query favorite_children($id: String!, $after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
@@ -121909,6 +123336,9 @@ export const Favorite_ChildrenDocument = new TypedDocumentString(`
   label {
     id
   }
+  workflowDefinition {
+    ...WorkflowDefinition
+  }
   projectLabel {
     id
   }
@@ -121957,6 +123387,66 @@ export const Favorite_ChildrenDocument = new TypedDocumentString(`
     id
   }
 }
+fragment WorkflowDefinition on WorkflowDefinition {
+  __typename
+  stats
+  schedule
+  color
+  customView {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  project {
+    id
+  }
+  user {
+    id
+  }
+  lastExecutedAt
+  description
+  editAccess
+  triggerType
+  trigger
+  activationMode
+  conditions
+  icon
+  updatedAt
+  groupName
+  name
+  activities
+  sortOrder
+  team {
+    id
+  }
+  archivedAt
+  createdAt
+  type
+  userContextViewType
+  contextViewType
+  id
+  creator {
+    id
+  }
+  lastUpdatedBy {
+    id
+  }
+  owner {
+    id
+  }
+  slugId
+  restrictEditing
+  enabled
+  applyToSubTeams
+  runOnce
+}
 fragment FavoriteConnection on FavoriteConnection {
   __typename
   nodes {
@@ -121973,6 +123463,74 @@ fragment PageInfo on PageInfo {
   hasPreviousPage
   hasNextPage
 }`) as unknown as TypedDocumentString<Favorite_ChildrenQuery, Favorite_ChildrenQueryVariables>;
+export const Favorite_WorkflowDefinitionDocument = new TypedDocumentString(`
+    query favorite_workflowDefinition($id: String!) {
+  favorite(id: $id) {
+    workflowDefinition {
+      ...WorkflowDefinition
+    }
+  }
+}
+    fragment WorkflowDefinition on WorkflowDefinition {
+  __typename
+  stats
+  schedule
+  color
+  customView {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  project {
+    id
+  }
+  user {
+    id
+  }
+  lastExecutedAt
+  description
+  editAccess
+  triggerType
+  trigger
+  activationMode
+  conditions
+  icon
+  updatedAt
+  groupName
+  name
+  activities
+  sortOrder
+  team {
+    id
+  }
+  archivedAt
+  createdAt
+  type
+  userContextViewType
+  contextViewType
+  id
+  creator {
+    id
+  }
+  lastUpdatedBy {
+    id
+  }
+  owner {
+    id
+  }
+  slugId
+  restrictEditing
+  enabled
+  applyToSubTeams
+  runOnce
+}`) as unknown as TypedDocumentString<Favorite_WorkflowDefinitionQuery, Favorite_WorkflowDefinitionQueryVariables>;
 export const FavoritesDocument = new TypedDocumentString(`
     query favorites($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
   favorites(
@@ -122009,6 +123567,9 @@ export const FavoritesDocument = new TypedDocumentString(`
   label {
     id
   }
+  workflowDefinition {
+    ...WorkflowDefinition
+  }
   projectLabel {
     id
   }
@@ -122056,6 +123617,66 @@ export const FavoritesDocument = new TypedDocumentString(`
   projectTeam {
     id
   }
+}
+fragment WorkflowDefinition on WorkflowDefinition {
+  __typename
+  stats
+  schedule
+  color
+  customView {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  project {
+    id
+  }
+  user {
+    id
+  }
+  lastExecutedAt
+  description
+  editAccess
+  triggerType
+  trigger
+  activationMode
+  conditions
+  icon
+  updatedAt
+  groupName
+  name
+  activities
+  sortOrder
+  team {
+    id
+  }
+  archivedAt
+  createdAt
+  type
+  userContextViewType
+  contextViewType
+  id
+  creator {
+    id
+  }
+  lastUpdatedBy {
+    id
+  }
+  owner {
+    id
+  }
+  slugId
+  restrictEditing
+  enabled
+  applyToSubTeams
+  runOnce
 }
 fragment FavoriteConnection on FavoriteConnection {
   __typename
@@ -129086,6 +130707,7 @@ export const LatestReleaseByAccessKeyDocument = new TypedDocumentString(`
 fragment AccessKeyReleaseStage on AccessKeyReleaseStage {
   __typename
   name
+  type
 }`) as unknown as TypedDocumentString<LatestReleaseByAccessKeyQuery, LatestReleaseByAccessKeyQueryVariables>;
 export const LatestReleaseByAccessKey_StageDocument = new TypedDocumentString(`
     query latestReleaseByAccessKey_stage {
@@ -129098,6 +130720,7 @@ export const LatestReleaseByAccessKey_StageDocument = new TypedDocumentString(`
     fragment AccessKeyReleaseStage on AccessKeyReleaseStage {
   __typename
   name
+  type
 }`) as unknown as TypedDocumentString<
   LatestReleaseByAccessKey_StageQuery,
   LatestReleaseByAccessKey_StageQueryVariables
@@ -129699,6 +131322,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   editAccess
   triggerType
   trigger
+  activationMode
   conditions
   icon
   updatedAt
@@ -130444,6 +132068,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   editAccess
   triggerType
   trigger
+  activationMode
   conditions
   icon
   updatedAt
@@ -130949,6 +132574,7 @@ export const Organization_TemplatesDocument = new TypedDocumentString(`
     id
   }
   templateData
+  content
   archivedAt
   createdAt
   id
@@ -134604,6 +136230,7 @@ export const RecentReleasesByAccessKeyDocument = new TypedDocumentString(`
 fragment AccessKeyReleaseStage on AccessKeyReleaseStage {
   __typename
   name
+  type
 }`) as unknown as TypedDocumentString<RecentReleasesByAccessKeyQuery, RecentReleasesByAccessKeyQueryVariables>;
 export const ReleaseDocument = new TypedDocumentString(`
     query release($id: String!) {
@@ -137359,6 +138986,7 @@ export const SlaConfigurationsDocument = new TypedDocumentString(`
   id
   name
   conditions
+  startMode
   removesSla
 }`) as unknown as TypedDocumentString<SlaConfigurationsQuery, SlaConfigurationsQueryVariables>;
 export const SsoUrlFromEmailDocument = new TypedDocumentString(`
@@ -138379,6 +140007,7 @@ export const Team_TemplatesDocument = new TypedDocumentString(`
     id
   }
   templateData
+  content
   archivedAt
   createdAt
   id
@@ -138679,6 +140308,7 @@ export const TemplateDocument = new TypedDocumentString(`
     id
   }
   templateData
+  content
   archivedAt
   createdAt
   id
@@ -138689,6 +140319,47 @@ export const TemplateDocument = new TypedDocumentString(`
     id
   }
 }`) as unknown as TypedDocumentString<TemplateQuery, TemplateQueryVariables>;
+export const TemplateSearchDocument = new TypedDocumentString(`
+    query templateSearch($filter: TemplateFilter, $first: Int, $includeArchived: Boolean) {
+  templateSearch(
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+  ) {
+    ...Template
+  }
+}
+    fragment Template on Template {
+  __typename
+  description
+  lastAppliedAt
+  type
+  color
+  icon
+  updatedAt
+  name
+  inheritedFrom {
+    id
+  }
+  pipeline {
+    id
+  }
+  sortOrder
+  team {
+    id
+  }
+  templateData
+  content
+  archivedAt
+  createdAt
+  id
+  creator {
+    id
+  }
+  lastUpdatedBy {
+    id
+  }
+}`) as unknown as TypedDocumentString<TemplateSearchQuery, TemplateSearchQueryVariables>;
 export const TemplatesDocument = new TypedDocumentString(`
     query templates {
   templates {
@@ -138715,6 +140386,7 @@ export const TemplatesDocument = new TypedDocumentString(`
     id
   }
   templateData
+  content
   archivedAt
   createdAt
   id
@@ -138751,6 +140423,7 @@ export const TemplatesForIntegrationDocument = new TypedDocumentString(`
     id
   }
   templateData
+  content
   archivedAt
   createdAt
   id
@@ -147226,6 +148899,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   editAccess
   triggerType
   trigger
+  activationMode
   conditions
   icon
   updatedAt
@@ -147854,6 +149528,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   editAccess
   triggerType
   trigger
+  activationMode
   conditions
   icon
   updatedAt
@@ -148508,6 +150183,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   editAccess
   triggerType
   trigger
+  activationMode
   conditions
   icon
   updatedAt
@@ -149144,6 +150820,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   editAccess
   triggerType
   trigger
+  activationMode
   conditions
   icon
   updatedAt
@@ -149780,6 +151457,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   editAccess
   triggerType
   trigger
+  activationMode
   conditions
   icon
   updatedAt
@@ -150547,6 +152225,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   editAccess
   triggerType
   trigger
+  activationMode
   conditions
   icon
   updatedAt
@@ -151175,6 +152854,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   editAccess
   triggerType
   trigger
+  activationMode
   conditions
   icon
   updatedAt
@@ -151811,6 +153491,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   editAccess
   triggerType
   trigger
+  activationMode
   conditions
   icon
   updatedAt
@@ -153606,6 +155287,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  reviewFieldSla
   documentFieldOwner
   documentFieldParent
   projectFieldActivity
@@ -153905,6 +155587,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldStatus
   memberFieldTeams
   fieldMilestone
+  reviewFieldSla
   documentFieldOwner
   documentFieldParent
   projectFieldActivity

@@ -3393,6 +3393,8 @@ fragment AccessKeyReleaseStage on AccessKeyReleaseStage {
   __typename
   # The name of the release stage.
   name
+  # The type of the release stage.
+  type
 }
 
 # A release that bundles issues together for a software deployment or version. Releases belong to a
@@ -3530,6 +3532,8 @@ fragment Template on Template {
   }
   # The template data as a JSON-encoded string containing the pre-filled attributes for the entity type (e.g., issue fields, project configuration, or document content).
   templateData
+  # The template's content in markdown format: the body it pre-fills on the entity it creates. Distinct from `description`, which says what the template is for. Form templates serialize their form fields as markdown placeholders instead. Null when the template has no content.
+  content
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
@@ -3619,7 +3623,7 @@ fragment AiConversationElicitationOption on AiConversationElicitationOption {
   __typename
   # The short label shown for the option.
   label
-  # The user prompt rendered to the agent when this option is selected.
+  # The user prompt rendered to the agent when this option is selected. Null when selecting the option only dismisses the elicitation without replying.
   prompt
 }
 
@@ -3895,10 +3899,6 @@ fragment InitiativeUpdate on InitiativeUpdate {
 # A structured request for user input shown with an AI conversation.
 fragment AiConversationElicitationPart on AiConversationElicitationPart {
   __typename
-  # Selectable prompt options for multiple-choice elicitations.
-  options {
-    ...AiConversationElicitationOption
-  }
   # The ID of the part.
   id
   # The MCP server URL for a new connection. Null for reconnects and other elicitation kinds.
@@ -3911,12 +3911,16 @@ fragment AiConversationElicitationPart on AiConversationElicitationPart {
   metadata {
     ...AiConversationPartMetadata
   }
+  # The optional title shown above the elicitation choices.
+  title
   # The requested owner of the MCP server connection. Null for other elicitation kinds.
   scope {
     ...AiConversationMcpServerConnectionScope
   }
-  # The title shown above the elicitation choices.
-  title
+  # The selectable actions for multiple-choice and confirmation elicitations.
+  options {
+    ...AiConversationElicitationOption
+  }
   # The type of the part.
   type
 }
@@ -3924,12 +3928,17 @@ fragment AiConversationElicitationPart on AiConversationElicitationPart {
 # A structured user response to an elicitation in an AI conversation.
 fragment AiConversationElicitationResponsePart on AiConversationElicitationResponsePart {
   __typename
+  # Additional user-authored commentary submitted with the response. For a response batch, only the first response contains it. Null when none was provided.
+  bodyData
   # The ID of the part.
   id
   # The identifier of the elicitation that was answered.
   elicitationId
   # The kind-specific response data.
   data {
+    ... on AiConversationConfirmationElicitationResponseData {
+      ...AiConversationConfirmationElicitationResponseData
+    }
     ... on AiConversationMcpServerConnectionElicitationResponseData {
       ...AiConversationMcpServerConnectionElicitationResponseData
     }
@@ -4737,6 +4746,10 @@ fragment Favorite on Favorite {
   label {
     id
   }
+  # The favorited loop.
+  workflowDefinition {
+    ...WorkflowDefinition
+  }
   # The favorited project label.
   projectLabel {
     id
@@ -5452,6 +5465,8 @@ fragment SlaConfiguration on SlaConfiguration {
   name
   # The workflow conditions that determine when this SLA rule applies.
   conditions
+  # When SLA timing begins. Null when the rule removes an SLA.
+  startMode
   # Whether the rule removes an SLA instead of setting one.
   removesSla
 }
@@ -5642,6 +5657,8 @@ fragment WorkflowDefinition on WorkflowDefinition {
   triggerType
   # The event that triggers the workflow, such as entity creation, update, or a specific state change.
   trigger
+  # The explicit activation semantics for entity updates. When null, the mode is inferred from the legacy trigger fields.
+  activationMode
   # The filter conditions that must match for the workflow to execute. When null, the workflow triggers on all matching events.
   conditions
   # The icon of the workflow. Can be an emoji or a decorative icon type.
@@ -9283,6 +9300,15 @@ fragment TeamWithParentWebhookPayload on TeamWithParentWebhookPayload {
   displayName
 }
 
+# The affirmative response recorded for a confirmation elicitation.
+fragment AiConversationConfirmationElicitationResponseData on AiConversationConfirmationElicitationResponseData {
+  __typename
+  # The kind of elicitation that was answered.
+  kind
+  # True when the user confirmed the action.
+  confirmed
+}
+
 # The billing subscription of a workspace. Represents an active paid plan (e.g., Basic, Business,
 # Enterprise) backed by a Stripe subscription. If a workspace has no Subscription record, it is on the
 # free plan. Only one active subscription per workspace is expected.
@@ -9668,6 +9694,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   memberFieldTeams
   # Whether to show the milestone field.
   fieldMilestone
+  # Whether to show the most pressing SLA from connected issues on review list items. Null if the preference is unset.
+  reviewFieldSla
   # Whether to show the owner field for documents.
   documentFieldOwner
   # Whether to show the parent field for documents.
@@ -11389,11 +11417,21 @@ fragment AiConversationCreateEntityToolCallArgs on AiConversationCreateEntityToo
 fragment AiConversationCreateEntityToolCallResult on AiConversationCreateEntityToolCallResult {
   __typename
   createdEntities {
-    ...AiConversationSearchEntitiesToolCallResultEntities
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
   }
   startedAgentSessions {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
+}
+
+fragment AiConversationCreateEntityToolCallResultCreatedEntities on AiConversationCreateEntityToolCallResultCreatedEntities {
+  __typename
+  id
+  label
+  parent {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  type
 }
 
 fragment AiConversationCreateSandboxToolCall on AiConversationCreateSandboxToolCall {
@@ -11430,6 +11468,10 @@ fragment AiConversationDeleteEntityToolCall on AiConversationDeleteEntityToolCal
   name
   # The result of the tool call.
   rawResult
+  # The result of the tool call.
+  result {
+    ...AiConversationDeleteEntityToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
@@ -11439,6 +11481,13 @@ fragment AiConversationDeleteEntityToolCallArgs on AiConversationDeleteEntityToo
   __typename
   entity {
     ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+
+fragment AiConversationDeleteEntityToolCallResult on AiConversationDeleteEntityToolCallResult {
+  __typename
+  deletedEntities {
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
   }
 }
 
@@ -11767,6 +11816,10 @@ fragment AiConversationNotifyUsersToolCall on AiConversationNotifyUsersToolCall 
   name
   # The result of the tool call.
   rawResult
+  # The result of the tool call.
+  result {
+    ...AiConversationNotifyUsersToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
@@ -11774,8 +11827,15 @@ fragment AiConversationNotifyUsersToolCall on AiConversationNotifyUsersToolCall 
 
 fragment AiConversationNotifyUsersToolCallArgs on AiConversationNotifyUsersToolCallArgs {
   __typename
+  message
   summary
   userIds
+}
+
+fragment AiConversationNotifyUsersToolCallResult on AiConversationNotifyUsersToolCallResult {
+  __typename
+  notifiedUserIds
+  skippedUserIds
 }
 
 fragment AiConversationPostChatMessageToolCall on AiConversationPostChatMessageToolCall {
@@ -11832,12 +11892,14 @@ fragment AiConversationPromptCodingSessionToolCallResult on AiConversationPrompt
   agentSession {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
+  created
   entities {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
   pullRequests {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
+  quotaBlocked
 }
 
 fragment AiConversationQueryActivityToolCall on AiConversationQueryActivityToolCall {
@@ -12062,6 +12124,10 @@ fragment AiConversationRestoreEntityToolCall on AiConversationRestoreEntityToolC
   name
   # The result of the tool call.
   rawResult
+  # The result of the tool call.
+  result {
+    ...AiConversationRestoreEntityToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
@@ -12071,6 +12137,13 @@ fragment AiConversationRestoreEntityToolCallArgs on AiConversationRestoreEntityT
   __typename
   entity {
     ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+}
+
+fragment AiConversationRestoreEntityToolCallResult on AiConversationRestoreEntityToolCallResult {
+  __typename
+  restoredEntities {
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
   }
 }
 
@@ -12240,7 +12313,7 @@ fragment AiConversationSettingWidget on AiConversationSettingWidget {
 
 fragment AiConversationSettingWidgetArgs on AiConversationSettingWidgetArgs {
   __typename
-  # The resolved settings target returned by ReadSetting
+  # The settings target when the setting scope does not imply it
   target {
     ...AiConversationSettingWidgetArgsTarget
   }
@@ -12481,6 +12554,9 @@ fragment AiConversationUpdateEntityToolCallResult on AiConversationUpdateEntityT
   __typename
   startedAgentSessions {
     ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  updatedEntities {
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
   }
 }
 
@@ -15890,6 +15966,8 @@ query emojis(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # Filter returned emojis.
+  $filter: EmojiFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -15898,14 +15976,18 @@ query emojis(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned emojis.
+  $sort: [EmojiSortInput!]
 ) {
   emojis(
     after: $after
     before: $before
+    filter: $filter
     first: $first
     includeArchived: $includeArchived
     last: $last
     orderBy: $orderBy
+    sort: $sort
   ) {
     ...EmojiConnection
   }
@@ -15987,6 +16069,14 @@ query favorite_children(
       orderBy: $orderBy
     ) {
       ...FavoriteConnection
+    }
+  }
+}
+# The favorited loop.
+query favorite_workflowDefinition($id: String!) {
+  favorite(id: $id) {
+    workflowDefinition {
+      ...WorkflowDefinition
     }
   }
 }
@@ -17953,7 +18043,8 @@ query issues(
     ...IssueConnection
   }
 }
-# Returns the latest release for the pipeline associated with the access key.
+# Returns the most recently completed or updated release for the pipeline associated with the access
+# key.
 query latestReleaseByAccessKey {
   latestReleaseByAccessKey {
     ...AccessKeyRelease
@@ -19213,8 +19304,8 @@ query rateLimitStatus {
     ...RateLimitPayload
   }
 }
-# Returns recent releases for the pipeline associated with the access key, ordered with in-progress
-# releases first, followed by the most recently completed releases.
+# Returns releases for the pipeline associated with the access key, ordered with the most recently
+# completed or updated first.
 query recentReleasesByAccessKey(
   # Maximum number of releases to return. Defaults to 20 and is capped at 100.
   $limit: Int
@@ -20483,6 +20574,20 @@ query template(
   $id: String!
 ) {
   template(id: $id) {
+    ...Template
+  }
+}
+# Templates matching a filter, in the order they appear in the app. Filter on a null team to return
+# only workspace-level templates.
+query templateSearch(
+  # Filter to apply to the template results.
+  $filter: TemplateFilter
+  # Maximum results. Capped at 250.
+  $first: Int
+  # Should archived resources be included (default: false).
+  $includeArchived: Boolean
+) {
+  templateSearch(filter: $filter, first: $first, includeArchived: $includeArchived) {
     ...Template
   }
 }
