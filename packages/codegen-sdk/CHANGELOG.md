@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.0.5
+
+### Patch Changes
+
+- a88ff07: chore(deps): update dependency patch versions
+- Updated dependencies [a88ff07]
+  - @linear/codegen-doc@3.3.4
+
 ## 4.0.4
 
 ### Patch Changes
@@ -44,9 +52,7 @@
   ```ts
   import { DocumentNode } from "graphql";
 
-  const documentNode: DocumentNode = {
-    /* ... */
-  };
+  const documentNode: DocumentNode = {/* ... */};
   const graphQLClient = linearClient.client;
 
   await client.request(documentNode);
@@ -57,9 +63,7 @@
   ```ts
   import { DocumentNode, print } from "graphql";
 
-  const documentNode: DocumentNode = {
-    /* ... */
-  };
+  const documentNode: DocumentNode = {/* ... */};
   const graphQLClient = linearClient.client;
 
   await client.request(print(documentNode));

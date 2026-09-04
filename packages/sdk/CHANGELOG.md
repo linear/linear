@@ -1,5 +1,11 @@
 # Change Log
 
+## 93.0.1
+
+### Patch Changes
+
+- a88ff07: chore(deps): update dependency patch versions
+
 ## 93.0.0
 
 ### Major Changes
@@ -8075,9 +8081,7 @@
   ```ts
   import { DocumentNode } from "graphql";
 
-  const documentNode: DocumentNode = {
-    /* ... */
-  };
+  const documentNode: DocumentNode = {/* ... */};
   const graphQLClient = linearClient.client;
 
   await client.request(documentNode);
@@ -8088,9 +8092,7 @@
   ```ts
   import { DocumentNode, print } from "graphql";
 
-  const documentNode: DocumentNode = {
-    /* ... */
-  };
+  const documentNode: DocumentNode = {/* ... */};
   const graphQLClient = linearClient.client;
 
   await client.request(print(documentNode));
