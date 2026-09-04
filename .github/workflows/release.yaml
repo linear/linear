@@ -6,18 +6,21 @@ on:
       - master
   workflow_dispatch:
 
+concurrency:
+  group: sdk-publish
+  cancel-in-progress: false
+  # Preserve every queued release snapshot so later master pushes cannot replace one.
+  queue: max
+
 permissions: {}
 
 jobs:
   release:
     name: Release
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
-      actions: read
       contents: write
-      checks: write
-      pull-requests: write
-      statuses: read
       id-token: write # Required for OIDC (https://docs.npmjs.com/trusted-publishers#github-actions-configuration)
     steps:
       - name: Checkout code
@@ -50,11 +53,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Run lint
-        run: pnpm lint
-
       - name: Build packages
         run: pnpm build
+
+      - name: Run lint
+        run: pnpm lint
 
       - name: Run tests
         run: pnpm test
@@ -69,21 +72,14 @@ jobs:
         # Catch issues like https://github.com/linear/linear/issues/830
         run: npx @arethetypeswrong/cli@0.18.2 --pack packages/sdk
 
-      - name: Compare schema for changes
-        uses: graphql-hive/graphql-inspector@8733c10560f98b868d3eb4db1325c8edf64936b3 # @graphql-inspector/action@5.0.21
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          schema: "master:packages/sdk/src/schema.graphql"
-          fail-on-breaking: false
-
       - name: Check for no generated changes
-        run: git update-index --refresh && git diff-index HEAD
+        run: test -z "$(git status --porcelain)"
 
-      - name: Create Release Pull Request or Publish to npm
+      # schema.yaml is the only workflow that prepares release pull requests; pending changesets must be versioned there.
+      - name: Publish to npm
+        if: hashFiles('.changeset/*.md', '!.changeset/README.md') == ''
         uses: changesets/action@63a615b9cd06ba9a3e6d13796c7fbcb080a60a0b # v1.8.0
         with:
-          commit: "chore(release): version packages"
-          title: "chore(release): version packages"
           publish: pnpm ci:publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
