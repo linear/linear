@@ -8,9 +8,14 @@ on:
     - cron: "0 19 * * *"
       timezone: America/Los_Angeles
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Generate and validate a release without creating a pull request
+        type: boolean
+        default: false
 
 concurrency:
-  group: sdk-prepare-release
+  group: sdk-prepare-release-${{ github.ref }}
   cancel-in-progress: false
 
 permissions: {}
@@ -18,7 +23,7 @@ permissions: {}
 jobs:
   schema:
     name: Prepare release
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master' || inputs.dry_run
     runs-on: ubuntu-latest
     permissions:
       actions: write
@@ -29,7 +34,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
-          ref: master
+          ref: ${{ inputs.dry_run && github.ref || 'master' }}
           fetch-depth: 0
           persist-credentials: false
 
@@ -91,6 +96,7 @@ jobs:
           fail-on-breaking: false
 
       - name: Create or update release pull request
+        if: ${{ !inputs.dry_run }}
         id: release-pr
         uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
         with:
@@ -104,7 +110,7 @@ jobs:
       # GITHUB_TOKEN pushes do not trigger build workflows, so dispatch the release branch explicitly.
       # This includes unchanged open pull requests so reruns retry failed or missing checks.
       - name: Run build for release pull request
-        if: steps.release-pr.outputs.pull-request-number != '' && steps.release-pr.outputs.pull-request-operation != 'closed'
+        if: ${{ !inputs.dry_run && steps.release-pr.outputs.pull-request-number != '' && steps.release-pr.outputs.pull-request-operation != 'closed' }}
         run: gh workflow run build.yaml --ref changeset-release/master
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -116,7 +122,7 @@ jobs:
     permissions:
       actions: read
       contents: read
-    if: ${{ always() && github.ref_name == 'master' && contains(needs.*.result, 'failure') }}
+    if: ${{ always() && !inputs.dry_run && github.ref_name == 'master' && contains(needs.*.result, 'failure') }}
     steps:
       - uses: ravsamhq/notify-slack-action@bca2d7f5660b833a27bda4f6b8bef389ebfefd25 # 2.3.0
         with:
