@@ -2040,6 +2040,93 @@ describe("generated", () => {
     });
   });
 
+  /** Test all Notification queries */
+  describe("InboxNotifications", () => {
+    let _notification:
+      | L.Notification
+      | L.CustomerNeedNotification
+      | L.CustomerNotification
+      | L.DocumentNotification
+      | L.InitiativeNotification
+      | L.IssueNotification
+      | L.OauthClientApprovalNotification
+      | L.PostNotification
+      | L.ProductAnnouncementNotification
+      | L.ProjectNotification
+      | L.PullRequestNotification
+      | L.UsageAlertNotification
+      | L.WelcomeMessageNotification
+      | L.WorkflowDefinitionNotification
+      | undefined
+      | null;
+    let _notification_id: string | undefined | null;
+
+    /** Test the root connection query for the Notification */
+    it("inboxNotifications", async () => {
+      const inboxNotifications: L.NotificationConnection | undefined | null = await client.inboxNotifications();
+      const notification = inboxNotifications?.nodes?.[0];
+      _notification_id = notification?.id;
+      expect(inboxNotifications instanceof L.NotificationConnection);
+    });
+
+    /** Test the root query for a single Notification */
+    it("notification", async () => {
+      if (_notification_id) {
+        const notification:
+          | L.Notification
+          | L.CustomerNeedNotification
+          | L.CustomerNotification
+          | L.DocumentNotification
+          | L.InitiativeNotification
+          | L.IssueNotification
+          | L.OauthClientApprovalNotification
+          | L.PostNotification
+          | L.ProductAnnouncementNotification
+          | L.ProjectNotification
+          | L.PullRequestNotification
+          | L.UsageAlertNotification
+          | L.WelcomeMessageNotification
+          | L.WorkflowDefinitionNotification
+          | undefined
+          | null = await client.notification(_notification_id);
+        _notification = notification;
+        expect(notification instanceof L.Notification);
+      } else {
+        console.warn("codegen-doc:print: No first Notification found in connection - cannot test notification query");
+      }
+    });
+
+    /** Test the notification.actor query for L.User */
+    it("notification.actor", async () => {
+      if (_notification) {
+        const notification_actor: L.User | undefined | null = await _notification.actor;
+        expect(notification_actor instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Notification found - cannot test notification.actor query");
+      }
+    });
+
+    /** Test the notification.externalUserActor query for L.ExternalUser */
+    it("notification.externalUserActor", async () => {
+      if (_notification) {
+        const notification_externalUserActor: L.ExternalUser | undefined | null = await _notification.externalUserActor;
+        expect(notification_externalUserActor instanceof L.ExternalUser);
+      } else {
+        console.warn("codegen-doc:print: No Notification found - cannot test notification.externalUserActor query");
+      }
+    });
+
+    /** Test the notification.user query for L.User */
+    it("notification.user", async () => {
+      if (_notification) {
+        const notification_user: L.User | undefined | null = await _notification.user;
+        expect(notification_user instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Notification found - cannot test notification.user query");
+      }
+    });
+  });
+
   /** Test InitiativeFilterSuggestion query */
   describe("InitiativeFilterSuggestion", () => {
     /** Test the root model query for InitiativeFilterSuggestion */

@@ -4542,6 +4542,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     ... on AiConversationRetryPullRequestCheckToolCall {
       ...AiConversationRetryPullRequestCheckToolCall
     }
+    ... on AiConversationSearchChatChannelsToolCall {
+      ...AiConversationSearchChatChannelsToolCall
+    }
     ... on AiConversationSearchDocumentationToolCall {
       ...AiConversationSearchDocumentationToolCall
     }
@@ -9198,6 +9201,23 @@ fragment FavoritePayload on FavoritePayload {
   success
 }
 
+# Return type for inbox notification updates.
+fragment InboxNotificationUpdatePayload on InboxNotificationUpdatePayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The notifications changed by the stack update.
+  updatedNotifications {
+    ...Notification
+  }
+  # The requested notification after the update.
+  notification {
+    ...Notification
+  }
+  # Whether the operation was successful.
+  success
+}
+
 # Return type for notification mutations.
 fragment NotificationPayload on NotificationPayload {
   __typename
@@ -11262,6 +11282,10 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
     ...AiConversationRetryPullRequestCheckToolCall
   }
 
+  ... on AiConversationSearchChatChannelsToolCall {
+    ...AiConversationSearchChatChannelsToolCall
+  }
+
   ... on AiConversationSearchDocumentationToolCall {
     ...AiConversationSearchDocumentationToolCall
   }
@@ -12195,6 +12219,29 @@ fragment AiConversationRetryPullRequestCheckToolCallArgs on AiConversationRetryP
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
   workflowName
+}
+
+fragment AiConversationSearchChatChannelsToolCall on AiConversationSearchChatChannelsToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationSearchChatChannelsToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationSearchChatChannelsToolCallArgs on AiConversationSearchChatChannelsToolCallArgs {
+  __typename
+  filter
+  platform
 }
 
 fragment AiConversationSearchDocumentationToolCall on AiConversationSearchDocumentationToolCall {
@@ -16104,6 +16151,19 @@ query favorites(
     orderBy: $orderBy
   ) {
     ...FavoriteConnection
+  }
+}
+# The authenticated user's active inbox notifications, grouped according to inbox behavior.
+query inboxNotifications(
+  # The cursor after which to return inbox notification stacks.
+  $after: String
+  # The maximum number of inbox notification stacks to return. Defaults to 50.
+  $first: Int
+  # Whether to return only unread inbox notification stacks.
+  $unreadOnly: Boolean
+) {
+  inboxNotifications(after: $after, first: $first, unreadOnly: $unreadOnly) {
+    ...NotificationConnection
   }
 }
 # Returns a single initiative by its identifier or URL slug.
@@ -22767,6 +22827,17 @@ mutation importFileUpload(
 ) {
   importFileUpload(contentType: $contentType, filename: $filename, metaData: $metaData, size: $size) {
     ...UploadPayload
+  }
+}
+# Updates a notification in the authenticated user's inbox using inbox grouping behavior.
+mutation updateInboxNotification(
+  # The identifier of the inbox notification to update.
+  $id: String!
+  # The inbox state changes to apply.
+  $input: InboxNotificationUpdateInput!
+) {
+  inboxNotificationUpdate(id: $id, input: $input) {
+    ...InboxNotificationUpdatePayload
   }
 }
 # Adds a label to an initiative.
