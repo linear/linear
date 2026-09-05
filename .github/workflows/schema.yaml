@@ -1,17 +1,32 @@
 name: schema
 
 on:
+  push:
+    branches:
+      - master
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 19 * * *"
+      timezone: America/Los_Angeles
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Generate and validate a release without creating a pull request
+        type: boolean
+        default: false
+
+concurrency:
+  group: sdk-prepare-release-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions: {}
 
 jobs:
   schema:
-    name: Schema
+    name: Prepare release
+    if: github.ref == 'refs/heads/master' || inputs.dry_run
     runs-on: ubuntu-latest
     permissions:
+      actions: write
       contents: write
       checks: write
       pull-requests: write
@@ -19,8 +34,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
+          ref: ${{ inputs.dry_run && github.ref || 'master' }}
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Set Changesets base branch for dry runs
+        if: inputs.dry_run && github.ref != 'refs/heads/master'
+        run: git branch master origin/master
 
       - name: Install pnpm
         uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
@@ -36,16 +56,28 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build packages
-        # update:schema depends on utilities from other packages, so we have to build them first, then rebuild once
-        # we've generated the updated schema.
-        run: pnpm build
+      - name: Build schema update prerequisites
+        # Changeset generation imports utilities from @linear/codegen-doc.
+        run: pnpm --filter @linear/codegen-doc build:codegen-doc
 
       - name: Update schema
         run: pnpm update:schema
 
-      - name: Build packages with updated schema
+      - name: Create release summary
+        run: |
+          pnpm changeset status --output "$RUNNER_TEMP/release-plan.json"
+          node .github/scripts/create-release-summary.mjs
+
+      - name: Version packages
+        run: |
+          pnpm changeset version
+          pnpm install --lockfile-only
+
+      - name: Build packages
         run: pnpm build
+
+      - name: Run lint
+        run: pnpm lint
 
       - name: Run tests
         run: pnpm test
@@ -67,15 +99,25 @@ jobs:
           schema: "master:packages/sdk/src/schema.graphql"
           fail-on-breaking: false
 
-      - name: Create schema pull request
+      - name: Create or update release pull request
+        if: ${{ !inputs.dry_run }}
+        id: release-pr
         uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
         with:
           sign-commits: true
-          commit-message: "feat(sdk): update schema"
-          title: "feat(sdk): update schema"
-          body: "Update schema, regenerate types and SDK"
-          branch: schema
+          commit-message: "chore(release): update schema and version packages"
+          title: "chore(release): update schema and version packages"
+          body-path: ${{ runner.temp }}/release-body.md
+          branch: changeset-release/master
           base: master
+
+      # GITHUB_TOKEN pushes do not trigger build workflows, so dispatch the release branch explicitly.
+      # This includes unchanged open pull requests so reruns retry failed or missing checks.
+      - name: Run build for release pull request
+        if: ${{ !inputs.dry_run && steps.release-pr.outputs.pull-request-number != '' && steps.release-pr.outputs.pull-request-operation != 'closed' }}
+        run: gh workflow run build.yaml --ref changeset-release/master
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   notify-slack:
     runs-on: ubuntu-latest
@@ -84,7 +126,7 @@ jobs:
     permissions:
       actions: read
       contents: read
-    if: ${{ always() && github.ref_name == 'master' && contains(needs.*.result, 'failure') }}
+    if: ${{ always() && !inputs.dry_run && github.ref_name == 'master' && contains(needs.*.result, 'failure') }}
     steps:
       - uses: ravsamhq/notify-slack-action@bca2d7f5660b833a27bda4f6b8bef389ebfefd25 # 2.3.0
         with:
