@@ -38,6 +38,10 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Set Changesets base branch for dry runs
+        if: inputs.dry_run && github.ref != 'refs/heads/master'
+        run: git branch master origin/master
+
       - name: Install pnpm
         uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
         with:
