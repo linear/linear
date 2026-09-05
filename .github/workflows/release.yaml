@@ -22,7 +22,13 @@ jobs:
     permissions:
       contents: write
       id-token: write # Required for OIDC (https://docs.npmjs.com/trusted-publishers#github-actions-configuration)
+    env:
+      SKIP_RELEASE: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[skip release]') }}
     steps:
+      - name: Report skipped release
+        if: env.SKIP_RELEASE == 'true'
+        run: echo 'Publishing skipped by [skip release]. Validation still runs.' >> "$GITHUB_STEP_SUMMARY"
+
       - name: Checkout code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
@@ -77,7 +83,7 @@ jobs:
 
       # schema.yaml is the only workflow that prepares release pull requests; pending changesets must be versioned there.
       - name: Publish to npm
-        if: hashFiles('.changeset/*.md', '!.changeset/README.md') == ''
+        if: env.SKIP_RELEASE != 'true' && hashFiles('.changeset/*.md', '!.changeset/README.md') == ''
         uses: changesets/action@63a615b9cd06ba9a3e6d13796c7fbcb080a60a0b # v1.8.0
         with:
           publish: pnpm ci:publish
