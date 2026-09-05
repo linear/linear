@@ -1585,6 +1585,10 @@ type AiConversation implements Node {
   """
   iterationId: String
   """
+  [Internal] The Loop execution that created this conversation.
+  """
+  loopExecution: LoopExecution
+  """
   The ordered sequence of conversation parts (prompts, text responses, reasoning steps, tool calls, errors, and widgets) that make up this conversation's visible history.
   """
   parts: [AiConversationPart!]
@@ -3100,6 +3104,31 @@ type AiConversationRetryPullRequestCheckToolCallArgs {
   workflowName: String
 }
 
+type AiConversationSearchChatChannelsToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationSearchChatChannelsToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationSearchChatChannelsToolCallArgs {
+  filter: String!
+  platform: AiConversationPostChatMessageToolCallArgsPlatform!
+}
+
 type AiConversationSearchDocumentationToolCall implements AiConversationBaseToolCall {
   displayInfo: AiConversationToolDisplayInfo!
   """
@@ -3459,6 +3488,7 @@ enum AiConversationTool {
   RestoreEntity
   RetrieveEntities
   RetryPullRequestCheck
+  SearchChatChannels
   SearchDocumentation
   SearchEntities
   SearchSettings
@@ -3507,6 +3537,7 @@ union AiConversationToolCall =
   | AiConversationRestoreEntityToolCall
   | AiConversationRetrieveEntitiesToolCall
   | AiConversationRetryPullRequestCheckToolCall
+  | AiConversationSearchChatChannelsToolCall
   | AiConversationSearchDocumentationToolCall
   | AiConversationSearchEntitiesToolCall
   | AiConversationSearchSettingsToolCall
@@ -13673,6 +13704,42 @@ enum InboxBadgeScope {
   priority
 }
 
+"""
+State changes to apply to an inbox notification stack.
+"""
+input InboxNotificationUpdateInput {
+  """
+  Whether to mark the notification stack as read.
+  """
+  read: Boolean
+  """
+  The time until which to snooze the notification stack. Null unsnoozes it.
+  """
+  snoozedUntilAt: DateTime
+}
+
+"""
+Return type for inbox notification updates.
+"""
+type InboxNotificationUpdatePayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  The requested notification after the update.
+  """
+  notification: Notification!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+  """
+  The notifications changed by the stack update.
+  """
+  updatedNotifications: [Notification!]!
+}
+
 input InheritanceEntityMapping {
   """
   Mapping of the IssueLabel ID to the new IssueLabel name.
@@ -16501,6 +16568,7 @@ enum IntegrationService {
   microsoftTeamsProjectPost
   notion
   opsgenie
+  origin
   pagerDuty
   salesforce
   sentry
@@ -22951,6 +23019,61 @@ type LogoutResponse {
 }
 
 """
+[Internal] A Loop execution and the entity that triggered it.
+"""
+type LoopExecution implements Node {
+  """
+  [Internal] The AI conversation created for this Loop execution.
+  """
+  aiConversation: AiConversation!
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  [Internal] The cycle that triggered this Loop execution.
+  """
+  cycle: Cycle
+  """
+  [Internal] The document that triggered this Loop execution.
+  """
+  document: Document
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  [Internal] The initiative that triggered this Loop execution.
+  """
+  initiative: Initiative
+  """
+  [Internal] The issue that triggered this Loop execution.
+  """
+  issue: Issue
+  """
+  [Internal] The project that triggered this Loop execution.
+  """
+  project: Project
+  """
+  [Internal] The team that triggered this Loop execution.
+  """
+  team: Team
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  [Internal] The Loop that was executed.
+  """
+  workflowDefinition: WorkflowDefinition
+}
+
+"""
 Issue manual sorting options.
 """
 input ManualSort {
@@ -22983,21 +23106,13 @@ input McpServerCustomHeaderInput {
 """
 type Meeting implements Node {
   """
-  [Internal] The transcript analysis state: `pending` while analysis runs and `completed` after it finishes. Null before analysis starts.
-  """
-  analysisStatus: MeetingAnalysisStatus
-  """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
   """
-  [Internal] The meeting attendees. Each entry has a name and may include an active workspace user identifier.
+  [Internal] The IDs of the workspace users who attended the meeting, identified during import.
   """
-  attendees: [JSONObject!]
-  """
-  [Internal] The source that owns the attendee list. Null when attendees have not been set.
-  """
-  attendeesSource: String
+  attendeeIds: [String!]!
   """
   The time at which the entity was created.
   """
@@ -23023,30 +23138,14 @@ type Meeting implements Node {
   """
   project: Project
   """
-  [Internal] The meeting's unique URL slug.
+  [Internal] The meeting title generated during import. Null when the import produced no title.
   """
-  slugId: String!
-  """
-  [Internal] The meeting summary in markdown format. Null before a summary exists.
-  """
-  summary: String
-  """
-  [Internal] The meeting summary as a Prosemirror document. Null before a summary exists.
-  """
-  summaryData: String
+  title: String
   """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
-}
-
-"""
-[Internal] The analysis state of a meeting transcript.
-"""
-enum MeetingAnalysisStatus {
-  completed
-  pending
 }
 
 type MicrosoftTeamsChannel {
@@ -24416,6 +24515,19 @@ type Mutation {
     """
     size: Int!
   ): UploadPayload!
+  """
+  Updates a notification in the authenticated user's inbox using inbox grouping behavior.
+  """
+  inboxNotificationUpdate(
+    """
+    The identifier of the inbox notification to update.
+    """
+    id: String!
+    """
+    The inbox state changes to apply.
+    """
+    input: InboxNotificationUpdateInput!
+  ): InboxNotificationUpdatePayload!
   """
   Adds a label to an initiative.
   """
@@ -33352,7 +33464,7 @@ type Project implements Node {
   """
   lead: User
   """
-  [Internal] The team that leads the project. Null if no lead team is assigned.
+  [Internal] The team that leads the project. Null if the viewer does not have access to the team.
   """
   leadTeam: Team
   """
@@ -36092,7 +36204,7 @@ type ProjectSearchResult implements Node {
   """
   lead: User
   """
-  [Internal] The team that leads the project. Null if no lead team is assigned.
+  [Internal] The team that leads the project. Null if the viewer does not have access to the team.
   """
   leadTeam: Team
   """
@@ -39060,6 +39172,23 @@ type Query {
     orderBy: PaginationOrderBy
   ): FavoriteConnection!
   """
+  The authenticated user's active inbox notifications, grouped according to inbox behavior.
+  """
+  inboxNotifications(
+    """
+    The cursor after which to return inbox notification stacks.
+    """
+    after: String
+    """
+    The maximum number of inbox notification stacks to return. Defaults to 50.
+    """
+    first: Int
+    """
+    Whether to return only unread inbox notification stacks.
+    """
+    unreadOnly: Boolean
+  ): NotificationConnection!
+  """
   Returns a single initiative by its identifier or URL slug.
   """
   initiative(id: String!): Initiative!
@@ -41707,6 +41836,10 @@ input ReleaseCompleteInput {
   """
   commitSha: String
   """
+  Optional release description to apply when completing the release. Pass null to clear it.
+  """
+  description: String
+  """
   Documents to attach to the completed release. Existing documents with the same title are updated.
   """
   documents: [ReleaseDocumentInput!]
@@ -41740,6 +41873,10 @@ input ReleaseCompleteInputBase {
   The commit SHA to store when moving a release to completed. With a version, an existing SHA is preserved. Without a version, this SHA replaces the started release's SHA and is used to detect retries.
   """
   commitSha: String
+  """
+  Optional release description to apply when completing the release. Pass null to clear it.
+  """
+  description: String
   """
   Documents to attach to the completed release. Existing documents with the same title are updated.
   """
@@ -43083,6 +43220,10 @@ input ReleaseSyncInput {
   """
   debugSink: ReleaseDebugSinkInput
   """
+  The description of the release. Pass null to clear an existing description.
+  """
+  description: String
+  """
   Documents to attach to the release. Existing documents on the release with the same title are updated.
   """
   documents: [ReleaseDocumentInput!]
@@ -43140,6 +43281,10 @@ input ReleaseSyncInputBase {
   Debug information for release creation diagnostics.
   """
   debugSink: ReleaseDebugSinkInput
+  """
+  The description of the release. Pass null to clear an existing description.
+  """
+  description: String
   """
   Documents to attach to the release. Existing documents on the release with the same title are updated.
   """

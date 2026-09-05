@@ -3113,6 +3113,48 @@ export class AiConversationRetryPullRequestCheckToolCallArgs extends Request {
   public entity: AiConversationSearchEntitiesToolCallResultEntities;
 }
 /**
+ * AiConversationSearchChatChannelsToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSearchChatChannelsToolCallFragment response data
+ */
+export class AiConversationSearchChatChannelsToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSearchChatChannelsToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationSearchChatChannelsToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationSearchChatChannelsToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationSearchChatChannelsToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSearchChatChannelsToolCallArgsFragment response data
+ */
+export class AiConversationSearchChatChannelsToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSearchChatChannelsToolCallArgsFragment) {
+    super(request);
+    this.filter = data.filter;
+    this.platform = data.platform;
+  }
+
+  public filter: string;
+  public platform: L.AiConversationPostChatMessageToolCallArgsPlatform;
+}
+/**
  * AiConversationSearchDocumentationToolCall model
  *
  * @param request - function to call the graphql client
@@ -9967,6 +10009,27 @@ export class ImageUploadFromUrlPayload extends Request {
   public success: boolean;
   /** The URL containing the image. */
   public url?: string | null;
+}
+/**
+ * Return type for inbox notification updates.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.InboxNotificationUpdatePayloadFragment response data
+ */
+export class InboxNotificationUpdatePayload extends Request {
+  public constructor(request: LinearRequest, data: L.InboxNotificationUpdatePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this.updatedNotifications = data.updatedNotifications.map(node => new Notification(request, node));
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The notifications changed by the stack update. */
+  public updatedNotifications: Notification[];
 }
 /**
  * An initiative is a high-level strategic grouping of projects toward a business goal. Initiatives can contain multiple projects, have their own status updates and health tracking, and can be organized hierarchically with parent-child relationships.
@@ -27665,6 +27728,43 @@ export class FavoritesQuery extends Request {
 }
 
 /**
+ * A fetchable InboxNotifications Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class InboxNotificationsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the InboxNotifications query and return a NotificationConnection
+   *
+   * @param variables - variables to pass into the InboxNotificationsQuery
+   * @returns parsed response from InboxNotificationsQuery
+   */
+  public async fetch(variables?: L.InboxNotificationsQueryVariables): LinearFetch<NotificationConnection> {
+    const response = await this._request<L.InboxNotificationsQuery, L.InboxNotificationsQueryVariables>(
+      L.InboxNotificationsDocument.toString(),
+      variables
+    );
+    const data = response.inboxNotifications;
+
+    return new NotificationConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable Initiative Query
  *
  * @param request - function to call the graphql client
@@ -33854,6 +33954,37 @@ export class ImportFileUploadMutation extends Request {
     const data = response.importFileUpload;
 
     return new UploadPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UpdateInboxNotification Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UpdateInboxNotificationMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UpdateInboxNotification mutation and return a InboxNotificationUpdatePayload
+   *
+   * @param id - required id to pass to updateInboxNotification
+   * @param input - required input to pass to updateInboxNotification
+   * @returns parsed response from UpdateInboxNotificationMutation
+   */
+  public async fetch(id: string, input: L.InboxNotificationUpdateInput): LinearFetch<InboxNotificationUpdatePayload> {
+    const response = await this._request<L.UpdateInboxNotificationMutation, L.UpdateInboxNotificationMutationVariables>(
+      L.UpdateInboxNotificationDocument.toString(),
+      {
+        id,
+        input,
+      }
+    );
+    const data = response.inboxNotificationUpdate;
+
+    return new InboxNotificationUpdatePayload(this._request, data);
   }
 }
 
@@ -49805,6 +49936,15 @@ export class LinearSdk extends Request {
     return new FavoritesQuery(this._request).fetch(variables);
   }
   /**
+   * The authenticated user's active inbox notifications, grouped according to inbox behavior.
+   *
+   * @param variables - variables to pass into the InboxNotificationsQuery
+   * @returns NotificationConnection
+   */
+  public inboxNotifications(variables?: L.InboxNotificationsQueryVariables): LinearFetch<NotificationConnection> {
+    return new InboxNotificationsQuery(this._request).fetch(variables);
+  }
+  /**
    * Returns a single initiative by its identifier or URL slug.
    *
    * @param id - required id to pass to initiative
@@ -51806,6 +51946,19 @@ export class LinearSdk extends Request {
     variables?: Omit<L.ImportFileUploadMutationVariables, "contentType" | "filename" | "size">
   ): LinearFetch<UploadPayload> {
     return new ImportFileUploadMutation(this._request).fetch(contentType, filename, size, variables);
+  }
+  /**
+   * Updates a notification in the authenticated user's inbox using inbox grouping behavior.
+   *
+   * @param id - required id to pass to updateInboxNotification
+   * @param input - required input to pass to updateInboxNotification
+   * @returns InboxNotificationUpdatePayload
+   */
+  public updateInboxNotification(
+    id: string,
+    input: L.InboxNotificationUpdateInput
+  ): LinearFetch<InboxNotificationUpdatePayload> {
+    return new UpdateInboxNotificationMutation(this._request).fetch(id, input);
   }
   /**
    * Adds a label to an initiative.
@@ -54305,7 +54458,6 @@ export {
   IssueSuggestionType,
   LinearAgentMcpServersMode,
   LinearAgentTrustedSourcesMode,
-  MeetingAnalysisStatus,
   NotificationCategory,
   NotificationChannel,
   NotificationSubscriptionType,
