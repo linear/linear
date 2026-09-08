@@ -15,11 +15,11 @@ const releaseLines = publishedPackages.map(({ name, version }) => {
   const previousVersion = versionIndex >= 0 ? versions[versionIndex + 1] : undefined;
   const currentRelease = changelog.split(`## ${version}\n`)[1]?.split(/^## /m)[0] ?? "";
   const releaseType = currentRelease.match(/^### (Major|Minor|Patch) Changes$/m)?.[1].toLowerCase() ?? "";
-  const releaseLabel = releaseType ? ` [${releaseType}]` : "";
+  const releaseLabel = releaseType ? `[${releaseType}] ` : "";
   const npmUrl = `https://www.npmjs.com/package/${name}/v/${version}`;
   const versionChange = previousVersion ? `v${previousVersion} → ` : "";
 
-  return `• \`${name}\`${releaseLabel} ${versionChange}<${npmUrl}|v${version}>`;
+  return `• ${releaseLabel}\`${name}\`: ${versionChange}<${npmUrl}|v${version}>`;
 });
 
 const githubApi = endpoint =>
