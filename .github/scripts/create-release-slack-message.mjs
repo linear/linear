@@ -11,22 +11,24 @@ const releaseLines = publishedPackages.map(({ name, version }) => {
   const changelog = fs.existsSync(changelogPath) ? fs.readFileSync(changelogPath, "utf8") : "";
 
   const versions = [...changelog.matchAll(/^## ([0-9]\S*)$/gm)].map(match => match[1]);
-  const previousVersion = versions.find(candidate => candidate !== version);
+  const versionIndex = versions.indexOf(version);
+  const previousVersion = versionIndex >= 0 ? versions[versionIndex + 1] : undefined;
   const currentRelease = changelog.split(`## ${version}\n`)[1]?.split(/^## /m)[0] ?? "";
   const releaseType = currentRelease.match(/^### (Major|Minor|Patch) Changes$/m)?.[1].toLowerCase() ?? "";
+  const releaseLabel = releaseType ? ` [${releaseType}]` : "";
   const npmUrl = `https://www.npmjs.com/package/${name}/v/${version}`;
   const versionChange = previousVersion ? `v${previousVersion} → ` : "";
 
-  return `• ${name} [${releaseType}] ${versionChange}<${npmUrl}|v${version}>`;
+  return `• ${name}${releaseLabel} ${versionChange}<${npmUrl}|v${version}>`;
 });
 
 const githubApi = endpoint =>
   JSON.parse(
-    execFileSync("gh", ["api", `repos/${process.env.GITHUB_REPOSITORY}/${endpoint}`], {
+    execFileSync("gh", ["api", "--paginate", "--slurp", `repos/${process.env.GITHUB_REPOSITORY}/${endpoint}`], {
       encoding: "utf8",
       stdio: ["ignore", "pipe", "ignore"],
     })
-  );
+  ).flat();
 
 let approval = "";
 let pullRequestContext = "";
@@ -34,6 +36,13 @@ try {
   const pullRequests = githubApi(`commits/${process.env.GITHUB_SHA}/pulls`);
   const pullRequest = pullRequests.find(({ merged_at: mergedAt }) => mergedAt);
   if (pullRequest) {
+    const pullRequestUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/pull/${pullRequest.number}`;
+    const author =
+      pullRequest.user.login === "github-actions[bot]"
+        ? "CI"
+        : `<https://github.com/${pullRequest.user.login}|@${pullRequest.user.login}>`;
+    pullRequestContext = ` — <${pullRequestUrl}|#${pullRequest.number}> by ${author}`;
+
     const reviews = githubApi(`pulls/${pullRequest.number}/reviews?per_page=100`);
     const latestDecisions = new Map();
     for (const review of reviews) {
@@ -54,13 +63,6 @@ try {
     if (approvers) {
       approval = `, approved by ${approvers}`;
     }
-
-    const pullRequestUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/pull/${pullRequest.number}`;
-    const author =
-      pullRequest.user.login === "github-actions[bot]"
-        ? "CI"
-        : `<https://github.com/${pullRequest.user.login}|@${pullRequest.user.login}>`;
-    pullRequestContext = ` — <${pullRequestUrl}|#${pullRequest.number}> by ${author}`;
   }
 } catch {
   // Approval context is best effort and should never block a release notification.
