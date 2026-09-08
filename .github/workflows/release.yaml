@@ -5,6 +5,11 @@ on:
     branches:
       - master
   workflow_dispatch:
+    inputs:
+      send_test_notification:
+        description: Send a sample SDK release Slack notification without running the release
+        type: boolean
+        default: false
 
 concurrency:
   group: sdk-publish
@@ -17,11 +22,12 @@ permissions: {}
 jobs:
   release:
     name: Release
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master' && !inputs.send_test_notification
     runs-on: ubuntu-latest
     permissions:
       contents: write
       id-token: write # Required for OIDC (https://docs.npmjs.com/trusted-publishers#github-actions-configuration)
+      pull-requests: read
     env:
       SKIP_RELEASE: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[skip release]') }}
     steps:
@@ -83,12 +89,68 @@ jobs:
 
       # schema.yaml is the only workflow that prepares release pull requests; pending changesets must be versioned there.
       - name: Publish to npm
+        id: publish
         if: env.SKIP_RELEASE != 'true' && hashFiles('.changeset/*.md', '!.changeset/README.md') == ''
         uses: changesets/action@63a615b9cd06ba9a3e6d13796c7fbcb080a60a0b # v1.8.0
         with:
           publish: pnpm ci:publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify Slack
+        if: steps.publish.outputs.published == 'true'
+        continue-on-error: true
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTOR: ${{ github.actor }}
+          PUBLISHED_PACKAGES: ${{ steps.publish.outputs.publishedPackages }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          RELEASES=$(jq -r 'map("\(.name) v\(.version)") | join(", ")' <<< "$PUBLISHED_PACKAGES")
+
+          PR_JSON=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/pulls" 2>/dev/null || true)
+          PR_NUMBER=$(jq -r 'map(select(.merged_at != null)) | first | .number // empty' <<< "${PR_JSON:-[]}" 2>/dev/null || true)
+          APPROVAL=""
+          PR_LINK=""
+          if [[ -n "$PR_NUMBER" ]]; then
+            PR_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/pull/${PR_NUMBER}"
+            PR_LINK=" — <${PR_URL}|#${PR_NUMBER}>"
+            REVIEWS=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/reviews?per_page=100" 2>/dev/null || true)
+            APPROVERS=$(jq -r '
+              map(select(.state == "APPROVED" or .state == "CHANGES_REQUESTED" or .state == "DISMISSED"))
+              | group_by(.user.login)
+              | map(max_by(.submitted_at) | select(.state == "APPROVED") | "<https://github.com/\(.user.login)|@\(.user.login)>")
+              | join(", ")
+            ' <<< "${REVIEWS:-[]}" 2>/dev/null || true)
+            if [[ -n "$APPROVERS" ]]; then
+              APPROVAL=", approved by ${APPROVERS}"
+            fi
+          fi
+
+          curl -s -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-Type: application/json' \
+            -d "$(jq -n \
+              --arg text ":rocket: SDK release ${RELEASES} published by ${ACTOR}${APPROVAL}${PR_LINK} — <${RUN_URL}|View Run>" \
+              '{text: $text}')"
+
+  test-slack-notification:
+    name: Test Slack notification
+    if: inputs.send_test_notification
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Notify Slack
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          ACTOR: ${{ github.actor }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          curl -sS --fail-with-body -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-Type: application/json' \
+            -d "$(jq -n \
+              --arg text ":rocket: [TEST] SDK release @linear/sdk v0.0.0-sample published by ${ACTOR}, approved by <https://github.com/${ACTOR}|@${ACTOR}> — <${RUN_URL}|View Run>" \
+              '{text: $text}')"
 
   notify-slack:
     runs-on: ubuntu-latest
