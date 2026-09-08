@@ -107,7 +107,10 @@ jobs:
           PUBLISHED_PACKAGES: ${{ steps.publish.outputs.publishedPackages }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          RELEASES=$(jq -r 'map("\(.name) v\(.version)") | join(", ")' <<< "$PUBLISHED_PACKAGES")
+          RELEASES=$(jq -r '
+            map("• <https://www.npmjs.com/package/\(.name)/v/\(.version)|\(.name) v\(.version)>")
+            | join("\n")
+          ' <<< "$PUBLISHED_PACKAGES")
 
           PR_JSON=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/pulls" 2>/dev/null || true)
           PR_NUMBER=$(jq -r 'map(select(.merged_at != null)) | first | .number // empty' <<< "${PR_JSON:-[]}" 2>/dev/null || true)
@@ -131,7 +134,8 @@ jobs:
           curl -s -X POST "$SLACK_WEBHOOK_URL" \
             -H 'Content-Type: application/json' \
             -d "$(jq -n \
-              --arg text ":rocket: SDK release ${RELEASES} published by ${ACTOR}${APPROVAL}${PR_LINK} — <${RUN_URL}|View Run>" \
+              --arg text ":rocket: SDK release published by ${ACTOR}${APPROVAL}${PR_LINK} — <${RUN_URL}|View Run>
+          ${RELEASES}" \
               '{text: $text}')"
 
   test-slack-notification:
@@ -149,7 +153,9 @@ jobs:
           curl -sS --fail-with-body -X POST "$SLACK_WEBHOOK_URL" \
             -H 'Content-Type: application/json' \
             -d "$(jq -n \
-              --arg text ":rocket: [TEST] SDK release @linear/sdk v0.0.0-sample published by ${ACTOR}, approved by <https://github.com/${ACTOR}|@${ACTOR}> — <${RUN_URL}|View Run>" \
+              --arg text ":rocket: [TEST] SDK release published by ${ACTOR}, approved by <https://github.com/${ACTOR}|@${ACTOR}> — <${RUN_URL}|View Run>
+          • <https://www.npmjs.com/package/@linear/sdk/v/0.0.0-sample|@linear/sdk v0.0.0-sample>
+          • <https://www.npmjs.com/package/@linear/import/v/0.0.0-sample|@linear/import v0.0.0-sample>" \
               '{text: $text}')"
 
   notify-slack:
