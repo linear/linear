@@ -19,7 +19,7 @@ const releaseLines = publishedPackages.map(({ name, version }) => {
   const npmUrl = `https://www.npmjs.com/package/${name}/v/${version}`;
   const versionChange = previousVersion ? `v${previousVersion} → ` : "";
 
-  return `• ${name}${releaseLabel} ${versionChange}<${npmUrl}|v${version}>`;
+  return `• \`${name}\`${releaseLabel} ${versionChange}<${npmUrl}|v${version}>`;
 });
 
 const githubApi = endpoint =>
