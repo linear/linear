@@ -104,5 +104,9 @@ export default defineConfig(
       "jsdoc/newline-after-description": "off",
       "no-extra-boolean-cast": "off",
     },
+  },
+  {
+    files: [".github/scripts/*.mjs"],
+    extends: [tseslint.configs.disableTypeChecked],
   }
 );
