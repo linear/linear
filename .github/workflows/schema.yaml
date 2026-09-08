@@ -1,11 +1,8 @@
 name: schema
 
 on:
-  push:
-    branches:
-      - master
   schedule:
-    - cron: "0 19 * * *"
+    - cron: "0 19 * * 2"
       timezone: America/Los_Angeles
   workflow_dispatch:
     inputs:
@@ -30,13 +27,7 @@ jobs:
       contents: write
       checks: write
       pull-requests: write
-    env:
-      SKIP_RELEASE: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[skip release]') }}
     steps:
-      - name: Report skipped release
-        if: env.SKIP_RELEASE == 'true'
-        run: echo 'Release preparation skipped by [skip release]. Validation still runs.' >> "$GITHUB_STEP_SUMMARY"
-
       - name: Checkout code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
@@ -63,22 +54,18 @@ jobs:
         run: pnpm install
 
       - name: Build schema update prerequisites
-        if: env.SKIP_RELEASE != 'true'
         # Changeset generation imports utilities from @linear/codegen-doc.
         run: pnpm --filter @linear/codegen-doc build:codegen-doc
 
       - name: Update schema
-        if: env.SKIP_RELEASE != 'true'
         run: pnpm update:schema
 
       - name: Create release summary
-        if: env.SKIP_RELEASE != 'true'
         run: |
           pnpm changeset status --output "$RUNNER_TEMP/release-plan.json"
           node .github/scripts/create-release-summary.mjs
 
       - name: Version packages
-        if: env.SKIP_RELEASE != 'true'
         run: |
           pnpm changeset version
           pnpm install --lockfile-only
@@ -110,7 +97,7 @@ jobs:
           fail-on-breaking: false
 
       - name: Create or update release pull request
-        if: ${{ !inputs.dry_run && env.SKIP_RELEASE != 'true' }}
+        if: ${{ !inputs.dry_run }}
         id: release-pr
         uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
         with:
@@ -124,7 +111,7 @@ jobs:
       # GITHUB_TOKEN pushes do not trigger build workflows, so dispatch the release branch explicitly.
       # This includes unchanged open pull requests so reruns retry failed or missing checks.
       - name: Run build for release pull request
-        if: ${{ !inputs.dry_run && env.SKIP_RELEASE != 'true' && steps.release-pr.outputs.pull-request-number != '' && steps.release-pr.outputs.pull-request-operation != 'closed' }}
+        if: ${{ !inputs.dry_run && steps.release-pr.outputs.pull-request-number != '' && steps.release-pr.outputs.pull-request-operation != 'closed' }}
         run: gh workflow run build.yaml --ref changeset-release/master
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
