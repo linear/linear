@@ -107,10 +107,29 @@ jobs:
           PUBLISHED_PACKAGES: ${{ steps.publish.outputs.publishedPackages }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          RELEASES=$(jq -r '
-            map("• <https://www.npmjs.com/package/\(.name)/v/\(.version)|\(.name) v\(.version)>")
-            | join("\n")
-          ' <<< "$PUBLISHED_PACKAGES")
+          RELEASES=$(
+            jq -r '.[] | [.name, .version] | @tsv' <<< "$PUBLISHED_PACKAGES" |
+              while IFS=$'\t' read -r NAME VERSION; do
+                PACKAGE_DIR="packages/${NAME##*/}"
+                PREVIOUS_VERSION=""
+                RELEASE_TYPE=""
+                if [[ -f "$PACKAGE_DIR/CHANGELOG.md" ]]; then
+                  PREVIOUS_VERSION=$(awk '/^## [0-9]/ && $2 != version { print $2; exit }' version="$VERSION" "$PACKAGE_DIR/CHANGELOG.md")
+                  RELEASE_TYPE=$(awk '
+                    $0 == "## " version { in_release = 1; next }
+                    in_release && /^## / { exit }
+                    in_release && /^### (Major|Minor|Patch) Changes$/ { print tolower($2); exit }
+                  ' version="$VERSION" "$PACKAGE_DIR/CHANGELOG.md")
+                fi
+
+                NPM_URL="https://www.npmjs.com/package/${NAME}/v/${VERSION}"
+                if [[ -n "$PREVIOUS_VERSION" ]]; then
+                  printf '• %s [%s] v%s → *<%s|v%s>*\n' "$NAME" "$RELEASE_TYPE" "$PREVIOUS_VERSION" "$NPM_URL" "$VERSION"
+                else
+                  printf '• %s [%s] *<%s|v%s>*\n' "$NAME" "$RELEASE_TYPE" "$NPM_URL" "$VERSION"
+                fi
+              done
+          )
 
           PR_JSON=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/pulls" 2>/dev/null || true)
           PR_NUMBER=$(jq -r 'map(select(.merged_at != null)) | first | .number // empty' <<< "${PR_JSON:-[]}" 2>/dev/null || true)
@@ -154,8 +173,8 @@ jobs:
             -H 'Content-Type: application/json' \
             -d "$(jq -n \
               --arg text ":rocket: [TEST] SDK release published by ${ACTOR}, approved by <https://github.com/${ACTOR}|@${ACTOR}> — <${RUN_URL}|View Run>
-          • <https://www.npmjs.com/package/@linear/sdk/v/0.0.0-sample|@linear/sdk v0.0.0-sample>
-          • <https://www.npmjs.com/package/@linear/import/v/0.0.0-sample|@linear/import v0.0.0-sample>" \
+          • @linear/sdk [major] v93.0.1 → *<https://www.npmjs.com/package/@linear/sdk/v/94.0.0|v94.0.0>*
+          • @linear/import [patch] v3.2.11 → *<https://www.npmjs.com/package/@linear/import/v/3.2.12|v3.2.12>*" \
               '{text: $text}')"
 
   notify-slack:
