@@ -17,7 +17,7 @@ const releaseLines = publishedPackages.map(({ name, version }) => {
   const npmUrl = `https://www.npmjs.com/package/${name}/v/${version}`;
   const versionChange = previousVersion ? `v${previousVersion} → ` : "";
 
-  return `• ${name} [${releaseType}] ${versionChange}*<${npmUrl}|v${version}>*`;
+  return `• ${name} [${releaseType}] ${versionChange}<${npmUrl}|v${version}>`;
 });
 
 const githubApi = endpoint =>
@@ -29,7 +29,7 @@ const githubApi = endpoint =>
   );
 
 let approval = "";
-let pullRequestLink = "";
+let pullRequestContext = "";
 try {
   const pullRequests = githubApi(`commits/${process.env.GITHUB_SHA}/pulls`);
   const pullRequest = pullRequests.find(({ merged_at: mergedAt }) => mergedAt);
@@ -56,13 +56,17 @@ try {
     }
 
     const pullRequestUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/pull/${pullRequest.number}`;
-    pullRequestLink = ` — <${pullRequestUrl}|#${pullRequest.number}>`;
+    const author =
+      pullRequest.user.login === "github-actions[bot]"
+        ? "CI"
+        : `<https://github.com/${pullRequest.user.login}|@${pullRequest.user.login}>`;
+    pullRequestContext = ` — <${pullRequestUrl}|#${pullRequest.number}> by ${author}`;
   }
 } catch {
   // Approval context is best effort and should never block a release notification.
 }
 
 const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
-const text = `:rocket: SDK release published by ${process.env.GITHUB_ACTOR}${approval}${pullRequestLink} — <${runUrl}|View Run>\n${releaseLines.join("\n")}`;
+const text = `:rocket: New releases published by ${process.env.GITHUB_ACTOR}${approval}${pullRequestContext} — <${runUrl}|View Run>\n${releaseLines.join("\n")}`;
 
 fs.writeFileSync(path.join(process.env.RUNNER_TEMP, "sdk-release-slack.json"), JSON.stringify({ text }));
