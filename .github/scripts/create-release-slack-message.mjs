@@ -67,6 +67,6 @@ try {
 }
 
 const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
-const text = `:rocket: New releases published by ${process.env.GITHUB_ACTOR}${approval}${pullRequestContext} — <${runUrl}|View Run>\n${releaseLines.join("\n")}`;
+const text = `:rocket: New releases${approval}${pullRequestContext}\n${releaseLines.join("\n")}\n<${runUrl}|View Run>`;
 
 fs.writeFileSync(path.join(process.env.RUNNER_TEMP, "sdk-release-slack.json"), JSON.stringify({ text }));
