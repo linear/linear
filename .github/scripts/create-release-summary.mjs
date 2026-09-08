@@ -11,7 +11,7 @@ const lines = [
   "| --- | --- | --- | --- |",
   ...releases.map(({ name, oldVersion, newVersion, type }) => `| ${name} | ${oldVersion} | ${newVersion} | ${type} |`),
   "",
-  "Full release notes are available in the changed `CHANGELOG.md` files. This pull request updates daily and whenever changes are merged to `master`.",
+  "Full release notes are available in the changed `CHANGELOG.md` files. This pull request updates on Tuesdays at 7 p.m. Pacific or when the schema workflow is run manually.",
   "",
 ];
 const body = lines.join("\n");
