@@ -2230,6 +2230,48 @@ export class AiConversationMcpServerConnectionScope extends Request {
   public type: L.AiConversationMcpServerConnectionScopeType;
 }
 /**
+ * AiConversationMemoryToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationMemoryToolCallFragment response data
+ */
+export class AiConversationMemoryToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationMemoryToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationMemoryToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationMemoryToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationMemoryToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationMemoryToolCallArgsFragment response data
+ */
+export class AiConversationMemoryToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationMemoryToolCallArgsFragment) {
+    super(request);
+    this.name = data.name ?? undefined;
+    this.action = data.action;
+  }
+
+  public name?: string | null;
+  public action: L.AiConversationMemoryToolCallArgsAction;
+}
+/**
  * The selected option in a multiple-choice AI conversation elicitation.
  *
  * @param request - function to call the graphql client
@@ -2412,6 +2454,46 @@ export class AiConversationPartMetadata extends Request {
   public turnId: string;
   /** The phase during which the part was generated. */
   public phase?: L.AiConversationPartPhase | null;
+}
+/**
+ * AiConversationPatchSettingsToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationPatchSettingsToolCallFragment response data
+ */
+export class AiConversationPatchSettingsToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationPatchSettingsToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationPatchSettingsToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationPatchSettingsToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationPatchSettingsToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationPatchSettingsToolCallArgsFragment response data
+ */
+export class AiConversationPatchSettingsToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationPatchSettingsToolCallArgsFragment) {
+    super(request);
+    this.ids = data.ids;
+  }
+
+  public ids: string[];
 }
 /**
  * AiConversationPostChatMessageToolCall model
@@ -3111,6 +3193,48 @@ export class AiConversationRetryPullRequestCheckToolCallArgs extends Request {
   public checkName: string;
   public workflowName?: string | null;
   public entity: AiConversationSearchEntitiesToolCallResultEntities;
+}
+/**
+ * AiConversationSearchChatChannelsToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSearchChatChannelsToolCallFragment response data
+ */
+export class AiConversationSearchChatChannelsToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSearchChatChannelsToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationSearchChatChannelsToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationSearchChatChannelsToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationSearchChatChannelsToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSearchChatChannelsToolCallArgsFragment response data
+ */
+export class AiConversationSearchChatChannelsToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSearchChatChannelsToolCallArgsFragment) {
+    super(request);
+    this.filter = data.filter;
+    this.platform = data.platform;
+  }
+
+  public filter: string;
+  public platform: L.AiConversationPostChatMessageToolCallArgsPlatform;
 }
 /**
  * AiConversationSearchDocumentationToolCall model
@@ -9967,6 +10091,27 @@ export class ImageUploadFromUrlPayload extends Request {
   public success: boolean;
   /** The URL containing the image. */
   public url?: string | null;
+}
+/**
+ * Return type for inbox notification updates.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.InboxNotificationUpdatePayloadFragment response data
+ */
+export class InboxNotificationUpdatePayload extends Request {
+  public constructor(request: LinearRequest, data: L.InboxNotificationUpdatePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this.updatedNotifications = data.updatedNotifications.map(node => new Notification(request, node));
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The notifications changed by the stack update. */
+  public updatedNotifications: Notification[];
 }
 /**
  * An initiative is a high-level strategic grouping of projects toward a business goal. Initiatives can contain multiple projects, have their own status updates and health tracking, and can be organized hierarchically with parent-child relationships.
@@ -24775,6 +24920,7 @@ export class ViewPreferencesValues extends Request {
     this.fieldSla = data.fieldSla ?? undefined;
     this.fieldStatus = data.fieldStatus ?? undefined;
     this.fieldTimeInCurrentStatus = data.fieldTimeInCurrentStatus ?? undefined;
+    this.fieldUserPresence = data.fieldUserPresence ?? undefined;
     this.focusViewGrouping = data.focusViewGrouping ?? undefined;
     this.focusViewOrdering = data.focusViewOrdering ?? undefined;
     this.focusViewOrderingDirection = data.focusViewOrderingDirection ?? undefined;
@@ -25100,6 +25246,8 @@ export class ViewPreferencesValues extends Request {
   public fieldStatus?: boolean | null;
   /** Whether to show the time in current status field. */
   public fieldTimeInCurrentStatus?: boolean | null;
+  /** Whether to show the avatars of the other people currently viewing an issue. */
+  public fieldUserPresence?: boolean | null;
   /** The focus view grouping. */
   public focusViewGrouping?: string | null;
   /** The focus view ordering. */
@@ -25875,6 +26023,7 @@ export class WorkflowDefinition extends Request {
     this.activationMode = data.activationMode ?? undefined;
     this.contextViewType = data.contextViewType ?? undefined;
     this.editAccess = data.editAccess ?? undefined;
+    this.intelligence = data.intelligence ?? undefined;
     this.trigger = data.trigger;
     this.triggerType = data.triggerType;
     this.type = data.type;
@@ -25940,6 +26089,8 @@ export class WorkflowDefinition extends Request {
   public contextViewType?: L.ContextViewType | null;
   /** The edit access setting for this workflow definition. When unset, access is derived from restrictEditing. */
   public editAccess?: L.WorkflowDefinitionEditAccess | null;
+  /** The intelligence level used to run the workflow. When null, Auto is used. */
+  public intelligence?: L.WorkflowIntelligence | null;
   /** The event that triggers the workflow, such as entity creation, update, or a specific state change. */
   public trigger: L.WorkflowTrigger;
   /** The entity type that triggers this workflow, such as Issue, Project, or Release. */
@@ -27651,6 +27802,43 @@ export class FavoritesQuery extends Request {
     const data = response.favorites;
 
     return new FavoriteConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable InboxNotifications Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class InboxNotificationsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the InboxNotifications query and return a NotificationConnection
+   *
+   * @param variables - variables to pass into the InboxNotificationsQuery
+   * @returns parsed response from InboxNotificationsQuery
+   */
+  public async fetch(variables?: L.InboxNotificationsQueryVariables): LinearFetch<NotificationConnection> {
+    const response = await this._request<L.InboxNotificationsQuery, L.InboxNotificationsQueryVariables>(
+      L.InboxNotificationsDocument.toString(),
+      variables
+    );
+    const data = response.inboxNotifications;
+
+    return new NotificationConnection(
       this._request,
       connection =>
         this.fetch(
@@ -33854,6 +34042,37 @@ export class ImportFileUploadMutation extends Request {
     const data = response.importFileUpload;
 
     return new UploadPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UpdateInboxNotification Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UpdateInboxNotificationMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UpdateInboxNotification mutation and return a InboxNotificationUpdatePayload
+   *
+   * @param id - required id to pass to updateInboxNotification
+   * @param input - required input to pass to updateInboxNotification
+   * @returns parsed response from UpdateInboxNotificationMutation
+   */
+  public async fetch(id: string, input: L.InboxNotificationUpdateInput): LinearFetch<InboxNotificationUpdatePayload> {
+    const response = await this._request<L.UpdateInboxNotificationMutation, L.UpdateInboxNotificationMutationVariables>(
+      L.UpdateInboxNotificationDocument.toString(),
+      {
+        id,
+        input,
+      }
+    );
+    const data = response.inboxNotificationUpdate;
+
+    return new InboxNotificationUpdatePayload(this._request, data);
   }
 }
 
@@ -49805,6 +50024,15 @@ export class LinearSdk extends Request {
     return new FavoritesQuery(this._request).fetch(variables);
   }
   /**
+   * The authenticated user's active inbox notifications, grouped according to inbox behavior.
+   *
+   * @param variables - variables to pass into the InboxNotificationsQuery
+   * @returns NotificationConnection
+   */
+  public inboxNotifications(variables?: L.InboxNotificationsQueryVariables): LinearFetch<NotificationConnection> {
+    return new InboxNotificationsQuery(this._request).fetch(variables);
+  }
+  /**
    * Returns a single initiative by its identifier or URL slug.
    *
    * @param id - required id to pass to initiative
@@ -51806,6 +52034,19 @@ export class LinearSdk extends Request {
     variables?: Omit<L.ImportFileUploadMutationVariables, "contentType" | "filename" | "size">
   ): LinearFetch<UploadPayload> {
     return new ImportFileUploadMutation(this._request).fetch(contentType, filename, size, variables);
+  }
+  /**
+   * Updates a notification in the authenticated user's inbox using inbox grouping behavior.
+   *
+   * @param id - required id to pass to updateInboxNotification
+   * @param input - required input to pass to updateInboxNotification
+   * @returns InboxNotificationUpdatePayload
+   */
+  public updateInboxNotification(
+    id: string,
+    input: L.InboxNotificationUpdateInput
+  ): LinearFetch<InboxNotificationUpdatePayload> {
+    return new UpdateInboxNotificationMutation(this._request).fetch(id, input);
   }
   /**
    * Adds a label to an initiative.
@@ -54258,6 +54499,7 @@ export {
   AiConversationErrorType,
   AiConversationInitialSource,
   AiConversationMcpServerConnectionScopeType,
+  AiConversationMemoryToolCallArgsAction,
   AiConversationPartPhase,
   AiConversationPartType,
   AiConversationPostChatMessageToolCallArgsPlatform,
@@ -54305,7 +54547,6 @@ export {
   IssueSuggestionType,
   LinearAgentMcpServersMode,
   LinearAgentTrustedSourcesMode,
-  MeetingAnalysisStatus,
   NotificationCategory,
   NotificationChannel,
   NotificationSubscriptionType,
@@ -54331,7 +54572,6 @@ export {
   ProjectUpdateReminderFrequency,
   PullRequestCheckPresentation,
   PullRequestMergeMethod,
-  PullRequestReviewTool,
   PullRequestStatus,
   PushSubscriptionType,
   ReleaseChannel,
@@ -54363,6 +54603,7 @@ export {
   WebhookResourceType,
   WorkflowActivationMode,
   WorkflowDefinitionEditAccess,
+  WorkflowIntelligence,
   WorkflowTrigger,
   WorkflowTriggerType,
   WorkflowType,
