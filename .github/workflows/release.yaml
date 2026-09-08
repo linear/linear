@@ -5,11 +5,6 @@ on:
     branches:
       - master
   workflow_dispatch:
-    inputs:
-      send_test_notification:
-        description: Send a sample SDK release Slack notification without running the release
-        type: boolean
-        default: false
 
 concurrency:
   group: sdk-publish
@@ -22,7 +17,7 @@ permissions: {}
 jobs:
   release:
     name: Release
-    if: github.ref == 'refs/heads/master' && !inputs.send_test_notification
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -103,79 +98,10 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CLI_CHANNEL_WEBHOOK_URL }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ACTOR: ${{ github.actor }}
           PUBLISHED_PACKAGES: ${{ steps.publish.outputs.publishedPackages }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          RELEASES=$(
-            jq -r '.[] | [.name, .version] | @tsv' <<< "$PUBLISHED_PACKAGES" |
-              while IFS=$'\t' read -r NAME VERSION; do
-                PACKAGE_DIR="packages/${NAME##*/}"
-                PREVIOUS_VERSION=""
-                RELEASE_TYPE=""
-                if [[ -f "$PACKAGE_DIR/CHANGELOG.md" ]]; then
-                  PREVIOUS_VERSION=$(awk '/^## [0-9]/ && $2 != version { print $2; exit }' version="$VERSION" "$PACKAGE_DIR/CHANGELOG.md")
-                  RELEASE_TYPE=$(awk '
-                    $0 == "## " version { in_release = 1; next }
-                    in_release && /^## / { exit }
-                    in_release && /^### (Major|Minor|Patch) Changes$/ { print tolower($2); exit }
-                  ' version="$VERSION" "$PACKAGE_DIR/CHANGELOG.md")
-                fi
-
-                NPM_URL="https://www.npmjs.com/package/${NAME}/v/${VERSION}"
-                if [[ -n "$PREVIOUS_VERSION" ]]; then
-                  printf '• %s [%s] v%s → *<%s|v%s>*\n' "$NAME" "$RELEASE_TYPE" "$PREVIOUS_VERSION" "$NPM_URL" "$VERSION"
-                else
-                  printf '• %s [%s] *<%s|v%s>*\n' "$NAME" "$RELEASE_TYPE" "$NPM_URL" "$VERSION"
-                fi
-              done
-          )
-
-          PR_JSON=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/pulls" 2>/dev/null || true)
-          PR_NUMBER=$(jq -r 'map(select(.merged_at != null)) | first | .number // empty' <<< "${PR_JSON:-[]}" 2>/dev/null || true)
-          APPROVAL=""
-          PR_LINK=""
-          if [[ -n "$PR_NUMBER" ]]; then
-            PR_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/pull/${PR_NUMBER}"
-            PR_LINK=" — <${PR_URL}|#${PR_NUMBER}>"
-            REVIEWS=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/reviews?per_page=100" 2>/dev/null || true)
-            APPROVERS=$(jq -r '
-              map(select(.state == "APPROVED" or .state == "CHANGES_REQUESTED" or .state == "DISMISSED"))
-              | group_by(.user.login)
-              | map(max_by(.submitted_at) | select(.state == "APPROVED") | "<https://github.com/\(.user.login)|@\(.user.login)>")
-              | join(", ")
-            ' <<< "${REVIEWS:-[]}" 2>/dev/null || true)
-            if [[ -n "$APPROVERS" ]]; then
-              APPROVAL=", approved by ${APPROVERS}"
-            fi
-          fi
-
-          curl -s -X POST "$SLACK_WEBHOOK_URL" \
-            -H 'Content-Type: application/json' \
-            -d "$(jq -n \
-              --arg text ":rocket: SDK release published by ${ACTOR}${APPROVAL}${PR_LINK} — <${RUN_URL}|View Run>
-          ${RELEASES}" \
-              '{text: $text}')"
-
-  test-slack-notification:
-    name: Test Slack notification
-    if: inputs.send_test_notification
-    runs-on: ubuntu-latest
-    permissions: {}
-    steps:
-      - name: Notify Slack
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CLI_CHANNEL_WEBHOOK_URL }}
-          ACTOR: ${{ github.actor }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: |
-          curl -sS --fail-with-body -X POST "$SLACK_WEBHOOK_URL" \
-            -H 'Content-Type: application/json' \
-            -d "$(jq -n \
-              --arg text ":rocket: [TEST] SDK release published by ${ACTOR}, approved by <https://github.com/${ACTOR}|@${ACTOR}> — <${RUN_URL}|View Run>
-          • @linear/sdk [major] v93.0.1 → *<https://www.npmjs.com/package/@linear/sdk/v/94.0.0|v94.0.0>*
-          • @linear/import [patch] v3.2.11 → *<https://www.npmjs.com/package/@linear/import/v/3.2.12|v3.2.12>*" \
-              '{text: $text}')"
+          node .github/scripts/create-release-slack-message.mjs
+          curl -s -X POST "$SLACK_WEBHOOK_URL" -H 'Content-Type: application/json' --data @"$RUNNER_TEMP/sdk-release-slack.json"
 
   notify-slack:
     runs-on: ubuntu-latest
