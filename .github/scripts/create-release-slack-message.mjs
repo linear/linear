@@ -66,7 +66,6 @@ try {
   // Approval context is best effort and should never block a release notification.
 }
 
-const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
-const text = `:rocket: New releases${approval}${pullRequestContext}\n${releaseLines.join("\n")}\n<${runUrl}|View Run>`;
+const text = `:rocket: New releases${approval}${pullRequestContext}\n${releaseLines.join("\n")}`;
 
 fs.writeFileSync(path.join(process.env.RUNNER_TEMP, "sdk-release-slack.json"), JSON.stringify({ text }));
