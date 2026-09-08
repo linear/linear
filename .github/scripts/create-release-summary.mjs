@@ -5,13 +5,13 @@ import process from "node:process";
 const plan = JSON.parse(fs.readFileSync(path.join(process.env.RUNNER_TEMP, "release-plan.json"), "utf8"));
 const releases = plan.releases.filter(({ type }) => type !== "none");
 const lines = [
-  "This single pull request contains the generated schema and SDK updates plus all pending changesets. Merging it publishes the listed packages to npm; no second release pull request will be created.",
+  "This is an automated SDK maintenance PR. Merging it will publish the listed packages to npm.",
   "",
   "| Package | Current | Release | Bump |",
   "| --- | --- | --- | --- |",
   ...releases.map(({ name, oldVersion, newVersion, type }) => `| ${name} | ${oldVersion} | ${newVersion} | ${type} |`),
   "",
-  "Full release notes are available in the changed `CHANGELOG.md` files. This pull request updates on Tuesdays at 7 p.m. Pacific or when the schema workflow is run manually.",
+  "Full release notes are available in the changed `CHANGELOG.md` files.",
   "",
 ];
 const body = lines.join("\n");
