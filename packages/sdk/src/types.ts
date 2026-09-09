@@ -6,7 +6,7 @@ export interface LinearClientOptions extends RequestInit {
   apiKey?: string;
   /** The access token returned from oauth endpoints configured in https://linear.app/settings/account/security */
   accessToken?: string;
-  /** The url to the Linear graphql api */
+  /** The HTTPS URL to the Linear GraphQL API. HTTP is supported only for local development servers. */
   apiUrl?: string;
 }
 
