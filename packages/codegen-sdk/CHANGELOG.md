@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.0.6
+
+### Patch Changes
+
+- b6024c1: Only reuse model queries when response fields match the argument types. Generate ID getters only when the query selects an ID.
+- Updated dependencies [b6024c1]
+  - @linear/codegen-doc@3.3.5
+
 ## 4.0.5
 
 ### Patch Changes

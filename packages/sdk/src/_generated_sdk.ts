@@ -679,7 +679,7 @@ export class AgentSession extends Request {
   public sourceMetadata?: Record<string, unknown> | null;
   /** The time the agent session transitioned to active status and began work. Null if the session has not yet started. */
   public startedAt?: Date | null;
-  /** A human-readable summary of the work performed in this session. Null if no summary has been generated yet. */
+  /** The session title, generated automatically or set by the owning OAuth application. Null if no title is set. */
   public summary?: string | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -1471,10 +1471,10 @@ export class AiConversationCreateSandboxToolCall extends Request {
 export class AiConversationCreateSandboxToolCallArgs extends Request {
   public constructor(request: LinearRequest, data: L.AiConversationCreateSandboxToolCallArgsFragment) {
     super(request);
-    this.repository = data.repository;
+    this.repository = data.repository ?? undefined;
   }
 
-  public repository: string;
+  public repository?: string | null;
 }
 /**
  * AiConversationDeleteEntityToolCall model
@@ -1974,7 +1974,11 @@ export class AiConversationGetSlackConversationHistoryToolCall extends Request {
     super(request);
     this.rawArgs = parseJson(data.rawArgs) ?? undefined;
     this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationGetSlackConversationHistoryToolCallArgs(request, data.args) : undefined;
     this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.result = data.result
+      ? new AiConversationGetSlackConversationHistoryToolCallResult(request, data.result)
+      : undefined;
     this.name = data.name;
   }
 
@@ -1982,9 +1986,49 @@ export class AiConversationGetSlackConversationHistoryToolCall extends Request {
   public rawArgs?: Record<string, unknown> | null;
   /** The result of the tool call. */
   public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationGetSlackConversationHistoryToolCallArgs | null;
   public displayInfo: AiConversationToolDisplayInfo;
+  /** The result of the tool call. */
+  public result?: AiConversationGetSlackConversationHistoryToolCallResult | null;
   /** The name of the tool that was called. */
   public name: L.AiConversationTool;
+}
+/**
+ * AiConversationGetSlackConversationHistoryToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationGetSlackConversationHistoryToolCallArgsFragment response data
+ */
+export class AiConversationGetSlackConversationHistoryToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationGetSlackConversationHistoryToolCallArgsFragment) {
+    super(request);
+    this.channel = data.channel ?? undefined;
+    this.targetType = data.targetType ?? undefined;
+  }
+
+  public channel?: string | null;
+  public targetType?: L.AiConversationGetSlackConversationHistoryToolCallArgsTargetType | null;
+}
+/**
+ * AiConversationGetSlackConversationHistoryToolCallResult model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationGetSlackConversationHistoryToolCallResultFragment response data
+ */
+export class AiConversationGetSlackConversationHistoryToolCallResult extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationGetSlackConversationHistoryToolCallResultFragment) {
+    super(request);
+    this.conversationUrl = data.conversationUrl ?? undefined;
+    this.error = data.error ?? undefined;
+    this.hasMore = data.hasMore ?? undefined;
+    this.messageCount = data.messageCount ?? undefined;
+  }
+
+  public conversationUrl?: string | null;
+  public error?: string | null;
+  public hasMore?: boolean | null;
+  public messageCount?: number | null;
 }
 /**
  * AiConversationHandoffToCodingSessionToolCall model
@@ -2508,6 +2552,7 @@ export class AiConversationPostChatMessageToolCall extends Request {
     this.rawResult = parseJson(data.rawResult) ?? undefined;
     this.args = data.args ? new AiConversationPostChatMessageToolCallArgs(request, data.args) : undefined;
     this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.result = data.result ? new AiConversationPostChatMessageToolCallResult(request, data.result) : undefined;
     this.name = data.name;
   }
 
@@ -2518,6 +2563,8 @@ export class AiConversationPostChatMessageToolCall extends Request {
   /** The arguments to the tool call. */
   public args?: AiConversationPostChatMessageToolCallArgs | null;
   public displayInfo: AiConversationToolDisplayInfo;
+  /** The result of the tool call. */
+  public result?: AiConversationPostChatMessageToolCallResult | null;
   /** The name of the tool that was called. */
   public name: L.AiConversationTool;
 }
@@ -2530,10 +2577,38 @@ export class AiConversationPostChatMessageToolCall extends Request {
 export class AiConversationPostChatMessageToolCallArgs extends Request {
   public constructor(request: LinearRequest, data: L.AiConversationPostChatMessageToolCallArgsFragment) {
     super(request);
+    this.channel = data.channel ?? undefined;
+    this.isReply = data.isReply ?? undefined;
+    this.recipient = data.recipient ?? undefined;
+    this.recipientId = data.recipientId ?? undefined;
     this.platform = data.platform;
   }
 
+  public channel?: string | null;
+  public isReply?: boolean | null;
+  public recipient?: string | null;
+  public recipientId?: string | null;
   public platform: L.AiConversationPostChatMessageToolCallArgsPlatform;
+}
+/**
+ * AiConversationPostChatMessageToolCallResult model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationPostChatMessageToolCallResultFragment response data
+ */
+export class AiConversationPostChatMessageToolCallResult extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationPostChatMessageToolCallResultFragment) {
+    super(request);
+    this.conversationUrl = data.conversationUrl ?? undefined;
+    this.error = data.error ?? undefined;
+    this.message = data.message ?? undefined;
+    this.posted = data.posted;
+  }
+
+  public conversationUrl?: string | null;
+  public error?: string | null;
+  public message?: string | null;
+  public posted: boolean;
 }
 /**
  * AiConversationPromptCodingSessionToolCall model
@@ -3195,6 +3270,48 @@ export class AiConversationRetryPullRequestCheckToolCallArgs extends Request {
   public entity: AiConversationSearchEntitiesToolCallResultEntities;
 }
 /**
+ * AiConversationSandboxGitHistoryToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSandboxGitHistoryToolCallFragment response data
+ */
+export class AiConversationSandboxGitHistoryToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSandboxGitHistoryToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationSandboxGitHistoryToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationSandboxGitHistoryToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationSandboxGitHistoryToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSandboxGitHistoryToolCallArgsFragment response data
+ */
+export class AiConversationSandboxGitHistoryToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSandboxGitHistoryToolCallArgsFragment) {
+    super(request);
+    this.paths = data.paths ?? undefined;
+    this.operation = data.operation;
+  }
+
+  public paths?: string[] | null;
+  public operation: L.AiConversationSandboxGitHistoryToolCallArgsOperation;
+}
+/**
  * AiConversationSearchChatChannelsToolCall model
  *
  * @param request - function to call the graphql client
@@ -3207,6 +3324,7 @@ export class AiConversationSearchChatChannelsToolCall extends Request {
     this.rawResult = parseJson(data.rawResult) ?? undefined;
     this.args = data.args ? new AiConversationSearchChatChannelsToolCallArgs(request, data.args) : undefined;
     this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.result = data.result ? new AiConversationSearchChatChannelsToolCallResult(request, data.result) : undefined;
     this.name = data.name;
   }
 
@@ -3217,6 +3335,8 @@ export class AiConversationSearchChatChannelsToolCall extends Request {
   /** The arguments to the tool call. */
   public args?: AiConversationSearchChatChannelsToolCallArgs | null;
   public displayInfo: AiConversationToolDisplayInfo;
+  /** The result of the tool call. */
+  public result?: AiConversationSearchChatChannelsToolCallResult | null;
   /** The name of the tool that was called. */
   public name: L.AiConversationTool;
 }
@@ -3235,6 +3355,20 @@ export class AiConversationSearchChatChannelsToolCallArgs extends Request {
 
   public filter: string;
   public platform: L.AiConversationPostChatMessageToolCallArgsPlatform;
+}
+/**
+ * AiConversationSearchChatChannelsToolCallResult model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSearchChatChannelsToolCallResultFragment response data
+ */
+export class AiConversationSearchChatChannelsToolCallResult extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSearchChatChannelsToolCallResultFragment) {
+    super(request);
+    this.totalCount = data.totalCount;
+  }
+
+  public totalCount: number;
 }
 /**
  * AiConversationSearchDocumentationToolCall model
@@ -31056,6 +31190,35 @@ export class UserSettingsQuery extends Request {
 }
 
 /**
+ * A fetchable UserViewPreferences Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserViewPreferencesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserViewPreferences query and return a ViewPreferences
+   *
+   * @param viewType - required viewType to pass to userViewPreferences
+   * @returns parsed response from UserViewPreferencesQuery
+   */
+  public async fetch(viewType: L.ViewType): LinearFetch<ViewPreferences | undefined> {
+    const response = await this._request<L.UserViewPreferencesQuery, L.UserViewPreferencesQueryVariables>(
+      L.UserViewPreferencesDocument.toString(),
+      {
+        viewType,
+      }
+    );
+    const data = response.userViewPreferences;
+
+    return data ? new ViewPreferences(this._request, data) : undefined;
+  }
+}
+
+/**
  * A fetchable Users Query
  *
  * @param request - function to call the graphql client
@@ -49317,6 +49480,38 @@ export class UserSettings_Theme_Custom_SidebarQuery extends Request {
 }
 
 /**
+ * A fetchable UserViewPreferences_Preferences Query
+ *
+ * @param request - function to call the graphql client
+ * @param viewType - required viewType to pass to userViewPreferences
+ */
+export class UserViewPreferences_PreferencesQuery extends Request {
+  private _viewType: L.ViewType;
+
+  public constructor(request: LinearRequest, viewType: L.ViewType) {
+    super(request);
+    this._viewType = viewType;
+  }
+
+  /**
+   * Call the UserViewPreferences_Preferences query and return a ViewPreferencesValues
+   *
+   * @returns parsed response from UserViewPreferences_PreferencesQuery
+   */
+  public async fetch(): LinearFetch<ViewPreferencesValues | undefined> {
+    const response = await this._request<
+      L.UserViewPreferences_PreferencesQuery,
+      L.UserViewPreferences_PreferencesQueryVariables
+    >(L.UserViewPreferences_PreferencesDocument.toString(), {
+      viewType: this._viewType,
+    });
+    const data = response.userViewPreferences?.preferences;
+
+    return data ? new ViewPreferencesValues(this._request, data) : undefined;
+  }
+}
+
+/**
  * A fetchable Viewer_AssignedIssues Query
  *
  * @param request - function to call the graphql client
@@ -51001,6 +51196,15 @@ export class LinearSdk extends Request {
    */
   public get userSettings(): LinearFetch<UserSettings> {
     return new UserSettingsQuery(this._request).fetch();
+  }
+  /**
+   * The authenticated user's workspace-level view display preferences for a view type. Returns the user-type preferences that are not scoped to a team, project, or other entity. Null if the user has not customized the view.
+   *
+   * @param viewType - required viewType to pass to userViewPreferences
+   * @returns ViewPreferences
+   */
+  public userViewPreferences(viewType: L.ViewType): LinearFetch<ViewPreferences | undefined> {
+    return new UserViewPreferencesQuery(this._request).fetch(viewType);
   }
   /**
    * All users in the workspace. Supports filtering, sorting, and pagination.
@@ -54497,6 +54701,7 @@ export {
   AiConversationEntityListWidgetArgsAction,
   AiConversationEntityListWidgetArgsEntitiesType,
   AiConversationErrorType,
+  AiConversationGetSlackConversationHistoryToolCallArgsTargetType,
   AiConversationInitialSource,
   AiConversationMcpServerConnectionScopeType,
   AiConversationMemoryToolCallArgsAction,
@@ -54506,6 +54711,7 @@ export {
   AiConversationQueryUpdatesToolCallArgsUpdateType,
   AiConversationQueryViewToolCallArgsMode,
   AiConversationReadFileToolCallArgsMode,
+  AiConversationSandboxGitHistoryToolCallArgsOperation,
   AiConversationStatus,
   AiConversationSubscribeToEventToolCallArgsKind,
   AiConversationSubscribeToEventToolCallArgsType,

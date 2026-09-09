@@ -6734,6 +6734,32 @@ describe("generated", () => {
     });
   });
 
+  /** Test UserViewPreferences query */
+  describe("UserViewPreferences", () => {
+    let _userViewPreferences: L.ViewPreferences | undefined | null;
+
+    /** Test the root model query for UserViewPreferences */
+    it("userViewPreferences", async () => {
+      const userViewPreferences: L.ViewPreferences | undefined | null = await client.userViewPreferences(
+        L.ViewType.ActiveIssues
+      );
+      _userViewPreferences = userViewPreferences;
+      expect(userViewPreferences instanceof L.ViewPreferences);
+    });
+
+    /** Test the userViewPreferences model query for UserViewPreferences_Preferences */
+    it("userViewPreferences.preferences", async () => {
+      if (_userViewPreferences) {
+        const preferences: L.ViewPreferencesValues | undefined | null = _userViewPreferences.preferences;
+        expect(preferences instanceof L.ViewPreferencesValues);
+      } else {
+        console.warn(
+          "codegen-doc:print: No userViewPreferences found - cannot test _userViewPreferences.preferences query"
+        );
+      }
+    });
+  });
+
   /** Test all User queries */
   describe("Users", () => {
     let _user: L.User | undefined | null;

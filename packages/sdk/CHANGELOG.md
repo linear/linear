@@ -1,5 +1,69 @@
 # Change Log
 
+## 95.0.0
+
+### Major Changes
+
+- feat(schema): [breaking] Field 'AiConversationCreateSandboxToolCallArgs.repository' changed type from 'String!' to 'String' (AiConversationCreateSandboxToolCallArgs.repository)
+
+  feat(schema): [dangerous] Input field 'summary' was added to input object type 'AgentSessionUpdateInput' (AgentSessionUpdateInput.summary)
+
+  feat(schema): [dangerous] Enum value 'SandboxGitHistory' was added to enum 'AiConversationTool' (AiConversationTool.SandboxGitHistory)
+
+  feat(schema): [dangerous] Member 'AiConversationSandboxGitHistoryToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Enum value 'loops' was added to enum 'ProjectTab' (ProjectTab.loops)
+
+  feat(schema): [dangerous] Enum value 'chatMessagePosted' was added to enum 'WorkflowTrigger' (WorkflowTrigger.chatMessagePosted)
+
+  feat(schema): [dangerous] Enum value 'chatReactionAdded' was added to enum 'WorkflowTrigger' (WorkflowTrigger.chatReactionAdded)
+
+  feat(schema): [dangerous] Enum value 'chat' was added to enum 'WorkflowTriggerType' (WorkflowTriggerType.chat)
+
+  feat(schema): [non_breaking] Type 'AiConversationGetSlackConversationHistoryToolCallArgs' was added (AiConversationGetSlackConversationHistoryToolCallArgs)
+
+  feat(schema): [non_breaking] Type 'AiConversationGetSlackConversationHistoryToolCallArgsTargetType' was added (AiConversationGetSlackConversationHistoryToolCallArgsTargetType)
+
+  feat(schema): [non_breaking] Type 'AiConversationGetSlackConversationHistoryToolCallResult' was added (AiConversationGetSlackConversationHistoryToolCallResult)
+
+  feat(schema): [non_breaking] Type 'AiConversationPostChatMessageToolCallResult' was added (AiConversationPostChatMessageToolCallResult)
+
+  feat(schema): [non_breaking] Type 'AiConversationSandboxGitHistoryToolCall' was added (AiConversationSandboxGitHistoryToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationSandboxGitHistoryToolCallArgs' was added (AiConversationSandboxGitHistoryToolCallArgs)
+
+  feat(schema): [non_breaking] Type 'AiConversationSandboxGitHistoryToolCallArgsOperation' was added (AiConversationSandboxGitHistoryToolCallArgsOperation)
+
+  feat(schema): [non_breaking] Type 'AiConversationSearchChatChannelsToolCallResult' was added (AiConversationSearchChatChannelsToolCallResult)
+
+  feat(schema): [non_breaking] Field 'AgentSession.summary' description changed from 'A human-readable summary of the work performed in this session. Null if no summary has been generated yet.' to 'The session title, generated automatically or set by the owning OAuth application. Null if no title is set.' (AgentSession.summary)
+
+  feat(schema): [non_breaking] Field 'args' was added to object type 'AiConversationGetSlackConversationHistoryToolCall' (AiConversationGetSlackConversationHistoryToolCall.args)
+
+  feat(schema): [non_breaking] Field 'result' was added to object type 'AiConversationGetSlackConversationHistoryToolCall' (AiConversationGetSlackConversationHistoryToolCall.result)
+
+  feat(schema): [non_breaking] Field 'result' was added to object type 'AiConversationPostChatMessageToolCall' (AiConversationPostChatMessageToolCall.result)
+
+  feat(schema): [non_breaking] Field 'channel' was added to object type 'AiConversationPostChatMessageToolCallArgs' (AiConversationPostChatMessageToolCallArgs.channel)
+
+  feat(schema): [non_breaking] Field 'isReply' was added to object type 'AiConversationPostChatMessageToolCallArgs' (AiConversationPostChatMessageToolCallArgs.isReply)
+
+  feat(schema): [non_breaking] Field 'recipient' was added to object type 'AiConversationPostChatMessageToolCallArgs' (AiConversationPostChatMessageToolCallArgs.recipient)
+
+  feat(schema): [non_breaking] Field 'recipientId' was added to object type 'AiConversationPostChatMessageToolCallArgs' (AiConversationPostChatMessageToolCallArgs.recipientId)
+
+  feat(schema): [non_breaking] Field 'result' was added to object type 'AiConversationSearchChatChannelsToolCall' (AiConversationSearchChatChannelsToolCall.result)
+
+  feat(schema): [non_breaking] Field 'agentSessionSshAddress' was added to object type 'Query' (Query.agentSessionSshAddress)
+
+  feat(schema): [non_breaking] Field 'userViewPreferences' was added to object type 'Query' (Query.userViewPreferences)
+
+### Patch Changes
+
+- 7aaa438: Omit GraphQL request variables from error messages.
+- 2cddc35: Require a finite numeric `webhookTimestamp` in the signed body and enforce the existing one-minute replay window in all webhook verification APIs. Unsigned timestamp headers and legacy timestamp arguments can no longer bypass this check. The optional third argument to `verify()` and `parseData()` is retained for source compatibility but ignored; callers can omit it. Payloads without a signed timestamp, including header-only payloads, are now rejected.
+- e5842b5: Require HTTPS for custom API URLs outside local development.
+
 ## 94.0.0
 
 ### Major Changes

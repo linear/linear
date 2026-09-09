@@ -3636,8 +3636,6 @@ fragment AgentSession on AgentSession {
   __typename
   # A dynamically updated plan describing the agent's execution strategy, including steps to be taken and their current status. Updated as the agent progresses through its work. Null if no plan has been set.
   plan
-  # A human-readable summary of the work performed in this session. Null if no summary has been generated yet.
-  summary
   # External links associated with this session.
   externalLinks {
     ...AgentSessionExternalLink
@@ -3677,6 +3675,8 @@ fragment AgentSession on AgentSession {
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The session title, generated automatically or set by the owning OAuth application. Null if no title is set.
+  summary
   # The time a user dismissed this agent session. When dismissed, the agent is removed as delegate from the associated issue. Null if the session has not been dismissed.
   dismissedAt
   # The time at which the entity was archived. Null if the entity has not been archived.
@@ -4547,6 +4547,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     }
     ... on AiConversationRetryPullRequestCheckToolCall {
       ...AiConversationRetryPullRequestCheckToolCall
+    }
+    ... on AiConversationSandboxGitHistoryToolCall {
+      ...AiConversationSandboxGitHistoryToolCall
     }
     ... on AiConversationSearchChatChannelsToolCall {
       ...AiConversationSearchChatChannelsToolCall
@@ -11300,6 +11303,10 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
     ...AiConversationRetryPullRequestCheckToolCall
   }
 
+  ... on AiConversationSandboxGitHistoryToolCall {
+    ...AiConversationSandboxGitHistoryToolCall
+  }
+
   ... on AiConversationSearchChatChannelsToolCall {
     ...AiConversationSearchChatChannelsToolCall
   }
@@ -11688,13 +11695,35 @@ fragment AiConversationGetSlackConversationHistoryToolCall on AiConversationGetS
   __typename
   # The arguments of the tool call.
   rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationGetSlackConversationHistoryToolCallArgs
+  }
   # The name of the tool that was called.
   name
   # The result of the tool call.
   rawResult
+  # The result of the tool call.
+  result {
+    ...AiConversationGetSlackConversationHistoryToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
+}
+
+fragment AiConversationGetSlackConversationHistoryToolCallArgs on AiConversationGetSlackConversationHistoryToolCallArgs {
+  __typename
+  channel
+  targetType
+}
+
+fragment AiConversationGetSlackConversationHistoryToolCallResult on AiConversationGetSlackConversationHistoryToolCallResult {
+  __typename
+  conversationUrl
+  error
+  hasMore
+  messageCount
 }
 
 fragment AiConversationHandoffToCodingSessionToolCall on AiConversationHandoffToCodingSessionToolCall {
@@ -11937,6 +11966,10 @@ fragment AiConversationPostChatMessageToolCall on AiConversationPostChatMessageT
   name
   # The result of the tool call.
   rawResult
+  # The result of the tool call.
+  result {
+    ...AiConversationPostChatMessageToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
@@ -11944,7 +11977,19 @@ fragment AiConversationPostChatMessageToolCall on AiConversationPostChatMessageT
 
 fragment AiConversationPostChatMessageToolCallArgs on AiConversationPostChatMessageToolCallArgs {
   __typename
+  channel
+  isReply
   platform
+  recipient
+  recipientId
+}
+
+fragment AiConversationPostChatMessageToolCallResult on AiConversationPostChatMessageToolCallResult {
+  __typename
+  conversationUrl
+  error
+  message
+  posted
 }
 
 fragment AiConversationPromptCodingSessionToolCall on AiConversationPromptCodingSessionToolCall {
@@ -12284,6 +12329,29 @@ fragment AiConversationRetryPullRequestCheckToolCallArgs on AiConversationRetryP
   workflowName
 }
 
+fragment AiConversationSandboxGitHistoryToolCall on AiConversationSandboxGitHistoryToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationSandboxGitHistoryToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationSandboxGitHistoryToolCallArgs on AiConversationSandboxGitHistoryToolCallArgs {
+  __typename
+  operation
+  paths
+}
+
 fragment AiConversationSearchChatChannelsToolCall on AiConversationSearchChatChannelsToolCall {
   __typename
   # The arguments of the tool call.
@@ -12296,6 +12364,10 @@ fragment AiConversationSearchChatChannelsToolCall on AiConversationSearchChatCha
   name
   # The result of the tool call.
   rawResult
+  # The result of the tool call.
+  result {
+    ...AiConversationSearchChatChannelsToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
@@ -12305,6 +12377,11 @@ fragment AiConversationSearchChatChannelsToolCallArgs on AiConversationSearchCha
   __typename
   filter
   platform
+}
+
+fragment AiConversationSearchChatChannelsToolCallResult on AiConversationSearchChatChannelsToolCallResult {
+  __typename
+  totalCount
 }
 
 fragment AiConversationSearchDocumentationToolCall on AiConversationSearchDocumentationToolCall {
@@ -21427,6 +21504,28 @@ query userSettings_theme_custom_sidebar(
           ...UserSettingsCustomSidebarTheme
         }
       }
+    }
+  }
+}
+# The authenticated user's workspace-level view display preferences for a view type. Returns the
+# user-type preferences that are not scoped to a team, project, or other entity. Null if the user has
+# not customized the view.
+query userViewPreferences(
+  # The view type the preferences are associated with.
+  $viewType: ViewType!
+) {
+  userViewPreferences(viewType: $viewType) {
+    ...ViewPreferences
+  }
+}
+# The view preferences values, containing layout, grouping, sorting, and field visibility settings.
+query userViewPreferences_preferences(
+  # The view type the preferences are associated with.
+  $viewType: ViewType!
+) {
+  userViewPreferences(viewType: $viewType) {
+    preferences {
+      ...ViewPreferencesValues
     }
   }
 }
