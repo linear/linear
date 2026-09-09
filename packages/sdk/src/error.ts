@@ -152,8 +152,8 @@ export class RatelimitedLinearError extends LinearError {
     if (value === undefined || value === null || value === "") {
       return undefined;
     }
-    // eslint-disable-next-line no-constant-binary-expression
-    return Number(value) ?? undefined;
+    const parsedValue = Number(value);
+    return Number.isNaN(parsedValue) ? undefined : parsedValue;
   }
 }
 
