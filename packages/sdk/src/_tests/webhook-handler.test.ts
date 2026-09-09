@@ -233,6 +233,36 @@ describe("webhooks handlers", () => {
     }
   });
 
+  it.each([undefined, "fresh"])("rejects a body without a timestamp with header %s", async timestampHeader => {
+    const secret = "SECRET";
+    const client = new LinearWebhookClient(secret);
+    const handler = client.createHandler();
+    let invoked = 0;
+    handler.on("*", () => {
+      invoked += 1;
+    });
+
+    const { payload } = generateIssuePayload();
+    delete payload.webhookTimestamp;
+    const { body, signature } = createSignedBody(secret, payload);
+    const headers = new Map<string, string>([
+      [LINEAR_WEBHOOK_SIGNATURE_HEADER, signature],
+      ["content-type", "application/json"],
+    ]);
+    if (timestampHeader) {
+      headers.set(LINEAR_WEBHOOK_TS_HEADER, String(Date.now()));
+    }
+    const req = {
+      method: "POST",
+      headers: { get: (key: string) => headers.get(key.toLowerCase()) ?? null },
+      arrayBuffer: async () => body,
+    } as unknown as Request;
+
+    const res = await handler(req);
+    expect(res.status).toBe(400);
+    expect(invoked).toBe(0);
+  });
+
   it("listens to 'Issue' and 'Comment' specifically (express server)", async () => {
     const secret = "SECRET";
     const client = new LinearWebhookClient(secret);

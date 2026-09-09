@@ -206,13 +206,13 @@ export class LinearWebhookClient {
   }
 
   /**
-   * Parses the JSON body and verifies signature and optional timestamp.
+   * Parses the JSON body and verifies signature and signed body timestamp.
    *
    * Throws if the JSON is invalid, the signature is invalid, or the timestamp check fails.
    *
    * @param rawBody - Raw request body as a Buffer
    * @param signature - The value of the `linear-signature` header
-   * @param timestampHeader - The value of the `linear-timestamp` header (used only when the signed body has no timestamp)
+   * @param timestampHeader - Legacy timestamp header; verify() only trusts the signed body timestamp.
    * @returns The verified and parsed webhook payload
    */
   private parseVerifiedPayload(
@@ -261,12 +261,11 @@ export class LinearWebhookClient {
   /**
    * Verify the webhook signature
    *
-   * Throws an error if the signature or timestamp is invalid.
+   * Throws if the signature is invalid or the signed body timestamp is missing or invalid.
    *
    * @param rawBody The webhook request raw body
    * @param signature The signature to verify
-   * @param timestamp The timestamp value - either from the `linear-timestamp` header (string)
-   *                  or the `webhookTimestamp` field from the request parsed body (number)
+   * @param timestamp Deprecated and ignored. Only webhookTimestamp in the signed body is trusted.
    * @returns True if the signature is valid
    */
   public verify(rawBody: Buffer, signature: string, timestamp?: number | string): boolean {
@@ -281,16 +280,18 @@ export class LinearWebhookClient {
       throw new Error("Invalid webhook signature");
     }
 
-    if (timestamp) {
-      const timestampMs = typeof timestamp === "string" ? parseInt(timestamp, 10) : timestamp;
-      if (isNaN(timestampMs)) {
-        throw new Error(`Invalid webhook timestamp: ${timestamp}`);
-      }
-      const timeDiff = Math.abs(new Date().getTime() - timestampMs);
-      // Throw error if more than one minute delta between provided ts and current time
-      if (timeDiff > 1000 * 60) {
-        throw new Error("Invalid webhook timestamp");
-      }
+    // Only the timestamp in the signed body can establish freshness.
+    timestamp = this.parseBodyAsWebhookPayload(rawBody)?.webhookTimestamp;
+    if (timestamp === undefined || timestamp === null) {
+      throw new Error("Missing webhook timestamp");
+    }
+    if (typeof timestamp !== "number" || !Number.isFinite(timestamp)) {
+      throw new Error("Invalid webhook timestamp");
+    }
+    const timeDiff = Math.abs(Date.now() - timestamp);
+    // Throw error if more than one minute delta between provided ts and current time
+    if (timeDiff > 1000 * 60) {
+      throw new Error("Invalid webhook timestamp");
     }
 
     return true;
@@ -301,8 +302,7 @@ export class LinearWebhookClient {
    *
    * @param rawBody The webhook request raw body
    * @param signature The signature to verify
-   * @param timestamp The timestamp value - either from the `linear-timestamp` header (string)
-   *                  or the `webhookTimestamp` field from the request parsed body (number)
+   * @param timestamp Deprecated and ignored. Only webhookTimestamp in the signed body is trusted.
    */
   public parseData(rawBody: Buffer, signature: string, timestamp?: number | string): LinearWebhookPayload {
     const verified = this.verify(rawBody, signature, timestamp);
