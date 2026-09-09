@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.3.5
+
+### Patch Changes
+
+- b6024c1: Only reuse model queries when response fields match the argument types. Generate ID getters only when the query selects an ID.
+
 ## 3.3.4
 
 ### Patch Changes

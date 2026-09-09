@@ -1,5 +1,13 @@
 # Change Log
 
+## 2.2.6
+
+### Patch Changes
+
+- Updated dependencies [b6024c1]
+  - @linear/codegen-doc@3.3.5
+  - @linear/codegen-sdk@4.0.6
+
 ## 2.2.5
 
 ### Patch Changes

@@ -531,7 +531,7 @@ export type AgentSession = Node & {
   startedAt?: Maybe<Scalars["DateTime"]>;
   /** The current status of the agent session, such as pending, active, awaiting input, complete, error, or stale. */
   status: AgentSessionStatus;
-  /** A human-readable summary of the work performed in this session. Null if no summary has been generated yet. */
+  /** The session title, generated automatically or set by the owning OAuth application. Null if no title is set. */
   summary?: Maybe<Scalars["String"]>;
   /**
    * [DEPRECATED] The type of the agent session.
@@ -762,6 +762,8 @@ export type AgentSessionUpdateInput = {
   plan?: InputMaybe<Scalars["JSONObject"]>;
   /** URLs to be removed from this session. Only updatable by the OAuth application that owns the session. */
   removedExternalUrls?: InputMaybe<Array<Scalars["String"]>>;
+  /** The session title, displayed as its summary. Must contain 1 to 255 characters, including a non-whitespace character, with no line breaks or NUL bytes. Set to null to clear it and allow automatic title generation. Updating only this field does not acknowledge the session. Only updatable by the OAuth application that owns the session. */
+  summary?: InputMaybe<Scalars["String"]>;
   /** [Internal] User-specific state for the agent session. Only updatable by internal clients. */
   userState?: InputMaybe<Array<AgentSessionUserStateInput>>;
 };
@@ -1161,7 +1163,7 @@ export type AiConversationCreateSandboxToolCall = AiConversationBaseToolCall & {
 
 export type AiConversationCreateSandboxToolCallArgs = {
   __typename?: "AiConversationCreateSandboxToolCallArgs";
-  repository: Scalars["String"];
+  repository?: Maybe<Scalars["String"]>;
 };
 
 export type AiConversationDeleteEntityToolCall = AiConversationBaseToolCall & {
@@ -1503,6 +1505,8 @@ export type AiConversationGetPullRequestFileToolCallArgs = {
 
 export type AiConversationGetSlackConversationHistoryToolCall = AiConversationBaseToolCall & {
   __typename?: "AiConversationGetSlackConversationHistoryToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationGetSlackConversationHistoryToolCallArgs>;
   displayInfo: AiConversationToolDisplayInfo;
   /** The name of the tool that was called. */
   name: AiConversationTool;
@@ -1510,6 +1514,27 @@ export type AiConversationGetSlackConversationHistoryToolCall = AiConversationBa
   rawArgs?: Maybe<Scalars["JSON"]>;
   /** The result of the tool call. */
   rawResult?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  result?: Maybe<AiConversationGetSlackConversationHistoryToolCallResult>;
+};
+
+export type AiConversationGetSlackConversationHistoryToolCallArgs = {
+  __typename?: "AiConversationGetSlackConversationHistoryToolCallArgs";
+  channel?: Maybe<Scalars["String"]>;
+  targetType?: Maybe<AiConversationGetSlackConversationHistoryToolCallArgsTargetType>;
+};
+
+export enum AiConversationGetSlackConversationHistoryToolCallArgsTargetType {
+  Channel = "channel",
+  Thread = "thread",
+}
+
+export type AiConversationGetSlackConversationHistoryToolCallResult = {
+  __typename?: "AiConversationGetSlackConversationHistoryToolCallResult";
+  conversationUrl?: Maybe<Scalars["String"]>;
+  error?: Maybe<Scalars["String"]>;
+  hasMore?: Maybe<Scalars["Boolean"]>;
+  messageCount?: Maybe<Scalars["Float"]>;
 };
 
 export type AiConversationHandoffToCodingSessionToolCall = AiConversationBaseToolCall & {
@@ -1811,17 +1836,31 @@ export type AiConversationPostChatMessageToolCall = AiConversationBaseToolCall &
   rawArgs?: Maybe<Scalars["JSON"]>;
   /** The result of the tool call. */
   rawResult?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  result?: Maybe<AiConversationPostChatMessageToolCallResult>;
 };
 
 export type AiConversationPostChatMessageToolCallArgs = {
   __typename?: "AiConversationPostChatMessageToolCallArgs";
+  channel?: Maybe<Scalars["String"]>;
+  isReply?: Maybe<Scalars["Boolean"]>;
   platform: AiConversationPostChatMessageToolCallArgsPlatform;
+  recipient?: Maybe<Scalars["String"]>;
+  recipientId?: Maybe<Scalars["String"]>;
 };
 
 export enum AiConversationPostChatMessageToolCallArgsPlatform {
   MicrosoftTeams = "microsoftTeams",
   Slack = "slack",
 }
+
+export type AiConversationPostChatMessageToolCallResult = {
+  __typename?: "AiConversationPostChatMessageToolCallResult";
+  conversationUrl?: Maybe<Scalars["String"]>;
+  error?: Maybe<Scalars["String"]>;
+  message?: Maybe<Scalars["String"]>;
+  posted: Scalars["Boolean"];
+};
 
 export type AiConversationPromptCodingSessionToolCall = AiConversationBaseToolCall & {
   __typename?: "AiConversationPromptCodingSessionToolCall";
@@ -2131,6 +2170,32 @@ export type AiConversationRetryPullRequestCheckToolCallArgs = {
   workflowName?: Maybe<Scalars["String"]>;
 };
 
+export type AiConversationSandboxGitHistoryToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationSandboxGitHistoryToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationSandboxGitHistoryToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationSandboxGitHistoryToolCallArgs = {
+  __typename?: "AiConversationSandboxGitHistoryToolCallArgs";
+  operation: AiConversationSandboxGitHistoryToolCallArgsOperation;
+  paths?: Maybe<Array<Scalars["String"]>>;
+};
+
+export enum AiConversationSandboxGitHistoryToolCallArgsOperation {
+  Blame = "blame",
+  Log = "log",
+  Search = "search",
+  Show = "show",
+}
+
 export type AiConversationSearchChatChannelsToolCall = AiConversationBaseToolCall & {
   __typename?: "AiConversationSearchChatChannelsToolCall";
   /** The arguments to the tool call. */
@@ -2142,12 +2207,19 @@ export type AiConversationSearchChatChannelsToolCall = AiConversationBaseToolCal
   rawArgs?: Maybe<Scalars["JSON"]>;
   /** The result of the tool call. */
   rawResult?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  result?: Maybe<AiConversationSearchChatChannelsToolCallResult>;
 };
 
 export type AiConversationSearchChatChannelsToolCallArgs = {
   __typename?: "AiConversationSearchChatChannelsToolCallArgs";
   filter: Scalars["String"];
   platform: AiConversationPostChatMessageToolCallArgsPlatform;
+};
+
+export type AiConversationSearchChatChannelsToolCallResult = {
+  __typename?: "AiConversationSearchChatChannelsToolCallResult";
+  totalCount: Scalars["Float"];
 };
 
 export type AiConversationSearchDocumentationToolCall = AiConversationBaseToolCall & {
@@ -2429,6 +2501,7 @@ export enum AiConversationTool {
   RestoreEntity = "RestoreEntity",
   RetrieveEntities = "RetrieveEntities",
   RetryPullRequestCheck = "RetryPullRequestCheck",
+  SandboxGitHistory = "SandboxGitHistory",
   SearchChatChannels = "SearchChatChannels",
   SearchDocumentation = "SearchDocumentation",
   SearchEntities = "SearchEntities",
@@ -2478,6 +2551,7 @@ export type AiConversationToolCall =
   | AiConversationRestoreEntityToolCall
   | AiConversationRetrieveEntitiesToolCall
   | AiConversationRetryPullRequestCheckToolCall
+  | AiConversationSandboxGitHistoryToolCall
   | AiConversationSearchChatChannelsToolCall
   | AiConversationSearchDocumentationToolCall
   | AiConversationSearchEntitiesToolCall
@@ -20915,6 +20989,7 @@ export enum ProjectTab {
   Customers = "customers",
   Documents = "documents",
   Issues = "issues",
+  Loops = "loops",
   Updates = "updates",
 }
 
@@ -21699,6 +21774,8 @@ export type Query = {
   agentSession: AgentSession;
   /** [Internal] Retrieves coding agent sandbox details for a given agent session ID. */
   agentSessionSandbox?: Maybe<CodingAgentSandboxPayload>;
+  /** [Internal] SSH address of the current user's running coding sandbox for this agent session. */
+  agentSessionSshAddress?: Maybe<Scalars["String"]>;
   /** All agent sessions. */
   agentSessions: AgentSessionConnection;
   /** A specific agent skill. */
@@ -22037,6 +22114,8 @@ export type Query = {
   userSessions: Array<AuthenticationSessionResponse>;
   /** The authenticated user's notification and UI settings. */
   userSettings: UserSettings;
+  /** The authenticated user's workspace-level view display preferences for a view type. Returns the user-type preferences that are not scoped to a team, project, or other entity. Null if the user has not customized the view. */
+  userViewPreferences?: Maybe<ViewPreferences>;
   /** All users in the workspace. Supports filtering, sorting, and pagination. */
   users: UserConnection;
   /** Verify that we received the correct response from the GitHub Enterprise Server. */
@@ -22082,6 +22161,10 @@ export type QueryAgentSessionArgs = {
 };
 
 export type QueryAgentSessionSandboxArgs = {
+  agentSessionId: Scalars["String"];
+};
+
+export type QueryAgentSessionSshAddressArgs = {
   agentSessionId: Scalars["String"];
 };
 
@@ -22991,6 +23074,10 @@ export type QueryUserArgs = {
 
 export type QueryUserSessionsArgs = {
   id: Scalars["String"];
+};
+
+export type QueryUserViewPreferencesArgs = {
+  viewType: ViewType;
 };
 
 export type QueryUsersArgs = {
@@ -29016,6 +29103,8 @@ export type WorkflowStateUpdateInput = {
 };
 
 export enum WorkflowTrigger {
+  ChatMessagePosted = "chatMessagePosted",
+  ChatReactionAdded = "chatReactionAdded",
   CommentAdded = "commentAdded",
   CycleEnded = "cycleEnded",
   CycleStarted = "cycleStarted",
@@ -29028,6 +29117,7 @@ export enum WorkflowTrigger {
 }
 
 export enum WorkflowTriggerType {
+  Chat = "chat",
   Cycle = "cycle",
   Document = "document",
   Initiative = "initiative",
@@ -29433,6 +29523,18 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
           AiConversationGetSlackConversationHistoryToolCall,
           "rawArgs" | "name" | "rawResult"
         > & {
+            args?: Maybe<
+              { __typename: "AiConversationGetSlackConversationHistoryToolCallArgs" } & Pick<
+                AiConversationGetSlackConversationHistoryToolCallArgs,
+                "channel" | "targetType"
+              >
+            >;
+            result?: Maybe<
+              { __typename: "AiConversationGetSlackConversationHistoryToolCallResult" } & Pick<
+                AiConversationGetSlackConversationHistoryToolCallResult,
+                "conversationUrl" | "error" | "hasMore" | "messageCount"
+              >
+            >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
               AiConversationToolDisplayInfo,
               "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
@@ -29604,7 +29706,13 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
             args?: Maybe<
               { __typename: "AiConversationPostChatMessageToolCallArgs" } & Pick<
                 AiConversationPostChatMessageToolCallArgs,
-                "platform"
+                "channel" | "isReply" | "platform" | "recipient" | "recipientId"
+              >
+            >;
+            result?: Maybe<
+              { __typename: "AiConversationPostChatMessageToolCallResult" } & Pick<
+                AiConversationPostChatMessageToolCallResult,
+                "conversationUrl" | "error" | "message" | "posted"
               >
             >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
@@ -29889,6 +29997,21 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
               "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
             >;
           })
+      | ({ __typename: "AiConversationSandboxGitHistoryToolCall" } & Pick<
+          AiConversationSandboxGitHistoryToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationSandboxGitHistoryToolCallArgs" } & Pick<
+                AiConversationSandboxGitHistoryToolCallArgs,
+                "operation" | "paths"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
       | ({ __typename: "AiConversationSearchChatChannelsToolCall" } & Pick<
           AiConversationSearchChatChannelsToolCall,
           "rawArgs" | "name" | "rawResult"
@@ -29897,6 +30020,12 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
               { __typename: "AiConversationSearchChatChannelsToolCallArgs" } & Pick<
                 AiConversationSearchChatChannelsToolCallArgs,
                 "filter" | "platform"
+              >
+            >;
+            result?: Maybe<
+              { __typename: "AiConversationSearchChatChannelsToolCallResult" } & Pick<
+                AiConversationSearchChatChannelsToolCallResult,
+                "totalCount"
               >
             >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
@@ -34876,7 +35005,6 @@ export type AiConversationElicitationOptionFragment = { __typename: "AiConversat
 export type AgentSessionFragment = { __typename: "AgentSession" } & Pick<
   AgentSession,
   | "plan"
-  | "summary"
   | "sourceMetadata"
   | "externalLink"
   | "url"
@@ -34884,6 +35012,7 @@ export type AgentSessionFragment = { __typename: "AgentSession" } & Pick<
   | "status"
   | "context"
   | "updatedAt"
+  | "summary"
   | "dismissedAt"
   | "archivedAt"
   | "createdAt"
@@ -35552,6 +35681,18 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
           AiConversationGetSlackConversationHistoryToolCall,
           "rawArgs" | "name" | "rawResult"
         > & {
+            args?: Maybe<
+              { __typename: "AiConversationGetSlackConversationHistoryToolCallArgs" } & Pick<
+                AiConversationGetSlackConversationHistoryToolCallArgs,
+                "channel" | "targetType"
+              >
+            >;
+            result?: Maybe<
+              { __typename: "AiConversationGetSlackConversationHistoryToolCallResult" } & Pick<
+                AiConversationGetSlackConversationHistoryToolCallResult,
+                "conversationUrl" | "error" | "hasMore" | "messageCount"
+              >
+            >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
               AiConversationToolDisplayInfo,
               "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
@@ -35723,7 +35864,13 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
             args?: Maybe<
               { __typename: "AiConversationPostChatMessageToolCallArgs" } & Pick<
                 AiConversationPostChatMessageToolCallArgs,
-                "platform"
+                "channel" | "isReply" | "platform" | "recipient" | "recipientId"
+              >
+            >;
+            result?: Maybe<
+              { __typename: "AiConversationPostChatMessageToolCallResult" } & Pick<
+                AiConversationPostChatMessageToolCallResult,
+                "conversationUrl" | "error" | "message" | "posted"
               >
             >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
@@ -36008,6 +36155,21 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
               "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
             >;
           })
+      | ({ __typename: "AiConversationSandboxGitHistoryToolCall" } & Pick<
+          AiConversationSandboxGitHistoryToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationSandboxGitHistoryToolCallArgs" } & Pick<
+                AiConversationSandboxGitHistoryToolCallArgs,
+                "operation" | "paths"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
       | ({ __typename: "AiConversationSearchChatChannelsToolCall" } & Pick<
           AiConversationSearchChatChannelsToolCall,
           "rawArgs" | "name" | "rawResult"
@@ -36016,6 +36178,12 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
               { __typename: "AiConversationSearchChatChannelsToolCallArgs" } & Pick<
                 AiConversationSearchChatChannelsToolCallArgs,
                 "filter" | "platform"
+              >
+            >;
+            result?: Maybe<
+              { __typename: "AiConversationSearchChatChannelsToolCallResult" } & Pick<
+                AiConversationSearchChatChannelsToolCallResult,
+                "totalCount"
               >
             >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
@@ -43763,7 +43931,6 @@ export type AgentSessionConnectionFragment = { __typename: "AgentSessionConnecti
     { __typename: "AgentSession" } & Pick<
       AgentSession,
       | "plan"
-      | "summary"
       | "sourceMetadata"
       | "externalLink"
       | "url"
@@ -43771,6 +43938,7 @@ export type AgentSessionConnectionFragment = { __typename: "AgentSessionConnecti
       | "status"
       | "context"
       | "updatedAt"
+      | "summary"
       | "dismissedAt"
       | "archivedAt"
       | "createdAt"
@@ -44037,6 +44205,18 @@ type AiConversationBaseToolCall_AiConversationGetSlackConversationHistoryToolCal
       AiConversationToolDisplayInfo,
       "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
     >;
+    args?: Maybe<
+      { __typename: "AiConversationGetSlackConversationHistoryToolCallArgs" } & Pick<
+        AiConversationGetSlackConversationHistoryToolCallArgs,
+        "channel" | "targetType"
+      >
+    >;
+    result?: Maybe<
+      { __typename: "AiConversationGetSlackConversationHistoryToolCallResult" } & Pick<
+        AiConversationGetSlackConversationHistoryToolCallResult,
+        "conversationUrl" | "error" | "hasMore" | "messageCount"
+      >
+    >;
   };
 
 type AiConversationBaseToolCall_AiConversationHandoffToCodingSessionToolCall_Fragment = {
@@ -44202,7 +44382,13 @@ type AiConversationBaseToolCall_AiConversationPostChatMessageToolCall_Fragment =
     args?: Maybe<
       { __typename: "AiConversationPostChatMessageToolCallArgs" } & Pick<
         AiConversationPostChatMessageToolCallArgs,
-        "platform"
+        "channel" | "isReply" | "platform" | "recipient" | "recipientId"
+      >
+    >;
+    result?: Maybe<
+      { __typename: "AiConversationPostChatMessageToolCallResult" } & Pick<
+        AiConversationPostChatMessageToolCallResult,
+        "conversationUrl" | "error" | "message" | "posted"
       >
     >;
   };
@@ -44478,6 +44664,21 @@ type AiConversationBaseToolCall_AiConversationRetryPullRequestCheckToolCall_Frag
     >;
   };
 
+type AiConversationBaseToolCall_AiConversationSandboxGitHistoryToolCall_Fragment = {
+  __typename: "AiConversationSandboxGitHistoryToolCall";
+} & Pick<AiConversationSandboxGitHistoryToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationSandboxGitHistoryToolCallArgs" } & Pick<
+        AiConversationSandboxGitHistoryToolCallArgs,
+        "operation" | "paths"
+      >
+    >;
+  };
+
 type AiConversationBaseToolCall_AiConversationSearchChatChannelsToolCall_Fragment = {
   __typename: "AiConversationSearchChatChannelsToolCall";
 } & Pick<AiConversationSearchChatChannelsToolCall, "rawArgs" | "name" | "rawResult"> & {
@@ -44489,6 +44690,12 @@ type AiConversationBaseToolCall_AiConversationSearchChatChannelsToolCall_Fragmen
       { __typename: "AiConversationSearchChatChannelsToolCallArgs" } & Pick<
         AiConversationSearchChatChannelsToolCallArgs,
         "filter" | "platform"
+      >
+    >;
+    result?: Maybe<
+      { __typename: "AiConversationSearchChatChannelsToolCallResult" } & Pick<
+        AiConversationSearchChatChannelsToolCallResult,
+        "totalCount"
       >
     >;
   };
@@ -44786,6 +44993,7 @@ export type AiConversationBaseToolCallFragment =
   | AiConversationBaseToolCall_AiConversationRestoreEntityToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationRetrieveEntitiesToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationRetryPullRequestCheckToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationSandboxGitHistoryToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationSearchChatChannelsToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationSearchDocumentationToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationSearchEntitiesToolCall_Fragment
@@ -45221,11 +45429,34 @@ export type AiConversationGetPullRequestFileToolCallArgsFragment = {
 export type AiConversationGetSlackConversationHistoryToolCallFragment = {
   __typename: "AiConversationGetSlackConversationHistoryToolCall";
 } & Pick<AiConversationGetSlackConversationHistoryToolCall, "rawArgs" | "name" | "rawResult"> & {
+    args?: Maybe<
+      { __typename: "AiConversationGetSlackConversationHistoryToolCallArgs" } & Pick<
+        AiConversationGetSlackConversationHistoryToolCallArgs,
+        "channel" | "targetType"
+      >
+    >;
+    result?: Maybe<
+      { __typename: "AiConversationGetSlackConversationHistoryToolCallResult" } & Pick<
+        AiConversationGetSlackConversationHistoryToolCallResult,
+        "conversationUrl" | "error" | "hasMore" | "messageCount"
+      >
+    >;
     displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
       AiConversationToolDisplayInfo,
       "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
     >;
   };
+
+export type AiConversationGetSlackConversationHistoryToolCallArgsFragment = {
+  __typename: "AiConversationGetSlackConversationHistoryToolCallArgs";
+} & Pick<AiConversationGetSlackConversationHistoryToolCallArgs, "channel" | "targetType">;
+
+export type AiConversationGetSlackConversationHistoryToolCallResultFragment = {
+  __typename: "AiConversationGetSlackConversationHistoryToolCallResult";
+} & Pick<
+  AiConversationGetSlackConversationHistoryToolCallResult,
+  "conversationUrl" | "error" | "hasMore" | "messageCount"
+>;
 
 export type AiConversationHandoffToCodingSessionToolCallFragment = {
   __typename: "AiConversationHandoffToCodingSessionToolCall";
@@ -45501,7 +45732,13 @@ export type AiConversationPostChatMessageToolCallFragment = {
     args?: Maybe<
       { __typename: "AiConversationPostChatMessageToolCallArgs" } & Pick<
         AiConversationPostChatMessageToolCallArgs,
-        "platform"
+        "channel" | "isReply" | "platform" | "recipient" | "recipientId"
+      >
+    >;
+    result?: Maybe<
+      { __typename: "AiConversationPostChatMessageToolCallResult" } & Pick<
+        AiConversationPostChatMessageToolCallResult,
+        "conversationUrl" | "error" | "message" | "posted"
       >
     >;
     displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
@@ -45512,7 +45749,11 @@ export type AiConversationPostChatMessageToolCallFragment = {
 
 export type AiConversationPostChatMessageToolCallArgsFragment = {
   __typename: "AiConversationPostChatMessageToolCallArgs";
-} & Pick<AiConversationPostChatMessageToolCallArgs, "platform">;
+} & Pick<AiConversationPostChatMessageToolCallArgs, "channel" | "isReply" | "platform" | "recipient" | "recipientId">;
+
+export type AiConversationPostChatMessageToolCallResultFragment = {
+  __typename: "AiConversationPostChatMessageToolCallResult";
+} & Pick<AiConversationPostChatMessageToolCallResult, "conversationUrl" | "error" | "message" | "posted">;
 
 export type AiConversationPromptCodingSessionToolCallFragment = {
   __typename: "AiConversationPromptCodingSessionToolCall";
@@ -45957,6 +46198,25 @@ export type AiConversationRetryPullRequestCheckToolCallArgsFragment = {
     >;
   };
 
+export type AiConversationSandboxGitHistoryToolCallFragment = {
+  __typename: "AiConversationSandboxGitHistoryToolCall";
+} & Pick<AiConversationSandboxGitHistoryToolCall, "rawArgs" | "name" | "rawResult"> & {
+    args?: Maybe<
+      { __typename: "AiConversationSandboxGitHistoryToolCallArgs" } & Pick<
+        AiConversationSandboxGitHistoryToolCallArgs,
+        "operation" | "paths"
+      >
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationSandboxGitHistoryToolCallArgsFragment = {
+  __typename: "AiConversationSandboxGitHistoryToolCallArgs";
+} & Pick<AiConversationSandboxGitHistoryToolCallArgs, "operation" | "paths">;
+
 export type AiConversationSearchChatChannelsToolCallFragment = {
   __typename: "AiConversationSearchChatChannelsToolCall";
 } & Pick<AiConversationSearchChatChannelsToolCall, "rawArgs" | "name" | "rawResult"> & {
@@ -45964,6 +46224,12 @@ export type AiConversationSearchChatChannelsToolCallFragment = {
       { __typename: "AiConversationSearchChatChannelsToolCallArgs" } & Pick<
         AiConversationSearchChatChannelsToolCallArgs,
         "filter" | "platform"
+      >
+    >;
+    result?: Maybe<
+      { __typename: "AiConversationSearchChatChannelsToolCallResult" } & Pick<
+        AiConversationSearchChatChannelsToolCallResult,
+        "totalCount"
       >
     >;
     displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
@@ -45975,6 +46241,10 @@ export type AiConversationSearchChatChannelsToolCallFragment = {
 export type AiConversationSearchChatChannelsToolCallArgsFragment = {
   __typename: "AiConversationSearchChatChannelsToolCallArgs";
 } & Pick<AiConversationSearchChatChannelsToolCallArgs, "filter" | "platform">;
+
+export type AiConversationSearchChatChannelsToolCallResultFragment = {
+  __typename: "AiConversationSearchChatChannelsToolCallResult";
+} & Pick<AiConversationSearchChatChannelsToolCallResult, "totalCount">;
 
 export type AiConversationSearchDocumentationToolCallFragment = {
   __typename: "AiConversationSearchDocumentationToolCall";
@@ -55122,7 +55392,6 @@ export type AgentSessionQuery = { __typename?: "Query" } & {
   agentSession: { __typename: "AgentSession" } & Pick<
     AgentSession,
     | "plan"
-    | "summary"
     | "sourceMetadata"
     | "externalLink"
     | "url"
@@ -55130,6 +55399,7 @@ export type AgentSessionQuery = { __typename?: "Query" } & {
     | "status"
     | "context"
     | "updatedAt"
+    | "summary"
     | "dismissedAt"
     | "archivedAt"
     | "createdAt"
@@ -55217,7 +55487,6 @@ export type AgentSessionsQuery = { __typename?: "Query" } & {
       { __typename: "AgentSession" } & Pick<
         AgentSession,
         | "plan"
-        | "summary"
         | "sourceMetadata"
         | "externalLink"
         | "url"
@@ -55225,6 +55494,7 @@ export type AgentSessionsQuery = { __typename?: "Query" } & {
         | "status"
         | "context"
         | "updatedAt"
+        | "summary"
         | "dismissedAt"
         | "archivedAt"
         | "createdAt"
@@ -76759,6 +77029,559 @@ export type UserSettings_Theme_Custom_SidebarQuery = { __typename?: "Query" } & 
   };
 };
 
+export type UserViewPreferencesQueryVariables = Exact<{
+  viewType: ViewType;
+}>;
+
+export type UserViewPreferencesQuery = { __typename?: "Query" } & {
+  userViewPreferences?: Maybe<
+    { __typename: "ViewPreferences" } & Pick<
+      ViewPreferences,
+      "updatedAt" | "archivedAt" | "createdAt" | "type" | "viewType" | "id"
+    > & {
+        preferences: { __typename: "ViewPreferencesValues" } & Pick<
+          ViewPreferencesValues,
+          | "columnOrderBoard"
+          | "columnOrderList"
+          | "issueNesting"
+          | "projectShowEmptyGroupsBoard"
+          | "projectShowEmptyGroupsList"
+          | "projectShowEmptyGroupsTimeline"
+          | "projectShowEmptyGroups"
+          | "projectShowEmptySubGroupsBoard"
+          | "projectShowEmptySubGroupsList"
+          | "projectShowEmptySubGroupsTimeline"
+          | "projectShowEmptySubGroups"
+          | "hiddenColumns"
+          | "hiddenGroupsList"
+          | "hiddenRows"
+          | "reviewFieldChecks"
+          | "reviewFieldPreviewLinks"
+          | "timelineChronologyShowCycleTeamIds"
+          | "continuousPipelineReleasesViewGrouping"
+          | "customViewsOrdering"
+          | "customerPageNeedsViewGrouping"
+          | "customerPageNeedsViewOrdering"
+          | "customersViewOrdering"
+          | "dashboardsOrdering"
+          | "projectGroupingDateResolution"
+          | "viewOrderingDirection"
+          | "embeddedCustomerNeedsViewOrdering"
+          | "focusViewGrouping"
+          | "focusViewOrderingDirection"
+          | "focusViewOrdering"
+          | "inboxViewGrouping"
+          | "inboxViewOrdering"
+          | "initiativeGrouping"
+          | "initiativesViewOrdering"
+          | "issueGrouping"
+          | "layout"
+          | "viewOrdering"
+          | "issueSubGrouping"
+          | "initiativeGroupingLabelGroupId"
+          | "issueGroupingLabelGroupId"
+          | "issueSubGroupingLabelGroupId"
+          | "projectGroupingLabelGroupId"
+          | "projectSubGroupingLabelGroupId"
+          | "automationGrouping"
+          | "automationOrdering"
+          | "automationStatsPeriod"
+          | "groupOrderingMode"
+          | "projectGroupOrdering"
+          | "projectCustomerNeedsViewGrouping"
+          | "projectCustomerNeedsViewOrdering"
+          | "projectGrouping"
+          | "projectLayout"
+          | "projectViewOrdering"
+          | "projectSubGrouping"
+          | "releasePipelineGrouping"
+          | "releasePipelinesViewOrdering"
+          | "reviewGrouping"
+          | "reviewViewOrdering"
+          | "scheduledPipelineReleasesViewGrouping"
+          | "scheduledPipelineReleasesViewOrdering"
+          | "searchResultType"
+          | "searchViewOrdering"
+          | "teamViewOrdering"
+          | "triageViewOrdering"
+          | "workspaceMembersViewOrdering"
+          | "projectZoomLevel"
+          | "timelineZoomScale"
+          | "showCompletedAgentSessions"
+          | "showCompletedIssues"
+          | "showCompletedProjects"
+          | "showCompletedReviews"
+          | "closedIssuesOrderedByRecency"
+          | "showTeamReviews"
+          | "showArchivedItems"
+          | "customerPageNeedsShowCompletedIssuesAndProjects"
+          | "projectCustomerNeedsShowCompletedIssuesLast"
+          | "automationShowDisabled"
+          | "showDraftReviews"
+          | "showEmptyGroupsBoard"
+          | "showEmptyGroupsList"
+          | "showEmptyGroups"
+          | "showEmptySubGroupsBoard"
+          | "showEmptySubGroupsList"
+          | "showEmptySubGroups"
+          | "customerPageNeedsShowImportantFirst"
+          | "embeddedCustomerNeedsShowImportantFirst"
+          | "projectCustomerNeedsShowImportantFirst"
+          | "showOnlySnoozedItems"
+          | "showParents"
+          | "fieldPreviewLinks"
+          | "showReadItems"
+          | "reviewFieldStatusDetails"
+          | "showSnoozedItems"
+          | "showSubInitiativeProjects"
+          | "showNestedInitiatives"
+          | "showSubIssues"
+          | "showSubTeamIssues"
+          | "automationShowDescendants"
+          | "showSubTeamProjects"
+          | "showSupervisedIssues"
+          | "showTeamInitiatives"
+          | "fieldSla"
+          | "fieldSentryIssues"
+          | "fieldUserPresence"
+          | "scheduledPipelineReleaseFieldCompletion"
+          | "documentFieldDateCreated"
+          | "documentFieldCreator"
+          | "customViewFieldDateCreated"
+          | "customViewFieldOwner"
+          | "customViewFieldDateUpdated"
+          | "customViewFieldVisibility"
+          | "customerFieldDomains"
+          | "customerFieldOwner"
+          | "customerFieldRequestCount"
+          | "fieldCustomerCount"
+          | "customerFieldRevenue"
+          | "fieldCustomerRevenue"
+          | "customerFieldSize"
+          | "customerFieldSource"
+          | "customerFieldStatus"
+          | "customerFieldTier"
+          | "fieldCycle"
+          | "dashboardFieldDateCreated"
+          | "dashboardFieldOwner"
+          | "dashboardFieldDateUpdated"
+          | "scheduledPipelineReleaseFieldDescription"
+          | "fieldDueDate"
+          | "initiativeFieldHealth"
+          | "initiativeFieldActivity"
+          | "initiativeFieldDateCompleted"
+          | "initiativeFieldDateCreated"
+          | "initiativeFieldDescription"
+          | "initiativeFieldInitiativeHealth"
+          | "initiativeFieldId"
+          | "initiativeFieldLabels"
+          | "initiativeFieldLeadTeam"
+          | "initiativeFieldOwner"
+          | "initiativeFieldPriority"
+          | "initiativeFieldProjects"
+          | "initiativeFieldStartDate"
+          | "initiativeFieldStatus"
+          | "initiativeFieldTargetDate"
+          | "initiativeFieldTeams"
+          | "initiativeFieldDateUpdated"
+          | "fieldDateArchived"
+          | "fieldAssignee"
+          | "fieldDateCreated"
+          | "customerPageNeedsFieldIssueTargetDueDate"
+          | "fieldEstimate"
+          | "customerPageNeedsFieldIssueIdentifier"
+          | "fieldId"
+          | "automationRunHistoryShowIssueIdentifier"
+          | "fieldDateMyActivity"
+          | "customerPageNeedsFieldIssuePriority"
+          | "fieldPriority"
+          | "customerPageNeedsFieldIssueStatus"
+          | "fieldStatus"
+          | "fieldDateUpdated"
+          | "fieldLabels"
+          | "releasePipelineFieldLatestRelease"
+          | "fieldLinkCount"
+          | "automationFieldLastExecuted"
+          | "automationFieldStats"
+          | "automationFieldTeam"
+          | "automationFieldTrigger"
+          | "memberFieldJoined"
+          | "memberFieldStatus"
+          | "memberFieldTeams"
+          | "fieldMilestone"
+          | "reviewFieldSla"
+          | "documentFieldOwner"
+          | "documentFieldParent"
+          | "projectFieldActivity"
+          | "projectFieldDateCompleted"
+          | "projectFieldDateCreated"
+          | "projectFieldCustomerCount"
+          | "projectFieldCustomerRevenue"
+          | "projectFieldDescriptionBoard"
+          | "projectFieldDescription"
+          | "fieldProject"
+          | "projectFieldHealthTimeline"
+          | "projectFieldHealth"
+          | "projectFieldId"
+          | "projectFieldInitiatives"
+          | "projectFieldIssues"
+          | "projectFieldLabels"
+          | "projectFieldLeadTimeline"
+          | "projectFieldLead"
+          | "projectFieldMembersBoard"
+          | "projectFieldMembersList"
+          | "projectFieldMembersTimeline"
+          | "projectFieldMembers"
+          | "projectFieldMilestoneTimeline"
+          | "projectFieldMilestone"
+          | "projectFieldPredictionsTimeline"
+          | "projectFieldPredictions"
+          | "projectFieldPriority"
+          | "projectFieldRelationsTimeline"
+          | "projectFieldRelations"
+          | "projectFieldRoadmapsBoard"
+          | "projectFieldRoadmapsList"
+          | "projectFieldRoadmapsTimeline"
+          | "projectFieldRoadmaps"
+          | "projectFieldRolloutStage"
+          | "projectFieldStartDate"
+          | "projectFieldStatusTimeline"
+          | "projectFieldStatus"
+          | "projectFieldTargetDate"
+          | "projectFieldTeamsBoard"
+          | "projectFieldTeamsList"
+          | "projectFieldTeamsTimeline"
+          | "projectFieldTeams"
+          | "projectFieldDateUpdated"
+          | "timelineShowProjectsAside"
+          | "reviewFieldOpenedAt"
+          | "fieldPullRequests"
+          | "reviewFieldQuickToReview"
+          | "continuousPipelineReleaseFieldReleaseDate"
+          | "scheduledPipelineReleaseFieldReleaseDate"
+          | "fieldRelease"
+          | "continuousPipelineReleaseFieldReleaseNote"
+          | "scheduledPipelineReleaseFieldReleaseNote"
+          | "releasePipelineFieldReleases"
+          | "reviewFieldGithubTeam"
+          | "reviewFieldAvatar"
+          | "reviewFieldIdentifier"
+          | "reviewFieldRepository"
+          | "automationRunHistoryShowDuration"
+          | "teamFieldDateCreated"
+          | "teamFieldCycle"
+          | "teamFieldIdentifier"
+          | "teamFieldMembers"
+          | "teamFieldMembership"
+          | "teamFieldOwner"
+          | "teamFieldProjects"
+          | "teamFieldDateUpdated"
+          | "releasePipelineFieldTeams"
+          | "fieldTimeInCurrentStatus"
+          | "releasePipelineFieldType"
+          | "documentFieldDateUpdated"
+          | "continuousPipelineReleaseFieldVersion"
+          | "scheduledPipelineReleaseFieldVersion"
+          | "showTriageIssues"
+          | "showUnreadItemsFirst"
+          | "timelineChronologyShowWeekNumbers"
+        > & {
+            initiativeLabelGroupColumns?: Maybe<
+              Array<
+                { __typename: "ViewPreferencesInitiativeLabelGroupColumn" } & Pick<
+                  ViewPreferencesInitiativeLabelGroupColumn,
+                  "id" | "active"
+                >
+              >
+            >;
+            projectLabelGroupColumns?: Maybe<
+              Array<
+                { __typename: "ViewPreferencesProjectLabelGroupColumn" } & Pick<
+                  ViewPreferencesProjectLabelGroupColumn,
+                  "id" | "active"
+                >
+              >
+            >;
+          };
+      }
+  >;
+};
+
+export type UserViewPreferences_PreferencesQueryVariables = Exact<{
+  viewType: ViewType;
+}>;
+
+export type UserViewPreferences_PreferencesQuery = { __typename?: "Query" } & {
+  userViewPreferences?: Maybe<
+    { __typename?: "ViewPreferences" } & {
+      preferences: { __typename: "ViewPreferencesValues" } & Pick<
+        ViewPreferencesValues,
+        | "columnOrderBoard"
+        | "columnOrderList"
+        | "issueNesting"
+        | "projectShowEmptyGroupsBoard"
+        | "projectShowEmptyGroupsList"
+        | "projectShowEmptyGroupsTimeline"
+        | "projectShowEmptyGroups"
+        | "projectShowEmptySubGroupsBoard"
+        | "projectShowEmptySubGroupsList"
+        | "projectShowEmptySubGroupsTimeline"
+        | "projectShowEmptySubGroups"
+        | "hiddenColumns"
+        | "hiddenGroupsList"
+        | "hiddenRows"
+        | "reviewFieldChecks"
+        | "reviewFieldPreviewLinks"
+        | "timelineChronologyShowCycleTeamIds"
+        | "continuousPipelineReleasesViewGrouping"
+        | "customViewsOrdering"
+        | "customerPageNeedsViewGrouping"
+        | "customerPageNeedsViewOrdering"
+        | "customersViewOrdering"
+        | "dashboardsOrdering"
+        | "projectGroupingDateResolution"
+        | "viewOrderingDirection"
+        | "embeddedCustomerNeedsViewOrdering"
+        | "focusViewGrouping"
+        | "focusViewOrderingDirection"
+        | "focusViewOrdering"
+        | "inboxViewGrouping"
+        | "inboxViewOrdering"
+        | "initiativeGrouping"
+        | "initiativesViewOrdering"
+        | "issueGrouping"
+        | "layout"
+        | "viewOrdering"
+        | "issueSubGrouping"
+        | "initiativeGroupingLabelGroupId"
+        | "issueGroupingLabelGroupId"
+        | "issueSubGroupingLabelGroupId"
+        | "projectGroupingLabelGroupId"
+        | "projectSubGroupingLabelGroupId"
+        | "automationGrouping"
+        | "automationOrdering"
+        | "automationStatsPeriod"
+        | "groupOrderingMode"
+        | "projectGroupOrdering"
+        | "projectCustomerNeedsViewGrouping"
+        | "projectCustomerNeedsViewOrdering"
+        | "projectGrouping"
+        | "projectLayout"
+        | "projectViewOrdering"
+        | "projectSubGrouping"
+        | "releasePipelineGrouping"
+        | "releasePipelinesViewOrdering"
+        | "reviewGrouping"
+        | "reviewViewOrdering"
+        | "scheduledPipelineReleasesViewGrouping"
+        | "scheduledPipelineReleasesViewOrdering"
+        | "searchResultType"
+        | "searchViewOrdering"
+        | "teamViewOrdering"
+        | "triageViewOrdering"
+        | "workspaceMembersViewOrdering"
+        | "projectZoomLevel"
+        | "timelineZoomScale"
+        | "showCompletedAgentSessions"
+        | "showCompletedIssues"
+        | "showCompletedProjects"
+        | "showCompletedReviews"
+        | "closedIssuesOrderedByRecency"
+        | "showTeamReviews"
+        | "showArchivedItems"
+        | "customerPageNeedsShowCompletedIssuesAndProjects"
+        | "projectCustomerNeedsShowCompletedIssuesLast"
+        | "automationShowDisabled"
+        | "showDraftReviews"
+        | "showEmptyGroupsBoard"
+        | "showEmptyGroupsList"
+        | "showEmptyGroups"
+        | "showEmptySubGroupsBoard"
+        | "showEmptySubGroupsList"
+        | "showEmptySubGroups"
+        | "customerPageNeedsShowImportantFirst"
+        | "embeddedCustomerNeedsShowImportantFirst"
+        | "projectCustomerNeedsShowImportantFirst"
+        | "showOnlySnoozedItems"
+        | "showParents"
+        | "fieldPreviewLinks"
+        | "showReadItems"
+        | "reviewFieldStatusDetails"
+        | "showSnoozedItems"
+        | "showSubInitiativeProjects"
+        | "showNestedInitiatives"
+        | "showSubIssues"
+        | "showSubTeamIssues"
+        | "automationShowDescendants"
+        | "showSubTeamProjects"
+        | "showSupervisedIssues"
+        | "showTeamInitiatives"
+        | "fieldSla"
+        | "fieldSentryIssues"
+        | "fieldUserPresence"
+        | "scheduledPipelineReleaseFieldCompletion"
+        | "documentFieldDateCreated"
+        | "documentFieldCreator"
+        | "customViewFieldDateCreated"
+        | "customViewFieldOwner"
+        | "customViewFieldDateUpdated"
+        | "customViewFieldVisibility"
+        | "customerFieldDomains"
+        | "customerFieldOwner"
+        | "customerFieldRequestCount"
+        | "fieldCustomerCount"
+        | "customerFieldRevenue"
+        | "fieldCustomerRevenue"
+        | "customerFieldSize"
+        | "customerFieldSource"
+        | "customerFieldStatus"
+        | "customerFieldTier"
+        | "fieldCycle"
+        | "dashboardFieldDateCreated"
+        | "dashboardFieldOwner"
+        | "dashboardFieldDateUpdated"
+        | "scheduledPipelineReleaseFieldDescription"
+        | "fieldDueDate"
+        | "initiativeFieldHealth"
+        | "initiativeFieldActivity"
+        | "initiativeFieldDateCompleted"
+        | "initiativeFieldDateCreated"
+        | "initiativeFieldDescription"
+        | "initiativeFieldInitiativeHealth"
+        | "initiativeFieldId"
+        | "initiativeFieldLabels"
+        | "initiativeFieldLeadTeam"
+        | "initiativeFieldOwner"
+        | "initiativeFieldPriority"
+        | "initiativeFieldProjects"
+        | "initiativeFieldStartDate"
+        | "initiativeFieldStatus"
+        | "initiativeFieldTargetDate"
+        | "initiativeFieldTeams"
+        | "initiativeFieldDateUpdated"
+        | "fieldDateArchived"
+        | "fieldAssignee"
+        | "fieldDateCreated"
+        | "customerPageNeedsFieldIssueTargetDueDate"
+        | "fieldEstimate"
+        | "customerPageNeedsFieldIssueIdentifier"
+        | "fieldId"
+        | "automationRunHistoryShowIssueIdentifier"
+        | "fieldDateMyActivity"
+        | "customerPageNeedsFieldIssuePriority"
+        | "fieldPriority"
+        | "customerPageNeedsFieldIssueStatus"
+        | "fieldStatus"
+        | "fieldDateUpdated"
+        | "fieldLabels"
+        | "releasePipelineFieldLatestRelease"
+        | "fieldLinkCount"
+        | "automationFieldLastExecuted"
+        | "automationFieldStats"
+        | "automationFieldTeam"
+        | "automationFieldTrigger"
+        | "memberFieldJoined"
+        | "memberFieldStatus"
+        | "memberFieldTeams"
+        | "fieldMilestone"
+        | "reviewFieldSla"
+        | "documentFieldOwner"
+        | "documentFieldParent"
+        | "projectFieldActivity"
+        | "projectFieldDateCompleted"
+        | "projectFieldDateCreated"
+        | "projectFieldCustomerCount"
+        | "projectFieldCustomerRevenue"
+        | "projectFieldDescriptionBoard"
+        | "projectFieldDescription"
+        | "fieldProject"
+        | "projectFieldHealthTimeline"
+        | "projectFieldHealth"
+        | "projectFieldId"
+        | "projectFieldInitiatives"
+        | "projectFieldIssues"
+        | "projectFieldLabels"
+        | "projectFieldLeadTimeline"
+        | "projectFieldLead"
+        | "projectFieldMembersBoard"
+        | "projectFieldMembersList"
+        | "projectFieldMembersTimeline"
+        | "projectFieldMembers"
+        | "projectFieldMilestoneTimeline"
+        | "projectFieldMilestone"
+        | "projectFieldPredictionsTimeline"
+        | "projectFieldPredictions"
+        | "projectFieldPriority"
+        | "projectFieldRelationsTimeline"
+        | "projectFieldRelations"
+        | "projectFieldRoadmapsBoard"
+        | "projectFieldRoadmapsList"
+        | "projectFieldRoadmapsTimeline"
+        | "projectFieldRoadmaps"
+        | "projectFieldRolloutStage"
+        | "projectFieldStartDate"
+        | "projectFieldStatusTimeline"
+        | "projectFieldStatus"
+        | "projectFieldTargetDate"
+        | "projectFieldTeamsBoard"
+        | "projectFieldTeamsList"
+        | "projectFieldTeamsTimeline"
+        | "projectFieldTeams"
+        | "projectFieldDateUpdated"
+        | "timelineShowProjectsAside"
+        | "reviewFieldOpenedAt"
+        | "fieldPullRequests"
+        | "reviewFieldQuickToReview"
+        | "continuousPipelineReleaseFieldReleaseDate"
+        | "scheduledPipelineReleaseFieldReleaseDate"
+        | "fieldRelease"
+        | "continuousPipelineReleaseFieldReleaseNote"
+        | "scheduledPipelineReleaseFieldReleaseNote"
+        | "releasePipelineFieldReleases"
+        | "reviewFieldGithubTeam"
+        | "reviewFieldAvatar"
+        | "reviewFieldIdentifier"
+        | "reviewFieldRepository"
+        | "automationRunHistoryShowDuration"
+        | "teamFieldDateCreated"
+        | "teamFieldCycle"
+        | "teamFieldIdentifier"
+        | "teamFieldMembers"
+        | "teamFieldMembership"
+        | "teamFieldOwner"
+        | "teamFieldProjects"
+        | "teamFieldDateUpdated"
+        | "releasePipelineFieldTeams"
+        | "fieldTimeInCurrentStatus"
+        | "releasePipelineFieldType"
+        | "documentFieldDateUpdated"
+        | "continuousPipelineReleaseFieldVersion"
+        | "scheduledPipelineReleaseFieldVersion"
+        | "showTriageIssues"
+        | "showUnreadItemsFirst"
+        | "timelineChronologyShowWeekNumbers"
+      > & {
+          initiativeLabelGroupColumns?: Maybe<
+            Array<
+              { __typename: "ViewPreferencesInitiativeLabelGroupColumn" } & Pick<
+                ViewPreferencesInitiativeLabelGroupColumn,
+                "id" | "active"
+              >
+            >
+          >;
+          projectLabelGroupColumns?: Maybe<
+            Array<
+              { __typename: "ViewPreferencesProjectLabelGroupColumn" } & Pick<
+                ViewPreferencesProjectLabelGroupColumn,
+                "id" | "active"
+              >
+            >
+          >;
+        };
+    }
+  >;
+};
+
 export type UsersQueryVariables = Exact<{
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -89882,18 +90705,58 @@ fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
 }`,
   { fragmentName: "AiConversationGetPullRequestFileToolCall" }
 ) as unknown as TypedDocumentString<AiConversationGetPullRequestFileToolCallFragment, unknown>;
+export const AiConversationGetSlackConversationHistoryToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationGetSlackConversationHistoryToolCallArgs on AiConversationGetSlackConversationHistoryToolCallArgs {
+  __typename
+  channel
+  targetType
+}
+    `,
+  { fragmentName: "AiConversationGetSlackConversationHistoryToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationGetSlackConversationHistoryToolCallArgsFragment, unknown>;
+export const AiConversationGetSlackConversationHistoryToolCallResultFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationGetSlackConversationHistoryToolCallResult on AiConversationGetSlackConversationHistoryToolCallResult {
+  __typename
+  conversationUrl
+  error
+  hasMore
+  messageCount
+}
+    `,
+  { fragmentName: "AiConversationGetSlackConversationHistoryToolCallResult" }
+) as unknown as TypedDocumentString<AiConversationGetSlackConversationHistoryToolCallResultFragment, unknown>;
 export const AiConversationGetSlackConversationHistoryToolCallFragmentDoc = new TypedDocumentString(
   `
     fragment AiConversationGetSlackConversationHistoryToolCall on AiConversationGetSlackConversationHistoryToolCall {
   __typename
   rawArgs
+  args {
+    ...AiConversationGetSlackConversationHistoryToolCallArgs
+  }
   name
   rawResult
+  result {
+    ...AiConversationGetSlackConversationHistoryToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
 }
-    fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+    fragment AiConversationGetSlackConversationHistoryToolCallArgs on AiConversationGetSlackConversationHistoryToolCallArgs {
+  __typename
+  channel
+  targetType
+}
+fragment AiConversationGetSlackConversationHistoryToolCallResult on AiConversationGetSlackConversationHistoryToolCallResult {
+  __typename
+  conversationUrl
+  error
+  hasMore
+  messageCount
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
   __typename
   activeLabel
   detail
@@ -90364,11 +91227,27 @@ export const AiConversationPostChatMessageToolCallArgsFragmentDoc = new TypedDoc
   `
     fragment AiConversationPostChatMessageToolCallArgs on AiConversationPostChatMessageToolCallArgs {
   __typename
+  channel
+  isReply
   platform
+  recipient
+  recipientId
 }
     `,
   { fragmentName: "AiConversationPostChatMessageToolCallArgs" }
 ) as unknown as TypedDocumentString<AiConversationPostChatMessageToolCallArgsFragment, unknown>;
+export const AiConversationPostChatMessageToolCallResultFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationPostChatMessageToolCallResult on AiConversationPostChatMessageToolCallResult {
+  __typename
+  conversationUrl
+  error
+  message
+  posted
+}
+    `,
+  { fragmentName: "AiConversationPostChatMessageToolCallResult" }
+) as unknown as TypedDocumentString<AiConversationPostChatMessageToolCallResultFragment, unknown>;
 export const AiConversationPostChatMessageToolCallFragmentDoc = new TypedDocumentString(
   `
     fragment AiConversationPostChatMessageToolCall on AiConversationPostChatMessageToolCall {
@@ -90379,13 +91258,27 @@ export const AiConversationPostChatMessageToolCallFragmentDoc = new TypedDocumen
   }
   name
   rawResult
+  result {
+    ...AiConversationPostChatMessageToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
 }
     fragment AiConversationPostChatMessageToolCallArgs on AiConversationPostChatMessageToolCallArgs {
   __typename
+  channel
+  isReply
   platform
+  recipient
+  recipientId
+}
+fragment AiConversationPostChatMessageToolCallResult on AiConversationPostChatMessageToolCallResult {
+  __typename
+  conversationUrl
+  error
+  message
+  posted
 }
 fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
   __typename
@@ -91090,6 +91983,45 @@ fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
 }`,
   { fragmentName: "AiConversationRetryPullRequestCheckToolCall" }
 ) as unknown as TypedDocumentString<AiConversationRetryPullRequestCheckToolCallFragment, unknown>;
+export const AiConversationSandboxGitHistoryToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationSandboxGitHistoryToolCallArgs on AiConversationSandboxGitHistoryToolCallArgs {
+  __typename
+  operation
+  paths
+}
+    `,
+  { fragmentName: "AiConversationSandboxGitHistoryToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationSandboxGitHistoryToolCallArgsFragment, unknown>;
+export const AiConversationSandboxGitHistoryToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationSandboxGitHistoryToolCall on AiConversationSandboxGitHistoryToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationSandboxGitHistoryToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationSandboxGitHistoryToolCallArgs on AiConversationSandboxGitHistoryToolCallArgs {
+  __typename
+  operation
+  paths
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationSandboxGitHistoryToolCall" }
+) as unknown as TypedDocumentString<AiConversationSandboxGitHistoryToolCallFragment, unknown>;
 export const AiConversationSearchChatChannelsToolCallArgsFragmentDoc = new TypedDocumentString(
   `
     fragment AiConversationSearchChatChannelsToolCallArgs on AiConversationSearchChatChannelsToolCallArgs {
@@ -91100,6 +92032,15 @@ export const AiConversationSearchChatChannelsToolCallArgsFragmentDoc = new Typed
     `,
   { fragmentName: "AiConversationSearchChatChannelsToolCallArgs" }
 ) as unknown as TypedDocumentString<AiConversationSearchChatChannelsToolCallArgsFragment, unknown>;
+export const AiConversationSearchChatChannelsToolCallResultFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationSearchChatChannelsToolCallResult on AiConversationSearchChatChannelsToolCallResult {
+  __typename
+  totalCount
+}
+    `,
+  { fragmentName: "AiConversationSearchChatChannelsToolCallResult" }
+) as unknown as TypedDocumentString<AiConversationSearchChatChannelsToolCallResultFragment, unknown>;
 export const AiConversationSearchChatChannelsToolCallFragmentDoc = new TypedDocumentString(
   `
     fragment AiConversationSearchChatChannelsToolCall on AiConversationSearchChatChannelsToolCall {
@@ -91110,6 +92051,9 @@ export const AiConversationSearchChatChannelsToolCallFragmentDoc = new TypedDocu
   }
   name
   rawResult
+  result {
+    ...AiConversationSearchChatChannelsToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
@@ -91118,6 +92062,10 @@ export const AiConversationSearchChatChannelsToolCallFragmentDoc = new TypedDocu
   __typename
   filter
   platform
+}
+fragment AiConversationSearchChatChannelsToolCallResult on AiConversationSearchChatChannelsToolCallResult {
+  __typename
+  totalCount
 }
 fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
   __typename
@@ -91853,6 +92801,9 @@ export const AiConversationToolCallPartFragmentDoc = new TypedDocumentString(
     ... on AiConversationRetryPullRequestCheckToolCall {
       ...AiConversationRetryPullRequestCheckToolCall
     }
+    ... on AiConversationSandboxGitHistoryToolCall {
+      ...AiConversationSandboxGitHistoryToolCall
+    }
     ... on AiConversationSearchChatChannelsToolCall {
       ...AiConversationSearchChatChannelsToolCall
     }
@@ -92092,11 +93043,29 @@ fragment AiConversationGetPullRequestFileToolCallArgs on AiConversationGetPullRe
 fragment AiConversationGetSlackConversationHistoryToolCall on AiConversationGetSlackConversationHistoryToolCall {
   __typename
   rawArgs
+  args {
+    ...AiConversationGetSlackConversationHistoryToolCallArgs
+  }
   name
   rawResult
+  result {
+    ...AiConversationGetSlackConversationHistoryToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
+}
+fragment AiConversationGetSlackConversationHistoryToolCallArgs on AiConversationGetSlackConversationHistoryToolCallArgs {
+  __typename
+  channel
+  targetType
+}
+fragment AiConversationGetSlackConversationHistoryToolCallResult on AiConversationGetSlackConversationHistoryToolCallResult {
+  __typename
+  conversationUrl
+  error
+  hasMore
+  messageCount
 }
 fragment AiConversationHandoffToCodingSessionToolCall on AiConversationHandoffToCodingSessionToolCall {
   __typename
@@ -92282,13 +93251,27 @@ fragment AiConversationPostChatMessageToolCall on AiConversationPostChatMessageT
   }
   name
   rawResult
+  result {
+    ...AiConversationPostChatMessageToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
 }
 fragment AiConversationPostChatMessageToolCallArgs on AiConversationPostChatMessageToolCallArgs {
   __typename
+  channel
+  isReply
   platform
+  recipient
+  recipientId
+}
+fragment AiConversationPostChatMessageToolCallResult on AiConversationPostChatMessageToolCallResult {
+  __typename
+  conversationUrl
+  error
+  message
+  posted
 }
 fragment AiConversationPromptCodingSessionToolCall on AiConversationPromptCodingSessionToolCall {
   __typename
@@ -92548,6 +93531,23 @@ fragment AiConversationRetryPullRequestCheckToolCallArgs on AiConversationRetryP
   }
   workflowName
 }
+fragment AiConversationSandboxGitHistoryToolCall on AiConversationSandboxGitHistoryToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationSandboxGitHistoryToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationSandboxGitHistoryToolCallArgs on AiConversationSandboxGitHistoryToolCallArgs {
+  __typename
+  operation
+  paths
+}
 fragment AiConversationSearchChatChannelsToolCall on AiConversationSearchChatChannelsToolCall {
   __typename
   rawArgs
@@ -92556,6 +93556,9 @@ fragment AiConversationSearchChatChannelsToolCall on AiConversationSearchChatCha
   }
   name
   rawResult
+  result {
+    ...AiConversationSearchChatChannelsToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
@@ -92564,6 +93567,10 @@ fragment AiConversationSearchChatChannelsToolCallArgs on AiConversationSearchCha
   __typename
   filter
   platform
+}
+fragment AiConversationSearchChatChannelsToolCallResult on AiConversationSearchChatChannelsToolCallResult {
+  __typename
+  totalCount
 }
 fragment AiConversationSearchDocumentationToolCall on AiConversationSearchDocumentationToolCall {
   __typename
@@ -93329,6 +94336,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     ... on AiConversationRetryPullRequestCheckToolCall {
       ...AiConversationRetryPullRequestCheckToolCall
     }
+    ... on AiConversationSandboxGitHistoryToolCall {
+      ...AiConversationSandboxGitHistoryToolCall
+    }
     ... on AiConversationSearchChatChannelsToolCall {
       ...AiConversationSearchChatChannelsToolCall
     }
@@ -93681,11 +94691,29 @@ fragment AiConversationGetPullRequestFileToolCallArgs on AiConversationGetPullRe
 fragment AiConversationGetSlackConversationHistoryToolCall on AiConversationGetSlackConversationHistoryToolCall {
   __typename
   rawArgs
+  args {
+    ...AiConversationGetSlackConversationHistoryToolCallArgs
+  }
   name
   rawResult
+  result {
+    ...AiConversationGetSlackConversationHistoryToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
+}
+fragment AiConversationGetSlackConversationHistoryToolCallArgs on AiConversationGetSlackConversationHistoryToolCallArgs {
+  __typename
+  channel
+  targetType
+}
+fragment AiConversationGetSlackConversationHistoryToolCallResult on AiConversationGetSlackConversationHistoryToolCallResult {
+  __typename
+  conversationUrl
+  error
+  hasMore
+  messageCount
 }
 fragment AiConversationHandoffToCodingSessionToolCall on AiConversationHandoffToCodingSessionToolCall {
   __typename
@@ -93871,13 +94899,27 @@ fragment AiConversationPostChatMessageToolCall on AiConversationPostChatMessageT
   }
   name
   rawResult
+  result {
+    ...AiConversationPostChatMessageToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
 }
 fragment AiConversationPostChatMessageToolCallArgs on AiConversationPostChatMessageToolCallArgs {
   __typename
+  channel
+  isReply
   platform
+  recipient
+  recipientId
+}
+fragment AiConversationPostChatMessageToolCallResult on AiConversationPostChatMessageToolCallResult {
+  __typename
+  conversationUrl
+  error
+  message
+  posted
 }
 fragment AiConversationPromptCodingSessionToolCall on AiConversationPromptCodingSessionToolCall {
   __typename
@@ -94137,6 +95179,23 @@ fragment AiConversationRetryPullRequestCheckToolCallArgs on AiConversationRetryP
   }
   workflowName
 }
+fragment AiConversationSandboxGitHistoryToolCall on AiConversationSandboxGitHistoryToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationSandboxGitHistoryToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationSandboxGitHistoryToolCallArgs on AiConversationSandboxGitHistoryToolCallArgs {
+  __typename
+  operation
+  paths
+}
 fragment AiConversationSearchChatChannelsToolCall on AiConversationSearchChatChannelsToolCall {
   __typename
   rawArgs
@@ -94145,6 +95204,9 @@ fragment AiConversationSearchChatChannelsToolCall on AiConversationSearchChatCha
   }
   name
   rawResult
+  result {
+    ...AiConversationSearchChatChannelsToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
@@ -94153,6 +95215,10 @@ fragment AiConversationSearchChatChannelsToolCallArgs on AiConversationSearchCha
   __typename
   filter
   platform
+}
+fragment AiConversationSearchChatChannelsToolCallResult on AiConversationSearchChatChannelsToolCallResult {
+  __typename
+  totalCount
 }
 fragment AiConversationSearchDocumentationToolCall on AiConversationSearchDocumentationToolCall {
   __typename
@@ -107249,7 +108315,6 @@ export const AgentSessionFragmentDoc = new TypedDocumentString(
     fragment AgentSession on AgentSession {
   __typename
   plan
-  summary
   externalLinks {
     ...AgentSessionExternalLink
   }
@@ -107275,6 +108340,7 @@ export const AgentSessionFragmentDoc = new TypedDocumentString(
     id
   }
   updatedAt
+  summary
   dismissedAt
   archivedAt
   createdAt
@@ -107308,7 +108374,6 @@ export const AgentSessionConnectionFragmentDoc = new TypedDocumentString(
     fragment AgentSession on AgentSession {
   __typename
   plan
-  summary
   externalLinks {
     ...AgentSessionExternalLink
   }
@@ -107334,6 +108399,7 @@ export const AgentSessionConnectionFragmentDoc = new TypedDocumentString(
     id
   }
   updatedAt
+  summary
   dismissedAt
   archivedAt
   createdAt
@@ -107601,6 +108667,9 @@ export const AiConversationBaseToolCallFragmentDoc = new TypedDocumentString(
   ... on AiConversationRetryPullRequestCheckToolCall {
     ...AiConversationRetryPullRequestCheckToolCall
   }
+  ... on AiConversationSandboxGitHistoryToolCall {
+    ...AiConversationSandboxGitHistoryToolCall
+  }
   ... on AiConversationSearchChatChannelsToolCall {
     ...AiConversationSearchChatChannelsToolCall
   }
@@ -107829,11 +108898,29 @@ fragment AiConversationGetPullRequestFileToolCallArgs on AiConversationGetPullRe
 fragment AiConversationGetSlackConversationHistoryToolCall on AiConversationGetSlackConversationHistoryToolCall {
   __typename
   rawArgs
+  args {
+    ...AiConversationGetSlackConversationHistoryToolCallArgs
+  }
   name
   rawResult
+  result {
+    ...AiConversationGetSlackConversationHistoryToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
+}
+fragment AiConversationGetSlackConversationHistoryToolCallArgs on AiConversationGetSlackConversationHistoryToolCallArgs {
+  __typename
+  channel
+  targetType
+}
+fragment AiConversationGetSlackConversationHistoryToolCallResult on AiConversationGetSlackConversationHistoryToolCallResult {
+  __typename
+  conversationUrl
+  error
+  hasMore
+  messageCount
 }
 fragment AiConversationHandoffToCodingSessionToolCall on AiConversationHandoffToCodingSessionToolCall {
   __typename
@@ -108019,13 +109106,27 @@ fragment AiConversationPostChatMessageToolCall on AiConversationPostChatMessageT
   }
   name
   rawResult
+  result {
+    ...AiConversationPostChatMessageToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
 }
 fragment AiConversationPostChatMessageToolCallArgs on AiConversationPostChatMessageToolCallArgs {
   __typename
+  channel
+  isReply
   platform
+  recipient
+  recipientId
+}
+fragment AiConversationPostChatMessageToolCallResult on AiConversationPostChatMessageToolCallResult {
+  __typename
+  conversationUrl
+  error
+  message
+  posted
 }
 fragment AiConversationPromptCodingSessionToolCall on AiConversationPromptCodingSessionToolCall {
   __typename
@@ -108285,6 +109386,23 @@ fragment AiConversationRetryPullRequestCheckToolCallArgs on AiConversationRetryP
   }
   workflowName
 }
+fragment AiConversationSandboxGitHistoryToolCall on AiConversationSandboxGitHistoryToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationSandboxGitHistoryToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationSandboxGitHistoryToolCallArgs on AiConversationSandboxGitHistoryToolCallArgs {
+  __typename
+  operation
+  paths
+}
 fragment AiConversationSearchChatChannelsToolCall on AiConversationSearchChatChannelsToolCall {
   __typename
   rawArgs
@@ -108293,6 +109411,9 @@ fragment AiConversationSearchChatChannelsToolCall on AiConversationSearchChatCha
   }
   name
   rawResult
+  result {
+    ...AiConversationSearchChatChannelsToolCallResult
+  }
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
@@ -108301,6 +109422,10 @@ fragment AiConversationSearchChatChannelsToolCallArgs on AiConversationSearchCha
   __typename
   filter
   platform
+}
+fragment AiConversationSearchChatChannelsToolCallResult on AiConversationSearchChatChannelsToolCallResult {
+  __typename
+  totalCount
 }
 fragment AiConversationSearchDocumentationToolCall on AiConversationSearchDocumentationToolCall {
   __typename
@@ -119446,7 +120571,6 @@ export const AgentSessionDocument = new TypedDocumentString(`
     fragment AgentSession on AgentSession {
   __typename
   plan
-  summary
   externalLinks {
     ...AgentSessionExternalLink
   }
@@ -119472,6 +120596,7 @@ export const AgentSessionDocument = new TypedDocumentString(`
     id
   }
   updatedAt
+  summary
   dismissedAt
   archivedAt
   createdAt
@@ -119611,7 +120736,6 @@ export const AgentSessionsDocument = new TypedDocumentString(`
     fragment AgentSession on AgentSession {
   __typename
   plan
-  summary
   externalLinks {
     ...AgentSessionExternalLink
   }
@@ -119637,6 +120761,7 @@ export const AgentSessionsDocument = new TypedDocumentString(`
     id
   }
   updatedAt
+  summary
   dismissedAt
   archivedAt
   createdAt
@@ -147682,6 +148807,561 @@ export const UserSettings_Theme_Custom_SidebarDocument = new TypedDocumentString
 }`) as unknown as TypedDocumentString<
   UserSettings_Theme_Custom_SidebarQuery,
   UserSettings_Theme_Custom_SidebarQueryVariables
+>;
+export const UserViewPreferencesDocument = new TypedDocumentString(`
+    query userViewPreferences($viewType: ViewType!) {
+  userViewPreferences(viewType: $viewType) {
+    ...ViewPreferences
+  }
+}
+    fragment ViewPreferencesInitiativeLabelGroupColumn on ViewPreferencesInitiativeLabelGroupColumn {
+  __typename
+  id
+  active
+}
+fragment ViewPreferencesProjectLabelGroupColumn on ViewPreferencesProjectLabelGroupColumn {
+  __typename
+  id
+  active
+}
+fragment ViewPreferencesValues on ViewPreferencesValues {
+  __typename
+  columnOrderBoard
+  columnOrderList
+  issueNesting
+  projectShowEmptyGroupsBoard
+  projectShowEmptyGroupsList
+  projectShowEmptyGroupsTimeline
+  projectShowEmptyGroups
+  projectShowEmptySubGroupsBoard
+  projectShowEmptySubGroupsList
+  projectShowEmptySubGroupsTimeline
+  projectShowEmptySubGroups
+  hiddenColumns
+  hiddenGroupsList
+  hiddenRows
+  reviewFieldChecks
+  reviewFieldPreviewLinks
+  timelineChronologyShowCycleTeamIds
+  continuousPipelineReleasesViewGrouping
+  customViewsOrdering
+  customerPageNeedsViewGrouping
+  customerPageNeedsViewOrdering
+  customersViewOrdering
+  dashboardsOrdering
+  projectGroupingDateResolution
+  viewOrderingDirection
+  embeddedCustomerNeedsViewOrdering
+  focusViewGrouping
+  focusViewOrderingDirection
+  focusViewOrdering
+  inboxViewGrouping
+  inboxViewOrdering
+  initiativeGrouping
+  initiativeLabelGroupColumns {
+    ...ViewPreferencesInitiativeLabelGroupColumn
+  }
+  initiativesViewOrdering
+  issueGrouping
+  layout
+  viewOrdering
+  issueSubGrouping
+  initiativeGroupingLabelGroupId
+  issueGroupingLabelGroupId
+  issueSubGroupingLabelGroupId
+  projectGroupingLabelGroupId
+  projectSubGroupingLabelGroupId
+  automationGrouping
+  automationOrdering
+  automationStatsPeriod
+  groupOrderingMode
+  projectGroupOrdering
+  projectCustomerNeedsViewGrouping
+  projectCustomerNeedsViewOrdering
+  projectGrouping
+  projectLabelGroupColumns {
+    ...ViewPreferencesProjectLabelGroupColumn
+  }
+  projectLayout
+  projectViewOrdering
+  projectSubGrouping
+  releasePipelineGrouping
+  releasePipelinesViewOrdering
+  reviewGrouping
+  reviewViewOrdering
+  scheduledPipelineReleasesViewGrouping
+  scheduledPipelineReleasesViewOrdering
+  searchResultType
+  searchViewOrdering
+  teamViewOrdering
+  triageViewOrdering
+  workspaceMembersViewOrdering
+  projectZoomLevel
+  timelineZoomScale
+  showCompletedAgentSessions
+  showCompletedIssues
+  showCompletedProjects
+  showCompletedReviews
+  closedIssuesOrderedByRecency
+  showTeamReviews
+  showArchivedItems
+  customerPageNeedsShowCompletedIssuesAndProjects
+  projectCustomerNeedsShowCompletedIssuesLast
+  automationShowDisabled
+  showDraftReviews
+  showEmptyGroupsBoard
+  showEmptyGroupsList
+  showEmptyGroups
+  showEmptySubGroupsBoard
+  showEmptySubGroupsList
+  showEmptySubGroups
+  customerPageNeedsShowImportantFirst
+  embeddedCustomerNeedsShowImportantFirst
+  projectCustomerNeedsShowImportantFirst
+  showOnlySnoozedItems
+  showParents
+  fieldPreviewLinks
+  showReadItems
+  reviewFieldStatusDetails
+  showSnoozedItems
+  showSubInitiativeProjects
+  showNestedInitiatives
+  showSubIssues
+  showSubTeamIssues
+  automationShowDescendants
+  showSubTeamProjects
+  showSupervisedIssues
+  showTeamInitiatives
+  fieldSla
+  fieldSentryIssues
+  fieldUserPresence
+  scheduledPipelineReleaseFieldCompletion
+  documentFieldDateCreated
+  documentFieldCreator
+  customViewFieldDateCreated
+  customViewFieldOwner
+  customViewFieldDateUpdated
+  customViewFieldVisibility
+  customerFieldDomains
+  customerFieldOwner
+  customerFieldRequestCount
+  fieldCustomerCount
+  customerFieldRevenue
+  fieldCustomerRevenue
+  customerFieldSize
+  customerFieldSource
+  customerFieldStatus
+  customerFieldTier
+  fieldCycle
+  dashboardFieldDateCreated
+  dashboardFieldOwner
+  dashboardFieldDateUpdated
+  scheduledPipelineReleaseFieldDescription
+  fieldDueDate
+  initiativeFieldHealth
+  initiativeFieldActivity
+  initiativeFieldDateCompleted
+  initiativeFieldDateCreated
+  initiativeFieldDescription
+  initiativeFieldInitiativeHealth
+  initiativeFieldId
+  initiativeFieldLabels
+  initiativeFieldLeadTeam
+  initiativeFieldOwner
+  initiativeFieldPriority
+  initiativeFieldProjects
+  initiativeFieldStartDate
+  initiativeFieldStatus
+  initiativeFieldTargetDate
+  initiativeFieldTeams
+  initiativeFieldDateUpdated
+  fieldDateArchived
+  fieldAssignee
+  fieldDateCreated
+  customerPageNeedsFieldIssueTargetDueDate
+  fieldEstimate
+  customerPageNeedsFieldIssueIdentifier
+  fieldId
+  automationRunHistoryShowIssueIdentifier
+  fieldDateMyActivity
+  customerPageNeedsFieldIssuePriority
+  fieldPriority
+  customerPageNeedsFieldIssueStatus
+  fieldStatus
+  fieldDateUpdated
+  fieldLabels
+  releasePipelineFieldLatestRelease
+  fieldLinkCount
+  automationFieldLastExecuted
+  automationFieldStats
+  automationFieldTeam
+  automationFieldTrigger
+  memberFieldJoined
+  memberFieldStatus
+  memberFieldTeams
+  fieldMilestone
+  reviewFieldSla
+  documentFieldOwner
+  documentFieldParent
+  projectFieldActivity
+  projectFieldDateCompleted
+  projectFieldDateCreated
+  projectFieldCustomerCount
+  projectFieldCustomerRevenue
+  projectFieldDescriptionBoard
+  projectFieldDescription
+  fieldProject
+  projectFieldHealthTimeline
+  projectFieldHealth
+  projectFieldId
+  projectFieldInitiatives
+  projectFieldIssues
+  projectFieldLabels
+  projectFieldLeadTimeline
+  projectFieldLead
+  projectFieldMembersBoard
+  projectFieldMembersList
+  projectFieldMembersTimeline
+  projectFieldMembers
+  projectFieldMilestoneTimeline
+  projectFieldMilestone
+  projectFieldPredictionsTimeline
+  projectFieldPredictions
+  projectFieldPriority
+  projectFieldRelationsTimeline
+  projectFieldRelations
+  projectFieldRoadmapsBoard
+  projectFieldRoadmapsList
+  projectFieldRoadmapsTimeline
+  projectFieldRoadmaps
+  projectFieldRolloutStage
+  projectFieldStartDate
+  projectFieldStatusTimeline
+  projectFieldStatus
+  projectFieldTargetDate
+  projectFieldTeamsBoard
+  projectFieldTeamsList
+  projectFieldTeamsTimeline
+  projectFieldTeams
+  projectFieldDateUpdated
+  timelineShowProjectsAside
+  reviewFieldOpenedAt
+  fieldPullRequests
+  reviewFieldQuickToReview
+  continuousPipelineReleaseFieldReleaseDate
+  scheduledPipelineReleaseFieldReleaseDate
+  fieldRelease
+  continuousPipelineReleaseFieldReleaseNote
+  scheduledPipelineReleaseFieldReleaseNote
+  releasePipelineFieldReleases
+  reviewFieldGithubTeam
+  reviewFieldAvatar
+  reviewFieldIdentifier
+  reviewFieldRepository
+  automationRunHistoryShowDuration
+  teamFieldDateCreated
+  teamFieldCycle
+  teamFieldIdentifier
+  teamFieldMembers
+  teamFieldMembership
+  teamFieldOwner
+  teamFieldProjects
+  teamFieldDateUpdated
+  releasePipelineFieldTeams
+  fieldTimeInCurrentStatus
+  releasePipelineFieldType
+  documentFieldDateUpdated
+  continuousPipelineReleaseFieldVersion
+  scheduledPipelineReleaseFieldVersion
+  showTriageIssues
+  showUnreadItemsFirst
+  timelineChronologyShowWeekNumbers
+}
+fragment ViewPreferences on ViewPreferences {
+  __typename
+  updatedAt
+  archivedAt
+  createdAt
+  type
+  viewType
+  id
+  preferences {
+    ...ViewPreferencesValues
+  }
+}`) as unknown as TypedDocumentString<UserViewPreferencesQuery, UserViewPreferencesQueryVariables>;
+export const UserViewPreferences_PreferencesDocument = new TypedDocumentString(`
+    query userViewPreferences_preferences($viewType: ViewType!) {
+  userViewPreferences(viewType: $viewType) {
+    preferences {
+      ...ViewPreferencesValues
+    }
+  }
+}
+    fragment ViewPreferencesInitiativeLabelGroupColumn on ViewPreferencesInitiativeLabelGroupColumn {
+  __typename
+  id
+  active
+}
+fragment ViewPreferencesProjectLabelGroupColumn on ViewPreferencesProjectLabelGroupColumn {
+  __typename
+  id
+  active
+}
+fragment ViewPreferencesValues on ViewPreferencesValues {
+  __typename
+  columnOrderBoard
+  columnOrderList
+  issueNesting
+  projectShowEmptyGroupsBoard
+  projectShowEmptyGroupsList
+  projectShowEmptyGroupsTimeline
+  projectShowEmptyGroups
+  projectShowEmptySubGroupsBoard
+  projectShowEmptySubGroupsList
+  projectShowEmptySubGroupsTimeline
+  projectShowEmptySubGroups
+  hiddenColumns
+  hiddenGroupsList
+  hiddenRows
+  reviewFieldChecks
+  reviewFieldPreviewLinks
+  timelineChronologyShowCycleTeamIds
+  continuousPipelineReleasesViewGrouping
+  customViewsOrdering
+  customerPageNeedsViewGrouping
+  customerPageNeedsViewOrdering
+  customersViewOrdering
+  dashboardsOrdering
+  projectGroupingDateResolution
+  viewOrderingDirection
+  embeddedCustomerNeedsViewOrdering
+  focusViewGrouping
+  focusViewOrderingDirection
+  focusViewOrdering
+  inboxViewGrouping
+  inboxViewOrdering
+  initiativeGrouping
+  initiativeLabelGroupColumns {
+    ...ViewPreferencesInitiativeLabelGroupColumn
+  }
+  initiativesViewOrdering
+  issueGrouping
+  layout
+  viewOrdering
+  issueSubGrouping
+  initiativeGroupingLabelGroupId
+  issueGroupingLabelGroupId
+  issueSubGroupingLabelGroupId
+  projectGroupingLabelGroupId
+  projectSubGroupingLabelGroupId
+  automationGrouping
+  automationOrdering
+  automationStatsPeriod
+  groupOrderingMode
+  projectGroupOrdering
+  projectCustomerNeedsViewGrouping
+  projectCustomerNeedsViewOrdering
+  projectGrouping
+  projectLabelGroupColumns {
+    ...ViewPreferencesProjectLabelGroupColumn
+  }
+  projectLayout
+  projectViewOrdering
+  projectSubGrouping
+  releasePipelineGrouping
+  releasePipelinesViewOrdering
+  reviewGrouping
+  reviewViewOrdering
+  scheduledPipelineReleasesViewGrouping
+  scheduledPipelineReleasesViewOrdering
+  searchResultType
+  searchViewOrdering
+  teamViewOrdering
+  triageViewOrdering
+  workspaceMembersViewOrdering
+  projectZoomLevel
+  timelineZoomScale
+  showCompletedAgentSessions
+  showCompletedIssues
+  showCompletedProjects
+  showCompletedReviews
+  closedIssuesOrderedByRecency
+  showTeamReviews
+  showArchivedItems
+  customerPageNeedsShowCompletedIssuesAndProjects
+  projectCustomerNeedsShowCompletedIssuesLast
+  automationShowDisabled
+  showDraftReviews
+  showEmptyGroupsBoard
+  showEmptyGroupsList
+  showEmptyGroups
+  showEmptySubGroupsBoard
+  showEmptySubGroupsList
+  showEmptySubGroups
+  customerPageNeedsShowImportantFirst
+  embeddedCustomerNeedsShowImportantFirst
+  projectCustomerNeedsShowImportantFirst
+  showOnlySnoozedItems
+  showParents
+  fieldPreviewLinks
+  showReadItems
+  reviewFieldStatusDetails
+  showSnoozedItems
+  showSubInitiativeProjects
+  showNestedInitiatives
+  showSubIssues
+  showSubTeamIssues
+  automationShowDescendants
+  showSubTeamProjects
+  showSupervisedIssues
+  showTeamInitiatives
+  fieldSla
+  fieldSentryIssues
+  fieldUserPresence
+  scheduledPipelineReleaseFieldCompletion
+  documentFieldDateCreated
+  documentFieldCreator
+  customViewFieldDateCreated
+  customViewFieldOwner
+  customViewFieldDateUpdated
+  customViewFieldVisibility
+  customerFieldDomains
+  customerFieldOwner
+  customerFieldRequestCount
+  fieldCustomerCount
+  customerFieldRevenue
+  fieldCustomerRevenue
+  customerFieldSize
+  customerFieldSource
+  customerFieldStatus
+  customerFieldTier
+  fieldCycle
+  dashboardFieldDateCreated
+  dashboardFieldOwner
+  dashboardFieldDateUpdated
+  scheduledPipelineReleaseFieldDescription
+  fieldDueDate
+  initiativeFieldHealth
+  initiativeFieldActivity
+  initiativeFieldDateCompleted
+  initiativeFieldDateCreated
+  initiativeFieldDescription
+  initiativeFieldInitiativeHealth
+  initiativeFieldId
+  initiativeFieldLabels
+  initiativeFieldLeadTeam
+  initiativeFieldOwner
+  initiativeFieldPriority
+  initiativeFieldProjects
+  initiativeFieldStartDate
+  initiativeFieldStatus
+  initiativeFieldTargetDate
+  initiativeFieldTeams
+  initiativeFieldDateUpdated
+  fieldDateArchived
+  fieldAssignee
+  fieldDateCreated
+  customerPageNeedsFieldIssueTargetDueDate
+  fieldEstimate
+  customerPageNeedsFieldIssueIdentifier
+  fieldId
+  automationRunHistoryShowIssueIdentifier
+  fieldDateMyActivity
+  customerPageNeedsFieldIssuePriority
+  fieldPriority
+  customerPageNeedsFieldIssueStatus
+  fieldStatus
+  fieldDateUpdated
+  fieldLabels
+  releasePipelineFieldLatestRelease
+  fieldLinkCount
+  automationFieldLastExecuted
+  automationFieldStats
+  automationFieldTeam
+  automationFieldTrigger
+  memberFieldJoined
+  memberFieldStatus
+  memberFieldTeams
+  fieldMilestone
+  reviewFieldSla
+  documentFieldOwner
+  documentFieldParent
+  projectFieldActivity
+  projectFieldDateCompleted
+  projectFieldDateCreated
+  projectFieldCustomerCount
+  projectFieldCustomerRevenue
+  projectFieldDescriptionBoard
+  projectFieldDescription
+  fieldProject
+  projectFieldHealthTimeline
+  projectFieldHealth
+  projectFieldId
+  projectFieldInitiatives
+  projectFieldIssues
+  projectFieldLabels
+  projectFieldLeadTimeline
+  projectFieldLead
+  projectFieldMembersBoard
+  projectFieldMembersList
+  projectFieldMembersTimeline
+  projectFieldMembers
+  projectFieldMilestoneTimeline
+  projectFieldMilestone
+  projectFieldPredictionsTimeline
+  projectFieldPredictions
+  projectFieldPriority
+  projectFieldRelationsTimeline
+  projectFieldRelations
+  projectFieldRoadmapsBoard
+  projectFieldRoadmapsList
+  projectFieldRoadmapsTimeline
+  projectFieldRoadmaps
+  projectFieldRolloutStage
+  projectFieldStartDate
+  projectFieldStatusTimeline
+  projectFieldStatus
+  projectFieldTargetDate
+  projectFieldTeamsBoard
+  projectFieldTeamsList
+  projectFieldTeamsTimeline
+  projectFieldTeams
+  projectFieldDateUpdated
+  timelineShowProjectsAside
+  reviewFieldOpenedAt
+  fieldPullRequests
+  reviewFieldQuickToReview
+  continuousPipelineReleaseFieldReleaseDate
+  scheduledPipelineReleaseFieldReleaseDate
+  fieldRelease
+  continuousPipelineReleaseFieldReleaseNote
+  scheduledPipelineReleaseFieldReleaseNote
+  releasePipelineFieldReleases
+  reviewFieldGithubTeam
+  reviewFieldAvatar
+  reviewFieldIdentifier
+  reviewFieldRepository
+  automationRunHistoryShowDuration
+  teamFieldDateCreated
+  teamFieldCycle
+  teamFieldIdentifier
+  teamFieldMembers
+  teamFieldMembership
+  teamFieldOwner
+  teamFieldProjects
+  teamFieldDateUpdated
+  releasePipelineFieldTeams
+  fieldTimeInCurrentStatus
+  releasePipelineFieldType
+  documentFieldDateUpdated
+  continuousPipelineReleaseFieldVersion
+  scheduledPipelineReleaseFieldVersion
+  showTriageIssues
+  showUnreadItemsFirst
+  timelineChronologyShowWeekNumbers
+}`) as unknown as TypedDocumentString<
+  UserViewPreferences_PreferencesQuery,
+  UserViewPreferences_PreferencesQueryVariables
 >;
 export const UsersDocument = new TypedDocumentString(`
     query users($after: String, $before: String, $filter: UserFilter, $first: Int, $includeArchived: Boolean, $includeDisabled: Boolean, $last: Int, $orderBy: PaginationOrderBy, $sort: [UserSortInput!]) {

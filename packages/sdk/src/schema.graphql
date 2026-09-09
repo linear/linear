@@ -884,7 +884,7 @@ type AgentSession implements Node {
   """
   status: AgentSessionStatus!
   """
-  A human-readable summary of the work performed in this session. Null if no summary has been generated yet.
+  The session title, generated automatically or set by the owning OAuth application. Null if no title is set.
   """
   summary: String
   """
@@ -1202,6 +1202,10 @@ input AgentSessionUpdateInput {
   URLs to be removed from this session. Only updatable by the OAuth application that owns the session.
   """
   removedExternalUrls: [String!]
+  """
+  The session title, displayed as its summary. Must contain 1 to 255 characters, including a non-whitespace character, with no line breaks or NUL bytes. Set to null to clear it and allow automatic title generation. Updating only this field does not acknowledge the session. Only updatable by the OAuth application that owns the session.
+  """
+  summary: String
   """
   [Internal] User-specific state for the agent session. Only updatable by internal clients.
   """
@@ -1856,7 +1860,7 @@ type AiConversationCreateSandboxToolCall implements AiConversationBaseToolCall {
 }
 
 type AiConversationCreateSandboxToolCallArgs {
-  repository: String!
+  repository: String
 }
 
 type AiConversationDeleteEntityToolCall implements AiConversationBaseToolCall {
@@ -2339,6 +2343,10 @@ type AiConversationGetPullRequestFileToolCallArgs {
 }
 
 type AiConversationGetSlackConversationHistoryToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationGetSlackConversationHistoryToolCallArgs
   displayInfo: AiConversationToolDisplayInfo!
   """
   The name of the tool that was called.
@@ -2352,6 +2360,27 @@ type AiConversationGetSlackConversationHistoryToolCall implements AiConversation
   The result of the tool call.
   """
   rawResult: JSON
+  """
+  The result of the tool call.
+  """
+  result: AiConversationGetSlackConversationHistoryToolCallResult
+}
+
+type AiConversationGetSlackConversationHistoryToolCallArgs {
+  channel: String
+  targetType: AiConversationGetSlackConversationHistoryToolCallArgsTargetType
+}
+
+enum AiConversationGetSlackConversationHistoryToolCallArgsTargetType {
+  channel
+  thread
+}
+
+type AiConversationGetSlackConversationHistoryToolCallResult {
+  conversationUrl: String
+  error: String
+  hasMore: Boolean
+  messageCount: Float
 }
 
 type AiConversationHandoffToCodingSessionToolCall implements AiConversationBaseToolCall {
@@ -2741,15 +2770,30 @@ type AiConversationPostChatMessageToolCall implements AiConversationBaseToolCall
   The result of the tool call.
   """
   rawResult: JSON
+  """
+  The result of the tool call.
+  """
+  result: AiConversationPostChatMessageToolCallResult
 }
 
 type AiConversationPostChatMessageToolCallArgs {
+  channel: String
+  isReply: Boolean
   platform: AiConversationPostChatMessageToolCallArgsPlatform!
+  recipient: String
+  recipientId: String
 }
 
 enum AiConversationPostChatMessageToolCallArgsPlatform {
   microsoftTeams
   slack
+}
+
+type AiConversationPostChatMessageToolCallResult {
+  conversationUrl: String
+  error: String
+  message: String
+  posted: Boolean!
 }
 
 type AiConversationPromptCodingSessionToolCall implements AiConversationBaseToolCall {
@@ -3160,6 +3204,38 @@ type AiConversationRetryPullRequestCheckToolCallArgs {
   workflowName: String
 }
 
+type AiConversationSandboxGitHistoryToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationSandboxGitHistoryToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationSandboxGitHistoryToolCallArgs {
+  operation: AiConversationSandboxGitHistoryToolCallArgsOperation!
+  paths: [String!]
+}
+
+enum AiConversationSandboxGitHistoryToolCallArgsOperation {
+  blame
+  log
+  search
+  show
+}
+
 type AiConversationSearchChatChannelsToolCall implements AiConversationBaseToolCall {
   """
   The arguments to the tool call.
@@ -3178,11 +3254,19 @@ type AiConversationSearchChatChannelsToolCall implements AiConversationBaseToolC
   The result of the tool call.
   """
   rawResult: JSON
+  """
+  The result of the tool call.
+  """
+  result: AiConversationSearchChatChannelsToolCallResult
 }
 
 type AiConversationSearchChatChannelsToolCallArgs {
   filter: String!
   platform: AiConversationPostChatMessageToolCallArgsPlatform!
+}
+
+type AiConversationSearchChatChannelsToolCallResult {
+  totalCount: Float!
 }
 
 type AiConversationSearchDocumentationToolCall implements AiConversationBaseToolCall {
@@ -3546,6 +3630,7 @@ enum AiConversationTool {
   RestoreEntity
   RetrieveEntities
   RetryPullRequestCheck
+  SandboxGitHistory
   SearchChatChannels
   SearchDocumentation
   SearchEntities
@@ -3597,6 +3682,7 @@ union AiConversationToolCall =
   | AiConversationRestoreEntityToolCall
   | AiConversationRetrieveEntitiesToolCall
   | AiConversationRetryPullRequestCheckToolCall
+  | AiConversationSandboxGitHistoryToolCall
   | AiConversationSearchChatChannelsToolCall
   | AiConversationSearchDocumentationToolCall
   | AiConversationSearchEntitiesToolCall
@@ -36963,6 +37049,7 @@ enum ProjectTab {
   customers
   documents
   issues
+  loops
   updates
 }
 
@@ -38444,6 +38531,15 @@ type Query {
     """
     agentSessionId: String!
   ): CodingAgentSandboxPayload
+  """
+  [Internal] SSH address of the current user's running coding sandbox for this agent session.
+  """
+  agentSessionSshAddress(
+    """
+    The identifier of the agent session.
+    """
+    agentSessionId: String!
+  ): String
   """
   All agent sessions.
   """
@@ -41060,6 +41156,15 @@ type Query {
   The authenticated user's notification and UI settings.
   """
   userSettings: UserSettings!
+  """
+  The authenticated user's workspace-level view display preferences for a view type. Returns the user-type preferences that are not scoped to a team, project, or other entity. Null if the user has not customized the view.
+  """
+  userViewPreferences(
+    """
+    The view type the preferences are associated with.
+    """
+    viewType: ViewType!
+  ): ViewPreferences
   """
   All users in the workspace. Supports filtering, sorting, and pagination.
   """
@@ -51837,6 +51942,8 @@ input WorkflowStateUpdateInput {
 }
 
 enum WorkflowTrigger {
+  chatMessagePosted
+  chatReactionAdded
   commentAdded
   cycleEnded
   cycleStarted
@@ -51849,6 +51956,7 @@ enum WorkflowTrigger {
 }
 
 enum WorkflowTriggerType {
+  chat
   cycle
   document
   initiative
