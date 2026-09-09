@@ -1,6 +1,7 @@
 import { FieldDefinitionNode } from "graphql";
 import { getRequiredArgs } from "./args.js";
 import { Doc } from "./constants.js";
+import { printTypescriptType } from "./print.js";
 import { Named, PluginContext } from "./types.js";
 import { nodeHasSkipComment, reduceListType, reduceTypeName } from "./utils.js";
 
@@ -22,8 +23,8 @@ export function findQuery(
 
   /** Get the matching object definition */
   const responseObject = context.objects.find(obj => type === obj.name.value);
-  const responseFieldNames = responseObject?.fields?.map(responseField => responseField.name.value);
-  if (!responseFieldNames?.length) {
+  const responseFields = responseObject?.fields;
+  if (!responseFields?.length) {
     return undefined;
   }
 
@@ -32,7 +33,12 @@ export function findQuery(
     return (
       reduceTypeName(query.type) === type &&
       reduceListType(query.type) === listType &&
-      getRequiredArgs(query.arguments).every(arg => responseFieldNames.includes(arg.name.value))
+      getRequiredArgs(query.arguments).every(arg => {
+        const responseField = responseFields.find(candidate => candidate.name.value === arg.name.value);
+        return (
+          responseField && printTypescriptType(context, responseField.type) === printTypescriptType(context, arg.type)
+        );
+      })
     );
   });
 
