@@ -817,7 +817,7 @@ __metadata:
     "@types/node-fetch": "npm:^2.6.4"
     "@types/react": "npm:18.2.15"
     "@types/react-dom": "npm:^18.2.7"
-    multer: "npm:^2.1.1"
+    multer: "npm:^2.3.0"
     next: "npm:^15.5.24"
     node-fetch: "npm:^3.3.2"
     react: "npm:^18.2.0"
@@ -867,15 +867,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"multer@npm:^2.1.1":
-  version: 2.1.1
-  resolution: "multer@npm:2.1.1"
+"multer@npm:^2.3.0":
+  version: 2.3.0
+  resolution: "multer@npm:2.3.0"
   dependencies:
     append-field: "npm:^1.0.0"
     busboy: "npm:^1.6.0"
     concat-stream: "npm:^2.0.0"
     type-is: "npm:^1.6.18"
-  checksum: 10c0/2ec4e02833b20f403cfb879d4b64d2a9070d902b9deae7aef18a6faadb707d7665385456cf540aa8a6dadfe3d4c5fc8e0e7b0675b94e1077048b1125426deee6
+  checksum: 10c0/e78fe6b1fe2132cdd33eeec4146643b906046edc1bbbcc90a43ea3d3aed6a7271272897a6d2e40e711e595a156d99b6761848a76fecca6ae3b9a7ee4892ee30c
   languageName: node
   linkType: hard
 
