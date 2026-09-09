@@ -22,6 +22,7 @@ jobs:
     permissions:
       contents: write
       id-token: write # Required for OIDC (https://docs.npmjs.com/trusted-publishers#github-actions-configuration)
+      pull-requests: read
     env:
       SKIP_RELEASE: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[skip release]') }}
     steps:
@@ -83,12 +84,24 @@ jobs:
 
       # schema.yaml is the only workflow that prepares release pull requests; pending changesets must be versioned there.
       - name: Publish to npm
+        id: publish
         if: env.SKIP_RELEASE != 'true' && hashFiles('.changeset/*.md', '!.changeset/README.md') == ''
         uses: changesets/action@63a615b9cd06ba9a3e6d13796c7fbcb080a60a0b # v1.8.0
         with:
           publish: pnpm ci:publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify Slack
+        if: steps.publish.outputs.published == 'true'
+        continue-on-error: true
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CLI_CHANNEL_WEBHOOK_URL }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBLISHED_PACKAGES: ${{ steps.publish.outputs.publishedPackages }}
+        run: |
+          node .github/scripts/create-release-slack-message.mjs
+          curl -s -X POST "$SLACK_WEBHOOK_URL" -H 'Content-Type: application/json' --data @"$RUNNER_TEMP/sdk-release-slack.json"
 
   notify-slack:
     runs-on: ubuntu-latest
