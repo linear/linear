@@ -4,6 +4,25 @@ import { LinearClientOptions, LinearClientParsedOptions } from "./types.js";
 import { serializeUserAgent } from "./utils.js";
 import { LinearSdk } from "./_generated_sdk.js";
 
+const LOCAL_API_HOSTNAMES = new Set(["localhost", "127.0.0.1", "[::1]"]);
+
+/**
+ * Require encrypted API connections except for local development servers.
+ */
+function validateApiUrl(apiUrl: string): void {
+  const { hostname, protocol } = new URL(apiUrl);
+
+  if (protocol === "https:") {
+    return;
+  }
+
+  if (protocol === "http:" && LOCAL_API_HOSTNAMES.has(hostname)) {
+    return;
+  }
+
+  throw new Error("LinearClient apiUrl must use HTTPS unless it points to a local development server");
+}
+
 /**
  * Validate and return default LinearGraphQLClient options
  *
@@ -23,6 +42,9 @@ function parseClientOptions({
     );
   }
 
+  const resolvedApiUrl = apiUrl ?? "https://api.linear.app/graphql";
+  validateApiUrl(resolvedApiUrl);
+
   return {
     headers: {
       /** Use bearer if oauth token exists, otherwise use the provided apiKey */
@@ -39,7 +61,7 @@ function parseClientOptions({
       }),
     },
     /** Default to production linear api */
-    apiUrl: apiUrl ?? "https://api.linear.app/graphql",
+    apiUrl: resolvedApiUrl,
     ...opts,
   };
 }

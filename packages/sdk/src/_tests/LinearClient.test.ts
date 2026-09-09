@@ -24,6 +24,28 @@ describe("LinearClient", () => {
     });
   });
 
+  it.each([
+    "https://api.example.com/graphql",
+    "http://localhost:3000/graphql",
+    "http://127.0.0.1:3000/graphql",
+    "http://[::1]:3000/graphql",
+  ])("accepts secure or local apiUrl value %s", apiUrl => {
+    const client = new LinearClient({ apiKey: MOCK_API_KEY, apiUrl });
+
+    expect(client.options.apiUrl).toEqual(apiUrl);
+  });
+
+  it.each([
+    "http://api.example.com/graphql",
+    "http://localhost.example.com/graphql",
+    "http://localhost@api.example.com/graphql",
+    "ftp://api.example.com/graphql",
+  ])("rejects insecure non-local apiUrl value %s", apiUrl => {
+    expect(() => new LinearClient({ apiKey: MOCK_API_KEY, apiUrl })).toThrow(
+      "LinearClient apiUrl must use HTTPS unless it points to a local development server"
+    );
+  });
+
   it("makes query to apiUrl", async () => {
     const client = new LinearClient({ apiKey: MOCK_API_KEY, apiUrl: ctx.url });
     const response = await client.viewer;

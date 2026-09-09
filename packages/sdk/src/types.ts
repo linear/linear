@@ -6,7 +6,7 @@ export interface LinearClientOptions extends RequestInit {
   apiKey?: string;
   /** The access token returned from oauth endpoints configured in https://linear.app/settings/account/security */
   accessToken?: string;
-  /** The url to the Linear graphql api */
+  /** The HTTPS URL to the Linear GraphQL API. HTTP is supported only for local development servers. */
   apiUrl?: string;
 }
 
@@ -40,20 +40,20 @@ export interface LinearRawResponse<Data> {
  * The error types returned by the Linear API
  */
 export enum LinearErrorType {
-  "FeatureNotAccessible" = "FeatureNotAccessible",
-  "InvalidInput" = "InvalidInput",
-  "Ratelimited" = "Ratelimited",
-  "NetworkError" = "NetworkError",
-  "AuthenticationError" = "AuthenticationError",
-  "Forbidden" = "Forbidden",
-  "BootstrapError" = "BootstrapError",
-  "Unknown" = "Unknown",
-  "InternalError" = "InternalError",
-  "Other" = "Other",
-  "UserError" = "UserError",
-  "GraphqlError" = "GraphqlError",
-  "LockTimeout" = "LockTimeout",
-  "UsageLimitExceeded" = "UsageLimitExceeded",
+  FeatureNotAccessible = "FeatureNotAccessible",
+  InvalidInput = "InvalidInput",
+  Ratelimited = "Ratelimited",
+  NetworkError = "NetworkError",
+  AuthenticationError = "AuthenticationError",
+  Forbidden = "Forbidden",
+  BootstrapError = "BootstrapError",
+  Unknown = "Unknown",
+  InternalError = "InternalError",
+  Other = "Other",
+  UserError = "UserError",
+  GraphqlError = "GraphqlError",
+  LockTimeout = "LockTimeout",
+  UsageLimitExceeded = "UsageLimitExceeded",
 }
 
 /**
