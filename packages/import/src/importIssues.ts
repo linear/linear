@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { LinearClient } from "@linear/sdk";
+import { IssueRelationType, LinearClient } from "@linear/sdk";
 import chalk from "chalk";
 import { Presets, SingleBar } from "cli-progress";
 import { format } from "date-fns";
@@ -7,7 +7,7 @@ import inquirer from "inquirer";
 import uniq from "lodash/uniq.js";
 import ora from "ora";
 import { handleLabels } from "./helpers/labelManager.ts";
-import type { Comment, Importer, ImportResult } from "./types.ts";
+import type { Comment, Importer, ImportResult, Issue } from "./types.ts";
 import { replaceImagesInMarkdown } from "./utils/replaceImages.ts";
 
 type Id = string;
@@ -41,6 +41,17 @@ interface NonInteractiveFlags {
   selfAssign?: boolean;
 }
 
+/** One resolved dependency between two source-batch issues. Holds the source issues until creation maps them to Linear ids. */
+interface ResolvedDependency {
+  /** The issue that blocks. */
+  blocker: Issue;
+  /** The issue that is blocked. */
+  blocked: Issue;
+}
+
+/** Maps a source issue to the Linear id created for it during the import loop. */
+type CreatedIssueIds = Map<Issue, string>;
+
 /**
  * Import issues into Linear via the API.
  */
@@ -53,6 +64,11 @@ export const importIssues = async (
 ): Promise<void> => {
   const client = new LinearClient({ apiKey, apiUrl });
   const importData = await importer.import();
+
+  // Resolve and validate dependency references against the source batch before any workspace mutation
+  // (team creation, label creation, or issue creation). A bad reference must abort before anything is
+  // created, otherwise a re-run would duplicate issues or strand a half-mutated workspace.
+  const resolvedDependencies = resolveDependencies(importData.issues);
 
   const viewerQuery = await client.viewer;
 
@@ -297,6 +313,9 @@ export const importIssues = async (
   issuesProgressBar.start(importData.issues.length, 0);
   let issueCursor = 0;
 
+  // Only track created ids when dependencies need to be linked afterwards.
+  const createdIssueIds: CreatedIssueIds | undefined = resolvedDependencies.length > 0 ? new Map() : undefined;
+
   // Create issues
   for (const issue of importData.issues) {
     const issueDescription = issue.description
@@ -353,23 +372,36 @@ export const importIssues = async (
     const formattedDueDate = issue.dueDate ? format(issue.dueDate, "yyyy-MM-dd") : undefined;
 
     try {
-      const createdIssue = await createIssueWithRetries(client, {
-        teamId,
-        projectId,
-        title: issue.title,
-        description,
-        priority: issue.priority,
-        labelIds,
-        stateId,
-        assigneeId,
-        createdAt: issue.createdAt,
-        completedAt: issue.completedAt,
-        dueDate: formattedDueDate,
-        estimate: issue.estimate,
-      });
+      const createdIssue = await withRateLimitRetries(() =>
+        client.createIssue({
+          teamId,
+          projectId,
+          title: issue.title,
+          description,
+          priority: issue.priority,
+          labelIds,
+          stateId,
+          assigneeId,
+          createdAt: issue.createdAt,
+          completedAt: issue.completedAt,
+          dueDate: formattedDueDate,
+          estimate: issue.estimate,
+        })
+      );
 
       if (issue.archived) {
         await (await createdIssue.issue)?.archive();
+      }
+
+      const createdIssueId = createdIssue.issueId;
+      if (createdIssue.success === false || !createdIssueId) {
+        issuesProgressBar.stop();
+        throw new Error(
+          `Failed to create issue "${issue.title}": the API rejected the creation (no issue id returned).`
+        );
+      }
+      if (createdIssueIds) {
+        createdIssueIds.set(issue, createdIssueId);
       }
 
       issueCursor++;
@@ -381,6 +413,15 @@ export const importIssues = async (
   }
 
   issuesProgressBar.stop();
+
+  if (resolvedDependencies.length > 0 && createdIssueIds) {
+    spinner = ora("Creating issue dependencies").start();
+    try {
+      await createRelations(client, resolvedDependencies, createdIssueIds);
+    } finally {
+      spinner.stop();
+    }
+  }
 
   console.info(chalk.green(`${importer.name} issues imported to your team: https://linear.app/team/${teamKey}/all`));
 };
@@ -405,21 +446,163 @@ const buildComments = async (
   return `${description}\n\n---\n\n${newComments.join("\n\n")}`;
 };
 
-const createIssueWithRetries = async (
-  client: LinearClient,
-  input: Parameters<LinearClient["createIssue"]>[0],
-  retries = 3
-): ReturnType<LinearClient["createIssue"]> => {
+/**
+ * Run a Linear request, retrying up to `retries` times when the API rate-limits the caller. Both issue
+ * creation and relation creation ride this wrapper so a rate-limited import does not fail midway.
+ */
+const withRateLimitRetries = async <T>(request: () => Promise<T>, retries = 3): Promise<T> => {
   try {
-    return await client.createIssue(input);
+    return await request();
   } catch (error) {
     if (error.type === "Ratelimited" && retries > 0) {
       // Hard-coded to 1 minute for now; when we do LIN-17685, we can use the X-RateLimit-Endpoint-Requests-Remaining
       // header to find out how long to wait.
       await new Promise(resolve => setTimeout(resolve, 60000));
-      return createIssueWithRetries(client, input, retries - 1);
+      return withRateLimitRetries(request, retries - 1);
     } else {
       throw error;
+    }
+  }
+};
+
+/**
+ * Resolve every `blocks` / `blockedBy` reference against the source batch and return the deduplicated
+ * dependency pairs to create. Each reference is matched, in order, against:
+ *
+ * 1. a source issue's externalId (its row `Id`),
+ * 2. a case-insensitive, trimmed title match.
+ *
+ * A reference that matches zero issues or more than one issue aborts the import before any issue is created.
+ * Pairs are canonicalized (the blocking issue first) and deduplicated so one dependency expressed in both
+ * the `Blocks` and `Blocked By` columns is created only once.
+ */
+export const resolveDependencies = (issues: Issue[]): ResolvedDependency[] => {
+  const byExternalId = new Map<string, Issue[]>();
+  const byLowerTitle = new Map<string, Issue[]>();
+
+  for (const issue of issues) {
+    if (issue.externalId) {
+      const idMatches = byExternalId.get(issue.externalId) ?? [];
+      idMatches.push(issue);
+      byExternalId.set(issue.externalId, idMatches);
+    }
+    const lowerTitle = issue.title.trim().toLowerCase();
+    const titleMatches = byLowerTitle.get(lowerTitle) ?? [];
+    titleMatches.push(issue);
+    byLowerTitle.set(lowerTitle, titleMatches);
+  }
+
+  const match = (reference: string): Issue => {
+    const trimmed = reference.trim();
+    const idMatches = byExternalId.get(trimmed);
+    if (idMatches) {
+      if (idMatches.length > 1) {
+        throw new Error(
+          `dependency reference "${reference}" matched ${idMatches.length} issues in this import (row Ids must be unique)`
+        );
+      }
+      return idMatches[0];
+    }
+
+    const titleMatches = byLowerTitle.get(trimmed.toLowerCase());
+    if (!titleMatches) {
+      throw new Error(`dependency reference "${reference}" matched 0 issues in this import`);
+    }
+    if (titleMatches.length > 1) {
+      throw new Error(
+        `dependency reference "${reference}" matched ${titleMatches.length} issues in this import (titles must be unique)`
+      );
+    }
+    return titleMatches[0];
+  };
+
+  // Two issues can only share one `blocks` relation regardless of which column expressed it, so key the
+  // seen-set on the ordered pair of issue indices and keep first-occurrence order. A pair declared in both
+  // directions (row A blocks B and row B blocks A) is rejected rather than silently collapsed, and a
+  // self-reference is rejected too, so malformed graphs fail before any issue is created.
+  const indexByIdentity = new Map<Issue, number>();
+  issues.forEach((issue, index) => indexByIdentity.set(issue, index));
+
+  const seen = new Set<string>();
+  const unique: ResolvedDependency[] = [];
+  for (const issue of issues) {
+    for (const reference of issue.blocks ?? []) {
+      const blocked = match(reference);
+      if (blocked === issue) {
+        throw new Error(`dependency reference "${reference}" refers to the issue itself in Blocks`);
+      }
+      const blockerIdx = indexByIdentity.get(issue)!;
+      const blockedIdx = indexByIdentity.get(blocked)!;
+      const key = `${blockerIdx}:${blockedIdx}`;
+      const reverseKey = `${blockedIdx}:${blockerIdx}`;
+      if (seen.has(reverseKey)) {
+        throw new Error(
+          `dependency reference "${reference}" declares a blocks relation in both directions (rows reference each other)`
+        );
+      }
+      if (!seen.has(key)) {
+        seen.add(key);
+        unique.push({ blocker: issue, blocked });
+      }
+    }
+    for (const reference of issue.blockedBy ?? []) {
+      const blocker = match(reference);
+      if (blocker === issue) {
+        throw new Error(`dependency reference "${reference}" refers to the issue itself in Blocked By`);
+      }
+      const blockerIdx = indexByIdentity.get(issue)!;
+      const blockedIdx = indexByIdentity.get(blocker)!;
+      const key = `${blockedIdx}:${blockerIdx}`;
+      const reverseKey = `${blockerIdx}:${blockedIdx}`;
+      if (seen.has(reverseKey)) {
+        throw new Error(
+          `dependency reference "${reference}" declares a blocks relation in both directions (rows reference each other)`
+        );
+      }
+      if (!seen.has(key)) {
+        seen.add(key);
+        unique.push({ blocker, blocked: issue });
+      }
+    }
+  }
+  return unique;
+};
+
+/**
+ * Create the resolved `blocks` relations once every issue in the batch has been created. The source issues
+ * resolved at validation time are mapped to their created Linear ids; any issue whose creation did not return
+ * an id is skipped and reported. Each relation creation is retried on rate limits, and its `success` flag is
+ * checked so a silent partial graph is never reported as a successful import.
+ */
+const createRelations = async (
+  client: LinearClient,
+  dependencies: ResolvedDependency[],
+  createdIssueIds: CreatedIssueIds
+): Promise<void> => {
+  for (const dep of dependencies) {
+    const issueId = createdIssueIds.get(dep.blocker);
+    const relatedIssueId = createdIssueIds.get(dep.blocked);
+
+    if (!issueId || !relatedIssueId) {
+      console.error(
+        chalk.yellow(
+          `Skipped dependency "${dep.blocked.title}" blocked by "${dep.blocker.title}": a referenced issue could not be matched to a created issue.`
+        )
+      );
+      continue;
+    }
+
+    const result = await withRateLimitRetries(() =>
+      client.createIssueRelation({
+        issueId,
+        relatedIssueId,
+        type: IssueRelationType.Blocks,
+      })
+    );
+    if (result.success === false) {
+      throw new Error(
+        `Failed to create dependency between "${dep.blocker.title}" and "${dep.blocked.title}": the API rejected the relation.`
+      );
     }
   }
 };
