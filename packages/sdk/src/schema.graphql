@@ -2061,6 +2061,7 @@ enum AiConversationEntityCardWidgetArgsAction {
 """
 enum AiConversationEntityCardWidgetArgsType {
   AgentSession
+  AiConversation
   AiPrompt
   AiPromptRules
   CustomView
@@ -2073,6 +2074,7 @@ enum AiConversationEntityCardWidgetArgsType {
   InitiativeUpdate
   Issue
   IssueDraft
+  Meeting
   Project
   ProjectDraft
   ProjectMilestone
@@ -2526,6 +2528,10 @@ type AiConversationMcpServerConnectionScope {
   """
   type: AiConversationMcpServerConnectionScopeType!
   """
+  The identifier of the Loop draft that will own the connection. Null for other scope types.
+  """
+  workflowDefinitionDraftId: String
+  """
   The identifier of the Loop that will own the connection. Null for other scope types.
   """
   workflowDefinitionId: String
@@ -2538,6 +2544,7 @@ enum AiConversationMcpServerConnectionScopeType {
   team
   user
   workflowDefinition
+  workflowDefinitionDraft
 }
 
 type AiConversationMemoryToolCall implements AiConversationBaseToolCall {
@@ -2791,9 +2798,17 @@ enum AiConversationPostChatMessageToolCallArgsPlatform {
 
 type AiConversationPostChatMessageToolCallResult {
   conversationUrl: String
+  destination: AiConversationPostChatMessageToolCallResultDestination
   error: String
   message: String
   posted: Boolean!
+}
+
+type AiConversationPostChatMessageToolCallResultDestination {
+  channelId: String!
+  integrationId: String!
+  messageId: String!
+  threadId: String!
 }
 
 type AiConversationPromptCodingSessionToolCall implements AiConversationBaseToolCall {
@@ -3202,6 +3217,40 @@ type AiConversationRetryPullRequestCheckToolCallArgs {
   checkName: String!
   entity: AiConversationSearchEntitiesToolCallResultEntities!
   workflowName: String
+}
+
+type AiConversationRunLoopToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationRunLoopToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+  """
+  The result of the tool call.
+  """
+  result: AiConversationRunLoopToolCallResult
+}
+
+type AiConversationRunLoopToolCallArgs {
+  workflowDefinitionId: String!
+}
+
+type AiConversationRunLoopToolCallResult {
+  conversationId: String!
+  createdEntities: [AiConversationCreateEntityToolCallResultCreatedEntities!]
+  url: String!
 }
 
 type AiConversationSandboxGitHistoryToolCall implements AiConversationBaseToolCall {
@@ -3630,6 +3679,7 @@ enum AiConversationTool {
   RestoreEntity
   RetrieveEntities
   RetryPullRequestCheck
+  RunLoop
   SandboxGitHistory
   SearchChatChannels
   SearchDocumentation
@@ -3682,6 +3732,7 @@ union AiConversationToolCall =
   | AiConversationRestoreEntityToolCall
   | AiConversationRetrieveEntitiesToolCall
   | AiConversationRetryPullRequestCheckToolCall
+  | AiConversationRunLoopToolCall
   | AiConversationSandboxGitHistoryToolCall
   | AiConversationSearchChatChannelsToolCall
   | AiConversationSearchDocumentationToolCall
@@ -10148,7 +10199,7 @@ type DocumentConnection {
 }
 
 """
-The rich-text content body of a document, issue, project, initiative, project milestone, pull request, release note, automation prompt, AI prompt rules, or welcome message. Content is stored as a base64-encoded Yjs state and can be converted to Markdown or ProseMirror JSON. Each DocumentContent belongs to exactly one parent entity and supports real-time collaborative editing.
+The rich-text content body of a document, issue, project, initiative, project milestone, pull request, release note, automation prompt, AI prompt rules, welcome message, or workspace announcement. Content is stored as a base64-encoded Yjs state and can be converted to Markdown or ProseMirror JSON. Each DocumentContent belongs to exactly one parent entity and supports real-time collaborative editing.
 """
 type DocumentContent implements Node {
   """
@@ -14464,6 +14515,10 @@ input InitiativeCollectionFilter {
   """
   priority: NullableNumberComparator
   """
+  Filters that the initiative projects must satisfy.
+  """
+  projects: ProjectCollectionFilter
+  """
   Comparator for the initiative slug ID.
   """
   slugId: StringComparator
@@ -14663,6 +14718,10 @@ input InitiativeFilter {
   Comparator for the initiative priority.
   """
   priority: NullableNumberComparator
+  """
+  Filters that the initiative projects must satisfy.
+  """
+  projects: ProjectCollectionFilter
   """
   Comparator for the initiative slug ID.
   """
@@ -16606,6 +16665,21 @@ input IntegrationCustomerDataAttributesRefreshInput {
   service: String!
 }
 
+"""
+A Datadog feature flag environment.
+"""
+type IntegrationDatadogEnvironment {
+  id: String!
+  name: String!
+}
+
+"""
+Datadog environments available to connect.
+"""
+type IntegrationDatadogEnvironmentsPayload {
+  environments: [IntegrationDatadogEnvironment!]!
+}
+
 type IntegrationEdge {
   """
   Used in `before` and `after` args
@@ -16685,6 +16759,7 @@ Linear supported integration services.
 enum IntegrationService {
   airbyte
   asksWeb
+  datadog
   discord
   email
   figma
@@ -19889,6 +19964,10 @@ type IssueLabel implements Node {
   """
   description: String
   """
+  The selection mode of this label group. Null for regular labels. Groups without a type use single-select behavior.
+  """
+  groupType: LabelGroupType
+  """
   The unique identifier of the entity.
   """
   id: ID!
@@ -20068,6 +20147,10 @@ input IssueLabelCreateInput {
   """
   description: String
   """
+  The selection mode of the label group. Defaults to singleSelect for groups and null for regular labels.
+  """
+  groupType: LabelGroupType
+  """
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
@@ -20177,6 +20260,10 @@ input IssueLabelUpdateInput {
   The description of the label.
   """
   description: String
+  """
+  The selection mode of the label group. Omit to keep the current value. Null resets groups to singleSelect. Regular labels always use null.
+  """
+  groupType: LabelGroupType
   """
   Whether the label is a group.
   """
@@ -23027,6 +23114,14 @@ input LabelGroupSort {
 }
 
 """
+The selection mode of an issue label group.
+"""
+enum LabelGroupType {
+  multiSelect
+  singleSelect
+}
+
+"""
 A notification subscription scoped to a specific issue label. The subscriber receives notifications for events related to issues with this label.
 """
 type LabelNotificationSubscription implements Entity & Node & NotificationSubscription {
@@ -24947,6 +25042,44 @@ type Mutation {
     """
     input: IntegrationCustomerDataAttributesRefreshInput!
   ): IntegrationPayload!
+  """
+  [Internal] Connects Datadog feature flags to the workspace.
+  """
+  integrationDatadogConnect(
+    """
+    The Datadog API key.
+    """
+    apiKey: String!
+    """
+    The Datadog application key with feature flag read access.
+    """
+    applicationKey: String!
+    """
+    The Datadog environment ID.
+    """
+    environmentId: String!
+    """
+    The Datadog site domain.
+    """
+    site: String!
+  ): IntegrationPayload!
+  """
+  [Internal] Lists Datadog environments available to connect.
+  """
+  integrationDatadogEnvironments(
+    """
+    The Datadog API key.
+    """
+    apiKey: String!
+    """
+    The Datadog application key with feature flag read access.
+    """
+    applicationKey: String!
+    """
+    The Datadog site domain.
+    """
+    site: String!
+  ): IntegrationDatadogEnvironmentsPayload!
   """
   Deletes an integration.
   """
@@ -29246,6 +29379,10 @@ input NullableInitiativeFilter {
   """
   priority: NullableNumberComparator
   """
+  Filters that the initiative projects must satisfy.
+  """
+  projects: ProjectCollectionFilter
+  """
   Comparator for the initiative slug ID.
   """
   slugId: StringComparator
@@ -31403,6 +31540,14 @@ input OrganizationCodingAgentSettingsInput {
   [Internal] The model preference used for Coding Sessions.
   """
   model: String
+  """
+  [Internal] Whether new Coding Session sandboxes should use workspace region pinning.
+  """
+  regionPinning: Boolean
+  """
+  [Internal] The default sandbox size used for Coding Sessions.
+  """
+  sandboxSize: String
 }
 
 """
@@ -31932,6 +32077,10 @@ input OrganizationSecuritySettingsInput {
   The minimum role required to create personal API keys.
   """
   personalApiKeysRole: UserRoleType
+  """
+  The minimum role required to pin views to workspace pages and to change the views pinned there.
+  """
+  pinnedViewManagementRole: UserRoleType
   """
   The minimum role required to create teams.
   """
@@ -37155,6 +37304,10 @@ type ProjectUpdate implements Node {
   """
   reactions: [Reaction!]!
   """
+  A short AI-generated summary of the project update. Null if no short summary is available.
+  """
+  shortSummary: String
+  """
   The update's unique URL slug.
   """
   slugId: String!
@@ -38063,6 +38216,10 @@ type PullRequestCommit {
   Linear user IDs for commit authors (includes co-authors).
   """
   authorUserIds: [String!]!
+  """
+  The time when the commit was authored, as an ISO 8601 string. Null if unavailable.
+  """
+  authoredAt: String
   """
   The number of files changed in this commit. Null if the hosting provider did not include this information.
   """
@@ -47055,6 +47212,10 @@ input TeamSecuritySettingsInput {
   """
   memberManagement: TeamRoleType
   """
+  The minimum team role required to pin views to the team's pages and to change the views pinned there.
+  """
+  pinnedViewManagement: TeamRoleType
+  """
   The minimum team role required to manage team settings.
   """
   teamManagement: TeamRoleType
@@ -47748,15 +47909,19 @@ type TimeScheduleEntry {
   """
   endsAt: DateTime!
   """
+  [ALPHA] The user this entry replaced, set when the entry is an override.
+  """
+  overriddenUser: TimeScheduleUser
+  """
   The start time of the schedule entry in ISO 8601 date-time format.
   """
   startsAt: DateTime!
   """
-  The email, name or reference to the user on schedule. This is used in case the external user could not be mapped to a Linear user id.
+  The external email, name or reference text for the user when the reference cannot be mapped to a Linear user id.
   """
   userEmail: String
   """
-  The Linear user id of the user on schedule. If the user cannot be mapped to a Linear user then `userEmail` can be used as a reference.
+  The Linear user id of the referenced user. If the reference cannot be mapped to a Linear user then `userEmail` can be used instead.
   """
   userId: String
 }
@@ -47767,15 +47932,19 @@ input TimeScheduleEntryInput {
   """
   endsAt: DateTime!
   """
+  [ALPHA] The user this entry replaced, set when the entry is an override.
+  """
+  overriddenUser: TimeScheduleUserInput
+  """
   The start time of the schedule entry in ISO 8601 date-time format.
   """
   startsAt: DateTime!
   """
-  The email, name or reference to the user on schedule. This is used in case the external user could not be mapped to a Linear user id.
+  The external email, name or reference text for the user when the reference cannot be mapped to a Linear user id.
   """
   userEmail: String
   """
-  The Linear user id of the user on schedule. If the user cannot be mapped to a Linear user then `userEmail` can be used as a reference.
+  The Linear user id of the referenced user. If the reference cannot be mapped to a Linear user then `userEmail` can be used instead.
   """
   userId: String
 }
@@ -47822,6 +47991,31 @@ input TimeScheduleUpdateInput {
   The name of the schedule.
   """
   name: String
+}
+
+"""
+A reference to a user on a time schedule.
+"""
+type TimeScheduleUser {
+  """
+  The external email, name or reference text for the user when the reference cannot be mapped to a Linear user id.
+  """
+  userEmail: String
+  """
+  The Linear user id of the referenced user. If the reference cannot be mapped to a Linear user then `userEmail` can be used instead.
+  """
+  userId: String
+}
+
+input TimeScheduleUserInput {
+  """
+  The external email, name or reference text for the user when the reference cannot be mapped to a Linear user id.
+  """
+  userEmail: String
+  """
+  The Linear user id of the referenced user. If the reference cannot be mapped to a Linear user then `userEmail` can be used instead.
+  """
+  userId: String
 }
 
 """
@@ -50558,6 +50752,10 @@ type ViewPreferencesValues {
   """
   reviewFieldRepository: Boolean
   """
+  Whether to show reviewer avatars on review list items. Null if the preference is unset.
+  """
+  reviewFieldReviewers: Boolean
+  """
   Whether to show the most pressing SLA from connected issues on review list items. Null if the preference is unset.
   """
   reviewFieldSla: Boolean
@@ -50661,6 +50859,10 @@ type ViewPreferencesValues {
   Whether to show sub-initiatives nested.
   """
   showNestedInitiatives: Boolean
+  """
+  Whether a team's project views show only the projects that team leads. When true, projects the team only contributes to are hidden. Null if the preference is unset.
+  """
+  showOnlyLeadTeamProjects: Boolean
   """
   Whether to show only snoozed items.
   """
@@ -51945,6 +52147,7 @@ enum WorkflowTrigger {
   chatMessagePosted
   chatReactionAdded
   commentAdded
+  customerRequestAdded
   cycleEnded
   cycleStarted
   entityCreated
@@ -51974,6 +52177,129 @@ enum WorkflowType {
   triage
   triageAutomation
   viewSubscription
+}
+
+"""
+A workspace announcement delivered to a member's inbox.
+"""
+type WorkspaceAnnouncementNotification implements Entity & Node & Notification {
+  """
+  The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event.
+  """
+  actor: User
+  """
+  [Internal] Notification actor initials if avatar is not available.
+  """
+  actorAvatarColor: String!
+  """
+  [Internal] Notification avatar URL.
+  """
+  actorAvatarUrl: String
+  """
+  [Internal] Whether the notification's user actor is deactivated in the workspace.
+  """
+  actorInactive: Boolean!
+  """
+  [Internal] Notification actor initials if avatar is not available.
+  """
+  actorInitials: String
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The bot that caused the notification.
+  """
+  botActor: ActorBot
+  """
+  The category of the notification.
+  """
+  category: NotificationCategory!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent.
+  """
+  emailedAt: DateTime
+  """
+  The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member.
+  """
+  externalUserActor: ExternalUser
+  """
+  [Internal] Notifications with the same grouping key will be grouped together in the UI.
+  """
+  groupingKey: String!
+  """
+  [Internal] Priority of the notification with the same grouping key. Higher number means higher priority. If priority is the same, notifications should be sorted by `createdAt`.
+  """
+  groupingPriority: Float!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  [Internal] Inbox URL for the notification.
+  """
+  inboxUrl: String!
+  """
+  [Internal] Initiative update health for new updates.
+  """
+  initiativeUpdateHealth: String
+  """
+  [Internal] If notification actor was Linear.
+  """
+  isLinearActor: Boolean!
+  """
+  [Internal] Issue's status type for issue notifications.
+  """
+  issueStatusType: String
+  """
+  [Internal] Project update health for new updates.
+  """
+  projectUpdateHealth: String
+  """
+  The time at which the user marked the notification as read. Null if the notification is unread.
+  """
+  readAt: DateTime
+  """
+  The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed.
+  """
+  snoozedUntilAt: DateTime
+  """
+  [Internal] Notification subtitle.
+  """
+  subtitle: String!
+  """
+  [Internal] Notification title.
+  """
+  title: String!
+  """
+  Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated.
+  """
+  type: String!
+  """
+  The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed.
+  """
+  unsnoozedAt: DateTime
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  [Internal] URL to the target of the notification.
+  """
+  url: String!
+  """
+  The recipient user of this notification.
+  """
+  user: User!
+  """
+  Related workspace announcement.
+  """
+  workspaceAnnouncementId: String!
 }
 
 input ZendeskSettingsInput {

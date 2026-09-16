@@ -2262,12 +2262,15 @@ export class AiConversationMcpServerConnectionScope extends Request {
   public constructor(request: LinearRequest, data: L.AiConversationMcpServerConnectionScopeFragment) {
     super(request);
     this.teamId = data.teamId ?? undefined;
+    this.workflowDefinitionDraftId = data.workflowDefinitionDraftId ?? undefined;
     this.workflowDefinitionId = data.workflowDefinitionId ?? undefined;
     this.type = data.type;
   }
 
   /** The identifier of the team that will own the connection. Null for other scope types. */
   public teamId?: string | null;
+  /** The identifier of the Loop draft that will own the connection. Null for other scope types. */
+  public workflowDefinitionDraftId?: string | null;
   /** The identifier of the Loop that will own the connection. Null for other scope types. */
   public workflowDefinitionId?: string | null;
   /** The type of owner that will receive the MCP server connection. */
@@ -2603,12 +2606,36 @@ export class AiConversationPostChatMessageToolCallResult extends Request {
     this.error = data.error ?? undefined;
     this.message = data.message ?? undefined;
     this.posted = data.posted;
+    this.destination = data.destination
+      ? new AiConversationPostChatMessageToolCallResultDestination(request, data.destination)
+      : undefined;
   }
 
   public conversationUrl?: string | null;
   public error?: string | null;
   public message?: string | null;
   public posted: boolean;
+  public destination?: AiConversationPostChatMessageToolCallResultDestination | null;
+}
+/**
+ * AiConversationPostChatMessageToolCallResultDestination model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationPostChatMessageToolCallResultDestinationFragment response data
+ */
+export class AiConversationPostChatMessageToolCallResultDestination extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationPostChatMessageToolCallResultDestinationFragment) {
+    super(request);
+    this.channelId = data.channelId;
+    this.integrationId = data.integrationId;
+    this.messageId = data.messageId;
+    this.threadId = data.threadId;
+  }
+
+  public channelId: string;
+  public integrationId: string;
+  public messageId: string;
+  public threadId: string;
 }
 /**
  * AiConversationPromptCodingSessionToolCall model
@@ -3268,6 +3295,69 @@ export class AiConversationRetryPullRequestCheckToolCallArgs extends Request {
   public checkName: string;
   public workflowName?: string | null;
   public entity: AiConversationSearchEntitiesToolCallResultEntities;
+}
+/**
+ * AiConversationRunLoopToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationRunLoopToolCallFragment response data
+ */
+export class AiConversationRunLoopToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationRunLoopToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationRunLoopToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.result = data.result ? new AiConversationRunLoopToolCallResult(request, data.result) : undefined;
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationRunLoopToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The result of the tool call. */
+  public result?: AiConversationRunLoopToolCallResult | null;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationRunLoopToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationRunLoopToolCallArgsFragment response data
+ */
+export class AiConversationRunLoopToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationRunLoopToolCallArgsFragment) {
+    super(request);
+    this.workflowDefinitionId = data.workflowDefinitionId;
+  }
+
+  public workflowDefinitionId: string;
+}
+/**
+ * AiConversationRunLoopToolCallResult model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationRunLoopToolCallResultFragment response data
+ */
+export class AiConversationRunLoopToolCallResult extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationRunLoopToolCallResultFragment) {
+    super(request);
+    this.conversationId = data.conversationId;
+    this.url = data.url;
+    this.createdEntities = data.createdEntities
+      ? data.createdEntities.map(node => new AiConversationCreateEntityToolCallResultCreatedEntities(request, node))
+      : undefined;
+  }
+
+  public conversationId: string;
+  public url: string;
+  public createdEntities?: AiConversationCreateEntityToolCallResultCreatedEntities[] | null;
 }
 /**
  * AiConversationSandboxGitHistoryToolCall model
@@ -7762,7 +7852,7 @@ export class DocumentConnection extends Connection<Document> {
   }
 }
 /**
- * The rich-text content body of a document, issue, project, initiative, project milestone, pull request, release note, automation prompt, AI prompt rules, or welcome message. Content is stored as a base64-encoded Yjs state and can be converted to Markdown or ProseMirror JSON. Each DocumentContent belongs to exactly one parent entity and supports real-time collaborative editing.
+ * The rich-text content body of a document, issue, project, initiative, project milestone, pull request, release note, automation prompt, AI prompt rules, welcome message, or workspace announcement. Content is stored as a base64-encoded Yjs state and can be converted to Markdown or ProseMirror JSON. Each DocumentContent belongs to exactly one parent entity and supports real-time collaborative editing.
  *
  * @param request - function to call the graphql client
  * @param data - L.DocumentContentFragment response data
@@ -11897,6 +11987,36 @@ export class IntegrationConnection extends Connection<Integration> {
   }
 }
 /**
+ * A Datadog feature flag environment.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IntegrationDatadogEnvironmentFragment response data
+ */
+export class IntegrationDatadogEnvironment extends Request {
+  public constructor(request: LinearRequest, data: L.IntegrationDatadogEnvironmentFragment) {
+    super(request);
+    this.id = data.id;
+    this.name = data.name;
+  }
+
+  public id: string;
+  public name: string;
+}
+/**
+ * Datadog environments available to connect.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IntegrationDatadogEnvironmentsPayloadFragment response data
+ */
+export class IntegrationDatadogEnvironmentsPayload extends Request {
+  public constructor(request: LinearRequest, data: L.IntegrationDatadogEnvironmentsPayloadFragment) {
+    super(request);
+    this.environments = data.environments.map(node => new IntegrationDatadogEnvironment(request, node));
+  }
+
+  public environments: IntegrationDatadogEnvironment[];
+}
+/**
  * IntegrationGithubRemoveCodeAccessPayload model
  *
  * @param request - function to call the graphql client
@@ -13617,6 +13737,7 @@ export class IssueLabel extends Request {
     this.lastAppliedAt = parseDate(data.lastAppliedAt) ?? undefined;
     this.name = data.name;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.groupType = data.groupType ?? undefined;
     this._creator = data.creator ?? undefined;
     this._inheritedFrom = data.inheritedFrom ?? undefined;
     this._parent = data.parent ?? undefined;
@@ -13645,6 +13766,8 @@ export class IssueLabel extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The selection mode of this label group. Null for regular labels. Groups without a type use single-select behavior. */
+  public groupType?: L.LabelGroupType | null;
   /** The user who created the label. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
@@ -15694,6 +15817,7 @@ export class NotificationConnection extends Connection<
   | UsageAlertNotification
   | WelcomeMessageNotification
   | WorkflowDefinitionNotification
+  | WorkspaceAnnouncementNotification
   | Notification
 > {
   public constructor(
@@ -15715,6 +15839,7 @@ export class NotificationConnection extends Connection<
           | UsageAlertNotification
           | WelcomeMessageNotification
           | WorkflowDefinitionNotification
+          | WorkspaceAnnouncementNotification
           | Notification
         >
       | undefined
@@ -15752,6 +15877,8 @@ export class NotificationConnection extends Connection<
             return new WelcomeMessageNotification(request, node as L.WelcomeMessageNotificationFragment);
           case "WorkflowDefinitionNotification":
             return new WorkflowDefinitionNotification(request, node as L.WorkflowDefinitionNotificationFragment);
+          case "WorkspaceAnnouncementNotification":
+            return new WorkspaceAnnouncementNotification(request, node as L.WorkspaceAnnouncementNotificationFragment);
 
           default:
             return new Notification(request, node);
@@ -19370,6 +19497,7 @@ export class ProjectUpdate extends Request {
     this.isDiffHidden = data.isDiffHidden;
     this.isStale = data.isStale;
     this.reactionData = data.reactionData;
+    this.shortSummary = data.shortSummary ?? undefined;
     this.slugId = data.slugId;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
@@ -19401,6 +19529,8 @@ export class ProjectUpdate extends Request {
   public isStale: boolean;
   /** Emoji reaction summary, grouped by emoji type. */
   public reactionData: L.Scalars["JSONObject"];
+  /** A short AI-generated summary of the project update. Null if no short summary is available. */
+  public shortSummary?: string | null;
   /** The update's unique URL slug. */
   public slugId: string;
   /**
@@ -23783,9 +23913,9 @@ export class TimeScheduleEntry extends Request {
   public endsAt: Date;
   /** The start time of the schedule entry in ISO 8601 date-time format. */
   public startsAt: Date;
-  /** The email, name or reference to the user on schedule. This is used in case the external user could not be mapped to a Linear user id. */
+  /** The external email, name or reference text for the user when the reference cannot be mapped to a Linear user id. */
   public userEmail?: string | null;
-  /** The Linear user id of the user on schedule. If the user cannot be mapped to a Linear user then `userEmail` can be used as a reference. */
+  /** The Linear user id of the referenced user. If the reference cannot be mapped to a Linear user then `userEmail` can be used instead. */
   public userId?: string | null;
 }
 /**
@@ -23816,6 +23946,24 @@ export class TimeSchedulePayload extends Request {
   public get timeScheduleId(): string | undefined {
     return this._timeSchedule?.id;
   }
+}
+/**
+ * A reference to a user on a time schedule.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.TimeScheduleUserFragment response data
+ */
+export class TimeScheduleUser extends Request {
+  public constructor(request: LinearRequest, data: L.TimeScheduleUserFragment) {
+    super(request);
+    this.userEmail = data.userEmail ?? undefined;
+    this.userId = data.userId ?? undefined;
+  }
+
+  /** The external email, name or reference text for the user when the reference cannot be mapped to a Linear user id. */
+  public userEmail?: string | null;
+  /** The Linear user id of the referenced user. If the reference cannot be mapped to a Linear user then `userEmail` can be used instead. */
+  public userId?: string | null;
 }
 /**
  * A team's triage responsibility configuration that defines how issues entering triage are handled. Each team can have one triage responsibility, which specifies the action to take (notify or assign) and the responsible users, determined either by a manual selection of specific users or by an on-call time schedule.
@@ -25168,6 +25316,7 @@ export class ViewPreferencesValues extends Request {
     this.reviewFieldPreviewLinks = data.reviewFieldPreviewLinks ?? undefined;
     this.reviewFieldQuickToReview = data.reviewFieldQuickToReview ?? undefined;
     this.reviewFieldRepository = data.reviewFieldRepository ?? undefined;
+    this.reviewFieldReviewers = data.reviewFieldReviewers ?? undefined;
     this.reviewFieldSla = data.reviewFieldSla ?? undefined;
     this.reviewFieldStatusDetails = data.reviewFieldStatusDetails ?? undefined;
     this.reviewGrouping = data.reviewGrouping ?? undefined;
@@ -25194,6 +25343,7 @@ export class ViewPreferencesValues extends Request {
     this.showEmptySubGroupsBoard = data.showEmptySubGroupsBoard ?? undefined;
     this.showEmptySubGroupsList = data.showEmptySubGroupsList ?? undefined;
     this.showNestedInitiatives = data.showNestedInitiatives ?? undefined;
+    this.showOnlyLeadTeamProjects = data.showOnlyLeadTeamProjects ?? undefined;
     this.showOnlySnoozedItems = data.showOnlySnoozedItems ?? undefined;
     this.showParents = data.showParents ?? undefined;
     this.showReadItems = data.showReadItems ?? undefined;
@@ -25608,6 +25758,8 @@ export class ViewPreferencesValues extends Request {
   public reviewFieldQuickToReview?: boolean | null;
   /** Whether to show the review repository field. */
   public reviewFieldRepository?: boolean | null;
+  /** Whether to show reviewer avatars on review list items. Null if the preference is unset. */
+  public reviewFieldReviewers?: boolean | null;
   /** Whether to show the most pressing SLA from connected issues on review list items. Null if the preference is unset. */
   public reviewFieldSla?: boolean | null;
   /** Whether to show review status details on a second line. */
@@ -25660,6 +25812,8 @@ export class ViewPreferencesValues extends Request {
   public showEmptySubGroupsList?: boolean | null;
   /** Whether to show sub-initiatives nested. */
   public showNestedInitiatives?: boolean | null;
+  /** Whether a team's project views show only the projects that team leads. When true, projects the team only contributes to are hidden. Null if the preference is unset. */
+  public showOnlyLeadTeamProjects?: boolean | null;
   /** Whether to show only snoozed items. */
   public showOnlySnoozedItems?: boolean | null;
   /** Whether to show parent issues for sub-issues. */
@@ -26579,6 +26733,90 @@ export class WorkflowStatePayload extends Request {
   /** The ID of state that was created or updated. */
   public get workflowStateId(): string | undefined {
     return this._workflowState?.id;
+  }
+}
+/**
+ * A workspace announcement delivered to a member's inbox.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.WorkspaceAnnouncementNotificationFragment response data
+ */
+export class WorkspaceAnnouncementNotification extends Request {
+  private _actor?: L.WorkspaceAnnouncementNotificationFragment["actor"];
+  private _externalUserActor?: L.WorkspaceAnnouncementNotificationFragment["externalUserActor"];
+  private _user: L.WorkspaceAnnouncementNotificationFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.WorkspaceAnnouncementNotificationFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.emailedAt = parseDate(data.emailedAt) ?? undefined;
+    this.id = data.id;
+    this.readAt = parseDate(data.readAt) ?? undefined;
+    this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
+    this.type = data.type;
+    this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.workspaceAnnouncementId = data.workspaceAnnouncementId;
+    this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.category = data.category;
+    this._actor = data.actor ?? undefined;
+    this._externalUserActor = data.externalUserActor ?? undefined;
+    this._user = data.user;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent. */
+  public emailedAt?: Date | null;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The time at which the user marked the notification as read. Null if the notification is unread. */
+  public readAt?: Date | null;
+  /** The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed. */
+  public snoozedUntilAt?: Date | null;
+  /** Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated. */
+  public type: string;
+  /** The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed. */
+  public unsnoozedAt?: Date | null;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** Related workspace announcement. */
+  public workspaceAnnouncementId: string;
+  /** The bot that caused the notification. */
+  public botActor?: ActorBot | null;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
+  /** The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
+  public get actor(): LinearFetch<User> | undefined {
+    return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
+  }
+  /** The ID of user that caused the notification. null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
+  public get actorId(): string | undefined {
+    return this._actor?.id;
+  }
+  /** The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member. */
+  public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
+    return this._externalUserActor?.id
+      ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
+      : undefined;
+  }
+  /** The ID of external user that caused the notification. populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like slack or github) rather than a linear workspace member. */
+  public get externalUserActorId(): string | undefined {
+    return this._externalUserActor?.id;
+  }
+  /** The recipient user of this notification. */
+  public get user(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._user.id);
+  }
+  /** The ID of recipient user of this notification. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
 }
 /**
@@ -29200,6 +29438,7 @@ export class NotificationQuery extends Request {
     | UsageAlertNotification
     | WelcomeMessageNotification
     | WorkflowDefinitionNotification
+    | WorkspaceAnnouncementNotification
     | Notification
   > {
     const response = await this._request<L.NotificationQuery, L.NotificationQueryVariables>(
@@ -29237,6 +29476,11 @@ export class NotificationQuery extends Request {
         return new WelcomeMessageNotification(this._request, data as L.WelcomeMessageNotificationFragment);
       case "WorkflowDefinitionNotification":
         return new WorkflowDefinitionNotification(this._request, data as L.WorkflowDefinitionNotificationFragment);
+      case "WorkspaceAnnouncementNotification":
+        return new WorkspaceAnnouncementNotification(
+          this._request,
+          data as L.WorkspaceAnnouncementNotificationFragment
+        );
 
       default:
         return new Notification(this._request, data);
@@ -50609,6 +50853,7 @@ export class LinearSdk extends Request {
     | UsageAlertNotification
     | WelcomeMessageNotification
     | WorkflowDefinitionNotification
+    | WorkspaceAnnouncementNotification
     | Notification
   > {
     return new NotificationQuery(this._request).fetch(id);
@@ -54751,6 +54996,7 @@ export {
   IssueSharingPolicy,
   IssueSuggestionState,
   IssueSuggestionType,
+  LabelGroupType,
   LinearAgentMcpServersMode,
   LinearAgentTrustedSourcesMode,
   NotificationCategory,

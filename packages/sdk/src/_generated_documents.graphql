@@ -11,6 +11,13 @@ fragment SesDomainIdentityDnsRecord on SesDomainIdentityDnsRecord {
   isVerified
 }
 
+# A Datadog feature flag environment.
+fragment IntegrationDatadogEnvironment on IntegrationDatadogEnvironment {
+  __typename
+  id
+  name
+}
+
 # A Git automation rule that automatically transitions issues to a specified workflow state when a Git
 # event occurs (e.g., when a PR is opened, move the linked issue to 'In Review'). Each rule is scoped
 # to a team and optionally to a specific target branch. When no target branch is specified, the rule
@@ -1513,6 +1520,10 @@ fragment Notification on Notification {
 
   ... on WorkflowDefinitionNotification {
     ...WorkflowDefinitionNotification
+  }
+
+  ... on WorkspaceAnnouncementNotification {
+    ...WorkspaceAnnouncementNotification
   }
 }
 
@@ -3234,6 +3245,15 @@ fragment IssueHistory on IssueHistory {
   customerNeedId
 }
 
+# A reference to a user on a time schedule.
+fragment TimeScheduleUser on TimeScheduleUser {
+  __typename
+  # The Linear user id of the referenced user. If the reference cannot be mapped to a Linear user then `userEmail` can be used instead.
+  userId
+  # The external email, name or reference text for the user when the reference cannot be mapped to a Linear user id.
+  userEmail
+}
+
 # A reference to an entity returned by semantic search, containing its type and ID. Resolve the
 # specific entity using the type-specific field resolvers (issue, project, initiative, document).
 fragment SemanticSearchResult on SemanticSearchResult {
@@ -3718,12 +3738,12 @@ fragment AiConversationAckPart on AiConversationAckPart {
 # period.
 fragment TimeScheduleEntry on TimeScheduleEntry {
   __typename
-  # The Linear user id of the user on schedule. If the user cannot be mapped to a Linear user then `userEmail` can be used as a reference.
+  # The Linear user id of the referenced user. If the reference cannot be mapped to a Linear user then `userEmail` can be used instead.
   userId
-  # The email, name or reference to the user on schedule. This is used in case the external user could not be mapped to a Linear user id.
-  userEmail
   # The end time of the schedule entry in ISO 8601 date-time format.
   endsAt
+  # The external email, name or reference text for the user when the reference cannot be mapped to a Linear user id.
+  userEmail
   # The start time of the schedule entry in ISO 8601 date-time format.
   startsAt
 }
@@ -3801,6 +3821,8 @@ fragment WorkflowState on WorkflowState {
 # rich-text body with the update content.
 fragment ProjectUpdate on ProjectUpdate {
   __typename
+  # A short AI-generated summary of the project update. Null if no short summary is available.
+  shortSummary
   # Emoji reaction summary, grouped by emoji type.
   reactionData
   # Number of comments associated with the project update.
@@ -4547,6 +4569,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     }
     ... on AiConversationRetryPullRequestCheckToolCall {
       ...AiConversationRetryPullRequestCheckToolCall
+    }
+    ... on AiConversationRunLoopToolCall {
+      ...AiConversationRunLoopToolCall
     }
     ... on AiConversationSandboxGitHistoryToolCall {
       ...AiConversationSandboxGitHistoryToolCall
@@ -5312,6 +5337,50 @@ fragment Organization on Organization {
   restrictLabelManagementToAdmins
   # [DEPRECATED] Which day count to use for SLA calculations.
   slaDayCount
+}
+
+# A workspace announcement delivered to a member's inbox.
+fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
+  __typename
+  # Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated.
+  type
+  # Related workspace announcement.
+  workspaceAnnouncementId
+  # The bot that caused the notification.
+  botActor {
+    ...ActorBot
+  }
+  # The category of the notification.
+  category
+  # The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member.
+  externalUserActor {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The recipient user of this notification.
+  user {
+    id
+  }
+  # The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed.
+  unsnoozedAt
+  # The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent.
+  emailedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the user marked the notification as read. Null if the notification is unread.
+  readAt
+  # The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed.
+  snoozedUntilAt
+  # The unique identifier of the entity.
+  id
+  # The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event.
+  actor {
+    id
+  }
 }
 
 # A workspace audit log entry recording a security or compliance-relevant action. Audit entries
@@ -6987,6 +7056,14 @@ fragment UserSettingsCustomTheme on UserSettingsCustomTheme {
   contrast
 }
 
+# Datadog environments available to connect.
+fragment IntegrationDatadogEnvironmentsPayload on IntegrationDatadogEnvironmentsPayload {
+  __typename
+  environments {
+    ...IntegrationDatadogEnvironment
+  }
+}
+
 # Delivery preferences for a specific notification channel, including an optional delivery schedule
 # that restricts when notifications are sent.
 fragment NotificationDeliveryPreferencesChannel on NotificationDeliveryPreferencesChannel {
@@ -7186,6 +7263,8 @@ fragment IssueLabel on IssueLabel {
   parent {
     id
   }
+  # The selection mode of this label group. Null for regular labels. Groups without a type use single-select behavior.
+  groupType
   # The team that the label is scoped to. If null, the label is a workspace-level label available to all teams in the workspace.
   team {
     id
@@ -9523,6 +9602,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectZoomLevel
   # The zoom scale for the timeline view.
   timelineZoomScale
+  # Whether a team's project views show only the projects that team leads. When true, projects the team only contributes to are hidden. Null if the preference is unset.
+  showOnlyLeadTeamProjects
   # Whether completed agent sessions are shown and for how long.
   showCompletedAgentSessions
   # Whether completed issues are shown and for how long.
@@ -9573,6 +9654,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showReadItems
   # Whether to show review status details on a second line.
   reviewFieldStatusDetails
+  # Whether to show reviewer avatars on review list items. Null if the preference is unset.
+  reviewFieldReviewers
   # Whether to show snoozed items.
   showSnoozedItems
   # Whether to show sub-initiative projects.
@@ -10033,6 +10116,8 @@ fragment AgentAutomationRetryResolution on AgentAutomationRetryResolution {
 # The owner scope for an MCP server connection requested in an AI conversation.
 fragment AiConversationMcpServerConnectionScope on AiConversationMcpServerConnectionScope {
   __typename
+  # The identifier of the Loop draft that will own the connection. Null for other scope types.
+  workflowDefinitionDraftId
   # The identifier of the Loop that will own the connection. Null for other scope types.
   workflowDefinitionId
   # The identifier of the team that will own the connection. Null for other scope types.
@@ -10861,9 +10946,10 @@ fragment IssueImportJqlCheckPayload on IssueImportJqlCheckPayload {
 }
 
 # The rich-text content body of a document, issue, project, initiative, project milestone, pull
-# request, release note, automation prompt, AI prompt rules, or welcome message. Content is stored as
-# a base64-encoded Yjs state and can be converted to Markdown or ProseMirror JSON. Each
-# DocumentContent belongs to exactly one parent entity and supports real-time collaborative editing.
+# request, release note, automation prompt, AI prompt rules, welcome message, or workspace
+# announcement. Content is stored as a base64-encoded Yjs state and can be converted to Markdown or
+# ProseMirror JSON. Each DocumentContent belongs to exactly one parent entity and supports real-time
+# collaborative editing.
 fragment DocumentContent on DocumentContent {
   __typename
   # The AI prompt rules that the content is associated with. Null if the content belongs to a different parent entity type.
@@ -11301,6 +11387,10 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
 
   ... on AiConversationRetryPullRequestCheckToolCall {
     ...AiConversationRetryPullRequestCheckToolCall
+  }
+
+  ... on AiConversationRunLoopToolCall {
+    ...AiConversationRunLoopToolCall
   }
 
   ... on AiConversationSandboxGitHistoryToolCall {
@@ -11987,9 +12077,20 @@ fragment AiConversationPostChatMessageToolCallArgs on AiConversationPostChatMess
 fragment AiConversationPostChatMessageToolCallResult on AiConversationPostChatMessageToolCallResult {
   __typename
   conversationUrl
+  destination {
+    ...AiConversationPostChatMessageToolCallResultDestination
+  }
   error
   message
   posted
+}
+
+fragment AiConversationPostChatMessageToolCallResultDestination on AiConversationPostChatMessageToolCallResultDestination {
+  __typename
+  channelId
+  integrationId
+  messageId
+  threadId
 }
 
 fragment AiConversationPromptCodingSessionToolCall on AiConversationPromptCodingSessionToolCall {
@@ -12327,6 +12428,41 @@ fragment AiConversationRetryPullRequestCheckToolCallArgs on AiConversationRetryP
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
   workflowName
+}
+
+fragment AiConversationRunLoopToolCall on AiConversationRunLoopToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationRunLoopToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  # The result of the tool call.
+  result {
+    ...AiConversationRunLoopToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationRunLoopToolCallArgs on AiConversationRunLoopToolCallArgs {
+  __typename
+  workflowDefinitionId
+}
+
+fragment AiConversationRunLoopToolCallResult on AiConversationRunLoopToolCallResult {
+  __typename
+  conversationId
+  createdEntities {
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
+  }
+  url
 }
 
 fragment AiConversationSandboxGitHistoryToolCall on AiConversationSandboxGitHistoryToolCall {
