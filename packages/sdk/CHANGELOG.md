@@ -1,5 +1,93 @@
 # Change Log
 
+## 95.1.0
+
+### Minor Changes
+
+- feat(schema): [dangerous] Enum value 'AiConversation' was added to enum 'AiConversationEntityCardWidgetArgsType' (AiConversationEntityCardWidgetArgsType.AiConversation)
+
+  feat(schema): [dangerous] Enum value 'Meeting' was added to enum 'AiConversationEntityCardWidgetArgsType' (AiConversationEntityCardWidgetArgsType.Meeting)
+
+  feat(schema): [dangerous] Enum value 'workflowDefinitionDraft' was added to enum 'AiConversationMcpServerConnectionScopeType' (AiConversationMcpServerConnectionScopeType.workflowDefinitionDraft)
+
+  feat(schema): [dangerous] Enum value 'RunLoop' was added to enum 'AiConversationTool' (AiConversationTool.RunLoop)
+
+  feat(schema): [dangerous] Member 'AiConversationRunLoopToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Input field 'projects' was added to input object type 'InitiativeCollectionFilter' (InitiativeCollectionFilter.projects)
+
+  feat(schema): [dangerous] Input field 'projects' was added to input object type 'InitiativeFilter' (InitiativeFilter.projects)
+
+  feat(schema): [dangerous] Enum value 'datadog' was added to enum 'IntegrationService' (IntegrationService.datadog)
+
+  feat(schema): [dangerous] Input field 'groupType' was added to input object type 'IssueLabelCreateInput' (IssueLabelCreateInput.groupType)
+
+  feat(schema): [dangerous] Input field 'groupType' was added to input object type 'IssueLabelUpdateInput' (IssueLabelUpdateInput.groupType)
+
+  feat(schema): [dangerous] Input field 'projects' was added to input object type 'NullableInitiativeFilter' (NullableInitiativeFilter.projects)
+
+  feat(schema): [dangerous] Input field 'regionPinning' was added to input object type 'OrganizationCodingAgentSettingsInput' (OrganizationCodingAgentSettingsInput.regionPinning)
+
+  feat(schema): [dangerous] Input field 'sandboxSize' was added to input object type 'OrganizationCodingAgentSettingsInput' (OrganizationCodingAgentSettingsInput.sandboxSize)
+
+  feat(schema): [dangerous] Input field 'pinnedViewManagementRole' was added to input object type 'OrganizationSecuritySettingsInput' (OrganizationSecuritySettingsInput.pinnedViewManagementRole)
+
+  feat(schema): [dangerous] Input field 'pinnedViewManagement' was added to input object type 'TeamSecuritySettingsInput' (TeamSecuritySettingsInput.pinnedViewManagement)
+
+  feat(schema): [dangerous] Input field 'overriddenUser' was added to input object type 'TimeScheduleEntryInput' (TimeScheduleEntryInput.overriddenUser)
+
+  feat(schema): [dangerous] Enum value 'customerRequestAdded' was added to enum 'WorkflowTrigger' (WorkflowTrigger.customerRequestAdded)
+
+  feat(schema): [non_breaking] Type 'AiConversationPostChatMessageToolCallResultDestination' was added (AiConversationPostChatMessageToolCallResultDestination)
+
+  feat(schema): [non_breaking] Type 'AiConversationRunLoopToolCall' was added (AiConversationRunLoopToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationRunLoopToolCallArgs' was added (AiConversationRunLoopToolCallArgs)
+
+  feat(schema): [non_breaking] Type 'AiConversationRunLoopToolCallResult' was added (AiConversationRunLoopToolCallResult)
+
+  feat(schema): [non_breaking] Type 'IntegrationDatadogEnvironment' was added (IntegrationDatadogEnvironment)
+
+  feat(schema): [non_breaking] Type 'IntegrationDatadogEnvironmentsPayload' was added (IntegrationDatadogEnvironmentsPayload)
+
+  feat(schema): [non_breaking] Type 'LabelGroupType' was added (LabelGroupType)
+
+  feat(schema): [non_breaking] Type 'TimeScheduleUser' was added (TimeScheduleUser)
+
+  feat(schema): [non_breaking] Type 'TimeScheduleUserInput' was added (TimeScheduleUserInput)
+
+  feat(schema): [non_breaking] Type 'WorkspaceAnnouncementNotification' was added (WorkspaceAnnouncementNotification)
+
+  feat(schema): [non_breaking] Field 'workflowDefinitionDraftId' was added to object type 'AiConversationMcpServerConnectionScope' (AiConversationMcpServerConnectionScope.workflowDefinitionDraftId)
+
+  feat(schema): [non_breaking] Field 'destination' was added to object type 'AiConversationPostChatMessageToolCallResult' (AiConversationPostChatMessageToolCallResult.destination)
+
+  feat(schema): [non_breaking] Description 'The rich-text content body of a document, issue, project, initiative, project milestone, pull request, release note, automation prompt, AI prompt rules, or welcome message. Content is stored as a base64-encoded Yjs state and can be converted to Markdown or ProseMirror JSON. Each DocumentContent belongs to exactly one parent entity and supports real-time collaborative editing.' on type 'DocumentContent' has changed to 'The rich-text content body of a document, issue, project, initiative, project milestone, pull request, release note, automation prompt, AI prompt rules, welcome message, or workspace announcement. Content is stored as a base64-encoded Yjs state and can be converted to Markdown or ProseMirror JSON. Each DocumentContent belongs to exactly one parent entity and supports real-time collaborative editing.' (DocumentContent)
+
+  feat(schema): [non_breaking] Field 'groupType' was added to object type 'IssueLabel' (IssueLabel.groupType)
+
+  feat(schema): [non_breaking] Field 'integrationDatadogConnect' was added to object type 'Mutation' (Mutation.integrationDatadogConnect)
+
+  feat(schema): [non_breaking] Field 'integrationDatadogEnvironments' was added to object type 'Mutation' (Mutation.integrationDatadogEnvironments)
+
+  feat(schema): [non_breaking] Field 'shortSummary' was added to object type 'ProjectUpdate' (ProjectUpdate.shortSummary)
+
+  feat(schema): [non_breaking] Field 'authoredAt' was added to object type 'PullRequestCommit' (PullRequestCommit.authoredAt)
+
+  feat(schema): [non_breaking] Field 'overriddenUser' was added to object type 'TimeScheduleEntry' (TimeScheduleEntry.overriddenUser)
+
+  feat(schema): [non_breaking] Field 'TimeScheduleEntry.userEmail' description changed from 'The email, name or reference to the user on schedule. This is used in case the external user could not be mapped to a Linear user id.' to 'The external email, name or reference text for the user when the reference cannot be mapped to a Linear user id.' (TimeScheduleEntry.userEmail)
+
+  feat(schema): [non_breaking] Field 'TimeScheduleEntry.userId' description changed from 'The Linear user id of the user on schedule. If the user cannot be mapped to a Linear user then `userEmail` can be used as a reference.' to 'The Linear user id of the referenced user. If the reference cannot be mapped to a Linear user then `userEmail` can be used instead.' (TimeScheduleEntry.userId)
+
+  feat(schema): [non_breaking] Input field 'TimeScheduleEntryInput.userEmail' description changed from 'The email, name or reference to the user on schedule. This is used in case the external user could not be mapped to a Linear user id.' to 'The external email, name or reference text for the user when the reference cannot be mapped to a Linear user id.' (TimeScheduleEntryInput.userEmail)
+
+  feat(schema): [non_breaking] Input field 'TimeScheduleEntryInput.userId' description changed from 'The Linear user id of the user on schedule. If the user cannot be mapped to a Linear user then `userEmail` can be used as a reference.' to 'The Linear user id of the referenced user. If the reference cannot be mapped to a Linear user then `userEmail` can be used instead.' (TimeScheduleEntryInput.userId)
+
+  feat(schema): [non_breaking] Field 'reviewFieldReviewers' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.reviewFieldReviewers)
+
+  feat(schema): [non_breaking] Field 'showOnlyLeadTeamProjects' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.showOnlyLeadTeamProjects)
+
 ## 95.0.0
 
 ### Major Changes

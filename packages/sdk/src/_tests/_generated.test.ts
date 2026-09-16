@@ -2057,6 +2057,7 @@ describe("generated", () => {
       | L.UsageAlertNotification
       | L.WelcomeMessageNotification
       | L.WorkflowDefinitionNotification
+      | L.WorkspaceAnnouncementNotification
       | undefined
       | null;
     let _notification_id: string | undefined | null;
@@ -2087,6 +2088,7 @@ describe("generated", () => {
           | L.UsageAlertNotification
           | L.WelcomeMessageNotification
           | L.WorkflowDefinitionNotification
+          | L.WorkspaceAnnouncementNotification
           | undefined
           | null = await client.notification(_notification_id);
         _notification = notification;
@@ -4482,6 +4484,7 @@ describe("generated", () => {
       | L.UsageAlertNotification
       | L.WelcomeMessageNotification
       | L.WorkflowDefinitionNotification
+      | L.WorkspaceAnnouncementNotification
       | undefined
       | null;
     let _notification_id: string | undefined | null;
@@ -4512,6 +4515,7 @@ describe("generated", () => {
           | L.UsageAlertNotification
           | L.WelcomeMessageNotification
           | L.WorkflowDefinitionNotification
+          | L.WorkspaceAnnouncementNotification
           | undefined
           | null = await client.notification(_notification_id);
         _notification = notification;

@@ -1295,6 +1295,7 @@ export enum AiConversationEntityCardWidgetArgsAction {
 /** [Internal] The entity type */
 export enum AiConversationEntityCardWidgetArgsType {
   AgentSession = "AgentSession",
+  AiConversation = "AiConversation",
   AiPrompt = "AiPrompt",
   AiPromptRules = "AiPromptRules",
   CustomView = "CustomView",
@@ -1307,6 +1308,7 @@ export enum AiConversationEntityCardWidgetArgsType {
   InitiativeUpdate = "InitiativeUpdate",
   Issue = "Issue",
   IssueDraft = "IssueDraft",
+  Meeting = "Meeting",
   Project = "Project",
   ProjectDraft = "ProjectDraft",
   ProjectMilestone = "ProjectMilestone",
@@ -1651,6 +1653,8 @@ export type AiConversationMcpServerConnectionScope = {
   teamId?: Maybe<Scalars["String"]>;
   /** The type of owner that will receive the MCP server connection. */
   type: AiConversationMcpServerConnectionScopeType;
+  /** The identifier of the Loop draft that will own the connection. Null for other scope types. */
+  workflowDefinitionDraftId?: Maybe<Scalars["String"]>;
   /** The identifier of the Loop that will own the connection. Null for other scope types. */
   workflowDefinitionId?: Maybe<Scalars["String"]>;
 };
@@ -1660,6 +1664,7 @@ export enum AiConversationMcpServerConnectionScopeType {
   Team = "team",
   User = "user",
   WorkflowDefinition = "workflowDefinition",
+  WorkflowDefinitionDraft = "workflowDefinitionDraft",
 }
 
 export type AiConversationMemoryToolCall = AiConversationBaseToolCall & {
@@ -1857,9 +1862,18 @@ export enum AiConversationPostChatMessageToolCallArgsPlatform {
 export type AiConversationPostChatMessageToolCallResult = {
   __typename?: "AiConversationPostChatMessageToolCallResult";
   conversationUrl?: Maybe<Scalars["String"]>;
+  destination?: Maybe<AiConversationPostChatMessageToolCallResultDestination>;
   error?: Maybe<Scalars["String"]>;
   message?: Maybe<Scalars["String"]>;
   posted: Scalars["Boolean"];
+};
+
+export type AiConversationPostChatMessageToolCallResultDestination = {
+  __typename?: "AiConversationPostChatMessageToolCallResultDestination";
+  channelId: Scalars["String"];
+  integrationId: Scalars["String"];
+  messageId: Scalars["String"];
+  threadId: Scalars["String"];
 };
 
 export type AiConversationPromptCodingSessionToolCall = AiConversationBaseToolCall & {
@@ -2168,6 +2182,33 @@ export type AiConversationRetryPullRequestCheckToolCallArgs = {
   checkName: Scalars["String"];
   entity: AiConversationSearchEntitiesToolCallResultEntities;
   workflowName?: Maybe<Scalars["String"]>;
+};
+
+export type AiConversationRunLoopToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationRunLoopToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationRunLoopToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  result?: Maybe<AiConversationRunLoopToolCallResult>;
+};
+
+export type AiConversationRunLoopToolCallArgs = {
+  __typename?: "AiConversationRunLoopToolCallArgs";
+  workflowDefinitionId: Scalars["String"];
+};
+
+export type AiConversationRunLoopToolCallResult = {
+  __typename?: "AiConversationRunLoopToolCallResult";
+  conversationId: Scalars["String"];
+  createdEntities?: Maybe<Array<AiConversationCreateEntityToolCallResultCreatedEntities>>;
+  url: Scalars["String"];
 };
 
 export type AiConversationSandboxGitHistoryToolCall = AiConversationBaseToolCall & {
@@ -2501,6 +2542,7 @@ export enum AiConversationTool {
   RestoreEntity = "RestoreEntity",
   RetrieveEntities = "RetrieveEntities",
   RetryPullRequestCheck = "RetryPullRequestCheck",
+  RunLoop = "RunLoop",
   SandboxGitHistory = "SandboxGitHistory",
   SearchChatChannels = "SearchChatChannels",
   SearchDocumentation = "SearchDocumentation",
@@ -2551,6 +2593,7 @@ export type AiConversationToolCall =
   | AiConversationRestoreEntityToolCall
   | AiConversationRetrieveEntitiesToolCall
   | AiConversationRetryPullRequestCheckToolCall
+  | AiConversationRunLoopToolCall
   | AiConversationSandboxGitHistoryToolCall
   | AiConversationSearchChatChannelsToolCall
   | AiConversationSearchDocumentationToolCall
@@ -6179,7 +6222,7 @@ export type DocumentConnection = {
   pageInfo: PageInfo;
 };
 
-/** The rich-text content body of a document, issue, project, initiative, project milestone, pull request, release note, automation prompt, AI prompt rules, or welcome message. Content is stored as a base64-encoded Yjs state and can be converted to Markdown or ProseMirror JSON. Each DocumentContent belongs to exactly one parent entity and supports real-time collaborative editing. */
+/** The rich-text content body of a document, issue, project, initiative, project milestone, pull request, release note, automation prompt, AI prompt rules, welcome message, or workspace announcement. Content is stored as a base64-encoded Yjs state and can be converted to Markdown or ProseMirror JSON. Each DocumentContent belongs to exactly one parent entity and supports real-time collaborative editing. */
 export type DocumentContent = Node & {
   __typename?: "DocumentContent";
   /** The AI prompt rules that the content is associated with. Null if the content belongs to a different parent entity type. */
@@ -8616,6 +8659,8 @@ export type InitiativeCollectionFilter = {
   owner?: InputMaybe<NullableUserFilter>;
   /** Comparator for the initiative priority. */
   priority?: InputMaybe<NullableNumberComparator>;
+  /** Filters that the initiative projects must satisfy. */
+  projects?: InputMaybe<ProjectCollectionFilter>;
   /** Comparator for the initiative slug ID. */
   slugId?: InputMaybe<StringComparator>;
   /** Filters that needs to be matched by some initiatives. */
@@ -8726,6 +8771,8 @@ export type InitiativeFilter = {
   owner?: InputMaybe<NullableUserFilter>;
   /** Comparator for the initiative priority. */
   priority?: InputMaybe<NullableNumberComparator>;
+  /** Filters that the initiative projects must satisfy. */
+  projects?: InputMaybe<ProjectCollectionFilter>;
   /** Comparator for the initiative slug ID. */
   slugId?: InputMaybe<StringComparator>;
   /** Comparator for the initiative started at date. */
@@ -9838,6 +9885,19 @@ export type IntegrationCustomerDataAttributesRefreshInput = {
   service: Scalars["String"];
 };
 
+/** A Datadog feature flag environment. */
+export type IntegrationDatadogEnvironment = {
+  __typename?: "IntegrationDatadogEnvironment";
+  id: Scalars["String"];
+  name: Scalars["String"];
+};
+
+/** Datadog environments available to connect. */
+export type IntegrationDatadogEnvironmentsPayload = {
+  __typename?: "IntegrationDatadogEnvironmentsPayload";
+  environments: Array<IntegrationDatadogEnvironment>;
+};
+
 export type IntegrationEdge = {
   __typename?: "IntegrationEdge";
   /** Used in `before` and `after` args */
@@ -9892,6 +9952,7 @@ export type IntegrationRequestPayload = {
 export enum IntegrationService {
   Airbyte = "airbyte",
   AsksWeb = "asksWeb",
+  Datadog = "datadog",
   Discord = "discord",
   Email = "email",
   Figma = "figma",
@@ -11573,6 +11634,8 @@ export type IssueLabel = Node & {
   creator?: Maybe<User>;
   /** The label's description. */
   description?: Maybe<Scalars["String"]>;
+  /** The selection mode of this label group. Null for regular labels. Groups without a type use single-select behavior. */
+  groupType?: Maybe<LabelGroupType>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /** The original workspace or parent-team label that this label was inherited from. Null if the label is not inherited. */
@@ -11682,6 +11745,8 @@ export type IssueLabelCreateInput = {
   color?: InputMaybe<Scalars["String"]>;
   /** The description of the label. */
   description?: InputMaybe<Scalars["String"]>;
+  /** The selection mode of the label group. Defaults to singleSelect for groups and null for regular labels. */
+  groupType?: InputMaybe<LabelGroupType>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars["String"]>;
   /** Whether the label is a group. */
@@ -11744,6 +11809,8 @@ export type IssueLabelUpdateInput = {
   color?: InputMaybe<Scalars["String"]>;
   /** The description of the label. */
   description?: InputMaybe<Scalars["String"]>;
+  /** The selection mode of the label group. Omit to keep the current value. Null resets groups to singleSelect. Regular labels always use null. */
+  groupType?: InputMaybe<LabelGroupType>;
   /** Whether the label is a group. */
   isGroup?: InputMaybe<Scalars["Boolean"]>;
   /** The name of the label. */
@@ -13225,6 +13292,12 @@ export type LabelGroupSort = {
   order?: InputMaybe<PaginationSortOrder>;
 };
 
+/** The selection mode of an issue label group. */
+export enum LabelGroupType {
+  MultiSelect = "multiSelect",
+  SingleSelect = "singleSelect",
+}
+
 /** A notification subscription scoped to a specific issue label. The subscriber receives notifications for events related to issues with this label. */
 export type LabelNotificationSubscription = Entity &
   Node &
@@ -13697,6 +13770,10 @@ export type Mutation = {
   integrationAsksConnectChannel: AsksChannelConnectPayload;
   /** [INTERNAL] Refreshes the customer data attributes from the specified integration service. */
   integrationCustomerDataAttributesRefresh: IntegrationPayload;
+  /** [Internal] Connects Datadog feature flags to the workspace. */
+  integrationDatadogConnect: IntegrationPayload;
+  /** [Internal] Lists Datadog environments available to connect. */
+  integrationDatadogEnvironments: IntegrationDatadogEnvironmentsPayload;
   /** Deletes an integration. */
   integrationDelete: DeletePayload;
   /** Integrates the workspace with Discord. */
@@ -14845,6 +14922,19 @@ export type MutationIntegrationAsksConnectChannelArgs = {
 
 export type MutationIntegrationCustomerDataAttributesRefreshArgs = {
   input: IntegrationCustomerDataAttributesRefreshInput;
+};
+
+export type MutationIntegrationDatadogConnectArgs = {
+  apiKey: Scalars["String"];
+  applicationKey: Scalars["String"];
+  environmentId: Scalars["String"];
+  site: Scalars["String"];
+};
+
+export type MutationIntegrationDatadogEnvironmentsArgs = {
+  apiKey: Scalars["String"];
+  applicationKey: Scalars["String"];
+  site: Scalars["String"];
 };
 
 export type MutationIntegrationDeleteArgs = {
@@ -16761,6 +16851,8 @@ export type NullableInitiativeFilter = {
   owner?: InputMaybe<NullableUserFilter>;
   /** Comparator for the initiative priority. */
   priority?: InputMaybe<NullableNumberComparator>;
+  /** Filters that the initiative projects must satisfy. */
+  projects?: InputMaybe<ProjectCollectionFilter>;
   /** Comparator for the initiative slug ID. */
   slugId?: InputMaybe<StringComparator>;
   /** Comparator for the initiative started at date. */
@@ -17910,6 +18002,10 @@ export type OrganizationCodingAgentSettingsInput = {
   effort?: InputMaybe<Scalars["String"]>;
   /** [Internal] The model preference used for Coding Sessions. */
   model?: InputMaybe<Scalars["String"]>;
+  /** [Internal] Whether new Coding Session sandboxes should use workspace region pinning. */
+  regionPinning?: InputMaybe<Scalars["Boolean"]>;
+  /** [Internal] The default sandbox size used for Coding Sessions. */
+  sandboxSize?: InputMaybe<Scalars["String"]>;
 };
 
 /** Workspace deletion operation response. */
@@ -18231,6 +18327,8 @@ export type OrganizationSecuritySettingsInput = {
   labelManagementRole?: InputMaybe<UserRoleType>;
   /** The minimum role required to create personal API keys. */
   personalApiKeysRole?: InputMaybe<UserRoleType>;
+  /** The minimum role required to pin views to workspace pages and to change the views pinned there. */
+  pinnedViewManagementRole?: InputMaybe<UserRoleType>;
   /** The minimum role required to create teams. */
   teamCreationRole?: InputMaybe<UserRoleType>;
   /** The minimum role required to manage workspace templates. */
@@ -21030,6 +21128,8 @@ export type ProjectUpdate = Node & {
   reactionData: Scalars["JSONObject"];
   /** Reactions associated with the project update. */
   reactions: Array<Reaction>;
+  /** A short AI-generated summary of the project update. Null if no short summary is available. */
+  shortSummary?: Maybe<Scalars["String"]>;
   /** The update's unique URL slug. */
   slugId: Scalars["String"];
   /**
@@ -21541,6 +21641,8 @@ export type PullRequestCommit = {
   authorExternalUserIds: Array<Scalars["String"]>;
   /** Linear user IDs for commit authors (includes co-authors). */
   authorUserIds: Array<Scalars["String"]>;
+  /** The time when the commit was authored, as an ISO 8601 string. Null if unavailable. */
+  authoredAt?: Maybe<Scalars["String"]>;
   /** The number of files changed in this commit. Null if the hosting provider did not include this information. */
   changedFiles?: Maybe<Scalars["Float"]>;
   /** The timestamp when the commit was committed, as an ISO 8601 string. */
@@ -26318,6 +26420,8 @@ export type TeamSecuritySettingsInput = {
   labelManagement?: InputMaybe<TeamRoleType>;
   /** The minimum team role required to manage full workspace members (non-guests) in the team. */
   memberManagement?: InputMaybe<TeamRoleType>;
+  /** The minimum team role required to pin views to the team's pages and to change the views pinned there. */
+  pinnedViewManagement?: InputMaybe<TeamRoleType>;
   /** The minimum team role required to manage team settings. */
   teamManagement?: InputMaybe<TeamRoleType>;
   /** The minimum team role required to manage templates in the team. */
@@ -26709,22 +26813,26 @@ export type TimeScheduleEntry = {
   __typename?: "TimeScheduleEntry";
   /** The end time of the schedule entry in ISO 8601 date-time format. */
   endsAt: Scalars["DateTime"];
+  /** [ALPHA] The user this entry replaced, set when the entry is an override. */
+  overriddenUser?: Maybe<TimeScheduleUser>;
   /** The start time of the schedule entry in ISO 8601 date-time format. */
   startsAt: Scalars["DateTime"];
-  /** The email, name or reference to the user on schedule. This is used in case the external user could not be mapped to a Linear user id. */
+  /** The external email, name or reference text for the user when the reference cannot be mapped to a Linear user id. */
   userEmail?: Maybe<Scalars["String"]>;
-  /** The Linear user id of the user on schedule. If the user cannot be mapped to a Linear user then `userEmail` can be used as a reference. */
+  /** The Linear user id of the referenced user. If the reference cannot be mapped to a Linear user then `userEmail` can be used instead. */
   userId?: Maybe<Scalars["String"]>;
 };
 
 export type TimeScheduleEntryInput = {
   /** The end time of the schedule entry in ISO 8601 date-time format. */
   endsAt: Scalars["DateTime"];
+  /** [ALPHA] The user this entry replaced, set when the entry is an override. */
+  overriddenUser?: InputMaybe<TimeScheduleUserInput>;
   /** The start time of the schedule entry in ISO 8601 date-time format. */
   startsAt: Scalars["DateTime"];
-  /** The email, name or reference to the user on schedule. This is used in case the external user could not be mapped to a Linear user id. */
+  /** The external email, name or reference text for the user when the reference cannot be mapped to a Linear user id. */
   userEmail?: InputMaybe<Scalars["String"]>;
-  /** The Linear user id of the user on schedule. If the user cannot be mapped to a Linear user then `userEmail` can be used as a reference. */
+  /** The Linear user id of the referenced user. If the reference cannot be mapped to a Linear user then `userEmail` can be used instead. */
   userId?: InputMaybe<Scalars["String"]>;
 };
 
@@ -26751,6 +26859,22 @@ export type TimeScheduleUpdateInput = {
   externalUrl?: InputMaybe<Scalars["String"]>;
   /** The name of the schedule. */
   name?: InputMaybe<Scalars["String"]>;
+};
+
+/** A reference to a user on a time schedule. */
+export type TimeScheduleUser = {
+  __typename?: "TimeScheduleUser";
+  /** The external email, name or reference text for the user when the reference cannot be mapped to a Linear user id. */
+  userEmail?: Maybe<Scalars["String"]>;
+  /** The Linear user id of the referenced user. If the reference cannot be mapped to a Linear user then `userEmail` can be used instead. */
+  userId?: Maybe<Scalars["String"]>;
+};
+
+export type TimeScheduleUserInput = {
+  /** The external email, name or reference text for the user when the reference cannot be mapped to a Linear user id. */
+  userEmail?: InputMaybe<Scalars["String"]>;
+  /** The Linear user id of the referenced user. If the reference cannot be mapped to a Linear user then `userEmail` can be used instead. */
+  userId?: InputMaybe<Scalars["String"]>;
 };
 
 /** Issue title sorting options. */
@@ -28281,6 +28405,8 @@ export type ViewPreferencesValues = {
   reviewFieldQuickToReview?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the review repository field. */
   reviewFieldRepository?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show reviewer avatars on review list items. Null if the preference is unset. */
+  reviewFieldReviewers?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the most pressing SLA from connected issues on review list items. Null if the preference is unset. */
   reviewFieldSla?: Maybe<Scalars["Boolean"]>;
   /** Whether to show review status details on a second line. */
@@ -28333,6 +28459,8 @@ export type ViewPreferencesValues = {
   showEmptySubGroupsList?: Maybe<Scalars["Boolean"]>;
   /** Whether to show sub-initiatives nested. */
   showNestedInitiatives?: Maybe<Scalars["Boolean"]>;
+  /** Whether a team's project views show only the projects that team leads. When true, projects the team only contributes to are hidden. Null if the preference is unset. */
+  showOnlyLeadTeamProjects?: Maybe<Scalars["Boolean"]>;
   /** Whether to show only snoozed items. */
   showOnlySnoozedItems?: Maybe<Scalars["Boolean"]>;
   /** [Internal] Whether parent initiatives that do not match the view are shown. Defaults to true when unset. */
@@ -29106,6 +29234,7 @@ export enum WorkflowTrigger {
   ChatMessagePosted = "chatMessagePosted",
   ChatReactionAdded = "chatReactionAdded",
   CommentAdded = "commentAdded",
+  CustomerRequestAdded = "customerRequestAdded",
   CycleEnded = "cycleEnded",
   CycleStarted = "cycleStarted",
   EntityCreated = "entityCreated",
@@ -29136,6 +29265,74 @@ export enum WorkflowType {
   TriageAutomation = "triageAutomation",
   ViewSubscription = "viewSubscription",
 }
+
+/** A workspace announcement delivered to a member's inbox. */
+export type WorkspaceAnnouncementNotification = Entity &
+  Node &
+  Notification & {
+    __typename?: "WorkspaceAnnouncementNotification";
+    /** The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
+    actor?: Maybe<User>;
+    /** [Internal] Notification actor initials if avatar is not available. */
+    actorAvatarColor: Scalars["String"];
+    /** [Internal] Notification avatar URL. */
+    actorAvatarUrl?: Maybe<Scalars["String"]>;
+    /** [Internal] Whether the notification's user actor is deactivated in the workspace. */
+    actorInactive: Scalars["Boolean"];
+    /** [Internal] Notification actor initials if avatar is not available. */
+    actorInitials?: Maybe<Scalars["String"]>;
+    /** The time at which the entity was archived. Null if the entity has not been archived. */
+    archivedAt?: Maybe<Scalars["DateTime"]>;
+    /** The bot that caused the notification. */
+    botActor?: Maybe<ActorBot>;
+    /** The category of the notification. */
+    category: NotificationCategory;
+    /** The time at which the entity was created. */
+    createdAt: Scalars["DateTime"];
+    /** The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent. */
+    emailedAt?: Maybe<Scalars["DateTime"]>;
+    /** The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member. */
+    externalUserActor?: Maybe<ExternalUser>;
+    /** [Internal] Notifications with the same grouping key will be grouped together in the UI. */
+    groupingKey: Scalars["String"];
+    /** [Internal] Priority of the notification with the same grouping key. Higher number means higher priority. If priority is the same, notifications should be sorted by `createdAt`. */
+    groupingPriority: Scalars["Float"];
+    /** The unique identifier of the entity. */
+    id: Scalars["ID"];
+    /** [Internal] Inbox URL for the notification. */
+    inboxUrl: Scalars["String"];
+    /** [Internal] Initiative update health for new updates. */
+    initiativeUpdateHealth?: Maybe<Scalars["String"]>;
+    /** [Internal] If notification actor was Linear. */
+    isLinearActor: Scalars["Boolean"];
+    /** [Internal] Issue's status type for issue notifications. */
+    issueStatusType?: Maybe<Scalars["String"]>;
+    /** [Internal] Project update health for new updates. */
+    projectUpdateHealth?: Maybe<Scalars["String"]>;
+    /** The time at which the user marked the notification as read. Null if the notification is unread. */
+    readAt?: Maybe<Scalars["DateTime"]>;
+    /** The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed. */
+    snoozedUntilAt?: Maybe<Scalars["DateTime"]>;
+    /** [Internal] Notification subtitle. */
+    subtitle: Scalars["String"];
+    /** [Internal] Notification title. */
+    title: Scalars["String"];
+    /** Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated. */
+    type: Scalars["String"];
+    /** The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed. */
+    unsnoozedAt?: Maybe<Scalars["DateTime"]>;
+    /**
+     * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+     *     been updated after creation.
+     */
+    updatedAt: Scalars["DateTime"];
+    /** [Internal] URL to the target of the notification. */
+    url: Scalars["String"];
+    /** The recipient user of this notification. */
+    user: User;
+    /** Related workspace announcement. */
+    workspaceAnnouncementId: Scalars["String"];
+  };
 
 export type ZendeskSettingsInput = {
   /** Whether a ticket should be automatically reopened when its linked Linear issue is canceled. */
@@ -29179,6 +29376,11 @@ export type ZendeskSettingsInput = {
 export type SesDomainIdentityDnsRecordFragment = { __typename: "SesDomainIdentityDnsRecord" } & Pick<
   SesDomainIdentityDnsRecord,
   "content" | "name" | "type" | "isVerified"
+>;
+
+export type IntegrationDatadogEnvironmentFragment = { __typename: "IntegrationDatadogEnvironment" } & Pick<
+  IntegrationDatadogEnvironment,
+  "id" | "name"
 >;
 
 export type GitAutomationStateFragment = { __typename: "GitAutomationState" } & Pick<
@@ -29236,7 +29438,7 @@ type AiConversationBasePart_AiConversationElicitationPart_Fragment = {
     scope?: Maybe<
       { __typename: "AiConversationMcpServerConnectionScope" } & Pick<
         AiConversationMcpServerConnectionScope,
-        "workflowDefinitionId" | "teamId" | "type"
+        "workflowDefinitionDraftId" | "workflowDefinitionId" | "teamId" | "type"
       >
     >;
     options: Array<
@@ -29713,7 +29915,14 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
               { __typename: "AiConversationPostChatMessageToolCallResult" } & Pick<
                 AiConversationPostChatMessageToolCallResult,
                 "conversationUrl" | "error" | "message" | "posted"
-              >
+              > & {
+                  destination?: Maybe<
+                    { __typename: "AiConversationPostChatMessageToolCallResultDestination" } & Pick<
+                      AiConversationPostChatMessageToolCallResultDestination,
+                      "channelId" | "integrationId" | "messageId" | "threadId"
+                    >
+                  >;
+                }
             >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
               AiConversationToolDisplayInfo,
@@ -29989,6 +30198,43 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
                   entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
                     AiConversationSearchEntitiesToolCallResultEntities,
                     "id" | "type"
+                  >;
+                }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationRunLoopToolCall" } & Pick<
+          AiConversationRunLoopToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationRunLoopToolCallArgs" } & Pick<
+                AiConversationRunLoopToolCallArgs,
+                "workflowDefinitionId"
+              >
+            >;
+            result?: Maybe<
+              { __typename: "AiConversationRunLoopToolCallResult" } & Pick<
+                AiConversationRunLoopToolCallResult,
+                "conversationId" | "url"
+              > & {
+                  createdEntities?: Maybe<
+                    Array<
+                      { __typename: "AiConversationCreateEntityToolCallResultCreatedEntities" } & Pick<
+                        AiConversationCreateEntityToolCallResultCreatedEntities,
+                        "id" | "label" | "type"
+                      > & {
+                          parent?: Maybe<
+                            { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                              AiConversationSearchEntitiesToolCallResultEntities,
+                              "id" | "type"
+                            >
+                          >;
+                        }
+                    >
                   >;
                 }
             >;
@@ -30481,6 +30727,11 @@ type Entity_WorkflowDefinitionNotification_Fragment = { __typename: "WorkflowDef
   "updatedAt" | "archivedAt" | "createdAt" | "id"
 >;
 
+type Entity_WorkspaceAnnouncementNotification_Fragment = { __typename: "WorkspaceAnnouncementNotification" } & Pick<
+  WorkspaceAnnouncementNotification,
+  "updatedAt" | "archivedAt" | "createdAt" | "id"
+>;
+
 export type EntityFragment =
   | Entity_CustomViewNotificationSubscription_Fragment
   | Entity_CustomerNeedNotification_Fragment
@@ -30502,7 +30753,8 @@ export type EntityFragment =
   | Entity_UsageAlertNotification_Fragment
   | Entity_UserNotificationSubscription_Fragment
   | Entity_WelcomeMessageNotification_Fragment
-  | Entity_WorkflowDefinitionNotification_Fragment;
+  | Entity_WorkflowDefinitionNotification_Fragment
+  | Entity_WorkspaceAnnouncementNotification_Fragment;
 
 export type ActorBotFragment = { __typename: "ActorBot" } & Pick<
   ActorBot,
@@ -30746,6 +30998,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "workspaceMembersViewOrdering"
         | "projectZoomLevel"
         | "timelineZoomScale"
+        | "showOnlyLeadTeamProjects"
         | "showCompletedAgentSessions"
         | "showCompletedIssues"
         | "showCompletedProjects"
@@ -30771,6 +31024,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "fieldPreviewLinks"
         | "showReadItems"
         | "reviewFieldStatusDetails"
+        | "reviewFieldReviewers"
         | "showSnoozedItems"
         | "showSubInitiativeProjects"
         | "showNestedInitiatives"
@@ -31016,6 +31270,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "workspaceMembersViewOrdering"
             | "projectZoomLevel"
             | "timelineZoomScale"
+            | "showOnlyLeadTeamProjects"
             | "showCompletedAgentSessions"
             | "showCompletedIssues"
             | "showCompletedProjects"
@@ -31041,6 +31296,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "fieldPreviewLinks"
             | "showReadItems"
             | "reviewFieldStatusDetails"
+            | "reviewFieldReviewers"
             | "showSnoozedItems"
             | "showSubInitiativeProjects"
             | "showNestedInitiatives"
@@ -31291,6 +31547,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "workspaceMembersViewOrdering"
             | "projectZoomLevel"
             | "timelineZoomScale"
+            | "showOnlyLeadTeamProjects"
             | "showCompletedAgentSessions"
             | "showCompletedIssues"
             | "showCompletedProjects"
@@ -31316,6 +31573,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "fieldPreviewLinks"
             | "showReadItems"
             | "reviewFieldStatusDetails"
+            | "reviewFieldReviewers"
             | "showSnoozedItems"
             | "showSubInitiativeProjects"
             | "showNestedInitiatives"
@@ -32266,6 +32524,30 @@ export type NotificationArchivePayloadFragment = { __typename: "NotificationArch
                 owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               };
           })
+      | ({ __typename: "WorkspaceAnnouncementNotification" } & Pick<
+          WorkspaceAnnouncementNotification,
+          | "type"
+          | "category"
+          | "updatedAt"
+          | "unsnoozedAt"
+          | "emailedAt"
+          | "archivedAt"
+          | "createdAt"
+          | "readAt"
+          | "snoozedUntilAt"
+          | "id"
+          | "workspaceAnnouncementId"
+        > & {
+            botActor?: Maybe<
+              { __typename: "ActorBot" } & Pick<
+                ActorBot,
+                "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+              >
+            >;
+            externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+            user: { __typename?: "User" } & Pick<User, "id">;
+            actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          })
     >;
   };
 
@@ -32936,6 +33218,30 @@ type ArchivePayload_NotificationArchivePayload_Fragment = { __typename: "Notific
                 lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                 owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               };
+          })
+      | ({ __typename: "WorkspaceAnnouncementNotification" } & Pick<
+          WorkspaceAnnouncementNotification,
+          | "type"
+          | "category"
+          | "updatedAt"
+          | "unsnoozedAt"
+          | "emailedAt"
+          | "archivedAt"
+          | "createdAt"
+          | "readAt"
+          | "snoozedUntilAt"
+          | "id"
+          | "workspaceAnnouncementId"
+        > & {
+            botActor?: Maybe<
+              { __typename: "ActorBot" } & Pick<
+                ActorBot,
+                "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+              >
+            >;
+            externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+            user: { __typename?: "User" } & Pick<User, "id">;
+            actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           })
     >;
   };
@@ -33659,6 +33965,30 @@ type Notification_WorkflowDefinitionNotification_Fragment = { __typename: "Workf
       };
   };
 
+type Notification_WorkspaceAnnouncementNotification_Fragment = {
+  __typename: "WorkspaceAnnouncementNotification";
+} & Pick<
+  WorkspaceAnnouncementNotification,
+  | "type"
+  | "category"
+  | "updatedAt"
+  | "unsnoozedAt"
+  | "emailedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "readAt"
+  | "snoozedUntilAt"
+  | "id"
+  | "workspaceAnnouncementId"
+> & {
+    botActor?: Maybe<
+      { __typename: "ActorBot" } & Pick<ActorBot, "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type">
+    >;
+    externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+    user: { __typename?: "User" } & Pick<User, "id">;
+    actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+  };
+
 export type NotificationFragment =
   | Notification_CustomerNeedNotification_Fragment
   | Notification_CustomerNotification_Fragment
@@ -33672,7 +34002,8 @@ export type NotificationFragment =
   | Notification_PullRequestNotification_Fragment
   | Notification_UsageAlertNotification_Fragment
   | Notification_WelcomeMessageNotification_Fragment
-  | Notification_WorkflowDefinitionNotification_Fragment;
+  | Notification_WorkflowDefinitionNotification_Fragment
+  | Notification_WorkspaceAnnouncementNotification_Fragment;
 
 export type CustomerNeedNotificationFragment = { __typename: "CustomerNeedNotification" } & Pick<
   CustomerNeedNotification,
@@ -34713,6 +35044,7 @@ export type IssueHistoryFragment = { __typename: "IssueHistory" } & Pick<
           | "description"
           | "name"
           | "updatedAt"
+          | "groupType"
           | "archivedAt"
           | "createdAt"
           | "id"
@@ -34735,6 +35067,7 @@ export type IssueHistoryFragment = { __typename: "IssueHistory" } & Pick<
           | "description"
           | "name"
           | "updatedAt"
+          | "groupType"
           | "archivedAt"
           | "createdAt"
           | "id"
@@ -34804,6 +35137,11 @@ export type IssueHistoryFragment = { __typename: "IssueHistory" } & Pick<
       >
     >;
   };
+
+export type TimeScheduleUserFragment = { __typename: "TimeScheduleUser" } & Pick<
+  TimeScheduleUser,
+  "userId" | "userEmail"
+>;
 
 export type SemanticSearchResultFragment = { __typename: "SemanticSearchResult" } & Pick<
   SemanticSearchResult,
@@ -35043,7 +35381,7 @@ export type AiConversationAckPartFragment = { __typename: "AiConversationAckPart
 
 export type TimeScheduleEntryFragment = { __typename: "TimeScheduleEntry" } & Pick<
   TimeScheduleEntry,
-  "userId" | "userEmail" | "endsAt" | "startsAt"
+  "userId" | "endsAt" | "userEmail" | "startsAt"
 >;
 
 export type ReleaseStageFragment = { __typename: "ReleaseStage" } & Pick<
@@ -35061,6 +35399,7 @@ export type WorkflowStateFragment = { __typename: "WorkflowState" } & Pick<
 
 export type ProjectUpdateFragment = { __typename: "ProjectUpdate" } & Pick<
   ProjectUpdate,
+  | "shortSummary"
   | "reactionData"
   | "commentCount"
   | "url"
@@ -35134,7 +35473,7 @@ export type AiConversationElicitationPartFragment = { __typename: "AiConversatio
     scope?: Maybe<
       { __typename: "AiConversationMcpServerConnectionScope" } & Pick<
         AiConversationMcpServerConnectionScope,
-        "workflowDefinitionId" | "teamId" | "type"
+        "workflowDefinitionDraftId" | "workflowDefinitionId" | "teamId" | "type"
       >
     >;
     options: Array<
@@ -35425,7 +35764,7 @@ export type TimeScheduleFragment = { __typename: "TimeSchedule" } & Pick<
     integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">>;
     entries?: Maybe<
       Array<
-        { __typename: "TimeScheduleEntry" } & Pick<TimeScheduleEntry, "userId" | "userEmail" | "endsAt" | "startsAt">
+        { __typename: "TimeScheduleEntry" } & Pick<TimeScheduleEntry, "userId" | "endsAt" | "userEmail" | "startsAt">
       >
     >;
   };
@@ -35871,7 +36210,14 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
               { __typename: "AiConversationPostChatMessageToolCallResult" } & Pick<
                 AiConversationPostChatMessageToolCallResult,
                 "conversationUrl" | "error" | "message" | "posted"
-              >
+              > & {
+                  destination?: Maybe<
+                    { __typename: "AiConversationPostChatMessageToolCallResultDestination" } & Pick<
+                      AiConversationPostChatMessageToolCallResultDestination,
+                      "channelId" | "integrationId" | "messageId" | "threadId"
+                    >
+                  >;
+                }
             >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
               AiConversationToolDisplayInfo,
@@ -36147,6 +36493,43 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
                   entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
                     AiConversationSearchEntitiesToolCallResultEntities,
                     "id" | "type"
+                  >;
+                }
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationRunLoopToolCall" } & Pick<
+          AiConversationRunLoopToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationRunLoopToolCallArgs" } & Pick<
+                AiConversationRunLoopToolCallArgs,
+                "workflowDefinitionId"
+              >
+            >;
+            result?: Maybe<
+              { __typename: "AiConversationRunLoopToolCallResult" } & Pick<
+                AiConversationRunLoopToolCallResult,
+                "conversationId" | "url"
+              > & {
+                  createdEntities?: Maybe<
+                    Array<
+                      { __typename: "AiConversationCreateEntityToolCallResultCreatedEntities" } & Pick<
+                        AiConversationCreateEntityToolCallResultCreatedEntities,
+                        "id" | "label" | "type"
+                      > & {
+                          parent?: Maybe<
+                            { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                              AiConversationSearchEntitiesToolCallResultEntities,
+                              "id" | "type"
+                            >
+                          >;
+                        }
+                    >
                   >;
                 }
             >;
@@ -37029,6 +37412,28 @@ export type OrganizationFragment = { __typename: "Organization" } & Pick<
     >;
   };
 
+export type WorkspaceAnnouncementNotificationFragment = { __typename: "WorkspaceAnnouncementNotification" } & Pick<
+  WorkspaceAnnouncementNotification,
+  | "type"
+  | "workspaceAnnouncementId"
+  | "category"
+  | "updatedAt"
+  | "unsnoozedAt"
+  | "emailedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "readAt"
+  | "snoozedUntilAt"
+  | "id"
+> & {
+    botActor?: Maybe<
+      { __typename: "ActorBot" } & Pick<ActorBot, "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type">
+    >;
+    externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+    user: { __typename?: "User" } & Pick<User, "id">;
+    actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+  };
+
 export type AuditEntryFragment = { __typename: "AuditEntry" } & Pick<
   AuditEntry,
   | "requestInformation"
@@ -37267,6 +37672,7 @@ export type IssueHistoryTriageRuleErrorFragment = { __typename: "IssueHistoryTri
           | "description"
           | "name"
           | "updatedAt"
+          | "groupType"
           | "archivedAt"
           | "createdAt"
           | "id"
@@ -37840,6 +38246,12 @@ export type UserSettingsCustomThemeFragment = { __typename: "UserSettingsCustomT
     >;
   };
 
+export type IntegrationDatadogEnvironmentsPayloadFragment = { __typename: "IntegrationDatadogEnvironmentsPayload" } & {
+  environments: Array<
+    { __typename: "IntegrationDatadogEnvironment" } & Pick<IntegrationDatadogEnvironment, "id" | "name">
+  >;
+};
+
 export type NotificationDeliveryPreferencesChannelFragment = {
   __typename: "NotificationDeliveryPreferencesChannel";
 } & Pick<NotificationDeliveryPreferencesChannel, "notificationsDisabled"> & {
@@ -38012,7 +38424,16 @@ export type IntegrationActorWebhookPayloadFragment = { __typename: "IntegrationA
 
 export type IssueLabelFragment = { __typename: "IssueLabel" } & Pick<
   IssueLabel,
-  "lastAppliedAt" | "color" | "description" | "name" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "isGroup"
+  | "lastAppliedAt"
+  | "color"
+  | "description"
+  | "name"
+  | "updatedAt"
+  | "groupType"
+  | "archivedAt"
+  | "createdAt"
+  | "id"
+  | "isGroup"
 > & {
     inheritedFrom?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
     parent?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -38098,6 +38519,7 @@ export type IssueHistoryTriageRuleMetadataFragment = { __typename: "IssueHistory
               | "description"
               | "name"
               | "updatedAt"
+              | "groupType"
               | "archivedAt"
               | "createdAt"
               | "id"
@@ -40337,6 +40759,30 @@ export type NotificationBatchActionPayloadFragment = { __typename: "Notification
                 owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               };
           })
+      | ({ __typename: "WorkspaceAnnouncementNotification" } & Pick<
+          WorkspaceAnnouncementNotification,
+          | "type"
+          | "category"
+          | "updatedAt"
+          | "unsnoozedAt"
+          | "emailedAt"
+          | "archivedAt"
+          | "createdAt"
+          | "readAt"
+          | "snoozedUntilAt"
+          | "id"
+          | "workspaceAnnouncementId"
+        > & {
+            botActor?: Maybe<
+              { __typename: "ActorBot" } & Pick<
+                ActorBot,
+                "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+              >
+            >;
+            externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+            user: { __typename?: "User" } & Pick<User, "id">;
+            actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          })
     >;
   };
 
@@ -40991,6 +41437,30 @@ export type InboxNotificationUpdatePayloadFragment = { __typename: "InboxNotific
                 owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               };
           })
+      | ({ __typename: "WorkspaceAnnouncementNotification" } & Pick<
+          WorkspaceAnnouncementNotification,
+          | "type"
+          | "category"
+          | "updatedAt"
+          | "unsnoozedAt"
+          | "emailedAt"
+          | "archivedAt"
+          | "createdAt"
+          | "readAt"
+          | "snoozedUntilAt"
+          | "id"
+          | "workspaceAnnouncementId"
+        > & {
+            botActor?: Maybe<
+              { __typename: "ActorBot" } & Pick<
+                ActorBot,
+                "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+              >
+            >;
+            externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+            user: { __typename?: "User" } & Pick<User, "id">;
+            actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          })
     >;
     notification:
       | ({ __typename: "CustomerNeedNotification" } & Pick<
@@ -41575,6 +42045,30 @@ export type InboxNotificationUpdatePayloadFragment = { __typename: "InboxNotific
                 lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                 owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               };
+          })
+      | ({ __typename: "WorkspaceAnnouncementNotification" } & Pick<
+          WorkspaceAnnouncementNotification,
+          | "type"
+          | "category"
+          | "updatedAt"
+          | "unsnoozedAt"
+          | "emailedAt"
+          | "archivedAt"
+          | "createdAt"
+          | "readAt"
+          | "snoozedUntilAt"
+          | "id"
+          | "workspaceAnnouncementId"
+        > & {
+            botActor?: Maybe<
+              { __typename: "ActorBot" } & Pick<
+                ActorBot,
+                "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+              >
+            >;
+            externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+            user: { __typename?: "User" } & Pick<User, "id">;
+            actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           });
   };
 
@@ -42165,6 +42659,30 @@ export type NotificationPayloadFragment = { __typename: "NotificationPayload" } 
                 lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                 owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               };
+          })
+      | ({ __typename: "WorkspaceAnnouncementNotification" } & Pick<
+          WorkspaceAnnouncementNotification,
+          | "type"
+          | "category"
+          | "updatedAt"
+          | "unsnoozedAt"
+          | "emailedAt"
+          | "archivedAt"
+          | "createdAt"
+          | "readAt"
+          | "snoozedUntilAt"
+          | "id"
+          | "workspaceAnnouncementId"
+        > & {
+            botActor?: Maybe<
+              { __typename: "ActorBot" } & Pick<
+                ActorBot,
+                "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+              >
+            >;
+            externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+            user: { __typename?: "User" } & Pick<User, "id">;
+            actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           });
   };
 
@@ -42301,6 +42819,7 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "workspaceMembersViewOrdering"
   | "projectZoomLevel"
   | "timelineZoomScale"
+  | "showOnlyLeadTeamProjects"
   | "showCompletedAgentSessions"
   | "showCompletedIssues"
   | "showCompletedProjects"
@@ -42326,6 +42845,7 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "fieldPreviewLinks"
   | "showReadItems"
   | "reviewFieldStatusDetails"
+  | "reviewFieldReviewers"
   | "showSnoozedItems"
   | "showSubInitiativeProjects"
   | "showNestedInitiatives"
@@ -42613,6 +43133,7 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "workspaceMembersViewOrdering"
       | "projectZoomLevel"
       | "timelineZoomScale"
+      | "showOnlyLeadTeamProjects"
       | "showCompletedAgentSessions"
       | "showCompletedIssues"
       | "showCompletedProjects"
@@ -42638,6 +43159,7 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "fieldPreviewLinks"
       | "showReadItems"
       | "reviewFieldStatusDetails"
+      | "reviewFieldReviewers"
       | "showSnoozedItems"
       | "showSubInitiativeProjects"
       | "showNestedInitiatives"
@@ -42830,7 +43352,10 @@ export type AgentAutomationRetryResolutionFragment = { __typename: "AgentAutomat
 
 export type AiConversationMcpServerConnectionScopeFragment = {
   __typename: "AiConversationMcpServerConnectionScope";
-} & Pick<AiConversationMcpServerConnectionScope, "workflowDefinitionId" | "teamId" | "type">;
+} & Pick<
+  AiConversationMcpServerConnectionScope,
+  "workflowDefinitionDraftId" | "workflowDefinitionId" | "teamId" | "type"
+>;
 
 export type CyclePayloadFragment = { __typename: "CyclePayload" } & Pick<CyclePayload, "lastSyncId" | "success"> & {
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
@@ -43385,6 +43910,7 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "workspaceMembersViewOrdering"
           | "projectZoomLevel"
           | "timelineZoomScale"
+          | "showOnlyLeadTeamProjects"
           | "showCompletedAgentSessions"
           | "showCompletedIssues"
           | "showCompletedProjects"
@@ -43410,6 +43936,7 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "fieldPreviewLinks"
           | "showReadItems"
           | "reviewFieldStatusDetails"
+          | "reviewFieldReviewers"
           | "showSnoozedItems"
           | "showSubInitiativeProjects"
           | "showNestedInitiatives"
@@ -44389,7 +44916,14 @@ type AiConversationBaseToolCall_AiConversationPostChatMessageToolCall_Fragment =
       { __typename: "AiConversationPostChatMessageToolCallResult" } & Pick<
         AiConversationPostChatMessageToolCallResult,
         "conversationUrl" | "error" | "message" | "posted"
-      >
+      > & {
+          destination?: Maybe<
+            { __typename: "AiConversationPostChatMessageToolCallResultDestination" } & Pick<
+              AiConversationPostChatMessageToolCallResultDestination,
+              "channelId" | "integrationId" | "messageId" | "threadId"
+            >
+          >;
+        }
     >;
   };
 
@@ -44659,6 +45193,43 @@ type AiConversationBaseToolCall_AiConversationRetryPullRequestCheckToolCall_Frag
           entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
             AiConversationSearchEntitiesToolCallResultEntities,
             "id" | "type"
+          >;
+        }
+    >;
+  };
+
+type AiConversationBaseToolCall_AiConversationRunLoopToolCall_Fragment = {
+  __typename: "AiConversationRunLoopToolCall";
+} & Pick<AiConversationRunLoopToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationRunLoopToolCallArgs" } & Pick<
+        AiConversationRunLoopToolCallArgs,
+        "workflowDefinitionId"
+      >
+    >;
+    result?: Maybe<
+      { __typename: "AiConversationRunLoopToolCallResult" } & Pick<
+        AiConversationRunLoopToolCallResult,
+        "conversationId" | "url"
+      > & {
+          createdEntities?: Maybe<
+            Array<
+              { __typename: "AiConversationCreateEntityToolCallResultCreatedEntities" } & Pick<
+                AiConversationCreateEntityToolCallResultCreatedEntities,
+                "id" | "label" | "type"
+              > & {
+                  parent?: Maybe<
+                    { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                      AiConversationSearchEntitiesToolCallResultEntities,
+                      "id" | "type"
+                    >
+                  >;
+                }
+            >
           >;
         }
     >;
@@ -44993,6 +45564,7 @@ export type AiConversationBaseToolCallFragment =
   | AiConversationBaseToolCall_AiConversationRestoreEntityToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationRetrieveEntitiesToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationRetryPullRequestCheckToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationRunLoopToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationSandboxGitHistoryToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationSearchChatChannelsToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationSearchDocumentationToolCall_Fragment
@@ -45739,7 +46311,14 @@ export type AiConversationPostChatMessageToolCallFragment = {
       { __typename: "AiConversationPostChatMessageToolCallResult" } & Pick<
         AiConversationPostChatMessageToolCallResult,
         "conversationUrl" | "error" | "message" | "posted"
-      >
+      > & {
+          destination?: Maybe<
+            { __typename: "AiConversationPostChatMessageToolCallResultDestination" } & Pick<
+              AiConversationPostChatMessageToolCallResultDestination,
+              "channelId" | "integrationId" | "messageId" | "threadId"
+            >
+          >;
+        }
     >;
     displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
       AiConversationToolDisplayInfo,
@@ -45753,7 +46332,21 @@ export type AiConversationPostChatMessageToolCallArgsFragment = {
 
 export type AiConversationPostChatMessageToolCallResultFragment = {
   __typename: "AiConversationPostChatMessageToolCallResult";
-} & Pick<AiConversationPostChatMessageToolCallResult, "conversationUrl" | "error" | "message" | "posted">;
+} & Pick<AiConversationPostChatMessageToolCallResult, "conversationUrl" | "error" | "message" | "posted"> & {
+    destination?: Maybe<
+      { __typename: "AiConversationPostChatMessageToolCallResultDestination" } & Pick<
+        AiConversationPostChatMessageToolCallResultDestination,
+        "channelId" | "integrationId" | "messageId" | "threadId"
+      >
+    >;
+  };
+
+export type AiConversationPostChatMessageToolCallResultDestinationFragment = {
+  __typename: "AiConversationPostChatMessageToolCallResultDestination";
+} & Pick<
+  AiConversationPostChatMessageToolCallResultDestination,
+  "channelId" | "integrationId" | "messageId" | "threadId"
+>;
 
 export type AiConversationPromptCodingSessionToolCallFragment = {
   __typename: "AiConversationPromptCodingSessionToolCall";
@@ -46195,6 +46788,70 @@ export type AiConversationRetryPullRequestCheckToolCallArgsFragment = {
     entity: { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
       AiConversationSearchEntitiesToolCallResultEntities,
       "id" | "type"
+    >;
+  };
+
+export type AiConversationRunLoopToolCallFragment = { __typename: "AiConversationRunLoopToolCall" } & Pick<
+  AiConversationRunLoopToolCall,
+  "rawArgs" | "name" | "rawResult"
+> & {
+    args?: Maybe<
+      { __typename: "AiConversationRunLoopToolCallArgs" } & Pick<
+        AiConversationRunLoopToolCallArgs,
+        "workflowDefinitionId"
+      >
+    >;
+    result?: Maybe<
+      { __typename: "AiConversationRunLoopToolCallResult" } & Pick<
+        AiConversationRunLoopToolCallResult,
+        "conversationId" | "url"
+      > & {
+          createdEntities?: Maybe<
+            Array<
+              { __typename: "AiConversationCreateEntityToolCallResultCreatedEntities" } & Pick<
+                AiConversationCreateEntityToolCallResultCreatedEntities,
+                "id" | "label" | "type"
+              > & {
+                  parent?: Maybe<
+                    { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                      AiConversationSearchEntitiesToolCallResultEntities,
+                      "id" | "type"
+                    >
+                  >;
+                }
+            >
+          >;
+        }
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationRunLoopToolCallArgsFragment = { __typename: "AiConversationRunLoopToolCallArgs" } & Pick<
+  AiConversationRunLoopToolCallArgs,
+  "workflowDefinitionId"
+>;
+
+export type AiConversationRunLoopToolCallResultFragment = { __typename: "AiConversationRunLoopToolCallResult" } & Pick<
+  AiConversationRunLoopToolCallResult,
+  "conversationId" | "url"
+> & {
+    createdEntities?: Maybe<
+      Array<
+        { __typename: "AiConversationCreateEntityToolCallResultCreatedEntities" } & Pick<
+          AiConversationCreateEntityToolCallResultCreatedEntities,
+          "id" | "label" | "type"
+        > & {
+            parent?: Maybe<
+              { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                AiConversationSearchEntitiesToolCallResultEntities,
+                "id" | "type"
+              >
+            >;
+          }
+      >
     >;
   };
 
@@ -47107,6 +47764,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "workspaceMembersViewOrdering"
             | "projectZoomLevel"
             | "timelineZoomScale"
+            | "showOnlyLeadTeamProjects"
             | "showCompletedAgentSessions"
             | "showCompletedIssues"
             | "showCompletedProjects"
@@ -47132,6 +47790,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "fieldPreviewLinks"
             | "showReadItems"
             | "reviewFieldStatusDetails"
+            | "reviewFieldReviewers"
             | "showSnoozedItems"
             | "showSubInitiativeProjects"
             | "showNestedInitiatives"
@@ -47377,6 +48036,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "workspaceMembersViewOrdering"
                 | "projectZoomLevel"
                 | "timelineZoomScale"
+                | "showOnlyLeadTeamProjects"
                 | "showCompletedAgentSessions"
                 | "showCompletedIssues"
                 | "showCompletedProjects"
@@ -47402,6 +48062,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "fieldPreviewLinks"
                 | "showReadItems"
                 | "reviewFieldStatusDetails"
+                | "reviewFieldReviewers"
                 | "showSnoozedItems"
                 | "showSubInitiativeProjects"
                 | "showNestedInitiatives"
@@ -47652,6 +48313,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "workspaceMembersViewOrdering"
                 | "projectZoomLevel"
                 | "timelineZoomScale"
+                | "showOnlyLeadTeamProjects"
                 | "showCompletedAgentSessions"
                 | "showCompletedIssues"
                 | "showCompletedProjects"
@@ -47677,6 +48339,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "fieldPreviewLinks"
                 | "showReadItems"
                 | "reviewFieldStatusDetails"
+                | "reviewFieldReviewers"
                 | "showSnoozedItems"
                 | "showSubInitiativeProjects"
                 | "showNestedInitiatives"
@@ -48974,6 +49637,7 @@ export type IssueHistoryConnectionFragment = { __typename: "IssueHistoryConnecti
               | "description"
               | "name"
               | "updatedAt"
+              | "groupType"
               | "archivedAt"
               | "createdAt"
               | "id"
@@ -48996,6 +49660,7 @@ export type IssueHistoryConnectionFragment = { __typename: "IssueHistoryConnecti
               | "description"
               | "name"
               | "updatedAt"
+              | "groupType"
               | "archivedAt"
               | "createdAt"
               | "id"
@@ -49076,7 +49741,16 @@ export type IssueLabelConnectionFragment = { __typename: "IssueLabelConnection" 
   nodes: Array<
     { __typename: "IssueLabel" } & Pick<
       IssueLabel,
-      "lastAppliedAt" | "color" | "description" | "name" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "isGroup"
+      | "lastAppliedAt"
+      | "color"
+      | "description"
+      | "name"
+      | "updatedAt"
+      | "groupType"
+      | "archivedAt"
+      | "createdAt"
+      | "id"
+      | "isGroup"
     > & {
         inheritedFrom?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
         parent?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -49774,6 +50448,11 @@ type Node_WorkflowDefinitionNotification_Fragment = { __typename: "WorkflowDefin
 
 type Node_WorkflowState_Fragment = { __typename: "WorkflowState" } & Pick<WorkflowState, "id">;
 
+type Node_WorkspaceAnnouncementNotification_Fragment = { __typename: "WorkspaceAnnouncementNotification" } & Pick<
+  WorkspaceAnnouncementNotification,
+  "id"
+>;
+
 export type NodeFragment =
   | Node_AgentActivity_Fragment
   | Node_AgentSession_Fragment
@@ -49894,7 +50573,8 @@ export type NodeFragment =
   | Node_WorkflowCronJobDefinition_Fragment
   | Node_WorkflowDefinition_Fragment
   | Node_WorkflowDefinitionNotification_Fragment
-  | Node_WorkflowState_Fragment;
+  | Node_WorkflowState_Fragment
+  | Node_WorkspaceAnnouncementNotification_Fragment;
 
 export type NotificationConnectionFragment = { __typename: "NotificationConnection" } & {
   nodes: Array<
@@ -50432,6 +51112,30 @@ export type NotificationConnectionFragment = { __typename: "NotificationConnecti
               lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             };
+        })
+    | ({ __typename: "WorkspaceAnnouncementNotification" } & Pick<
+        WorkspaceAnnouncementNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "unsnoozedAt"
+        | "emailedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "readAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "workspaceAnnouncementId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
         })
   >;
   pageInfo: { __typename: "PageInfo" } & Pick<
@@ -51108,6 +51812,7 @@ export type ProjectUpdateConnectionFragment = { __typename: "ProjectUpdateConnec
   nodes: Array<
     { __typename: "ProjectUpdate" } & Pick<
       ProjectUpdate,
+      | "shortSummary"
       | "reactionData"
       | "commentCount"
       | "url"
@@ -51912,6 +52617,30 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
               lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             };
+        })
+    | ({ __typename: "WorkspaceAnnouncementNotification" } & Pick<
+        WorkspaceAnnouncementNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "unsnoozedAt"
+        | "emailedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "readAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "workspaceAnnouncementId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
         });
   projectUnarchived: { __typename?: "Project" } & Pick<Project, "id">;
   issueUnarchived: { __typename?: "Issue" } & Pick<Issue, "id">;
@@ -52754,6 +53483,30 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
               lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             };
+        })
+    | ({ __typename: "WorkspaceAnnouncementNotification" } & Pick<
+        WorkspaceAnnouncementNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "unsnoozedAt"
+        | "emailedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "readAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "workspaceAnnouncementId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
         });
   notificationCreated:
     | ({ __typename: "CustomerNeedNotification" } & Pick<
@@ -53290,6 +54043,30 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
               lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             };
+        })
+    | ({ __typename: "WorkspaceAnnouncementNotification" } & Pick<
+        WorkspaceAnnouncementNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "unsnoozedAt"
+        | "emailedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "readAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "workspaceAnnouncementId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
         });
   notificationDeleted:
     | ({ __typename: "CustomerNeedNotification" } & Pick<
@@ -53826,6 +54603,30 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
               lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             };
+        })
+    | ({ __typename: "WorkspaceAnnouncementNotification" } & Pick<
+        WorkspaceAnnouncementNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "unsnoozedAt"
+        | "emailedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "readAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "workspaceAnnouncementId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
         });
   notificationUpdated:
     | ({ __typename: "CustomerNeedNotification" } & Pick<
@@ -54362,6 +55163,30 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
               lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             };
+        })
+    | ({ __typename: "WorkspaceAnnouncementNotification" } & Pick<
+        WorkspaceAnnouncementNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "unsnoozedAt"
+        | "emailedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "readAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "workspaceAnnouncementId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
         });
   projectArchived: { __typename?: "Project" } & Pick<Project, "id">;
   projectCreated: { __typename?: "Project" } & Pick<Project, "id">;
@@ -54563,6 +55388,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "description"
             | "name"
             | "updatedAt"
+            | "groupType"
             | "archivedAt"
             | "createdAt"
             | "id"
@@ -54585,6 +55411,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "description"
             | "name"
             | "updatedAt"
+            | "groupType"
             | "archivedAt"
             | "createdAt"
             | "id"
@@ -54827,6 +55654,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "description"
             | "name"
             | "updatedAt"
+            | "groupType"
             | "archivedAt"
             | "createdAt"
             | "id"
@@ -54849,6 +55677,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "description"
             | "name"
             | "updatedAt"
+            | "groupType"
             | "archivedAt"
             | "createdAt"
             | "id"
@@ -55071,7 +55900,7 @@ export type TimeScheduleConnectionFragment = { __typename: "TimeScheduleConnecti
           Array<
             { __typename: "TimeScheduleEntry" } & Pick<
               TimeScheduleEntry,
-              "userId" | "userEmail" | "endsAt" | "startsAt"
+              "userId" | "endsAt" | "userEmail" | "startsAt"
             >
           >
         >;
@@ -56477,6 +57306,7 @@ export type AttachmentIssue_HistoryQuery = { __typename?: "Query" } & {
                   | "description"
                   | "name"
                   | "updatedAt"
+                  | "groupType"
                   | "archivedAt"
                   | "createdAt"
                   | "id"
@@ -56499,6 +57329,7 @@ export type AttachmentIssue_HistoryQuery = { __typename?: "Query" } & {
                   | "description"
                   | "name"
                   | "updatedAt"
+                  | "groupType"
                   | "archivedAt"
                   | "createdAt"
                   | "id"
@@ -56629,6 +57460,7 @@ export type AttachmentIssue_LabelsQuery = { __typename?: "Query" } & {
           | "description"
           | "name"
           | "updatedAt"
+          | "groupType"
           | "archivedAt"
           | "createdAt"
           | "id"
@@ -57992,6 +58824,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "workspaceMembersViewOrdering"
           | "projectZoomLevel"
           | "timelineZoomScale"
+          | "showOnlyLeadTeamProjects"
           | "showCompletedAgentSessions"
           | "showCompletedIssues"
           | "showCompletedProjects"
@@ -58017,6 +58850,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "fieldPreviewLinks"
           | "showReadItems"
           | "reviewFieldStatusDetails"
+          | "reviewFieldReviewers"
           | "showSnoozedItems"
           | "showSubInitiativeProjects"
           | "showNestedInitiatives"
@@ -58262,6 +59096,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "workspaceMembersViewOrdering"
               | "projectZoomLevel"
               | "timelineZoomScale"
+              | "showOnlyLeadTeamProjects"
               | "showCompletedAgentSessions"
               | "showCompletedIssues"
               | "showCompletedProjects"
@@ -58287,6 +59122,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "fieldPreviewLinks"
               | "showReadItems"
               | "reviewFieldStatusDetails"
+              | "reviewFieldReviewers"
               | "showSnoozedItems"
               | "showSubInitiativeProjects"
               | "showNestedInitiatives"
@@ -58537,6 +59373,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "workspaceMembersViewOrdering"
               | "projectZoomLevel"
               | "timelineZoomScale"
+              | "showOnlyLeadTeamProjects"
               | "showCompletedAgentSessions"
               | "showCompletedIssues"
               | "showCompletedProjects"
@@ -58562,6 +59399,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "fieldPreviewLinks"
               | "showReadItems"
               | "reviewFieldStatusDetails"
+              | "reviewFieldReviewers"
               | "showSnoozedItems"
               | "showSubInitiativeProjects"
               | "showNestedInitiatives"
@@ -59071,6 +59909,7 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "workspaceMembersViewOrdering"
             | "projectZoomLevel"
             | "timelineZoomScale"
+            | "showOnlyLeadTeamProjects"
             | "showCompletedAgentSessions"
             | "showCompletedIssues"
             | "showCompletedProjects"
@@ -59096,6 +59935,7 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "fieldPreviewLinks"
             | "showReadItems"
             | "reviewFieldStatusDetails"
+            | "reviewFieldReviewers"
             | "showSnoozedItems"
             | "showSubInitiativeProjects"
             | "showNestedInitiatives"
@@ -59348,6 +60188,7 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "workspaceMembersViewOrdering"
           | "projectZoomLevel"
           | "timelineZoomScale"
+          | "showOnlyLeadTeamProjects"
           | "showCompletedAgentSessions"
           | "showCompletedIssues"
           | "showCompletedProjects"
@@ -59373,6 +60214,7 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "fieldPreviewLinks"
           | "showReadItems"
           | "reviewFieldStatusDetails"
+          | "reviewFieldReviewers"
           | "showSnoozedItems"
           | "showSubInitiativeProjects"
           | "showNestedInitiatives"
@@ -59757,6 +60599,7 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "workspaceMembersViewOrdering"
             | "projectZoomLevel"
             | "timelineZoomScale"
+            | "showOnlyLeadTeamProjects"
             | "showCompletedAgentSessions"
             | "showCompletedIssues"
             | "showCompletedProjects"
@@ -59782,6 +60625,7 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "fieldPreviewLinks"
             | "showReadItems"
             | "reviewFieldStatusDetails"
+            | "reviewFieldReviewers"
             | "showSnoozedItems"
             | "showSubInitiativeProjects"
             | "showNestedInitiatives"
@@ -60034,6 +60878,7 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "workspaceMembersViewOrdering"
           | "projectZoomLevel"
           | "timelineZoomScale"
+          | "showOnlyLeadTeamProjects"
           | "showCompletedAgentSessions"
           | "showCompletedIssues"
           | "showCompletedProjects"
@@ -60059,6 +60904,7 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "fieldPreviewLinks"
           | "showReadItems"
           | "reviewFieldStatusDetails"
+          | "reviewFieldReviewers"
           | "showSnoozedItems"
           | "showSubInitiativeProjects"
           | "showNestedInitiatives"
@@ -60310,6 +61156,7 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "workspaceMembersViewOrdering"
         | "projectZoomLevel"
         | "timelineZoomScale"
+        | "showOnlyLeadTeamProjects"
         | "showCompletedAgentSessions"
         | "showCompletedIssues"
         | "showCompletedProjects"
@@ -60335,6 +61182,7 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "fieldPreviewLinks"
         | "showReadItems"
         | "reviewFieldStatusDetails"
+        | "reviewFieldReviewers"
         | "showSnoozedItems"
         | "showSubInitiativeProjects"
         | "showNestedInitiatives"
@@ -60623,6 +61471,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "workspaceMembersViewOrdering"
               | "projectZoomLevel"
               | "timelineZoomScale"
+              | "showOnlyLeadTeamProjects"
               | "showCompletedAgentSessions"
               | "showCompletedIssues"
               | "showCompletedProjects"
@@ -60648,6 +61497,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "fieldPreviewLinks"
               | "showReadItems"
               | "reviewFieldStatusDetails"
+              | "reviewFieldReviewers"
               | "showSnoozedItems"
               | "showSubInitiativeProjects"
               | "showNestedInitiatives"
@@ -60893,6 +61743,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "workspaceMembersViewOrdering"
                   | "projectZoomLevel"
                   | "timelineZoomScale"
+                  | "showOnlyLeadTeamProjects"
                   | "showCompletedAgentSessions"
                   | "showCompletedIssues"
                   | "showCompletedProjects"
@@ -60918,6 +61769,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "fieldPreviewLinks"
                   | "showReadItems"
                   | "reviewFieldStatusDetails"
+                  | "reviewFieldReviewers"
                   | "showSnoozedItems"
                   | "showSubInitiativeProjects"
                   | "showNestedInitiatives"
@@ -61168,6 +62020,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "workspaceMembersViewOrdering"
                   | "projectZoomLevel"
                   | "timelineZoomScale"
+                  | "showOnlyLeadTeamProjects"
                   | "showCompletedAgentSessions"
                   | "showCompletedIssues"
                   | "showCompletedProjects"
@@ -61193,6 +62046,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "fieldPreviewLinks"
                   | "showReadItems"
                   | "reviewFieldStatusDetails"
+                  | "reviewFieldReviewers"
                   | "showSnoozedItems"
                   | "showSubInitiativeProjects"
                   | "showNestedInitiatives"
@@ -63502,6 +64356,30 @@ export type InboxNotificationsQuery = { __typename?: "Query" } & {
                 owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               };
           })
+      | ({ __typename: "WorkspaceAnnouncementNotification" } & Pick<
+          WorkspaceAnnouncementNotification,
+          | "type"
+          | "category"
+          | "updatedAt"
+          | "unsnoozedAt"
+          | "emailedAt"
+          | "archivedAt"
+          | "createdAt"
+          | "readAt"
+          | "snoozedUntilAt"
+          | "id"
+          | "workspaceAnnouncementId"
+        > & {
+            botActor?: Maybe<
+              { __typename: "ActorBot" } & Pick<
+                ActorBot,
+                "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+              >
+            >;
+            externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+            user: { __typename?: "User" } & Pick<User, "id">;
+            actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          })
     >;
     pageInfo: { __typename: "PageInfo" } & Pick<
       PageInfo,
@@ -65595,6 +66473,7 @@ export type Issue_HistoryQuery = { __typename?: "Query" } & {
                   | "description"
                   | "name"
                   | "updatedAt"
+                  | "groupType"
                   | "archivedAt"
                   | "createdAt"
                   | "id"
@@ -65617,6 +66496,7 @@ export type Issue_HistoryQuery = { __typename?: "Query" } & {
                   | "description"
                   | "name"
                   | "updatedAt"
+                  | "groupType"
                   | "archivedAt"
                   | "createdAt"
                   | "id"
@@ -65747,6 +66627,7 @@ export type Issue_LabelsQuery = { __typename?: "Query" } & {
           | "description"
           | "name"
           | "updatedAt"
+          | "groupType"
           | "archivedAt"
           | "createdAt"
           | "id"
@@ -66295,7 +67176,16 @@ export type IssueLabelQueryVariables = Exact<{
 export type IssueLabelQuery = { __typename?: "Query" } & {
   issueLabel: { __typename: "IssueLabel" } & Pick<
     IssueLabel,
-    "lastAppliedAt" | "color" | "description" | "name" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "isGroup"
+    | "lastAppliedAt"
+    | "color"
+    | "description"
+    | "name"
+    | "updatedAt"
+    | "groupType"
+    | "archivedAt"
+    | "createdAt"
+    | "id"
+    | "isGroup"
   > & {
       inheritedFrom?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
       parent?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -66327,6 +67217,7 @@ export type IssueLabel_ChildrenQuery = { __typename?: "Query" } & {
           | "description"
           | "name"
           | "updatedAt"
+          | "groupType"
           | "archivedAt"
           | "createdAt"
           | "id"
@@ -66527,7 +67418,16 @@ export type IssueLabelsQuery = { __typename?: "Query" } & {
     nodes: Array<
       { __typename: "IssueLabel" } & Pick<
         IssueLabel,
-        "lastAppliedAt" | "color" | "description" | "name" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "isGroup"
+        | "lastAppliedAt"
+        | "color"
+        | "description"
+        | "name"
+        | "updatedAt"
+        | "groupType"
+        | "archivedAt"
+        | "createdAt"
+        | "id"
+        | "isGroup"
       > & {
           inheritedFrom?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
           parent?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -67682,6 +68582,7 @@ export type IssueVcsBranchSearch_HistoryQuery = { __typename?: "Query" } & {
                     | "description"
                     | "name"
                     | "updatedAt"
+                    | "groupType"
                     | "archivedAt"
                     | "createdAt"
                     | "id"
@@ -67704,6 +68605,7 @@ export type IssueVcsBranchSearch_HistoryQuery = { __typename?: "Query" } & {
                     | "description"
                     | "name"
                     | "updatedAt"
+                    | "groupType"
                     | "archivedAt"
                     | "createdAt"
                     | "id"
@@ -67838,6 +68740,7 @@ export type IssueVcsBranchSearch_LabelsQuery = { __typename?: "Query" } & {
             | "description"
             | "name"
             | "updatedAt"
+            | "groupType"
             | "archivedAt"
             | "createdAt"
             | "id"
@@ -68906,6 +69809,30 @@ export type NotificationQuery = { __typename?: "Query" } & {
               lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             };
+        })
+    | ({ __typename: "WorkspaceAnnouncementNotification" } & Pick<
+        WorkspaceAnnouncementNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "unsnoozedAt"
+        | "emailedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "readAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "workspaceAnnouncementId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
         });
 };
 
@@ -69757,6 +70684,30 @@ export type NotificationsQuery = { __typename?: "Query" } & {
                 owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               };
           })
+      | ({ __typename: "WorkspaceAnnouncementNotification" } & Pick<
+          WorkspaceAnnouncementNotification,
+          | "type"
+          | "category"
+          | "updatedAt"
+          | "unsnoozedAt"
+          | "emailedAt"
+          | "archivedAt"
+          | "createdAt"
+          | "readAt"
+          | "snoozedUntilAt"
+          | "id"
+          | "workspaceAnnouncementId"
+        > & {
+            botActor?: Maybe<
+              { __typename: "ActorBot" } & Pick<
+                ActorBot,
+                "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+              >
+            >;
+            externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+            user: { __typename?: "User" } & Pick<User, "id">;
+            actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          })
     >;
     pageInfo: { __typename: "PageInfo" } & Pick<
       PageInfo,
@@ -69911,6 +70862,7 @@ export type Organization_LabelsQuery = { __typename?: "Query" } & {
           | "description"
           | "name"
           | "updatedAt"
+          | "groupType"
           | "archivedAt"
           | "createdAt"
           | "id"
@@ -71264,6 +72216,7 @@ export type Project_ProjectUpdatesQuery = { __typename?: "Query" } & {
       nodes: Array<
         { __typename: "ProjectUpdate" } & Pick<
           ProjectUpdate,
+          | "shortSummary"
           | "reactionData"
           | "commentCount"
           | "url"
@@ -72104,6 +73057,7 @@ export type ProjectUpdateQueryVariables = Exact<{
 export type ProjectUpdateQuery = { __typename?: "Query" } & {
   projectUpdate: { __typename: "ProjectUpdate" } & Pick<
     ProjectUpdate,
+    | "shortSummary"
     | "reactionData"
     | "commentCount"
     | "url"
@@ -72282,6 +73236,7 @@ export type ProjectUpdatesQuery = { __typename?: "Query" } & {
     nodes: Array<
       { __typename: "ProjectUpdate" } & Pick<
         ProjectUpdate,
+        | "shortSummary"
         | "reactionData"
         | "commentCount"
         | "url"
@@ -74628,6 +75583,7 @@ export type Team_LabelsQuery = { __typename?: "Query" } & {
           | "description"
           | "name"
           | "updatedAt"
+          | "groupType"
           | "archivedAt"
           | "createdAt"
           | "id"
@@ -75290,7 +76246,7 @@ export type TimeScheduleQuery = { __typename?: "Query" } & {
       integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">>;
       entries?: Maybe<
         Array<
-          { __typename: "TimeScheduleEntry" } & Pick<TimeScheduleEntry, "userId" | "userEmail" | "endsAt" | "startsAt">
+          { __typename: "TimeScheduleEntry" } & Pick<TimeScheduleEntry, "userId" | "endsAt" | "userEmail" | "startsAt">
         >
       >;
     };
@@ -75317,7 +76273,7 @@ export type TimeSchedulesQuery = { __typename?: "Query" } & {
             Array<
               { __typename: "TimeScheduleEntry" } & Pick<
                 TimeScheduleEntry,
-                "userId" | "userEmail" | "endsAt" | "startsAt"
+                "userId" | "endsAt" | "userEmail" | "startsAt"
               >
             >
           >;
@@ -77107,6 +78063,7 @@ export type UserViewPreferencesQuery = { __typename?: "Query" } & {
           | "workspaceMembersViewOrdering"
           | "projectZoomLevel"
           | "timelineZoomScale"
+          | "showOnlyLeadTeamProjects"
           | "showCompletedAgentSessions"
           | "showCompletedIssues"
           | "showCompletedProjects"
@@ -77132,6 +78089,7 @@ export type UserViewPreferencesQuery = { __typename?: "Query" } & {
           | "fieldPreviewLinks"
           | "showReadItems"
           | "reviewFieldStatusDetails"
+          | "reviewFieldReviewers"
           | "showSnoozedItems"
           | "showSubInitiativeProjects"
           | "showNestedInitiatives"
@@ -77382,6 +78340,7 @@ export type UserViewPreferences_PreferencesQuery = { __typename?: "Query" } & {
         | "workspaceMembersViewOrdering"
         | "projectZoomLevel"
         | "timelineZoomScale"
+        | "showOnlyLeadTeamProjects"
         | "showCompletedAgentSessions"
         | "showCompletedIssues"
         | "showCompletedProjects"
@@ -77407,6 +78366,7 @@ export type UserViewPreferences_PreferencesQuery = { __typename?: "Query" } & {
         | "fieldPreviewLinks"
         | "showReadItems"
         | "reviewFieldStatusDetails"
+        | "reviewFieldReviewers"
         | "showSnoozedItems"
         | "showSubInitiativeProjects"
         | "showNestedInitiatives"
@@ -80544,6 +81504,30 @@ export type UpdateInboxNotificationMutation = { __typename?: "Mutation" } & {
                   owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                 };
             })
+        | ({ __typename: "WorkspaceAnnouncementNotification" } & Pick<
+            WorkspaceAnnouncementNotification,
+            | "type"
+            | "category"
+            | "updatedAt"
+            | "unsnoozedAt"
+            | "emailedAt"
+            | "archivedAt"
+            | "createdAt"
+            | "readAt"
+            | "snoozedUntilAt"
+            | "id"
+            | "workspaceAnnouncementId"
+          > & {
+              botActor?: Maybe<
+                { __typename: "ActorBot" } & Pick<
+                  ActorBot,
+                  "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+                >
+              >;
+              externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+              user: { __typename?: "User" } & Pick<User, "id">;
+              actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            })
       >;
       notification:
         | ({ __typename: "CustomerNeedNotification" } & Pick<
@@ -81128,6 +82112,30 @@ export type UpdateInboxNotificationMutation = { __typename?: "Mutation" } & {
                   lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                   owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                 };
+            })
+        | ({ __typename: "WorkspaceAnnouncementNotification" } & Pick<
+            WorkspaceAnnouncementNotification,
+            | "type"
+            | "category"
+            | "updatedAt"
+            | "unsnoozedAt"
+            | "emailedAt"
+            | "archivedAt"
+            | "createdAt"
+            | "readAt"
+            | "snoozedUntilAt"
+            | "id"
+            | "workspaceAnnouncementId"
+          > & {
+              botActor?: Maybe<
+                { __typename: "ActorBot" } & Pick<
+                  ActorBot,
+                  "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+                >
+              >;
+              externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+              user: { __typename?: "User" } & Pick<User, "id">;
+              actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             });
     };
 };
@@ -83473,6 +84481,30 @@ export type ArchiveNotificationMutation = { __typename?: "Mutation" } & {
                   owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                 };
             })
+        | ({ __typename: "WorkspaceAnnouncementNotification" } & Pick<
+            WorkspaceAnnouncementNotification,
+            | "type"
+            | "category"
+            | "updatedAt"
+            | "unsnoozedAt"
+            | "emailedAt"
+            | "archivedAt"
+            | "createdAt"
+            | "readAt"
+            | "snoozedUntilAt"
+            | "id"
+            | "workspaceAnnouncementId"
+          > & {
+              botActor?: Maybe<
+                { __typename: "ActorBot" } & Pick<
+                  ActorBot,
+                  "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+                >
+              >;
+              externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+              user: { __typename?: "User" } & Pick<User, "id">;
+              actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            })
       >;
     };
 };
@@ -84069,6 +85101,30 @@ export type NotificationArchiveAllMutation = { __typename?: "Mutation" } & {
                   lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                   owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                 };
+            })
+        | ({ __typename: "WorkspaceAnnouncementNotification" } & Pick<
+            WorkspaceAnnouncementNotification,
+            | "type"
+            | "category"
+            | "updatedAt"
+            | "unsnoozedAt"
+            | "emailedAt"
+            | "archivedAt"
+            | "createdAt"
+            | "readAt"
+            | "snoozedUntilAt"
+            | "id"
+            | "workspaceAnnouncementId"
+          > & {
+              botActor?: Maybe<
+                { __typename: "ActorBot" } & Pick<
+                  ActorBot,
+                  "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+                >
+              >;
+              externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+              user: { __typename?: "User" } & Pick<User, "id">;
+              actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             })
       >;
     };
@@ -84681,6 +85737,30 @@ export type NotificationMarkReadAllMutation = { __typename?: "Mutation" } & {
                   owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                 };
             })
+        | ({ __typename: "WorkspaceAnnouncementNotification" } & Pick<
+            WorkspaceAnnouncementNotification,
+            | "type"
+            | "category"
+            | "updatedAt"
+            | "unsnoozedAt"
+            | "emailedAt"
+            | "archivedAt"
+            | "createdAt"
+            | "readAt"
+            | "snoozedUntilAt"
+            | "id"
+            | "workspaceAnnouncementId"
+          > & {
+              botActor?: Maybe<
+                { __typename: "ActorBot" } & Pick<
+                  ActorBot,
+                  "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+                >
+              >;
+              externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+              user: { __typename?: "User" } & Pick<User, "id">;
+              actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            })
       >;
     };
 };
@@ -85277,6 +86357,30 @@ export type NotificationMarkUnreadAllMutation = { __typename?: "Mutation" } & {
                   lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                   owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                 };
+            })
+        | ({ __typename: "WorkspaceAnnouncementNotification" } & Pick<
+            WorkspaceAnnouncementNotification,
+            | "type"
+            | "category"
+            | "updatedAt"
+            | "unsnoozedAt"
+            | "emailedAt"
+            | "archivedAt"
+            | "createdAt"
+            | "readAt"
+            | "snoozedUntilAt"
+            | "id"
+            | "workspaceAnnouncementId"
+          > & {
+              botActor?: Maybe<
+                { __typename: "ActorBot" } & Pick<
+                  ActorBot,
+                  "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+                >
+              >;
+              externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+              user: { __typename?: "User" } & Pick<User, "id">;
+              actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             })
       >;
     };
@@ -85875,6 +86979,30 @@ export type NotificationSnoozeAllMutation = { __typename?: "Mutation" } & {
                   lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                   owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                 };
+            })
+        | ({ __typename: "WorkspaceAnnouncementNotification" } & Pick<
+            WorkspaceAnnouncementNotification,
+            | "type"
+            | "category"
+            | "updatedAt"
+            | "unsnoozedAt"
+            | "emailedAt"
+            | "archivedAt"
+            | "createdAt"
+            | "readAt"
+            | "snoozedUntilAt"
+            | "id"
+            | "workspaceAnnouncementId"
+          > & {
+              botActor?: Maybe<
+                { __typename: "ActorBot" } & Pick<
+                  ActorBot,
+                  "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+                >
+              >;
+              externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+              user: { __typename?: "User" } & Pick<User, "id">;
+              actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             })
       >;
     };
@@ -86735,6 +87863,30 @@ export type UnarchiveNotificationMutation = { __typename?: "Mutation" } & {
                   owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                 };
             })
+        | ({ __typename: "WorkspaceAnnouncementNotification" } & Pick<
+            WorkspaceAnnouncementNotification,
+            | "type"
+            | "category"
+            | "updatedAt"
+            | "unsnoozedAt"
+            | "emailedAt"
+            | "archivedAt"
+            | "createdAt"
+            | "readAt"
+            | "snoozedUntilAt"
+            | "id"
+            | "workspaceAnnouncementId"
+          > & {
+              botActor?: Maybe<
+                { __typename: "ActorBot" } & Pick<
+                  ActorBot,
+                  "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+                >
+              >;
+              externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+              user: { __typename?: "User" } & Pick<User, "id">;
+              actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            })
       >;
     };
 };
@@ -87333,6 +88485,30 @@ export type NotificationUnsnoozeAllMutation = { __typename?: "Mutation" } & {
                   owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                 };
             })
+        | ({ __typename: "WorkspaceAnnouncementNotification" } & Pick<
+            WorkspaceAnnouncementNotification,
+            | "type"
+            | "category"
+            | "updatedAt"
+            | "unsnoozedAt"
+            | "emailedAt"
+            | "archivedAt"
+            | "createdAt"
+            | "readAt"
+            | "snoozedUntilAt"
+            | "id"
+            | "workspaceAnnouncementId"
+          > & {
+              botActor?: Maybe<
+                { __typename: "ActorBot" } & Pick<
+                  ActorBot,
+                  "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+                >
+              >;
+              externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+              user: { __typename?: "User" } & Pick<User, "id">;
+              actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            })
       >;
     };
 };
@@ -87927,6 +89103,30 @@ export type UpdateNotificationMutation = { __typename?: "Mutation" } & {
                   lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                   owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                 };
+            })
+        | ({ __typename: "WorkspaceAnnouncementNotification" } & Pick<
+            WorkspaceAnnouncementNotification,
+            | "type"
+            | "category"
+            | "updatedAt"
+            | "unsnoozedAt"
+            | "emailedAt"
+            | "archivedAt"
+            | "createdAt"
+            | "readAt"
+            | "snoozedUntilAt"
+            | "id"
+            | "workspaceAnnouncementId"
+          > & {
+              botActor?: Maybe<
+                { __typename: "ActorBot" } & Pick<
+                  ActorBot,
+                  "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+                >
+              >;
+              externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+              user: { __typename?: "User" } & Pick<User, "id">;
+              actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             });
     };
 };
@@ -89291,6 +90491,7 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "workspaceMembersViewOrdering"
             | "projectZoomLevel"
             | "timelineZoomScale"
+            | "showOnlyLeadTeamProjects"
             | "showCompletedAgentSessions"
             | "showCompletedIssues"
             | "showCompletedProjects"
@@ -89316,6 +90517,7 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "fieldPreviewLinks"
             | "showReadItems"
             | "reviewFieldStatusDetails"
+            | "reviewFieldReviewers"
             | "showSnoozedItems"
             | "showSubInitiativeProjects"
             | "showNestedInitiatives"
@@ -89581,6 +90783,7 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "workspaceMembersViewOrdering"
             | "projectZoomLevel"
             | "timelineZoomScale"
+            | "showOnlyLeadTeamProjects"
             | "showCompletedAgentSessions"
             | "showCompletedIssues"
             | "showCompletedProjects"
@@ -89606,6 +90809,7 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "fieldPreviewLinks"
             | "showReadItems"
             | "reviewFieldStatusDetails"
+            | "reviewFieldReviewers"
             | "showSnoozedItems"
             | "showSubInitiativeProjects"
             | "showNestedInitiatives"
@@ -89911,6 +91115,7 @@ export const AiConversationMcpServerConnectionScopeFragmentDoc = new TypedDocume
   `
     fragment AiConversationMcpServerConnectionScope on AiConversationMcpServerConnectionScope {
   __typename
+  workflowDefinitionDraftId
   workflowDefinitionId
   teamId
   type
@@ -89964,6 +91169,7 @@ fragment AiConversationPartMetadata on AiConversationPartMetadata {
 }
 fragment AiConversationMcpServerConnectionScope on AiConversationMcpServerConnectionScope {
   __typename
+  workflowDefinitionDraftId
   workflowDefinitionId
   teamId
   type
@@ -91236,16 +92442,37 @@ export const AiConversationPostChatMessageToolCallArgsFragmentDoc = new TypedDoc
     `,
   { fragmentName: "AiConversationPostChatMessageToolCallArgs" }
 ) as unknown as TypedDocumentString<AiConversationPostChatMessageToolCallArgsFragment, unknown>;
+export const AiConversationPostChatMessageToolCallResultDestinationFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationPostChatMessageToolCallResultDestination on AiConversationPostChatMessageToolCallResultDestination {
+  __typename
+  channelId
+  integrationId
+  messageId
+  threadId
+}
+    `,
+  { fragmentName: "AiConversationPostChatMessageToolCallResultDestination" }
+) as unknown as TypedDocumentString<AiConversationPostChatMessageToolCallResultDestinationFragment, unknown>;
 export const AiConversationPostChatMessageToolCallResultFragmentDoc = new TypedDocumentString(
   `
     fragment AiConversationPostChatMessageToolCallResult on AiConversationPostChatMessageToolCallResult {
   __typename
   conversationUrl
+  destination {
+    ...AiConversationPostChatMessageToolCallResultDestination
+  }
   error
   message
   posted
 }
-    `,
+    fragment AiConversationPostChatMessageToolCallResultDestination on AiConversationPostChatMessageToolCallResultDestination {
+  __typename
+  channelId
+  integrationId
+  messageId
+  threadId
+}`,
   { fragmentName: "AiConversationPostChatMessageToolCallResult" }
 ) as unknown as TypedDocumentString<AiConversationPostChatMessageToolCallResultFragment, unknown>;
 export const AiConversationPostChatMessageToolCallFragmentDoc = new TypedDocumentString(
@@ -91276,9 +92503,19 @@ export const AiConversationPostChatMessageToolCallFragmentDoc = new TypedDocumen
 fragment AiConversationPostChatMessageToolCallResult on AiConversationPostChatMessageToolCallResult {
   __typename
   conversationUrl
+  destination {
+    ...AiConversationPostChatMessageToolCallResultDestination
+  }
   error
   message
   posted
+}
+fragment AiConversationPostChatMessageToolCallResultDestination on AiConversationPostChatMessageToolCallResultDestination {
+  __typename
+  channelId
+  integrationId
+  messageId
+  threadId
 }
 fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
   __typename
@@ -91983,6 +93220,94 @@ fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
 }`,
   { fragmentName: "AiConversationRetryPullRequestCheckToolCall" }
 ) as unknown as TypedDocumentString<AiConversationRetryPullRequestCheckToolCallFragment, unknown>;
+export const AiConversationRunLoopToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationRunLoopToolCallArgs on AiConversationRunLoopToolCallArgs {
+  __typename
+  workflowDefinitionId
+}
+    `,
+  { fragmentName: "AiConversationRunLoopToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationRunLoopToolCallArgsFragment, unknown>;
+export const AiConversationRunLoopToolCallResultFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationRunLoopToolCallResult on AiConversationRunLoopToolCallResult {
+  __typename
+  conversationId
+  createdEntities {
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
+  }
+  url
+}
+    fragment AiConversationCreateEntityToolCallResultCreatedEntities on AiConversationCreateEntityToolCallResultCreatedEntities {
+  __typename
+  id
+  label
+  parent {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  type
+}
+fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}`,
+  { fragmentName: "AiConversationRunLoopToolCallResult" }
+) as unknown as TypedDocumentString<AiConversationRunLoopToolCallResultFragment, unknown>;
+export const AiConversationRunLoopToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationRunLoopToolCall on AiConversationRunLoopToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationRunLoopToolCallArgs
+  }
+  name
+  rawResult
+  result {
+    ...AiConversationRunLoopToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationCreateEntityToolCallResultCreatedEntities on AiConversationCreateEntityToolCallResultCreatedEntities {
+  __typename
+  id
+  label
+  parent {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
+  type
+}
+fragment AiConversationRunLoopToolCallArgs on AiConversationRunLoopToolCallArgs {
+  __typename
+  workflowDefinitionId
+}
+fragment AiConversationRunLoopToolCallResult on AiConversationRunLoopToolCallResult {
+  __typename
+  conversationId
+  createdEntities {
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
+  }
+  url
+}
+fragment AiConversationSearchEntitiesToolCallResultEntities on AiConversationSearchEntitiesToolCallResultEntities {
+  __typename
+  id
+  type
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationRunLoopToolCall" }
+) as unknown as TypedDocumentString<AiConversationRunLoopToolCallFragment, unknown>;
 export const AiConversationSandboxGitHistoryToolCallArgsFragmentDoc = new TypedDocumentString(
   `
     fragment AiConversationSandboxGitHistoryToolCallArgs on AiConversationSandboxGitHistoryToolCallArgs {
@@ -92801,6 +94126,9 @@ export const AiConversationToolCallPartFragmentDoc = new TypedDocumentString(
     ... on AiConversationRetryPullRequestCheckToolCall {
       ...AiConversationRetryPullRequestCheckToolCall
     }
+    ... on AiConversationRunLoopToolCall {
+      ...AiConversationRunLoopToolCall
+    }
     ... on AiConversationSandboxGitHistoryToolCall {
       ...AiConversationSandboxGitHistoryToolCall
     }
@@ -93269,9 +94597,19 @@ fragment AiConversationPostChatMessageToolCallArgs on AiConversationPostChatMess
 fragment AiConversationPostChatMessageToolCallResult on AiConversationPostChatMessageToolCallResult {
   __typename
   conversationUrl
+  destination {
+    ...AiConversationPostChatMessageToolCallResultDestination
+  }
   error
   message
   posted
+}
+fragment AiConversationPostChatMessageToolCallResultDestination on AiConversationPostChatMessageToolCallResultDestination {
+  __typename
+  channelId
+  integrationId
+  messageId
+  threadId
 }
 fragment AiConversationPromptCodingSessionToolCall on AiConversationPromptCodingSessionToolCall {
   __typename
@@ -93530,6 +94868,33 @@ fragment AiConversationRetryPullRequestCheckToolCallArgs on AiConversationRetryP
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
   workflowName
+}
+fragment AiConversationRunLoopToolCall on AiConversationRunLoopToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationRunLoopToolCallArgs
+  }
+  name
+  rawResult
+  result {
+    ...AiConversationRunLoopToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationRunLoopToolCallArgs on AiConversationRunLoopToolCallArgs {
+  __typename
+  workflowDefinitionId
+}
+fragment AiConversationRunLoopToolCallResult on AiConversationRunLoopToolCallResult {
+  __typename
+  conversationId
+  createdEntities {
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
+  }
+  url
 }
 fragment AiConversationSandboxGitHistoryToolCall on AiConversationSandboxGitHistoryToolCall {
   __typename
@@ -94336,6 +95701,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     ... on AiConversationRetryPullRequestCheckToolCall {
       ...AiConversationRetryPullRequestCheckToolCall
     }
+    ... on AiConversationRunLoopToolCall {
+      ...AiConversationRunLoopToolCall
+    }
     ... on AiConversationSandboxGitHistoryToolCall {
       ...AiConversationSandboxGitHistoryToolCall
     }
@@ -94458,6 +95826,7 @@ fragment AgentAutomationRetryResolution on AgentAutomationRetryResolution {
 }
 fragment AiConversationMcpServerConnectionScope on AiConversationMcpServerConnectionScope {
   __typename
+  workflowDefinitionDraftId
   workflowDefinitionId
   teamId
   type
@@ -94917,9 +96286,19 @@ fragment AiConversationPostChatMessageToolCallArgs on AiConversationPostChatMess
 fragment AiConversationPostChatMessageToolCallResult on AiConversationPostChatMessageToolCallResult {
   __typename
   conversationUrl
+  destination {
+    ...AiConversationPostChatMessageToolCallResultDestination
+  }
   error
   message
   posted
+}
+fragment AiConversationPostChatMessageToolCallResultDestination on AiConversationPostChatMessageToolCallResultDestination {
+  __typename
+  channelId
+  integrationId
+  messageId
+  threadId
 }
 fragment AiConversationPromptCodingSessionToolCall on AiConversationPromptCodingSessionToolCall {
   __typename
@@ -95178,6 +96557,33 @@ fragment AiConversationRetryPullRequestCheckToolCallArgs on AiConversationRetryP
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
   workflowName
+}
+fragment AiConversationRunLoopToolCall on AiConversationRunLoopToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationRunLoopToolCallArgs
+  }
+  name
+  rawResult
+  result {
+    ...AiConversationRunLoopToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationRunLoopToolCallArgs on AiConversationRunLoopToolCallArgs {
+  __typename
+  workflowDefinitionId
+}
+fragment AiConversationRunLoopToolCallResult on AiConversationRunLoopToolCallResult {
+  __typename
+  conversationId
+  createdEntities {
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
+  }
+  url
 }
 fragment AiConversationSandboxGitHistoryToolCall on AiConversationSandboxGitHistoryToolCall {
   __typename
@@ -96496,6 +97902,45 @@ fragment WorkflowDefinition on WorkflowDefinition {
 }`,
   { fragmentName: "WorkflowDefinitionNotification" }
 ) as unknown as TypedDocumentString<WorkflowDefinitionNotificationFragment, unknown>;
+export const WorkspaceAnnouncementNotificationFragmentDoc = new TypedDocumentString(
+  `
+    fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
+  __typename
+  type
+  workspaceAnnouncementId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+}
+    fragment ActorBot on ActorBot {
+  __typename
+  avatarUrl
+  subType
+  id
+  name
+  userDisplayName
+  type
+}`,
+  { fragmentName: "WorkspaceAnnouncementNotification" }
+) as unknown as TypedDocumentString<WorkspaceAnnouncementNotificationFragment, unknown>;
 export const NotificationFragmentDoc = new TypedDocumentString(
   `
     fragment Notification on Notification {
@@ -96560,6 +98005,9 @@ export const NotificationFragmentDoc = new TypedDocumentString(
   }
   ... on WorkflowDefinitionNotification {
     ...WorkflowDefinitionNotification
+  }
+  ... on WorkspaceAnnouncementNotification {
+    ...WorkspaceAnnouncementNotification
   }
 }
     fragment ActorBot on ActorBot {
@@ -97060,6 +98508,32 @@ fragment NotificationSubscription on NotificationSubscription {
     id
   }
   active
+}
+fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
+  __typename
+  type
+  workspaceAnnouncementId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
 }
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
@@ -97232,6 +98706,9 @@ fragment Notification on Notification {
   ... on WorkflowDefinitionNotification {
     ...WorkflowDefinitionNotification
   }
+  ... on WorkspaceAnnouncementNotification {
+    ...WorkspaceAnnouncementNotification
+  }
 }
 fragment CustomerNeedNotification on CustomerNeedNotification {
   __typename
@@ -97696,6 +99173,32 @@ fragment NotificationSubscription on NotificationSubscription {
     id
   }
   active
+}
+fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
+  __typename
+  type
+  workspaceAnnouncementId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
 }
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
@@ -98167,6 +99670,9 @@ fragment Notification on Notification {
   ... on WorkflowDefinitionNotification {
     ...WorkflowDefinitionNotification
   }
+  ... on WorkspaceAnnouncementNotification {
+    ...WorkspaceAnnouncementNotification
+  }
 }
 fragment CustomerNeedNotification on CustomerNeedNotification {
   __typename
@@ -98631,6 +100137,32 @@ fragment NotificationSubscription on NotificationSubscription {
     id
   }
   active
+}
+fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
+  __typename
+  type
+  workspaceAnnouncementId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
 }
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
@@ -99112,6 +100644,16 @@ export const WebhookFailureEventFragmentDoc = new TypedDocumentString(
     `,
   { fragmentName: "WebhookFailureEvent" }
 ) as unknown as TypedDocumentString<WebhookFailureEventFragment, unknown>;
+export const TimeScheduleUserFragmentDoc = new TypedDocumentString(
+  `
+    fragment TimeScheduleUser on TimeScheduleUser {
+  __typename
+  userId
+  userEmail
+}
+    `,
+  { fragmentName: "TimeScheduleUser" }
+) as unknown as TypedDocumentString<TimeScheduleUserFragment, unknown>;
 export const AccessKeyReleasePipelineFragmentDoc = new TypedDocumentString(
   `
     fragment AccessKeyReleasePipeline on AccessKeyReleasePipeline {
@@ -99628,6 +101170,31 @@ export const IntegrationChildWebhookPayloadFragmentDoc = new TypedDocumentString
     `,
   { fragmentName: "IntegrationChildWebhookPayload" }
 ) as unknown as TypedDocumentString<IntegrationChildWebhookPayloadFragment, unknown>;
+export const IntegrationDatadogEnvironmentFragmentDoc = new TypedDocumentString(
+  `
+    fragment IntegrationDatadogEnvironment on IntegrationDatadogEnvironment {
+  __typename
+  id
+  name
+}
+    `,
+  { fragmentName: "IntegrationDatadogEnvironment" }
+) as unknown as TypedDocumentString<IntegrationDatadogEnvironmentFragment, unknown>;
+export const IntegrationDatadogEnvironmentsPayloadFragmentDoc = new TypedDocumentString(
+  `
+    fragment IntegrationDatadogEnvironmentsPayload on IntegrationDatadogEnvironmentsPayload {
+  __typename
+  environments {
+    ...IntegrationDatadogEnvironment
+  }
+}
+    fragment IntegrationDatadogEnvironment on IntegrationDatadogEnvironment {
+  __typename
+  id
+  name
+}`,
+  { fragmentName: "IntegrationDatadogEnvironmentsPayload" }
+) as unknown as TypedDocumentString<IntegrationDatadogEnvironmentsPayloadFragment, unknown>;
 export const ExternalUserActorWebhookPayloadFragmentDoc = new TypedDocumentString(
   `
     fragment ExternalUserActorWebhookPayload on ExternalUserActorWebhookPayload {
@@ -100009,6 +101576,7 @@ export const IssueLabelFragmentDoc = new TypedDocumentString(
   parent {
     id
   }
+  groupType
   team {
     id
   }
@@ -100056,6 +101624,7 @@ export const IssueHistoryTriageRuleErrorFragmentDoc = new TypedDocumentString(
   parent {
     id
   }
+  groupType
   team {
     id
   }
@@ -100172,6 +101741,7 @@ fragment IssueLabel on IssueLabel {
   parent {
     id
   }
+  groupType
   team {
     id
   }
@@ -103133,6 +104703,9 @@ fragment Notification on Notification {
   ... on WorkflowDefinitionNotification {
     ...WorkflowDefinitionNotification
   }
+  ... on WorkspaceAnnouncementNotification {
+    ...WorkspaceAnnouncementNotification
+  }
 }
 fragment CustomerNeedNotification on CustomerNeedNotification {
   __typename
@@ -103597,6 +105170,32 @@ fragment NotificationSubscription on NotificationSubscription {
     id
   }
   active
+}
+fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
+  __typename
+  type
+  workspaceAnnouncementId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
 }
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
@@ -103988,6 +105587,9 @@ fragment Notification on Notification {
   ... on WorkflowDefinitionNotification {
     ...WorkflowDefinitionNotification
   }
+  ... on WorkspaceAnnouncementNotification {
+    ...WorkspaceAnnouncementNotification
+  }
 }
 fragment CustomerNeedNotification on CustomerNeedNotification {
   __typename
@@ -104452,6 +106054,32 @@ fragment NotificationSubscription on NotificationSubscription {
     id
   }
   active
+}
+fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
+  __typename
+  type
+  workspaceAnnouncementId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
 }
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
@@ -104624,6 +106252,9 @@ fragment Notification on Notification {
   ... on WorkflowDefinitionNotification {
     ...WorkflowDefinitionNotification
   }
+  ... on WorkspaceAnnouncementNotification {
+    ...WorkspaceAnnouncementNotification
+  }
 }
 fragment CustomerNeedNotification on CustomerNeedNotification {
   __typename
@@ -105088,6 +106719,32 @@ fragment NotificationSubscription on NotificationSubscription {
     id
   }
   active
+}
+fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
+  __typename
+  type
+  workspaceAnnouncementId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
 }
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
@@ -106737,6 +108394,7 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   workspaceMembersViewOrdering
   projectZoomLevel
   timelineZoomScale
+  showOnlyLeadTeamProjects
   showCompletedAgentSessions
   showCompletedIssues
   showCompletedProjects
@@ -106762,6 +108420,7 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   fieldPreviewLinks
   showReadItems
   reviewFieldStatusDetails
+  reviewFieldReviewers
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -107026,6 +108685,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   workspaceMembersViewOrdering
   projectZoomLevel
   timelineZoomScale
+  showOnlyLeadTeamProjects
   showCompletedAgentSessions
   showCompletedIssues
   showCompletedProjects
@@ -107051,6 +108711,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldPreviewLinks
   showReadItems
   reviewFieldStatusDetails
+  reviewFieldReviewers
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -107301,6 +108962,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   workspaceMembersViewOrdering
   projectZoomLevel
   timelineZoomScale
+  showOnlyLeadTeamProjects
   showCompletedAgentSessions
   showCompletedIssues
   showCompletedProjects
@@ -107326,6 +108988,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldPreviewLinks
   showReadItems
   reviewFieldStatusDetails
+  reviewFieldReviewers
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -108667,6 +110330,9 @@ export const AiConversationBaseToolCallFragmentDoc = new TypedDocumentString(
   ... on AiConversationRetryPullRequestCheckToolCall {
     ...AiConversationRetryPullRequestCheckToolCall
   }
+  ... on AiConversationRunLoopToolCall {
+    ...AiConversationRunLoopToolCall
+  }
   ... on AiConversationSandboxGitHistoryToolCall {
     ...AiConversationSandboxGitHistoryToolCall
   }
@@ -109124,9 +110790,19 @@ fragment AiConversationPostChatMessageToolCallArgs on AiConversationPostChatMess
 fragment AiConversationPostChatMessageToolCallResult on AiConversationPostChatMessageToolCallResult {
   __typename
   conversationUrl
+  destination {
+    ...AiConversationPostChatMessageToolCallResultDestination
+  }
   error
   message
   posted
+}
+fragment AiConversationPostChatMessageToolCallResultDestination on AiConversationPostChatMessageToolCallResultDestination {
+  __typename
+  channelId
+  integrationId
+  messageId
+  threadId
 }
 fragment AiConversationPromptCodingSessionToolCall on AiConversationPromptCodingSessionToolCall {
   __typename
@@ -109385,6 +111061,33 @@ fragment AiConversationRetryPullRequestCheckToolCallArgs on AiConversationRetryP
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
   workflowName
+}
+fragment AiConversationRunLoopToolCall on AiConversationRunLoopToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationRunLoopToolCallArgs
+  }
+  name
+  rawResult
+  result {
+    ...AiConversationRunLoopToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationRunLoopToolCallArgs on AiConversationRunLoopToolCallArgs {
+  __typename
+  workflowDefinitionId
+}
+fragment AiConversationRunLoopToolCallResult on AiConversationRunLoopToolCallResult {
+  __typename
+  conversationId
+  createdEntities {
+    ...AiConversationCreateEntityToolCallResultCreatedEntities
+  }
+  url
 }
 fragment AiConversationSandboxGitHistoryToolCall on AiConversationSandboxGitHistoryToolCall {
   __typename
@@ -110826,6 +112529,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   workspaceMembersViewOrdering
   projectZoomLevel
   timelineZoomScale
+  showOnlyLeadTeamProjects
   showCompletedAgentSessions
   showCompletedIssues
   showCompletedProjects
@@ -110851,6 +112555,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldPreviewLinks
   showReadItems
   reviewFieldStatusDetails
+  reviewFieldReviewers
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -111154,6 +112859,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   workspaceMembersViewOrdering
   projectZoomLevel
   timelineZoomScale
+  showOnlyLeadTeamProjects
   showCompletedAgentSessions
   showCompletedIssues
   showCompletedProjects
@@ -111179,6 +112885,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldPreviewLinks
   showReadItems
   reviewFieldStatusDetails
+  reviewFieldReviewers
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -114150,6 +115857,7 @@ fragment IssueLabel on IssueLabel {
   parent {
     id
   }
+  groupType
   team {
     id
   }
@@ -114394,6 +116102,7 @@ fragment IssueLabel on IssueLabel {
   parent {
     id
   }
+  groupType
   team {
     id
   }
@@ -114446,6 +116155,7 @@ export const IssueLabelConnectionFragmentDoc = new TypedDocumentString(
   parent {
     id
   }
+  groupType
   team {
     id
   }
@@ -115313,6 +117023,9 @@ fragment Notification on Notification {
   ... on WorkflowDefinitionNotification {
     ...WorkflowDefinitionNotification
   }
+  ... on WorkspaceAnnouncementNotification {
+    ...WorkspaceAnnouncementNotification
+  }
 }
 fragment CustomerNeedNotification on CustomerNeedNotification {
   __typename
@@ -115777,6 +117490,32 @@ fragment NotificationSubscription on NotificationSubscription {
     id
   }
   active
+}
+fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
+  __typename
+  type
+  workspaceAnnouncementId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
 }
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
@@ -117189,6 +118928,7 @@ export const ProjectUpdateFragmentDoc = new TypedDocumentString(
   `
     fragment ProjectUpdate on ProjectUpdate {
   __typename
+  shortSummary
   reactionData
   commentCount
   reactions {
@@ -117255,6 +118995,7 @@ export const ProjectUpdateConnectionFragmentDoc = new TypedDocumentString(
 }
     fragment ProjectUpdate on ProjectUpdate {
   __typename
+  shortSummary
   reactionData
   commentCount
   reactions {
@@ -118588,6 +120329,9 @@ fragment Notification on Notification {
   ... on WorkflowDefinitionNotification {
     ...WorkflowDefinitionNotification
   }
+  ... on WorkspaceAnnouncementNotification {
+    ...WorkspaceAnnouncementNotification
+  }
 }
 fragment CustomerNeedNotification on CustomerNeedNotification {
   __typename
@@ -119254,6 +120998,32 @@ fragment WelcomeMessage on WelcomeMessage {
   }
   enabled
 }
+fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
+  __typename
+  type
+  workspaceAnnouncementId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+}
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
   stats
@@ -119356,6 +121126,7 @@ fragment IssueLabel on IssueLabel {
   parent {
     id
   }
+  groupType
   team {
     id
   }
@@ -119802,8 +121573,8 @@ export const TimeScheduleEntryFragmentDoc = new TypedDocumentString(
     fragment TimeScheduleEntry on TimeScheduleEntry {
   __typename
   userId
-  userEmail
   endsAt
+  userEmail
   startsAt
 }
     `,
@@ -119830,8 +121601,8 @@ export const TimeScheduleFragmentDoc = new TypedDocumentString(
     fragment TimeScheduleEntry on TimeScheduleEntry {
   __typename
   userId
-  userEmail
   endsAt
+  userEmail
   startsAt
 }`,
   { fragmentName: "TimeSchedule" }
@@ -119850,8 +121621,8 @@ export const TimeScheduleConnectionFragmentDoc = new TypedDocumentString(
     fragment TimeScheduleEntry on TimeScheduleEntry {
   __typename
   userId
-  userEmail
   endsAt
+  userEmail
   startsAt
 }
 fragment TimeSchedule on TimeSchedule {
@@ -122196,6 +123967,7 @@ fragment IssueLabel on IssueLabel {
   parent {
     id
   }
+  groupType
   team {
     id
   }
@@ -122308,6 +124080,7 @@ export const AttachmentIssue_LabelsDocument = new TypedDocumentString(`
   parent {
     id
   }
+  groupType
   team {
     id
   }
@@ -124243,6 +126016,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   workspaceMembersViewOrdering
   projectZoomLevel
   timelineZoomScale
+  showOnlyLeadTeamProjects
   showCompletedAgentSessions
   showCompletedIssues
   showCompletedProjects
@@ -124268,6 +126042,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldPreviewLinks
   showReadItems
   reviewFieldStatusDetails
+  reviewFieldReviewers
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -124921,6 +126696,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   workspaceMembersViewOrdering
   projectZoomLevel
   timelineZoomScale
+  showOnlyLeadTeamProjects
   showCompletedAgentSessions
   showCompletedIssues
   showCompletedProjects
@@ -124946,6 +126722,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldPreviewLinks
   showReadItems
   reviewFieldStatusDetails
+  reviewFieldReviewers
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -125209,6 +126986,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   workspaceMembersViewOrdering
   projectZoomLevel
   timelineZoomScale
+  showOnlyLeadTeamProjects
   showCompletedAgentSessions
   showCompletedIssues
   showCompletedProjects
@@ -125234,6 +127012,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldPreviewLinks
   showReadItems
   reviewFieldStatusDetails
+  reviewFieldReviewers
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -125685,6 +127464,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   workspaceMembersViewOrdering
   projectZoomLevel
   timelineZoomScale
+  showOnlyLeadTeamProjects
   showCompletedAgentSessions
   showCompletedIssues
   showCompletedProjects
@@ -125710,6 +127490,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldPreviewLinks
   showReadItems
   reviewFieldStatusDetails
+  reviewFieldReviewers
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -125973,6 +127754,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   workspaceMembersViewOrdering
   projectZoomLevel
   timelineZoomScale
+  showOnlyLeadTeamProjects
   showCompletedAgentSessions
   showCompletedIssues
   showCompletedProjects
@@ -125998,6 +127780,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldPreviewLinks
   showReadItems
   reviewFieldStatusDetails
+  reviewFieldReviewers
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -126247,6 +128030,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   workspaceMembersViewOrdering
   projectZoomLevel
   timelineZoomScale
+  showOnlyLeadTeamProjects
   showCompletedAgentSessions
   showCompletedIssues
   showCompletedProjects
@@ -126272,6 +128056,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldPreviewLinks
   showReadItems
   reviewFieldStatusDetails
+  reviewFieldReviewers
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -126578,6 +128363,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   workspaceMembersViewOrdering
   projectZoomLevel
   timelineZoomScale
+  showOnlyLeadTeamProjects
   showCompletedAgentSessions
   showCompletedIssues
   showCompletedProjects
@@ -126603,6 +128389,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldPreviewLinks
   showReadItems
   reviewFieldStatusDetails
+  reviewFieldReviewers
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -129221,6 +131008,9 @@ fragment Notification on Notification {
   ... on WorkflowDefinitionNotification {
     ...WorkflowDefinitionNotification
   }
+  ... on WorkspaceAnnouncementNotification {
+    ...WorkspaceAnnouncementNotification
+  }
 }
 fragment CustomerNeedNotification on CustomerNeedNotification {
   __typename
@@ -129685,6 +131475,32 @@ fragment NotificationSubscription on NotificationSubscription {
     id
   }
   active
+}
+fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
+  __typename
+  type
+  workspaceAnnouncementId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
 }
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
@@ -132966,6 +134782,7 @@ fragment IssueLabel on IssueLabel {
   parent {
     id
   }
+  groupType
   team {
     id
   }
@@ -133075,6 +134892,7 @@ export const Issue_LabelsDocument = new TypedDocumentString(`
   parent {
     id
   }
+  groupType
   team {
     id
   }
@@ -133856,6 +135674,7 @@ export const IssueLabelDocument = new TypedDocumentString(`
   parent {
     id
   }
+  groupType
   team {
     id
   }
@@ -133899,6 +135718,7 @@ export const IssueLabel_ChildrenDocument = new TypedDocumentString(`
   parent {
     id
   }
+  groupType
   team {
     id
   }
@@ -134211,6 +136031,7 @@ export const IssueLabelsDocument = new TypedDocumentString(`
   parent {
     id
   }
+  groupType
   team {
     id
   }
@@ -135916,6 +137737,7 @@ fragment IssueLabel on IssueLabel {
   parent {
     id
   }
+  groupType
   team {
     id
   }
@@ -136028,6 +137850,7 @@ export const IssueVcsBranchSearch_LabelsDocument = new TypedDocumentString(`
   parent {
     id
   }
+  groupType
   team {
     id
   }
@@ -136898,6 +138721,9 @@ fragment Notification on Notification {
   ... on WorkflowDefinitionNotification {
     ...WorkflowDefinitionNotification
   }
+  ... on WorkspaceAnnouncementNotification {
+    ...WorkspaceAnnouncementNotification
+  }
 }
 fragment CustomerNeedNotification on CustomerNeedNotification {
   __typename
@@ -137362,6 +139188,32 @@ fragment NotificationSubscription on NotificationSubscription {
     id
   }
   active
+}
+fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
+  __typename
+  type
+  workspaceAnnouncementId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
 }
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
@@ -137645,6 +139497,9 @@ fragment Notification on Notification {
   ... on WorkflowDefinitionNotification {
     ...WorkflowDefinitionNotification
   }
+  ... on WorkspaceAnnouncementNotification {
+    ...WorkspaceAnnouncementNotification
+  }
 }
 fragment CustomerNeedNotification on CustomerNeedNotification {
   __typename
@@ -138110,6 +139965,32 @@ fragment NotificationSubscription on NotificationSubscription {
   }
   active
 }
+fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
+  __typename
+  type
+  workspaceAnnouncementId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+}
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
   stats
@@ -138364,6 +140245,7 @@ export const Organization_LabelsDocument = new TypedDocumentString(`
   parent {
     id
   }
+  groupType
   team {
     id
   }
@@ -140374,6 +142256,7 @@ export const Project_ProjectUpdatesDocument = new TypedDocumentString(`
 }
     fragment ProjectUpdate on ProjectUpdate {
   __typename
+  shortSummary
   reactionData
   commentCount
   reactions {
@@ -141676,6 +143559,7 @@ export const ProjectUpdateDocument = new TypedDocumentString(`
 }
     fragment ProjectUpdate on ProjectUpdate {
   __typename
+  shortSummary
   reactionData
   commentCount
   reactions {
@@ -141979,6 +143863,7 @@ export const ProjectUpdatesDocument = new TypedDocumentString(`
 }
     fragment ProjectUpdate on ProjectUpdate {
   __typename
+  shortSummary
   reactionData
   commentCount
   reactions {
@@ -145589,6 +147474,7 @@ export const Team_LabelsDocument = new TypedDocumentString(`
   parent {
     id
   }
+  groupType
   team {
     id
   }
@@ -146514,8 +148400,8 @@ export const TimeScheduleDocument = new TypedDocumentString(`
     fragment TimeScheduleEntry on TimeScheduleEntry {
   __typename
   userId
-  userEmail
   endsAt
+  userEmail
   startsAt
 }
 fragment TimeSchedule on TimeSchedule {
@@ -146550,8 +148436,8 @@ export const TimeSchedulesDocument = new TypedDocumentString(`
     fragment TimeScheduleEntry on TimeScheduleEntry {
   __typename
   userId
-  userEmail
   endsAt
+  userEmail
   startsAt
 }
 fragment TimeSchedule on TimeSchedule {
@@ -148898,6 +150784,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   workspaceMembersViewOrdering
   projectZoomLevel
   timelineZoomScale
+  showOnlyLeadTeamProjects
   showCompletedAgentSessions
   showCompletedIssues
   showCompletedProjects
@@ -148923,6 +150810,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldPreviewLinks
   showReadItems
   reviewFieldStatusDetails
+  reviewFieldReviewers
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -149181,6 +151069,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   workspaceMembersViewOrdering
   projectZoomLevel
   timelineZoomScale
+  showOnlyLeadTeamProjects
   showCompletedAgentSessions
   showCompletedIssues
   showCompletedProjects
@@ -149206,6 +151095,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldPreviewLinks
   showReadItems
   reviewFieldStatusDetails
+  reviewFieldReviewers
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -152622,6 +154512,9 @@ fragment Notification on Notification {
   ... on WorkflowDefinitionNotification {
     ...WorkflowDefinitionNotification
   }
+  ... on WorkspaceAnnouncementNotification {
+    ...WorkspaceAnnouncementNotification
+  }
 }
 fragment CustomerNeedNotification on CustomerNeedNotification {
   __typename
@@ -153086,6 +154979,32 @@ fragment NotificationSubscription on NotificationSubscription {
     id
   }
   active
+}
+fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
+  __typename
+  type
+  workspaceAnnouncementId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
 }
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
@@ -155673,6 +157592,9 @@ fragment Notification on Notification {
   ... on WorkflowDefinitionNotification {
     ...WorkflowDefinitionNotification
   }
+  ... on WorkspaceAnnouncementNotification {
+    ...WorkspaceAnnouncementNotification
+  }
 }
 fragment CustomerNeedNotification on CustomerNeedNotification {
   __typename
@@ -156137,6 +158059,32 @@ fragment NotificationSubscription on NotificationSubscription {
     id
   }
   active
+}
+fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
+  __typename
+  type
+  workspaceAnnouncementId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
 }
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
@@ -156303,6 +158251,9 @@ fragment Notification on Notification {
   ... on WorkflowDefinitionNotification {
     ...WorkflowDefinitionNotification
   }
+  ... on WorkspaceAnnouncementNotification {
+    ...WorkspaceAnnouncementNotification
+  }
 }
 fragment CustomerNeedNotification on CustomerNeedNotification {
   __typename
@@ -156767,6 +158718,32 @@ fragment NotificationSubscription on NotificationSubscription {
     id
   }
   active
+}
+fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
+  __typename
+  type
+  workspaceAnnouncementId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
 }
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
@@ -156959,6 +158936,9 @@ fragment Notification on Notification {
   ... on WorkflowDefinitionNotification {
     ...WorkflowDefinitionNotification
   }
+  ... on WorkspaceAnnouncementNotification {
+    ...WorkspaceAnnouncementNotification
+  }
 }
 fragment CustomerNeedNotification on CustomerNeedNotification {
   __typename
@@ -157423,6 +159403,32 @@ fragment NotificationSubscription on NotificationSubscription {
     id
   }
   active
+}
+fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
+  __typename
+  type
+  workspaceAnnouncementId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
 }
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
@@ -157597,6 +159603,9 @@ fragment Notification on Notification {
   ... on WorkflowDefinitionNotification {
     ...WorkflowDefinitionNotification
   }
+  ... on WorkspaceAnnouncementNotification {
+    ...WorkspaceAnnouncementNotification
+  }
 }
 fragment CustomerNeedNotification on CustomerNeedNotification {
   __typename
@@ -158061,6 +160070,32 @@ fragment NotificationSubscription on NotificationSubscription {
     id
   }
   active
+}
+fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
+  __typename
+  type
+  workspaceAnnouncementId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
 }
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
@@ -158235,6 +160270,9 @@ fragment Notification on Notification {
   ... on WorkflowDefinitionNotification {
     ...WorkflowDefinitionNotification
   }
+  ... on WorkspaceAnnouncementNotification {
+    ...WorkspaceAnnouncementNotification
+  }
 }
 fragment CustomerNeedNotification on CustomerNeedNotification {
   __typename
@@ -158699,6 +160737,32 @@ fragment NotificationSubscription on NotificationSubscription {
     id
   }
   active
+}
+fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
+  __typename
+  type
+  workspaceAnnouncementId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
 }
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
@@ -159004,6 +161068,9 @@ fragment Notification on Notification {
   ... on WorkflowDefinitionNotification {
     ...WorkflowDefinitionNotification
   }
+  ... on WorkspaceAnnouncementNotification {
+    ...WorkspaceAnnouncementNotification
+  }
 }
 fragment CustomerNeedNotification on CustomerNeedNotification {
   __typename
@@ -159468,6 +161535,32 @@ fragment NotificationSubscription on NotificationSubscription {
     id
   }
   active
+}
+fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
+  __typename
+  type
+  workspaceAnnouncementId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
 }
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
@@ -159634,6 +161727,9 @@ fragment Notification on Notification {
   ... on WorkflowDefinitionNotification {
     ...WorkflowDefinitionNotification
   }
+  ... on WorkspaceAnnouncementNotification {
+    ...WorkspaceAnnouncementNotification
+  }
 }
 fragment CustomerNeedNotification on CustomerNeedNotification {
   __typename
@@ -160098,6 +162194,32 @@ fragment NotificationSubscription on NotificationSubscription {
     id
   }
   active
+}
+fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
+  __typename
+  type
+  workspaceAnnouncementId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
 }
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
@@ -160272,6 +162394,9 @@ fragment Notification on Notification {
   ... on WorkflowDefinitionNotification {
     ...WorkflowDefinitionNotification
   }
+  ... on WorkspaceAnnouncementNotification {
+    ...WorkspaceAnnouncementNotification
+  }
 }
 fragment CustomerNeedNotification on CustomerNeedNotification {
   __typename
@@ -160736,6 +162861,32 @@ fragment NotificationSubscription on NotificationSubscription {
     id
   }
   active
+}
+fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
+  __typename
+  type
+  workspaceAnnouncementId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
 }
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
@@ -162461,6 +164612,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   workspaceMembersViewOrdering
   projectZoomLevel
   timelineZoomScale
+  showOnlyLeadTeamProjects
   showCompletedAgentSessions
   showCompletedIssues
   showCompletedProjects
@@ -162486,6 +164638,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldPreviewLinks
   showReadItems
   reviewFieldStatusDetails
+  reviewFieldReviewers
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
@@ -162762,6 +164915,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   workspaceMembersViewOrdering
   projectZoomLevel
   timelineZoomScale
+  showOnlyLeadTeamProjects
   showCompletedAgentSessions
   showCompletedIssues
   showCompletedProjects
@@ -162787,6 +164941,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldPreviewLinks
   showReadItems
   reviewFieldStatusDetails
+  reviewFieldReviewers
   showSnoozedItems
   showSubInitiativeProjects
   showNestedInitiatives
