@@ -12244,6 +12244,7 @@ export class IntegrationsSettings extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
     this.microsoftTeamsProjectUpdateCreated = data.microsoftTeamsProjectUpdateCreated ?? undefined;
+    this.slackInitiativeCommentCreated = data.slackInitiativeCommentCreated ?? undefined;
     this.slackInitiativeUpdateCreated = data.slackInitiativeUpdateCreated ?? undefined;
     this.slackIssueAddedToTriage = data.slackIssueAddedToTriage ?? undefined;
     this.slackIssueAddedToView = data.slackIssueAddedToView ?? undefined;
@@ -12253,6 +12254,7 @@ export class IntegrationsSettings extends Request {
     this.slackIssueSlaHighRisk = data.slackIssueSlaHighRisk ?? undefined;
     this.slackIssueStatusChangedAll = data.slackIssueStatusChangedAll ?? undefined;
     this.slackIssueStatusChangedDone = data.slackIssueStatusChangedDone ?? undefined;
+    this.slackProjectCommentCreated = data.slackProjectCommentCreated ?? undefined;
     this.slackProjectUpdateCreated = data.slackProjectUpdateCreated ?? undefined;
     this.slackProjectUpdateCreatedToTeam = data.slackProjectUpdateCreatedToTeam ?? undefined;
     this.slackProjectUpdateCreatedToWorkspace = data.slackProjectUpdateCreatedToWorkspace ?? undefined;
@@ -12271,6 +12273,8 @@ export class IntegrationsSettings extends Request {
   public id: string;
   /** Whether to send a Microsoft Teams message when a project update is created. */
   public microsoftTeamsProjectUpdateCreated?: boolean | null;
+  /** Whether to send a Slack message when a top-level initiative comment is created. New settings default to true. Existing unset settings inherit the initiative update preference until first edited. */
+  public slackInitiativeCommentCreated?: boolean | null;
   /** Whether to send a Slack message when an initiative update is created. */
   public slackInitiativeUpdateCreated?: boolean | null;
   /** Whether to send a Slack message when a new issue is added to triage. */
@@ -12289,6 +12293,8 @@ export class IntegrationsSettings extends Request {
   public slackIssueStatusChangedAll?: boolean | null;
   /** Whether to send a Slack message when any of the project or team's issues change to completed or canceled. */
   public slackIssueStatusChangedDone?: boolean | null;
+  /** Whether to send a Slack message when a top-level project comment is created. New settings default to true. Existing unset settings inherit the project update preference until first edited. */
+  public slackProjectCommentCreated?: boolean | null;
   /** Whether to send a Slack message when a project update is created. */
   public slackProjectUpdateCreated?: boolean | null;
   /** Whether to send a new project update to team Slack channels. */
@@ -18181,15 +18187,17 @@ export class ProjectHistoryConnection extends Connection<ProjectHistory> {
   }
 }
 /**
- * A label that can be applied to projects for categorization. Project labels are workspace-level and can be organized into groups with a parent-child hierarchy. Only child labels (not group labels) can be directly applied to projects.
+ * A label that can be applied to projects for categorization. Project labels can be workspace-level (available to all teams) or team-scoped, and can be organized into groups with a parent-child hierarchy. Only child labels (not group labels) can be directly applied to projects. Team-scoped labels may be inherited from parent teams to sub-teams.
  *
  * @param request - function to call the graphql client
  * @param data - L.ProjectLabelFragment response data
  */
 export class ProjectLabel extends Request {
   private _creator?: L.ProjectLabelFragment["creator"];
+  private _inheritedFrom?: L.ProjectLabelFragment["inheritedFrom"];
   private _parent?: L.ProjectLabelFragment["parent"];
   private _retiredBy?: L.ProjectLabelFragment["retiredBy"];
+  private _team?: L.ProjectLabelFragment["team"];
 
   public constructor(request: LinearRequest, data: L.ProjectLabelFragment) {
     super(request);
@@ -18203,8 +18211,10 @@ export class ProjectLabel extends Request {
     this.name = data.name;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._creator = data.creator ?? undefined;
+    this._inheritedFrom = data.inheritedFrom ?? undefined;
     this._parent = data.parent ?? undefined;
     this._retiredBy = data.retiredBy ?? undefined;
+    this._team = data.team ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -18236,6 +18246,14 @@ export class ProjectLabel extends Request {
   public get creatorId(): string | undefined {
     return this._creator?.id;
   }
+  /** The original workspace or parent-team label that this label was inherited from. Null if the label is not inherited. */
+  public get inheritedFrom(): LinearFetch<ProjectLabel> | undefined {
+    return this._inheritedFrom?.id ? new ProjectLabelQuery(this._request).fetch(this._inheritedFrom?.id) : undefined;
+  }
+  /** The ID of original workspace or parent-team label that this label was inherited from. null if the label is not inherited. */
+  public get inheritedFromId(): string | undefined {
+    return this._inheritedFrom?.id;
+  }
   /** The workspace that the project label belongs to. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
@@ -18255,6 +18273,14 @@ export class ProjectLabel extends Request {
   /** The ID of user who retired the label. retired labels cannot be applied to new projects but remain on existing ones. null if the label is active. */
   public get retiredById(): string | undefined {
     return this._retiredBy?.id;
+  }
+  /** The team that the label is scoped to. If null, the label is a workspace-level label available to all teams in the workspace. */
+  public get team(): LinearFetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+  }
+  /** The ID of team that the label is scoped to. if null, the label is a workspace-level label available to all teams in the workspace. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
   }
   /** Children of the label. */
   public children(variables?: Omit<L.ProjectLabel_ChildrenQueryVariables, "id">) {
@@ -18365,9 +18391,11 @@ export class ProjectLabelWebhookPayload {
     this.creatorId = data.creatorId ?? undefined;
     this.description = data.description ?? undefined;
     this.id = data.id;
+    this.inheritedFromId = data.inheritedFromId ?? undefined;
     this.isGroup = data.isGroup;
     this.name = data.name;
     this.parentId = data.parentId ?? undefined;
+    this.teamId = data.teamId ?? undefined;
     this.updatedAt = data.updatedAt;
   }
 
@@ -18383,12 +18411,16 @@ export class ProjectLabelWebhookPayload {
   public description?: string | null;
   /** The ID of the entity. */
   public id: string;
+  /** The ID of the original label this label was inherited from. Null if the label is not inherited. */
+  public inheritedFromId?: string | null;
   /** Whether the label is a group. */
   public isGroup: boolean;
   /** The name of the project label. */
   public name: string;
   /** The parent ID of the project label. */
   public parentId?: string | null;
+  /** The team ID of the project label. Null if the label is a workspace-level label. */
+  public teamId?: string | null;
   /** The time at which the entity was updated. */
   public updatedAt: string;
 }
@@ -24410,11 +24442,11 @@ export class User extends Request {
   public initials: string;
   /** [DEPRECATED] Unique hash for the user to be used in invite URLs. */
   public inviteHash: string;
-  /** Whether the user can be assigned to issues. Regular users are always assignable; app users are assignable only if they have the app:assignable scope. The Linear agent also requires coding sessions to be enabled. */
+  /** Whether the user can be assigned to issues. Active app users require the assignments capability. The Linear agent also requires coding sessions to be enabled. */
   public isAssignable: boolean;
   /** Whether the user is the currently authenticated user. */
   public isMe: boolean;
-  /** Whether the user is mentionable. */
+  /** Whether the user can be mentioned. Active app users require the mentions capability. */
   public isMentionable: boolean;
   /** The last time the user was seen online. Updated based on user activity. Null if the user has never been seen. */
   public lastSeen?: Date | null;
@@ -24747,6 +24779,7 @@ export class UserSettings extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.feedLastSeenTime = parseDate(data.feedLastSeenTime) ?? undefined;
     this.id = data.id;
+    this.showCodeBlockLineNumbers = data.showCodeBlockLineNumbers;
     this.showFullUserNames = data.showFullUserNames;
     this.subscribedToChangelog = data.subscribedToChangelog;
     this.subscribedToDPA = data.subscribedToDPA;
@@ -24783,6 +24816,8 @@ export class UserSettings extends Request {
   public feedLastSeenTime?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Whether to show line numbers in code blocks. */
+  public showCodeBlockLineNumbers: boolean;
   /** Whether to show full user names instead of display names. */
   public showFullUserNames: boolean;
   /** Whether this user is subscribed to receive changelog emails about Linear product updates. */
@@ -25134,7 +25169,9 @@ export class ViewPreferencesValues extends Request {
     this.automationGrouping = data.automationGrouping ?? undefined;
     this.automationOrdering = data.automationOrdering ?? undefined;
     this.automationRunHistoryShowDuration = data.automationRunHistoryShowDuration ?? undefined;
+    this.automationRunHistoryShowInitiativeIdentifier = data.automationRunHistoryShowInitiativeIdentifier ?? undefined;
     this.automationRunHistoryShowIssueIdentifier = data.automationRunHistoryShowIssueIdentifier ?? undefined;
+    this.automationRunHistoryShowProjectIdentifier = data.automationRunHistoryShowProjectIdentifier ?? undefined;
     this.automationShowDescendants = data.automationShowDescendants ?? undefined;
     this.automationShowDisabled = data.automationShowDisabled ?? undefined;
     this.automationStatsPeriod = data.automationStatsPeriod ?? undefined;
@@ -25396,8 +25433,12 @@ export class ViewPreferencesValues extends Request {
   public automationOrdering?: string | null;
   /** Whether to show the run duration in Loop run history. */
   public automationRunHistoryShowDuration?: boolean | null;
+  /** Whether to show the initiative identifier in Loop run history. */
+  public automationRunHistoryShowInitiativeIdentifier?: boolean | null;
   /** Whether to show the issue identifier in Loop run history. */
   public automationRunHistoryShowIssueIdentifier?: boolean | null;
+  /** Whether to show the project identifier in Loop run history. */
+  public automationRunHistoryShowProjectIdentifier?: boolean | null;
   /** Whether to show sub-team loops. */
   public automationShowDescendants?: boolean | null;
   /** Whether to show disabled loops. */
@@ -41024,14 +41065,19 @@ export class UserExternalUserDisconnectMutation extends Request {
    * Call the UserExternalUserDisconnect mutation and return a UserPayload
    *
    * @param service - required service to pass to userExternalUserDisconnect
+   * @param variables - variables without 'service' to pass into the UserExternalUserDisconnectMutation
    * @returns parsed response from UserExternalUserDisconnectMutation
    */
-  public async fetch(service: string): LinearFetch<UserPayload> {
+  public async fetch(
+    service: string,
+    variables?: Omit<L.UserExternalUserDisconnectMutationVariables, "service">
+  ): LinearFetch<UserPayload> {
     const response = await this._request<
       L.UserExternalUserDisconnectMutation,
       L.UserExternalUserDisconnectMutationVariables
     >(L.UserExternalUserDisconnectDocument.toString(), {
       service,
+      ...variables,
     });
     const data = response.userExternalUserDisconnect;
 
@@ -50968,7 +51014,7 @@ export class LinearSdk extends Request {
     return new ProjectLabelQuery(this._request).fetch(id);
   }
   /**
-   * Returns all project labels in the workspace, with optional filtering.
+   * All project labels. Returns a paginated list of labels visible to the authenticated user, including both workspace-level and team-scoped labels, with optional filtering.
    *
    * @param variables - variables to pass into the ProjectLabelsQuery
    * @returns ProjectLabelConnection
@@ -54733,10 +54779,14 @@ export class LinearSdk extends Request {
    * Disconnects the external user from this Linear account.
    *
    * @param service - required service to pass to userExternalUserDisconnect
+   * @param variables - variables without 'service' to pass into the UserExternalUserDisconnectMutation
    * @returns UserPayload
    */
-  public userExternalUserDisconnect(service: string): LinearFetch<UserPayload> {
-    return new UserExternalUserDisconnectMutation(this._request).fetch(service);
+  public userExternalUserDisconnect(
+    service: string,
+    variables?: Omit<L.UserExternalUserDisconnectMutationVariables, "service">
+  ): LinearFetch<UserPayload> {
+    return new UserExternalUserDisconnectMutation(this._request).fetch(service, variables);
   }
   /**
    * Updates a specific user settings flag by performing an operation (e.g., increment or clear) on it.

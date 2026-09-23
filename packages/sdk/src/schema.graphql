@@ -1561,6 +1561,10 @@ type AiConversation implements Node {
   """
   createdAt: DateTime!
   """
+  [Internal] The live diff that owns this conversation. Ownership moves to the review on promotion.
+  """
+  diff: Diff
+  """
   [Internal] The document this shared conversation is attached to. Null if the conversation is private.
   """
   document: Document
@@ -16817,6 +16821,10 @@ input IntegrationSettingsInput {
   jira: JiraSettingsInput
   jiraPersonal: JiraPersonalSettingsInput
   launchDarkly: LaunchDarklySettingsInput
+  """
+  Settings shared by personal and shared MCP server connections.
+  """
+  mcpServer: McpServerIntegrationSettingsInput
   microsoftTeams: MicrosoftTeamsSettingsInput
   microsoftTeamsProjectPost: MicrosoftTeamsPostSettingsInput
   notion: NotionSettingsInput
@@ -16983,6 +16991,10 @@ type IntegrationsSettings implements Node {
   """
   project: Project
   """
+  Whether to send a Slack message when a top-level initiative comment is created. New settings default to true. Existing unset settings inherit the initiative update preference until first edited.
+  """
+  slackInitiativeCommentCreated: Boolean
+  """
   Whether to send a Slack message when an initiative update is created.
   """
   slackInitiativeUpdateCreated: Boolean
@@ -17018,6 +17030,10 @@ type IntegrationsSettings implements Node {
   Whether to send a Slack message when any of the project or team's issues change to completed or canceled.
   """
   slackIssueStatusChangedDone: Boolean
+  """
+  Whether to send a Slack message when a top-level project comment is created. New settings default to true. Existing unset settings inherit the project update preference until first edited.
+  """
+  slackProjectCommentCreated: Boolean
   """
   Whether to send a Slack message when a project update is created.
   """
@@ -17067,6 +17083,10 @@ input IntegrationsSettingsCreateInput {
   """
   projectId: String
   """
+  Whether to send a Slack message when a top-level initiative comment is created.
+  """
+  slackInitiativeCommentCreated: Boolean
+  """
   Whether to send a Slack message when an initiative update is created.
   """
   slackInitiativeUpdateCreated: Boolean
@@ -17102,6 +17122,10 @@ input IntegrationsSettingsCreateInput {
   Whether to send a Slack message when any of the project or team's issues change to completed or canceled.
   """
   slackIssueStatusChangedDone: Boolean
+  """
+  Whether to send a Slack message when a top-level project comment is created.
+  """
+  slackProjectCommentCreated: Boolean
   """
   Whether to send a Slack message when a project update is created.
   """
@@ -17141,6 +17165,10 @@ input IntegrationsSettingsUpdateInput {
   """
   microsoftTeamsProjectUpdateCreated: Boolean
   """
+  Whether to send a Slack message when a top-level initiative comment is created.
+  """
+  slackInitiativeCommentCreated: Boolean
+  """
   Whether to send a Slack message when an initiative update is created.
   """
   slackInitiativeUpdateCreated: Boolean
@@ -17176,6 +17204,10 @@ input IntegrationsSettingsUpdateInput {
   Whether to send a Slack message when any of the project or team's issues change to completed or canceled.
   """
   slackIssueStatusChangedDone: Boolean
+  """
+  Whether to send a Slack message when a top-level project comment is created.
+  """
+  slackProjectCommentCreated: Boolean
   """
   Whether to send a Slack message when a project update is created.
   """
@@ -23055,6 +23087,10 @@ input JiraUpdateInput {
   """
   accessToken: String
   """
+  The mapped Jira project to use as its team's default. Omit to keep the current default.
+  """
+  defaultProjectId: String
+  """
   Whether to delete the current manual webhook configuration.
   """
   deleteWebhook: Boolean
@@ -23299,6 +23335,10 @@ type LoopExecution implements Node {
   """
   project: Project
   """
+  [Internal] The release that triggered this Loop execution.
+  """
+  release: Release
+  """
   [Internal] The team that triggered this Loop execution.
   """
   team: Team
@@ -23339,6 +23379,13 @@ input McpServerCustomHeaderInput {
   The HTTP header value.
   """
   value: String!
+}
+
+input McpServerIntegrationSettingsInput {
+  """
+  The connection-specific display name.
+  """
+  name: String
 }
 
 """
@@ -25339,6 +25386,10 @@ type Mutation {
     The Jira OAuth code, when connecting using OAuth.
     """
     code: String
+    """
+    The workspace Jira integration to connect to. Required when the connection would otherwise be ambiguous.
+    """
+    workspaceIntegrationId: String
   ): IntegrationPayload!
   """
   [INTERNAL] Updates a Jira Integration.
@@ -25823,6 +25874,10 @@ type Mutation {
     [INTERNAL] Bearer token that authenticates API requests instead of a Zendesk OAuth token. Requires `customApiUrl`; no OAuth exchange is performed.
     """
     accessToken: String
+    """
+    The Zendesk user ID to use as the author of internal notes instead of creating a bot user. Omit to keep the configured user on reconnect, or pass null to create a new bot user.
+    """
+    botUserId: String
     """
     The role to assign to the Linear bot user in Zendesk.
     """
@@ -27848,6 +27903,10 @@ type Mutation {
     The external service to disconnect.
     """
     service: String!
+    """
+    The workspace Jira integration whose account mapping to remove. If omitted, removes all Jira mappings without a personal connection.
+    """
+    workspaceIntegrationId: String
   ): UserPayload!
   """
   Updates a specific user settings flag by performing an operation (e.g., increment or clear) on it.
@@ -32763,6 +32822,7 @@ The kind of partner program an offer belongs to.
 """
 enum PartnerOfferCategory {
   accelerator
+  creator
   investor
   startup_community
 }
@@ -33762,6 +33822,10 @@ type Project implements Node {
   """
   leadTeam: Team
   """
+  [Internal] The ID of the team that leads the project, even when the viewer cannot access the team.
+  """
+  leadTeamId: String!
+  """
   Users that are members of the project.
   """
   members(
@@ -34759,7 +34823,7 @@ type ProjectHistoryEdge {
 }
 
 """
-A label that can be applied to projects for categorization. Project labels are workspace-level and can be organized into groups with a parent-child hierarchy. Only child labels (not group labels) can be directly applied to projects.
+A label that can be applied to projects for categorization. Project labels can be workspace-level (available to all teams) or team-scoped, and can be organized into groups with a parent-child hierarchy. Only child labels (not group labels) can be directly applied to projects. Team-scoped labels may be inherited from parent teams to sub-teams.
 """
 type ProjectLabel implements Node {
   """
@@ -34820,7 +34884,7 @@ type ProjectLabel implements Node {
   """
   id: ID!
   """
-  [Internal] The original workspace or parent-team label that this label was inherited from. Null if the label is not inherited.
+  The original workspace or parent-team label that this label was inherited from. Null if the label is not inherited.
   """
   inheritedFrom: ProjectLabel
   """
@@ -34889,7 +34953,7 @@ type ProjectLabel implements Node {
   """
   retiredBy: User
   """
-  [Internal] The team that the label is scoped to. If null, the label is a workspace-level label available to all teams in the workspace.
+  The team that the label is scoped to. If null, the label is a workspace-level label available to all teams in the workspace.
   """
   team: Team
   """
@@ -34974,6 +35038,10 @@ input ProjectLabelCollectionFilter {
   """
   some: ProjectLabelCollectionFilter
   """
+  Filters that the project label's team must satisfy. Use `{ null: true }` to filter workspace-level labels.
+  """
+  team: NullableTeamFilter
+  """
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
@@ -35018,7 +35086,7 @@ input ProjectLabelCreateInput {
   """
   retiredAt: DateTime
   """
-  [Internal] The team associated with the label. If not given, the label will be associated with the entire workspace.
+  The identifier of the team to scope the label to. If not given, the label is a workspace-level label available to all teams.
   """
   teamId: String
 }
@@ -35067,6 +35135,10 @@ input ProjectLabelFilter {
   Filters that the project label's parent label must satisfy.
   """
   parent: ProjectLabelFilter
+  """
+  Filters that the project label's team must satisfy. Use `{ null: true }` to filter workspace-level labels.
+  """
+  team: NullableTeamFilter
   """
   Comparator for the updated at date.
   """
@@ -35150,6 +35222,10 @@ type ProjectLabelWebhookPayload {
   """
   id: String!
   """
+  The ID of the original label this label was inherited from. Null if the label is not inherited.
+  """
+  inheritedFromId: String
+  """
   Whether the label is a group.
   """
   isGroup: Boolean!
@@ -35161,6 +35237,10 @@ type ProjectLabelWebhookPayload {
   The parent ID of the project label.
   """
   parentId: String
+  """
+  The team ID of the project label. Null if the label is a workspace-level label.
+  """
+  teamId: String
   """
   The time at which the entity was updated.
   """
@@ -36502,6 +36582,10 @@ type ProjectSearchResult implements Node {
   """
   leadTeam: Team
   """
+  [Internal] The ID of the team that leads the project, even when the viewer cannot access the team.
+  """
+  leadTeamId: String!
+  """
   Users that are members of the project.
   """
   members(
@@ -36946,6 +37030,10 @@ type ProjectStatus implements Node {
   [Internal] The team that the status is scoped to. If null, the status is a workspace-level status.
   """
   team: Team
+  """
+  [Internal] The ID of the team that owns the status, even when the viewer cannot access the team. Null for workspace statuses.
+  """
+  teamId: String
   """
   The category type of the project status (e.g., backlog, planned, started, paused, completed, canceled). Determines the status's behavior and position in the project lifecycle.
   """
@@ -40379,7 +40467,7 @@ type Query {
   """
   projectLabel(id: String!): ProjectLabel!
   """
-  Returns all project labels in the workspace, with optional filtering.
+  All project labels. Returns a paginated list of labels visible to the authenticated user, including both workspace-level and team-scoped labels, with optional filtering.
   """
   projectLabels(
     """
@@ -48801,7 +48889,7 @@ type User implements Node {
   """
   inviteHash: String! @deprecated(reason: "This hash is not in use anymore, this value will always be empty.")
   """
-  Whether the user can be assigned to issues. Regular users are always assignable; app users are assignable only if they have the app:assignable scope. The Linear agent also requires coding sessions to be enabled.
+  Whether the user can be assigned to issues. Active app users require the assignments capability. The Linear agent also requires coding sessions to be enabled.
   """
   isAssignable: Boolean!
   """
@@ -48809,7 +48897,7 @@ type User implements Node {
   """
   isMe: Boolean!
   """
-  Whether the user is mentionable.
+  Whether the user can be mentioned. Active app users require the mentions capability.
   """
   isMentionable: Boolean!
   """
@@ -49253,6 +49341,7 @@ enum UserFlagType {
   reviewsPromptToConnectGithubDismissed
   rewindBannerDismissed
   slackAgentPromoFromCreateNewIssueShown
+  slackAiFeedbackAcknowledgementShown
   slackBotWelcomeMessageShown
   slackCommentReactionTipShown
   slackProjectChannelsPromoDismissed
@@ -49447,6 +49536,10 @@ type UserSettings implements Node {
   [Internal] The user's preferred merge method for pull requests. Null if the user chooses a method for each pull request.
   """
   pullRequestMergeStrategyPreference: PullRequestMergeMethod
+  """
+  Whether to show line numbers in code blocks.
+  """
+  showCodeBlockLineNumbers: Boolean!
   """
   Whether to show full user names instead of display names.
   """
@@ -50020,9 +50113,17 @@ type ViewPreferencesValues {
   """
   automationRunHistoryShowDuration: Boolean
   """
+  Whether to show the initiative identifier in Loop run history.
+  """
+  automationRunHistoryShowInitiativeIdentifier: Boolean
+  """
   Whether to show the issue identifier in Loop run history.
   """
   automationRunHistoryShowIssueIdentifier: Boolean
+  """
+  Whether to show the project identifier in Loop run history.
+  """
+  automationRunHistoryShowProjectIdentifier: Boolean
   """
   Whether to show sub-team loops.
   """

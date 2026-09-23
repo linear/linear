@@ -965,6 +965,8 @@ export type AiConversation = Node & {
   context: Scalars["JSONObject"];
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
+  /** [Internal] The live diff that owns this conversation. Ownership moves to the review on promotion. */
+  diff?: Maybe<Diff>;
   /** [Internal] The document this shared conversation is attached to. Null if the conversation is private. */
   document?: Maybe<Document>;
   /** [Internal] The log ID of the AI response. */
@@ -10010,6 +10012,8 @@ export type IntegrationSettingsInput = {
   jira?: InputMaybe<JiraSettingsInput>;
   jiraPersonal?: InputMaybe<JiraPersonalSettingsInput>;
   launchDarkly?: InputMaybe<LaunchDarklySettingsInput>;
+  /** Settings shared by personal and shared MCP server connections. */
+  mcpServer?: InputMaybe<McpServerIntegrationSettingsInput>;
   microsoftTeams?: InputMaybe<MicrosoftTeamsSettingsInput>;
   microsoftTeamsProjectPost?: InputMaybe<MicrosoftTeamsPostSettingsInput>;
   notion?: InputMaybe<NotionSettingsInput>;
@@ -10121,6 +10125,8 @@ export type IntegrationsSettings = Node & {
   microsoftTeamsProjectUpdateCreated?: Maybe<Scalars["Boolean"]>;
   /** Project which those settings apply to. */
   project?: Maybe<Project>;
+  /** Whether to send a Slack message when a top-level initiative comment is created. New settings default to true. Existing unset settings inherit the initiative update preference until first edited. */
+  slackInitiativeCommentCreated?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when an initiative update is created. */
   slackInitiativeUpdateCreated?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when a new issue is added to triage. */
@@ -10142,6 +10148,8 @@ export type IntegrationsSettings = Node & {
   slackIssueStatusChangedAll?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when any of the project or team's issues change to completed or canceled. */
   slackIssueStatusChangedDone?: Maybe<Scalars["Boolean"]>;
+  /** Whether to send a Slack message when a top-level project comment is created. New settings default to true. Existing unset settings inherit the project update preference until first edited. */
+  slackProjectCommentCreated?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when a project update is created. */
   slackProjectUpdateCreated?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a new project update to team Slack channels. */
@@ -10170,6 +10178,8 @@ export type IntegrationsSettingsCreateInput = {
   microsoftTeamsProjectUpdateCreated?: InputMaybe<Scalars["Boolean"]>;
   /** The identifier of the project to create settings for. */
   projectId?: InputMaybe<Scalars["String"]>;
+  /** Whether to send a Slack message when a top-level initiative comment is created. */
+  slackInitiativeCommentCreated?: InputMaybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when an initiative update is created. */
   slackInitiativeUpdateCreated?: InputMaybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when a new issue is added to triage. */
@@ -10188,6 +10198,8 @@ export type IntegrationsSettingsCreateInput = {
   slackIssueStatusChangedAll?: InputMaybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when any of the project or team's issues change to completed or canceled. */
   slackIssueStatusChangedDone?: InputMaybe<Scalars["Boolean"]>;
+  /** Whether to send a Slack message when a top-level project comment is created. */
+  slackProjectCommentCreated?: InputMaybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when a project update is created. */
   slackProjectUpdateCreated?: InputMaybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when a project update is created to team channels. */
@@ -10211,6 +10223,8 @@ export type IntegrationsSettingsPayload = {
 export type IntegrationsSettingsUpdateInput = {
   /** Whether to send a Microsoft Teams message when a project update is created. */
   microsoftTeamsProjectUpdateCreated?: InputMaybe<Scalars["Boolean"]>;
+  /** Whether to send a Slack message when a top-level initiative comment is created. */
+  slackInitiativeCommentCreated?: InputMaybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when an initiative update is created. */
   slackInitiativeUpdateCreated?: InputMaybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when a new issue is added to triage. */
@@ -10229,6 +10243,8 @@ export type IntegrationsSettingsUpdateInput = {
   slackIssueStatusChangedAll?: InputMaybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when any of the project or team's issues change to completed or canceled. */
   slackIssueStatusChangedDone?: InputMaybe<Scalars["Boolean"]>;
+  /** Whether to send a Slack message when a top-level project comment is created. */
+  slackProjectCommentCreated?: InputMaybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when a project update is created. */
   slackProjectUpdateCreated?: InputMaybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when a project update is created to team channels. */
@@ -13259,6 +13275,8 @@ export type JiraSettingsInput = {
 export type JiraUpdateInput = {
   /** The Jira personal access token, or the API key of a Jira Cloud service account. */
   accessToken?: InputMaybe<Scalars["String"]>;
+  /** The mapped Jira project to use as its team's default. Omit to keep the current default. */
+  defaultProjectId?: InputMaybe<Scalars["String"]>;
   /** Whether to delete the current manual webhook configuration. */
   deleteWebhook?: InputMaybe<Scalars["Boolean"]>;
   /** The Jira user email address associated with the access token. */
@@ -13404,6 +13422,8 @@ export type LoopExecution = Node & {
   issue?: Maybe<Issue>;
   /** [Internal] The project that triggered this Loop execution. */
   project?: Maybe<Project>;
+  /** [Internal] The release that triggered this Loop execution. */
+  release?: Maybe<Release>;
   /** [Internal] The team that triggered this Loop execution. */
   team?: Maybe<Team>;
   /**
@@ -13429,6 +13449,11 @@ export type McpServerCustomHeaderInput = {
   name: Scalars["String"];
   /** The HTTP header value. */
   value: Scalars["String"];
+};
+
+export type McpServerIntegrationSettingsInput = {
+  /** The connection-specific display name. */
+  name?: InputMaybe<Scalars["String"]>;
 };
 
 /** [Internal] A meeting attached to one project or initiative. Its transcript is stored in related document content. */
@@ -15031,6 +15056,7 @@ export type MutationIntegrationJiraFetchProjectStatusesArgs = {
 export type MutationIntegrationJiraPersonalArgs = {
   accessToken?: InputMaybe<Scalars["String"]>;
   code?: InputMaybe<Scalars["String"]>;
+  workspaceIntegrationId?: InputMaybe<Scalars["String"]>;
 };
 
 export type MutationIntegrationJiraUpdateArgs = {
@@ -15205,6 +15231,7 @@ export type MutationIntegrationUpdateArgs = {
 
 export type MutationIntegrationZendeskArgs = {
   accessToken?: InputMaybe<Scalars["String"]>;
+  botUserId?: InputMaybe<Scalars["String"]>;
   botUserRole?: InputMaybe<Scalars["String"]>;
   code?: InputMaybe<Scalars["String"]>;
   customApiUrl?: InputMaybe<Scalars["String"]>;
@@ -16011,6 +16038,7 @@ export type MutationUserDiscordConnectArgs = {
 
 export type MutationUserExternalUserDisconnectArgs = {
   service: Scalars["String"];
+  workspaceIntegrationId?: InputMaybe<Scalars["String"]>;
 };
 
 export type MutationUserFlagUpdateArgs = {
@@ -18745,6 +18773,7 @@ export enum PartnerDiscountType {
 /** The kind of partner program an offer belongs to. */
 export enum PartnerOfferCategory {
   Accelerator = "accelerator",
+  Creator = "creator",
   Investor = "investor",
   StartupCommunity = "startup_community",
 }
@@ -19161,6 +19190,8 @@ export type Project = Node & {
   lead?: Maybe<User>;
   /** [Internal] The team that leads the project. Null if the viewer does not have access to the team. */
   leadTeam?: Maybe<Team>;
+  /** [Internal] The ID of the team that leads the project, even when the viewer cannot access the team. */
+  leadTeamId: Scalars["String"];
   /** Users that are members of the project. */
   members: UserConnection;
   /** The ID of the Microsoft Teams channel connected to the project, if any. */
@@ -19800,7 +19831,7 @@ export type ProjectHistoryEdge = {
   node: ProjectHistory;
 };
 
-/** A label that can be applied to projects for categorization. Project labels are workspace-level and can be organized into groups with a parent-child hierarchy. Only child labels (not group labels) can be directly applied to projects. */
+/** A label that can be applied to projects for categorization. Project labels can be workspace-level (available to all teams) or team-scoped, and can be organized into groups with a parent-child hierarchy. Only child labels (not group labels) can be directly applied to projects. Team-scoped labels may be inherited from parent teams to sub-teams. */
 export type ProjectLabel = Node & {
   __typename?: "ProjectLabel";
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -19817,7 +19848,7 @@ export type ProjectLabel = Node & {
   description?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
-  /** [Internal] The original workspace or parent-team label that this label was inherited from. Null if the label is not inherited. */
+  /** The original workspace or parent-team label that this label was inherited from. Null if the label is not inherited. */
   inheritedFrom?: Maybe<ProjectLabel>;
   /** Whether the label is a group. When true, this label acts as a container for child labels and cannot be directly applied to issues or projects. When false, the label can be directly applied. */
   isGroup: Scalars["Boolean"];
@@ -19835,7 +19866,7 @@ export type ProjectLabel = Node & {
   retiredAt?: Maybe<Scalars["DateTime"]>;
   /** The user who retired the label. Retired labels cannot be applied to new projects but remain on existing ones. Null if the label is active. */
   retiredBy?: Maybe<User>;
-  /** [Internal] The team that the label is scoped to. If null, the label is a workspace-level label available to all teams in the workspace. */
+  /** The team that the label is scoped to. If null, the label is a workspace-level label available to all teams in the workspace. */
   team?: Maybe<Team>;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -19844,7 +19875,7 @@ export type ProjectLabel = Node & {
   updatedAt: Scalars["DateTime"];
 };
 
-/** A label that can be applied to projects for categorization. Project labels are workspace-level and can be organized into groups with a parent-child hierarchy. Only child labels (not group labels) can be directly applied to projects. */
+/** A label that can be applied to projects for categorization. Project labels can be workspace-level (available to all teams) or team-scoped, and can be organized into groups with a parent-child hierarchy. Only child labels (not group labels) can be directly applied to projects. Team-scoped labels may be inherited from parent teams to sub-teams. */
 export type ProjectLabelChildrenArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -19855,7 +19886,7 @@ export type ProjectLabelChildrenArgs = {
   orderBy?: InputMaybe<PaginationOrderBy>;
 };
 
-/** A label that can be applied to projects for categorization. Project labels are workspace-level and can be organized into groups with a parent-child hierarchy. Only child labels (not group labels) can be directly applied to projects. */
+/** A label that can be applied to projects for categorization. Project labels can be workspace-level (available to all teams) or team-scoped, and can be organized into groups with a parent-child hierarchy. Only child labels (not group labels) can be directly applied to projects. Team-scoped labels may be inherited from parent teams to sub-teams. */
 export type ProjectLabelProjectsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -19906,6 +19937,8 @@ export type ProjectLabelCollectionFilter = {
   parent?: InputMaybe<ProjectLabelFilter>;
   /** Filters that needs to be matched by some project labels. */
   some?: InputMaybe<ProjectLabelCollectionFilter>;
+  /** Filters that the project label's team must satisfy. Use `{ null: true }` to filter workspace-level labels. */
+  team?: InputMaybe<NullableTeamFilter>;
   /** Comparator for the updated at date. */
   updatedAt?: InputMaybe<DateComparator>;
 };
@@ -19933,7 +19966,7 @@ export type ProjectLabelCreateInput = {
   parentId?: InputMaybe<Scalars["String"]>;
   /** The time at which the label was retired. Set to null to restore a retired label. */
   retiredAt?: InputMaybe<Scalars["DateTime"]>;
-  /** [Internal] The team associated with the label. If not given, the label will be associated with the entire workspace. */
+  /** The identifier of the team to scope the label to. If not given, the label is a workspace-level label available to all teams. */
   teamId?: InputMaybe<Scalars["String"]>;
 };
 
@@ -19962,6 +19995,8 @@ export type ProjectLabelFilter = {
   or?: InputMaybe<Array<ProjectLabelFilter>>;
   /** Filters that the project label's parent label must satisfy. */
   parent?: InputMaybe<ProjectLabelFilter>;
+  /** Filters that the project label's team must satisfy. Use `{ null: true }` to filter workspace-level labels. */
+  team?: InputMaybe<NullableTeamFilter>;
   /** Comparator for the updated at date. */
   updatedAt?: InputMaybe<DateComparator>;
 };
@@ -20008,12 +20043,16 @@ export type ProjectLabelWebhookPayload = {
   description?: Maybe<Scalars["String"]>;
   /** The ID of the entity. */
   id: Scalars["String"];
+  /** The ID of the original label this label was inherited from. Null if the label is not inherited. */
+  inheritedFromId?: Maybe<Scalars["String"]>;
   /** Whether the label is a group. */
   isGroup: Scalars["Boolean"];
   /** The name of the project label. */
   name: Scalars["String"];
   /** The parent ID of the project label. */
   parentId?: Maybe<Scalars["String"]>;
+  /** The team ID of the project label. Null if the label is a workspace-level label. */
+  teamId?: Maybe<Scalars["String"]>;
   /** The time at which the entity was updated. */
   updatedAt: Scalars["String"];
 };
@@ -20621,6 +20660,8 @@ export type ProjectSearchResult = Node & {
   lead?: Maybe<User>;
   /** [Internal] The team that leads the project. Null if the viewer does not have access to the team. */
   leadTeam?: Maybe<Team>;
+  /** [Internal] The ID of the team that leads the project, even when the viewer cannot access the team. */
+  leadTeamId: Scalars["String"];
   /** Users that are members of the project. */
   members: UserConnection;
   /** Metadata related to search result. */
@@ -20933,6 +20974,8 @@ export type ProjectStatus = Node & {
   position: Scalars["Float"];
   /** [Internal] The team that the status is scoped to. If null, the status is a workspace-level status. */
   team?: Maybe<Team>;
+  /** [Internal] The ID of the team that owns the status, even when the viewer cannot access the team. Null for workspace statuses. */
+  teamId?: Maybe<Scalars["String"]>;
   /** The category type of the project status (e.g., backlog, planned, started, paused, completed, canceled). Determines the status's behavior and position in the project lifecycle. */
   type: ProjectStatusType;
   /**
@@ -22102,7 +22145,7 @@ export type Query = {
   projectFilterSuggestion: ProjectFilterSuggestionPayload;
   /** Returns a single project label by its identifier. */
   projectLabel: ProjectLabel;
-  /** Returns all project labels in the workspace, with optional filtering. */
+  /** All project labels. Returns a paginated list of labels visible to the authenticated user, including both workspace-level and team-scoped labels, with optional filtering. */
   projectLabels: ProjectLabelConnection;
   /** Returns a single project milestone by its identifier. */
   projectMilestone: ProjectMilestone;
@@ -27251,11 +27294,11 @@ export type User = Node & {
    * @deprecated This hash is not in use anymore, this value will always be empty.
    */
   inviteHash: Scalars["String"];
-  /** Whether the user can be assigned to issues. Regular users are always assignable; app users are assignable only if they have the app:assignable scope. The Linear agent also requires coding sessions to be enabled. */
+  /** Whether the user can be assigned to issues. Active app users require the assignments capability. The Linear agent also requires coding sessions to be enabled. */
   isAssignable: Scalars["Boolean"];
   /** Whether the user is the currently authenticated user. */
   isMe: Scalars["Boolean"];
-  /** Whether the user is mentionable. */
+  /** Whether the user can be mentioned. Active app users require the mentions capability. */
   isMentionable: Scalars["Boolean"];
   /** Issue drafts that the user has created but not yet submitted. */
   issueDrafts: IssueDraftConnection;
@@ -27566,6 +27609,7 @@ export enum UserFlagType {
   ReviewsPromptToConnectGithubDismissed = "reviewsPromptToConnectGithubDismissed",
   RewindBannerDismissed = "rewindBannerDismissed",
   SlackAgentPromoFromCreateNewIssueShown = "slackAgentPromoFromCreateNewIssueShown",
+  SlackAiFeedbackAcknowledgementShown = "slackAiFeedbackAcknowledgementShown",
   SlackBotWelcomeMessageShown = "slackBotWelcomeMessageShown",
   SlackCommentReactionTipShown = "slackCommentReactionTipShown",
   SlackProjectChannelsPromoDismissed = "slackProjectChannelsPromoDismissed",
@@ -27689,6 +27733,8 @@ export type UserSettings = Node & {
   notificationDeliveryPreferences: NotificationDeliveryPreferences;
   /** [Internal] The user's preferred merge method for pull requests. Null if the user chooses a method for each pull request. */
   pullRequestMergeStrategyPreference?: Maybe<PullRequestMergeMethod>;
+  /** Whether to show line numbers in code blocks. */
+  showCodeBlockLineNumbers: Scalars["Boolean"];
   /** Whether to show full user names instead of display names. */
   showFullUserNames: Scalars["Boolean"];
   /** Whether this user is subscribed to receive changelog emails about Linear product updates. */
@@ -28024,8 +28070,12 @@ export type ViewPreferencesValues = {
   automationOrdering?: Maybe<Scalars["String"]>;
   /** Whether to show the run duration in Loop run history. */
   automationRunHistoryShowDuration?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show the initiative identifier in Loop run history. */
+  automationRunHistoryShowInitiativeIdentifier?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the issue identifier in Loop run history. */
   automationRunHistoryShowIssueIdentifier?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show the project identifier in Loop run history. */
+  automationRunHistoryShowProjectIdentifier?: Maybe<Scalars["Boolean"]>;
   /** Whether to show sub-team loops. */
   automationShowDescendants?: Maybe<Scalars["Boolean"]>;
   /** Whether to show disabled loops. */
@@ -31067,6 +31117,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "initiativeFieldDescription"
         | "initiativeFieldInitiativeHealth"
         | "initiativeFieldId"
+        | "automationRunHistoryShowInitiativeIdentifier"
         | "initiativeFieldLabels"
         | "initiativeFieldLeadTeam"
         | "initiativeFieldOwner"
@@ -31116,6 +31167,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "projectFieldHealthTimeline"
         | "projectFieldHealth"
         | "projectFieldId"
+        | "automationRunHistoryShowProjectIdentifier"
         | "projectFieldInitiatives"
         | "projectFieldIssues"
         | "projectFieldLabels"
@@ -31339,6 +31391,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "initiativeFieldDescription"
             | "initiativeFieldInitiativeHealth"
             | "initiativeFieldId"
+            | "automationRunHistoryShowInitiativeIdentifier"
             | "initiativeFieldLabels"
             | "initiativeFieldLeadTeam"
             | "initiativeFieldOwner"
@@ -31388,6 +31441,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "projectFieldHealthTimeline"
             | "projectFieldHealth"
             | "projectFieldId"
+            | "automationRunHistoryShowProjectIdentifier"
             | "projectFieldInitiatives"
             | "projectFieldIssues"
             | "projectFieldLabels"
@@ -31616,6 +31670,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "initiativeFieldDescription"
             | "initiativeFieldInitiativeHealth"
             | "initiativeFieldId"
+            | "automationRunHistoryShowInitiativeIdentifier"
             | "initiativeFieldLabels"
             | "initiativeFieldLeadTeam"
             | "initiativeFieldOwner"
@@ -31665,6 +31720,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "projectFieldHealthTimeline"
             | "projectFieldHealth"
             | "projectFieldId"
+            | "automationRunHistoryShowProjectIdentifier"
             | "projectFieldInitiatives"
             | "projectFieldIssues"
             | "projectFieldLabels"
@@ -33356,7 +33412,9 @@ export type ProjectLabelFragment = { __typename: "ProjectLabel" } & Pick<
   ProjectLabel,
   "lastAppliedAt" | "color" | "description" | "name" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "isGroup"
 > & {
+    inheritedFrom?: Maybe<{ __typename?: "ProjectLabel" } & Pick<ProjectLabel, "id">>;
     parent?: Maybe<{ __typename?: "ProjectLabel" } & Pick<ProjectLabel, "id">>;
+    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     retiredBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
@@ -34954,11 +35012,11 @@ export type IssueHistoryFragment = { __typename: "IssueHistory" } & Pick<
           | "url"
           | "active"
           | "isAssignable"
+          | "isMentionable"
           | "guest"
           | "admin"
           | "owner"
           | "app"
-          | "isMentionable"
           | "isMe"
           | "supportsAgentSessions"
           | "canAccessAnyPublicTeam"
@@ -34994,11 +35052,11 @@ export type IssueHistoryFragment = { __typename: "IssueHistory" } & Pick<
           | "url"
           | "active"
           | "isAssignable"
+          | "isMentionable"
           | "guest"
           | "admin"
           | "owner"
           | "app"
-          | "isMentionable"
           | "isMe"
           | "supportsAgentSessions"
           | "canAccessAnyPublicTeam"
@@ -35123,11 +35181,11 @@ export type IssueHistoryFragment = { __typename: "IssueHistory" } & Pick<
           | "url"
           | "active"
           | "isAssignable"
+          | "isMentionable"
           | "guest"
           | "admin"
           | "owner"
           | "app"
-          | "isMentionable"
           | "isMe"
           | "supportsAgentSessions"
           | "canAccessAnyPublicTeam"
@@ -36871,11 +36929,11 @@ export type UserFragment = { __typename: "User" } & Pick<
   | "url"
   | "active"
   | "isAssignable"
+  | "isMentionable"
   | "guest"
   | "admin"
   | "owner"
   | "app"
-  | "isMentionable"
   | "isMe"
   | "supportsAgentSessions"
   | "canAccessAnyPublicTeam"
@@ -37907,11 +37965,11 @@ export type IssueFragment = { __typename: "Issue" } & Pick<
             | "url"
             | "active"
             | "isAssignable"
+            | "isMentionable"
             | "guest"
             | "admin"
             | "owner"
             | "app"
-            | "isMentionable"
             | "isMe"
             | "supportsAgentSessions"
             | "canAccessAnyPublicTeam"
@@ -38613,11 +38671,11 @@ export type IssueSharedAccessFragment = { __typename: "IssueSharedAccess" } & Pi
         | "url"
         | "active"
         | "isAssignable"
+        | "isMentionable"
         | "guest"
         | "admin"
         | "owner"
         | "app"
-        | "isMentionable"
         | "isMe"
         | "supportsAgentSessions"
         | "canAccessAnyPublicTeam"
@@ -38912,11 +38970,13 @@ export type DocumentWebhookPayloadFragment = { __typename: "DocumentWebhookPaylo
 export type ProjectLabelWebhookPayloadFragment = { __typename: "ProjectLabelWebhookPayload" } & Pick<
   ProjectLabelWebhookPayload,
   | "id"
+  | "inheritedFromId"
   | "color"
   | "creatorId"
   | "description"
   | "name"
   | "parentId"
+  | "teamId"
   | "archivedAt"
   | "createdAt"
   | "updatedAt"
@@ -39992,6 +40052,7 @@ export type UserSettingsFragment = { __typename: "UserSettings" } & Pick<
   | "subscribedToPrivacyLegalUpdates"
   | "autoAssignToSelf"
   | "showFullUserNames"
+  | "showCodeBlockLineNumbers"
 > & {
     notificationDeliveryPreferences: { __typename: "NotificationDeliveryPreferences" } & {
       mobile?: Maybe<
@@ -42888,6 +42949,7 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "initiativeFieldDescription"
   | "initiativeFieldInitiativeHealth"
   | "initiativeFieldId"
+  | "automationRunHistoryShowInitiativeIdentifier"
   | "initiativeFieldLabels"
   | "initiativeFieldLeadTeam"
   | "initiativeFieldOwner"
@@ -42937,6 +42999,7 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "projectFieldHealthTimeline"
   | "projectFieldHealth"
   | "projectFieldId"
+  | "automationRunHistoryShowProjectIdentifier"
   | "projectFieldInitiatives"
   | "projectFieldIssues"
   | "projectFieldLabels"
@@ -43030,6 +43093,8 @@ export type IntegrationsSettingsFragment = { __typename: "IntegrationsSettings" 
   | "slackIssueAddedToTriage"
   | "slackIssueCreated"
   | "slackProjectUpdateCreated"
+  | "slackInitiativeCommentCreated"
+  | "slackProjectCommentCreated"
   | "slackIssueSlaHighRisk"
   | "slackIssueSlaBreached"
   | "slackInitiativeUpdateCreated"
@@ -43202,6 +43267,7 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "initiativeFieldDescription"
       | "initiativeFieldInitiativeHealth"
       | "initiativeFieldId"
+      | "automationRunHistoryShowInitiativeIdentifier"
       | "initiativeFieldLabels"
       | "initiativeFieldLeadTeam"
       | "initiativeFieldOwner"
@@ -43251,6 +43317,7 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "projectFieldHealthTimeline"
       | "projectFieldHealth"
       | "projectFieldId"
+      | "automationRunHistoryShowProjectIdentifier"
       | "projectFieldInitiatives"
       | "projectFieldIssues"
       | "projectFieldLabels"
@@ -43479,11 +43546,11 @@ export type IssueBatchPayloadFragment = { __typename: "IssueBatchPayload" } & Pi
                   | "url"
                   | "active"
                   | "isAssignable"
+                  | "isMentionable"
                   | "guest"
                   | "admin"
                   | "owner"
                   | "app"
-                  | "isMentionable"
                   | "isMe"
                   | "supportsAgentSessions"
                   | "canAccessAnyPublicTeam"
@@ -43979,6 +44046,7 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "initiativeFieldDescription"
           | "initiativeFieldInitiativeHealth"
           | "initiativeFieldId"
+          | "automationRunHistoryShowInitiativeIdentifier"
           | "initiativeFieldLabels"
           | "initiativeFieldLeadTeam"
           | "initiativeFieldOwner"
@@ -44028,6 +44096,7 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "projectFieldHealthTimeline"
           | "projectFieldHealth"
           | "projectFieldId"
+          | "automationRunHistoryShowProjectIdentifier"
           | "projectFieldInitiatives"
           | "projectFieldIssues"
           | "projectFieldLabels"
@@ -47833,6 +47902,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "initiativeFieldDescription"
             | "initiativeFieldInitiativeHealth"
             | "initiativeFieldId"
+            | "automationRunHistoryShowInitiativeIdentifier"
             | "initiativeFieldLabels"
             | "initiativeFieldLeadTeam"
             | "initiativeFieldOwner"
@@ -47882,6 +47952,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "projectFieldHealthTimeline"
             | "projectFieldHealth"
             | "projectFieldId"
+            | "automationRunHistoryShowProjectIdentifier"
             | "projectFieldInitiatives"
             | "projectFieldIssues"
             | "projectFieldLabels"
@@ -48105,6 +48176,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "initiativeFieldDescription"
                 | "initiativeFieldInitiativeHealth"
                 | "initiativeFieldId"
+                | "automationRunHistoryShowInitiativeIdentifier"
                 | "initiativeFieldLabels"
                 | "initiativeFieldLeadTeam"
                 | "initiativeFieldOwner"
@@ -48154,6 +48226,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "projectFieldHealthTimeline"
                 | "projectFieldHealth"
                 | "projectFieldId"
+                | "automationRunHistoryShowProjectIdentifier"
                 | "projectFieldInitiatives"
                 | "projectFieldIssues"
                 | "projectFieldLabels"
@@ -48382,6 +48455,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "initiativeFieldDescription"
                 | "initiativeFieldInitiativeHealth"
                 | "initiativeFieldId"
+                | "automationRunHistoryShowInitiativeIdentifier"
                 | "initiativeFieldLabels"
                 | "initiativeFieldLeadTeam"
                 | "initiativeFieldOwner"
@@ -48431,6 +48505,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "projectFieldHealthTimeline"
                 | "projectFieldHealth"
                 | "projectFieldId"
+                | "automationRunHistoryShowProjectIdentifier"
                 | "projectFieldInitiatives"
                 | "projectFieldIssues"
                 | "projectFieldLabels"
@@ -49396,11 +49471,11 @@ export type IssueConnectionFragment = { __typename: "IssueConnection" } & {
                 | "url"
                 | "active"
                 | "isAssignable"
+                | "isMentionable"
                 | "guest"
                 | "admin"
                 | "owner"
                 | "app"
-                | "isMentionable"
                 | "isMe"
                 | "supportsAgentSessions"
                 | "canAccessAnyPublicTeam"
@@ -49544,11 +49619,11 @@ export type IssueHistoryConnectionFragment = { __typename: "IssueHistoryConnecti
               | "url"
               | "active"
               | "isAssignable"
+              | "isMentionable"
               | "guest"
               | "admin"
               | "owner"
               | "app"
-              | "isMentionable"
               | "isMe"
               | "supportsAgentSessions"
               | "canAccessAnyPublicTeam"
@@ -49584,11 +49659,11 @@ export type IssueHistoryConnectionFragment = { __typename: "IssueHistoryConnecti
               | "url"
               | "active"
               | "isAssignable"
+              | "isMentionable"
               | "guest"
               | "admin"
               | "owner"
               | "app"
-              | "isMentionable"
               | "isMe"
               | "supportsAgentSessions"
               | "canAccessAnyPublicTeam"
@@ -49716,11 +49791,11 @@ export type IssueHistoryConnectionFragment = { __typename: "IssueHistoryConnecti
               | "url"
               | "active"
               | "isAssignable"
+              | "isMentionable"
               | "guest"
               | "admin"
               | "owner"
               | "app"
-              | "isMentionable"
               | "isMe"
               | "supportsAgentSessions"
               | "canAccessAnyPublicTeam"
@@ -49872,11 +49947,11 @@ export type IssueSearchPayloadFragment = { __typename: "IssueSearchPayload" } & 
                   | "url"
                   | "active"
                   | "isAssignable"
+                  | "isMentionable"
                   | "guest"
                   | "admin"
                   | "owner"
                   | "app"
-                  | "isMentionable"
                   | "isMe"
                   | "supportsAgentSessions"
                   | "canAccessAnyPublicTeam"
@@ -50021,11 +50096,11 @@ export type IssueSearchResultFragment = { __typename: "IssueSearchResult" } & Pi
             | "url"
             | "active"
             | "isAssignable"
+            | "isMentionable"
             | "guest"
             | "admin"
             | "owner"
             | "app"
-            | "isMentionable"
             | "isMe"
             | "supportsAgentSessions"
             | "canAccessAnyPublicTeam"
@@ -51474,7 +51549,9 @@ export type ProjectLabelConnectionFragment = { __typename: "ProjectLabelConnecti
       ProjectLabel,
       "lastAppliedAt" | "color" | "description" | "name" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "isGroup"
     > & {
+        inheritedFrom?: Maybe<{ __typename?: "ProjectLabel" } & Pick<ProjectLabel, "id">>;
         parent?: Maybe<{ __typename?: "ProjectLabel" } & Pick<ProjectLabel, "id">>;
+        team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
         creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
         retiredBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
       }
@@ -55295,11 +55372,11 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "url"
             | "active"
             | "isAssignable"
+            | "isMentionable"
             | "guest"
             | "admin"
             | "owner"
             | "app"
-            | "isMentionable"
             | "isMe"
             | "supportsAgentSessions"
             | "canAccessAnyPublicTeam"
@@ -55335,11 +55412,11 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "url"
             | "active"
             | "isAssignable"
+            | "isMentionable"
             | "guest"
             | "admin"
             | "owner"
             | "app"
-            | "isMentionable"
             | "isMe"
             | "supportsAgentSessions"
             | "canAccessAnyPublicTeam"
@@ -55467,11 +55544,11 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "url"
             | "active"
             | "isAssignable"
+            | "isMentionable"
             | "guest"
             | "admin"
             | "owner"
             | "app"
-            | "isMentionable"
             | "isMe"
             | "supportsAgentSessions"
             | "canAccessAnyPublicTeam"
@@ -55561,11 +55638,11 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "url"
             | "active"
             | "isAssignable"
+            | "isMentionable"
             | "guest"
             | "admin"
             | "owner"
             | "app"
-            | "isMentionable"
             | "isMe"
             | "supportsAgentSessions"
             | "canAccessAnyPublicTeam"
@@ -55601,11 +55678,11 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "url"
             | "active"
             | "isAssignable"
+            | "isMentionable"
             | "guest"
             | "admin"
             | "owner"
             | "app"
-            | "isMentionable"
             | "isMe"
             | "supportsAgentSessions"
             | "canAccessAnyPublicTeam"
@@ -55733,11 +55810,11 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
             | "url"
             | "active"
             | "isAssignable"
+            | "isMentionable"
             | "guest"
             | "admin"
             | "owner"
             | "app"
-            | "isMentionable"
             | "isMe"
             | "supportsAgentSessions"
             | "canAccessAnyPublicTeam"
@@ -55983,11 +56060,11 @@ export type UserConnectionFragment = { __typename: "UserConnection" } & {
       | "url"
       | "active"
       | "isAssignable"
+      | "isMentionable"
       | "guest"
       | "admin"
       | "owner"
       | "app"
-      | "isMentionable"
       | "isMe"
       | "supportsAgentSessions"
       | "canAccessAnyPublicTeam"
@@ -56561,11 +56638,11 @@ export type AttachmentIssueQuery = { __typename?: "Query" } & {
               | "url"
               | "active"
               | "isAssignable"
+              | "isMentionable"
               | "guest"
               | "admin"
               | "owner"
               | "app"
-              | "isMentionable"
               | "isMe"
               | "supportsAgentSessions"
               | "canAccessAnyPublicTeam"
@@ -56775,11 +56852,11 @@ export type AttachmentIssue_ChildrenQuery = { __typename?: "Query" } & {
                     | "url"
                     | "active"
                     | "isAssignable"
+                    | "isMentionable"
                     | "guest"
                     | "admin"
                     | "owner"
                     | "app"
-                    | "isMentionable"
                     | "isMe"
                     | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
@@ -57213,11 +57290,11 @@ export type AttachmentIssue_HistoryQuery = { __typename?: "Query" } & {
                   | "url"
                   | "active"
                   | "isAssignable"
+                  | "isMentionable"
                   | "guest"
                   | "admin"
                   | "owner"
                   | "app"
-                  | "isMentionable"
                   | "isMe"
                   | "supportsAgentSessions"
                   | "canAccessAnyPublicTeam"
@@ -57253,11 +57330,11 @@ export type AttachmentIssue_HistoryQuery = { __typename?: "Query" } & {
                   | "url"
                   | "active"
                   | "isAssignable"
+                  | "isMentionable"
                   | "guest"
                   | "admin"
                   | "owner"
                   | "app"
-                  | "isMentionable"
                   | "isMe"
                   | "supportsAgentSessions"
                   | "canAccessAnyPublicTeam"
@@ -57385,11 +57462,11 @@ export type AttachmentIssue_HistoryQuery = { __typename?: "Query" } & {
                   | "url"
                   | "active"
                   | "isAssignable"
+                  | "isMentionable"
                   | "guest"
                   | "admin"
                   | "owner"
                   | "app"
-                  | "isMentionable"
                   | "isMe"
                   | "supportsAgentSessions"
                   | "canAccessAnyPublicTeam"
@@ -57691,11 +57768,11 @@ export type AttachmentIssue_SharedAccessQuery = { __typename?: "Query" } & {
             | "url"
             | "active"
             | "isAssignable"
+            | "isMentionable"
             | "guest"
             | "admin"
             | "owner"
             | "app"
-            | "isMentionable"
             | "isMe"
             | "supportsAgentSessions"
             | "canAccessAnyPublicTeam"
@@ -57772,11 +57849,11 @@ export type AttachmentIssue_SubscribersQuery = { __typename?: "Query" } & {
           | "url"
           | "active"
           | "isAssignable"
+          | "isMentionable"
           | "guest"
           | "admin"
           | "owner"
           | "app"
-          | "isMentionable"
           | "isMe"
           | "supportsAgentSessions"
           | "canAccessAnyPublicTeam"
@@ -58441,11 +58518,11 @@ export type Comment_CreatedIssuesQuery = { __typename?: "Query" } & {
                     | "url"
                     | "active"
                     | "isAssignable"
+                    | "isMentionable"
                     | "guest"
                     | "admin"
                     | "owner"
                     | "app"
-                    | "isMentionable"
                     | "isMe"
                     | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
@@ -58893,6 +58970,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "initiativeFieldDescription"
           | "initiativeFieldInitiativeHealth"
           | "initiativeFieldId"
+          | "automationRunHistoryShowInitiativeIdentifier"
           | "initiativeFieldLabels"
           | "initiativeFieldLeadTeam"
           | "initiativeFieldOwner"
@@ -58942,6 +59020,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "projectFieldHealthTimeline"
           | "projectFieldHealth"
           | "projectFieldId"
+          | "automationRunHistoryShowProjectIdentifier"
           | "projectFieldInitiatives"
           | "projectFieldIssues"
           | "projectFieldLabels"
@@ -59165,6 +59244,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "initiativeFieldDescription"
               | "initiativeFieldInitiativeHealth"
               | "initiativeFieldId"
+              | "automationRunHistoryShowInitiativeIdentifier"
               | "initiativeFieldLabels"
               | "initiativeFieldLeadTeam"
               | "initiativeFieldOwner"
@@ -59214,6 +59294,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "projectFieldHealthTimeline"
               | "projectFieldHealth"
               | "projectFieldId"
+              | "automationRunHistoryShowProjectIdentifier"
               | "projectFieldInitiatives"
               | "projectFieldIssues"
               | "projectFieldLabels"
@@ -59442,6 +59523,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "initiativeFieldDescription"
               | "initiativeFieldInitiativeHealth"
               | "initiativeFieldId"
+              | "automationRunHistoryShowInitiativeIdentifier"
               | "initiativeFieldLabels"
               | "initiativeFieldLeadTeam"
               | "initiativeFieldOwner"
@@ -59491,6 +59573,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "projectFieldHealthTimeline"
               | "projectFieldHealth"
               | "projectFieldId"
+              | "automationRunHistoryShowProjectIdentifier"
               | "projectFieldInitiatives"
               | "projectFieldIssues"
               | "projectFieldLabels"
@@ -59764,11 +59847,11 @@ export type CustomView_IssuesQuery = { __typename?: "Query" } & {
                     | "url"
                     | "active"
                     | "isAssignable"
+                    | "isMentionable"
                     | "guest"
                     | "admin"
                     | "owner"
                     | "app"
-                    | "isMentionable"
                     | "isMe"
                     | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
@@ -59978,6 +60061,7 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "initiativeFieldDescription"
             | "initiativeFieldInitiativeHealth"
             | "initiativeFieldId"
+            | "automationRunHistoryShowInitiativeIdentifier"
             | "initiativeFieldLabels"
             | "initiativeFieldLeadTeam"
             | "initiativeFieldOwner"
@@ -60027,6 +60111,7 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "projectFieldHealthTimeline"
             | "projectFieldHealth"
             | "projectFieldId"
+            | "automationRunHistoryShowProjectIdentifier"
             | "projectFieldInitiatives"
             | "projectFieldIssues"
             | "projectFieldLabels"
@@ -60257,6 +60342,7 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "initiativeFieldDescription"
           | "initiativeFieldInitiativeHealth"
           | "initiativeFieldId"
+          | "automationRunHistoryShowInitiativeIdentifier"
           | "initiativeFieldLabels"
           | "initiativeFieldLeadTeam"
           | "initiativeFieldOwner"
@@ -60306,6 +60392,7 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "projectFieldHealthTimeline"
           | "projectFieldHealth"
           | "projectFieldId"
+          | "automationRunHistoryShowProjectIdentifier"
           | "projectFieldInitiatives"
           | "projectFieldIssues"
           | "projectFieldLabels"
@@ -60668,6 +60755,7 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "initiativeFieldDescription"
             | "initiativeFieldInitiativeHealth"
             | "initiativeFieldId"
+            | "automationRunHistoryShowInitiativeIdentifier"
             | "initiativeFieldLabels"
             | "initiativeFieldLeadTeam"
             | "initiativeFieldOwner"
@@ -60717,6 +60805,7 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "projectFieldHealthTimeline"
             | "projectFieldHealth"
             | "projectFieldId"
+            | "automationRunHistoryShowProjectIdentifier"
             | "projectFieldInitiatives"
             | "projectFieldIssues"
             | "projectFieldLabels"
@@ -60947,6 +61036,7 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "initiativeFieldDescription"
           | "initiativeFieldInitiativeHealth"
           | "initiativeFieldId"
+          | "automationRunHistoryShowInitiativeIdentifier"
           | "initiativeFieldLabels"
           | "initiativeFieldLeadTeam"
           | "initiativeFieldOwner"
@@ -60996,6 +61086,7 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "projectFieldHealthTimeline"
           | "projectFieldHealth"
           | "projectFieldId"
+          | "automationRunHistoryShowProjectIdentifier"
           | "projectFieldInitiatives"
           | "projectFieldIssues"
           | "projectFieldLabels"
@@ -61225,6 +61316,7 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "initiativeFieldDescription"
         | "initiativeFieldInitiativeHealth"
         | "initiativeFieldId"
+        | "automationRunHistoryShowInitiativeIdentifier"
         | "initiativeFieldLabels"
         | "initiativeFieldLeadTeam"
         | "initiativeFieldOwner"
@@ -61274,6 +61366,7 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "projectFieldHealthTimeline"
         | "projectFieldHealth"
         | "projectFieldId"
+        | "automationRunHistoryShowProjectIdentifier"
         | "projectFieldInitiatives"
         | "projectFieldIssues"
         | "projectFieldLabels"
@@ -61540,6 +61633,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "initiativeFieldDescription"
               | "initiativeFieldInitiativeHealth"
               | "initiativeFieldId"
+              | "automationRunHistoryShowInitiativeIdentifier"
               | "initiativeFieldLabels"
               | "initiativeFieldLeadTeam"
               | "initiativeFieldOwner"
@@ -61589,6 +61683,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "projectFieldHealthTimeline"
               | "projectFieldHealth"
               | "projectFieldId"
+              | "automationRunHistoryShowProjectIdentifier"
               | "projectFieldInitiatives"
               | "projectFieldIssues"
               | "projectFieldLabels"
@@ -61812,6 +61907,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "initiativeFieldDescription"
                   | "initiativeFieldInitiativeHealth"
                   | "initiativeFieldId"
+                  | "automationRunHistoryShowInitiativeIdentifier"
                   | "initiativeFieldLabels"
                   | "initiativeFieldLeadTeam"
                   | "initiativeFieldOwner"
@@ -61861,6 +61957,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "projectFieldHealthTimeline"
                   | "projectFieldHealth"
                   | "projectFieldId"
+                  | "automationRunHistoryShowProjectIdentifier"
                   | "projectFieldInitiatives"
                   | "projectFieldIssues"
                   | "projectFieldLabels"
@@ -62089,6 +62186,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "initiativeFieldDescription"
                   | "initiativeFieldInitiativeHealth"
                   | "initiativeFieldId"
+                  | "automationRunHistoryShowInitiativeIdentifier"
                   | "initiativeFieldLabels"
                   | "initiativeFieldLeadTeam"
                   | "initiativeFieldOwner"
@@ -62138,6 +62236,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "projectFieldHealthTimeline"
                   | "projectFieldHealth"
                   | "projectFieldId"
+                  | "automationRunHistoryShowProjectIdentifier"
                   | "projectFieldInitiatives"
                   | "projectFieldIssues"
                   | "projectFieldLabels"
@@ -62692,11 +62791,11 @@ export type Cycle_IssuesQuery = { __typename?: "Query" } & {
                     | "url"
                     | "active"
                     | "isAssignable"
+                    | "isMentionable"
                     | "guest"
                     | "admin"
                     | "owner"
                     | "app"
-                    | "isMentionable"
                     | "isMe"
                     | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
@@ -62857,11 +62956,11 @@ export type Cycle_UncompletedIssuesUponCloseQuery = { __typename?: "Query" } & {
                     | "url"
                     | "active"
                     | "isAssignable"
+                    | "isMentionable"
                     | "guest"
                     | "admin"
                     | "owner"
                     | "app"
-                    | "isMentionable"
                     | "isMe"
                     | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
@@ -63177,11 +63276,11 @@ export type Document_SubscribersQuery = { __typename?: "Query" } & {
           | "url"
           | "active"
           | "isAssignable"
+          | "isMentionable"
           | "guest"
           | "admin"
           | "owner"
           | "app"
-          | "isMentionable"
           | "isMe"
           | "supportsAgentSessions"
           | "canAccessAnyPublicTeam"
@@ -65624,6 +65723,8 @@ export type IntegrationsSettingsQuery = { __typename?: "Query" } & {
     | "slackIssueAddedToTriage"
     | "slackIssueCreated"
     | "slackProjectUpdateCreated"
+    | "slackInitiativeCommentCreated"
+    | "slackProjectCommentCreated"
     | "slackIssueSlaHighRisk"
     | "slackIssueSlaBreached"
     | "slackInitiativeUpdateCreated"
@@ -65728,11 +65829,11 @@ export type IssueQuery = { __typename?: "Query" } & {
               | "url"
               | "active"
               | "isAssignable"
+              | "isMentionable"
               | "guest"
               | "admin"
               | "owner"
               | "app"
-              | "isMentionable"
               | "isMe"
               | "supportsAgentSessions"
               | "canAccessAnyPublicTeam"
@@ -65942,11 +66043,11 @@ export type Issue_ChildrenQuery = { __typename?: "Query" } & {
                     | "url"
                     | "active"
                     | "isAssignable"
+                    | "isMentionable"
                     | "guest"
                     | "admin"
                     | "owner"
                     | "app"
-                    | "isMentionable"
                     | "isMe"
                     | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
@@ -66380,11 +66481,11 @@ export type Issue_HistoryQuery = { __typename?: "Query" } & {
                   | "url"
                   | "active"
                   | "isAssignable"
+                  | "isMentionable"
                   | "guest"
                   | "admin"
                   | "owner"
                   | "app"
-                  | "isMentionable"
                   | "isMe"
                   | "supportsAgentSessions"
                   | "canAccessAnyPublicTeam"
@@ -66420,11 +66521,11 @@ export type Issue_HistoryQuery = { __typename?: "Query" } & {
                   | "url"
                   | "active"
                   | "isAssignable"
+                  | "isMentionable"
                   | "guest"
                   | "admin"
                   | "owner"
                   | "app"
-                  | "isMentionable"
                   | "isMe"
                   | "supportsAgentSessions"
                   | "canAccessAnyPublicTeam"
@@ -66552,11 +66653,11 @@ export type Issue_HistoryQuery = { __typename?: "Query" } & {
                   | "url"
                   | "active"
                   | "isAssignable"
+                  | "isMentionable"
                   | "guest"
                   | "admin"
                   | "owner"
                   | "app"
-                  | "isMentionable"
                   | "isMe"
                   | "supportsAgentSessions"
                   | "canAccessAnyPublicTeam"
@@ -66858,11 +66959,11 @@ export type Issue_SharedAccessQuery = { __typename?: "Query" } & {
             | "url"
             | "active"
             | "isAssignable"
+            | "isMentionable"
             | "guest"
             | "admin"
             | "owner"
             | "app"
-            | "isMentionable"
             | "isMe"
             | "supportsAgentSessions"
             | "canAccessAnyPublicTeam"
@@ -66939,11 +67040,11 @@ export type Issue_SubscribersQuery = { __typename?: "Query" } & {
           | "url"
           | "active"
           | "isAssignable"
+          | "isMentionable"
           | "guest"
           | "admin"
           | "owner"
           | "app"
-          | "isMentionable"
           | "isMe"
           | "supportsAgentSessions"
           | "canAccessAnyPublicTeam"
@@ -67056,11 +67157,11 @@ export type IssueFigmaFileKeySearchQuery = { __typename?: "Query" } & {
                   | "url"
                   | "active"
                   | "isAssignable"
+                  | "isMentionable"
                   | "guest"
                   | "admin"
                   | "owner"
                   | "app"
-                  | "isMentionable"
                   | "isMe"
                   | "supportsAgentSessions"
                   | "canAccessAnyPublicTeam"
@@ -67337,11 +67438,11 @@ export type IssueLabel_IssuesQuery = { __typename?: "Query" } & {
                     | "url"
                     | "active"
                     | "isAssignable"
+                    | "isMentionable"
                     | "guest"
                     | "admin"
                     | "owner"
                     | "app"
-                    | "isMentionable"
                     | "isMe"
                     | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
@@ -67605,11 +67706,11 @@ export type IssueSearchQuery = { __typename?: "Query" } & {
                   | "url"
                   | "active"
                   | "isAssignable"
+                  | "isMentionable"
                   | "guest"
                   | "admin"
                   | "owner"
                   | "app"
-                  | "isMentionable"
                   | "isMe"
                   | "supportsAgentSessions"
                   | "canAccessAnyPublicTeam"
@@ -67809,11 +67910,11 @@ export type IssueVcsBranchSearchQuery = { __typename?: "Query" } & {
                 | "url"
                 | "active"
                 | "isAssignable"
+                | "isMentionable"
                 | "guest"
                 | "admin"
                 | "owner"
                 | "app"
-                | "isMentionable"
                 | "isMe"
                 | "supportsAgentSessions"
                 | "canAccessAnyPublicTeam"
@@ -68035,11 +68136,11 @@ export type IssueVcsBranchSearch_ChildrenQuery = { __typename?: "Query" } & {
                       | "url"
                       | "active"
                       | "isAssignable"
+                      | "isMentionable"
                       | "guest"
                       | "admin"
                       | "owner"
                       | "app"
-                      | "isMentionable"
                       | "isMe"
                       | "supportsAgentSessions"
                       | "canAccessAnyPublicTeam"
@@ -68489,11 +68590,11 @@ export type IssueVcsBranchSearch_HistoryQuery = { __typename?: "Query" } & {
                     | "url"
                     | "active"
                     | "isAssignable"
+                    | "isMentionable"
                     | "guest"
                     | "admin"
                     | "owner"
                     | "app"
-                    | "isMentionable"
                     | "isMe"
                     | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
@@ -68529,11 +68630,11 @@ export type IssueVcsBranchSearch_HistoryQuery = { __typename?: "Query" } & {
                     | "url"
                     | "active"
                     | "isAssignable"
+                    | "isMentionable"
                     | "guest"
                     | "admin"
                     | "owner"
                     | "app"
-                    | "isMentionable"
                     | "isMe"
                     | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
@@ -68661,11 +68762,11 @@ export type IssueVcsBranchSearch_HistoryQuery = { __typename?: "Query" } & {
                     | "url"
                     | "active"
                     | "isAssignable"
+                    | "isMentionable"
                     | "guest"
                     | "admin"
                     | "owner"
                     | "app"
-                    | "isMentionable"
                     | "isMe"
                     | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
@@ -68979,11 +69080,11 @@ export type IssueVcsBranchSearch_SharedAccessQuery = { __typename?: "Query" } & 
               | "url"
               | "active"
               | "isAssignable"
+              | "isMentionable"
               | "guest"
               | "admin"
               | "owner"
               | "app"
-              | "isMentionable"
               | "isMe"
               | "supportsAgentSessions"
               | "canAccessAnyPublicTeam"
@@ -69064,11 +69165,11 @@ export type IssueVcsBranchSearch_SubscribersQuery = { __typename?: "Query" } & {
             | "url"
             | "active"
             | "isAssignable"
+            | "isMentionable"
             | "guest"
             | "admin"
             | "owner"
             | "app"
-            | "isMentionable"
             | "isMe"
             | "supportsAgentSessions"
             | "canAccessAnyPublicTeam"
@@ -69183,11 +69284,11 @@ export type IssuesQuery = { __typename?: "Query" } & {
                   | "url"
                   | "active"
                   | "isAssignable"
+                  | "isMentionable"
                   | "guest"
                   | "admin"
                   | "owner"
                   | "app"
-                  | "isMentionable"
                   | "isMe"
                   | "supportsAgentSessions"
                   | "canAccessAnyPublicTeam"
@@ -70909,7 +71010,9 @@ export type Organization_ProjectLabelsQuery = { __typename?: "Query" } & {
           | "id"
           | "isGroup"
         > & {
+            inheritedFrom?: Maybe<{ __typename?: "ProjectLabel" } & Pick<ProjectLabel, "id">>;
             parent?: Maybe<{ __typename?: "ProjectLabel" } & Pick<ProjectLabel, "id">>;
+            team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
             creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             retiredBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           }
@@ -71128,11 +71231,11 @@ export type Organization_UsersQuery = { __typename?: "Query" } & {
           | "url"
           | "active"
           | "isAssignable"
+          | "isMentionable"
           | "guest"
           | "admin"
           | "owner"
           | "app"
-          | "isMentionable"
           | "isMe"
           | "supportsAgentSessions"
           | "canAccessAnyPublicTeam"
@@ -71919,11 +72022,11 @@ export type Project_IssuesQuery = { __typename?: "Query" } & {
                     | "url"
                     | "active"
                     | "isAssignable"
+                    | "isMentionable"
                     | "guest"
                     | "admin"
                     | "owner"
                     | "app"
-                    | "isMentionable"
                     | "isMe"
                     | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
@@ -72012,7 +72115,9 @@ export type Project_LabelsQuery = { __typename?: "Query" } & {
           | "id"
           | "isGroup"
         > & {
+            inheritedFrom?: Maybe<{ __typename?: "ProjectLabel" } & Pick<ProjectLabel, "id">>;
             parent?: Maybe<{ __typename?: "ProjectLabel" } & Pick<ProjectLabel, "id">>;
+            team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
             creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             retiredBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           }
@@ -72066,11 +72171,11 @@ export type Project_MembersQuery = { __typename?: "Query" } & {
           | "url"
           | "active"
           | "isAssignable"
+          | "isMentionable"
           | "guest"
           | "admin"
           | "owner"
           | "app"
-          | "isMentionable"
           | "isMe"
           | "supportsAgentSessions"
           | "canAccessAnyPublicTeam"
@@ -72407,7 +72512,9 @@ export type ProjectLabelQuery = { __typename?: "Query" } & {
     ProjectLabel,
     "lastAppliedAt" | "color" | "description" | "name" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "isGroup"
   > & {
+      inheritedFrom?: Maybe<{ __typename?: "ProjectLabel" } & Pick<ProjectLabel, "id">>;
       parent?: Maybe<{ __typename?: "ProjectLabel" } & Pick<ProjectLabel, "id">>;
+      team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
       creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
       retiredBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     };
@@ -72440,7 +72547,9 @@ export type ProjectLabel_ChildrenQuery = { __typename?: "Query" } & {
           | "id"
           | "isGroup"
         > & {
+            inheritedFrom?: Maybe<{ __typename?: "ProjectLabel" } & Pick<ProjectLabel, "id">>;
             parent?: Maybe<{ __typename?: "ProjectLabel" } & Pick<ProjectLabel, "id">>;
+            team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
             creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             retiredBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           }
@@ -72598,7 +72707,9 @@ export type ProjectLabelsQuery = { __typename?: "Query" } & {
         ProjectLabel,
         "lastAppliedAt" | "color" | "description" | "name" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "isGroup"
       > & {
+          inheritedFrom?: Maybe<{ __typename?: "ProjectLabel" } & Pick<ProjectLabel, "id">>;
           parent?: Maybe<{ __typename?: "ProjectLabel" } & Pick<ProjectLabel, "id">>;
+          team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
           creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           retiredBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
         }
@@ -72823,11 +72934,11 @@ export type ProjectMilestone_IssuesQuery = { __typename?: "Query" } & {
                     | "url"
                     | "active"
                     | "isAssignable"
+                    | "isMentionable"
                     | "guest"
                     | "admin"
                     | "owner"
                     | "app"
-                    | "isMentionable"
                     | "isMe"
                     | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
@@ -73686,11 +73797,11 @@ export type Release_IssuesQuery = { __typename?: "Query" } & {
                     | "url"
                     | "active"
                     | "isAssignable"
+                    | "isMentionable"
                     | "guest"
                     | "admin"
                     | "owner"
                     | "app"
-                    | "isMentionable"
                     | "isMe"
                     | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
@@ -74943,11 +75054,11 @@ export type SearchIssuesQuery = { __typename?: "Query" } & {
                     | "url"
                     | "active"
                     | "isAssignable"
+                    | "isMentionable"
                     | "guest"
                     | "admin"
                     | "owner"
                     | "app"
-                    | "isMentionable"
                     | "isMe"
                     | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
@@ -75495,11 +75606,11 @@ export type Team_IssuesQuery = { __typename?: "Query" } & {
                     | "url"
                     | "active"
                     | "isAssignable"
+                    | "isMentionable"
                     | "guest"
                     | "admin"
                     | "owner"
                     | "app"
-                    | "isMentionable"
                     | "isMe"
                     | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
@@ -75646,11 +75757,11 @@ export type Team_MembersQuery = { __typename?: "Query" } & {
           | "url"
           | "active"
           | "isAssignable"
+          | "isMentionable"
           | "guest"
           | "admin"
           | "owner"
           | "app"
-          | "isMentionable"
           | "isMe"
           | "supportsAgentSessions"
           | "canAccessAnyPublicTeam"
@@ -76413,11 +76524,11 @@ export type UserQuery = { __typename?: "Query" } & {
     | "url"
     | "active"
     | "isAssignable"
+    | "isMentionable"
     | "guest"
     | "admin"
     | "owner"
     | "app"
-    | "isMentionable"
     | "isMe"
     | "supportsAgentSessions"
     | "canAccessAnyPublicTeam"
@@ -76525,11 +76636,11 @@ export type User_AssignedIssuesQuery = { __typename?: "Query" } & {
                     | "url"
                     | "active"
                     | "isAssignable"
+                    | "isMentionable"
                     | "guest"
                     | "admin"
                     | "owner"
                     | "app"
-                    | "isMentionable"
                     | "isMe"
                     | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
@@ -76690,11 +76801,11 @@ export type User_CreatedIssuesQuery = { __typename?: "Query" } & {
                     | "url"
                     | "active"
                     | "isAssignable"
+                    | "isMentionable"
                     | "guest"
                     | "admin"
                     | "owner"
                     | "app"
-                    | "isMentionable"
                     | "isMe"
                     | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
@@ -76855,11 +76966,11 @@ export type User_DelegatedIssuesQuery = { __typename?: "Query" } & {
                     | "url"
                     | "active"
                     | "isAssignable"
+                    | "isMentionable"
                     | "guest"
                     | "admin"
                     | "owner"
                     | "app"
-                    | "isMentionable"
                     | "isMe"
                     | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
@@ -77140,6 +77251,7 @@ export type UserSettingsQuery = { __typename?: "Query" } & {
     | "subscribedToPrivacyLegalUpdates"
     | "autoAssignToSelf"
     | "showFullUserNames"
+    | "showCodeBlockLineNumbers"
   > & {
       notificationDeliveryPreferences: { __typename: "NotificationDeliveryPreferences" } & {
         mobile?: Maybe<
@@ -78132,6 +78244,7 @@ export type UserViewPreferencesQuery = { __typename?: "Query" } & {
           | "initiativeFieldDescription"
           | "initiativeFieldInitiativeHealth"
           | "initiativeFieldId"
+          | "automationRunHistoryShowInitiativeIdentifier"
           | "initiativeFieldLabels"
           | "initiativeFieldLeadTeam"
           | "initiativeFieldOwner"
@@ -78181,6 +78294,7 @@ export type UserViewPreferencesQuery = { __typename?: "Query" } & {
           | "projectFieldHealthTimeline"
           | "projectFieldHealth"
           | "projectFieldId"
+          | "automationRunHistoryShowProjectIdentifier"
           | "projectFieldInitiatives"
           | "projectFieldIssues"
           | "projectFieldLabels"
@@ -78409,6 +78523,7 @@ export type UserViewPreferences_PreferencesQuery = { __typename?: "Query" } & {
         | "initiativeFieldDescription"
         | "initiativeFieldInitiativeHealth"
         | "initiativeFieldId"
+        | "automationRunHistoryShowInitiativeIdentifier"
         | "initiativeFieldLabels"
         | "initiativeFieldLeadTeam"
         | "initiativeFieldOwner"
@@ -78458,6 +78573,7 @@ export type UserViewPreferences_PreferencesQuery = { __typename?: "Query" } & {
         | "projectFieldHealthTimeline"
         | "projectFieldHealth"
         | "projectFieldId"
+        | "automationRunHistoryShowProjectIdentifier"
         | "projectFieldInitiatives"
         | "projectFieldIssues"
         | "projectFieldLabels"
@@ -78582,11 +78698,11 @@ export type UsersQuery = { __typename?: "Query" } & {
         | "url"
         | "active"
         | "isAssignable"
+        | "isMentionable"
         | "guest"
         | "admin"
         | "owner"
         | "app"
-        | "isMentionable"
         | "isMe"
         | "supportsAgentSessions"
         | "canAccessAnyPublicTeam"
@@ -78640,11 +78756,11 @@ export type ViewerQuery = { __typename?: "Query" } & {
     | "url"
     | "active"
     | "isAssignable"
+    | "isMentionable"
     | "guest"
     | "admin"
     | "owner"
     | "app"
-    | "isMentionable"
     | "isMe"
     | "supportsAgentSessions"
     | "canAccessAnyPublicTeam"
@@ -78751,11 +78867,11 @@ export type Viewer_AssignedIssuesQuery = { __typename?: "Query" } & {
                     | "url"
                     | "active"
                     | "isAssignable"
+                    | "isMentionable"
                     | "guest"
                     | "admin"
                     | "owner"
                     | "app"
-                    | "isMentionable"
                     | "isMe"
                     | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
@@ -78915,11 +79031,11 @@ export type Viewer_CreatedIssuesQuery = { __typename?: "Query" } & {
                     | "url"
                     | "active"
                     | "isAssignable"
+                    | "isMentionable"
                     | "guest"
                     | "admin"
                     | "owner"
                     | "app"
-                    | "isMentionable"
                     | "isMe"
                     | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
@@ -79079,11 +79195,11 @@ export type Viewer_DelegatedIssuesQuery = { __typename?: "Query" } & {
                     | "url"
                     | "active"
                     | "isAssignable"
+                    | "isMentionable"
                     | "guest"
                     | "admin"
                     | "owner"
                     | "app"
-                    | "isMentionable"
                     | "isMe"
                     | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
@@ -79482,11 +79598,11 @@ export type WorkflowState_IssuesQuery = { __typename?: "Query" } & {
                     | "url"
                     | "active"
                     | "isAssignable"
+                    | "isMentionable"
                     | "guest"
                     | "admin"
                     | "owner"
                     | "app"
-                    | "isMentionable"
                     | "isMe"
                     | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
@@ -82699,6 +82815,7 @@ export type UpdateIntegrationIntercomSettingsMutation = { __typename?: "Mutation
 export type IntegrationJiraPersonalMutationVariables = Exact<{
   accessToken?: InputMaybe<Scalars["String"]>;
   code?: InputMaybe<Scalars["String"]>;
+  workspaceIntegrationId?: InputMaybe<Scalars["String"]>;
 }>;
 
 export type IntegrationJiraPersonalMutation = { __typename?: "Mutation" } & {
@@ -82983,6 +83100,7 @@ export type DeleteIntegrationTemplateMutation = { __typename?: "Mutation" } & {
 
 export type IntegrationZendeskMutationVariables = Exact<{
   accessToken?: InputMaybe<Scalars["String"]>;
+  botUserId?: InputMaybe<Scalars["String"]>;
   botUserRole?: InputMaybe<Scalars["String"]>;
   code?: InputMaybe<Scalars["String"]>;
   customApiUrl?: InputMaybe<Scalars["String"]>;
@@ -83136,11 +83254,11 @@ export type CreateIssueBatchMutation = { __typename?: "Mutation" } & {
                     | "url"
                     | "active"
                     | "isAssignable"
+                    | "isMentionable"
                     | "guest"
                     | "admin"
                     | "owner"
                     | "app"
-                    | "isMentionable"
                     | "isMe"
                     | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
@@ -83289,11 +83407,11 @@ export type UpdateIssueBatchMutation = { __typename?: "Mutation" } & {
                     | "url"
                     | "active"
                     | "isAssignable"
+                    | "isMentionable"
                     | "guest"
                     | "admin"
                     | "owner"
                     | "app"
-                    | "isMentionable"
                     | "isMe"
                     | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
@@ -90316,6 +90434,7 @@ export type UserDiscordConnectMutation = { __typename?: "Mutation" } & {
 
 export type UserExternalUserDisconnectMutationVariables = Exact<{
   service: Scalars["String"];
+  workspaceIntegrationId?: InputMaybe<Scalars["String"]>;
 }>;
 
 export type UserExternalUserDisconnectMutation = { __typename?: "Mutation" } & {
@@ -90560,6 +90679,7 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "initiativeFieldDescription"
             | "initiativeFieldInitiativeHealth"
             | "initiativeFieldId"
+            | "automationRunHistoryShowInitiativeIdentifier"
             | "initiativeFieldLabels"
             | "initiativeFieldLeadTeam"
             | "initiativeFieldOwner"
@@ -90609,6 +90729,7 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "projectFieldHealthTimeline"
             | "projectFieldHealth"
             | "projectFieldId"
+            | "automationRunHistoryShowProjectIdentifier"
             | "projectFieldInitiatives"
             | "projectFieldIssues"
             | "projectFieldLabels"
@@ -90852,6 +90973,7 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "initiativeFieldDescription"
             | "initiativeFieldInitiativeHealth"
             | "initiativeFieldId"
+            | "automationRunHistoryShowInitiativeIdentifier"
             | "initiativeFieldLabels"
             | "initiativeFieldLeadTeam"
             | "initiativeFieldOwner"
@@ -90901,6 +91023,7 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "projectFieldHealthTimeline"
             | "projectFieldHealth"
             | "projectFieldId"
+            | "automationRunHistoryShowProjectIdentifier"
             | "projectFieldInitiatives"
             | "projectFieldIssues"
             | "projectFieldLabels"
@@ -102311,11 +102434,13 @@ export const ProjectLabelWebhookPayloadFragmentDoc = new TypedDocumentString(
     fragment ProjectLabelWebhookPayload on ProjectLabelWebhookPayload {
   __typename
   id
+  inheritedFromId
   color
   creatorId
   description
   name
   parentId
+  teamId
   archivedAt
   createdAt
   updatedAt
@@ -104360,6 +104485,7 @@ export const UserSettingsFragmentDoc = new TypedDocumentString(
   subscribedToPrivacyLegalUpdates
   autoAssignToSelf
   showFullUserNames
+  showCodeBlockLineNumbers
 }
     fragment NotificationCategoryPreferences on NotificationCategoryPreferences {
   __typename
@@ -106944,6 +107070,8 @@ export const IntegrationsSettingsFragmentDoc = new TypedDocumentString(
   slackIssueAddedToTriage
   slackIssueCreated
   slackProjectUpdateCreated
+  slackInitiativeCommentCreated
+  slackProjectCommentCreated
   slackIssueSlaHighRisk
   slackIssueSlaBreached
   slackInitiativeUpdateCreated
@@ -107158,11 +107286,11 @@ export const UserFragmentDoc = new TypedDocumentString(
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -107209,11 +107337,11 @@ export const IssueSharedAccessFragmentDoc = new TypedDocumentString(
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -107438,11 +107566,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -107566,11 +107694,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -108463,6 +108591,7 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldId
+  automationRunHistoryShowInitiativeIdentifier
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -108512,6 +108641,7 @@ export const ViewPreferencesValuesFragmentDoc = new TypedDocumentString(
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldId
+  automationRunHistoryShowProjectIdentifier
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -108754,6 +108884,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldId
+  automationRunHistoryShowInitiativeIdentifier
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -108803,6 +108934,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldId
+  automationRunHistoryShowProjectIdentifier
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -109031,6 +109163,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldId
+  automationRunHistoryShowInitiativeIdentifier
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -109080,6 +109213,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldId
+  automationRunHistoryShowProjectIdentifier
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -112598,6 +112732,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldId
+  automationRunHistoryShowInitiativeIdentifier
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -112647,6 +112782,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldId
+  automationRunHistoryShowProjectIdentifier
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -112928,6 +113064,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldId
+  automationRunHistoryShowInitiativeIdentifier
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -112977,6 +113114,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldId
+  automationRunHistoryShowProjectIdentifier
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -115435,11 +115573,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -115815,11 +115953,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -116060,11 +116198,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -116376,11 +116514,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -116509,11 +116647,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -118197,7 +118335,13 @@ export const ProjectLabelFragmentDoc = new TypedDocumentString(
   description
   name
   updatedAt
+  inheritedFrom {
+    id
+  }
   parent {
+    id
+  }
+  team {
     id
   }
   archivedAt
@@ -118232,7 +118376,13 @@ export const ProjectLabelConnectionFragmentDoc = new TypedDocumentString(
   description
   name
   updatedAt
+  inheritedFrom {
+    id
+  }
   parent {
+    id
+  }
+  team {
     id
   }
   archivedAt
@@ -120975,11 +121125,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -121872,11 +122022,11 @@ export const UserConnectionFragmentDoc = new TypedDocumentString(
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -122766,11 +122916,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -123081,11 +123231,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -123925,11 +124075,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -124416,11 +124566,11 @@ export const AttachmentIssue_SharedAccessDocument = new TypedDocumentString(`
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -124513,11 +124663,11 @@ export const AttachmentIssue_SubscribersDocument = new TypedDocumentString(`
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -125318,11 +125468,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -126085,6 +126235,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldId
+  automationRunHistoryShowInitiativeIdentifier
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -126134,6 +126285,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldId
+  automationRunHistoryShowProjectIdentifier
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -126399,11 +126551,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -126765,6 +126917,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldId
+  automationRunHistoryShowInitiativeIdentifier
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -126814,6 +126967,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldId
+  automationRunHistoryShowProjectIdentifier
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -127055,6 +127209,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldId
+  automationRunHistoryShowInitiativeIdentifier
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -127104,6 +127259,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldId
+  automationRunHistoryShowProjectIdentifier
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -127533,6 +127689,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldId
+  automationRunHistoryShowInitiativeIdentifier
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -127582,6 +127739,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldId
+  automationRunHistoryShowProjectIdentifier
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -127823,6 +127981,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldId
+  automationRunHistoryShowInitiativeIdentifier
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -127872,6 +128031,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldId
+  automationRunHistoryShowProjectIdentifier
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -128099,6 +128259,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldId
+  automationRunHistoryShowInitiativeIdentifier
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -128148,6 +128309,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldId
+  automationRunHistoryShowProjectIdentifier
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -128432,6 +128594,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldId
+  automationRunHistoryShowInitiativeIdentifier
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -128481,6 +128644,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldId
+  automationRunHistoryShowProjectIdentifier
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -129149,11 +129313,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -129404,11 +129568,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -129998,11 +130162,11 @@ export const Document_SubscribersDocument = new TypedDocumentString(`
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -133535,6 +133699,8 @@ export const IntegrationsSettingsDocument = new TypedDocumentString(`
   slackIssueAddedToTriage
   slackIssueCreated
   slackProjectUpdateCreated
+  slackInitiativeCommentCreated
+  slackProjectCommentCreated
   slackIssueSlaHighRisk
   slackIssueSlaBreached
   slackInitiativeUpdateCreated
@@ -133584,11 +133750,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -133899,11 +134065,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -134740,11 +134906,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -135228,11 +135394,11 @@ export const Issue_SharedAccessDocument = new TypedDocumentString(`
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -135325,11 +135491,11 @@ export const Issue_SubscribersDocument = new TypedDocumentString(`
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -135400,11 +135566,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -135799,11 +135965,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -136207,11 +136373,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -136527,11 +136693,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -136845,11 +137011,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -137695,11 +137861,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -138189,11 +138355,11 @@ export const IssueVcsBranchSearch_SharedAccessDocument = new TypedDocumentString
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -138292,11 +138458,11 @@ export const IssueVcsBranchSearch_SubscribersDocument = new TypedDocumentString(
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -138371,11 +138537,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -140299,7 +140465,13 @@ export const Organization_ProjectLabelsDocument = new TypedDocumentString(`
   description
   name
   updatedAt
+  inheritedFrom {
+    id
+  }
   parent {
+    id
+  }
+  team {
     id
   }
   archivedAt
@@ -140595,11 +140767,11 @@ export const Organization_UsersDocument = new TypedDocumentString(`
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -141725,11 +141897,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -141953,7 +142125,13 @@ export const Project_LabelsDocument = new TypedDocumentString(`
   description
   name
   updatedAt
+  inheritedFrom {
+    id
+  }
   parent {
+    id
+  }
+  team {
     id
   }
   archivedAt
@@ -142025,11 +142203,11 @@ export const Project_MembersDocument = new TypedDocumentString(`
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -142539,7 +142717,13 @@ export const ProjectLabelDocument = new TypedDocumentString(`
   description
   name
   updatedAt
+  inheritedFrom {
+    id
+  }
   parent {
+    id
+  }
+  team {
     id
   }
   archivedAt
@@ -142576,7 +142760,13 @@ export const ProjectLabel_ChildrenDocument = new TypedDocumentString(`
   description
   name
   updatedAt
+  inheritedFrom {
+    id
+  }
   parent {
+    id
+  }
+  team {
     id
   }
   archivedAt
@@ -142828,7 +143018,13 @@ export const ProjectLabelsDocument = new TypedDocumentString(`
   description
   name
   updatedAt
+  inheritedFrom {
+    id
+  }
   parent {
+    id
+  }
+  team {
     id
   }
   archivedAt
@@ -143098,11 +143294,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -144471,11 +144667,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -146413,11 +146609,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -147240,11 +147436,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -147548,11 +147744,11 @@ export const Team_MembersDocument = new TypedDocumentString(`
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -148657,11 +148853,11 @@ export const UserDocument = new TypedDocumentString(`
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -148718,11 +148914,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -148973,11 +149169,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -149228,11 +149424,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -149877,6 +150073,7 @@ fragment UserSettings on UserSettings {
   subscribedToPrivacyLegalUpdates
   autoAssignToSelf
   showFullUserNames
+  showCodeBlockLineNumbers
 }
 fragment UserSettingsTheme on UserSettingsTheme {
   __typename
@@ -150853,6 +151050,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldId
+  automationRunHistoryShowInitiativeIdentifier
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -150902,6 +151100,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldId
+  automationRunHistoryShowProjectIdentifier
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -151138,6 +151337,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldId
+  automationRunHistoryShowInitiativeIdentifier
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -151187,6 +151387,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldId
+  automationRunHistoryShowProjectIdentifier
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -151294,11 +151495,11 @@ export const UsersDocument = new TypedDocumentString(`
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -151365,11 +151566,11 @@ export const ViewerDocument = new TypedDocumentString(`
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -151426,11 +151627,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -151681,11 +151882,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -151936,11 +152137,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -152547,11 +152748,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -155861,8 +156062,12 @@ fragment IntegrationPayload on IntegrationPayload {
   UpdateIntegrationIntercomSettingsMutationVariables
 >;
 export const IntegrationJiraPersonalDocument = new TypedDocumentString(`
-    mutation integrationJiraPersonal($accessToken: String, $code: String) {
-  integrationJiraPersonal(accessToken: $accessToken, code: $code) {
+    mutation integrationJiraPersonal($accessToken: String, $code: String, $workspaceIntegrationId: String) {
+  integrationJiraPersonal(
+    accessToken: $accessToken
+    code: $code
+    workspaceIntegrationId: $workspaceIntegrationId
+  ) {
     ...IntegrationPayload
   }
 }
@@ -156282,9 +156487,10 @@ export const DeleteIntegrationTemplateDocument = new TypedDocumentString(`
   success
 }`) as unknown as TypedDocumentString<DeleteIntegrationTemplateMutation, DeleteIntegrationTemplateMutationVariables>;
 export const IntegrationZendeskDocument = new TypedDocumentString(`
-    mutation integrationZendesk($accessToken: String, $botUserRole: String, $code: String, $customApiUrl: String, $redirectUri: String, $scope: String, $subdomain: String!) {
+    mutation integrationZendesk($accessToken: String, $botUserId: String, $botUserRole: String, $code: String, $customApiUrl: String, $redirectUri: String, $scope: String, $subdomain: String!) {
   integrationZendesk(
     accessToken: $accessToken
+    botUserId: $botUserId
     botUserRole: $botUserRole
     code: $code
     customApiUrl: $customApiUrl
@@ -156406,11 +156612,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -156643,11 +156849,11 @@ fragment User on User {
   url
   active
   isAssignable
+  isMentionable
   guest
   admin
   owner
   app
-  isMentionable
   isMe
   supportsAgentSessions
   canAccessAnyPublicTeam
@@ -164404,8 +164610,11 @@ export const UserDiscordConnectDocument = new TypedDocumentString(`
   success
 }`) as unknown as TypedDocumentString<UserDiscordConnectMutation, UserDiscordConnectMutationVariables>;
 export const UserExternalUserDisconnectDocument = new TypedDocumentString(`
-    mutation userExternalUserDisconnect($service: String!) {
-  userExternalUserDisconnect(service: $service) {
+    mutation userExternalUserDisconnect($service: String!, $workspaceIntegrationId: String) {
+  userExternalUserDisconnect(
+    service: $service
+    workspaceIntegrationId: $workspaceIntegrationId
+  ) {
     ...UserPayload
   }
 }
@@ -164681,6 +164890,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldId
+  automationRunHistoryShowInitiativeIdentifier
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -164730,6 +164940,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldId
+  automationRunHistoryShowProjectIdentifier
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels
@@ -164984,6 +165195,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldDescription
   initiativeFieldInitiativeHealth
   initiativeFieldId
+  automationRunHistoryShowInitiativeIdentifier
   initiativeFieldLabels
   initiativeFieldLeadTeam
   initiativeFieldOwner
@@ -165033,6 +165245,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealthTimeline
   projectFieldHealth
   projectFieldId
+  automationRunHistoryShowProjectIdentifier
   projectFieldInitiatives
   projectFieldIssues
   projectFieldLabels

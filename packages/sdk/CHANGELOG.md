@@ -1,5 +1,75 @@
 # Change Log
 
+## 95.2.0
+
+### Minor Changes
+
+- feat(schema): [dangerous] Input field 'mcpServer' was added to input object type 'IntegrationSettingsInput' (IntegrationSettingsInput.mcpServer)
+
+  feat(schema): [dangerous] Input field 'slackInitiativeCommentCreated' was added to input object type 'IntegrationsSettingsCreateInput' (IntegrationsSettingsCreateInput.slackInitiativeCommentCreated)
+
+  feat(schema): [dangerous] Input field 'slackProjectCommentCreated' was added to input object type 'IntegrationsSettingsCreateInput' (IntegrationsSettingsCreateInput.slackProjectCommentCreated)
+
+  feat(schema): [dangerous] Input field 'slackInitiativeCommentCreated' was added to input object type 'IntegrationsSettingsUpdateInput' (IntegrationsSettingsUpdateInput.slackInitiativeCommentCreated)
+
+  feat(schema): [dangerous] Input field 'slackProjectCommentCreated' was added to input object type 'IntegrationsSettingsUpdateInput' (IntegrationsSettingsUpdateInput.slackProjectCommentCreated)
+
+  feat(schema): [dangerous] Input field 'defaultProjectId' was added to input object type 'JiraUpdateInput' (JiraUpdateInput.defaultProjectId)
+
+  feat(schema): [dangerous] Argument 'workspaceIntegrationId: String' added to field 'Mutation.integrationJiraPersonal' (Mutation.integrationJiraPersonal.workspaceIntegrationId)
+
+  feat(schema): [dangerous] Argument 'botUserId: String' added to field 'Mutation.integrationZendesk' (Mutation.integrationZendesk.botUserId)
+
+  feat(schema): [dangerous] Argument 'workspaceIntegrationId: String' added to field 'Mutation.userExternalUserDisconnect' (Mutation.userExternalUserDisconnect.workspaceIntegrationId)
+
+  feat(schema): [dangerous] Enum value 'creator' was added to enum 'PartnerOfferCategory' (PartnerOfferCategory.creator)
+
+  feat(schema): [dangerous] Input field 'team' was added to input object type 'ProjectLabelCollectionFilter' (ProjectLabelCollectionFilter.team)
+
+  feat(schema): [dangerous] Input field 'team' was added to input object type 'ProjectLabelFilter' (ProjectLabelFilter.team)
+
+  feat(schema): [dangerous] Enum value 'slackAiFeedbackAcknowledgementShown' was added to enum 'UserFlagType' (UserFlagType.slackAiFeedbackAcknowledgementShown)
+
+  feat(schema): [non_breaking] Type 'McpServerIntegrationSettingsInput' was added (McpServerIntegrationSettingsInput)
+
+  feat(schema): [non_breaking] Field 'diff' was added to object type 'AiConversation' (AiConversation.diff)
+
+  feat(schema): [non_breaking] Field 'slackInitiativeCommentCreated' was added to object type 'IntegrationsSettings' (IntegrationsSettings.slackInitiativeCommentCreated)
+
+  feat(schema): [non_breaking] Field 'slackProjectCommentCreated' was added to object type 'IntegrationsSettings' (IntegrationsSettings.slackProjectCommentCreated)
+
+  feat(schema): [non_breaking] Field 'release' was added to object type 'LoopExecution' (LoopExecution.release)
+
+  feat(schema): [non_breaking] Field 'leadTeamId' was added to object type 'Project' (Project.leadTeamId)
+
+  feat(schema): [non_breaking] Field 'ProjectLabel.inheritedFrom' description changed from '[Internal] The original workspace or parent-team label that this label was inherited from. Null if the label is not inherited.' to 'The original workspace or parent-team label that this label was inherited from. Null if the label is not inherited.' (ProjectLabel.inheritedFrom)
+
+  feat(schema): [non_breaking] Field 'ProjectLabel.team' description changed from '[Internal] The team that the label is scoped to. If null, the label is a workspace-level label available to all teams in the workspace.' to 'The team that the label is scoped to. If null, the label is a workspace-level label available to all teams in the workspace.' (ProjectLabel.team)
+
+  feat(schema): [non_breaking] Description 'A label that can be applied to projects for categorization. Project labels are workspace-level and can be organized into groups with a parent-child hierarchy. Only child labels (not group labels) can be directly applied to projects.' on type 'ProjectLabel' has changed to 'A label that can be applied to projects for categorization. Project labels can be workspace-level (available to all teams) or team-scoped, and can be organized into groups with a parent-child hierarchy. Only child labels (not group labels) can be directly applied to projects. Team-scoped labels may be inherited from parent teams to sub-teams.' (ProjectLabel)
+
+  feat(schema): [non_breaking] Input field 'ProjectLabelCreateInput.teamId' description changed from '[Internal] The team associated with the label. If not given, the label will be associated with the entire workspace.' to 'The identifier of the team to scope the label to. If not given, the label is a workspace-level label available to all teams.' (ProjectLabelCreateInput.teamId)
+
+  feat(schema): [non_breaking] Field 'inheritedFromId' was added to object type 'ProjectLabelWebhookPayload' (ProjectLabelWebhookPayload.inheritedFromId)
+
+  feat(schema): [non_breaking] Field 'teamId' was added to object type 'ProjectLabelWebhookPayload' (ProjectLabelWebhookPayload.teamId)
+
+  feat(schema): [non_breaking] Field 'leadTeamId' was added to object type 'ProjectSearchResult' (ProjectSearchResult.leadTeamId)
+
+  feat(schema): [non_breaking] Field 'teamId' was added to object type 'ProjectStatus' (ProjectStatus.teamId)
+
+  feat(schema): [non_breaking] Field 'Query.projectLabels' description changed from 'Returns all project labels in the workspace, with optional filtering.' to 'All project labels. Returns a paginated list of labels visible to the authenticated user, including both workspace-level and team-scoped labels, with optional filtering.' (Query.projectLabels)
+
+  feat(schema): [non_breaking] Field 'User.isAssignable' description changed from 'Whether the user can be assigned to issues. Regular users are always assignable; app users are assignable only if they have the app:assignable scope. The Linear agent also requires coding sessions to be enabled.' to 'Whether the user can be assigned to issues. Active app users require the assignments capability. The Linear agent also requires coding sessions to be enabled.' (User.isAssignable)
+
+  feat(schema): [non_breaking] Field 'User.isMentionable' description changed from 'Whether the user is mentionable.' to 'Whether the user can be mentioned. Active app users require the mentions capability.' (User.isMentionable)
+
+  feat(schema): [non_breaking] Field 'showCodeBlockLineNumbers' was added to object type 'UserSettings' (UserSettings.showCodeBlockLineNumbers)
+
+  feat(schema): [non_breaking] Field 'automationRunHistoryShowInitiativeIdentifier' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.automationRunHistoryShowInitiativeIdentifier)
+
+  feat(schema): [non_breaking] Field 'automationRunHistoryShowProjectIdentifier' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.automationRunHistoryShowProjectIdentifier)
+
 ## 95.1.0
 
 ### Minor Changes

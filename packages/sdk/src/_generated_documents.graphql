@@ -1238,9 +1238,10 @@ fragment InitiativeLabel on InitiativeLabel {
   isGroup
 }
 
-# A label that can be applied to projects for categorization. Project labels are workspace-level and
-# can be organized into groups with a parent-child hierarchy. Only child labels (not group labels) can
-# be directly applied to projects.
+# A label that can be applied to projects for categorization. Project labels can be workspace-level
+# (available to all teams) or team-scoped, and can be organized into groups with a parent-child
+# hierarchy. Only child labels (not group labels) can be directly applied to projects. Team-scoped
+# labels may be inherited from parent teams to sub-teams.
 fragment ProjectLabel on ProjectLabel {
   __typename
   # The date when the label was last applied to an issue, project, or initiative. Null if the label has never been applied.
@@ -1254,8 +1255,16 @@ fragment ProjectLabel on ProjectLabel {
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The original workspace or parent-team label that this label was inherited from. Null if the label is not inherited.
+  inheritedFrom {
+    id
+  }
   # The parent label group. If set, this label is a child within a group. Only one child label from each group can be applied to a project at a time.
   parent {
+    id
+  }
+  # The team that the label is scoped to. If null, the label is a workspace-level label available to all teams in the workspace.
+  team {
     id
   }
   # The time at which the entity was archived. Null if the entity has not been archived.
@@ -4696,8 +4705,10 @@ fragment User on User {
   url
   # Whether the user account is active or disabled (suspended).
   active
-  # Whether the user can be assigned to issues. Regular users are always assignable; app users are assignable only if they have the app:assignable scope. The Linear agent also requires coding sessions to be enabled.
+  # Whether the user can be assigned to issues. Active app users require the assignments capability. The Linear agent also requires coding sessions to be enabled.
   isAssignable
+  # Whether the user can be mentioned. Active app users require the mentions capability.
+  isMentionable
   # Whether the user is a guest in the workspace and limited to accessing a subset of teams.
   guest
   # Whether the user is a workspace administrator. On Free plans, all members are treated as admins.
@@ -4706,8 +4717,6 @@ fragment User on User {
   owner
   # Whether the user is an app.
   app
-  # Whether the user is mentionable.
-  isMentionable
   # Whether the user is the currently authenticated user.
   isMe
   # Whether this agent user supports agent sessions.
@@ -7753,6 +7762,8 @@ fragment ProjectLabelWebhookPayload on ProjectLabelWebhookPayload {
   __typename
   # The ID of the entity.
   id
+  # The ID of the original label this label was inherited from. Null if the label is not inherited.
+  inheritedFromId
   # The color of the project label.
   color
   # The creator ID of the project label.
@@ -7763,6 +7774,8 @@ fragment ProjectLabelWebhookPayload on ProjectLabelWebhookPayload {
   name
   # The parent ID of the project label.
   parentId
+  # The team ID of the project label. Null if the label is a workspace-level label.
+  teamId
   # The time at which the entity was archived.
   archivedAt
   # The time at which the entity was created.
@@ -9085,6 +9098,8 @@ fragment UserSettings on UserSettings {
   autoAssignToSelf
   # Whether to show full user names instead of display names.
   showFullUserNames
+  # Whether to show line numbers in code blocks.
+  showCodeBlockLineNumbers
 }
 
 # Public-facing information about an OAuth application. Contains only the fields that are safe to
@@ -9740,6 +9755,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   initiativeFieldInitiativeHealth
   # Whether to show the initiative identifier field.
   initiativeFieldId
+  # Whether to show the initiative identifier in Loop run history.
+  automationRunHistoryShowInitiativeIdentifier
   # Whether to show the initiative labels field.
   initiativeFieldLabels
   # Whether to show the initiative lead team field.
@@ -9838,6 +9855,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldHealth
   # Whether to show the project identifier field.
   projectFieldId
+  # Whether to show the project identifier in Loop run history.
+  automationRunHistoryShowProjectIdentifier
   # Whether to show the project initiatives field.
   projectFieldInitiatives
   # Whether to show the project issue count field.
@@ -10003,6 +10022,10 @@ fragment IntegrationsSettings on IntegrationsSettings {
   slackIssueCreated
   # Whether to send a Slack message when a project update is created.
   slackProjectUpdateCreated
+  # Whether to send a Slack message when a top-level initiative comment is created. New settings default to true. Existing unset settings inherit the initiative update preference until first edited.
+  slackInitiativeCommentCreated
+  # Whether to send a Slack message when a top-level project comment is created. New settings default to true. Existing unset settings inherit the project update preference until first edited.
+  slackProjectCommentCreated
   # Whether to send a Slack message when an SLA is at high risk.
   slackIssueSlaHighRisk
   # Whether to send a Slack message when an SLA is breached.
@@ -19324,7 +19347,8 @@ query projectLabel_projects(
     }
   }
 }
-# Returns all project labels in the workspace, with optional filtering.
+# All project labels. Returns a paginated list of labels visible to the authenticated user, including
+# both workspace-level and team-scoped labels, with optional filtering.
 query projectLabels(
   # A cursor to be used with first for forward pagination
   $after: String
@@ -23584,8 +23608,10 @@ mutation integrationJiraPersonal(
   $accessToken: String
   # The Jira OAuth code, when connecting using OAuth.
   $code: String
+  # The workspace Jira integration to connect to. Required when the connection would otherwise be ambiguous.
+  $workspaceIntegrationId: String
 ) {
-  integrationJiraPersonal(accessToken: $accessToken, code: $code) {
+  integrationJiraPersonal(accessToken: $accessToken, code: $code, workspaceIntegrationId: $workspaceIntegrationId) {
     ...IntegrationPayload
   }
 }
@@ -23808,6 +23834,8 @@ mutation deleteIntegrationTemplate(
 mutation integrationZendesk(
   # [INTERNAL] Bearer token that authenticates API requests instead of a Zendesk OAuth token. Requires `customApiUrl`; no OAuth exchange is performed.
   $accessToken: String
+  # The Zendesk user ID to use as the author of internal notes instead of creating a bot user. Omit to keep the configured user on reconnect, or pass null to create a new bot user.
+  $botUserId: String
   # The role to assign to the Linear bot user in Zendesk.
   $botUserRole: String
   # The Zendesk OAuth code. Required unless connecting with `accessToken`.
@@ -23823,6 +23851,7 @@ mutation integrationZendesk(
 ) {
   integrationZendesk(
     accessToken: $accessToken
+    botUserId: $botUserId
     botUserRole: $botUserRole
     code: $code
     customApiUrl: $customApiUrl
@@ -25478,8 +25507,10 @@ mutation userDiscordConnect(
 mutation userExternalUserDisconnect(
   # The external service to disconnect.
   $service: String!
+  # The workspace Jira integration whose account mapping to remove. If omitted, removes all Jira mappings without a personal connection.
+  $workspaceIntegrationId: String
 ) {
-  userExternalUserDisconnect(service: $service) {
+  userExternalUserDisconnect(service: $service, workspaceIntegrationId: $workspaceIntegrationId) {
     ...UserPayload
   }
 }
