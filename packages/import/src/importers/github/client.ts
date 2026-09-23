@@ -16,6 +16,11 @@ export const githubClient = (apiKey: string) => {
       }),
     });
 
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`GitHub API request failed with ${res.status} ${res.statusText}: ${body}`);
+    }
+
     const data = await res.json();
     return data.data;
   };
