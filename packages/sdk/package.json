@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "test": "vitest",
-    "build:sdk": "tsdown --clean --exports --dts --format esm --format cjs src/index.ts src/webhooks/index.ts",
+    "build:sdk": "tsdown --clean --exports src/index.ts src/webhooks/index.ts",
     "build:types": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
     "generate:changeset:dependencies": "node scripts/generate-dependencies-changeset.ts",
     "generate:changeset:schema": "node scripts/generate-schema-changeset.ts",
