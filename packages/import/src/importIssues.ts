@@ -287,8 +287,9 @@ export const importIssues = async (
       existingUserMapByName[userName] = user.id;
     }
 
-    if (!existingUserMapByEmail[user.email]) {
-      existingUserMapByEmail[user.email] = user.id;
+    const userEmail = user.email?.toLowerCase();
+    if (userEmail && !existingUserMapByEmail[userEmail]) {
+      existingUserMapByEmail[userEmail] = user.id;
     }
   }
 
