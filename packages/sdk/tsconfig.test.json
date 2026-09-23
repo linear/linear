@@ -5,5 +5,5 @@
     "noEmit": true,
     "skipLibCheck": true
   },
-  "include": ["src/_tests", "scripts"]
+  "include": ["src/_tests", "scripts", "tsdown.config.ts"]
 }
