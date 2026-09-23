@@ -4773,6 +4773,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the projectLabel.inheritedFrom query for L.ProjectLabel */
+    it("projectLabel.inheritedFrom", async () => {
+      if (_projectLabel) {
+        const projectLabel_inheritedFrom: L.ProjectLabel | undefined | null = await _projectLabel.inheritedFrom;
+        expect(projectLabel_inheritedFrom instanceof L.ProjectLabel);
+      } else {
+        console.warn("codegen-doc:print: No ProjectLabel found - cannot test projectLabel.inheritedFrom query");
+      }
+    });
+
     /** Test the projectLabel.organization query for L.Organization */
     it("projectLabel.organization", async () => {
       if (_projectLabel) {
@@ -4800,6 +4810,16 @@ describe("generated", () => {
         expect(projectLabel_retiredBy instanceof L.User);
       } else {
         console.warn("codegen-doc:print: No ProjectLabel found - cannot test projectLabel.retiredBy query");
+      }
+    });
+
+    /** Test the projectLabel.team query for L.Team */
+    it("projectLabel.team", async () => {
+      if (_projectLabel) {
+        const projectLabel_team: L.Team | undefined | null = await _projectLabel.team;
+        expect(projectLabel_team instanceof L.Team);
+      } else {
+        console.warn("codegen-doc:print: No ProjectLabel found - cannot test projectLabel.team query");
       }
     });
   });

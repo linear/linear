@@ -5423,6 +5423,18 @@
             "deprecationReason": null
           },
           {
+            "name": "diff",
+            "description": "[Internal] The live diff that owns this conversation. Ownership moves to the review on promotion.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Diff",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "document",
             "description": "[Internal] The document this shared conversation is attached to. Null if the conversation is private.",
             "args": [],
@@ -61256,6 +61268,18 @@
             "deprecationReason": null
           },
           {
+            "name": "mcpServer",
+            "description": "Settings shared by personal and shared MCP server connections.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "McpServerIntegrationSettingsInput",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "microsoftTeams",
             "description": null,
             "type": {
@@ -62005,6 +62029,18 @@
             "deprecationReason": null
           },
           {
+            "name": "slackInitiativeCommentCreated",
+            "description": "Whether to send a Slack message when a top-level initiative comment is created. New settings default to true. Existing unset settings inherit the initiative update preference until first edited.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "slackInitiativeUpdateCreated",
             "description": "Whether to send a Slack message when an initiative update is created.",
             "args": [],
@@ -62103,6 +62139,18 @@
           {
             "name": "slackIssueStatusChangedDone",
             "description": "Whether to send a Slack message when any of the project or team's issues change to completed or canceled.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slackProjectCommentCreated",
+            "description": "Whether to send a Slack message when a top-level project comment is created. New settings default to true. Existing unset settings inherit the project update preference until first edited.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -62267,6 +62315,18 @@
             "deprecationReason": null
           },
           {
+            "name": "slackInitiativeCommentCreated",
+            "description": "Whether to send a Slack message when a top-level initiative comment is created.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "slackInitiativeUpdateCreated",
             "description": "Whether to send a Slack message when an initiative update is created.",
             "type": {
@@ -62365,6 +62425,18 @@
           {
             "name": "slackIssueStatusChangedDone",
             "description": "Whether to send a Slack message when any of the project or team's issues change to completed or canceled.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slackProjectCommentCreated",
+            "description": "Whether to send a Slack message when a top-level project comment is created.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -62505,6 +62577,18 @@
             "deprecationReason": null
           },
           {
+            "name": "slackInitiativeCommentCreated",
+            "description": "Whether to send a Slack message when a top-level initiative comment is created.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "slackInitiativeUpdateCreated",
             "description": "Whether to send a Slack message when an initiative update is created.",
             "type": {
@@ -62603,6 +62687,18 @@
           {
             "name": "slackIssueStatusChangedDone",
             "description": "Whether to send a Slack message when any of the project or team's issues change to completed or canceled.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slackProjectCommentCreated",
+            "description": "Whether to send a Slack message when a top-level project comment is created.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -82307,6 +82403,18 @@
             "deprecationReason": null
           },
           {
+            "name": "defaultProjectId",
+            "description": "The mapped Jira project to use as its team's default. Omit to keep the current default.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "deleteWebhook",
             "description": "Whether to delete the current manual webhook configuration.",
             "type": {
@@ -83091,6 +83199,18 @@
             "deprecationReason": null
           },
           {
+            "name": "release",
+            "description": "[Internal] The release that triggered this Loop execution.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Release",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "team",
             "description": "[Internal] The team that triggered this Loop execution.",
             "args": [],
@@ -83210,6 +83330,29 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "McpServerIntegrationSettingsInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "name",
+            "description": "The connection-specific display name.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -90423,6 +90566,18 @@
                 "defaultValue": null,
                 "isDeprecated": false,
                 "deprecationReason": null
+              },
+              {
+                "name": "workspaceIntegrationId",
+                "description": "The workspace Jira integration to connect to. Required when the connection would otherwise be ambiguous.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
               }
             ],
             "type": {
@@ -92239,6 +92394,18 @@
               {
                 "name": "accessToken",
                 "description": "[INTERNAL] Bearer token that authenticates API requests instead of a Zendesk OAuth token. Requires `customApiUrl`; no OAuth exchange is performed.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "botUserId",
+                "description": "The Zendesk user ID to use as the author of internal notes instead of creating a bot user. Omit to keep the configured user on reconnect, or pass null to create a new bot user.",
                 "type": {
                   "kind": "SCALAR",
                   "name": "String",
@@ -99624,6 +99791,18 @@
                     "name": "String",
                     "ofType": null
                   }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "workspaceIntegrationId",
+                "description": "The workspace Jira integration whose account mapping to remove. If omitted, removes all Jira mappings without a personal connection.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
                 },
                 "defaultValue": null,
                 "isDeprecated": false,
@@ -117100,6 +117279,12 @@
             "deprecationReason": null
           },
           {
+            "name": "creator",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "investor",
             "description": null,
             "isDeprecated": false,
@@ -120439,6 +120624,22 @@
               "kind": "OBJECT",
               "name": "Team",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "leadTeamId",
+            "description": "[Internal] The ID of the team that leads the project, even when the viewer cannot access the team.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -123850,7 +124051,7 @@
       {
         "kind": "OBJECT",
         "name": "ProjectLabel",
-        "description": "A label that can be applied to projects for categorization. Project labels are workspace-level and can be organized into groups with a parent-child hierarchy. Only child labels (not group labels) can be directly applied to projects.",
+        "description": "A label that can be applied to projects for categorization. Project labels can be workspace-level (available to all teams) or team-scoped, and can be organized into groups with a parent-child hierarchy. Only child labels (not group labels) can be directly applied to projects. Team-scoped labels may be inherited from parent teams to sub-teams.",
         "fields": [
           {
             "name": "archivedAt",
@@ -124039,7 +124240,7 @@
           },
           {
             "name": "inheritedFrom",
-            "description": "[Internal] The original workspace or parent-team label that this label was inherited from. Null if the label is not inherited.",
+            "description": "The original workspace or parent-team label that this label was inherited from. Null if the label is not inherited.",
             "args": [],
             "type": {
               "kind": "OBJECT",
@@ -124268,7 +124469,7 @@
           },
           {
             "name": "team",
-            "description": "[Internal] The team that the label is scoped to. If null, the label is a workspace-level label available to all teams in the workspace.",
+            "description": "The team that the label is scoped to. If null, the label is a workspace-level label available to all teams in the workspace.",
             "args": [],
             "type": {
               "kind": "OBJECT",
@@ -124544,6 +124745,18 @@
             "deprecationReason": null
           },
           {
+            "name": "team",
+            "description": "Filters that the project label's team must satisfy. Use `{ null: true }` to filter workspace-level labels.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableTeamFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "updatedAt",
             "description": "Comparator for the updated at date.",
             "type": {
@@ -124731,7 +124944,7 @@
           },
           {
             "name": "teamId",
-            "description": "[Internal] The team associated with the label. If not given, the label will be associated with the entire workspace.",
+            "description": "The identifier of the team to scope the label to. If not given, the label is a workspace-level label available to all teams.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -124901,6 +125114,18 @@
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "ProjectLabelFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "team",
+            "description": "Filters that the project label's team must satisfy. Use `{ null: true }` to filter workspace-level labels.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableTeamFilter",
               "ofType": null
             },
             "defaultValue": null,
@@ -125156,6 +125381,18 @@
             "deprecationReason": null
           },
           {
+            "name": "inheritedFromId",
+            "description": "The ID of the original label this label was inherited from. Null if the label is not inherited.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "isGroup",
             "description": "Whether the label is a group.",
             "args": [],
@@ -125190,6 +125427,18 @@
           {
             "name": "parentId",
             "description": "The parent ID of the project label.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "teamId",
+            "description": "The team ID of the project label. Null if the label is a workspace-level label.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -129808,6 +130057,22 @@
             "deprecationReason": null
           },
           {
+            "name": "leadTeamId",
+            "description": "[Internal] The ID of the team that leads the project, even when the viewer cannot access the team.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "members",
             "description": "Users that are members of the project.",
             "args": [
@@ -131278,6 +131543,18 @@
             "type": {
               "kind": "OBJECT",
               "name": "Team",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "teamId",
+            "description": "[Internal] The ID of the team that owns the status, even when the viewer cannot access the team. Null for workspace statuses.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "isDeprecated": false,
@@ -143202,7 +143479,7 @@
           },
           {
             "name": "projectLabels",
-            "description": "Returns all project labels in the workspace, with optional filtering.",
+            "description": "All project labels. Returns a paginated list of labels visible to the authenticated user, including both workspace-level and team-scoped labels, with optional filtering.",
             "args": [
               {
                 "name": "after",
@@ -171977,7 +172254,7 @@
           },
           {
             "name": "isAssignable",
-            "description": "Whether the user can be assigned to issues. Regular users are always assignable; app users are assignable only if they have the app:assignable scope. The Linear agent also requires coding sessions to be enabled.",
+            "description": "Whether the user can be assigned to issues. Active app users require the assignments capability. The Linear agent also requires coding sessions to be enabled.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -172009,7 +172286,7 @@
           },
           {
             "name": "isMentionable",
-            "description": "Whether the user is mentionable.",
+            "description": "Whether the user can be mentioned. Active app users require the mentions capability.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -173622,6 +173899,12 @@
             "deprecationReason": null
           },
           {
+            "name": "slackAiFeedbackAcknowledgementShown",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "slackBotWelcomeMessageShown",
             "description": null,
             "isDeprecated": false,
@@ -174310,6 +174593,22 @@
               "kind": "ENUM",
               "name": "PullRequestMergeMethod",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "showCodeBlockLineNumbers",
+            "description": "Whether to show line numbers in code blocks.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -176169,8 +176468,32 @@
             "deprecationReason": null
           },
           {
+            "name": "automationRunHistoryShowInitiativeIdentifier",
+            "description": "Whether to show the initiative identifier in Loop run history.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "automationRunHistoryShowIssueIdentifier",
             "description": "Whether to show the issue identifier in Loop run history.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "automationRunHistoryShowProjectIdentifier",
+            "description": "Whether to show the project identifier in Loop run history.",
             "args": [],
             "type": {
               "kind": "SCALAR",
