@@ -106,6 +106,10 @@ describe("GithubImporter", () => {
 describe("githubClient", () => {
   const query = () => githubClient("token")("query { viewer { login } }");
   const viewer = jsonResponse({ data: { viewer: { login: "octocat" } } });
+  const timeoutError = {
+    message:
+      "Something went wrong while executing your query. This may be the result of a timeout, or it could be a GitHub bug. Please include `0400:3B5A:5E6F4C:6E3C5B:65A1B2C3` when reporting this issue.",
+  };
   const rateLimited = (headers: Record<string, string>) =>
     jsonResponse({ errors: [{ type: "RATE_LIMITED", message: "API rate limit exceeded for user ID 1." }] }, 200, "OK", {
       "x-ratelimit-remaining": "0",
@@ -151,6 +155,28 @@ describe("githubClient", () => {
 
     await expect(result).resolves.toEqual({ viewer: { login: "octocat" } });
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("retries GraphQL errors GitHub returns for query timeouts", async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse({ data: null, errors: [timeoutError] })).mockResolvedValueOnce(viewer);
+
+    const result = query();
+    await vi.runAllTimersAsync();
+
+    await expect(result).resolves.toEqual({ viewer: { login: "octocat" } });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not retry when a timeout comes with an error retrying can't fix", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        data: null,
+        errors: [timeoutError, { type: "FORBIDDEN", message: "Resource not accessible by personal access token" }],
+      })
+    );
+
+    await expect(query()).rejects.toThrow("Resource not accessible by personal access token");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it("gives up after 5 attempts", async () => {

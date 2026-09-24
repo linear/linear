@@ -49,6 +49,10 @@ interface GraphQLError {
   path?: (string | number)[];
 }
 
+// GitHub reports query timeouts and internal errors with a 200 status and this message, which Octokit also retries
+const isTransientGraphQLError = (error: GraphQLError) =>
+  /Something went wrong while executing your query/.test(error.message);
+
 const MAX_LISTED_ERRORS = 3;
 
 const describeErrors = (errors: GraphQLError[]): string => {
@@ -112,7 +116,8 @@ const request = async (apiKey: string, query: string, variables?: { [key: string
   // GitHub can return partial data alongside errors, e.g. for fields the token can't access. Fail rather than import
   // incomplete data.
   if (errors.length > 0) {
-    throw new Error(`GitHub API request failed: ${describeErrors(errors)}`);
+    const error = `GitHub API request failed: ${describeErrors(errors)}`;
+    throw errors.every(isTransientGraphQLError) ? new TransientError(error) : new Error(error);
   }
   if (!json.data) {
     throw new Error("GitHub API returned no data");
