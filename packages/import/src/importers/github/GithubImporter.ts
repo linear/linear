@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Importer, ImportResult } from "../../types.ts";
 import { githubClient } from "./client.ts";
@@ -23,13 +22,14 @@ interface GITHUB_ISSUE {
       body: string;
       createdAt: string;
       url: string;
+      /** Null when the author's GitHub account was deleted */
       author: {
         login: string;
         avatarUrl: string;
         id?: string;
         name?: string;
         email?: string;
-      };
+      } | null;
     }[];
   };
 }
@@ -60,76 +60,72 @@ export class GithubImporter implements Importer {
     const github = githubClient(this.apiKey);
 
     while (true) {
-      try {
-        const data = (await github(
-          `query lastIssues($owner: String!, $repo: String!, $num: Int, $cursor: String) {
-            repository(owner:$owner, name:$repo) {
-              issues(first:$num, after: $cursor, states:OPEN) {
-                edges {
-                  node {
-                    id
-                    title
-                    body
-                    url
-                    createdAt
-                    labels(first:100) {
-                      nodes{
-                        id
-                        color
-                        name
-                        description
-                      }
+      const data = (await github(
+        `query lastIssues($owner: String!, $repo: String!, $num: Int, $cursor: String) {
+          repository(owner:$owner, name:$repo) {
+            issues(first:$num, after: $cursor, states:OPEN) {
+              edges {
+                node {
+                  id
+                  title
+                  body
+                  url
+                  createdAt
+                  labels(first:100) {
+                    nodes{
+                      id
+                      color
+                      name
+                      description
                     }
-                    comments(first: 100) {
-                      nodes {
-                        id
-                        body
-                        createdAt
-                        url
-                        author {
-                          login
-                          avatarUrl(size: 255)
-                          ... on User {
-                            id
-                            name
-                            email
-                          }                        
-                        }
+                  }
+                  comments(first: 100) {
+                    nodes {
+                      id
+                      body
+                      createdAt
+                      url
+                      author {
+                        login
+                        avatarUrl(size: 255)
+                        ... on User {
+                          id
+                          name
+                          email
+                        }                        
                       }
                     }
                   }
                 }
-                pageInfo {
-                  hasNextPage
-                  endCursor
-                }
+              }
+              pageInfo {
+                hasNextPage
+                endCursor
               }
             }
-          }`,
-          {
-            owner: this.owner,
-            repo: this.repo,
-            num: 25,
-            cursor,
           }
-        )) as any;
-
-        // User didn't select repo scope
-        if (!data || !data.repository) {
-          throw new Error(
-            `Unable to find repo ${this.owner}/${this.repo}. Did you select \`repo\` scope for your GitHub token?`
-          );
+        }`,
+        {
+          owner: this.owner,
+          repo: this.repo,
+          num: 25,
+          cursor,
         }
+      )) as any;
 
-        cursor = data.repository.issues.pageInfo.endCursor;
-        const fetchedIssues = data.repository.issues.edges.map((d: any) => d.node) as GITHUB_ISSUE[];
-        issueData = issueData.concat(fetchedIssues);
+      // User didn't select repo scope
+      if (!data || !data.repository) {
+        throw new Error(
+          `Unable to find repo ${this.owner}/${this.repo}. Did you select \`repo\` scope for your GitHub token?`
+        );
+      }
 
-        if (!data.repository.issues.pageInfo.hasNextPage) {
-          break;
-        }
-      } catch (err) {
-        console.error(err);
+      cursor = data.repository.issues.pageInfo.endCursor;
+      const fetchedIssues = data.repository.issues.edges.map((d: any) => d.node) as GITHUB_ISSUE[];
+      issueData = issueData.concat(fetchedIssues);
+
+      if (!data.repository.issues.pageInfo.hasNextPage) {
+        break;
       }
     }
 
@@ -146,10 +142,10 @@ export class GithubImporter implements Importer {
         url: issue.url,
         comments: issue.comments.nodes
           ? issue.comments.nodes
-              .filter(comment => comment.author.id)
+              .filter(comment => comment.author?.id)
               .map(comment => ({
                 body: comment.body,
-                userId: comment.author.id as string,
+                userId: comment.author?.id as string,
                 createdAt: new Date(comment.createdAt),
               }))
           : [],
@@ -158,12 +154,9 @@ export class GithubImporter implements Importer {
       });
 
       const users = issue.comments.nodes
-        ? issue.comments.nodes.map(comment => ({
-            id: comment.author.id,
-            name: comment.author.login,
-            avatarUrl: comment.author.avatarUrl,
-            email: comment.author.email,
-          }))
+        ? issue.comments.nodes.flatMap(({ author }) =>
+            author ? [{ id: author.id, name: author.login, avatarUrl: author.avatarUrl, email: author.email }] : []
+          )
         : [];
       for (const user of users) {
         const { id, email, ...userData } = user;
