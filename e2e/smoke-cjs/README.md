@@ -1,6 +1,8 @@
 # Linear SDK CommonJS Smoke Test
 
-Verifies the SDK works as a CommonJS module across different Node.js and TypeScript versions.
+Verifies the ESM-only SDK can be loaded with `require()` from CommonJS across different Node.js and TypeScript versions.
+
+This also guards against top-level await in the SDK, which would make `require()` fail with `ERR_REQUIRE_ASYNC_MODULE`.
 
 ## Running locally
 
