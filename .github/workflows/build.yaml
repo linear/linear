@@ -27,6 +27,10 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Check release branch is up to date with master
+        if: github.ref == 'refs/heads/changeset-release/master'
+        run: git merge-base --is-ancestor origin/master HEAD
+
       - name: Install pnpm
         uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
         with:
