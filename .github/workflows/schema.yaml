@@ -56,6 +56,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout code
+        id: checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           ref: ${{ inputs.dry_run && github.ref || 'master' }}
@@ -153,6 +154,18 @@ jobs:
         run: gh workflow run build.yaml --ref changeset-release/master
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Pushes during this run may have found no open pull request for check-release-pr to refresh.
+      - name: Regenerate release pull request if master moved
+        if: ${{ !inputs.dry_run && steps.release-pr.outputs.pull-request-number != '' && steps.release-pr.outputs.pull-request-operation != 'closed' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          CHECKED_OUT_SHA: ${{ steps.checkout.outputs.commit }}
+        run: |
+          if [ "$(gh api "repos/$GH_REPO/commits/master" --jq .sha)" != "$CHECKED_OUT_SHA" ]; then
+            gh workflow run schema.yaml --ref master
+          fi
 
   notify-slack:
     runs-on: ubuntu-latest
