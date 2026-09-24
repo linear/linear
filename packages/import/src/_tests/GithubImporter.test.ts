@@ -204,34 +204,53 @@ describe("githubClient", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  it("honors retry-after on secondary rate limits", async () => {
+  it("honors retry-after on secondary rate limits, doubling it while the limit persists", async () => {
+    const secondaryRateLimit = jsonResponse(
+      { message: "You have exceeded a secondary rate limit." },
+      403,
+      "Forbidden",
+      {
+        "retry-after": "10",
+      }
+    );
     fetchMock
-      .mockResolvedValueOnce(
-        jsonResponse({ message: "You have exceeded a secondary rate limit." }, 403, "Forbidden", {
-          "retry-after": "10",
-        })
-      )
+      .mockResolvedValueOnce(secondaryRateLimit)
+      .mockResolvedValueOnce(secondaryRateLimit)
       .mockResolvedValueOnce(viewer);
 
     const result = query();
     await vi.advanceTimersByTimeAsync(9_999);
     expect(fetchMock).toHaveBeenCalledTimes(1);
     await vi.advanceTimersByTimeAsync(1);
-
-    await expect(result).resolves.toEqual({ viewer: { login: "octocat" } });
-  });
-
-  it("waits a minute when a rate limit doesn't say how long to wait", async () => {
-    fetchMock
-      .mockResolvedValueOnce(jsonResponse({ message: "You have exceeded a secondary rate limit." }, 403, "Forbidden"))
-      .mockResolvedValueOnce(viewer);
-
-    const result = query();
-    await vi.advanceTimersByTimeAsync(59_999);
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    await vi.advanceTimersByTimeAsync(19_999);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
     await vi.advanceTimersByTimeAsync(1);
 
     await expect(result).resolves.toEqual({ viewer: { login: "octocat" } });
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
+  it("waits a minute, then exponentially longer, while a rate limit that doesn't say how long to wait persists", async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse({ message: "You have exceeded a secondary rate limit." }, 403, "Forbidden")
+    );
+
+    const result = expect(query()).rejects.toThrow(/secondary rate limit\. Try again after/);
+    for (const [wait, calls] of [
+      [60_000, 2],
+      [120_000, 3],
+      [240_000, 4],
+    ]) {
+      await vi.advanceTimersByTimeAsync(wait - 1);
+      expect(fetchMock).toHaveBeenCalledTimes(calls - 1);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(fetchMock).toHaveBeenCalledTimes(calls);
+    }
+
+    // The next wait would be 8 minutes, so it gives up instead
+    await result;
+    expect(fetchMock).toHaveBeenCalledTimes(4);
   });
 
   it("still backs off when the rate limit has already reset by our clock", async () => {
