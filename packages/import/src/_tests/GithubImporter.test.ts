@@ -16,6 +16,8 @@ const jsonResponse = (body: unknown, status = 200, statusText = "OK", headers: R
     text: async () => JSON.stringify(body),
   }) as unknown as Awaited<ReturnType<typeof fetch>>;
 
+const fetchError = (message: string) => Object.assign(new Error(message), { name: "FetchError" });
+
 const issuesPage = (titles: string[], hasNextPage: boolean, endCursor: string, comments: unknown[] = []) =>
   jsonResponse({
     data: {
@@ -148,7 +150,7 @@ describe("githubClient", () => {
   });
 
   it("retries network failures", async () => {
-    fetchMock.mockRejectedValueOnce(new Error("socket hang up")).mockResolvedValueOnce(viewer);
+    fetchMock.mockRejectedValueOnce(fetchError("socket hang up")).mockResolvedValueOnce(viewer);
 
     const result = query();
     await vi.runAllTimersAsync();
@@ -156,6 +158,36 @@ describe("githubClient", () => {
     await expect(result).resolves.toEqual({ viewer: { login: "octocat" } });
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
+
+  it("retries timed out requests, then fails", async () => {
+    fetchMock.mockRejectedValue(fetchError("network timeout at: https://api.github.com/graphql"));
+
+    const result = expect(query()).rejects.toThrow("GitHub API request failed: network timeout");
+    await vi.runAllTimersAsync();
+
+    await result;
+    expect(fetchMock).toHaveBeenCalledTimes(5);
+    expect(fetchMock.mock.calls[0][1]?.timeout).toBe(30_000);
+  });
+
+  it("does not retry errors that aren't network failures", async () => {
+    fetchMock.mockRejectedValueOnce(new TypeError("Invalid URL"));
+
+    await expect(query()).rejects.toThrow("Invalid URL");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(["ghp_secret\u200b", "\u2018ghp_secret\u2019"])(
+    "rejects a token with characters that can't be sent in a header without printing it",
+    async token => {
+      await expect(githubClient(token)("query { viewer { login } }")).rejects.toThrow(
+        new Error(
+          "GitHub token contains characters that aren't allowed. Copy it again from https://github.com/settings/tokens"
+        )
+      );
+      expect(fetchMock).not.toHaveBeenCalled();
+    }
+  );
 
   it("retries GraphQL errors GitHub returns for query timeouts", async () => {
     fetchMock.mockResolvedValueOnce(jsonResponse({ data: null, errors: [timeoutError] })).mockResolvedValueOnce(viewer);

@@ -9,6 +9,17 @@ const BASE_RETRY_DELAY_MS = 1000;
 const MAX_RETRY_DELAY_MS = 5 * 60_000;
 // GitHub asks clients to wait at least a minute when a rate limit response doesn't say how long to wait
 const DEFAULT_RATE_LIMIT_DELAY_MS = 60_000;
+// node-fetch has no timeout by default, so a stalled connection would hang the import
+const REQUEST_TIMEOUT_MS = 30_000;
+
+/**
+ * Rejects tokens with characters that can't be sent in a header, e.g. a pasted zero-width space. fetch would otherwise
+ * fail with an error that includes the token.
+ */
+export const githubTokenError = (token: string): string | undefined =>
+  /[^\x21-\x7e]/.test(token)
+    ? "GitHub token contains characters that aren't allowed. Copy it again from https://github.com/settings/tokens"
+    : undefined;
 
 interface RetryDelay {
   /** Don't retry sooner than this, e.g. until a rate limit resets */
@@ -99,10 +110,14 @@ const request = async (apiKey: string, query: string, variables?: { [key: string
         query,
         variables,
       }),
+      timeout: REQUEST_TIMEOUT_MS,
     });
     body = await res.text();
   } catch (err) {
-    // fetch rejects on network failures, and reading the body fails if the connection drops
+    // node-fetch rejects with a FetchError on network failures and timeouts. Retrying won't fix anything else.
+    if ((err as Error).name !== "FetchError") {
+      throw err;
+    }
     throw new TransientError(`GitHub API request failed: ${(err as Error).message}`);
   }
 
@@ -143,6 +158,10 @@ const request = async (apiKey: string, query: string, variables?: { [key: string
 
 export const githubClient = (apiKey: string) => {
   return async (query: string, variables?: { [key: string]: any }) => {
+    const tokenError = githubTokenError(apiKey);
+    if (tokenError) {
+      throw new Error(tokenError);
+    }
     for (let attempt = 1; ; attempt++) {
       try {
         return await request(apiKey, query, variables);
