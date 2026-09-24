@@ -22,13 +22,14 @@ interface GITHUB_ISSUE {
       body: string;
       createdAt: string;
       url: string;
+      /** Null when the author's GitHub account was deleted */
       author: {
         login: string;
         avatarUrl: string;
         id?: string;
         name?: string;
         email?: string;
-      };
+      } | null;
     }[];
   };
 }
@@ -141,10 +142,10 @@ export class GithubImporter implements Importer {
         url: issue.url,
         comments: issue.comments.nodes
           ? issue.comments.nodes
-              .filter(comment => comment.author.id)
+              .filter(comment => comment.author?.id)
               .map(comment => ({
                 body: comment.body,
-                userId: comment.author.id as string,
+                userId: comment.author?.id as string,
                 createdAt: new Date(comment.createdAt),
               }))
           : [],
@@ -153,12 +154,9 @@ export class GithubImporter implements Importer {
       });
 
       const users = issue.comments.nodes
-        ? issue.comments.nodes.map(comment => ({
-            id: comment.author.id,
-            name: comment.author.login,
-            avatarUrl: comment.author.avatarUrl,
-            email: comment.author.email,
-          }))
+        ? issue.comments.nodes.flatMap(({ author }) =>
+            author ? [{ id: author.id, name: author.login, avatarUrl: author.avatarUrl, email: author.email }] : []
+          )
         : [];
       for (const user of users) {
         const { id, email, ...userData } = user;

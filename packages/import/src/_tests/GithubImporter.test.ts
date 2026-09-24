@@ -16,7 +16,7 @@ const jsonResponse = (body: unknown, status = 200, statusText = "OK", headers: R
     text: async () => JSON.stringify(body),
   }) as unknown as Awaited<ReturnType<typeof fetch>>;
 
-const issuesPage = (titles: string[], hasNextPage: boolean, endCursor: string) =>
+const issuesPage = (titles: string[], hasNextPage: boolean, endCursor: string, comments: unknown[] = []) =>
   jsonResponse({
     data: {
       repository: {
@@ -29,7 +29,7 @@ const issuesPage = (titles: string[], hasNextPage: boolean, endCursor: string) =
               url: `https://github.com/owner/repo/issues/${title}`,
               createdAt: "2026-01-01T00:00:00Z",
               labels: { nodes: [] },
-              comments: { nodes: [] },
+              comments: { nodes: comments },
             },
           })),
           pageInfo: { hasNextPage, endCursor },
@@ -54,6 +54,23 @@ describe("GithubImporter", () => {
     expect(result.issues.map(issue => issue.title)).toEqual(["1", "2", "3"]);
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(JSON.parse(fetchMock.mock.calls[1][1]?.body as string).variables.cursor).toBe("cursor-1");
+  });
+
+  it("skips comments whose author account was deleted", async () => {
+    const comment = { body: "Hello", createdAt: "2026-01-02T00:00:00Z", url: "https://github.com/c" };
+    fetchMock.mockResolvedValueOnce(
+      issuesPage(["1"], false, "cursor-1", [
+        { ...comment, id: "c1", author: null },
+        { ...comment, id: "c2", author: { id: "u1", login: "octocat", avatarUrl: "https://avatars/u1", email: "" } },
+      ])
+    );
+
+    const result = await new GithubImporter("token", "owner", "repo").import();
+
+    expect(result.issues[0].comments).toEqual([
+      { body: "Hello", userId: "u1", createdAt: new Date(comment.createdAt) },
+    ]);
+    expect(result.users).toEqual({ u1: { name: "octocat", avatarUrl: "https://avatars/u1", email: undefined } });
   });
 
   it("fails instead of retrying forever when the GitHub API rejects the request", async () => {
