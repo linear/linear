@@ -1,5 +1,145 @@
 # Change Log
 
+## 96.0.0
+
+### Major Changes
+
+- feat(schema): [breaking] Input field 'noSecret' was removed from input object type 'JiraUpdateInput' (JiraUpdateInput.noSecret)
+
+  feat(schema): [dangerous] Enum value 'permissionDenied' was added to enum 'AgentActivityExecutionSkippedReason' (AgentActivityExecutionSkippedReason.permissionDenied)
+
+  feat(schema): [dangerous] Enum value 'stopping' was added to enum 'AgentSessionStatus' (AgentSessionStatus.stopping)
+
+  feat(schema): [dangerous] Enum value 'skipped' was added to enum 'AiConversationAckKind' (AiConversationAckKind.skipped)
+
+  feat(schema): [dangerous] Enum value 'entitySelection' was added to enum 'AiConversationElicitationKind' (AiConversationElicitationKind.entitySelection)
+
+  feat(schema): [dangerous] Member 'AiConversationEntitySelectionElicitationResponseData' was added to Union type 'AiConversationElicitationResponseData' (AiConversationElicitationResponseData)
+
+  feat(schema): [dangerous] Enum value 'ContactSupport' was added to enum 'AiConversationTool' (AiConversationTool.ContactSupport)
+
+  feat(schema): [dangerous] Member 'AiConversationContactSupportToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Input field 'canSelfRotate' was added to input object type 'GitLabSettingsInput' (GitLabSettingsInput.canSelfRotate)
+
+  feat(schema): [dangerous] Input field 'lastRotatedAt' was added to input object type 'GitLabSettingsInput' (GitLabSettingsInput.lastRotatedAt)
+
+  feat(schema): [dangerous] Input field 'nextRotationAt' was added to input object type 'GitLabSettingsInput' (GitLabSettingsInput.nextRotationAt)
+
+  feat(schema): [dangerous] Input field 'rotationEnabled' was added to input object type 'GitLabSettingsInput' (GitLabSettingsInput.rotationEnabled)
+
+  feat(schema): [dangerous] Input field 'rotationFailureReason' was added to input object type 'GitLabSettingsInput' (GitLabSettingsInput.rotationFailureReason)
+
+  feat(schema): [dangerous] Input field 'scopes' was added to input object type 'GitLabSettingsInput' (GitLabSettingsInput.scopes)
+
+  feat(schema): [dangerous] Input field 'conversationAccess' was added to input object type 'McpServerIntegrationSettingsInput' (McpServerIntegrationSettingsInput.conversationAccess)
+
+  feat(schema): [dangerous] Input field 'loopAccess' was added to input object type 'McpServerIntegrationSettingsInput' (McpServerIntegrationSettingsInput.loopAccess)
+
+  feat(schema): [dangerous] Argument 'settings: McpServerIntegrationSettingsInput' added to field 'Mutation.integrationMcpServerConnect' (Mutation.integrationMcpServerConnect.settings)
+
+  feat(schema): [dangerous] Input field 'includeSubInitiativeUpdates' was added to input object type 'NotificationSubscriptionCreateInput' (NotificationSubscriptionCreateInput.includeSubInitiativeUpdates)
+
+  feat(schema): [dangerous] Input field 'includeSubInitiativeUpdates' was added to input object type 'NotificationSubscriptionUpdateInput' (NotificationSubscriptionUpdateInput.includeSubInitiativeUpdates)
+
+  feat(schema): [non_breaking] Type 'AgentSessionCodingHarness' was added (AgentSessionCodingHarness)
+
+  feat(schema): [non_breaking] Type 'AiConversationContactSupportToolCall' was added (AiConversationContactSupportToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationEntitySelectionElicitationResponseData' was added (AiConversationEntitySelectionElicitationResponseData)
+
+  feat(schema): [non_breaking] Type 'DependencyEcosystem' was added (DependencyEcosystem)
+
+  feat(schema): [non_breaking] Type 'DependencyPackageInput' was added (DependencyPackageInput)
+
+  feat(schema): [non_breaking] Type 'DependencyPackageMetadataResult' was added (DependencyPackageMetadataResult)
+
+  feat(schema): [non_breaking] Field 'codingHarness' was added to object type 'AgentSession' (AgentSession.codingHarness)
+
+  feat(schema): [non_breaking] Field 'AgentSession.status' description changed from 'The current status of the agent session, such as pending, active, awaiting input, complete, error, or stale.' to 'The current status of the agent session, such as pending, active, stopping, awaiting input, complete, error, or stale.' (AgentSession.status)
+
+  feat(schema): [non_breaking] Field 'entityType' was added to object type 'AiConversationElicitationPart' (AiConversationElicitationPart.entityType)
+
+  feat(schema): [non_breaking] Field 'selection' was added to object type 'AiConversationElicitationPart' (AiConversationElicitationPart.selection)
+
+  feat(schema): [non_breaking] Field 'suggestedEntityIds' was added to object type 'AiConversationElicitationPart' (AiConversationElicitationPart.suggestedEntityIds)
+
+  feat(schema): [non_breaking] Input field 'CommentCreateInput.initiativeId' description changed from 'The initiative to associate the comment with.' to 'The initiative to associate the comment with. Can be a UUID or initiative identifier (e.g., 'I-12').' (CommentCreateInput.initiativeId)
+
+  feat(schema): [non_breaking] Input field 'CommentCreateInput.projectId' description changed from 'The project to associate the comment with.' to 'The project to associate the comment with. Can be a UUID or project identifier (e.g., 'P-LIN-123').' (CommentCreateInput.projectId)
+
+  feat(schema): [non_breaking] Input field 'ContactCreateInput.type' description changed from 'The type of support contact (e.g., bug report, feature request, general feedback).' to 'The type of support contact.' (ContactCreateInput.type)
+
+  feat(schema): [non_breaking] Field 'includeSubInitiativeUpdates' was added to object type 'CustomViewNotificationSubscription' (CustomViewNotificationSubscription.includeSubInitiativeUpdates)
+
+  feat(schema): [non_breaking] Input field 'CustomerNeedCreateInput.projectId' description changed from '[INTERNAL] The project to link this need to. Either issueId or projectId must be provided.' to '[INTERNAL] The project to link this need to. Accepts a UUID or project identifier (e.g., 'P-LIN-123'). Either issueId or projectId must be provided.' (CustomerNeedCreateInput.projectId)
+
+  feat(schema): [non_breaking] Input field 'CustomerNeedUpdateInput.projectId' description changed from '[INTERNAL] The project to move this need to.' to '[INTERNAL] The project to move this need to. Accepts a UUID or project identifier (e.g., 'P-LIN-123').' (CustomerNeedUpdateInput.projectId)
+
+  feat(schema): [non_breaking] Field 'includeSubInitiativeUpdates' was added to object type 'CustomerNotificationSubscription' (CustomerNotificationSubscription.includeSubInitiativeUpdates)
+
+  feat(schema): [non_breaking] Field 'includeSubInitiativeUpdates' was added to object type 'CycleNotificationSubscription' (CycleNotificationSubscription.includeSubInitiativeUpdates)
+
+  feat(schema): [non_breaking] Input field 'DocumentCreateInput.initiativeId' description changed from '[Internal] Related initiative for the document.' to '[Internal] Related initiative for the document. Can be a UUID or initiative identifier (e.g., 'I-12').' (DocumentCreateInput.initiativeId)
+
+  feat(schema): [non_breaking] Input field 'DocumentCreateInput.projectId' description changed from 'Related project for the document.' to 'Related project for the document. Can be a UUID or project identifier (e.g., 'P-LIN-123').' (DocumentCreateInput.projectId)
+
+  feat(schema): [non_breaking] Input field 'DocumentUpdateInput.initiativeId' description changed from '[Internal] Related initiative for the document.' to '[Internal] Related initiative for the document. Can be a UUID or initiative identifier (e.g., 'I-12').' (DocumentUpdateInput.initiativeId)
+
+  feat(schema): [non_breaking] Input field 'DocumentUpdateInput.projectId' description changed from 'Related project for the document.' to 'Related project for the document. Can be a UUID or project identifier (e.g., 'P-LIN-123').' (DocumentUpdateInput.projectId)
+
+  feat(schema): [non_breaking] Input field 'EntityExternalLinkCreateInput.initiativeId' description changed from 'The initiative associated with the link.' to 'The initiative associated with the link. Can be a UUID or initiative identifier (e.g., 'I-12').' (EntityExternalLinkCreateInput.initiativeId)
+
+  feat(schema): [non_breaking] Input field 'EntityExternalLinkCreateInput.projectId' description changed from 'The project associated with the link.' to 'The project associated with the link. Can be a UUID or project identifier (e.g., 'P-LIN-123').' (EntityExternalLinkCreateInput.projectId)
+
+  feat(schema): [non_breaking] Field 'includeSubInitiativeUpdates' was added to object type 'InitiativeNotificationSubscription' (InitiativeNotificationSubscription.includeSubInitiativeUpdates)
+
+  feat(schema): [non_breaking] Input field 'IssueCreateInput.projectId' description changed from 'The project associated with the issue.' to 'The project associated with the issue. Can be a UUID or project identifier (e.g., 'P-LIN-123').' (IssueCreateInput.projectId)
+
+  feat(schema): [non_breaking] Input field 'IssueUpdateInput.projectId' description changed from 'The project associated with the issue.' to 'The project associated with the issue. Can be a UUID or project identifier (e.g., 'P-LIN-123').' (IssueUpdateInput.projectId)
+
+  feat(schema): [non_breaking] Field 'includeSubInitiativeUpdates' was added to object type 'LabelNotificationSubscription' (LabelNotificationSubscription.includeSubInitiativeUpdates)
+
+  feat(schema): [non_breaking] Field 'integrationGitlabRotate' was added to object type 'Mutation' (Mutation.integrationGitlabRotate)
+
+  feat(schema): [non_breaking] Field 'integrationGitlabUpdateRotationSettings' was added to object type 'Mutation' (Mutation.integrationGitlabUpdateRotationSettings)
+
+  feat(schema): [non_breaking] Field 'integrationGitlabUpdateToken' was added to object type 'Mutation' (Mutation.integrationGitlabUpdateToken)
+
+  feat(schema): [non_breaking] Field 'includeSubInitiativeUpdates' was added to interface 'NotificationSubscription' (NotificationSubscription.includeSubInitiativeUpdates)
+
+  feat(schema): [non_breaking] Input field 'ProjectMilestoneCreateInput.projectId' description changed from 'Related project for the project milestone.' to 'Related project for the project milestone. Can be a UUID or project identifier (e.g., 'P-LIN-123').' (ProjectMilestoneCreateInput.projectId)
+
+  feat(schema): [non_breaking] Input field 'ProjectMilestoneUpdateInput.projectId' description changed from 'Related project for the project milestone.' to 'Related project for the project milestone. Can be a UUID or project identifier (e.g., 'P-LIN-123').' (ProjectMilestoneUpdateInput.projectId)
+
+  feat(schema): [non_breaking] Field 'includeSubInitiativeUpdates' was added to object type 'ProjectNotificationSubscription' (ProjectNotificationSubscription.includeSubInitiativeUpdates)
+
+  feat(schema): [non_breaking] Input field 'ProjectRelationCreateInput.projectId' description changed from 'The identifier of the project that is related to another project.' to 'The identifier of the project that is related to another project. Can be a UUID or project identifier (e.g., 'P-LIN-123').' (ProjectRelationCreateInput.projectId)
+
+  feat(schema): [non_breaking] Input field 'ProjectRelationCreateInput.relatedProjectId' description changed from 'The identifier of the related project.' to 'The identifier of the related project. Can be a UUID or project identifier (e.g., 'P-LIN-123').' (ProjectRelationCreateInput.relatedProjectId)
+
+  feat(schema): [non_breaking] Input field 'ProjectRelationUpdateInput.projectId' description changed from 'The identifier of the project that is related to another project.' to 'The identifier of the project that is related to another project. Can be a UUID or project identifier (e.g., 'P-LIN-123').' (ProjectRelationUpdateInput.projectId)
+
+  feat(schema): [non_breaking] Input field 'ProjectRelationUpdateInput.relatedProjectId' description changed from 'The identifier of the related project.' to 'The identifier of the related project. Can be a UUID or project identifier (e.g., 'P-LIN-123').' (ProjectRelationUpdateInput.relatedProjectId)
+
+  feat(schema): [non_breaking] Input field 'ProjectUpdateCreateInput.projectId' description changed from 'The project to associate the project update with.' to 'The project to associate the project update with. Can be a UUID or project identifier (e.g., 'P-LIN-123').' (ProjectUpdateCreateInput.projectId)
+
+  feat(schema): [non_breaking] Field 'dependencyPackageMetadata' was added to object type 'Query' (Query.dependencyPackageMetadata)
+
+  feat(schema): [non_breaking] Field 'projectLabelCreated' was added to object type 'Subscription' (Subscription.projectLabelCreated)
+
+  feat(schema): [non_breaking] Field 'projectLabelDeleted' was added to object type 'Subscription' (Subscription.projectLabelDeleted)
+
+  feat(schema): [non_breaking] Field 'projectLabelUpdated' was added to object type 'Subscription' (Subscription.projectLabelUpdated)
+
+  feat(schema): [non_breaking] Field 'includeSubInitiativeUpdates' was added to object type 'TeamNotificationSubscription' (TeamNotificationSubscription.includeSubInitiativeUpdates)
+
+  feat(schema): [non_breaking] Field 'includeSubInitiativeUpdates' was added to object type 'UserNotificationSubscription' (UserNotificationSubscription.includeSubInitiativeUpdates)
+
+### Patch Changes
+
+- 2d5d122: Reduce package size by omitting unused declaration maps.
+
 ## 95.2.0
 
 ### Minor Changes

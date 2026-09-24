@@ -1475,6 +1475,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "permissionDenied",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "quotaExceeded",
             "description": null,
             "isDeprecated": false,
@@ -2560,6 +2566,18 @@
             "deprecationReason": null
           },
           {
+            "name": "codingHarness",
+            "description": "[Internal] Coding harness metadata from the latest associated sandbox.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "AgentSessionCodingHarness",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "codingHarnessModelLabel",
             "description": "[Internal] Compact display label for the coding harness model used by this session, derived from the latest associated sandbox.",
             "args": [],
@@ -2922,7 +2940,7 @@
           },
           {
             "name": "status",
-            "description": "The current status of the agent session, such as pending, active, awaiting input, complete, error, or stale.",
+            "description": "The current status of the agent session, such as pending, active, stopping, awaiting input, complete, error, or stale.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -3046,6 +3064,49 @@
             "ofType": null
           }
         ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AgentSessionCodingHarness",
+        "description": "[Internal] Coding harness metadata from an agent session's latest sandbox.",
+        "fields": [
+          {
+            "name": "harness",
+            "description": "The coding harness used by the sandbox.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "modelLabel",
+            "description": "Compact display label for the model used by the sandbox.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -3752,6 +3813,12 @@
           },
           {
             "name": "stale",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "stopping",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -5747,6 +5814,12 @@
             "deprecationReason": null
           },
           {
+            "name": "skipped",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "waiting",
             "description": null,
             "isDeprecated": false,
@@ -6032,6 +6105,11 @@
           {
             "kind": "OBJECT",
             "name": "AiConversationCodeIntelligenceToolCall",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "AiConversationContactSupportToolCall",
             "ofType": null
           },
           {
@@ -6626,6 +6704,79 @@
       },
       {
         "kind": "OBJECT",
+        "name": "AiConversationContactSupportToolCall",
+        "description": null,
+        "fields": [
+          {
+            "name": "displayInfo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AiConversationToolDisplayInfo",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "The name of the tool that was called.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "AiConversationTool",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rawArgs",
+            "description": "The arguments of the tool call.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rawResult",
+            "description": "The result of the tool call.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "AiConversationBaseToolCall",
+            "ofType": null
+          }
+        ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "AiConversationCreateEntityToolCall",
         "description": null,
         "fields": [
@@ -7156,6 +7307,12 @@
             "deprecationReason": null
           },
           {
+            "name": "entitySelection",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "mcpServerConnection",
             "description": null,
             "isDeprecated": false,
@@ -7214,6 +7371,18 @@
         "name": "AiConversationElicitationPart",
         "description": "A structured request for user input shown with an AI conversation.",
         "fields": [
+          {
+            "name": "entityType",
+            "description": "Entity type for entity selection.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "id",
             "description": "The ID of the part.",
@@ -7311,6 +7480,18 @@
             "deprecationReason": null
           },
           {
+            "name": "selection",
+            "description": "Whether to select one or multiple entities.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "serverUrl",
             "description": "The MCP server URL for a new connection. Null for reconnects and other elicitation kinds.",
             "args": [],
@@ -7318,6 +7499,26 @@
               "kind": "SCALAR",
               "name": "String",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "suggestedEntityIds",
+            "description": "Suggested entity identifiers.",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -7374,6 +7575,11 @@
           {
             "kind": "OBJECT",
             "name": "AiConversationConfirmationElicitationResponseData",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "AiConversationEntitySelectionElicitationResponseData",
             "ofType": null
           },
           {
@@ -8224,6 +8430,57 @@
             "deprecationReason": null
           }
         ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AiConversationEntitySelectionElicitationResponseData",
+        "description": "Selected entities in an entity selection elicitation.",
+        "fields": [
+          {
+            "name": "kind",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "AiConversationElicitationKind",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "selectedEntityIds",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
         "possibleTypes": null
       },
       {
@@ -15414,6 +15671,12 @@
             "deprecationReason": null
           },
           {
+            "name": "ContactSupport",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "CreateEntity",
             "description": null,
             "isDeprecated": false,
@@ -15703,6 +15966,11 @@
           {
             "kind": "OBJECT",
             "name": "AiConversationCodeIntelligenceToolCall",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "AiConversationContactSupportToolCall",
             "ofType": null
           },
           {
@@ -23849,7 +24117,7 @@
           },
           {
             "name": "initiativeId",
-            "description": "The initiative to associate the comment with.",
+            "description": "The initiative to associate the comment with. Can be a UUID or initiative identifier (e.g., 'I-12').",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -23909,7 +24177,7 @@
           },
           {
             "name": "projectId",
-            "description": "The project to associate the comment with.",
+            "description": "The project to associate the comment with. Can be a UUID or project identifier (e.g., 'P-LIN-123').",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -24902,7 +25170,7 @@
           },
           {
             "name": "type",
-            "description": "The type of support contact (e.g., bug report, feature request, general feedback).",
+            "description": "The type of support contact.",
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -26967,6 +27235,22 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "ID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "includeSubInitiativeUpdates",
+            "description": "Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
                 "ofType": null
               }
             },
@@ -29368,7 +29652,7 @@
           },
           {
             "name": "projectId",
-            "description": "[INTERNAL] The project to link this need to. Either issueId or projectId must be provided.",
+            "description": "[INTERNAL] The project to link this need to. Accepts a UUID or project identifier (e.g., 'P-LIN-123'). Either issueId or projectId must be provided.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -30227,7 +30511,7 @@
           },
           {
             "name": "projectId",
-            "description": "[INTERNAL] The project to move this need to.",
+            "description": "[INTERNAL] The project to move this need to. Accepts a UUID or project identifier (e.g., 'P-LIN-123').",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -31134,6 +31418,22 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "ID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "includeSubInitiativeUpdates",
+            "description": "Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
                 "ofType": null
               }
             },
@@ -35482,6 +35782,22 @@
             "deprecationReason": null
           },
           {
+            "name": "includeSubInitiativeUpdates",
+            "description": "Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "initiative",
             "description": "The initiative that this notification subscription is scoped to. Null if the subscription targets a different entity type.",
             "args": [],
@@ -37037,6 +37353,161 @@
             "ofType": null
           }
         ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "DependencyEcosystem",
+        "description": "A package registry a dependency file's packages can be looked up in.",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "npm",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "DependencyPackageInput",
+        "description": "One package version to look up registry metadata for.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "ecosystem",
+            "description": "The registry the package comes from.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "DependencyEcosystem",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "Package name.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "version",
+            "description": "Package version.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "DependencyPackageMetadataResult",
+        "description": "Registry metadata for one dependency package version.",
+        "fields": [
+          {
+            "name": "license",
+            "description": "SPDX license identifier. Null if the registry doesn't report one.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "Package name, echoed back from the request.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "publishedAt",
+            "description": "When this version was published. Null if the registry doesn't report it.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "version",
+            "description": "Package version, echoed back from the request.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "weeklyDownloads",
+            "description": "Weekly download count. Null if the registry doesn't report it.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -39338,7 +39809,7 @@
           },
           {
             "name": "initiativeId",
-            "description": "[Internal] Related initiative for the document.",
+            "description": "[Internal] Related initiative for the document. Can be a UUID or initiative identifier (e.g., 'I-12').",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -39386,7 +39857,7 @@
           },
           {
             "name": "projectId",
-            "description": "Related project for the document.",
+            "description": "Related project for the document. Can be a UUID or project identifier (e.g., 'P-LIN-123').",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -41297,7 +41768,7 @@
           },
           {
             "name": "initiativeId",
-            "description": "[Internal] Related initiative for the document.",
+            "description": "[Internal] Related initiative for the document. Can be a UUID or initiative identifier (e.g., 'I-12').",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -41345,7 +41816,7 @@
           },
           {
             "name": "projectId",
-            "description": "Related project for the document.",
+            "description": "Related project for the document. Can be a UUID or project identifier (e.g., 'P-LIN-123').",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -44475,7 +44946,7 @@
           },
           {
             "name": "initiativeId",
-            "description": "The initiative associated with the link.",
+            "description": "The initiative associated with the link. Can be a UUID or initiative identifier (e.g., 'I-12').",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -44503,7 +44974,7 @@
           },
           {
             "name": "projectId",
-            "description": "The project associated with the link.",
+            "description": "The project associated with the link. Can be a UUID or project identifier (e.g., 'P-LIN-123').",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -49941,8 +50412,44 @@
         "fields": null,
         "inputFields": [
           {
+            "name": "canSelfRotate",
+            "description": "Whether the token supports self-rotation.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "expiresAt",
             "description": "The ISO timestamp the GitLab access token expires.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "lastRotatedAt",
+            "description": "The ISO timestamp of the last successful token rotation.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nextRotationAt",
+            "description": "The ISO timestamp of the next automatic token rotation.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -49959,6 +50466,50 @@
               "kind": "SCALAR",
               "name": "Boolean",
               "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rotationEnabled",
+            "description": "Whether Linear automatically rotates the token.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rotationFailureReason",
+            "description": "The reason token rotation needs attention.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "scopes",
+            "description": "Verified scopes of the GitLab access token.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -56363,6 +56914,22 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "ID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "includeSubInitiativeUpdates",
+            "description": "Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
                 "ofType": null
               }
             },
@@ -67754,7 +68321,7 @@
           },
           {
             "name": "projectId",
-            "description": "The project associated with the issue.",
+            "description": "The project associated with the issue. Can be a UUID or project identifier (e.g., 'P-LIN-123').",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -80447,7 +81014,7 @@
           },
           {
             "name": "projectId",
-            "description": "The project associated with the issue.",
+            "description": "The project associated with the issue. Can be a UUID or project identifier (e.g., 'P-LIN-123').",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -82455,18 +83022,6 @@
             "deprecationReason": null
           },
           {
-            "name": "noSecret",
-            "description": "Whether the Jira instance does not support webhook secrets.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Boolean",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "updateMetadata",
             "description": "Whether to refresh Jira metadata for the integration.",
             "type": {
@@ -82727,6 +83282,22 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "ID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "includeSubInitiativeUpdates",
+            "description": "Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
                 "ofType": null
               }
             },
@@ -83346,6 +83917,30 @@
         "description": null,
         "fields": null,
         "inputFields": [
+          {
+            "name": "conversationAccess",
+            "description": "Who may use this connector in conversations.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "loopAccess",
+            "description": "Who may add this connector to a Loop.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "name",
             "description": "The connection-specific display name.",
@@ -90249,6 +90844,39 @@
             "deprecationReason": null
           },
           {
+            "name": "integrationGitlabRotate",
+            "description": "Rotates the GitLab token, revoking the previous token and saving its replacement.",
+            "args": [
+              {
+                "name": "integrationId",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "IntegrationPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "integrationGitlabTestConnection",
             "description": "Tests connectivity to a self-hosted GitLab instance and clears auth errors if successful.",
             "args": [
@@ -90275,6 +90903,128 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "GitLabTestConnectionPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "integrationGitlabUpdateRotationSettings",
+            "description": "Enables or disables automatic self-rotation of the GitLab token.",
+            "args": [
+              {
+                "name": "enabled",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "integrationId",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "IntegrationPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "integrationGitlabUpdateToken",
+            "description": "Replaces the GitLab access token while preserving the connected host and webhook.",
+            "args": [
+              {
+                "name": "accessToken",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "expiresAt",
+                "description": "The time at which the replacement token expires. Used when GitLab cannot return its expiry.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "integrationId",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "readonly",
+                "description": "Whether the replacement token has read-only access. Required when GitLab cannot return its scopes.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "IntegrationPayload",
                 "ofType": null
               }
             },
@@ -90786,6 +91536,18 @@
                     "name": "String",
                     "ofType": null
                   }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "settings",
+                "description": "Access settings for a new team MCP connector.",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "McpServerIntegrationSettingsInput",
+                  "ofType": null
                 },
                 "defaultValue": null,
                 "isDeprecated": false,
@@ -103541,6 +104303,22 @@
             "deprecationReason": null
           },
           {
+            "name": "includeSubInitiativeUpdates",
+            "description": "Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "initiative",
             "description": "The initiative that this notification subscription is scoped to. Null if the subscription targets a different entity type.",
             "args": [],
@@ -103849,6 +104627,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "includeSubInitiativeUpdates",
+            "description": "Whether to include updates from sub-initiatives.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "defaultValue": null,
@@ -104227,6 +105017,18 @@
           {
             "name": "active",
             "description": "Whether the subscription is active.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "includeSubInitiativeUpdates",
+            "description": "Whether to include updates from sub-initiatives.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -126231,7 +127033,7 @@
           },
           {
             "name": "projectId",
-            "description": "Related project for the project milestone.",
+            "description": "Related project for the project milestone. Can be a UUID or project identifier (e.g., 'P-LIN-123').",
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -126940,7 +127742,7 @@
           },
           {
             "name": "projectId",
-            "description": "Related project for the project milestone.",
+            "description": "Related project for the project milestone. Can be a UUID or project identifier (e.g., 'P-LIN-123').",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -127691,6 +128493,22 @@
             "deprecationReason": null
           },
           {
+            "name": "includeSubInitiativeUpdates",
+            "description": "Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "initiative",
             "description": "The initiative that this notification subscription is scoped to. Null if the subscription targets a different entity type.",
             "args": [],
@@ -128250,7 +129068,7 @@
           },
           {
             "name": "projectId",
-            "description": "The identifier of the project that is related to another project.",
+            "description": "The identifier of the project that is related to another project. Can be a UUID or project identifier (e.g., 'P-LIN-123').",
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -128294,7 +129112,7 @@
           },
           {
             "name": "relatedProjectId",
-            "description": "The identifier of the related project.",
+            "description": "The identifier of the related project. Can be a UUID or project identifier (e.g., 'P-LIN-123').",
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -128463,7 +129281,7 @@
           },
           {
             "name": "projectId",
-            "description": "The identifier of the project that is related to another project.",
+            "description": "The identifier of the project that is related to another project. Can be a UUID or project identifier (e.g., 'P-LIN-123').",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -128499,7 +129317,7 @@
           },
           {
             "name": "relatedProjectId",
-            "description": "The identifier of the related project.",
+            "description": "The identifier of the related project. Can be a UUID or project identifier (e.g., 'P-LIN-123').",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -133181,7 +133999,7 @@
           },
           {
             "name": "projectId",
-            "description": "The project to associate the project update with.",
+            "description": "The project to associate the project update with. Can be a UUID or project identifier (e.g., 'P-LIN-123').",
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -139524,6 +140342,55 @@
                 "kind": "OBJECT",
                 "name": "CycleConnection",
                 "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "dependencyPackageMetadata",
+            "description": "Registry metadata (license, publish date, weekly download count) for a batch of dependency package versions, used by the dependency lock file diff preview. Cached across all workspaces since registry data isn't workspace-specific. A package the registry has no data for (or an unsupported ecosystem) is simply omitted from the result rather than erroring. At most 500 packages per request.",
+            "args": [
+              {
+                "name": "packages",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "INPUT_OBJECT",
+                        "name": "DependencyPackageInput",
+                        "ofType": null
+                      }
+                    }
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "DependencyPackageMetadataResult",
+                    "ofType": null
+                  }
+                }
               }
             },
             "isDeprecated": false,
@@ -161264,6 +162131,54 @@
             "deprecationReason": null
           },
           {
+            "name": "projectLabelCreated",
+            "description": "Triggered when a project label is created",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ProjectLabel",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectLabelDeleted",
+            "description": "Triggered when a project label is deleted",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ProjectLabel",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectLabelUpdated",
+            "description": "Triggered when a project label is updated",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ProjectLabel",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "projectUnarchived",
             "description": "Triggered when a a project is unarchived",
             "args": [],
@@ -166200,6 +167115,22 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "ID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "includeSubInitiativeUpdates",
+            "description": "Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
                 "ofType": null
               }
             },
@@ -174180,6 +175111,22 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "ID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "includeSubInitiativeUpdates",
+            "description": "Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
                 "ofType": null
               }
             },
