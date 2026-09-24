@@ -4,9 +4,7 @@ import type * as es from "../index.js";
 import { LinearErrorType } from "../types.js";
 import { startClient, stopClient } from "./test-client.js";
 
-const bundles = {
-  esm: esm as typeof es,
-};
+const bundles = { esm };
 
 // https://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid/2117523#2117523
 function uuid() {
