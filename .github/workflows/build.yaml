@@ -62,7 +62,8 @@ jobs:
 
       - name: Validate CJS and ESM resolution for SDK
         # Catch issues like https://github.com/linear/linear/issues/830
-        run: npx @arethetypeswrong/cli@0.18.2 --pack packages/sdk
+        # The SDK is ESM-only, so CommonJS consumers on node16 resolution are expected to resolve to ESM
+        run: npx @arethetypeswrong/cli@0.18.2 --pack packages/sdk --ignore-rules cjs-resolves-to-esm
 
       - name: Compare schema for changes
         uses: graphql-hive/graphql-inspector@8733c10560f98b868d3eb4db1325c8edf64936b3 # @graphql-inspector/action@5.0.21
@@ -109,7 +110,11 @@ jobs:
       matrix:
         node: ["20", "24"]
         typescript: ["5.7", "5.9"]
-        module: ["cjs", "esm"]
+        module: ["cjs", "cjs-nodenext", "esm"]
+        exclude:
+          # TypeScript only allows importing ESM from CommonJS under nodenext from 5.8
+          - module: cjs-nodenext
+            typescript: "5.7"
 
     steps:
       - name: Checkout code
@@ -153,7 +158,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: ["18", "20", "22", "24"]
+        node: ["20", "22", "24"]
 
     steps:
       - name: Checkout code
