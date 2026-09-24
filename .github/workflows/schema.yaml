@@ -1,6 +1,9 @@
 name: schema
 
 on:
+  push:
+    branches:
+      - master
   schedule:
     - cron: "0 19 * * 2"
       timezone: America/Los_Angeles
@@ -11,17 +14,41 @@ on:
         type: boolean
         default: false
 
-concurrency:
-  group: sdk-prepare-release-${{ github.ref }}
-  cancel-in-progress: false
-
 permissions: {}
 
 jobs:
+  check-release-pr:
+    name: Check release pull request
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+      pull-requests: read
+    outputs:
+      outdated: ${{ steps.check.outputs.outdated }}
+    steps:
+      # Rebuilding fails the outdated release branch's Build check until the pull request is regenerated.
+      - name: Rebuild outdated release pull request
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if [ "$(gh pr list --head changeset-release/master --json number --jq length)" -gt 0 ]; then
+            gh workflow run build.yaml --ref changeset-release/master
+            echo "outdated=true" >> "$GITHUB_OUTPUT"
+          fi
+
   schema:
     name: Prepare release
-    if: github.ref == 'refs/heads/master' || inputs.dry_run
+    needs: [check-release-pr]
+    if: ${{ !cancelled() && (github.ref == 'refs/heads/master' || inputs.dry_run) && (github.event_name != 'push' || needs.check-release-pr.outputs.outdated == 'true') }}
     runs-on: ubuntu-latest
+    # Job-level so check-release-pr doesn't queue behind an in-progress run.
+    concurrency:
+      group: sdk-prepare-release-${{ github.ref }}
+      cancel-in-progress: false
     permissions:
       actions: write
       contents: write
@@ -108,6 +135,17 @@ jobs:
           branch: changeset-release/master
           base: master
 
+      - name: Dismiss outdated approvals
+        if: ${{ !inputs.dry_run && steps.release-pr.outputs.pull-request-operation == 'updated' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ steps.release-pr.outputs.pull-request-number }}
+        run: |
+          for id in $(gh api --paginate "repos/$GH_REPO/pulls/$PR_NUMBER/reviews" --jq '.[] | select(.state == "APPROVED") | .id'); do
+            gh api -X PUT "repos/$GH_REPO/pulls/$PR_NUMBER/reviews/$id/dismissals" -f message="Regenerated from latest master." > /dev/null
+          done
+
       # GITHUB_TOKEN pushes do not trigger build workflows, so dispatch the release branch explicitly.
       # This includes unchanged open pull requests so reruns retry failed or missing checks.
       - name: Run build for release pull request
@@ -119,7 +157,7 @@ jobs:
   notify-slack:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: [schema]
+    needs: [check-release-pr, schema]
     permissions:
       actions: read
       contents: read
