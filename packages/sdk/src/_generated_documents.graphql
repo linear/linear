@@ -2257,6 +2257,8 @@ fragment CustomViewNotificationSubscription on CustomViewNotificationSubscriptio
   subscriber {
     id
   }
+  # Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives.
+  includeSubInitiativeUpdates
   # Whether the subscription is active. When inactive, no notifications are generated from this subscription even though it still exists.
   active
 }
@@ -2316,6 +2318,8 @@ fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
   subscriber {
     id
   }
+  # Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives.
+  includeSubInitiativeUpdates
   # Whether the subscription is active. When inactive, no notifications are generated from this subscription even though it still exists.
   active
 }
@@ -2375,6 +2379,8 @@ fragment CycleNotificationSubscription on CycleNotificationSubscription {
   subscriber {
     id
   }
+  # Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives.
+  includeSubInitiativeUpdates
   # Whether the subscription is active. When inactive, no notifications are generated from this subscription even though it still exists.
   active
 }
@@ -2434,6 +2440,8 @@ fragment InitiativeNotificationSubscription on InitiativeNotificationSubscriptio
   subscriber {
     id
   }
+  # Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives.
+  includeSubInitiativeUpdates
   # Whether the subscription is active. When inactive, no notifications are generated from this subscription even though it still exists.
   active
 }
@@ -2493,6 +2501,8 @@ fragment LabelNotificationSubscription on LabelNotificationSubscription {
   subscriber {
     id
   }
+  # Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives.
+  includeSubInitiativeUpdates
   # Whether the subscription is active. When inactive, no notifications are generated from this subscription even though it still exists.
   active
 }
@@ -2552,6 +2562,8 @@ fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
   subscriber {
     id
   }
+  # Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives.
+  includeSubInitiativeUpdates
   # Whether the subscription is active. When inactive, no notifications are generated from this subscription even though it still exists.
   active
 }
@@ -2611,6 +2623,8 @@ fragment TeamNotificationSubscription on TeamNotificationSubscription {
   subscriber {
     id
   }
+  # Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives.
+  includeSubInitiativeUpdates
   # Whether the subscription is active. When inactive, no notifications are generated from this subscription even though it still exists.
   active
 }
@@ -2670,6 +2684,8 @@ fragment UserNotificationSubscription on UserNotificationSubscription {
   subscriber {
     id
   }
+  # Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives.
+  includeSubInitiativeUpdates
   # Whether the subscription is active. When inactive, no notifications are generated from this subscription even though it still exists.
   active
 }
@@ -3689,7 +3705,7 @@ fragment AgentSession on AgentSession {
   comment {
     id
   }
-  # The current status of the agent session, such as pending, active, awaiting input, complete, error, or stale.
+  # The current status of the agent session, such as pending, active, stopping, awaiting input, complete, error, or stale.
   status
   # The entity contexts this session is related to, such as issues or projects referenced in direct chat sessions. Used to provide contextual awareness to the agent.
   context
@@ -3930,6 +3946,10 @@ fragment InitiativeUpdate on InitiativeUpdate {
 # A structured request for user input shown with an AI conversation.
 fragment AiConversationElicitationPart on AiConversationElicitationPart {
   __typename
+  # Entity type for entity selection.
+  entityType
+  # Suggested entity identifiers.
+  suggestedEntityIds
   # The ID of the part.
   id
   # The MCP server URL for a new connection. Null for reconnects and other elicitation kinds.
@@ -3954,6 +3974,8 @@ fragment AiConversationElicitationPart on AiConversationElicitationPart {
   }
   # The type of the part.
   type
+  # Whether to select one or multiple entities.
+  selection
 }
 
 # A structured user response to an elicitation in an AI conversation.
@@ -3969,6 +3991,9 @@ fragment AiConversationElicitationResponsePart on AiConversationElicitationRespo
   data {
     ... on AiConversationConfirmationElicitationResponseData {
       ...AiConversationConfirmationElicitationResponseData
+    }
+    ... on AiConversationEntitySelectionElicitationResponseData {
+      ...AiConversationEntitySelectionElicitationResponseData
     }
     ... on AiConversationMcpServerConnectionElicitationResponseData {
       ...AiConversationMcpServerConnectionElicitationResponseData
@@ -4045,6 +4070,8 @@ fragment NotificationSubscription on NotificationSubscription {
   subscriber {
     id
   }
+  # Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives.
+  includeSubInitiativeUpdates
   # Whether the subscription is active. When inactive, no notifications are generated from this subscription even though it still exists.
   active
 }
@@ -4494,6 +4521,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     }
     ... on AiConversationCodeIntelligenceToolCall {
       ...AiConversationCodeIntelligenceToolCall
+    }
+    ... on AiConversationContactSupportToolCall {
+      ...AiConversationContactSupportToolCall
     }
     ... on AiConversationCreateEntityToolCall {
       ...AiConversationCreateEntityToolCall
@@ -9164,6 +9194,21 @@ fragment TeamPinnedResource on TeamPinnedResource {
   }
 }
 
+# Registry metadata for one dependency package version.
+fragment DependencyPackageMetadataResult on DependencyPackageMetadataResult {
+  __typename
+  # Package name, echoed back from the request.
+  name
+  # Package version, echoed back from the request.
+  version
+  # SPDX license identifier. Null if the registry doesn't report one.
+  license
+  # Weekly download count. Null if the registry doesn't report it.
+  weeklyDownloads
+  # When this version was published. Null if the registry doesn't report it.
+  publishedAt
+}
+
 # Represents a file upload destination with a pre-signed upload URL, asset URL, and required request
 # headers for uploading to cloud storage.
 fragment UploadFile on UploadFile {
@@ -9354,6 +9399,13 @@ fragment PushSubscriptionTestPayload on PushSubscriptionTestPayload {
   __typename
   # Whether the operation was successful.
   success
+}
+
+# Selected entities in an entity selection elicitation.
+fragment AiConversationEntitySelectionElicitationResponseData on AiConversationEntitySelectionElicitationResponseData {
+  __typename
+  kind
+  selectedEntityIds
 }
 
 # Signature verification metadata for a Git commit associated with a pull request.
@@ -11300,6 +11352,10 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
     ...AiConversationCodeIntelligenceToolCall
   }
 
+  ... on AiConversationContactSupportToolCall {
+    ...AiConversationContactSupportToolCall
+  }
+
   ... on AiConversationCreateEntityToolCall {
     ...AiConversationCreateEntityToolCall
   }
@@ -11547,6 +11603,19 @@ fragment AiConversationCodeIntelligenceToolCall on AiConversationCodeIntelligenc
 fragment AiConversationCodeIntelligenceToolCallArgs on AiConversationCodeIntelligenceToolCallArgs {
   __typename
   question
+}
+
+fragment AiConversationContactSupportToolCall on AiConversationContactSupportToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
 }
 
 fragment AiConversationCreateEntityToolCall on AiConversationCreateEntityToolCall {
@@ -14438,6 +14507,18 @@ fragment Subscription on Subscription {
   projectUpdated {
     id
   }
+  # Triggered when a project label is created
+  projectLabelCreated {
+    id
+  }
+  # Triggered when a project label is deleted
+  projectLabelDeleted {
+    id
+  }
+  # Triggered when a project label is updated
+  projectLabelUpdated {
+    id
+  }
   # Triggered when a project update is archived
   projectUpdateArchived {
     id
@@ -16162,6 +16243,15 @@ query cycles(
     orderBy: $orderBy
   ) {
     ...CycleConnection
+  }
+}
+# Registry metadata (license, publish date, weekly download count) for a batch of dependency package
+# versions, used by the dependency lock file diff preview. Cached across all workspaces since registry
+# data isn't workspace-specific. A package the registry has no data for (or an unsupported ecosystem)
+# is simply omitted from the result rather than erroring. At most 500 packages per request.
+query dependencyPackageMetadata($packages: [DependencyPackageInput!]!) {
+  dependencyPackageMetadata(packages: $packages) {
+    ...DependencyPackageMetadataResult
   }
 }
 # A specific document by ID or slug.
@@ -23545,6 +23635,12 @@ mutation integrationGitlabConnect(
     ...GitLabIntegrationCreatePayload
   }
 }
+# Rotates the GitLab token, revoking the previous token and saving its replacement.
+mutation integrationGitlabRotate($integrationId: String!) {
+  integrationGitlabRotate(integrationId: $integrationId) {
+    ...IntegrationPayload
+  }
+}
 # Tests connectivity to a self-hosted GitLab instance and clears auth errors if successful.
 mutation integrationGitlabTestConnection(
   # The ID of the GitLab integration to test.
@@ -23552,6 +23648,30 @@ mutation integrationGitlabTestConnection(
 ) {
   integrationGitlabTestConnection(integrationId: $integrationId) {
     ...GitLabTestConnectionPayload
+  }
+}
+# Enables or disables automatic self-rotation of the GitLab token.
+mutation integrationGitlabUpdateRotationSettings($enabled: Boolean!, $integrationId: String!) {
+  integrationGitlabUpdateRotationSettings(enabled: $enabled, integrationId: $integrationId) {
+    ...IntegrationPayload
+  }
+}
+# Replaces the GitLab access token while preserving the connected host and webhook.
+mutation integrationGitlabUpdateToken(
+  $accessToken: String!
+  # The time at which the replacement token expires. Used when GitLab cannot return its expiry.
+  $expiresAt: DateTime
+  $integrationId: String!
+  # Whether the replacement token has read-only access. Required when GitLab cannot return its scopes.
+  $readonly: Boolean
+) {
+  integrationGitlabUpdateToken(
+    accessToken: $accessToken
+    expiresAt: $expiresAt
+    integrationId: $integrationId
+    readonly: $readonly
+  ) {
+    ...IntegrationPayload
   }
 }
 # Integrates the workspace with Gong.

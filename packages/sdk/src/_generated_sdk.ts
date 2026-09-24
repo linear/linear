@@ -690,7 +690,7 @@ export class AgentSession extends Request {
   public url?: string | null;
   /** External links associated with this session. */
   public externalLinks: AgentSessionExternalLink[];
-  /** The current status of the agent session, such as pending, active, awaiting input, complete, error, or stale. */
+  /** The current status of the agent session, such as pending, active, stopping, awaiting input, complete, error, or stale. */
   public status: L.AgentSessionStatus;
   /** [DEPRECATED] The type of the agent session. */
   public type?: L.AgentSessionType | null;
@@ -1350,6 +1350,29 @@ export class AiConversationConfirmationElicitationResponseData extends Request {
   public kind: L.AiConversationElicitationKind;
 }
 /**
+ * AiConversationContactSupportToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationContactSupportToolCallFragment response data
+ */
+export class AiConversationContactSupportToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationContactSupportToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
  * AiConversationCreateEntityToolCall model
  *
  * @param request - function to call the graphql client
@@ -1562,9 +1585,12 @@ export class AiConversationElicitationOption extends Request {
 export class AiConversationElicitationPart extends Request {
   public constructor(request: LinearRequest, data: L.AiConversationElicitationPartFragment) {
     super(request);
+    this.entityType = data.entityType ?? undefined;
     this.id = data.id;
     this.integrationId = data.integrationId ?? undefined;
+    this.selection = data.selection ?? undefined;
     this.serverUrl = data.serverUrl ?? undefined;
+    this.suggestedEntityIds = data.suggestedEntityIds ?? undefined;
     this.title = data.title ?? undefined;
     this.metadata = new AiConversationPartMetadata(request, data.metadata);
     this.scope = data.scope ? new AiConversationMcpServerConnectionScope(request, data.scope) : undefined;
@@ -1573,12 +1599,18 @@ export class AiConversationElicitationPart extends Request {
     this.type = data.type;
   }
 
+  /** Entity type for entity selection. */
+  public entityType?: string | null;
   /** The ID of the part. */
   public id: string;
   /** The existing MCP integration to reconnect. Null when creating a new connection. */
   public integrationId?: string | null;
+  /** Whether to select one or multiple entities. */
+  public selection?: string | null;
   /** The MCP server URL for a new connection. Null for reconnects and other elicitation kinds. */
   public serverUrl?: string | null;
+  /** Suggested entity identifiers. */
+  public suggestedEntityIds?: string[] | null;
   /** The optional title shown above the elicitation choices. */
   public title?: string | null;
   /** The selectable actions for multiple-choice and confirmation elicitations. */
@@ -1742,6 +1774,22 @@ export class AiConversationEntityListWidgetArgsEntities extends Request {
   public id: string;
   /** @deprecated Optional note to display about the entity */
   public note?: string | null;
+}
+/**
+ * Selected entities in an entity selection elicitation.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationEntitySelectionElicitationResponseDataFragment response data
+ */
+export class AiConversationEntitySelectionElicitationResponseData extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationEntitySelectionElicitationResponseDataFragment) {
+    super(request);
+    this.selectedEntityIds = data.selectedEntityIds;
+    this.kind = data.kind;
+  }
+
+  public selectedEntityIds: string[];
+  public kind: L.AiConversationElicitationKind;
 }
 /**
  * An error part in an AI conversation.
@@ -5814,6 +5862,7 @@ export class CustomViewNotificationSubscription extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
+    this.includeSubInitiativeUpdates = data.includeSubInitiativeUpdates;
     this.notificationSubscriptionTypes = data.notificationSubscriptionTypes;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.contextViewType = data.contextViewType ?? undefined;
@@ -5837,6 +5886,8 @@ export class CustomViewNotificationSubscription extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives. */
+  public includeSubInitiativeUpdates: boolean;
   /** The notification event types that this subscription will deliver to the subscriber. */
   public notificationSubscriptionTypes: string[];
   /**
@@ -6693,6 +6744,7 @@ export class CustomerNotificationSubscription extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
+    this.includeSubInitiativeUpdates = data.includeSubInitiativeUpdates;
     this.notificationSubscriptionTypes = data.notificationSubscriptionTypes;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.contextViewType = data.contextViewType ?? undefined;
@@ -6716,6 +6768,8 @@ export class CustomerNotificationSubscription extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives. */
+  public includeSubInitiativeUpdates: boolean;
   /** The notification event types that this subscription will deliver to the subscriber. */
   public notificationSubscriptionTypes: string[];
   /**
@@ -7385,6 +7439,7 @@ export class CycleNotificationSubscription extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
+    this.includeSubInitiativeUpdates = data.includeSubInitiativeUpdates;
     this.notificationSubscriptionTypes = data.notificationSubscriptionTypes;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.contextViewType = data.contextViewType ?? undefined;
@@ -7408,6 +7463,8 @@ export class CycleNotificationSubscription extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives. */
+  public includeSubInitiativeUpdates: boolean;
   /** The notification event types that this subscription will deliver to the subscriber. */
   public notificationSubscriptionTypes: string[];
   /**
@@ -7608,6 +7665,33 @@ export class DeletePayload extends Request {
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
+}
+/**
+ * Registry metadata for one dependency package version.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.DependencyPackageMetadataResultFragment response data
+ */
+export class DependencyPackageMetadataResult extends Request {
+  public constructor(request: LinearRequest, data: L.DependencyPackageMetadataResultFragment) {
+    super(request);
+    this.license = data.license ?? undefined;
+    this.name = data.name;
+    this.publishedAt = parseDate(data.publishedAt) ?? undefined;
+    this.version = data.version;
+    this.weeklyDownloads = data.weeklyDownloads ?? undefined;
+  }
+
+  /** SPDX license identifier. Null if the registry doesn't report one. */
+  public license?: string | null;
+  /** Package name, echoed back from the request. */
+  public name: string;
+  /** When this version was published. Null if the registry doesn't report it. */
+  public publishedAt?: Date | null;
+  /** Package version, echoed back from the request. */
+  public version: string;
+  /** Weekly download count. Null if the registry doesn't report it. */
+  public weeklyDownloads?: number | null;
 }
 /**
  * A rich-text document that lives within a project, initiative, team, issue, release, or cycle. Documents support collaborative editing via ProseMirror/Yjs and store their content in a separate DocumentContent entity. Each document is associated with exactly one parent entity.
@@ -11072,6 +11156,7 @@ export class InitiativeNotificationSubscription extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
+    this.includeSubInitiativeUpdates = data.includeSubInitiativeUpdates;
     this.notificationSubscriptionTypes = data.notificationSubscriptionTypes;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.contextViewType = data.contextViewType ?? undefined;
@@ -11095,6 +11180,8 @@ export class InitiativeNotificationSubscription extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives. */
+  public includeSubInitiativeUpdates: boolean;
   /** The notification event types that this subscription will deliver to the subscriber. */
   public notificationSubscriptionTypes: string[];
   /**
@@ -15385,6 +15472,7 @@ export class LabelNotificationSubscription extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
+    this.includeSubInitiativeUpdates = data.includeSubInitiativeUpdates;
     this.notificationSubscriptionTypes = data.notificationSubscriptionTypes;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.contextViewType = data.contextViewType ?? undefined;
@@ -15408,6 +15496,8 @@ export class LabelNotificationSubscription extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives. */
+  public includeSubInitiativeUpdates: boolean;
   /** The notification event types that this subscription will deliver to the subscriber. */
   public notificationSubscriptionTypes: string[];
   /**
@@ -16022,6 +16112,7 @@ export class NotificationSubscription extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
+    this.includeSubInitiativeUpdates = data.includeSubInitiativeUpdates;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.contextViewType = data.contextViewType ?? undefined;
     this.userContextViewType = data.userContextViewType ?? undefined;
@@ -16044,6 +16135,8 @@ export class NotificationSubscription extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives. */
+  public includeSubInitiativeUpdates: boolean;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -18760,6 +18853,7 @@ export class ProjectNotificationSubscription extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
+    this.includeSubInitiativeUpdates = data.includeSubInitiativeUpdates;
     this.notificationSubscriptionTypes = data.notificationSubscriptionTypes;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.contextViewType = data.contextViewType ?? undefined;
@@ -18783,6 +18877,8 @@ export class ProjectNotificationSubscription extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives. */
+  public includeSubInitiativeUpdates: boolean;
   /** The notification event types that this subscription will deliver to the subscriber. */
   public notificationSubscriptionTypes: string[];
   /**
@@ -22040,6 +22136,9 @@ export class Subscription extends Request {
   private _issueUpdated: L.SubscriptionFragment["issueUpdated"];
   private _projectArchived: L.SubscriptionFragment["projectArchived"];
   private _projectCreated: L.SubscriptionFragment["projectCreated"];
+  private _projectLabelCreated: L.SubscriptionFragment["projectLabelCreated"];
+  private _projectLabelDeleted: L.SubscriptionFragment["projectLabelDeleted"];
+  private _projectLabelUpdated: L.SubscriptionFragment["projectLabelUpdated"];
   private _projectUnarchived: L.SubscriptionFragment["projectUnarchived"];
   private _projectUpdateArchived: L.SubscriptionFragment["projectUpdateArchived"];
   private _projectUpdateCreated: L.SubscriptionFragment["projectUpdateCreated"];
@@ -22111,6 +22210,9 @@ export class Subscription extends Request {
     this._issueUpdated = data.issueUpdated;
     this._projectArchived = data.projectArchived;
     this._projectCreated = data.projectCreated;
+    this._projectLabelCreated = data.projectLabelCreated;
+    this._projectLabelDeleted = data.projectLabelDeleted;
+    this._projectLabelUpdated = data.projectLabelUpdated;
     this._projectUnarchived = data.projectUnarchived;
     this._projectUpdateArchived = data.projectUpdateArchived;
     this._projectUpdateCreated = data.projectUpdateCreated;
@@ -22442,6 +22544,30 @@ export class Subscription extends Request {
   /** The ID of triggered when a project is created */
   public get projectCreatedId(): string | undefined {
     return this._projectCreated?.id;
+  }
+  /** Triggered when a project label is created */
+  public get projectLabelCreated(): LinearFetch<ProjectLabel> | undefined {
+    return new ProjectLabelQuery(this._request).fetch(this._projectLabelCreated.id);
+  }
+  /** The ID of triggered when a project label is created */
+  public get projectLabelCreatedId(): string | undefined {
+    return this._projectLabelCreated?.id;
+  }
+  /** Triggered when a project label is deleted */
+  public get projectLabelDeleted(): LinearFetch<ProjectLabel> | undefined {
+    return new ProjectLabelQuery(this._request).fetch(this._projectLabelDeleted.id);
+  }
+  /** The ID of triggered when a project label is deleted */
+  public get projectLabelDeletedId(): string | undefined {
+    return this._projectLabelDeleted?.id;
+  }
+  /** Triggered when a project label is updated */
+  public get projectLabelUpdated(): LinearFetch<ProjectLabel> | undefined {
+    return new ProjectLabelQuery(this._request).fetch(this._projectLabelUpdated.id);
+  }
+  /** The ID of triggered when a project label is updated */
+  public get projectLabelUpdatedId(): string | undefined {
+    return this._projectLabelUpdated?.id;
   }
   /** Triggered when a a project is unarchived */
   public get projectUnarchived(): LinearFetch<Project> | undefined {
@@ -23339,6 +23465,7 @@ export class TeamNotificationSubscription extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
+    this.includeSubInitiativeUpdates = data.includeSubInitiativeUpdates;
     this.notificationSubscriptionTypes = data.notificationSubscriptionTypes;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.contextViewType = data.contextViewType ?? undefined;
@@ -23362,6 +23489,8 @@ export class TeamNotificationSubscription extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives. */
+  public includeSubInitiativeUpdates: boolean;
   /** The notification event types that this subscription will deliver to the subscriber. */
   public notificationSubscriptionTypes: string[];
   /**
@@ -24626,6 +24755,7 @@ export class UserNotificationSubscription extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
+    this.includeSubInitiativeUpdates = data.includeSubInitiativeUpdates;
     this.notificationSubscriptionTypes = data.notificationSubscriptionTypes;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.contextViewType = data.contextViewType ?? undefined;
@@ -24649,6 +24779,8 @@ export class UserNotificationSubscription extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives. */
+  public includeSubInitiativeUpdates: boolean;
   /** The notification event types that this subscription will deliver to the subscriber. */
   public notificationSubscriptionTypes: string[];
   /**
@@ -27886,6 +28018,37 @@ export class CyclesQuery extends Request {
         ),
       data
     );
+  }
+}
+
+/**
+ * A fetchable DependencyPackageMetadata Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class DependencyPackageMetadataQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DependencyPackageMetadata query and return a DependencyPackageMetadataResult list
+   *
+   * @param packages - required packages to pass to dependencyPackageMetadata
+   * @returns parsed response from DependencyPackageMetadataQuery
+   */
+  public async fetch(packages: L.DependencyPackageInput[]): LinearFetch<DependencyPackageMetadataResult[]> {
+    const response = await this._request<L.DependencyPackageMetadataQuery, L.DependencyPackageMetadataQueryVariables>(
+      L.DependencyPackageMetadataDocument.toString(),
+      {
+        packages,
+      }
+    );
+    const data = response.dependencyPackageMetadata;
+
+    return data.map(node => {
+      return new DependencyPackageMetadataResult(this._request, node);
+    });
   }
 }
 
@@ -35618,6 +35781,35 @@ export class IntegrationGitlabConnectMutation extends Request {
 }
 
 /**
+ * A fetchable IntegrationGitlabRotate Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationGitlabRotateMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationGitlabRotate mutation and return a IntegrationPayload
+   *
+   * @param integrationId - required integrationId to pass to integrationGitlabRotate
+   * @returns parsed response from IntegrationGitlabRotateMutation
+   */
+  public async fetch(integrationId: string): LinearFetch<IntegrationPayload> {
+    const response = await this._request<L.IntegrationGitlabRotateMutation, L.IntegrationGitlabRotateMutationVariables>(
+      L.IntegrationGitlabRotateDocument.toString(),
+      {
+        integrationId,
+      }
+    );
+    const data = response.integrationGitlabRotate;
+
+    return new IntegrationPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable IntegrationGitlabTestConnection Mutation
  *
  * @param request - function to call the graphql client
@@ -35643,6 +35835,74 @@ export class IntegrationGitlabTestConnectionMutation extends Request {
     const data = response.integrationGitlabTestConnection;
 
     return new GitLabTestConnectionPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IntegrationGitlabUpdateRotationSettings Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationGitlabUpdateRotationSettingsMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationGitlabUpdateRotationSettings mutation and return a IntegrationPayload
+   *
+   * @param enabled - required enabled to pass to integrationGitlabUpdateRotationSettings
+   * @param integrationId - required integrationId to pass to integrationGitlabUpdateRotationSettings
+   * @returns parsed response from IntegrationGitlabUpdateRotationSettingsMutation
+   */
+  public async fetch(enabled: boolean, integrationId: string): LinearFetch<IntegrationPayload> {
+    const response = await this._request<
+      L.IntegrationGitlabUpdateRotationSettingsMutation,
+      L.IntegrationGitlabUpdateRotationSettingsMutationVariables
+    >(L.IntegrationGitlabUpdateRotationSettingsDocument.toString(), {
+      enabled,
+      integrationId,
+    });
+    const data = response.integrationGitlabUpdateRotationSettings;
+
+    return new IntegrationPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IntegrationGitlabUpdateToken Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationGitlabUpdateTokenMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationGitlabUpdateToken mutation and return a IntegrationPayload
+   *
+   * @param accessToken - required accessToken to pass to integrationGitlabUpdateToken
+   * @param integrationId - required integrationId to pass to integrationGitlabUpdateToken
+   * @param variables - variables without 'accessToken', 'integrationId' to pass into the IntegrationGitlabUpdateTokenMutation
+   * @returns parsed response from IntegrationGitlabUpdateTokenMutation
+   */
+  public async fetch(
+    accessToken: string,
+    integrationId: string,
+    variables?: Omit<L.IntegrationGitlabUpdateTokenMutationVariables, "accessToken" | "integrationId">
+  ): LinearFetch<IntegrationPayload> {
+    const response = await this._request<
+      L.IntegrationGitlabUpdateTokenMutation,
+      L.IntegrationGitlabUpdateTokenMutationVariables
+    >(L.IntegrationGitlabUpdateTokenDocument.toString(), {
+      accessToken,
+      integrationId,
+      ...variables,
+    });
+    const data = response.integrationGitlabUpdateToken;
+
+    return new IntegrationPayload(this._request, data);
   }
 }
 
@@ -50410,6 +50670,17 @@ export class LinearSdk extends Request {
     return new CyclesQuery(this._request).fetch(variables);
   }
   /**
+   * Registry metadata (license, publish date, weekly download count) for a batch of dependency package versions, used by the dependency lock file diff preview. Cached across all workspaces since registry data isn't workspace-specific. A package the registry has no data for (or an unsupported ecosystem) is simply omitted from the result rather than erroring. At most 500 packages per request.
+   *
+   * @param packages - required packages to pass to dependencyPackageMetadata
+   * @returns DependencyPackageMetadataResult[]
+   */
+  public dependencyPackageMetadata(
+    packages: L.DependencyPackageInput[]
+  ): LinearFetch<DependencyPackageMetadataResult[]> {
+    return new DependencyPackageMetadataQuery(this._request).fetch(packages);
+  }
+  /**
    * A specific document by ID or slug.
    *
    * @param id - required id to pass to document
@@ -52914,6 +53185,15 @@ export class LinearSdk extends Request {
     return new IntegrationGitlabConnectMutation(this._request).fetch(accessToken, gitlabUrl, variables);
   }
   /**
+   * Rotates the GitLab token, revoking the previous token and saving its replacement.
+   *
+   * @param integrationId - required integrationId to pass to integrationGitlabRotate
+   * @returns IntegrationPayload
+   */
+  public integrationGitlabRotate(integrationId: string): LinearFetch<IntegrationPayload> {
+    return new IntegrationGitlabRotateMutation(this._request).fetch(integrationId);
+  }
+  /**
    * Tests connectivity to a self-hosted GitLab instance and clears auth errors if successful.
    *
    * @param integrationId - required integrationId to pass to integrationGitlabTestConnection
@@ -52921,6 +53201,34 @@ export class LinearSdk extends Request {
    */
   public integrationGitlabTestConnection(integrationId: string): LinearFetch<GitLabTestConnectionPayload> {
     return new IntegrationGitlabTestConnectionMutation(this._request).fetch(integrationId);
+  }
+  /**
+   * Enables or disables automatic self-rotation of the GitLab token.
+   *
+   * @param enabled - required enabled to pass to integrationGitlabUpdateRotationSettings
+   * @param integrationId - required integrationId to pass to integrationGitlabUpdateRotationSettings
+   * @returns IntegrationPayload
+   */
+  public integrationGitlabUpdateRotationSettings(
+    enabled: boolean,
+    integrationId: string
+  ): LinearFetch<IntegrationPayload> {
+    return new IntegrationGitlabUpdateRotationSettingsMutation(this._request).fetch(enabled, integrationId);
+  }
+  /**
+   * Replaces the GitLab access token while preserving the connected host and webhook.
+   *
+   * @param accessToken - required accessToken to pass to integrationGitlabUpdateToken
+   * @param integrationId - required integrationId to pass to integrationGitlabUpdateToken
+   * @param variables - variables without 'accessToken', 'integrationId' to pass into the IntegrationGitlabUpdateTokenMutation
+   * @returns IntegrationPayload
+   */
+  public integrationGitlabUpdateToken(
+    accessToken: string,
+    integrationId: string,
+    variables?: Omit<L.IntegrationGitlabUpdateTokenMutationVariables, "accessToken" | "integrationId">
+  ): LinearFetch<IntegrationPayload> {
+    return new IntegrationGitlabUpdateTokenMutation(this._request).fetch(accessToken, integrationId, variables);
   }
   /**
    * Integrates the workspace with Gong.
@@ -55021,6 +55329,7 @@ export {
   CyclePeriod,
   DateResolutionType,
   Day,
+  DependencyEcosystem,
   DiffFileState,
   DocumentContentAgentCheckpointMode,
   DraftUpdateHealthType,

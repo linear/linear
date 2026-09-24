@@ -1567,6 +1567,18 @@ describe("generated", () => {
     });
   });
 
+  /** Test DependencyPackageMetadata query */
+  describe("DependencyPackageMetadata", () => {
+    /** Test the root model query for DependencyPackageMetadata */
+    it("dependencyPackageMetadata", async () => {
+      const dependencyPackageMetadata: L.DependencyPackageMetadataResult[] | undefined | null =
+        await client.dependencyPackageMetadata([
+          { ecosystem: L.DependencyEcosystem.Npm, name: "mock-name", version: "mock-version" },
+        ]);
+      dependencyPackageMetadata?.map(node => expect(node instanceof L.DependencyPackageMetadataResult));
+    });
+  });
+
   /** Test DocumentContentHistory query */
   describe("DocumentContentHistory", () => {
     /** Test the root model query for DocumentContentHistory */

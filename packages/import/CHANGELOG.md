@@ -1,5 +1,17 @@
 # Change Log
 
+## 3.2.16
+
+### Patch Changes
+
+- 2d1a591: fix(import): match assignee emails case-insensitively so workspace users whose email contains uppercase characters are no longer left unassigned
+- 1cec52a: fix(import): harden the GitHub importer's API client: retry network errors, server errors and rate limits with backoff, and fail with GitHub's error message instead of importing incomplete data
+- 1cec52a: fix(import): skip GitHub comments from deleted accounts instead of failing the import
+- 29f65c2: fix(import): time out stalled GitHub API requests, and don't retry or print GitHub tokens with characters that can't be sent in a header
+- Updated dependencies
+- Updated dependencies [2d5d122]
+  - @linear/sdk@96.0.0
+
 ## 3.2.15
 
 ### Patch Changes
