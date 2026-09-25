@@ -301,9 +301,7 @@ export const importIssues = async (
   // Create issues
   for (const issue of importData.issues) {
     const issueDescription = issue.description
-      ? importData.skipImageReplacement
-        ? issue.description
-        : await replaceImagesInMarkdown(client, issue.description, importData.resourceURLSuffix)
+      ? await replaceImagesInMarkdown(client, issue.description, importData.authenticateImageUrl)
       : undefined;
 
     const description =
@@ -398,9 +396,7 @@ const buildComments = async (
     const user = importData.users[comment.userId];
     const date = comment.createdAt ? comment.createdAt.toISOString().split("T")[0] : undefined;
 
-    const body = importData.skipImageReplacement
-      ? comment.body || ""
-      : await replaceImagesInMarkdown(client, comment.body || "", importData.resourceURLSuffix);
+    const body = await replaceImagesInMarkdown(client, comment.body || "", importData.authenticateImageUrl);
     newComments.push(`**${user.name}**${" " + date}\n\n${body}\n`);
   }
   return `${description}\n\n---\n\n${newComments.join("\n\n")}`;
