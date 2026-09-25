@@ -115,7 +115,8 @@ jobs:
 
       - name: Validate CJS and ESM resolution for SDK
         # Catch issues like https://github.com/linear/linear/issues/830
-        run: npx @arethetypeswrong/cli@0.18.2 --pack packages/sdk
+        # The SDK is ESM-only, so CommonJS consumers on node16 resolution are expected to resolve to ESM
+        run: npx @arethetypeswrong/cli@0.18.2 --pack packages/sdk --ignore-rules cjs-resolves-to-esm
 
       - name: Compare schema for changes
         uses: graphql-hive/graphql-inspector@8733c10560f98b868d3eb4db1325c8edf64936b3 # @graphql-inspector/action@5.0.21
