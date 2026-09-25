@@ -109,4 +109,20 @@ describe("ShortcutCsvImporter", () => {
     ]);
     expect(result).toBe(description);
   });
+
+  it("uploads images from their decoded URL, and only replaces the URL", async () => {
+    const { importData, description } = await importStory(
+      "| Before | After |\n|---|---|\n| ![shot](https://media.app.shortcut.com/Screen\\(1\\).png) | none |"
+    );
+    const imageUploadFromUrl = vi.fn().mockResolvedValue({ success: true, url: "https://uploads.linear.app/a.png" });
+
+    const result = await replaceImagesInMarkdown(
+      { imageUploadFromUrl } as unknown as LinearClient,
+      description,
+      importData.authenticateImageUrl
+    );
+
+    expect(imageUploadFromUrl.mock.calls).toEqual([[`https://media.app.shortcut.com/Screen(1).png?token=${TOKEN}`]]);
+    expect(result).toContain("| ![shot](https://uploads.linear.app/a.png) | none |");
+  });
 });

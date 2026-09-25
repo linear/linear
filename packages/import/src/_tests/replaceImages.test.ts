@@ -31,7 +31,7 @@ describe("replaceImagesInMarkdown", () => {
     );
 
     expect(result).toBe(
-      "\n![one](https://uploads.linear.app/1.png)\n \n![two](https://uploads.linear.app/2.png)\n ![](https://uploads.linear.app/3.png)"
+      "![one](https://uploads.linear.app/1.png) ![two](https://uploads.linear.app/2.png) ![](https://uploads.linear.app/3.png)"
     );
   });
 
@@ -39,7 +39,7 @@ describe("replaceImagesInMarkdown", () => {
     const result = await replaceImagesInMarkdown(client, "![one](https://example.com/1.png)", authenticateUrl);
 
     expect(imageUploadFromUrl).toHaveBeenCalledWith("https://example.com/1.png?token=secret");
-    expect(result).toBe(`\n![one](${UPLOADED_URL})\n`);
+    expect(result).toBe(`![one](${UPLOADED_URL})`);
   });
 
   it("keeps literal parentheses in image URLs", async () => {
@@ -49,7 +49,7 @@ describe("replaceImagesInMarkdown", () => {
     );
 
     expect(imageUploadFromUrl).toHaveBeenCalledWith("https://example.com/Screen%20Shot%20(1).png");
-    expect(result).toBe(`\n![Screenshot](${UPLOADED_URL})\n after`);
+    expect(result).toBe(`![Screenshot](${UPLOADED_URL}) after`);
   });
 
   it.each([
@@ -60,19 +60,104 @@ describe("replaceImagesInMarkdown", () => {
     const result = await replaceImagesInMarkdown(client, markdown);
 
     expect(imageUploadFromUrl).toHaveBeenCalledWith("https://example.com/a.png");
-    expect(result).toBe(`\n![Image](${UPLOADED_URL} ${title})\n`);
+    expect(result).toBe(`![Image](${UPLOADED_URL} ${title})`);
   });
 
   it("supports brackets in alt text", async () => {
     const result = await replaceImagesInMarkdown(client, "![a [b] \\] c](https://example.com/a.png)");
 
-    expect(result).toBe(`\n![a [b] \\] c](${UPLOADED_URL})\n`);
+    expect(result).toBe(`![a [b] \\] c](${UPLOADED_URL})`);
   });
 
   it("treats a doubly-escaped backslash as a literal backslash, so the image is replaced", async () => {
     const result = await replaceImagesInMarkdown(client, "\\\\![alt](https://example.com/a.png)");
 
-    expect(result).toBe(`\\\\\n![alt](${UPLOADED_URL})\n`);
+    expect(result).toBe(`\\\\![alt](${UPLOADED_URL})`);
+  });
+
+  it.each([
+    ["tables", "| a | b |\n|---|---|\n| x | ![one](https://example.com/1.png) |\n"],
+    ["lists", "- item ![one](https://example.com/1.png)\n- next\n"],
+    ["blockquotes", "> ![one](https://example.com/1.png) caption\n"],
+  ])("keeps images in place in %s", async (_, markdown) => {
+    const result = await replaceImagesInMarkdown(client, markdown);
+
+    expect(result).toBe(markdown.replace("https://example.com/1.png", UPLOADED_URL));
+  });
+
+  it.each([
+    [
+      "backslash escapes",
+      "![a](https://example.com/Screen\\(1\\)\\_a.png)",
+      "https://example.com/Screen(1)_a.png",
+      `![a](${UPLOADED_URL})`,
+    ],
+    [
+      "backslashes that don't escape punctuation",
+      "![a](https://example.com/a\\b.png)",
+      "https://example.com/a\\b.png",
+      `![a](${UPLOADED_URL})`,
+    ],
+    [
+      "character references",
+      "![a](https://example.com/a.png?x=1&amp;y=&#50;&#x33;)",
+      "https://example.com/a.png?x=1&y=23",
+      `![a](${UPLOADED_URL})`,
+    ],
+    [
+      "escaped character references",
+      "![a](https://example.com/a.png?x=1\\&amp;y=2)",
+      "https://example.com/a.png?x=1&amp;y=2",
+      `![a](${UPLOADED_URL})`,
+    ],
+    [
+      "angle brackets",
+      '![a](<https://example.com/Screen Shot (1.png> "Title")',
+      "https://example.com/Screen Shot (1.png",
+      `![a](<${UPLOADED_URL}> "Title")`,
+    ],
+    [
+      "image tag character references",
+      '<img src="https://example.com/a.png?x=1&amp;y=2\\_3">',
+      "https://example.com/a.png?x=1&y=2\\_3",
+      `![](${UPLOADED_URL})`,
+    ],
+  ])("decodes %s in image URLs before downloading them", async (_, markdown, sourceUrl, expected) => {
+    const result = await replaceImagesInMarkdown(client, markdown, authenticateUrl);
+
+    expect(imageUploadFromUrl).toHaveBeenCalledWith(`${sourceUrl}?token=secret`);
+    expect(result).toBe(expected);
+  });
+
+  it.each([
+    ["single quotes", "<img alt='a > b' src='https://example.com/a.png'>"],
+    ["no quotes", "<img src=https://example.com/a.png alt=a>"],
+    ["a > in another attribute", '<img alt="Settings > Billing" src="https://example.com/a.png">'],
+    ["a self-closing tag", '<img src="https://example.com/a.png" />'],
+  ])("replaces image tags with %s", async (_, markdown) => {
+    const result = await replaceImagesInMarkdown(client, markdown);
+
+    expect(imageUploadFromUrl).toHaveBeenCalledWith("https://example.com/a.png");
+    expect(result).toBe(`![](${UPLOADED_URL})`);
+  });
+
+  it.each([
+    ["image markers", "![".repeat(50_000)],
+    ["image URLs", "![a](https://example.com/".repeat(50_000)],
+    ["parentheses in image URLs", "![a](https://example.com/(".repeat(50_000)],
+    ["image titles", '![a](https://example.com/a.png ("'.repeat(50_000)],
+    ["image tags", '<img src="https://example.com/a.png" '.repeat(50_000)],
+    ["image tags without a src", "<img alt=a ".repeat(50_000)],
+    ["code spans between image markers", "`a` ![ ".repeat(50_000)],
+    ["backticks", `a ${"`".repeat(100_000)}`],
+  ])("processes unclosed %s in linear time", async (_, markdown) => {
+    // Quadratic parsing takes several seconds or more for this much text
+    const start = performance.now();
+    const result = await replaceImagesInMarkdown(client, markdown);
+    expect(performance.now() - start).toBeLessThan(1000);
+
+    expect(imageUploadFromUrl).not.toHaveBeenCalled();
+    expect(result).toBe(markdown);
   });
 
   it.each([
@@ -88,6 +173,12 @@ describe("replaceImagesInMarkdown", () => {
     ["image markers without a URL", "![not an image] and [link](https://example.com/a.png)"],
     ["images with a relative URL", "![alt](/a.png)"],
     ["image tags with another src attribute", '<img data-src="https://example.com/a.png">'],
+    ["unclosed image tags", '<img src="https://example.com/a.png"'],
+    ["image tags with a src inside another attribute", '<img alt="a src="https://example.com/a.png">'],
+    ["images with unbalanced parentheses in their URL", "![alt](https://example.com/a(.png)"],
+    ["images with whitespace in parentheses in their URL", "![alt](https://example.com/a( b).png)"],
+    ["images with parentheses in a title in parentheses", "![alt](https://example.com/a.png (a (b)))"],
+    ["images with a line break in an angle-bracketed URL", "![alt](<https://example.com/a\n.png>)"],
   ])("leaves %s untouched", async (_, markdown) => {
     const result = await replaceImagesInMarkdown(client, markdown, authenticateUrl);
 
@@ -103,7 +194,7 @@ describe("replaceImagesInMarkdown", () => {
 
     expect(imageUploadFromUrl.mock.calls).toEqual([["https://example.com/a.png"], ["https://example.com/c.png"]]);
     expect(result).toBe(
-      `\n![one](${UPLOADED_URL})\n\n\n\`\`\`\n![two](https://example.com/b.png)\n\`\`\`\n\n\n![three](${UPLOADED_URL})\n`
+      `![one](${UPLOADED_URL})\n\n\`\`\`\n![two](https://example.com/b.png)\n\`\`\`\n\n![three](${UPLOADED_URL})`
     );
   });
 
@@ -158,8 +249,6 @@ describe("replaceImagesInMarkdown", () => {
       authenticateUrl
     );
 
-    expect(result).toBe(
-      `![a](https://example.com/fail.png) \n![b](${UPLOADED_URL})\n ![c](https://example.com/fail.png)`
-    );
+    expect(result).toBe(`![a](https://example.com/fail.png) ![b](${UPLOADED_URL}) ![c](https://example.com/fail.png)`);
   });
 });
