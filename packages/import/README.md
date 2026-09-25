@@ -121,6 +121,10 @@ The following fields are supported:
 - `Estimate` - Issue estimate
 - `Created` - Issue creation date
 - `Completed` - Issue completion date (if has completed status)
+- `Blocks` - Comma-separated references to issues in this import that this issue blocks
+- `Blocked By` - Comma-separated references to issues in this import that block this issue
+
+The `Blocks` and `Blocked By` columns are optional. Each reference is resolved against the other issues in the same import file, matching first on the row `Id` column, then on an issue's title (case-insensitive). A reference that matches no issue or more than one issue aborts the import before any issue is created, so a re-run never duplicates a half-imported backlog. Self-references, a dependency declared in both directions, and duplicate row `Id`s are rejected the same way. A dependency expressed in both columns is created once.
 
 ### GitLab CSV
 
