@@ -482,9 +482,9 @@ export type AgentSession = Node & {
   appUser: User;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
-  /** [Internal] Coding harness metadata from the latest associated sandbox. */
+  /** [Internal] Coding harness metadata for this cloud or local session. */
   codingHarness?: Maybe<AgentSessionCodingHarness>;
-  /** [Internal] Compact display label for the coding harness model used by this session, derived from the latest associated sandbox. */
+  /** [Internal] Compact display label for the coding harness model used by this cloud or local session. */
   codingHarnessModelLabel?: Maybe<Scalars["String"]>;
   /** The comment this agent session is associated with. */
   comment?: Maybe<Comment>;
@@ -586,12 +586,12 @@ export type AgentSessionWorkspaceDiffFilesArgs = {
   contentHash: Scalars["String"];
 };
 
-/** [Internal] Coding harness metadata from an agent session's latest sandbox. */
+/** [Internal] Coding harness metadata for a cloud or local coding session. */
 export type AgentSessionCodingHarness = {
   __typename?: "AgentSessionCodingHarness";
-  /** The coding harness used by the sandbox. */
+  /** The coding harness or local target used by the session. */
   harness: Scalars["String"];
-  /** Compact display label for the model used by the sandbox. */
+  /** Compact display label for the model used by the session. */
   modelLabel: Scalars["String"];
 };
 

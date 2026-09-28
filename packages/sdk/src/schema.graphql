@@ -772,11 +772,11 @@ type AgentSession implements Node {
   """
   archivedAt: DateTime
   """
-  [Internal] Coding harness metadata from the latest associated sandbox.
+  [Internal] Coding harness metadata for this cloud or local session.
   """
   codingHarness: AgentSessionCodingHarness
   """
-  [Internal] Compact display label for the coding harness model used by this session, derived from the latest associated sandbox.
+  [Internal] Compact display label for the coding harness model used by this cloud or local session.
   """
   codingHarnessModelLabel: String
   """
@@ -921,15 +921,15 @@ type AgentSession implements Node {
 }
 
 """
-[Internal] Coding harness metadata from an agent session's latest sandbox.
+[Internal] Coding harness metadata for a cloud or local coding session.
 """
 type AgentSessionCodingHarness {
   """
-  The coding harness used by the sandbox.
+  The coding harness or local target used by the session.
   """
   harness: String!
   """
-  Compact display label for the model used by the sandbox.
+  Compact display label for the model used by the session.
   """
   modelLabel: String!
 }

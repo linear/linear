@@ -1,5 +1,31 @@
 # Change Log
 
+## 97.0.0
+
+### Major Changes
+
+- e09bb8d: **`@linear/sdk` is now ESM-only, halving its install size.** Most projects need no changes: on Node.js 20.19+ or 22.12+, `require("@linear/sdk")` still works from CommonJS.
+
+  You may need to update your setup if you use:
+
+  - **Node.js older than 20.19 or 22.12:** upgrade Node.js, or stay on the previous release of `@linear/sdk`.
+  - **Jest in CommonJS mode:** Jest can't `require()` ES modules. Let `babel-jest` transform the SDK by adding `transformIgnorePatterns: ["/node_modules/(?!@linear/sdk)"]`, or run Jest with native ESM support (`--experimental-vm-modules`).
+  - **TypeScript with `"module": "node16"`, or `"nodenext"` on TypeScript 5.7 or older:** these report error TS1479. Use `"module": "nodenext"` with TypeScript 5.8+, or `"moduleResolution": "bundler"`.
+
+### Patch Changes
+
+- feat(schema): [non_breaking] Field 'AgentSession.codingHarness' description changed from '[Internal] Coding harness metadata from the latest associated sandbox.' to '[Internal] Coding harness metadata for this cloud or local session.' (AgentSession.codingHarness)
+
+  feat(schema): [non_breaking] Field 'AgentSession.codingHarnessModelLabel' description changed from '[Internal] Compact display label for the coding harness model used by this session, derived from the latest associated sandbox.' to '[Internal] Compact display label for the coding harness model used by this cloud or local session.' (AgentSession.codingHarnessModelLabel)
+
+  feat(schema): [non_breaking] Field 'AgentSessionCodingHarness.harness' description changed from 'The coding harness used by the sandbox.' to 'The coding harness or local target used by the session.' (AgentSessionCodingHarness.harness)
+
+  feat(schema): [non_breaking] Field 'AgentSessionCodingHarness.modelLabel' description changed from 'Compact display label for the model used by the sandbox.' to 'Compact display label for the model used by the session.' (AgentSessionCodingHarness.modelLabel)
+
+  feat(schema): [non_breaking] Description '[Internal] Coding harness metadata from an agent session's latest sandbox.' on type 'AgentSessionCodingHarness' has changed to '[Internal] Coding harness metadata for a cloud or local coding session.' (AgentSessionCodingHarness)
+
+- 8dc7d7a: Reduced install size by about a third by no longer publishing the ESM source map; the published JavaScript is unchanged and remains unminified for debugging.
+
 ## 96.0.0
 
 ### Major Changes

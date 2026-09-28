@@ -2567,7 +2567,7 @@
           },
           {
             "name": "codingHarness",
-            "description": "[Internal] Coding harness metadata from the latest associated sandbox.",
+            "description": "[Internal] Coding harness metadata for this cloud or local session.",
             "args": [],
             "type": {
               "kind": "OBJECT",
@@ -2579,7 +2579,7 @@
           },
           {
             "name": "codingHarnessModelLabel",
-            "description": "[Internal] Compact display label for the coding harness model used by this session, derived from the latest associated sandbox.",
+            "description": "[Internal] Compact display label for the coding harness model used by this cloud or local session.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -3070,11 +3070,11 @@
       {
         "kind": "OBJECT",
         "name": "AgentSessionCodingHarness",
-        "description": "[Internal] Coding harness metadata from an agent session's latest sandbox.",
+        "description": "[Internal] Coding harness metadata for a cloud or local coding session.",
         "fields": [
           {
             "name": "harness",
-            "description": "The coding harness used by the sandbox.",
+            "description": "The coding harness or local target used by the session.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -3090,7 +3090,7 @@
           },
           {
             "name": "modelLabel",
-            "description": "Compact display label for the model used by the sandbox.",
+            "description": "Compact display label for the model used by the session.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
