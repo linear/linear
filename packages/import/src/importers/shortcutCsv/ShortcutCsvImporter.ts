@@ -2,10 +2,12 @@
 /* eslint-disable eqeqeq */
 import csv from "csvtojson";
 import type { Importer, ImportResult } from "../../types.ts";
-import { appendImageUrlSuffix } from "../../utils/appendImageUrlSuffix.ts";
 import { safeParseInt } from "../../utils/parseInt.ts";
 
 type ShortcutStoryType = "feature" | "bug" | "chore";
+
+// Hosts serving Shortcut attachments gated by the API token. The token is never sent to any other host.
+const SHORTCUT_HOST_SUFFIXES = ["shortcut.com", "clubhouse.io"];
 
 interface ShortcutIssueType {
   id: string;
@@ -102,9 +104,7 @@ export class ShortcutCsvImporter implements Importer {
       labels: {},
       users: {},
       statuses: {},
-      // Skip the client-side pre-upload of images. Linear's API will fetch the
-      // token-bearing URLs server-side.
-      skipImageReplacement: true,
+      authenticateImageUrl: url => authenticateShortcutUrl(url, this.apiToken),
     };
 
     const assignees = Array.from(new Set(data.map(row => row.owners).flat()));
@@ -115,12 +115,6 @@ export class ShortcutCsvImporter implements Importer {
         email: user,
       };
     }
-
-    const tokenSuffix = "?token=" + this.apiToken;
-    // Only hosts that we know are auth-gated by the Shortcut API token. Restricting the
-    // allowlist prevents the token from leaking to unrelated third-party hosts that may
-    // appear in story descriptions.
-    const shortcutHostSuffixes = ["clubhouse.io", "shortcut.com"];
 
     for (const row of data) {
       const title = row.name;
@@ -139,11 +133,7 @@ export class ShortcutCsvImporter implements Importer {
         row.external_tickets.map(externalUrl => `* **External Link:** ${externalUrl}`).join("\n"),
         `[View original issue in Shortcut](${url})`,
       ];
-      // Embed the token in image URLs so Linear's API can fetch them; the API rewrites
-      // these to Linear-hosted URLs before persisting, so the token never lands in stored content.
-      const description = appendImageUrlSuffix(descriptionParts.filter(s => s.length > 0).join("\n\n"), tokenSuffix, {
-        allowedHostSuffixes: shortcutHostSuffixes,
-      });
+      const description = descriptionParts.filter(s => s.length > 0).join("\n\n");
 
       const tags = row.labels;
       tags.push(row.type);
@@ -188,6 +178,29 @@ export class ShortcutCsvImporter implements Importer {
 
   private shortcutBaseURL: string;
 }
+
+/**
+ * Adds the API token to an https Shortcut URL so that its attachment can be downloaded.
+ * Any other URL is returned unchanged, so the token is never sent to a third-party host.
+ */
+const authenticateShortcutUrl = (url: string, apiToken: string): string => {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return url;
+  }
+
+  const host = parsed.hostname;
+  const isShortcutHost = SHORTCUT_HOST_SUFFIXES.some(suffix => host === suffix || host.endsWith("." + suffix));
+  if (parsed.protocol !== "https:" || !isShortcutHost) {
+    return url;
+  }
+
+  parsed.searchParams.set("token", apiToken);
+  // Serialize the parsed URL instead of appending to the original string, so the token only goes to the host checked above
+  return parsed.toString();
+};
 
 const mapStatus = (input: string): string => {
   const priorityMap: { [chState: string]: string } = {
