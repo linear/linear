@@ -82,7 +82,7 @@ export class GitLabCsvImporter implements Importer {
   private filePath: string;
 }
 
-// Map weights to a normalized range of 0-4, with 0 being the highest weight.
+// Map weights to a normalized range of 1-4, with 1 (Urgent) being the highest weight. 0 is reserved for "No priority".
 const normalizeWeights = (weights: Set<number>) => {
   const res: Map<number, IssuePriority> = new Map();
 
@@ -95,7 +95,7 @@ const normalizeWeights = (weights: Set<number>) => {
       // Handle division by zero
       res.set(weight, 1);
     } else {
-      res.set(weight, Math.round(((max - weight) / (max - min)) * 4) as IssuePriority);
+      res.set(weight, (1 + Math.round(((max - weight) / (max - min)) * 3)) as IssuePriority);
     }
   }
 
