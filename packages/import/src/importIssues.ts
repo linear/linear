@@ -87,9 +87,7 @@ export const importIssues = async (
     process.exit(1);
   }
   if (flags?.project && resolvedTeamIdFlag) {
-    const team = await client.team(resolvedTeamIdFlag);
-    const teamProjects = await team?.projects();
-    const projects = teamProjects?.nodes ?? [];
+    const projects = await fetchTeamProjects(client, resolvedTeamIdFlag);
     const matchedProject = projects.find(
       p => p.id === flags.project || p.name.toLowerCase() === flags.project!.toLowerCase()
     );
@@ -152,10 +150,7 @@ export const importIssues = async (
             return false;
           }
 
-          const team = await client.team(answers.targetTeamId);
-          const teamProjects = await team?.projects();
-
-          const projects = teamProjects?.nodes ?? [];
+          const projects = await fetchTeamProjects(client, answers.targetTeamId);
           return projects.length > 0;
         },
       },
@@ -169,10 +164,7 @@ export const importIssues = async (
             return false;
           }
 
-          const team = await client.team(answers.targetTeamId);
-          const teamProjects = await team?.projects();
-
-          const projects = teamProjects?.nodes ?? [];
+          const projects = await fetchTeamProjects(client, answers.targetTeamId);
           return projects.map(project => ({
             name: project.name,
             value: project.id,
@@ -384,6 +376,12 @@ export const importIssues = async (
   issuesProgressBar.stop();
 
   console.info(chalk.green(`${importer.name} issues imported to your team: https://linear.app/team/${teamKey}/all`));
+};
+
+// Fetch every project of a team, not just the first page
+const fetchTeamProjects = async (client: LinearClient, teamId: Id) => {
+  const team = await client.team(teamId);
+  return team ? team.paginate(team.projects, {}) : [];
 };
 
 // Build comments into issue description
