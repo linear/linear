@@ -68,9 +68,9 @@ const handleIssueLabels = async (
       }
 
       if (!actualLabelId) {
-        actualLabelId = await createLabel(client, { name: fullName, teamId, isGroup: false });
-        const newRootLabel = new Label(actualLabelId, fullName);
-        manager.addLabel({ label: newRootLabel, teamId });
+        const created = await createLabel(client, { name: fullName, teamId, isGroup: false });
+        actualLabelId = created.id;
+        manager.addLabel({ label: new Label(created.id, created.name), teamId });
       }
 
       labelMapping[labelId] = { type: "root", id: actualLabelId, existedBeforeImport: label?.existedBeforeImport };
@@ -86,24 +86,15 @@ const handleIssueLabels = async (
       continue;
     }
 
-    let groupLabel = group ? manager.getGroupLabel({ name: group }) : undefined;
+    // Previous imports may have renamed labels to avoid conflicts, so match those names too
+    let groupLabel = group ? findImportedLabel(group, name => manager.getGroupLabel({ name })) : undefined;
 
     if (group) {
       if (!groupLabel) {
-        // Check if the group name conflicts with an existing root label
-        const rootLabelConflict = manager.getRootLabel({ name: group });
-        if (rootLabelConflict) {
-          // Create the group label with a modified name
-          const groupName = `${group} (imported)`;
-          const groupId = await createLabel(client, { name: groupName, teamId, isGroup: true });
-          groupLabel = new GroupLabel(groupId, groupName);
-          manager.addLabel({ label: groupLabel, teamId });
-        } else {
-          // Create new group label
-          const groupId = await createLabel(client, { name: group, teamId, isGroup: true });
-          groupLabel = new GroupLabel(groupId, group);
-          manager.addLabel({ label: groupLabel, teamId });
-        }
+        const groupName = getAvailableName(manager, group, teamId);
+        const created = await createLabel(client, { name: groupName, teamId, isGroup: true });
+        groupLabel = new GroupLabel(created.id, created.name);
+        manager.addLabel({ label: groupLabel, teamId });
       }
 
       usedGroups.add(group);
@@ -111,22 +102,19 @@ const handleIssueLabels = async (
 
     // Handle the child label if we have a valid group
     if (groupLabel) {
-      const existingChildLabel = groupLabel.getSubgroupLabel(labelName);
+      const existingChildLabel = findImportedLabel(labelName, name => groupLabel.getSubgroupLabel(name));
       actualLabelId = existingChildLabel?.id;
 
       if (!actualLabelId) {
-        // Check for naming conflicts
-        const existingLabel = manager.getLabelByName(labelName, teamId);
-        const newLabelName = existingLabel ? renameConflictingLabel(labelName) : labelName;
-
-        actualLabelId = await createLabel(client, {
-          name: newLabelName,
+        const created = await createLabel(client, {
+          name: getAvailableName(manager, labelName, teamId),
           parentId: groupLabel.id,
           teamId,
           isGroup: false,
         });
+        actualLabelId = created.id;
 
-        const subgroupLabel = new SubgroupLabel(actualLabelId, newLabelName);
+        const subgroupLabel = new SubgroupLabel(created.id, created.name);
         manager.addLabel({ label: subgroupLabel, parent: groupLabel, teamId });
       }
 
@@ -152,9 +140,9 @@ const handleIssueLabels = async (
     actualLabelId = rootLabel?.id;
 
     if (!actualLabelId) {
-      actualLabelId = await createLabel(client, { name: rootLabelName, teamId, isGroup: false });
-      const newRootLabel = new Label(actualLabelId, rootLabelName);
-      manager.addLabel({ label: newRootLabel, teamId });
+      const created = await createLabel(client, { name: rootLabelName, teamId, isGroup: false });
+      actualLabelId = created.id;
+      manager.addLabel({ label: new Label(created.id, created.name), teamId });
     }
 
     labelMapping[labelId] = { type: "root", id: actualLabelId, existedBeforeImport: rootLabel?.existedBeforeImport };
@@ -162,6 +150,21 @@ const handleIssueLabels = async (
 };
 
 const renameConflictingLabel = (labelName: string) => `${labelName} (imported)`;
+
+const MAX_CONFLICT_RENAMES = 5;
+
+/** The label name followed by the names previous imports may have renamed it to on conflict */
+const importedNameCandidates = (labelName: string) =>
+  _.range(MAX_CONFLICT_RENAMES + 1).map(renames => labelName + " (imported)".repeat(renames));
+
+const findImportedLabel = <T>(labelName: string, find: (name: string) => T | undefined) =>
+  importedNameCandidates(labelName)
+    .map(find)
+    .find(label => label !== undefined);
+
+/** Label names are unique across the team regardless of group, so avoid every existing name */
+const getAvailableName = (manager: LabelManager, labelName: string, teamId: Id) =>
+  importedNameCandidates(labelName).find(name => !manager.getLabelByName(name, teamId)) ?? labelName;
 
 function parseLabelName(fullName: string): [string | undefined, string] {
   // Ensure every part is truncated to 80 characters
@@ -260,8 +263,8 @@ class LabelManager {
   ) {
     const { label, teamId = this.teamId } = props;
 
-    this.nameToLabel[label.normalizedName] = { [teamId]: label };
-    this.idToLabel[label.id] = { [teamId]: label };
+    this.nameToLabel[label.normalizedName] = { ...this.nameToLabel[label.normalizedName], [teamId]: label };
+    this.idToLabel[label.id] = { ...this.idToLabel[label.id], [teamId]: label };
 
     if ("parent" in props) {
       const { parent } = props;
@@ -284,7 +287,7 @@ class LabelManager {
 
   private async initializeLabels(existingLabels: IssueLabel[]) {
     // We want to process groups first.
-    existingLabels.sort(a => (a.isGroup ? -1 : 1));
+    existingLabels.sort((a, b) => Number(b.isGroup) - Number(a.isGroup));
 
     const isExisting = true;
 
@@ -296,9 +299,9 @@ class LabelManager {
         this.addLabel({ label: new GroupLabel(existingLabel.id, labelName, isExisting), teamId });
       } else if (labelName && existingLabel.id) {
         const parent = await existingLabel.parent;
+        const group = parent ? this.idToLabel[parent.id]?.[teamId] : undefined;
 
-        if (parent) {
-          const group = this.idToLabel[parent.id]?.[teamId] as GroupLabel;
+        if (group instanceof GroupLabel) {
           this.addLabel({ label: new Label(existingLabel.id, labelName, isExisting), parent: group, teamId });
         } else {
           this.addLabel({ label: new Label(existingLabel.id, labelName, isExisting), teamId });
@@ -328,12 +331,12 @@ const createLabel = async (
 ) => {
   try {
     const response = await client.createIssueLabel({ name, description, color, teamId, parentId, isGroup });
-    return (await response?.issueLabel)!.id;
+    return { id: (await response?.issueLabel)!.id, name };
   } catch {
     // If the label failed to create it's likely it's a name conflict, in which case we try one more time with a new name
     const newName = renameConflictingLabel(name);
     const response = await client.createIssueLabel({ name: newName, description, color, teamId, parentId, isGroup });
-    return (await response?.issueLabel)!.id;
+    return { id: (await response?.issueLabel)!.id, name: newName };
   }
 };
 
