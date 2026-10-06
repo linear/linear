@@ -86,13 +86,14 @@ const handleIssueLabels = async (
       continue;
     }
 
-    // Previous imports may have renamed labels to avoid conflicts, so match those names too
-    let groupLabel = group ? findImportedLabel(group, name => manager.getGroupLabel({ name })) : undefined;
+    let groupLabel: GroupLabel | undefined;
 
     if (group) {
+      const resolved = resolveImportedName(manager, group, teamId, name => manager.getGroupLabel({ name }));
+      groupLabel = resolved.label;
+
       if (!groupLabel) {
-        const groupName = getAvailableName(manager, group, teamId);
-        const created = await createLabel(client, { name: groupName, teamId, isGroup: true });
+        const created = await createLabel(client, { name: resolved.name, teamId, isGroup: true });
         groupLabel = new GroupLabel(created.id, created.name);
         manager.addLabel({ label: groupLabel, teamId });
       }
@@ -102,12 +103,13 @@ const handleIssueLabels = async (
 
     // Handle the child label if we have a valid group
     if (groupLabel) {
-      const existingChildLabel = findImportedLabel(labelName, name => groupLabel.getSubgroupLabel(name));
+      const resolved = resolveImportedName(manager, labelName, teamId, name => groupLabel.getSubgroupLabel(name));
+      const existingChildLabel = resolved.label;
       actualLabelId = existingChildLabel?.id;
 
       if (!actualLabelId) {
         const created = await createLabel(client, {
-          name: getAvailableName(manager, labelName, teamId),
+          name: resolved.name,
           parentId: groupLabel.id,
           teamId,
           isGroup: false,
@@ -157,14 +159,31 @@ const MAX_CONFLICT_RENAMES = 5;
 const importedNameCandidates = (labelName: string) =>
   _.range(MAX_CONFLICT_RENAMES + 1).map(renames => labelName + " (imported)".repeat(renames));
 
-const findImportedLabel = <T>(labelName: string, find: (name: string) => T | undefined) =>
-  importedNameCandidates(labelName)
-    .map(find)
-    .find(label => label !== undefined);
-
-/** Label names are unique across the team regardless of group, so avoid every existing name */
-const getAvailableName = (manager: LabelManager, labelName: string, teamId: Id) =>
-  importedNameCandidates(labelName).find(name => !manager.getLabelByName(name, teamId)) ?? labelName;
+/**
+ * Resolve a label the way previous imports named it. Label names are unique across the team regardless of group,
+ * so an import only renames a label when the previous candidate name is taken. Walk the candidates until one is
+ * either the label we're looking for or free to use.
+ *
+ * @param manager Label manager containing existing labels
+ * @param labelName Original label name
+ * @param teamId Team ID being imported to
+ * @param find Finds the matching label by name, e.g. within its group
+ * @returns The matching label if found, otherwise the name to create it with
+ */
+const resolveImportedName = <T extends Label>(
+  manager: LabelManager,
+  labelName: string,
+  teamId: Id,
+  find: (name: string) => T | undefined
+): { label?: T; name: string } => {
+  for (const name of importedNameCandidates(labelName)) {
+    const label = find(name);
+    if (label || !manager.getLabelByName(name, teamId)) {
+      return { label, name };
+    }
+  }
+  return { name: labelName };
+};
 
 function parseLabelName(fullName: string): [string | undefined, string] {
   // Ensure every part is truncated to 80 characters

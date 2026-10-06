@@ -128,6 +128,31 @@ describe("handleLabels", () => {
     expect(api.labels).toHaveLength(labelCount);
   });
 
+  it("doesn't reuse a child ending in (imported) when the original name is free", async () => {
+    const api = new FakeLabelApi();
+    const group = api.add({ name: "Notion Priority", isGroup: true, teamId: TEAM_ID });
+    const unrelated = api.add({ name: "Critical (imported)", isGroup: false, teamId: TEAM_ID, parentId: group.id });
+
+    const mapping = await api.import(importWithLabels(["Notion Priority/Critical"]));
+
+    const child = api.find("Critical");
+    expect(child?.parentId).toBe(group.id);
+    expect(mapping["csv-0"]).toMatchObject({ type: "child", id: child?.id });
+    expect(mapping["csv-0"]?.id).not.toBe(unrelated.id);
+  });
+
+  it("doesn't reuse a group ending in (imported) when the original name is free", async () => {
+    const api = new FakeLabelApi();
+    const unrelated = api.add({ name: "Notion Priority (imported)", isGroup: true, teamId: TEAM_ID });
+
+    await api.import(importWithLabels(["Notion Priority/High"]));
+
+    const group = api.find("Notion Priority");
+    expect(group?.isGroup).toBe(true);
+    expect(api.find("High")?.parentId).toBe(group?.id);
+    expect(api.find("High")?.parentId).not.toBe(unrelated.id);
+  });
+
   it("picks the next free name when the renamed name is taken outside the group", async () => {
     const api = new FakeLabelApi();
     api.add({ name: "Critical", isGroup: false, teamId: TEAM_ID });
