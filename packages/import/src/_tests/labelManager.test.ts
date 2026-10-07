@@ -153,6 +153,19 @@ describe("handleLabels", () => {
     expect(api.find("High")?.parentId).not.toBe(unrelated.id);
   });
 
+  it("keeps renaming until it finds a free name", async () => {
+    const api = new FakeLabelApi();
+    for (let renames = 0; renames <= 6; renames++) {
+      api.add({ name: "Critical" + " (imported)".repeat(renames), isGroup: false, teamId: TEAM_ID });
+    }
+
+    const mapping = await api.import(importWithLabels(["Notion Priority/Critical"]));
+
+    const child = api.find("Critical" + " (imported)".repeat(7));
+    expect(child?.parentId).toBe(api.find("Notion Priority")?.id);
+    expect(mapping["csv-0"]).toMatchObject({ type: "child", id: child?.id });
+  });
+
   it("picks the next free name when the renamed name is taken outside the group", async () => {
     const api = new FakeLabelApi();
     api.add({ name: "Critical", isGroup: false, teamId: TEAM_ID });

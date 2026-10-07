@@ -153,16 +153,11 @@ const handleIssueLabels = async (
 
 const renameConflictingLabel = (labelName: string) => `${labelName} (imported)`;
 
-const MAX_CONFLICT_RENAMES = 5;
-
-/** The label name followed by the names previous imports may have renamed it to on conflict */
-const importedNameCandidates = (labelName: string) =>
-  _.range(MAX_CONFLICT_RENAMES + 1).map(renames => labelName + " (imported)".repeat(renames));
-
 /**
  * Resolve a label the way previous imports named it. Label names are unique across the team regardless of group,
- * so an import only renames a label when the previous candidate name is taken. Walk the candidates until one is
- * either the label we're looking for or free to use.
+ * so an import only renames a label when the previous candidate name is taken. Keep appending "(imported)" until
+ * the name is either the label we're looking for or free to use. Every taken name belongs to a known label, so this
+ * always ends.
  *
  * @param manager Label manager containing existing labels
  * @param labelName Original label name
@@ -176,13 +171,12 @@ const resolveImportedName = <T extends Label>(
   teamId: Id,
   find: (name: string) => T | undefined
 ): { label?: T; name: string } => {
-  for (const name of importedNameCandidates(labelName)) {
+  for (let name = labelName; ; name = renameConflictingLabel(name)) {
     const label = find(name);
     if (label || !manager.getLabelByName(name, teamId)) {
       return { label, name };
     }
   }
-  return { name: labelName };
 };
 
 function parseLabelName(fullName: string): [string | undefined, string] {
