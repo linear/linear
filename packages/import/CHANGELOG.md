@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.0.1
+
+### Patch Changes
+
+- bdb1202: fix(import): reuse labels renamed with "(imported)" by previous imports so re-running an import no longer fails with duplicate label names
+- Updated dependencies
+  - @linear/sdk@97.1.0
+
 ## 4.0.0
 
 ### Major Changes
