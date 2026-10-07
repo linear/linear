@@ -30,6 +30,12 @@ export interface Issue {
   archived?: boolean;
   /** Issue estimate */
   estimate?: number;
+  /** External id of the issue in the source system. Used to resolve cross-references within an import batch. */
+  externalId?: string;
+  /** Issue identifiers (source row Ids, issue identifiers, or titles) that this issue blocks. */
+  blocks?: string[];
+  /** Issue identifiers (source row Ids, issue identifiers, or titles) that block this issue. */
+  blockedBy?: string[];
 }
 
 /** Issue comment */

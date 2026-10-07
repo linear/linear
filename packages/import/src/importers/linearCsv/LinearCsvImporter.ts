@@ -26,6 +26,8 @@ interface LinearIssueType {
   Completed: string;
   Canceled: string;
   Archived: string;
+  Blocks: string;
+  "Blocked By": string;
 }
 
 /**
@@ -72,6 +74,9 @@ export class LinearCsvImporter implements Importer {
       const tags = row.Labels ? row.Labels.split(", ") : [];
       const labels = tags.filter(tag => !!tag);
 
+      const blocks = splitReferences(row.Blocks);
+      const blockedBy = splitReferences(row["Blocked By"]);
+
       importData.issues.push({
         title: stripLeadingSingleQuote(row.Title),
         description: stripLeadingSingleQuote(row.Description),
@@ -83,6 +88,9 @@ export class LinearCsvImporter implements Importer {
         startedAt: !!row.Started ? new Date(row.Started) : undefined,
         estimate: safeParseInt(row.Estimate),
         labels,
+        externalId: row.Id || undefined,
+        blocks,
+        blockedBy,
       });
 
       for (const lab of labels) {
@@ -106,6 +114,19 @@ export class LinearCsvImporter implements Importer {
 // as a formula. When we're sending the data to the API, we need to strip that leading single quote.
 function stripLeadingSingleQuote(input: string): string {
   return input.replace(/^'([+\-=@∑√∏<>＜＞≤≥＝≠±÷×])/, "$1");
+}
+
+// Dependency columns hold comma-separated references to other issues in the same import. Split on the same ", "
+// separator used by the Labels column and drop empties.
+function splitReferences(input: string | undefined): string[] | undefined {
+  if (!input) {
+    return undefined;
+  }
+  const refs = input
+    .split(", ")
+    .map(ref => stripLeadingSingleQuote(ref.trim()))
+    .filter(ref => !!ref);
+  return refs.length > 0 ? refs : undefined;
 }
 
 const mapPriority = (input: LinearPriority) => {
