@@ -90,7 +90,7 @@ export function nonNullable<Type>(value: Type): value is NonNullable<Type> {
   return value !== null && value !== undefined;
 }
 
-/**§
+/**
  * Capitalize the first character in a string
  */
 export function upperFirst(str?: string): string {
@@ -127,10 +127,7 @@ export function getKeyByValue<Key extends string, Value>(obj: Record<Key, Value>
 export function nodeHasSkipComment(
   context: PluginContext,
   node?:
-    | FieldDefinitionNode
-    | ObjectTypeDefinitionNode
-    | InterfaceTypeDefinitionNode
-    | NamedFields<ObjectTypeDefinitionNode>
+    FieldDefinitionNode | ObjectTypeDefinitionNode | InterfaceTypeDefinitionNode | NamedFields<ObjectTypeDefinitionNode>
 ): boolean {
   return context.config.skipComments?.some(comment => node?.description?.value.includes(comment)) ?? false;
 }

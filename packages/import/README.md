@@ -95,7 +95,7 @@ The following fields are supported:
 
 ### Trello JSON
 
-Trello board can be imported into a Linear team from the JSON export file, which can be obtained by going into Board → Show Menu → More → Print and Export → Export as JSON.
+A Trello board can be imported into a Linear team from the JSON export file, which can be obtained by going into Board → Show Menu → More → Print and Export → Export as JSON.
 
 The following fields are supported:
 
@@ -120,7 +120,7 @@ The following fields are supported:
 - `Labels` - Added as a label
 - `Estimate` - Issue estimate
 - `Created` - Issue creation date
-- `Completed` - Issue completion date (if has completed status)
+- `Completed` - Issue completion date (if it has a completed status)
 
 ### GitLab CSV
 

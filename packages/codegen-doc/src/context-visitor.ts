@@ -104,7 +104,7 @@ export class ContextVisitor<Config extends PluginConfig> {
   };
 
   public EnumTypeDefinition = {
-    /** Record all enums types */
+    /** Record all enum types */
     enter: (node: EnumTypeDefinitionNode): EnumTypeDefinitionNode => {
       this._enums = [...this._enums, node];
       return node;

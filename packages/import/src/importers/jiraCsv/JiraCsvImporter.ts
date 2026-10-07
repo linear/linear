@@ -5,7 +5,7 @@ import { safeParseInt } from "../../utils/parseInt.ts";
 
 type JiraPriority = "Highest" | "High" | "Medium" | "Low" | "Lowest";
 
-// There are many estimates field in Jira. Use the one that comes as the default in new projects.
+// There are many estimate fields in Jira. Use the one that comes as the default in new projects.
 const estimateCustomField = "Custom field (Story point estimate)";
 
 interface JiraIssueType {

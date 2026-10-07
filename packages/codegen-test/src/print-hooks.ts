@@ -39,7 +39,7 @@ function printBeforeAll(): string {
 }
 
 /**
- * Prints the hook to call after all test have run
+ * Prints the hook to call after all tests have run
  * Kills the mock server
  */
 function printAfterAll(): string {

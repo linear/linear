@@ -230,7 +230,7 @@ class LabelManager {
   /**
    * Retrieve a label by its ID in either the workspace or specified team
    *
-   * @param name Label ID
+   * @param id Label ID
    * @param teamId Team ID to search in
    * @returns Label instance if found
    */

@@ -44,7 +44,7 @@ const parseDate = (item: string, _: any, __: any, row: string[]) => {
   if (item.length <= 0) {
     return null;
   }
-  // Inoptimal method for finding the timezone UTC offset, we parse it from the UTC offset column in this row each time
+  // Suboptimal method for finding the timezone UTC offset, we parse it from the UTC offset column in this row each time
   const utcOffset = row.find(c => /^[+-]([01]\d|2[0-4])(:?[0-5]\d)?$/g.test(c)) || "";
   return new Date(item + " " + utcOffset);
 };
@@ -71,7 +71,7 @@ const colParser = {
 };
 
 /**
- * Import issues from an Shortcut CSV export.
+ * Import issues from a Shortcut CSV export.
  *
  * @param filePath  path to csv file
  * @param workspaceSlug   Shortcut workspace slug (https://app.shortcut.com/[THIS])
