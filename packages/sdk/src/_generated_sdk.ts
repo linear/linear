@@ -7845,8 +7845,8 @@ export class Document extends Request {
     return new CreateDocumentMutation(this._request).fetch(input);
   }
   /** Deletes (trashes) a document. The document is marked as trashed and archived, but not permanently removed. */
-  public delete() {
-    return new DeleteDocumentMutation(this._request).fetch(this.id);
+  public delete(variables?: Omit<L.DeleteDocumentMutationVariables, "id">) {
+    return new DeleteDocumentMutation(this._request).fetch(this.id, variables);
   }
   /** Restores a previously trashed document by unarchiving it. */
   public unarchive() {
@@ -16768,6 +16768,7 @@ export class Organization extends Request {
     this.scimEnabled = data.scimEnabled;
     this.securitySettings = data.securitySettings;
     this.slackProjectChannelPrefix = data.slackProjectChannelPrefix;
+    this.suggestedBranchNameEnabled = data.suggestedBranchNameEnabled;
     this.trialEndsAt = parseDate(data.trialEndsAt) ?? undefined;
     this.trialStartsAt = parseDate(data.trialStartsAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
@@ -16868,6 +16869,8 @@ export class Organization extends Request {
   public securitySettings: L.Scalars["JSONObject"];
   /** The prefix used for auto-created Slack project channels. */
   public slackProjectChannelPrefix: string;
+  /** Whether the default prompt for copying an issue or opening it in a coding tool includes a suggested Git branch name. */
+  public suggestedBranchNameEnabled: boolean;
   /** The time at which the current plan trial will end. Null if the workspace is not in a trial period. */
   public trialEndsAt?: Date | null;
   /** The time at which the current plan trial started. Null if the workspace is not in a trial period. */
@@ -17281,6 +17284,52 @@ export class OrganizationPayload extends Request {
   }
 }
 /**
+ * A public resource quota for the current workspace.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OrganizationQuotaFragment response data
+ */
+export class OrganizationQuota extends Request {
+  public constructor(request: LinearRequest, data: L.OrganizationQuotaFragment) {
+    super(request);
+    this.description = data.description;
+    this.id = data.id;
+    this.key = data.key;
+    this.limit = data.limit;
+    this.name = data.name;
+  }
+
+  public description: string;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** Stable quota key. */
+  public key: string;
+  /** Effective quota limit, including workspace overrides. */
+  public limit: number;
+  public name: string;
+}
+/**
+ * OrganizationQuotaConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this OrganizationQuotaConnection model
+ * @param data - OrganizationQuotaConnection response data
+ */
+export class OrganizationQuotaConnection extends Connection<OrganizationQuota> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<OrganizationQuota> | undefined>,
+    data: L.OrganizationQuotaConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new OrganizationQuota(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
  * Workspace trial start response.
  *
  * @param request - function to call the graphql client
@@ -17294,6 +17343,63 @@ export class OrganizationStartTrialPayload extends Request {
 
   /** Whether the operation was successful. */
   public success: boolean;
+}
+/**
+ * OriginInstallUrlPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OriginInstallUrlPayloadFragment response data
+ */
+export class OriginInstallUrlPayload extends Request {
+  public constructor(request: LinearRequest, data: L.OriginInstallUrlPayloadFragment) {
+    super(request);
+    this.installUrl = data.installUrl;
+  }
+
+  /** The Origin URL to send the user to in order to install Linear's app. */
+  public installUrl: string;
+}
+/**
+ * OriginInstallationCancelPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OriginInstallationCancelPayloadFragment response data
+ */
+export class OriginInstallationCancelPayload extends Request {
+  public constructor(request: LinearRequest, data: L.OriginInstallationCancelPayloadFragment) {
+    super(request);
+    this.success = data.success;
+  }
+
+  /** Whether Linear's app was removed from the installation. */
+  public success: boolean;
+}
+/**
+ * OriginInstallationDetails model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OriginInstallationDetailsFragment response data
+ */
+export class OriginInstallationDetails extends Request {
+  public constructor(request: LinearRequest, data: L.OriginInstallationDetailsFragment) {
+    super(request);
+    this.connectedToWorkspace = data.connectedToWorkspace;
+    this.installationId = data.installationId;
+    this.ownerSlug = data.ownerSlug;
+    this.ownerType = data.ownerType ?? undefined;
+    this.repositorySelection = data.repositorySelection;
+  }
+
+  /** Whether the installation is already connected to the current workspace, as after a reinstall that updated it. */
+  public connectedToWorkspace: boolean;
+  /** The Origin installation id. */
+  public installationId: string;
+  /** The slug of the Origin owner the app was installed on. */
+  public ownerSlug: string;
+  /** Whether the Origin owner is a `team` or a `user`. */
+  public ownerType?: string | null;
+  /** Whether the installation covers `all` repositories of the owner or only `selected` ones. */
+  public repositorySelection: string;
 }
 /**
  * Generic notification payload.
@@ -22920,6 +23026,7 @@ export class Team extends Request {
     this.triageEnabled = data.triageEnabled;
     this.upcomingCycleCount = data.upcomingCycleCount;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.viewerCanJoin = data.viewerCanJoin;
     this.visibility = data.visibility;
     this._activeCycle = data.activeCycle ?? undefined;
     this._defaultIssueState = data.defaultIssueState ?? undefined;
@@ -23049,6 +23156,8 @@ export class Team extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** Whether the viewer can add themselves to the team. False when the viewer is already a member, the team is archived, retired, or SCIM-managed, the viewer lacks the plan access or permission to add themselves, or the viewer has reached their team membership limit. Runs the same checks `teamMembershipCreate` applies to a viewer joining on their own. */
+  public viewerCanJoin: boolean;
   /** The visibility of the team. Returns public for teams visible to all workspace members, private for teams visible only to members, and restricted for non-private teams inside a private-team boundary. */
   public visibility: L.TeamVisibility;
   /** Team's currently active cycle. */
@@ -30413,6 +30522,40 @@ export class PushSubscriptionTestQuery extends Request {
 }
 
 /**
+ * A fetchable Quotas Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class QuotasQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Quotas query and return a OrganizationQuotaConnection
+   *
+   * @param variables - variables to pass into the QuotasQuery
+   * @returns parsed response from QuotasQuery
+   */
+  public async fetch(variables?: L.QuotasQueryVariables): LinearFetch<OrganizationQuotaConnection> {
+    const response = await this._request<L.QuotasQuery, L.QuotasQueryVariables>(L.QuotasDocument.toString(), variables);
+    const data = response.quotas;
+
+    return new OrganizationQuotaConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable RateLimitStatus Query
  *
  * @param request - function to call the graphql client
@@ -33792,13 +33935,18 @@ export class DeleteDocumentMutation extends Request {
    * Call the DeleteDocument mutation and return a DocumentArchivePayload
    *
    * @param id - required id to pass to deleteDocument
+   * @param variables - variables without 'id' to pass into the DeleteDocumentMutation
    * @returns parsed response from DeleteDocumentMutation
    */
-  public async fetch(id: string): LinearFetch<DocumentArchivePayload> {
+  public async fetch(
+    id: string,
+    variables?: Omit<L.DeleteDocumentMutationVariables, "id">
+  ): LinearFetch<DocumentArchivePayload> {
     const response = await this._request<L.DeleteDocumentMutation, L.DeleteDocumentMutationVariables>(
       L.DeleteDocumentDocument.toString(),
       {
         id,
+        ...variables,
       }
     );
     const data = response.documentDelete;
@@ -51387,6 +51535,15 @@ export class LinearSdk extends Request {
     return new PushSubscriptionTestQuery(this._request).fetch(variables);
   }
   /**
+   * Public resource quotas for the authenticated workspace. These are not subscription limits.
+   *
+   * @param variables - variables to pass into the QuotasQuery
+   * @returns OrganizationQuotaConnection
+   */
+  public quotas(variables?: L.QuotasQueryVariables): LinearFetch<OrganizationQuotaConnection> {
+    return new QuotasQuery(this._request).fetch(variables);
+  }
+  /**
    * The current rate limit status for the authenticated client, including remaining quota and reset timing for each limit type.
    *
    * @returns RateLimitPayload
@@ -52504,10 +52661,14 @@ export class LinearSdk extends Request {
    * Deletes (trashes) a document. The document is marked as trashed and archived, but not permanently removed.
    *
    * @param id - required id to pass to deleteDocument
+   * @param variables - variables without 'id' to pass into the DeleteDocumentMutation
    * @returns DocumentArchivePayload
    */
-  public deleteDocument(id: string): LinearFetch<DocumentArchivePayload> {
-    return new DeleteDocumentMutation(this._request).fetch(id);
+  public deleteDocument(
+    id: string,
+    variables?: Omit<L.DeleteDocumentMutationVariables, "id">
+  ): LinearFetch<DocumentArchivePayload> {
+    return new DeleteDocumentMutation(this._request).fetch(id, variables);
   }
   /**
    * Restores a previously trashed document by unarchiving it.
