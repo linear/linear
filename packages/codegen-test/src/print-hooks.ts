@@ -14,7 +14,7 @@ function printBeforeSuite(): string {
 
 /**
  * Prints the hook to call before each test runs
- * Sets jest fake timers
+ * Sets vitest fake timers
  */
 function printBeforeEach(): string {
   return printLines([
@@ -52,7 +52,7 @@ function printAfterAll(): string {
 }
 
 /**
- * Print all jest hooks
+ * Print all vitest hooks
  */
 export function printTestHooks(): string {
   return printLines([printBeforeSuite(), printBeforeEach(), printBeforeAll(), printAfterAll()]);

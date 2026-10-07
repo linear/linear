@@ -60,7 +60,7 @@ export enum LinearErrorType {
  * One of potentially many raw graphql errors returned by the Linear API
  */
 export interface LinearGraphQLErrorRaw {
-  /** The error type */
+  /** The error message */
   message?: LinearErrorType;
   /** The path to the graphql node at which the error occurred */
   path?: string[];

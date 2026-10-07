@@ -34,7 +34,7 @@ export function printTests(context: SdkPluginContext): string {
 }
 
 /**
- * Print a jest describe block
+ * Print a vitest describe block
  */
 function printDescribe(name: string, description: string[], content: string, omit = false): string {
   return omit
@@ -49,7 +49,7 @@ function printDescribe(name: string, description: string[], content: string, omi
 }
 
 /**
- * Print a jest it block
+ * Print a vitest it block
  */
 function printIt(name: string, content: string): string {
   return printLines([

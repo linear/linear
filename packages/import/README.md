@@ -134,9 +134,9 @@ The following fields are supported:
 - `State` - Issue workflow state
 - `Labels` - Added as a label
 - `URL` - Added as a link in the issue description
-- `Created At` - Issue creation date
+- `Created At (UTC)` - Issue creation date
 - `Due Date` - Issue due date
-- `Closed At` - Issue completion date
+- `Closed At (UTC)` - Issue completion date
 - `Weight` - Issue priority
 - `Time Estimate` - Issue estimate
 
