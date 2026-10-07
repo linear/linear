@@ -2,9 +2,9 @@
 import { LinearClient } from "@linear/sdk";
 import { replaceAsync } from "./replaceAsync.ts";
 
-const IMAGE_MD_REGEX = /(?:!\[(.*?)\]\((https?:\/\/.*?)\))/;
+const IMAGE_MD_REGEX = /(?:!\[(.*?)\]\((https?:\/\/.*?)\))/g;
 // eslint-disable-next-line no-useless-escape
-const IMAGE_TAG_REGEX = /(?:<img.*?src=\"(.*?)\".*?>)/;
+const IMAGE_TAG_REGEX = /(?:<img.*?src=\"(.*?)\".*?>)/g;
 
 /**
  * Replace markdown image URLs with Linear uploaded ones.
