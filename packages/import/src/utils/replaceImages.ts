@@ -47,7 +47,7 @@ export const replaceImagesInMarkdown = async (
 };
 
 /**
- * Downloads image and upload it to
+ * Downloads an image and uploads it to Linear
  *
  * @param client Linear API client
  * @param url URL of the source image

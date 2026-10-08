@@ -57,7 +57,7 @@ export function createTestServer(): MockContext {
   let mockResponseFn: () => MockSpec;
 
   beforeAll(async () => {
-    /** Initialise the test server */
+    /** Initialize the test server */
     const port = await getPort();
     ctx.server = express();
     ctx.server.use(body.json());

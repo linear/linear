@@ -28,7 +28,7 @@ interface PivotalIssueType {
 }
 
 /**
- * Import issues from an Pivotal Tracker CSV export.
+ * Import issues from a Pivotal Tracker CSV export.
  *
  * @param filePath  path to csv file
  * @param orgSlug   base Pivotal project url

@@ -28,7 +28,7 @@ import { printNamespaced } from "./print.js";
 import { SdkDefinitions, SdkModel, SdkOperation, SdkOperationPrint, SdkPluginConfig } from "./types.js";
 
 /**
- * Get a list of all non null document notes
+ * Get a list of all non null document nodes
  */
 function getDocumentNodes(documents: Types.DocumentFile[]): DocumentNode[] {
   return documents.reduce<DocumentNode[]>((prev, node) => {
