@@ -47,7 +47,7 @@ import {
 } from "./types.js";
 
 /**
- * Ensure the models is not a root operation, an edge, or has a skip comment.
+ * Ensure the model is not a root operation, an edge, or has a skip comment.
  */
 function isValidModel(model: ObjectTypeDefinitionNode | InterfaceTypeDefinitionNode, context: PluginContext): boolean {
   const skipComment = nodeHasSkipComment(context, model);
@@ -116,12 +116,12 @@ export class ModelVisitor {
   };
 
   public ObjectTypeDefinition = {
-    /** Return an processed valid models */
+    /** Return processed valid models */
     leave: leaveObjectOrInterface,
   };
 
   public InterfaceTypeDefinition = {
-    /** Return an processed valid models */
+    /** Return processed valid models */
     leave: leaveObjectOrInterface,
   };
 

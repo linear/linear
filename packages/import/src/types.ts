@@ -36,7 +36,7 @@ export interface Issue {
 export interface Comment {
   /** Comment's body in markdown */
   body?: string;
-  /** User who posted the comments */
+  /** User who posted the comment */
   userId: string;
   /** When the comment was created. */
   createdAt?: Date;

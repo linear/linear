@@ -71,7 +71,7 @@ function printConnectionVariables(): string {
 }
 
 /**
- * Function to default any connection variables that are rerquired by the api
+ * Function to default any connection variables that are required by the api
  */
 function printConnectionDefault(): string {
   return printLines([

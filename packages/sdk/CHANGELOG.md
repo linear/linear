@@ -1,5 +1,95 @@
 # Change Log
 
+## 97.1.0
+
+### Minor Changes
+
+- feat(schema): [dangerous] Input field 'parentDocumentId' was added to input object type 'DocumentCreateInput' (DocumentCreateInput.parentDocumentId)
+
+  feat(schema): [dangerous] Input field 'subDocumentSortOrder' was added to input object type 'DocumentCreateInput' (DocumentCreateInput.subDocumentSortOrder)
+
+  feat(schema): [dangerous] Input field 'parentDocumentId' was added to input object type 'DocumentUpdateInput' (DocumentUpdateInput.parentDocumentId)
+
+  feat(schema): [dangerous] Input field 'personalUserId' was added to input object type 'DocumentUpdateInput' (DocumentUpdateInput.personalUserId)
+
+  feat(schema): [dangerous] Input field 'subDocumentSortOrder' was added to input object type 'DocumentUpdateInput' (DocumentUpdateInput.subDocumentSortOrder)
+
+  feat(schema): [dangerous] Argument 'ifParentDocumentId: String' added to field 'Mutation.documentDelete' (Mutation.documentDelete.ifParentDocumentId)
+
+  feat(schema): [dangerous] Input field 'suggestedBranchNameEnabled' was added to input object type 'OrganizationUpdateInput' (OrganizationUpdateInput.suggestedBranchNameEnabled)
+
+  feat(schema): [dangerous] Enum value 'commentResolved' was added to enum 'WorkflowTrigger' (WorkflowTrigger.commentResolved)
+
+  feat(schema): [dangerous] Enum value 'reviewSubmitted' was added to enum 'WorkflowTrigger' (WorkflowTrigger.reviewSubmitted)
+
+  feat(schema): [dangerous] Enum value 'pullRequest' was added to enum 'WorkflowTriggerType' (WorkflowTriggerType.pullRequest)
+
+  feat(schema): [non_breaking] Type 'OrganizationQuota' was added (OrganizationQuota)
+
+  feat(schema): [non_breaking] Type 'OrganizationQuotaConnection' was added (OrganizationQuotaConnection)
+
+  feat(schema): [non_breaking] Type 'OrganizationQuotaEdge' was added (OrganizationQuotaEdge)
+
+  feat(schema): [non_breaking] Type 'OrganizationQuotaFilter' was added (OrganizationQuotaFilter)
+
+  feat(schema): [non_breaking] Type 'OriginInstallUrlPayload' was added (OriginInstallUrlPayload)
+
+  feat(schema): [non_breaking] Type 'OriginInstallationCancelPayload' was added (OriginInstallationCancelPayload)
+
+  feat(schema): [non_breaking] Type 'OriginInstallationDetails' was added (OriginInstallationDetails)
+
+  feat(schema): [non_breaking] Field 'parentDocument' was added to object type 'Document' (Document.parentDocument)
+
+  feat(schema): [non_breaking] Field 'subDocumentSortOrder' was added to object type 'Document' (Document.subDocumentSortOrder)
+
+  feat(schema): [non_breaking] Field 'parentDocument' was added to object type 'DocumentSearchResult' (DocumentSearchResult.parentDocument)
+
+  feat(schema): [non_breaking] Field 'subDocumentSortOrder' was added to object type 'DocumentSearchResult' (DocumentSearchResult.subDocumentSortOrder)
+
+  feat(schema): [non_breaking] Field 'integrationOriginConnect' was added to object type 'Mutation' (Mutation.integrationOriginConnect)
+
+  feat(schema): [non_breaking] Field 'integrationOriginConnectInstallation' was added to object type 'Mutation' (Mutation.integrationOriginConnectInstallation)
+
+  feat(schema): [non_breaking] Field 'originInstallationCancel' was added to object type 'Mutation' (Mutation.originInstallationCancel)
+
+  feat(schema): [non_breaking] Field 'suggestedBranchNameEnabled' was added to object type 'Organization' (Organization.suggestedBranchNameEnabled)
+
+  feat(schema): [non_breaking] Field 'originInstallUrl' was added to object type 'Query' (Query.originInstallUrl)
+
+  feat(schema): [non_breaking] Field 'originInstallation' was added to object type 'Query' (Query.originInstallation)
+
+  feat(schema): [non_breaking] Field 'originPendingInstallations' was added to object type 'Query' (Query.originPendingInstallations)
+
+  feat(schema): [non_breaking] Field 'quotas' was added to object type 'Query' (Query.quotas)
+
+  feat(schema): [non_breaking] Field 'viewerCanJoin' was added to object type 'Team' (Team.viewerCanJoin)
+
+## 97.0.0
+
+### Major Changes
+
+- e09bb8d: **`@linear/sdk` is now ESM-only, halving its install size.** Most projects need no changes: on Node.js 20.19+ or 22.12+, `require("@linear/sdk")` still works from CommonJS.
+
+  You may need to update your setup if you use:
+
+  - **Node.js older than 20.19 or 22.12:** upgrade Node.js, or stay on the previous release of `@linear/sdk`.
+  - **Jest in CommonJS mode:** Jest can't `require()` ES modules. Let `babel-jest` transform the SDK by adding `transformIgnorePatterns: ["/node_modules/(?!@linear/sdk)"]`, or run Jest with native ESM support (`--experimental-vm-modules`).
+  - **TypeScript with `"module": "node16"`, or `"nodenext"` on TypeScript 5.7 or older:** these report error TS1479. Use `"module": "nodenext"` with TypeScript 5.8+, or `"moduleResolution": "bundler"`.
+
+### Patch Changes
+
+- feat(schema): [non_breaking] Field 'AgentSession.codingHarness' description changed from '[Internal] Coding harness metadata from the latest associated sandbox.' to '[Internal] Coding harness metadata for this cloud or local session.' (AgentSession.codingHarness)
+
+  feat(schema): [non_breaking] Field 'AgentSession.codingHarnessModelLabel' description changed from '[Internal] Compact display label for the coding harness model used by this session, derived from the latest associated sandbox.' to '[Internal] Compact display label for the coding harness model used by this cloud or local session.' (AgentSession.codingHarnessModelLabel)
+
+  feat(schema): [non_breaking] Field 'AgentSessionCodingHarness.harness' description changed from 'The coding harness used by the sandbox.' to 'The coding harness or local target used by the session.' (AgentSessionCodingHarness.harness)
+
+  feat(schema): [non_breaking] Field 'AgentSessionCodingHarness.modelLabel' description changed from 'Compact display label for the model used by the sandbox.' to 'Compact display label for the model used by the session.' (AgentSessionCodingHarness.modelLabel)
+
+  feat(schema): [non_breaking] Description '[Internal] Coding harness metadata from an agent session's latest sandbox.' on type 'AgentSessionCodingHarness' has changed to '[Internal] Coding harness metadata for a cloud or local coding session.' (AgentSessionCodingHarness)
+
+- 8dc7d7a: Reduced install size by about a third by no longer publishing the ESM source map; the published JavaScript is unchanged and remains unminified for debugging.
+
 ## 96.0.0
 
 ### Major Changes

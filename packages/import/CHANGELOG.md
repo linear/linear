@@ -1,5 +1,26 @@
 # Change Log
 
+## 4.0.1
+
+### Patch Changes
+
+- bdb1202: fix(import): reuse labels renamed with "(imported)" by previous imports so re-running an import no longer fails with duplicate label names
+- Updated dependencies
+  - @linear/sdk@97.1.0
+
+## 4.0.0
+
+### Major Changes
+
+- e09bb8d: **`linear-import` now requires Node.js 20.19+ or 22.12+**, because `@linear/sdk` is now ESM-only. On older Node.js versions, upgrade Node.js or keep using `@linear/import@3`.
+
+### Patch Changes
+
+- Updated dependencies
+- Updated dependencies [8dc7d7a]
+- Updated dependencies [e09bb8d]
+  - @linear/sdk@97.0.0
+
 ## 3.2.16
 
 ### Patch Changes

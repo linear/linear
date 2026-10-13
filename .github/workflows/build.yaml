@@ -182,12 +182,19 @@ jobs:
         with:
           name: linear-import
 
+      - name: Download SDK artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: linear-sdk
+
       - name: Install dependencies
-        run: |
-          npm install -g linear-import.tar.gz
+        working-directory: e2e/smoke-import
+        run: npm install
 
       - name: Run smoke test
+        working-directory: e2e/smoke-import
         run: |
+          export PATH="$PWD/node_modules/.bin:$PATH"
           linear-import --version
           OUTPUT=$(yes '' | linear-import 2>&1 || true)
           echo "$OUTPUT" | grep -q "No Linear API key"

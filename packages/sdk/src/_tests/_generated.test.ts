@@ -5391,6 +5391,15 @@ describe("generated", () => {
     });
   });
 
+  /** Test all OrganizationQuota queries */
+  describe("Quotas", () => {
+    /** Test the root connection query for the OrganizationQuota */
+    it("quotas", async () => {
+      const quotas: L.OrganizationQuotaConnection | undefined | null = await client.quotas();
+      expect(quotas instanceof L.OrganizationQuotaConnection);
+    });
+  });
+
   /** Test RateLimitStatus query */
   describe("RateLimitStatus", () => {
     /** Test the root model query for RateLimitStatus */

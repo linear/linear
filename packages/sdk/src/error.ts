@@ -44,7 +44,7 @@ export class LinearGraphQLError {
   public message: string;
   /** If this error is caused by the user input */
   public userError?: boolean;
-  /** The path to the graphql node at which the error occured */
+  /** The path to the graphql node at which the error occurred */
   public path?: string[];
 
   public constructor(error?: LinearGraphQLErrorRaw) {
@@ -80,7 +80,7 @@ export class LinearError extends Error {
   public raw?: LinearErrorRaw;
 
   public constructor(error?: LinearErrorRaw, errors?: LinearGraphQLError[], type?: LinearErrorType) {
-    /** Find messages, duplicate and join, or default */
+    /** Find messages, deduplicate and join, or default */
     super(
       Array.from(
         new Set(
@@ -253,7 +253,7 @@ export function parseLinearError(error?: LinearErrorRaw | LinearError): LinearEr
     return new LinearGraphQLError(graphqlError);
   });
 
-  /** Set type based first graphql error or http status */
+  /** Set type based on first graphql error or http status */
   const status = error?.response?.status;
   const type =
     errors[0]?.type ??

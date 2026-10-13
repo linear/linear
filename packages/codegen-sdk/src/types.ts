@@ -85,7 +85,7 @@ export interface SdkOperation {
   parentArgs: ArgList;
   /** The parent operation if it exists */
   parent?: SdkOperation;
-  /** THe parsed and printed type names required for generation */
+  /** The parsed and printed type names required for generation */
   print: SdkOperationPrint;
   /** Whether the response data is non-nullable */
   nonNull: boolean;

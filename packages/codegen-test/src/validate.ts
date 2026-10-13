@@ -18,8 +18,6 @@ export const validate: PluginValidateFn = async (
   logger.info(log, `Validating ${packageName}`);
   logger.info(log, config);
 
-  const prefix = `${log} Plugin "${packageName}" config requires`;
-
   /** Check the output file extension */
-  validateExtension(prefix, ".test.ts", outputFile);
+  validateExtension(packageName, ".test.ts", outputFile);
 };

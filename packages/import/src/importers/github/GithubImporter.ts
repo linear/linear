@@ -35,7 +35,7 @@ interface GITHUB_ISSUE {
 }
 
 /**
- * Fetch and paginate through all Github issues.
+ * Fetch and paginate through all GitHub issues.
  *
  * @param apiKey GitHub api key for authentication
  */

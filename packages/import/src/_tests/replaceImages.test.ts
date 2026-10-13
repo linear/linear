@@ -35,6 +35,40 @@ describe("replaceImagesInMarkdown", () => {
     );
   });
 
+  it("uploads every markdown image", async () => {
+    let count = 0;
+    imageUploadFromUrl.mockImplementation(async () => ({
+      success: true,
+      url: `https://uploads.linear.app/${++count}`,
+    }));
+
+    const result = await replaceImagesInMarkdown(
+      client,
+      "![a](https://example.com/a.png) ![b](https://example.com/b.png)"
+    );
+
+    expect(imageUploadFromUrl).toHaveBeenCalledTimes(2);
+    expect(imageUploadFromUrl).toHaveBeenNthCalledWith(1, "https://example.com/a.png");
+    expect(imageUploadFromUrl).toHaveBeenNthCalledWith(2, "https://example.com/b.png");
+    expect(result).toBe("![a](https://uploads.linear.app/1) ![b](https://uploads.linear.app/2)");
+  });
+
+  it("uploads every image tag", async () => {
+    let count = 0;
+    imageUploadFromUrl.mockImplementation(async () => ({
+      success: true,
+      url: `https://uploads.linear.app/${++count}`,
+    }));
+
+    const result = await replaceImagesInMarkdown(
+      client,
+      '<img src="https://example.com/a.png"> <img alt="b" src="https://example.com/b.png" />'
+    );
+
+    expect(imageUploadFromUrl).toHaveBeenCalledTimes(2);
+    expect(result).toBe("![](https://uploads.linear.app/1) ![](https://uploads.linear.app/2)");
+  });
+
   it("downloads images from the authenticated URL", async () => {
     const result = await replaceImagesInMarkdown(client, "![one](https://example.com/1.png)", authenticateUrl);
 

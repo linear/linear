@@ -1,0 +1,10 @@
+{
+  "name": "linear-import-smoke-test",
+  "private": true,
+  "dependencies": {
+    "@linear/import": "file:../../linear-import.tar.gz"
+  },
+  "overrides": {
+    "@linear/sdk": "file:../../linear-sdk.tar.gz"
+  }
+}

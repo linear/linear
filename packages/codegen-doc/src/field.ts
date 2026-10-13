@@ -25,7 +25,7 @@ export function findEnum(
 }
 
 /**
- * Determine whether to the field is valid to be output
+ * Determine whether the field is valid to be output
  *
  * Use config skipFields to skip fields with specific names
  * Use config skipComments to skip fields with comments containing specific strings

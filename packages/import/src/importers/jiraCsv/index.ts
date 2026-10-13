@@ -33,7 +33,7 @@ const questions = [
   {
     type: "confirm",
     name: "isCloud",
-    message: "Is your Jira installation on Jira Cloud (url similar to https://acme.atlassian.net)?",
+    message: "Is your Jira installation on Jira Cloud (URL similar to https://acme.atlassian.net)?",
     default: true,
   },
   {

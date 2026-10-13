@@ -40,29 +40,29 @@ export interface LinearRawResponse<Data> {
  * The error types returned by the Linear API
  */
 export enum LinearErrorType {
-  "FeatureNotAccessible" = "FeatureNotAccessible",
-  "InvalidInput" = "InvalidInput",
-  "Ratelimited" = "Ratelimited",
-  "NetworkError" = "NetworkError",
-  "AuthenticationError" = "AuthenticationError",
-  "Forbidden" = "Forbidden",
-  "BootstrapError" = "BootstrapError",
-  "Unknown" = "Unknown",
-  "InternalError" = "InternalError",
-  "Other" = "Other",
-  "UserError" = "UserError",
-  "GraphqlError" = "GraphqlError",
-  "LockTimeout" = "LockTimeout",
-  "UsageLimitExceeded" = "UsageLimitExceeded",
+  FeatureNotAccessible = "FeatureNotAccessible",
+  InvalidInput = "InvalidInput",
+  Ratelimited = "Ratelimited",
+  NetworkError = "NetworkError",
+  AuthenticationError = "AuthenticationError",
+  Forbidden = "Forbidden",
+  BootstrapError = "BootstrapError",
+  Unknown = "Unknown",
+  InternalError = "InternalError",
+  Other = "Other",
+  UserError = "UserError",
+  GraphqlError = "GraphqlError",
+  LockTimeout = "LockTimeout",
+  UsageLimitExceeded = "UsageLimitExceeded",
 }
 
 /**
  * One of potentially many raw graphql errors returned by the Linear API
  */
 export interface LinearGraphQLErrorRaw {
-  /** The error type */
+  /** The error message */
   message?: LinearErrorType;
-  /** The path to the graphql node at which the error occured */
+  /** The path to the graphql node at which the error occurred */
   path?: string[];
   extensions?: {
     /** The error type */

@@ -28,6 +28,6 @@ const questions = [
   {
     type: "input",
     name: "repo",
-    message: 'From which repo do you want to import issues from (e.g. "facebook/react")',
+    message: 'Which repo do you want to import issues from (e.g. "facebook/react")',
   },
 ];
