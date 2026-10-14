@@ -1,0 +1,45 @@
+# Temporary: dry-run the Linear release sync against the 97.1.0 / 4.0.1 release. Remove before merging.
+name: tmp linear release dry run
+
+on:
+  push:
+    branches:
+      - mingjie/add-linear-release-pipeline
+    paths:
+      - .github/workflows/tmp-linear-release-dry-run.yaml
+
+permissions: {}
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - package: sdk
+            version: 97.1.0
+            base_ref: "@linear/sdk@97.0.0"
+            secret: LINEAR_SDK_RELEASE_ACCESS_KEY
+          - package: import
+            version: 4.0.1
+            base_ref: "@linear/import@4.0.0"
+            secret: LINEAR_IMPORT_RELEASE_ACCESS_KEY
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: 7d2bc4279f1887cf763c59f9a173d9c590620023
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: linear/linear-release-action@30f9ae77461ec29f07fffe0c52edd1909bfbb6f5 # v0.18.1
+        with:
+          access_key: ${{ secrets[matrix.secret] }}
+          name: ${{ matrix.version }}
+          version: ${{ matrix.version }}
+          base_ref: ${{ matrix.base_ref }}
+          include_paths: packages/${{ matrix.package }}/**
+          dry_run: true
+          log_level: verbose
