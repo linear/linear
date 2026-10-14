@@ -1,5 +1,105 @@
 # Change Log
 
+## 97.2.0
+
+### Minor Changes
+
+- feat(schema): [dangerous] Enum value 'integrationConnection' was added to enum 'AiConversationElicitationKind' (AiConversationElicitationKind.integrationConnection)
+
+  feat(schema): [dangerous] Member 'AiConversationIntegrationConnectionElicitationResponseData' was added to Union type 'AiConversationElicitationResponseData' (AiConversationElicitationResponseData)
+
+  feat(schema): [dangerous] Enum value 'RerunPullRequestReview' was added to enum 'AiConversationTool' (AiConversationTool.RerunPullRequestReview)
+
+  feat(schema): [dangerous] Enum value 'UpdatePullRequestReviewFinding' was added to enum 'AiConversationTool' (AiConversationTool.UpdatePullRequestReviewFinding)
+
+  feat(schema): [dangerous] Member 'AiConversationRerunPullRequestReviewToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Member 'AiConversationUpdatePullRequestReviewFindingToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Input field 'groupType' was added to input object type 'InitiativeLabelCreateInput' (InitiativeLabelCreateInput.groupType)
+
+  feat(schema): [dangerous] Input field 'groupType' was added to input object type 'InitiativeLabelUpdateInput' (InitiativeLabelUpdateInput.groupType)
+
+  feat(schema): [dangerous] Argument 'asanaProjectName: String' added to field 'Mutation.issueImportCreateAsana' (Mutation.issueImportCreateAsana.asanaProjectName)
+
+  feat(schema): [dangerous] Enum value 'documentSharedWithYou' was added to enum 'OtherNotificationType' (OtherNotificationType.documentSharedWithYou)
+
+  feat(schema): [dangerous] Input field 'groupType' was added to input object type 'ProjectLabelCreateInput' (ProjectLabelCreateInput.groupType)
+
+  feat(schema): [dangerous] Input field 'groupType' was added to input object type 'ProjectLabelUpdateInput' (ProjectLabelUpdateInput.groupType)
+
+  feat(schema): [dangerous] Input field 'agentAutomationEnabled' was added to input object type 'TeamUpdateInput' (TeamUpdateInput.agentAutomationEnabled)
+
+  feat(schema): [dangerous] Input field 'codingAgentEnabled' was added to input object type 'TeamUpdateInput' (TeamUpdateInput.codingAgentEnabled)
+
+  feat(schema): [dangerous] Enum value 'webhookReceived' was added to enum 'WorkflowTrigger' (WorkflowTrigger.webhookReceived)
+
+  feat(schema): [dangerous] Enum value 'webhook' was added to enum 'WorkflowTriggerType' (WorkflowTriggerType.webhook)
+
+  feat(schema): [non_breaking] Type 'AiConversationIntegrationConnectionElicitationResponseData' was added (AiConversationIntegrationConnectionElicitationResponseData)
+
+  feat(schema): [non_breaking] Type 'AiConversationRerunPullRequestReviewToolCall' was added (AiConversationRerunPullRequestReviewToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationRerunPullRequestReviewToolCallArgs' was added (AiConversationRerunPullRequestReviewToolCallArgs)
+
+  feat(schema): [non_breaking] Type 'AiConversationUpdatePullRequestReviewFindingToolCall' was added (AiConversationUpdatePullRequestReviewFindingToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationUpdatePullRequestReviewFindingToolCallArgs' was added (AiConversationUpdatePullRequestReviewFindingToolCallArgs)
+
+  feat(schema): [non_breaking] Type 'DocumentShareRole' was added (DocumentShareRole)
+
+  feat(schema): [non_breaking] Type 'JiraStatusNameCategoriesPayload' was added (JiraStatusNameCategoriesPayload)
+
+  feat(schema): [non_breaking] Field 'subscriberIds' was added to object type 'AiConversation' (AiConversation.subscriberIds)
+
+  feat(schema): [non_breaking] Field 'integrationService' was added to object type 'AiConversationElicitationPart' (AiConversationElicitationPart.integrationService)
+
+  feat(schema): [non_breaking] Description 'A user that has access to the the resources of an organization.' on type 'AuthUser' has changed to 'A user that has access to the resources of an organization.' (AuthUser)
+
+  feat(schema): [non_breaking] Field 'Initiative.identifier' description changed from '[Internal] The human-readable identifier of the initiative. Returns the custom identifier override when set, otherwise the workspace default `<prefix>-<number>`. Null for legacy initiatives that have not been backfilled and while initiative identifiers are not enabled for the workspace.' to '[Internal] The human-readable identifier of the initiative. Returns the custom identifier override when set, otherwise the workspace default `<prefix>-<number>`. Null for legacy initiatives that have not been backfilled.' (Initiative.identifier)
+
+  feat(schema): [non_breaking] Field 'groupType' was added to object type 'InitiativeLabel' (InitiativeLabel.groupType)
+
+  feat(schema): [non_breaking] Field 'issueStatusCategories' was added to object type 'JiraProjectStatusesPayload' (JiraProjectStatusesPayload.issueStatusCategories)
+
+  feat(schema): [non_breaking] Field 'projectStatusCategories' was added to object type 'JiraProjectStatusesPayload' (JiraProjectStatusesPayload.projectStatusCategories)
+
+  feat(schema): [non_breaking] Description 'The selection mode of an issue label group.' on type 'LabelGroupType' has changed to 'The selection mode of a label group.' (LabelGroupType)
+
+  feat(schema): [non_breaking] Field 'documentShare' was added to object type 'Mutation' (Mutation.documentShare)
+
+  feat(schema): [non_breaking] Field 'documentUnshare' was added to object type 'Mutation' (Mutation.documentUnshare)
+
+  feat(schema): [non_breaking] Field 'Project.identifier' description changed from '[Internal] The human-readable identifier of the project. Returns the custom identifier override when set, otherwise the default `P-<leadTeamKey>-<number>`. Null for projects without a lead team, for legacy projects that have not been backfilled, and while project identifiers are not enabled for the workspace.' to '[Internal] The human-readable identifier of the project. Returns the custom identifier override when set, otherwise the default `P-<leadTeamKey>-<number>`. Null for projects without a lead team and for legacy projects that have not been backfilled.' (Project.identifier)
+
+  feat(schema): [non_breaking] Field 'groupType' was added to object type 'ProjectLabel' (ProjectLabel.groupType)
+
+  feat(schema): [non_breaking] Field 'ProjectSearchResult.identifier' description changed from '[Internal] The human-readable identifier of the project. Returns the custom identifier override when set, otherwise the default `P-<leadTeamKey>-<number>`. Null for projects without a lead team, for legacy projects that have not been backfilled, and while project identifiers are not enabled for the workspace.' to '[Internal] The human-readable identifier of the project. Returns the custom identifier override when set, otherwise the default `P-<leadTeamKey>-<number>`. Null for projects without a lead team and for legacy projects that have not been backfilled.' (ProjectSearchResult.identifier)
+
+  feat(schema): [non_breaking] Field 'PullRequestPreviewLink.url' description changed from 'The URL of the preview.' to 'The URL of the preview. Empty for a deployment that is still building and has not reported its URL.' (PullRequestPreviewLink.url)
+
+  feat(schema): [non_breaking] Field 'Subscription.commentUnarchived' description changed from 'Triggered when a a comment is unarchived' to 'Triggered when a comment is unarchived' (Subscription.commentUnarchived)
+
+  feat(schema): [non_breaking] Field 'Subscription.documentUnarchived' description changed from 'Triggered when a a document is unarchived' to 'Triggered when a document is unarchived' (Subscription.documentUnarchived)
+
+  feat(schema): [non_breaking] Field 'Subscription.issueUnarchived' description changed from 'Triggered when a an issue is unarchived' to 'Triggered when an issue is unarchived' (Subscription.issueUnarchived)
+
+  feat(schema): [non_breaking] Field 'Subscription.notificationUnarchived' description changed from 'Triggered when a a notification is unarchived' to 'Triggered when a notification is unarchived' (Subscription.notificationUnarchived)
+
+  feat(schema): [non_breaking] Field 'Subscription.projectUnarchived' description changed from 'Triggered when a a project is unarchived' to 'Triggered when a project is unarchived' (Subscription.projectUnarchived)
+
+  feat(schema): [non_breaking] Field 'agentAutomationEnabled' was added to object type 'Team' (Team.agentAutomationEnabled)
+
+  feat(schema): [non_breaking] Field 'codingAgentEnabled' was added to object type 'Team' (Team.codingAgentEnabled)
+
+  feat(schema): [non_breaking] Field 'viewerCanLeave' was added to object type 'Team' (Team.viewerCanLeave)
+
+  feat(schema): [non_breaking] Field 'viewerMembership' was added to object type 'Team' (Team.viewerMembership)
+
+  feat(schema): [non_breaking] Input field 'TeamCreateInput.cycleLockToActive' description changed from 'Only allow issues issues with cycles in Active Issues.' to 'Only allow issues with cycles in Active Issues.' (TeamCreateInput.cycleLockToActive)
+
+  feat(schema): [non_breaking] Field 'WorkflowDefinition.editAccess' description changed from 'The edit access setting for this workflow definition. When unset, access is derived from restrictEditing.' to 'The edit access setting for this workflow definition. When unset, everyone can edit the workflow.' (WorkflowDefinition.editAccess)
+
 ## 97.1.0
 
 ### Minor Changes

@@ -1595,6 +1595,7 @@ export class AiConversationElicitationPart extends Request {
     this.metadata = new AiConversationPartMetadata(request, data.metadata);
     this.scope = data.scope ? new AiConversationMcpServerConnectionScope(request, data.scope) : undefined;
     this.options = data.options.map(node => new AiConversationElicitationOption(request, node));
+    this.integrationService = data.integrationService ?? undefined;
     this.kind = data.kind;
     this.type = data.type;
   }
@@ -1619,6 +1620,8 @@ export class AiConversationElicitationPart extends Request {
   public metadata: AiConversationPartMetadata;
   /** The requested owner of the MCP server connection. Null for other elicitation kinds. */
   public scope?: AiConversationMcpServerConnectionScope | null;
+  /** The service of the integration to connect. Null for other elicitation kinds. */
+  public integrationService?: L.IntegrationService | null;
   /** The kind of input this elicitation asks for. */
   public kind: L.AiConversationElicitationKind;
   /** The type of the part. */
@@ -2119,6 +2122,27 @@ export class AiConversationHandoffToCodingSessionToolCallArgs extends Request {
 
   public instructions?: string | null;
   public entity: AiConversationSearchEntitiesToolCallResultEntities;
+}
+/**
+ * The integration connected to a Loop and its current run by a conversation.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationIntegrationConnectionElicitationResponseDataFragment response data
+ */
+export class AiConversationIntegrationConnectionElicitationResponseData extends Request {
+  public constructor(
+    request: LinearRequest,
+    data: L.AiConversationIntegrationConnectionElicitationResponseDataFragment
+  ) {
+    super(request);
+    this.integrationId = data.integrationId;
+    this.kind = data.kind;
+  }
+
+  /** The identifier of the integration that was connected. */
+  public integrationId: string;
+  /** The kind of elicitation that was answered. */
+  public kind: L.AiConversationElicitationKind;
 }
 /**
  * AiConversationInvokeMcpToolToolCall model
@@ -3137,6 +3161,46 @@ export class AiConversationRemoveSpendLimitToolCallArgs extends Request {
   }
 
   public summary?: string | null;
+}
+/**
+ * AiConversationRerunPullRequestReviewToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationRerunPullRequestReviewToolCallFragment response data
+ */
+export class AiConversationRerunPullRequestReviewToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationRerunPullRequestReviewToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationRerunPullRequestReviewToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationRerunPullRequestReviewToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationRerunPullRequestReviewToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationRerunPullRequestReviewToolCallArgsFragment response data
+ */
+export class AiConversationRerunPullRequestReviewToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationRerunPullRequestReviewToolCallArgsFragment) {
+    super(request);
+    this.entity = new AiConversationSearchEntitiesToolCallResultEntities(request, data.entity);
+  }
+
+  public entity: AiConversationSearchEntitiesToolCallResultEntities;
 }
 /**
  * AiConversationResearchToolCall model
@@ -4214,6 +4278,52 @@ export class AiConversationUpdateEntityToolCallResult extends Request {
   public updatedEntities?: AiConversationCreateEntityToolCallResultCreatedEntities[] | null;
 }
 /**
+ * AiConversationUpdatePullRequestReviewFindingToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationUpdatePullRequestReviewFindingToolCallFragment response data
+ */
+export class AiConversationUpdatePullRequestReviewFindingToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationUpdatePullRequestReviewFindingToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args
+      ? new AiConversationUpdatePullRequestReviewFindingToolCallArgs(request, data.args)
+      : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationUpdatePullRequestReviewFindingToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationUpdatePullRequestReviewFindingToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationUpdatePullRequestReviewFindingToolCallArgsFragment response data
+ */
+export class AiConversationUpdatePullRequestReviewFindingToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationUpdatePullRequestReviewFindingToolCallArgsFragment) {
+    super(request);
+    this.findingId = data.findingId;
+    this.rejected = data.rejected;
+    this.entity = new AiConversationSearchEntitiesToolCallResultEntities(request, data.entity);
+  }
+
+  public findingId: string;
+  public rejected: boolean;
+  public entity: AiConversationSearchEntitiesToolCallResultEntities;
+}
+/**
  * AiConversationWebSearchToolCall model
  *
  * @param request - function to call the graphql client
@@ -5092,7 +5202,7 @@ export class AuthResolverResponse extends Request {
   public users: AuthUser[];
 }
 /**
- * A user that has access to the the resources of an organization.
+ * A user that has access to the resources of an organization.
  *
  * @param request - function to call the graphql client
  * @param data - L.AuthUserFragment response data
@@ -10814,6 +10924,7 @@ export class InitiativeLabel extends Request {
     this.lastAppliedAt = parseDate(data.lastAppliedAt) ?? undefined;
     this.name = data.name;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.groupType = data.groupType ?? undefined;
     this._creator = data.creator ?? undefined;
     this._parent = data.parent ?? undefined;
     this._retiredBy = data.retiredBy ?? undefined;
@@ -10840,6 +10951,8 @@ export class InitiativeLabel extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The selection mode of this label group. Null for regular labels. Groups without a type use single-select behavior. */
+  public groupType?: L.LabelGroupType | null;
   /** The user who created the label. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
@@ -15442,12 +15555,40 @@ export class JiraProjectStatusesPayload extends Request {
     super(request);
     this.issueStatuses = data.issueStatuses;
     this.projectStatuses = data.projectStatuses;
+    this.issueStatusCategories = data.issueStatusCategories.map(
+      node => new JiraStatusNameCategoriesPayload(request, node)
+    );
+    this.projectStatusCategories = data.projectStatusCategories.map(
+      node => new JiraStatusNameCategoriesPayload(request, node)
+    );
   }
 
   /** The Jira project's issue statuses (non-Epic). */
   public issueStatuses: string[];
   /** The Jira project's project statuses (Epic). */
   public projectStatuses: string[];
+  /** The status categories of each of the Jira project's issue statuses (non-Epic). */
+  public issueStatusCategories: JiraStatusNameCategoriesPayload[];
+  /** The status categories of each of the Jira project's project statuses (Epic). */
+  public projectStatusCategories: JiraStatusNameCategoriesPayload[];
+}
+/**
+ * JiraStatusNameCategoriesPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.JiraStatusNameCategoriesPayloadFragment response data
+ */
+export class JiraStatusNameCategoriesPayload extends Request {
+  public constructor(request: LinearRequest, data: L.JiraStatusNameCategoriesPayloadFragment) {
+    super(request);
+    this.categories = data.categories;
+    this.name = data.name;
+  }
+
+  /** The distinct status category keys (new, indeterminate, or done) of the Jira statuses with this name. */
+  public categories: string[];
+  /** The name of the Jira status. */
+  public name: string;
 }
 /**
  * A notification subscription scoped to a specific issue label. The subscriber receives notifications for events related to issues with this label.
@@ -18409,6 +18550,7 @@ export class ProjectLabel extends Request {
     this.lastAppliedAt = parseDate(data.lastAppliedAt) ?? undefined;
     this.name = data.name;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.groupType = data.groupType ?? undefined;
     this._creator = data.creator ?? undefined;
     this._inheritedFrom = data.inheritedFrom ?? undefined;
     this._parent = data.parent ?? undefined;
@@ -18437,6 +18579,8 @@ export class ProjectLabel extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The selection mode of this label group. Null for regular labels. Groups without a type use single-select behavior. */
+  public groupType?: L.LabelGroupType | null;
   /** The user who created the label. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
@@ -22431,11 +22575,11 @@ export class Subscription extends Request {
   public get commentDeletedId(): string | undefined {
     return this._commentDeleted?.id;
   }
-  /** Triggered when a a comment is unarchived */
+  /** Triggered when a comment is unarchived */
   public get commentUnarchived(): LinearFetch<Comment> | undefined {
     return new CommentQuery(this._request).fetch({ id: this._commentUnarchived.id });
   }
-  /** The ID of triggered when a a comment is unarchived */
+  /** The ID of triggered when a comment is unarchived */
   public get commentUnarchivedId(): string | undefined {
     return this._commentUnarchived?.id;
   }
@@ -22487,11 +22631,11 @@ export class Subscription extends Request {
   public get documentCreatedId(): string | undefined {
     return this._documentCreated?.id;
   }
-  /** Triggered when a a document is unarchived */
+  /** Triggered when a document is unarchived */
   public get documentUnarchived(): LinearFetch<Document> | undefined {
     return new DocumentQuery(this._request).fetch(this._documentUnarchived.id);
   }
-  /** The ID of triggered when a a document is unarchived */
+  /** The ID of triggered when a document is unarchived */
   public get documentUnarchivedId(): string | undefined {
     return this._documentUnarchived?.id;
   }
@@ -22615,11 +22759,11 @@ export class Subscription extends Request {
   public get issueRelationUpdatedId(): string | undefined {
     return this._issueRelationUpdated?.id;
   }
-  /** Triggered when a an issue is unarchived */
+  /** Triggered when an issue is unarchived */
   public get issueUnarchived(): LinearFetch<Issue> | undefined {
     return new IssueQuery(this._request).fetch(this._issueUnarchived.id);
   }
-  /** The ID of triggered when a an issue is unarchived */
+  /** The ID of triggered when an issue is unarchived */
   public get issueUnarchivedId(): string | undefined {
     return this._issueUnarchived?.id;
   }
@@ -22675,11 +22819,11 @@ export class Subscription extends Request {
   public get projectLabelUpdatedId(): string | undefined {
     return this._projectLabelUpdated?.id;
   }
-  /** Triggered when a a project is unarchived */
+  /** Triggered when a project is unarchived */
   public get projectUnarchived(): LinearFetch<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._projectUnarchived.id);
   }
-  /** The ID of triggered when a a project is unarchived */
+  /** The ID of triggered when a project is unarchived */
   public get projectUnarchivedId(): string | undefined {
     return this._projectUnarchived?.id;
   }
@@ -22969,6 +23113,7 @@ export class Team extends Request {
   private _startWorkflowState?: L.TeamFragment["startWorkflowState"];
   private _triageIssueState?: L.TeamFragment["triageIssueState"];
   private _triageResponsibility?: L.TeamFragment["triageResponsibility"];
+  private _viewerMembership?: L.TeamFragment["viewerMembership"];
 
   public constructor(request: LinearRequest, data: L.TeamFragment) {
     super(request);
@@ -23027,6 +23172,7 @@ export class Team extends Request {
     this.upcomingCycleCount = data.upcomingCycleCount;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.viewerCanJoin = data.viewerCanJoin;
+    this.viewerCanLeave = data.viewerCanLeave;
     this.visibility = data.visibility;
     this._activeCycle = data.activeCycle ?? undefined;
     this._defaultIssueState = data.defaultIssueState ?? undefined;
@@ -23043,6 +23189,7 @@ export class Team extends Request {
     this._startWorkflowState = data.startWorkflowState ?? undefined;
     this._triageIssueState = data.triageIssueState ?? undefined;
     this._triageResponsibility = data.triageResponsibility ?? undefined;
+    this._viewerMembership = data.viewerMembership ?? undefined;
   }
 
   /** Whether to enable AI discussion summaries for issues in this team. */
@@ -23158,6 +23305,8 @@ export class Team extends Request {
   public updatedAt: Date;
   /** Whether the viewer can add themselves to the team. False when the viewer is already a member, the team is archived, retired, or SCIM-managed, the viewer lacks the plan access or permission to add themselves, or the viewer has reached their team membership limit. Runs the same checks `teamMembershipCreate` applies to a viewer joining on their own. */
   public viewerCanJoin: boolean;
+  /** Whether the viewer can remove themselves from the team. False when the viewer is not a member, the team is SCIM-managed, the viewer is an app user the team does not accept, or leaving would leave the viewer without an active team. Otherwise mirrors the checks `teamMembershipDelete` applies to a viewer leaving on their own. */
+  public viewerCanLeave: boolean;
   /** The visibility of the team. Returns public for teams visible to all workspace members, private for teams visible only to members, and restricted for non-private teams inside a private-team boundary. */
   public visibility: L.TeamVisibility;
   /** Team's currently active cycle. */
@@ -23301,6 +23450,16 @@ export class Team extends Request {
   /** The ID of team's triage responsibility. */
   public get triageResponsibilityId(): string | undefined {
     return this._triageResponsibility?.id;
+  }
+  /** The viewer's membership in the team. Null when the viewer is not a member. */
+  public get viewerMembership(): LinearFetch<TeamMembership> | undefined {
+    return this._viewerMembership?.id
+      ? new TeamMembershipQuery(this._request).fetch(this._viewerMembership?.id)
+      : undefined;
+  }
+  /** The ID of viewer's membership in the team. null when the viewer is not a member. */
+  public get viewerMembershipId(): string | undefined {
+    return this._viewerMembership?.id;
   }
   /** Cycles associated with the team. */
   public cycles(variables?: Omit<L.Team_CyclesQueryVariables, "id">) {
@@ -26657,7 +26816,7 @@ export class WorkflowDefinition extends Request {
   public activationMode?: L.WorkflowActivationMode | null;
   /** The type of view to which this workflow's context is associated with. */
   public contextViewType?: L.ContextViewType | null;
-  /** The edit access setting for this workflow definition. When unset, access is derived from restrictEditing. */
+  /** The edit access setting for this workflow definition. When unset, everyone can edit the workflow. */
   public editAccess?: L.WorkflowDefinitionEditAccess | null;
   /** The intelligence level used to run the workflow. When null, Auto is used. */
   public intelligence?: L.WorkflowIntelligence | null;
@@ -55493,6 +55652,7 @@ export {
   DependencyEcosystem,
   DiffFileState,
   DocumentContentAgentCheckpointMode,
+  DocumentShareRole,
   DraftUpdateHealthType,
   EmailIntakeAddressType,
   ExternalSyncService,

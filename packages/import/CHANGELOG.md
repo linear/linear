@@ -1,5 +1,14 @@
 # Change Log
 
+## 4.0.2
+
+### Patch Changes
+
+- bbbe311: fix(import): re-upload every image in issue descriptions and comments, not just the first
+- f368570: fix(import): correct typos in the GitHub and Jira importer prompts
+- Updated dependencies
+  - @linear/sdk@97.2.0
+
 ## 4.0.1
 
 ### Patch Changes
