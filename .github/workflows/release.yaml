@@ -23,6 +23,9 @@ jobs:
       contents: write
       id-token: write # Required for OIDC (https://docs.npmjs.com/trusted-publishers#github-actions-configuration)
       pull-requests: read
+    outputs:
+      published: ${{ steps.publish.outputs.published }}
+      published_packages: ${{ steps.publish.outputs.publishedPackages }}
     env:
       SKIP_RELEASE: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[skip release]') }}
     steps:
@@ -93,14 +96,40 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Each package has its own Linear pipeline, so issues move to Done when the package containing their change ships.
-      # The version's CHANGELOG.md section becomes the release notes. A missing notes file would fail the whole sync, so a
-      # path is only output when a section was found.
+      - name: Notify Slack
+        if: steps.publish.outputs.published == 'true'
+        continue-on-error: true
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CLI_CHANNEL_WEBHOOK_URL }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBLISHED_PACKAGES: ${{ steps.publish.outputs.publishedPackages }}
+        run: |
+          node .github/scripts/create-release-slack-message.mjs
+          curl -s -X POST "$SLACK_WEBHOOK_URL" -H 'Content-Type: application/json' --data @"$RUNNER_TEMP/sdk-release-slack.json"
+
+  # Each package has its own Linear pipeline, so issues move to Done when the package containing their change ships.
+  # The version's CHANGELOG.md section becomes the release notes. A missing notes file would fail the whole sync, so a
+  # path is only output when a section was found.
+  # Kept out of the release job so the Linear action and CLI never get its npm publishing or repo write permissions.
+  linear-release:
+    name: Linear release
+    needs: [release]
+    if: needs.release.outputs.published == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0 # The Linear CLI scans commits since the pipeline's last release.
+          persist-credentials: false
+
       - name: Prepare Linear releases
         id: versions
-        if: steps.publish.outputs.published == 'true'
         env:
-          PUBLISHED_PACKAGES: ${{ steps.publish.outputs.publishedPackages }}
+          PUBLISHED_PACKAGES: ${{ needs.release.outputs.published_packages }}
         run: |
           jq -r '.[] | "\(.name | ltrimstr("@linear/")) \(.version)"' <<< "$PUBLISHED_PACKAGES" |
             while read -r package version; do
@@ -143,17 +172,6 @@ jobs:
             NPM=https://www.npmjs.com/package/@linear/import/v/${{ steps.versions.outputs.import }}
             GitHub=${{ github.server_url }}/${{ github.repository }}/releases/tag/%40linear/import%40${{ steps.versions.outputs.import }}
             Action Run=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-
-      - name: Notify Slack
-        if: steps.publish.outputs.published == 'true'
-        continue-on-error: true
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CLI_CHANNEL_WEBHOOK_URL }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PUBLISHED_PACKAGES: ${{ steps.publish.outputs.publishedPackages }}
-        run: |
-          node .github/scripts/create-release-slack-message.mjs
-          curl -s -X POST "$SLACK_WEBHOOK_URL" -H 'Content-Type: application/json' --data @"$RUNNER_TEMP/sdk-release-slack.json"
 
   notify-slack:
     runs-on: ubuntu-latest
