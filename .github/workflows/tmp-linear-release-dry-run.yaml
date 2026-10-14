@@ -21,11 +21,9 @@ jobs:
         include:
           - package: sdk
             version: 97.1.0
-            base_ref: "@linear/sdk@97.0.0"
             secret: LINEAR_SDK_RELEASE_ACCESS_KEY
           - package: import
             version: 4.0.1
-            base_ref: "@linear/import@4.0.0"
             secret: LINEAR_IMPORT_RELEASE_ACCESS_KEY
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
@@ -39,7 +37,6 @@ jobs:
           access_key: ${{ secrets[matrix.secret] }}
           name: ${{ matrix.version }}
           version: ${{ matrix.version }}
-          base_ref: ${{ matrix.base_ref }}
           include_paths: packages/${{ matrix.package }}/**
           dry_run: true
           log_level: verbose
