@@ -23,6 +23,9 @@ jobs:
       contents: write
       id-token: write # Required for OIDC (https://docs.npmjs.com/trusted-publishers#github-actions-configuration)
       pull-requests: read
+    outputs:
+      published: ${{ steps.publish.outputs.published }}
+      published_packages: ${{ steps.publish.outputs.publishedPackages }}
     env:
       SKIP_RELEASE: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[skip release]') }}
     steps:
@@ -93,34 +96,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Each package has its own Linear pipeline, so issues move to Done when the package containing their change ships.
-      - name: Get published versions
-        id: versions
-        if: steps.publish.outputs.published == 'true'
-        env:
-          PUBLISHED_PACKAGES: ${{ steps.publish.outputs.publishedPackages }}
-        run: jq -r '.[] | "\(.name | ltrimstr("@linear/"))=\(.version)"' <<< "$PUBLISHED_PACKAGES" >> "$GITHUB_OUTPUT"
-
-      - name: Sync Linear SDK release
-        if: steps.versions.outputs.sdk
-        continue-on-error: true
-        uses: linear/linear-release-action@30f9ae77461ec29f07fffe0c52edd1909bfbb6f5 # v0.18.1
-        with:
-          access_key: ${{ secrets.LINEAR_SDK_RELEASE_ACCESS_KEY }}
-          name: ${{ steps.versions.outputs.sdk }}
-          version: ${{ steps.versions.outputs.sdk }}
-          include_paths: packages/sdk/**
-
-      - name: Sync Linear import release
-        if: steps.versions.outputs.import
-        continue-on-error: true
-        uses: linear/linear-release-action@30f9ae77461ec29f07fffe0c52edd1909bfbb6f5 # v0.18.1
-        with:
-          access_key: ${{ secrets.LINEAR_IMPORT_RELEASE_ACCESS_KEY }}
-          name: ${{ steps.versions.outputs.import }}
-          version: ${{ steps.versions.outputs.import }}
-          include_paths: packages/import/**
-
       - name: Notify Slack
         if: steps.publish.outputs.published == 'true'
         continue-on-error: true
@@ -131,6 +106,72 @@ jobs:
         run: |
           node .github/scripts/create-release-slack-message.mjs
           curl -s -X POST "$SLACK_WEBHOOK_URL" -H 'Content-Type: application/json' --data @"$RUNNER_TEMP/sdk-release-slack.json"
+
+  # Syncs each published package to its own Linear pipeline, which moves an issue to Done once the package it changed
+  # ships. Release notes come from the version's CHANGELOG.md section. A missing notes file fails the whole sync, so we
+  # only pass one when that section exists.
+  # This job runs apart from the release job so the Linear action and CLI can't mint npm tokens or push to the repo.
+  linear-release:
+    name: Linear release
+    needs: [release]
+    if: needs.release.outputs.published == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0 # The Linear CLI scans commits since the pipeline's last release.
+          persist-credentials: false
+
+      - name: Prepare Linear releases
+        id: versions
+        env:
+          PUBLISHED_PACKAGES: ${{ needs.release.outputs.published_packages }}
+        run: |
+          jq -r '.[] | "\(.name | ltrimstr("@linear/")) \(.version)"' <<< "$PUBLISHED_PACKAGES" |
+            while read -r package version; do
+              echo "$package=$version" >> "$GITHUB_OUTPUT"
+
+              # Lines under the "## <version>" heading, up to the next "## " heading.
+              notes="$RUNNER_TEMP/$package-notes.md"
+              awk -v heading="## $version" '/^## / { found = ($0 == heading); next } found' "packages/$package/CHANGELOG.md" > "$notes"
+              if [ -s "$notes" ]; then
+                echo "${package}_notes=$notes" >> "$GITHUB_OUTPUT"
+              fi
+            done
+
+      - name: Sync Linear SDK release
+        if: steps.versions.outputs.sdk
+        continue-on-error: true
+        uses: linear/linear-release-action@30f9ae77461ec29f07fffe0c52edd1909bfbb6f5 # v0.18.1
+        with:
+          access_key: ${{ secrets.LINEAR_SDK_RELEASE_ACCESS_KEY }}
+          name: ${{ steps.versions.outputs.sdk }}
+          version: ${{ steps.versions.outputs.sdk }}
+          include_paths: packages/sdk/**
+          release_notes: ${{ steps.versions.outputs.sdk_notes }}
+          links: |
+            NPM=https://www.npmjs.com/package/@linear/sdk/v/${{ steps.versions.outputs.sdk }}
+            GitHub=${{ github.server_url }}/${{ github.repository }}/releases/tag/%40linear/sdk%40${{ steps.versions.outputs.sdk }}
+            Action Run=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      - name: Sync Linear import release
+        if: steps.versions.outputs.import
+        continue-on-error: true
+        uses: linear/linear-release-action@30f9ae77461ec29f07fffe0c52edd1909bfbb6f5 # v0.18.1
+        with:
+          access_key: ${{ secrets.LINEAR_IMPORT_RELEASE_ACCESS_KEY }}
+          name: ${{ steps.versions.outputs.import }}
+          version: ${{ steps.versions.outputs.import }}
+          include_paths: packages/import/**
+          release_notes: ${{ steps.versions.outputs.import_notes }}
+          links: |
+            NPM=https://www.npmjs.com/package/@linear/import/v/${{ steps.versions.outputs.import }}
+            GitHub=${{ github.server_url }}/${{ github.repository }}/releases/tag/%40linear/import%40${{ steps.versions.outputs.import }}
+            Action Run=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
   notify-slack:
     runs-on: ubuntu-latest
