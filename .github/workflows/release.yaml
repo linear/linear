@@ -123,7 +123,7 @@ jobs:
           release_notes: ${{ steps.versions.outputs.sdk_notes }}
           links: |
             NPM=https://www.npmjs.com/package/@linear/sdk/v/${{ steps.versions.outputs.sdk }}
-            GitHub Release=${{ github.server_url }}/${{ github.repository }}/releases/tag/%40linear/sdk%40${{ steps.versions.outputs.sdk }}
+            GitHub=${{ github.server_url }}/${{ github.repository }}/releases/tag/%40linear/sdk%40${{ steps.versions.outputs.sdk }}
             Action Run=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
       - name: Sync Linear import release
@@ -138,7 +138,7 @@ jobs:
           release_notes: ${{ steps.versions.outputs.import_notes }}
           links: |
             NPM=https://www.npmjs.com/package/@linear/import/v/${{ steps.versions.outputs.import }}
-            GitHub Release=${{ github.server_url }}/${{ github.repository }}/releases/tag/%40linear/import%40${{ steps.versions.outputs.import }}
+            GitHub=${{ github.server_url }}/${{ github.repository }}/releases/tag/%40linear/import%40${{ steps.versions.outputs.import }}
             Action Run=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
       - name: Notify Slack
