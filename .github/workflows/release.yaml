@@ -93,45 +93,32 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Records each published package in its own Linear pipeline so issues move to Done when the package containing their
-      # change ships.
-      - name: Prepare Linear releases
-        id: linear-release
+      # Each package has its own Linear pipeline, so issues move to Done when the package containing their change ships.
+      - name: Get published versions
+        id: versions
         if: steps.publish.outputs.published == 'true'
-        continue-on-error: true
         env:
           PUBLISHED_PACKAGES: ${{ steps.publish.outputs.publishedPackages }}
-        run: |
-          for package in sdk import; do
-            version=$(jq -r --arg name "@linear/$package" '.[] | select(.name == $name) | .version' <<< "$PUBLISHED_PACKAGES")
-            if [ -n "$version" ]; then
-              echo "${package}_version=$version" >> "$GITHUB_OUTPUT"
-              # Scan from the package's previous release tag rather than the pipeline's stored baseline, so the first sync
-              # covers every change since that package's last npm release.
-              echo "${package}_base_ref=$(git describe --tags --abbrev=0 --match "@linear/$package@*" HEAD^)" >> "$GITHUB_OUTPUT"
-            fi
-          done
+        run: jq -r '.[] | "\(.name | ltrimstr("@linear/"))=\(.version)"' <<< "$PUBLISHED_PACKAGES" >> "$GITHUB_OUTPUT"
 
       - name: Sync Linear SDK release
-        if: steps.linear-release.outputs.sdk_version
+        if: steps.versions.outputs.sdk
         continue-on-error: true
         uses: linear/linear-release-action@30f9ae77461ec29f07fffe0c52edd1909bfbb6f5 # v0.18.1
         with:
           access_key: ${{ secrets.LINEAR_SDK_RELEASE_ACCESS_KEY }}
-          name: ${{ steps.linear-release.outputs.sdk_version }}
-          version: ${{ steps.linear-release.outputs.sdk_version }}
-          base_ref: ${{ steps.linear-release.outputs.sdk_base_ref }}
+          name: ${{ steps.versions.outputs.sdk }}
+          version: ${{ steps.versions.outputs.sdk }}
           include_paths: packages/sdk/**
 
       - name: Sync Linear import release
-        if: steps.linear-release.outputs.import_version
+        if: steps.versions.outputs.import
         continue-on-error: true
         uses: linear/linear-release-action@30f9ae77461ec29f07fffe0c52edd1909bfbb6f5 # v0.18.1
         with:
           access_key: ${{ secrets.LINEAR_IMPORT_RELEASE_ACCESS_KEY }}
-          name: ${{ steps.linear-release.outputs.import_version }}
-          version: ${{ steps.linear-release.outputs.import_version }}
-          base_ref: ${{ steps.linear-release.outputs.import_base_ref }}
+          name: ${{ steps.versions.outputs.import }}
+          version: ${{ steps.versions.outputs.import }}
           include_paths: packages/import/**
 
       - name: Notify Slack
