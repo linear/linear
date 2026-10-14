@@ -94,12 +94,22 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Each package has its own Linear pipeline, so issues move to Done when the package containing their change ships.
-      - name: Get published versions
+      # The version's CHANGELOG.md section becomes the release notes. A missing notes file would fail the whole sync, so a
+      # path is only output when a section was found.
+      - name: Prepare Linear releases
         id: versions
         if: steps.publish.outputs.published == 'true'
         env:
           PUBLISHED_PACKAGES: ${{ steps.publish.outputs.publishedPackages }}
-        run: jq -r '.[] | "\(.name | ltrimstr("@linear/"))=\(.version)"' <<< "$PUBLISHED_PACKAGES" >> "$GITHUB_OUTPUT"
+        run: |
+          jq -r '.[] | "\(.name | ltrimstr("@linear/")) \(.version)"' <<< "$PUBLISHED_PACKAGES" | while read -r package version; do
+            echo "$package=$version" >> "$GITHUB_OUTPUT"
+            notes="$RUNNER_TEMP/$package-release-notes.md"
+            awk -v heading="## $version" '$0 == heading { found = 1; next } /^## / { found = 0 } found' "packages/$package/CHANGELOG.md" > "$notes"
+            if [ -s "$notes" ]; then
+              echo "${package}_notes=$notes" >> "$GITHUB_OUTPUT"
+            fi
+          done
 
       - name: Sync Linear SDK release
         if: steps.versions.outputs.sdk
@@ -110,6 +120,7 @@ jobs:
           name: ${{ steps.versions.outputs.sdk }}
           version: ${{ steps.versions.outputs.sdk }}
           include_paths: packages/sdk/**
+          release_notes: ${{ steps.versions.outputs.sdk_notes }}
 
       - name: Sync Linear import release
         if: steps.versions.outputs.import
@@ -120,6 +131,7 @@ jobs:
           name: ${{ steps.versions.outputs.import }}
           version: ${{ steps.versions.outputs.import }}
           include_paths: packages/import/**
+          release_notes: ${{ steps.versions.outputs.import_notes }}
 
       - name: Notify Slack
         if: steps.publish.outputs.published == 'true'
