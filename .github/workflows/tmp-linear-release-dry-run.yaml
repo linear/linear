@@ -20,15 +20,15 @@ jobs:
       matrix:
         include:
           - package: sdk
-            version: 97.1.0
+            version: 97.1.1-dry-run
             secret: LINEAR_SDK_RELEASE_ACCESS_KEY
           - package: import
-            version: 4.0.1
+            version: 4.0.2-dry-run
             secret: LINEAR_IMPORT_RELEASE_ACCESS_KEY
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
-          ref: 7d2bc4279f1887cf763c59f9a173d9c590620023
+          ref: master
           fetch-depth: 0
           persist-credentials: false
 
