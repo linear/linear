@@ -93,6 +93,29 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # Records the npm release in Linear so issues shipped since the previous publish move to Done.
+      - name: Prepare Linear release
+        id: linear-release
+        if: steps.publish.outputs.published == 'true'
+        continue-on-error: true
+        env:
+          PUBLISHED_PACKAGES: ${{ steps.publish.outputs.publishedPackages }}
+        run: |
+          echo "name=$(jq -r 'map("\(.name)@\(.version)") | join(", ")' <<< "$PUBLISHED_PACKAGES")" >> "$GITHUB_OUTPUT"
+          # Scan from the previous publish's tag rather than relying on the pipeline's stored baseline,
+          # so the first sync covers every change since the last npm release.
+          echo "base_ref=$(git describe --tags --abbrev=0 --match '@linear/*' HEAD^)" >> "$GITHUB_OUTPUT"
+
+      - name: Sync Linear release
+        if: steps.linear-release.outcome == 'success'
+        continue-on-error: true
+        uses: linear/linear-release-action@30f9ae77461ec29f07fffe0c52edd1909bfbb6f5 # v0.18.1
+        with:
+          access_key: ${{ secrets.LINEAR_RELEASE_ACCESS_KEY }}
+          name: ${{ steps.linear-release.outputs.name }}
+          version: ${{ steps.linear-release.outputs.name }}
+          base_ref: ${{ steps.linear-release.outputs.base_ref }}
+
       - name: Notify Slack
         if: steps.publish.outputs.published == 'true'
         continue-on-error: true
