@@ -316,6 +316,16 @@ describe("generated", () => {
         console.warn("codegen-doc:print: No Team found - cannot test team.triageResponsibility query");
       }
     });
+
+    /** Test the team.viewerMembership query for L.TeamMembership */
+    it("team.viewerMembership", async () => {
+      if (_team) {
+        const team_viewerMembership: L.TeamMembership | undefined | null = await _team.viewerMembership;
+        expect(team_viewerMembership instanceof L.TeamMembership);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.viewerMembership query");
+      }
+    });
   });
 
   /** Test all AgentActivity queries */
@@ -6270,6 +6280,16 @@ describe("generated", () => {
         expect(team_triageResponsibility instanceof L.TriageResponsibility);
       } else {
         console.warn("codegen-doc:print: No Team found - cannot test team.triageResponsibility query");
+      }
+    });
+
+    /** Test the team.viewerMembership query for L.TeamMembership */
+    it("team.viewerMembership", async () => {
+      if (_team) {
+        const team_viewerMembership: L.TeamMembership | undefined | null = await _team.viewerMembership;
+        expect(team_viewerMembership instanceof L.TeamMembership);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.viewerMembership query");
       }
     });
   });

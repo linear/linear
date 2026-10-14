@@ -5694,6 +5694,26 @@
             "deprecationReason": null
           },
           {
+            "name": "subscriberIds",
+            "description": "[Internal] Users subscribed to this run.",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "summary",
             "description": "A summary of the conversation.",
             "args": [],
@@ -6234,6 +6254,11 @@
           },
           {
             "kind": "OBJECT",
+            "name": "AiConversationRerunPullRequestReviewToolCall",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
             "name": "AiConversationResearchToolCall",
             "ofType": null
           },
@@ -6330,6 +6355,11 @@
           {
             "kind": "OBJECT",
             "name": "AiConversationUpdateEntityToolCall",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "AiConversationUpdatePullRequestReviewFindingToolCall",
             "ofType": null
           },
           {
@@ -7313,6 +7343,12 @@
             "deprecationReason": null
           },
           {
+            "name": "integrationConnection",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "mcpServerConnection",
             "description": null,
             "isDeprecated": false,
@@ -7406,6 +7442,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "integrationService",
+            "description": "The service of the integration to connect. Null for other elicitation kinds.",
+            "args": [],
+            "type": {
+              "kind": "ENUM",
+              "name": "IntegrationService",
               "ofType": null
             },
             "isDeprecated": false,
@@ -7580,6 +7628,11 @@
           {
             "kind": "OBJECT",
             "name": "AiConversationEntitySelectionElicitationResponseData",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "AiConversationIntegrationConnectionElicitationResponseData",
             "ofType": null
           },
           {
@@ -9616,6 +9669,49 @@
             "deprecationReason": null
           }
         ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AiConversationIntegrationConnectionElicitationResponseData",
+        "description": "The integration connected to a Loop and its current run by a conversation.",
+        "fields": [
+          {
+            "name": "integrationId",
+            "description": "The identifier of the integration that was connected.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "kind",
+            "description": "The kind of elicitation that was answered.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "AiConversationElicitationKind",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
         "possibleTypes": null
       },
       {
@@ -12974,6 +13070,118 @@
       },
       {
         "kind": "OBJECT",
+        "name": "AiConversationRerunPullRequestReviewToolCall",
+        "description": null,
+        "fields": [
+          {
+            "name": "args",
+            "description": "The arguments to the tool call.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "AiConversationRerunPullRequestReviewToolCallArgs",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "displayInfo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AiConversationToolDisplayInfo",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "The name of the tool that was called.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "AiConversationTool",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rawArgs",
+            "description": "The arguments of the tool call.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rawResult",
+            "description": "The result of the tool call.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "AiConversationBaseToolCall",
+            "ofType": null
+          }
+        ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AiConversationRerunPullRequestReviewToolCallArgs",
+        "description": null,
+        "fields": [
+          {
+            "name": "entity",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AiConversationSearchEntitiesToolCallResultEntities",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "AiConversationResearchToolCall",
         "description": null,
         "fields": [
@@ -15821,6 +16029,12 @@
             "deprecationReason": null
           },
           {
+            "name": "RerunPullRequestReview",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "Research",
             "description": null,
             "isDeprecated": false,
@@ -15936,6 +16150,12 @@
           },
           {
             "name": "UpdateEntity",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "UpdatePullRequestReviewFinding",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -16095,6 +16315,11 @@
           },
           {
             "kind": "OBJECT",
+            "name": "AiConversationRerunPullRequestReviewToolCall",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
             "name": "AiConversationResearchToolCall",
             "ofType": null
           },
@@ -16191,6 +16416,11 @@
           {
             "kind": "OBJECT",
             "name": "AiConversationUpdateEntityToolCall",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "AiConversationUpdatePullRequestReviewFindingToolCall",
             "ofType": null
           },
           {
@@ -16814,6 +17044,150 @@
                   "name": "AiConversationCreateEntityToolCallResultCreatedEntities",
                   "ofType": null
                 }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AiConversationUpdatePullRequestReviewFindingToolCall",
+        "description": null,
+        "fields": [
+          {
+            "name": "args",
+            "description": "The arguments to the tool call.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "AiConversationUpdatePullRequestReviewFindingToolCallArgs",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "displayInfo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AiConversationToolDisplayInfo",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "The name of the tool that was called.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "AiConversationTool",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rawArgs",
+            "description": "The arguments of the tool call.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rawResult",
+            "description": "The result of the tool call.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "AiConversationBaseToolCall",
+            "ofType": null
+          }
+        ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AiConversationUpdatePullRequestReviewFindingToolCallArgs",
+        "description": null,
+        "fields": [
+          {
+            "name": "entity",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AiConversationSearchEntitiesToolCallResultEntities",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "findingId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rejected",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
               }
             },
             "isDeprecated": false,
@@ -21603,7 +21977,7 @@
       {
         "kind": "OBJECT",
         "name": "AuthUser",
-        "description": "A user that has access to the the resources of an organization.",
+        "description": "A user that has access to the resources of an organization.",
         "fields": [
           {
             "name": "active",
@@ -41667,6 +42041,23 @@
         "possibleTypes": null
       },
       {
+        "kind": "ENUM",
+        "name": "DocumentShareRole",
+        "description": "[Internal] The role of a user a personal document is shared with.",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "edit",
+            "description": "The user can read, edit, and comment on the document.",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
         "kind": "INPUT_OBJECT",
         "name": "DocumentSortInput",
         "description": "Document sorting options.",
@@ -52273,7 +52664,7 @@
           },
           {
             "name": "identifier",
-            "description": "[Internal] The human-readable identifier of the initiative. Returns the custom identifier override when set, otherwise the workspace default `<prefix>-<number>`. Null for legacy initiatives that have not been backfilled and while initiative identifiers are not enabled for the workspace.",
+            "description": "[Internal] The human-readable identifier of the initiative. Returns the custom identifier override when set, otherwise the workspace default `<prefix>-<number>`. Null for legacy initiatives that have not been backfilled.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -54986,6 +55377,18 @@
             "deprecationReason": null
           },
           {
+            "name": "groupType",
+            "description": "The selection mode of this label group. Null for regular labels. Groups without a type use single-select behavior.",
+            "args": [],
+            "type": {
+              "kind": "ENUM",
+              "name": "LabelGroupType",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "id",
             "description": "The unique identifier of the entity.",
             "args": [],
@@ -55606,6 +56009,18 @@
             "deprecationReason": null
           },
           {
+            "name": "groupType",
+            "description": "The selection mode of the label group. Only singleSelect is currently supported. Null uses single-select behavior.",
+            "type": {
+              "kind": "ENUM",
+              "name": "LabelGroupType",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "id",
             "description": "The identifier in UUID v4 format. If none is provided, the backend will generate one.",
             "type": {
@@ -55935,6 +56350,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "groupType",
+            "description": "The selection mode of the label group. Omit to keep the current value. Only singleSelect is currently supported. Null uses single-select behavior.",
+            "type": {
+              "kind": "ENUM",
+              "name": "LabelGroupType",
               "ofType": null
             },
             "defaultValue": null,
@@ -82855,6 +83282,30 @@
         "description": null,
         "fields": [
           {
+            "name": "issueStatusCategories",
+            "description": "The status categories of each of the Jira project's issue statuses (non-Epic).",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "JiraStatusNameCategoriesPayload",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "issueStatuses",
             "description": "The Jira project's issue statuses (non-Epic).",
             "args": [],
@@ -82870,6 +83321,30 @@
                   "ofType": {
                     "kind": "SCALAR",
                     "name": "String",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectStatusCategories",
+            "description": "The status categories of each of the Jira project's project statuses (Epic).",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "JiraStatusNameCategoriesPayload",
                     "ofType": null
                   }
                 }
@@ -83056,6 +83531,57 @@
           }
         ],
         "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "JiraStatusNameCategoriesPayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "categories",
+            "description": "The distinct status category keys (new, indeterminate, or done) of the Jira statuses with this name.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "The name of the Jira status.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -83263,7 +83789,7 @@
       {
         "kind": "ENUM",
         "name": "LabelGroupType",
-        "description": "The selection mode of an issue label group.",
+        "description": "The selection mode of a label group.",
         "fields": null,
         "inputFields": null,
         "interfaces": null,
@@ -88007,6 +88533,75 @@
             "deprecationReason": null
           },
           {
+            "name": "documentShare",
+            "description": "[Internal] Shares a personal document and its sub-documents with workspace members. Only the owner of the document can share it. New collaborators are subscribed to the document.",
+            "args": [
+              {
+                "name": "id",
+                "description": "The identifier of the personal document to share.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "role",
+                "description": "The role of the new collaborators.",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "DocumentShareRole",
+                  "ofType": null
+                },
+                "defaultValue": "edit",
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "userIds",
+                "description": "The identifiers of the users to share the document with.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DocumentPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "documentUnarchive",
             "description": "Restores a previously trashed document by unarchiving it.",
             "args": [
@@ -88033,6 +88628,63 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "DocumentArchivePayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentUnshare",
+            "description": "[Internal] Stops sharing a personal document and its sub-documents with users. The owner can remove any collaborator; a collaborator can only remove themselves.",
+            "args": [
+              {
+                "name": "id",
+                "description": "The identifier of the personal document to stop sharing.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "userIds",
+                "description": "The identifiers of the users to remove from the document.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DocumentPayload",
                 "ofType": null
               }
             },
@@ -93882,6 +94534,18 @@
             "name": "issueImportCreateAsana",
             "description": "Kicks off an Asana import job.",
             "args": [
+              {
+                "name": "asanaProjectName",
+                "description": "Name of an Asana project in the team. When set, only tasks from this project are imported.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
               {
                 "name": "asanaTeamName",
                 "description": "Asana team name to choose which issues we should import.",
@@ -117222,6 +117886,12 @@
             "deprecationReason": null
           },
           {
+            "name": "documentSharedWithYou",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "documentSubscribed",
             "description": null,
             "isDeprecated": false,
@@ -121490,7 +122160,7 @@
           },
           {
             "name": "identifier",
-            "description": "[Internal] The human-readable identifier of the project. Returns the custom identifier override when set, otherwise the default `P-<leadTeamKey>-<number>`. Null for projects without a lead team, for legacy projects that have not been backfilled, and while project identifiers are not enabled for the workspace.",
+            "description": "[Internal] The human-readable identifier of the project. Returns the custom identifier override when set, otherwise the default `P-<leadTeamKey>-<number>`. Null for projects without a lead team and for legacy projects that have not been backfilled.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -125696,6 +126366,18 @@
             "deprecationReason": null
           },
           {
+            "name": "groupType",
+            "description": "The selection mode of this label group. Null for regular labels. Groups without a type use single-select behavior.",
+            "args": [],
+            "type": {
+              "kind": "ENUM",
+              "name": "LabelGroupType",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "id",
             "description": "The unique identifier of the entity.",
             "args": [],
@@ -126352,6 +127034,18 @@
             "deprecationReason": null
           },
           {
+            "name": "groupType",
+            "description": "The selection mode of the label group. Only singleSelect is currently supported. Null uses single-select behavior.",
+            "type": {
+              "kind": "ENUM",
+              "name": "LabelGroupType",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "id",
             "description": "The identifier in UUID v4 format. If none is provided, the backend will generate one.",
             "type": {
@@ -126705,6 +127399,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "groupType",
+            "description": "The selection mode of the label group. Omit to keep the current value. Only singleSelect is currently supported. Null uses single-select behavior.",
+            "type": {
+              "kind": "ENUM",
+              "name": "LabelGroupType",
               "ofType": null
             },
             "defaultValue": null,
@@ -130934,7 +131640,7 @@
           },
           {
             "name": "identifier",
-            "description": "[Internal] The human-readable identifier of the project. Returns the custom identifier override when set, otherwise the default `P-<leadTeamKey>-<number>`. Null for projects without a lead team, for legacy projects that have not been backfilled, and while project identifiers are not enabled for the workspace.",
+            "description": "[Internal] The human-readable identifier of the project. Returns the custom identifier override when set, otherwise the default `P-<leadTeamKey>-<number>`. Null for projects without a lead team and for legacy projects that have not been backfilled.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -138437,7 +139143,7 @@
           },
           {
             "name": "url",
-            "description": "The URL of the preview.",
+            "description": "The URL of the preview. Empty for a deployment that is still building and has not reported its URL.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -162143,7 +162849,7 @@
           },
           {
             "name": "commentUnarchived",
-            "description": "Triggered when a a comment is unarchived",
+            "description": "Triggered when a comment is unarchived",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -162383,7 +163089,7 @@
           },
           {
             "name": "documentUnarchived",
-            "description": "Triggered when a a document is unarchived",
+            "description": "Triggered when a document is unarchived",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -162780,7 +163486,7 @@
           },
           {
             "name": "issueUnarchived",
-            "description": "Triggered when a an issue is unarchived",
+            "description": "Triggered when an issue is unarchived",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -162873,7 +163579,7 @@
           },
           {
             "name": "notificationUnarchived",
-            "description": "Triggered when a a notification is unarchived",
+            "description": "Triggered when a notification is unarchived",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -163001,7 +163707,7 @@
           },
           {
             "name": "projectUnarchived",
-            "description": "Triggered when a a project is unarchived",
+            "description": "Triggered when a project is unarchived",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -163770,6 +164476,22 @@
             "deprecationReason": null
           },
           {
+            "name": "agentAutomationEnabled",
+            "description": "[Internal] Whether the team has enabled agent automation.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "aiDiscussionSummariesEnabled",
             "description": "Whether to enable AI discussion summaries for issues in this team.",
             "args": [],
@@ -163932,6 +164654,22 @@
                     "ofType": null
                   }
                 }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "codingAgentEnabled",
+            "description": "[Internal] Whether the team has enabled Coding Sessions.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
               }
             },
             "isDeprecated": false,
@@ -166166,6 +166904,34 @@
             "deprecationReason": null
           },
           {
+            "name": "viewerCanLeave",
+            "description": "Whether the viewer can remove themselves from the team. False when the viewer is not a member, the team is SCIM-managed, the viewer is an app user the team does not accept, or leaving would leave the viewer without an active team. Otherwise mirrors the checks `teamMembershipDelete` applies to a viewer leaving on their own.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "viewerMembership",
+            "description": "The viewer's membership in the team. Null when the viewer is not a member.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "TeamMembership",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "visibility",
             "description": "The visibility of the team. Returns public for teams visible to all workspace members, private for teams visible only to members, and restricted for non-private teams inside a private-team boundary.",
             "args": [],
@@ -166728,7 +167494,7 @@
           },
           {
             "name": "cycleLockToActive",
-            "description": "Only allow issues issues with cycles in Active Issues.",
+            "description": "Only allow issues with cycles in Active Issues.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -168739,6 +169505,18 @@
         "fields": null,
         "inputFields": [
           {
+            "name": "agentAutomationEnabled",
+            "description": "[Internal] Whether the team has enabled agent automation.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "aiDiscussionSummariesEnabled",
             "description": "Whether to enable AI discussion summaries for issues.",
             "type": {
@@ -168828,6 +169606,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "codingAgentEnabled",
+            "description": "[Internal] Whether the team has enabled Coding Sessions.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "defaultValue": null,
@@ -183586,7 +184376,7 @@
           },
           {
             "name": "editAccess",
-            "description": "The edit access setting for this workflow definition. When unset, access is derived from restrictEditing.",
+            "description": "The edit access setting for this workflow definition. When unset, everyone can edit the workflow.",
             "args": [],
             "type": {
               "kind": "ENUM",
@@ -185650,6 +186440,12 @@
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "webhookReceived",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "possibleTypes": null
@@ -185718,6 +186514,12 @@
           },
           {
             "name": "team",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "webhook",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null

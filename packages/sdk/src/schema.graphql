@@ -1641,6 +1641,10 @@ type AiConversation implements Node {
   """
   status: AiConversationStatus!
   """
+  [Internal] Users subscribed to this run.
+  """
+  subscriberIds: [String!]
+  """
   A summary of the conversation.
   """
   summary: String
@@ -1942,6 +1946,7 @@ The kind of input an AI conversation elicitation asks for.
 enum AiConversationElicitationKind {
   confirmation
   entitySelection
+  integrationConnection
   mcpServerConnection
   multipleChoice
 }
@@ -1976,6 +1981,10 @@ type AiConversationElicitationPart implements AiConversationBasePart {
   The existing MCP integration to reconnect. Null when creating a new connection.
   """
   integrationId: String
+  """
+  The service of the integration to connect. Null for other elicitation kinds.
+  """
+  integrationService: IntegrationService
   """
   The kind of input this elicitation asks for.
   """
@@ -2020,6 +2029,7 @@ The kind-specific data recorded when a user answers an AI conversation elicitati
 union AiConversationElicitationResponseData =
   | AiConversationConfirmationElicitationResponseData
   | AiConversationEntitySelectionElicitationResponseData
+  | AiConversationIntegrationConnectionElicitationResponseData
   | AiConversationMcpServerConnectionElicitationResponseData
   | AiConversationMultipleChoiceElicitationResponseData
 
@@ -2487,6 +2497,20 @@ enum AiConversationInitialSource {
   slack
   subAgent
   workflow
+}
+
+"""
+The integration connected to a Loop and its current run by a conversation.
+"""
+type AiConversationIntegrationConnectionElicitationResponseData {
+  """
+  The identifier of the integration that was connected.
+  """
+  integrationId: String!
+  """
+  The kind of elicitation that was answered.
+  """
+  kind: AiConversationElicitationKind!
 }
 
 type AiConversationInvokeMcpToolToolCall implements AiConversationBaseToolCall {
@@ -3166,6 +3190,30 @@ type AiConversationRemoveSpendLimitToolCallArgs {
   summary: String
 }
 
+type AiConversationRerunPullRequestReviewToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationRerunPullRequestReviewToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationRerunPullRequestReviewToolCallArgs {
+  entity: AiConversationSearchEntitiesToolCallResultEntities!
+}
+
 type AiConversationResearchToolCall implements AiConversationBaseToolCall {
   """
   The arguments to the tool call.
@@ -3739,6 +3787,7 @@ enum AiConversationTool {
   ReadSandboxFile
   ReadSetting
   RemoveSpendLimit
+  RerunPullRequestReview
   Research
   RestoreEntity
   RetrieveEntities
@@ -3759,6 +3808,7 @@ enum AiConversationTool {
   TranscribeVideo
   UnsubscribeFromEvent
   UpdateEntity
+  UpdatePullRequestReviewFinding
   WebSearch
 }
 
@@ -3793,6 +3843,7 @@ union AiConversationToolCall =
   | AiConversationReadSandboxFileToolCall
   | AiConversationReadSettingToolCall
   | AiConversationRemoveSpendLimitToolCall
+  | AiConversationRerunPullRequestReviewToolCall
   | AiConversationResearchToolCall
   | AiConversationRestoreEntityToolCall
   | AiConversationRetrieveEntitiesToolCall
@@ -3813,6 +3864,7 @@ union AiConversationToolCall =
   | AiConversationTranscribeVideoToolCall
   | AiConversationUnsubscribeFromEventToolCall
   | AiConversationUpdateEntityToolCall
+  | AiConversationUpdatePullRequestReviewFindingToolCall
   | AiConversationWebSearchToolCall
 
 """
@@ -3934,6 +3986,32 @@ type AiConversationUpdateEntityToolCallArgs {
 type AiConversationUpdateEntityToolCallResult {
   startedAgentSessions: [AiConversationSearchEntitiesToolCallResultEntities!]
   updatedEntities: [AiConversationCreateEntityToolCallResultCreatedEntities!]
+}
+
+type AiConversationUpdatePullRequestReviewFindingToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationUpdatePullRequestReviewFindingToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationUpdatePullRequestReviewFindingToolCallArgs {
+  entity: AiConversationSearchEntitiesToolCallResultEntities!
+  findingId: String!
+  rejected: Boolean!
 }
 
 """
@@ -5240,7 +5318,7 @@ type AuthResolverResponse {
 }
 
 """
-A user that has access to the the resources of an organization.
+A user that has access to the resources of an organization.
 """
 type AuthUser {
   """
@@ -11191,6 +11269,16 @@ type DocumentSearchResultEdge {
 }
 
 """
+[Internal] The role of a user a personal document is shared with.
+"""
+enum DocumentShareRole {
+  """
+  The user can read, edit, and comment on the document.
+  """
+  edit
+}
+
+"""
 Document sorting options.
 """
 input DocumentSortInput {
@@ -14270,7 +14358,7 @@ type Initiative implements Node {
   """
   id: ID!
   """
-  [Internal] The human-readable identifier of the initiative. Returns the custom identifier override when set, otherwise the workspace default `<prefix>-<number>`. Null for legacy initiatives that have not been backfilled and while initiative identifiers are not enabled for the workspace.
+  [Internal] The human-readable identifier of the initiative. Returns the custom identifier override when set, otherwise the workspace default `<prefix>-<number>`. Null for legacy initiatives that have not been backfilled.
   """
   identifier: String
   """
@@ -15081,6 +15169,10 @@ type InitiativeLabel implements Node {
   """
   description: String
   """
+  The selection mode of this label group. Null for regular labels. Groups without a type use single-select behavior.
+  """
+  groupType: LabelGroupType
+  """
   The unique identifier of the entity.
   """
   id: ID!
@@ -15255,6 +15347,10 @@ input InitiativeLabelCreateInput {
   """
   description: String
   """
+  The selection mode of the label group. Only singleSelect is currently supported. Null uses single-select behavior.
+  """
+  groupType: LabelGroupType
+  """
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
@@ -15356,6 +15452,10 @@ input InitiativeLabelUpdateInput {
   The description of the label.
   """
   description: String
+  """
+  The selection mode of the label group. Omit to keep the current value. Only singleSelect is currently supported. Null uses single-select behavior.
+  """
+  groupType: LabelGroupType
   """
   Whether the label is a group.
   """
@@ -23217,9 +23317,17 @@ input JiraProjectDataInput {
 
 type JiraProjectStatusesPayload {
   """
+  The status categories of each of the Jira project's issue statuses (non-Epic).
+  """
+  issueStatusCategories: [JiraStatusNameCategoriesPayload!]!
+  """
   The Jira project's issue statuses (non-Epic).
   """
   issueStatuses: [String!]!
+  """
+  The status categories of each of the Jira project's project statuses (Epic).
+  """
+  projectStatusCategories: [JiraStatusNameCategoriesPayload!]!
   """
   The Jira project's project statuses (Epic).
   """
@@ -23267,6 +23375,17 @@ input JiraSettingsInput {
   Whether the user needs to provide setup information about the webhook to complete the integration setup. Only relevant for integrations that use a manual setup flow
   """
   setupPending: Boolean
+}
+
+type JiraStatusNameCategoriesPayload {
+  """
+  The distinct status category keys (new, indeterminate, or done) of the Jira statuses with this name.
+  """
+  categories: [String!]!
+  """
+  The name of the Jira status.
+  """
+  name: String!
 }
 
 input JiraUpdateInput {
@@ -23334,7 +23453,7 @@ input LabelGroupSort {
 }
 
 """
-The selection mode of an issue label group.
+The selection mode of a label group.
 """
 enum LabelGroupType {
   multiSelect
@@ -24690,6 +24809,23 @@ type Mutation {
     ifParentDocumentId: String
   ): DocumentArchivePayload!
   """
+  [Internal] Shares a personal document and its sub-documents with workspace members. Only the owner of the document can share it. New collaborators are subscribed to the document.
+  """
+  documentShare(
+    """
+    The identifier of the personal document to share.
+    """
+    id: String!
+    """
+    The role of the new collaborators.
+    """
+    role: DocumentShareRole = edit
+    """
+    The identifiers of the users to share the document with.
+    """
+    userIds: [String!]!
+  ): DocumentPayload!
+  """
   Restores a previously trashed document by unarchiving it.
   """
   documentUnarchive(
@@ -24698,6 +24834,19 @@ type Mutation {
     """
     id: String!
   ): DocumentArchivePayload!
+  """
+  [Internal] Stops sharing a personal document and its sub-documents with users. The owner can remove any collaborator; a collaborator can only remove themselves.
+  """
+  documentUnshare(
+    """
+    The identifier of the personal document to stop sharing.
+    """
+    id: String!
+    """
+    The identifiers of the users to remove from the document.
+    """
+    userIds: [String!]!
+  ): DocumentPayload!
   """
   Updates a document.
   """
@@ -26266,6 +26415,10 @@ type Mutation {
   Kicks off an Asana import job.
   """
   issueImportCreateAsana(
+    """
+    Name of an Asana project in the team. When set, only tasks from this project are imported.
+    """
+    asanaProjectName: String
     """
     Asana team name to choose which issues we should import.
     """
@@ -32768,6 +32921,7 @@ enum OtherNotificationType {
   documentReminder
   documentRemovedAsOwner
   documentRestored
+  documentSharedWithYou
   documentSubscribed
   documentThreadResolved
   documentUnsubscribed
@@ -33987,7 +34141,7 @@ type Project implements Node {
   """
   id: ID!
   """
-  [Internal] The human-readable identifier of the project. Returns the custom identifier override when set, otherwise the default `P-<leadTeamKey>-<number>`. Null for projects without a lead team, for legacy projects that have not been backfilled, and while project identifiers are not enabled for the workspace.
+  [Internal] The human-readable identifier of the project. Returns the custom identifier override when set, otherwise the default `P-<leadTeamKey>-<number>`. Null for projects without a lead team and for legacy projects that have not been backfilled.
   """
   identifier: String
   """
@@ -35234,6 +35388,10 @@ type ProjectLabel implements Node {
   """
   description: String
   """
+  The selection mode of this label group. Null for regular labels. Groups without a type use single-select behavior.
+  """
+  groupType: LabelGroupType
+  """
   The unique identifier of the entity.
   """
   id: ID!
@@ -35420,6 +35578,10 @@ input ProjectLabelCreateInput {
   """
   description: String
   """
+  The selection mode of the label group. Only singleSelect is currently supported. Null uses single-select behavior.
+  """
+  groupType: LabelGroupType
+  """
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
@@ -35529,6 +35691,10 @@ input ProjectLabelUpdateInput {
   The description of the label.
   """
   description: String
+  """
+  The selection mode of the label group. Omit to keep the current value. Only singleSelect is currently supported. Null uses single-select behavior.
+  """
+  groupType: LabelGroupType
   """
   Whether the label is a group.
   """
@@ -36751,7 +36917,7 @@ type ProjectSearchResult implements Node {
   """
   id: ID!
   """
-  [Internal] The human-readable identifier of the project. Returns the custom identifier override when set, otherwise the default `P-<leadTeamKey>-<number>`. Null for projects without a lead team, for legacy projects that have not been backfilled, and while project identifiers are not enabled for the workspace.
+  [Internal] The human-readable identifier of the project. Returns the custom identifier override when set, otherwise the default `P-<leadTeamKey>-<number>`. Null for projects without a lead team and for legacy projects that have not been backfilled.
   """
   identifier: String
   """
@@ -38925,7 +39091,7 @@ type PullRequestPreviewLink {
   """
   name: String
   """
-  The URL of the preview.
+  The URL of the preview. Empty for a deployment that is still building and has not reported its URL.
   """
   url: String!
 }
@@ -45855,7 +46021,7 @@ type Subscription {
   """
   commentDeleted: Comment!
   """
-  Triggered when a a comment is unarchived
+  Triggered when a comment is unarchived
   """
   commentUnarchived: Comment!
   """
@@ -45915,7 +46081,7 @@ type Subscription {
   """
   documentCreated: Document!
   """
-  Triggered when a a document is unarchived
+  Triggered when a document is unarchived
   """
   documentUnarchived: Document!
   """
@@ -46016,7 +46182,7 @@ type Subscription {
   """
   issueRelationUpdated: IssueRelation!
   """
-  Triggered when a an issue is unarchived
+  Triggered when an issue is unarchived
   """
   issueUnarchived: Issue!
   """
@@ -46041,7 +46207,7 @@ type Subscription {
   """
   notificationDeleted: Notification!
   """
-  Triggered when a a notification is unarchived
+  Triggered when a notification is unarchived
   """
   notificationUnarchived: Notification!
   """
@@ -46073,7 +46239,7 @@ type Subscription {
   """
   projectLabelUpdated: ProjectLabel!
   """
-  Triggered when a a project is unarchived
+  Triggered when a project is unarchived
   """
   projectUnarchived: Project!
   """
@@ -46290,6 +46456,10 @@ type Team implements Node {
   """
   activeCycle: Cycle
   """
+  [Internal] Whether the team has enabled agent automation.
+  """
+  agentAutomationEnabled: Boolean!
+  """
   Whether to enable AI discussion summaries for issues in this team.
   """
   aiDiscussionSummariesEnabled: Boolean!
@@ -46333,6 +46503,10 @@ type Team implements Node {
   [Internal] The team's sub-teams.
   """
   children: [Team!]!
+  """
+  [Internal] Whether the team has enabled Coding Sessions.
+  """
+  codingAgentEnabled: Boolean!
   """
   The team's color.
   """
@@ -46992,6 +47166,14 @@ type Team implements Node {
   """
   viewerCanJoin: Boolean!
   """
+  Whether the viewer can remove themselves from the team. False when the viewer is not a member, the team is SCIM-managed, the viewer is an app user the team does not accept, or leaving would leave the viewer without an active team. Otherwise mirrors the checks `teamMembershipDelete` applies to a viewer leaving on their own.
+  """
+  viewerCanLeave: Boolean!
+  """
+  The viewer's membership in the team. Null when the viewer is not a member.
+  """
+  viewerMembership: TeamMembership
+  """
   The visibility of the team. Returns public for teams visible to all workspace members, private for teams visible only to members, and restricted for non-private teams inside a private-team boundary.
   """
   visibility: TeamVisibility!
@@ -47148,7 +47330,7 @@ input TeamCreateInput {
   """
   cycleIssueAutoAssignStarted: Boolean
   """
-  Only allow issues issues with cycles in Active Issues.
+  Only allow issues with cycles in Active Issues.
   """
   cycleLockToActive: Boolean
   """
@@ -47750,6 +47932,10 @@ input TeamSort {
 
 input TeamUpdateInput {
   """
+  [Internal] Whether the team has enabled agent automation.
+  """
+  agentAutomationEnabled: Boolean
+  """
   Whether to enable AI discussion summaries for issues.
   """
   aiDiscussionSummariesEnabled: Boolean
@@ -47781,6 +47967,10 @@ input TeamUpdateInput {
   The canceled workflow state which auto closed issues will be set to.
   """
   autoCloseStateId: String
+  """
+  [Internal] Whether the team has enabled Coding Sessions.
+  """
+  codingAgentEnabled: Boolean
   """
   The color of the team.
   """
@@ -52108,7 +52298,7 @@ type WorkflowDefinition implements Node {
   """
   description: String
   """
-  The edit access setting for this workflow definition. When unset, access is derived from restrictEditing.
+  The edit access setting for this workflow definition. When unset, everyone can edit the workflow.
   """
   editAccess: WorkflowDefinitionEditAccess
   """
@@ -52684,6 +52874,7 @@ enum WorkflowTrigger {
   entityUpdated
   reviewSubmitted
   updatePosted
+  webhookReceived
 }
 
 enum WorkflowTriggerType {
@@ -52697,6 +52888,7 @@ enum WorkflowTriggerType {
   release
   schedule
   team
+  webhook
 }
 
 enum WorkflowType {
