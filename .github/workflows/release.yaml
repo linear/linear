@@ -107,10 +107,10 @@ jobs:
           node .github/scripts/create-release-slack-message.mjs
           curl -s -X POST "$SLACK_WEBHOOK_URL" -H 'Content-Type: application/json' --data @"$RUNNER_TEMP/sdk-release-slack.json"
 
-  # Each package has its own Linear pipeline, so issues move to Done when the package containing their change ships.
-  # The version's CHANGELOG.md section becomes the release notes. A missing notes file would fail the whole sync, so a
-  # path is only output when a section was found.
-  # Kept out of the release job so the Linear action and CLI never get its npm publishing or repo write permissions.
+  # Syncs each published package to its own Linear pipeline, which moves an issue to Done once the package it changed
+  # ships. Release notes come from the version's CHANGELOG.md section. A missing notes file fails the whole sync, so we
+  # only pass one when that section exists.
+  # This job runs apart from the release job so the Linear action and CLI can't mint npm tokens or push to the repo.
   linear-release:
     name: Linear release
     needs: [release]
