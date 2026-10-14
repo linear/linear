@@ -102,14 +102,17 @@ jobs:
         env:
           PUBLISHED_PACKAGES: ${{ steps.publish.outputs.publishedPackages }}
         run: |
-          jq -r '.[] | "\(.name | ltrimstr("@linear/")) \(.version)"' <<< "$PUBLISHED_PACKAGES" | while read -r package version; do
-            echo "$package=$version" >> "$GITHUB_OUTPUT"
-            notes="$RUNNER_TEMP/$package-release-notes.md"
-            awk -v heading="## $version" '$0 == heading { found = 1; next } /^## / { found = 0 } found' "packages/$package/CHANGELOG.md" > "$notes"
-            if [ -s "$notes" ]; then
-              echo "${package}_notes=$notes" >> "$GITHUB_OUTPUT"
-            fi
-          done
+          jq -r '.[] | "\(.name | ltrimstr("@linear/")) \(.version)"' <<< "$PUBLISHED_PACKAGES" |
+            while read -r package version; do
+              echo "$package=$version" >> "$GITHUB_OUTPUT"
+
+              # Lines under the "## <version>" heading, up to the next "## " heading.
+              notes="$RUNNER_TEMP/$package-notes.md"
+              awk -v heading="## $version" '/^## / { found = ($0 == heading); next } found' "packages/$package/CHANGELOG.md" > "$notes"
+              if [ -s "$notes" ]; then
+                echo "${package}_notes=$notes" >> "$GITHUB_OUTPUT"
+              fi
+            done
 
       - name: Sync Linear SDK release
         if: steps.versions.outputs.sdk
