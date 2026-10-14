@@ -93,6 +93,34 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # Each package has its own Linear pipeline, so issues move to Done when the package containing their change ships.
+      - name: Get published versions
+        id: versions
+        if: steps.publish.outputs.published == 'true'
+        env:
+          PUBLISHED_PACKAGES: ${{ steps.publish.outputs.publishedPackages }}
+        run: jq -r '.[] | "\(.name | ltrimstr("@linear/"))=\(.version)"' <<< "$PUBLISHED_PACKAGES" >> "$GITHUB_OUTPUT"
+
+      - name: Sync Linear SDK release
+        if: steps.versions.outputs.sdk
+        continue-on-error: true
+        uses: linear/linear-release-action@30f9ae77461ec29f07fffe0c52edd1909bfbb6f5 # v0.18.1
+        with:
+          access_key: ${{ secrets.LINEAR_SDK_RELEASE_ACCESS_KEY }}
+          name: ${{ steps.versions.outputs.sdk }}
+          version: ${{ steps.versions.outputs.sdk }}
+          include_paths: packages/sdk/**
+
+      - name: Sync Linear import release
+        if: steps.versions.outputs.import
+        continue-on-error: true
+        uses: linear/linear-release-action@30f9ae77461ec29f07fffe0c52edd1909bfbb6f5 # v0.18.1
+        with:
+          access_key: ${{ secrets.LINEAR_IMPORT_RELEASE_ACCESS_KEY }}
+          name: ${{ steps.versions.outputs.import }}
+          version: ${{ steps.versions.outputs.import }}
+          include_paths: packages/import/**
+
       - name: Notify Slack
         if: steps.publish.outputs.published == 'true'
         continue-on-error: true
