@@ -4,12 +4,16 @@ import {
   LinearWebhookEventHandler,
   LinearWebhookEventType,
   LinearWebhookHandler,
+  LinearWebhookHandlerOptions,
   LinearWebhookPayload,
 } from "./types.js";
 
 export const LINEAR_WEBHOOK_SIGNATURE_HEADER = "linear-signature";
 export const LINEAR_WEBHOOK_TS_HEADER = "linear-timestamp";
 export const LINEAR_WEBHOOK_TS_FIELD = "webhookTimestamp";
+export const LINEAR_WEBHOOK_DEFAULT_MAX_BODY_BYTES = 5 * 1024 * 1024;
+
+class WebhookBodyTooLargeError extends Error {}
 
 /**
  * Internal abstraction that adapts request/response behavior across
@@ -18,16 +22,54 @@ export const LINEAR_WEBHOOK_TS_FIELD = "webhookTimestamp";
  * Not exported on purpose: this is an implementation detail of
  * `LinearWebhookClient` and should not be relied upon by SDK consumers.
  *
- * - `method` and `signature` expose the necessary request metadata.
- * - `readRawBody` defers reading/streaming the raw body until invoked.
+ * - `method`, `signature`, `timestamp` and `contentLength` expose the necessary request metadata.
+ * - `readRawBody` defers reading/streaming the raw body until invoked and
+ *   throws `WebhookBodyTooLargeError` once more than `maxBytes` are received.
  * - `send` unifies writing responses in both environments.
  */
 interface HttpAdapter {
   method: string;
   signature: string | null;
   timestamp: string | null;
-  readRawBody: () => Promise<Buffer>;
+  contentLength: string | null;
+  readRawBody: (maxBytes: number) => Promise<Buffer>;
   send: (status: number, body: string) => Response | void;
+}
+
+/**
+ * Concatenates body chunks, throwing as soon as more than `maxBytes` have been received.
+ * Throwing ends the `for await` loop, which cancels or destroys the underlying stream.
+ */
+async function readBodyWithLimit(chunks: AsyncIterable<Uint8Array | string>, maxBytes: number): Promise<Buffer> {
+  const buffers: Buffer[] = [];
+  let size = 0;
+  for await (const chunk of chunks) {
+    const buffer = Buffer.from(chunk);
+    size += buffer.length;
+    if (size > maxBytes) {
+      throw new WebhookBodyTooLargeError();
+    }
+    buffers.push(buffer);
+  }
+  return Buffer.concat(buffers, size);
+}
+
+/**
+ * Iterates a Fetch API body stream, cancelling it if iteration stops early.
+ */
+async function* iterateBodyStream(stream: ReadableStream<Uint8Array>): AsyncIterable<Uint8Array> {
+  const reader = stream.getReader();
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) {
+        return;
+      }
+      yield value;
+    }
+  } finally {
+    await reader.cancel();
+  }
 }
 
 /**
@@ -46,11 +88,16 @@ export class LinearWebhookClient {
 
   /**
    * Creates a webhook handler function that can process Linear webhook requests
+   * @param options Optional handler settings, such as the maximum accepted body size.
    * @returns A webhook handler function with event registration capabilities.
    * Supports both Fetch API `(request: Request) => Promise<Response>` and
    * Node.js `(request: IncomingMessage, response: ServerResponse) => Promise<void>`
    */
-  public createHandler(): LinearWebhookHandler {
+  public createHandler(options?: LinearWebhookHandlerOptions): LinearWebhookHandler {
+    const maxBodyBytes = options?.maxBodyBytes ?? LINEAR_WEBHOOK_DEFAULT_MAX_BODY_BYTES;
+    if (!Number.isSafeInteger(maxBodyBytes) || maxBodyBytes <= 0) {
+      throw new TypeError("LinearWebhookClient: maxBodyBytes must be a positive integer");
+    }
     const eventHandlers = new Map<string, LinearWebhookEventHandler<LinearWebhookPayload>[]>();
 
     const handler = async (
@@ -69,7 +116,11 @@ export class LinearWebhookClient {
           return adapter.send(400, "Missing webhook signature");
         }
 
-        const rawBody = await adapter.readRawBody();
+        if (Number(adapter.contentLength) > maxBodyBytes) {
+          return adapter.send(413, "Payload too large");
+        }
+
+        const rawBody = await adapter.readRawBody(maxBodyBytes);
 
         let parsedPayload: LinearWebhookPayload;
         try {
@@ -82,7 +133,10 @@ export class LinearWebhookClient {
         // eslint-disable-next-line @typescript-eslint/await-thenable
         await Promise.all(allHandlers.map(h => h(parsedPayload)));
         return adapter.send(200, "OK");
-      } catch {
+      } catch (error) {
+        if (error instanceof WebhookBodyTooLargeError) {
+          return adapter.send(413, "Payload too large");
+        }
         return adapter.send(500, "Internal server error");
       }
     };
@@ -141,7 +195,7 @@ export class LinearWebhookClient {
 
   /**
    * Creates an HTTP adapter for Fetch-based runtimes.
-   * The body is not read until `readRawBody` is invoked.
+   * The body is not read until `readRawBody` is invoked, and is streamed with a size limit.
    *
    * @param request - Fetch API `Request`
    * @returns Helpers to read input and send responses in a unified way
@@ -151,14 +205,18 @@ export class LinearWebhookClient {
       method: request.method,
       signature: request.headers.get(LINEAR_WEBHOOK_SIGNATURE_HEADER),
       timestamp: request.headers.get(LINEAR_WEBHOOK_TS_HEADER),
-      readRawBody: async () => Buffer.from(await request.arrayBuffer()),
+      contentLength: request.headers.get("content-length"),
+      readRawBody: async maxBytes =>
+        request.body
+          ? readBodyWithLimit(iterateBodyStream(request.body), maxBytes)
+          : Buffer.from(await request.arrayBuffer()),
       send: (status, body) => new Response(body, { status }),
     };
   }
 
   /**
    * Creates an HTTP adapter for Node.js HTTP runtimes.
-   * The body stream is consumed when `readRawBody` is invoked.
+   * The body stream is consumed with a size limit when `readRawBody` is invoked.
    *
    * @param incomingMessage - Node.js `IncomingMessage`
    * @param res - Node.js `ServerResponse` used to write the response
@@ -177,14 +235,13 @@ export class LinearWebhookClient {
       method: incomingMessage.method || "",
       signature,
       timestamp,
-      readRawBody: async () => {
-        const chunks: Buffer[] = [];
-        for await (const chunk of incomingMessage) {
-          chunks.push(Buffer.from(chunk));
-        }
-        return Buffer.concat(chunks);
-      },
+      contentLength: incomingMessage.headers["content-length"] ?? null,
+      readRawBody: maxBytes => readBodyWithLimit(incomingMessage, maxBytes),
       send: (status, body) => {
+        if (!incomingMessage.complete) {
+          // Close the connection instead of keeping it open for a body that was not read.
+          res.setHeader("Connection", "close");
+        }
         res.statusCode = status;
         res.end(body);
       },
