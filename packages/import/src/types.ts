@@ -68,12 +68,9 @@ export interface ImportResult {
       description?: string;
     };
   };
-  /// A suffix to be appended to each resource URL (e.g. to authenticate requests)
-  resourceURLSuffix?: string;
-  /// When true, the CLI skips the client-side image pre-upload step and leaves image
-  /// URLs untouched in descriptions and comments. Use this when descriptions already
-  /// contain URLs that Linear's API will fetch and rewrite server-side.
-  skipImageReplacement?: boolean;
+  /// Maps an image URL to the URL to download it from (e.g. to authenticate requests). The returned
+  /// URL is only used to download the image and is never written to issue descriptions or comments.
+  authenticateImageUrl?: (url: string) => string;
 }
 
 /**

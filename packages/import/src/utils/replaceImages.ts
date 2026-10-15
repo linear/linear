@@ -1,49 +1,36 @@
 /* eslint-disable no-console */
 import { LinearClient } from "@linear/sdk";
-import { replaceAsync } from "./replaceAsync.ts";
-
-const IMAGE_MD_REGEX = /(?:!\[(.*?)\]\((https?:\/\/.*?)\))/g;
-// eslint-disable-next-line no-useless-escape
-const IMAGE_TAG_REGEX = /(?:<img.*?src=\"(.*?)\".*?>)/g;
+import { findImages } from "./markdownImages.ts";
 
 /**
  * Replace markdown image URLs with Linear uploaded ones.
  *
- * Also supports image tags used by GitHub.
+ * Also supports image tags used by GitHub. Images inside code spans and code blocks, and escaped
+ * image markers, don't render as images so they are left as-is. So are images that fail to upload.
  *
  * @param client Linear API client.
  * @param text Markdown content.
- * @param urlSuffix A suffix to append to each image URL, such as to perform authentication
+ * @param authenticateUrl Maps each image URL to the URL to download it from, such as to perform authentication
  * @returns Markdown content with images using the new Linear URLs
  */
 export const replaceImagesInMarkdown = async (
   client: LinearClient,
   text: string,
-  urlSuffix?: string
+  authenticateUrl?: (url: string) => string
 ): Promise<string> => {
-  let result = text;
-  const effectiveURLSuffix = urlSuffix || "";
+  const images = findImages(text);
+  const uploadedUrls = await Promise.all(images.map(image => replaceImageUrl(client, image.url, authenticateUrl)));
 
-  // Markdown tags
-  result = await replaceAsync(result, IMAGE_MD_REGEX, async (match, ...args: string[]) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    match;
-    const title = args[0];
-    const url = args[1];
-    const uploadedUrl = await replaceImageUrl(client, url + effectiveURLSuffix);
-    return `\n![${title}](${uploadedUrl})\n`;
+  let result = "";
+  let cursor = 0;
+  images.forEach((image, index) => {
+    const uploadedUrl = uploadedUrls[index];
+    if (uploadedUrl) {
+      result += text.slice(cursor, image.start) + image.render(uploadedUrl);
+      cursor = image.end;
+    }
   });
-
-  // HTML tags
-  result = await replaceAsync(result, IMAGE_TAG_REGEX, async (match, ...args: string[]) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    match;
-    const url = args[0];
-    const uploadedUrl = await replaceImageUrl(client, url + effectiveURLSuffix);
-    return `![](${uploadedUrl})`;
-  });
-
-  return result;
+  return result + text.slice(cursor);
 };
 
 /**
@@ -51,17 +38,23 @@ export const replaceImagesInMarkdown = async (
  *
  * @param client Linear API client
  * @param url URL of the source image
- * @returns URL of the uploaded image
+ * @param authenticateUrl Maps the source URL to the URL to download it from
+ * @returns URL of the uploaded image, or undefined if the upload failed
  */
-const replaceImageUrl = async (client: LinearClient, url: string) => {
+const replaceImageUrl = async (
+  client: LinearClient,
+  url: string,
+  authenticateUrl?: (url: string) => string
+): Promise<string | undefined> => {
   try {
-    const res = await client.imageUploadFromUrl(url);
-    if (res?.url) {
-      return res?.url;
+    const res = await client.imageUploadFromUrl(authenticateUrl ? authenticateUrl(url) : url);
+    if (res?.success === true && res.url) {
+      return res.url;
     }
   } catch (err) {
     console.error(`Failed to replace image`, err.message);
   }
 
-  return url;
+  // Never return the authenticated URL, so that credentials don't end up in issue content
+  return undefined;
 };
