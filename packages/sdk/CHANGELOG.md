@@ -1,5 +1,96 @@
 # Change Log
 
+## 98.0.0
+
+### Major Changes
+
+- feat(schema): [breaking] Argument 'asanaProjectName: String' was removed from field 'Mutation.issueImportCreateAsana' (Mutation.issueImportCreateAsana.asanaProjectName)
+
+  feat(schema): [dangerous] Enum value 'RenameAgentChat' was added to enum 'AiConversationTool' (AiConversationTool.RenameAgentChat)
+
+  feat(schema): [dangerous] Member 'AiConversationRenameAgentChatToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Argument 'asanaProjectNames: [String!]' added to field 'Mutation.issueImportCreateAsana' (Mutation.issueImportCreateAsana.asanaProjectNames)
+
+  feat(schema): [dangerous] Input field 'trustedExternalSourceUpdate' was added to input object type 'OrganizationCodingAgentSettingsInput' (OrganizationCodingAgentSettingsInput.trustedExternalSourceUpdate)
+
+  feat(schema): [dangerous] Input field 'trustedExternalSources' was added to input object type 'OrganizationCodingAgentSettingsInput' (OrganizationCodingAgentSettingsInput.trustedExternalSources)
+
+  feat(schema): [dangerous] Input field 'teamSecuritySettings' was added to input object type 'OrganizationUpdateInput' (OrganizationUpdateInput.teamSecuritySettings)
+
+  feat(schema): [dangerous] Enum value 'allDocuments' was added to enum 'ViewType' (ViewType.allDocuments)
+
+  feat(schema): [dangerous] Enum value 'myDocuments' was added to enum 'ViewType' (ViewType.myDocuments)
+
+  feat(schema): [dangerous] Enum value 'sharedDocuments' was added to enum 'ViewType' (ViewType.sharedDocuments)
+
+  feat(schema): [dangerous] Enum value 'teamDocuments' was added to enum 'ViewType' (ViewType.teamDocuments)
+
+  feat(schema): [dangerous] Enum value 'addedToMergeQueue' was added to enum 'WorkflowTrigger' (WorkflowTrigger.addedToMergeQueue)
+
+  feat(schema): [dangerous] Enum value 'removedFromMergeQueue' was added to enum 'WorkflowTrigger' (WorkflowTrigger.removedFromMergeQueue)
+
+  feat(schema): [non_breaking] Type 'AiConversationRenameAgentChatToolCall' was added (AiConversationRenameAgentChatToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationRenameAgentChatToolCallArgs' was added (AiConversationRenameAgentChatToolCallArgs)
+
+  feat(schema): [non_breaking] Type 'OrganizationCodingAgentTrustedSourceUpdateInput' was added (OrganizationCodingAgentTrustedSourceUpdateInput)
+
+  feat(schema): [non_breaking] Type 'WorkflowDefinitionConnection' was added (WorkflowDefinitionConnection)
+
+  feat(schema): [non_breaking] Type 'WorkflowDefinitionEdge' was added (WorkflowDefinitionEdge)
+
+  feat(schema): [non_breaking] Type 'WorkspaceTeamSecuritySettingsInput' was added (WorkspaceTeamSecuritySettingsInput)
+
+  feat(schema): [non_breaking] Field 'setupWorkflowDefinition' was added to object type 'AiConversation' (AiConversation.setupWorkflowDefinition)
+
+  feat(schema): [non_breaking] Input field 'InitiativeLabelCreateInput.groupType' description changed from 'The selection mode of the label group. Only singleSelect is currently supported. Null uses single-select behavior.' to 'The selection mode of the label group. Null uses single-select behavior.' (InitiativeLabelCreateInput.groupType)
+
+  feat(schema): [non_breaking] Input field 'InitiativeLabelUpdateInput.groupType' description changed from 'The selection mode of the label group. Omit to keep the current value. Only singleSelect is currently supported. Null uses single-select behavior.' to 'The selection mode of the label group. Omit to keep the current value. Null uses single-select behavior.' (InitiativeLabelUpdateInput.groupType)
+
+  feat(schema): [non_breaking] Field 'aiAnalysis' was added to object type 'Issue' (Issue.aiAnalysis)
+
+  feat(schema): [non_breaking] Field 'aiAnalysis' was added to object type 'IssueSearchResult' (IssueSearchResult.aiAnalysis)
+
+  feat(schema): [non_breaking] Field 'issueRequestSolubilityPrediction' was added to object type 'Mutation' (Mutation.issueRequestSolubilityPrediction)
+
+  feat(schema): [non_breaking] Field 'loops' was added to object type 'Organization' (Organization.loops)
+
+  feat(schema): [non_breaking] Field 'teamSecuritySettings' was added to object type 'Organization' (Organization.teamSecuritySettings)
+
+  feat(schema): [non_breaking] Input field 'ProjectLabelCreateInput.groupType' description changed from 'The selection mode of the label group. Only singleSelect is currently supported. Null uses single-select behavior.' to 'The selection mode of the label group. Null uses single-select behavior.' (ProjectLabelCreateInput.groupType)
+
+  feat(schema): [non_breaking] Input field 'ProjectLabelUpdateInput.groupType' description changed from 'The selection mode of the label group. Omit to keep the current value. Only singleSelect is currently supported. Null uses single-select behavior.' to 'The selection mode of the label group. Omit to keep the current value. Null uses single-select behavior.' (ProjectLabelUpdateInput.groupType)
+
+  feat(schema): [non_breaking] Field 'loops' was added to object type 'Team' (Team.loops)
+
+  feat(schema): [non_breaking] Field 'documentFieldProject' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.documentFieldProject)
+
+  feat(schema): [non_breaking] Field 'documentsListCreatedDateDirection' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.documentsListCreatedDateDirection)
+
+  feat(schema): [non_breaking] Field 'documentsListGrouping' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.documentsListGrouping)
+
+  feat(schema): [non_breaking] Field 'documentsListLastEditedDirection' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.documentsListLastEditedDirection)
+
+  feat(schema): [non_breaking] Field 'documentsListNameDirection' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.documentsListNameDirection)
+
+  feat(schema): [non_breaking] Field 'documentsListOrdering' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.documentsListOrdering)
+
+  feat(schema): [non_breaking] Field 'documentsListOwnerDirection' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.documentsListOwnerDirection)
+
+  feat(schema): [non_breaking] Field 'documentsListProjectDirection' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.documentsListProjectDirection)
+
+  feat(schema): [non_breaking] Field 'documentsListShowInactiveProjects' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.documentsListShowInactiveProjects)
+
+  feat(schema): [non_breaking] Field 'documentsListShowOnlyMyProjects' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.documentsListShowOnlyMyProjects)
+
+  feat(schema): [non_breaking] Field 'pinnedDocumentIds' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.pinnedDocumentIds)
+
+### Patch Changes
+
+- 1966d79: Support `Headers` instances and header arrays in client options and `setHeader()`, matching header names case-insensitively.
+- 379cb14: Limit webhook request bodies read by `createHandler()` before signature verification. Requests whose `content-length` or streamed body exceeds the limit are rejected with `413` without buffering the rest of the body, in both Fetch and Node.js handlers. The limit defaults to 5 MiB and can be configured with `createHandler({ maxBodyBytes })`.
+
 ## 97.2.0
 
 ### Minor Changes

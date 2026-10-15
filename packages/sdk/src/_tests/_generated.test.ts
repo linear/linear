@@ -85,6 +85,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the team connection query for the WorkflowDefinition */
+    it("team.loops", async () => {
+      if (_team) {
+        const loops: L.WorkflowDefinitionConnection | undefined | null = await _team.loops();
+        expect(loops instanceof L.WorkflowDefinitionConnection);
+      } else {
+        console.warn("codegen-doc:print: No team found - cannot test _team.loops query");
+      }
+    });
+
     /** Test the team connection query for the User */
     it("team.members", async () => {
       if (_team) {
@@ -4609,6 +4619,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the organization connection query for the WorkflowDefinition */
+    it("organization.loops", async () => {
+      if (_organization) {
+        const loops: L.WorkflowDefinitionConnection | undefined | null = await _organization.loops();
+        expect(loops instanceof L.WorkflowDefinitionConnection);
+      } else {
+        console.warn("codegen-doc:print: No organization found - cannot test _organization.loops query");
+      }
+    });
+
     /** Test the organization connection query for the ProjectLabel */
     it("organization.projectLabels", async () => {
       if (_organization) {
@@ -6048,6 +6068,16 @@ describe("generated", () => {
         expect(labels instanceof L.IssueLabelConnection);
       } else {
         console.warn("codegen-doc:print: No team found - cannot test _team.labels query");
+      }
+    });
+
+    /** Test the team connection query for the WorkflowDefinition */
+    it("team.loops", async () => {
+      if (_team) {
+        const loops: L.WorkflowDefinitionConnection | undefined | null = await _team.loops();
+        expect(loops instanceof L.WorkflowDefinitionConnection);
+      } else {
+        console.warn("codegen-doc:print: No team found - cannot test _team.loops query");
       }
     });
 

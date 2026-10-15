@@ -4627,6 +4627,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     ... on AiConversationRemoveSpendLimitToolCall {
       ...AiConversationRemoveSpendLimitToolCall
     }
+    ... on AiConversationRenameAgentChatToolCall {
+      ...AiConversationRenameAgentChatToolCall
+    }
     ... on AiConversationRerunPullRequestReviewToolCall {
       ...AiConversationRerunPullRequestReviewToolCall
     }
@@ -11499,6 +11502,10 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
     ...AiConversationRemoveSpendLimitToolCall
   }
 
+  ... on AiConversationRenameAgentChatToolCall {
+    ...AiConversationRenameAgentChatToolCall
+  }
+
   ... on AiConversationRerunPullRequestReviewToolCall {
     ...AiConversationRerunPullRequestReviewToolCall
   }
@@ -12455,6 +12462,28 @@ fragment AiConversationRemoveSpendLimitToolCall on AiConversationRemoveSpendLimi
 fragment AiConversationRemoveSpendLimitToolCallArgs on AiConversationRemoveSpendLimitToolCallArgs {
   __typename
   summary
+}
+
+fragment AiConversationRenameAgentChatToolCall on AiConversationRenameAgentChatToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationRenameAgentChatToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationRenameAgentChatToolCallArgs on AiConversationRenameAgentChatToolCallArgs {
+  __typename
+  name
 }
 
 fragment AiConversationRerunPullRequestReviewToolCall on AiConversationRerunPullRequestReviewToolCall {
@@ -14928,6 +14957,16 @@ fragment WebhookConnection on WebhookConnection {
   __typename
   nodes {
     ...Webhook
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment WorkflowDefinitionConnection on WorkflowDefinitionConnection {
+  __typename
+  nodes {
+    ...WorkflowDefinition
   }
   pageInfo {
     ...PageInfo
@@ -18805,6 +18844,35 @@ query organization_labels(
     }
   }
 }
+# Loops in the workspace that are visible to the requesting user, including team and project loops.
+# Includes enabled and disabled loops.
+query organization_loops(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  organization {
+    loops(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...WorkflowDefinitionConnection
+    }
+  }
+}
 # Project labels available in the workspace for categorizing projects.
 query organization_projectLabels(
   # A cursor to be used with first for forward pagination
@@ -20885,6 +20953,37 @@ query team_labels(
       orderBy: $orderBy
     ) {
       ...IssueLabelConnection
+    }
+  }
+}
+# Loops owned by the team that are visible to the requesting user. Includes enabled and disabled
+# loops.
+query team_loops(
+  # The identifier of the team to retrieve.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  team(id: $id) {
+    loops(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...WorkflowDefinitionConnection
     }
   }
 }
@@ -24250,8 +24349,8 @@ mutation issueExternalSyncDisable(
 }
 # Kicks off an Asana import job.
 mutation issueImportCreateAsana(
-  # Name of an Asana project in the team. When set, only tasks from this project are imported.
-  $asanaProjectName: String
+  # Names of Asana projects in the team. When set, only tasks from these projects are imported. When empty, all projects are imported.
+  $asanaProjectNames: [String!]
   # Asana team name to choose which issues we should import.
   $asanaTeamName: String!
   # Asana token to fetch information from the Asana API.
@@ -24268,7 +24367,7 @@ mutation issueImportCreateAsana(
   $teamName: String
 ) {
   issueImportCreateAsana(
-    asanaProjectName: $asanaProjectName
+    asanaProjectNames: $asanaProjectNames
     asanaTeamName: $asanaTeamName
     asanaToken: $asanaToken
     id: $id
