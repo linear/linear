@@ -1,5 +1,15 @@
 # Change Log
 
+## 4.0.3
+
+### Patch Changes
+
+- a983882: fix(import): upload Shortcut CSV images from the CLI again, and only send the Shortcut API token to https Shortcut hosts. Images are only replaced when the upload reports success and returns a URL. Failed uploads leave the original text unchanged, including when an unsuccessful response contains a URL. When uploading images, all importers now support image URLs with parentheses, angle brackets or a title, decode escaped characters in image URLs before downloading them, and leave images in code spans, code blocks and escaped image markers untouched. Uploaded images now keep their place in the text instead of moving to their own line, so images in tables and lists stay in them. Malformed images and image tags no longer make the import hang.
+- Updated dependencies
+- Updated dependencies [1966d79]
+- Updated dependencies [379cb14]
+  - @linear/sdk@98.0.0
+
 ## 4.0.2
 
 ### Patch Changes

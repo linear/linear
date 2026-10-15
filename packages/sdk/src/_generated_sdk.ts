@@ -3163,6 +3163,46 @@ export class AiConversationRemoveSpendLimitToolCallArgs extends Request {
   public summary?: string | null;
 }
 /**
+ * AiConversationRenameAgentChatToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationRenameAgentChatToolCallFragment response data
+ */
+export class AiConversationRenameAgentChatToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationRenameAgentChatToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationRenameAgentChatToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationRenameAgentChatToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationRenameAgentChatToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationRenameAgentChatToolCallArgsFragment response data
+ */
+export class AiConversationRenameAgentChatToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationRenameAgentChatToolCallArgsFragment) {
+    super(request);
+    this.name = data.name;
+  }
+
+  public name: string;
+}
+/**
  * AiConversationRerunPullRequestReviewToolCall model
  *
  * @param request - function to call the graphql client
@@ -17059,6 +17099,10 @@ export class Organization extends Request {
   public labels(variables?: L.Organization_LabelsQueryVariables) {
     return new Organization_LabelsQuery(this._request, variables).fetch(variables);
   }
+  /** Loops in the workspace that are visible to the requesting user, including team and project loops. Includes enabled and disabled loops. */
+  public loops(variables?: L.Organization_LoopsQueryVariables) {
+    return new Organization_LoopsQuery(this._request, variables).fetch(variables);
+  }
   /** Project labels available in the workspace for categorizing projects. */
   public projectLabels(variables?: L.Organization_ProjectLabelsQueryVariables) {
     return new Organization_ProjectLabelsQuery(this._request, variables).fetch(variables);
@@ -23477,6 +23521,10 @@ export class Team extends Request {
   public labels(variables?: Omit<L.Team_LabelsQueryVariables, "id">) {
     return new Team_LabelsQuery(this._request, this.id, variables).fetch(variables);
   }
+  /** Loops owned by the team that are visible to the requesting user. Includes enabled and disabled loops. */
+  public loops(variables?: Omit<L.Team_LoopsQueryVariables, "id">) {
+    return new Team_LoopsQuery(this._request, this.id, variables).fetch(variables);
+  }
   /** Users who are members of this team. Supports filtering and pagination. */
   public members(variables?: Omit<L.Team_MembersQueryVariables, "id">) {
     return new Team_MembersQuery(this._request, this.id, variables).fetch(variables);
@@ -26907,6 +26955,27 @@ export class WorkflowDefinition extends Request {
   /** The ID of contextual user view associated with the workflow. */
   public get userId(): string | undefined {
     return this._user?.id;
+  }
+}
+/**
+ * WorkflowDefinitionConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this WorkflowDefinitionConnection model
+ * @param data - WorkflowDefinitionConnection response data
+ */
+export class WorkflowDefinitionConnection extends Connection<WorkflowDefinition> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<WorkflowDefinition> | undefined>,
+    data: L.WorkflowDefinitionConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new WorkflowDefinition(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
   }
 }
 /**
@@ -46495,6 +46564,49 @@ export class Organization_LabelsQuery extends Request {
 }
 
 /**
+ * A fetchable Organization_Loops Query
+ *
+ * @param request - function to call the graphql client
+ * @param variables - variables to pass into the Organization_LoopsQuery
+ */
+export class Organization_LoopsQuery extends Request {
+  private _variables?: L.Organization_LoopsQueryVariables;
+
+  public constructor(request: LinearRequest, variables?: L.Organization_LoopsQueryVariables) {
+    super(request);
+
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Organization_Loops query and return a WorkflowDefinitionConnection
+   *
+   * @param variables - variables to pass into the Organization_LoopsQuery
+   * @returns parsed response from Organization_LoopsQuery
+   */
+  public async fetch(variables?: L.Organization_LoopsQueryVariables): LinearFetch<WorkflowDefinitionConnection> {
+    const response = await this._request<L.Organization_LoopsQuery, L.Organization_LoopsQueryVariables>(
+      L.Organization_LoopsDocument.toString(),
+      variables
+    );
+    const data = response.organization.loops;
+
+    return new WorkflowDefinitionConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable Organization_ProjectLabels Query
  *
  * @param request - function to call the graphql client
@@ -48791,6 +48903,55 @@ export class Team_LabelsQuery extends Request {
     const data = response.team.labels;
 
     return new IssueLabelConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Team_Loops Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to team
+ * @param variables - variables without 'id' to pass into the Team_LoopsQuery
+ */
+export class Team_LoopsQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Team_LoopsQueryVariables, "id">;
+
+  public constructor(request: LinearRequest, id: string, variables?: Omit<L.Team_LoopsQueryVariables, "id">) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Team_Loops query and return a WorkflowDefinitionConnection
+   *
+   * @param variables - variables without 'id' to pass into the Team_LoopsQuery
+   * @returns parsed response from Team_LoopsQuery
+   */
+  public async fetch(variables?: Omit<L.Team_LoopsQueryVariables, "id">): LinearFetch<WorkflowDefinitionConnection> {
+    const response = await this._request<L.Team_LoopsQuery, L.Team_LoopsQueryVariables>(
+      L.Team_LoopsDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.team.loops;
+
+    return new WorkflowDefinitionConnection(
       this._request,
       connection =>
         this.fetch(

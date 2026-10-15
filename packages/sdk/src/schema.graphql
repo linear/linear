@@ -1633,6 +1633,10 @@ type AiConversation implements Node {
   """
   readAt: DateTime
   """
+  [Internal] The published loop edited by this private setup conversation.
+  """
+  setupWorkflowDefinition: WorkflowDefinition
+  """
   The conversation's unique URL slug.
   """
   slugId: String!
@@ -3190,6 +3194,30 @@ type AiConversationRemoveSpendLimitToolCallArgs {
   summary: String
 }
 
+type AiConversationRenameAgentChatToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationRenameAgentChatToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationRenameAgentChatToolCallArgs {
+  name: String!
+}
+
 type AiConversationRerunPullRequestReviewToolCall implements AiConversationBaseToolCall {
   """
   The arguments to the tool call.
@@ -3787,6 +3815,7 @@ enum AiConversationTool {
   ReadSandboxFile
   ReadSetting
   RemoveSpendLimit
+  RenameAgentChat
   RerunPullRequestReview
   Research
   RestoreEntity
@@ -3843,6 +3872,7 @@ union AiConversationToolCall =
   | AiConversationReadSandboxFileToolCall
   | AiConversationReadSettingToolCall
   | AiConversationRemoveSpendLimitToolCall
+  | AiConversationRenameAgentChatToolCall
   | AiConversationRerunPullRequestReviewToolCall
   | AiConversationResearchToolCall
   | AiConversationRestoreEntityToolCall
@@ -15347,7 +15377,7 @@ input InitiativeLabelCreateInput {
   """
   description: String
   """
-  The selection mode of the label group. Only singleSelect is currently supported. Null uses single-select behavior.
+  The selection mode of the label group. Null uses single-select behavior.
   """
   groupType: LabelGroupType
   """
@@ -15453,7 +15483,7 @@ input InitiativeLabelUpdateInput {
   """
   description: String
   """
-  The selection mode of the label group. Omit to keep the current value. Only singleSelect is currently supported. Null uses single-select behavior.
+  The selection mode of the label group. Omit to keep the current value. Null uses single-select behavior.
   """
   groupType: LabelGroupType
   """
@@ -17610,6 +17640,10 @@ type Issue implements Node {
     """
     orderBy: PaginationOrderBy
   ): AgentSessionConnection!
+  """
+  [Internal] AI-generated analyses of the issue, keyed by feature, such as coding-agent suitability. Null if no analysis has run.
+  """
+  aiAnalysis: JSONObject
   """
   [Internal] AI prompt progresses associated with this issue.
   """
@@ -21174,6 +21208,10 @@ type IssueSearchResult implements Node {
     """
     orderBy: PaginationOrderBy
   ): AgentSessionConnection!
+  """
+  [Internal] AI-generated analyses of the issue, keyed by feature, such as coding-agent suitability. Null if no analysis has run.
+  """
+  aiAnalysis: JSONObject
   """
   [Internal] AI prompt progresses associated with this issue.
   """
@@ -26416,9 +26454,9 @@ type Mutation {
   """
   issueImportCreateAsana(
     """
-    Name of an Asana project in the team. When set, only tasks from this project are imported.
+    Names of Asana projects in the team. When set, only tasks from these projects are imported. When empty, all projects are imported.
     """
-    asanaProjectName: String
+    asanaProjectNames: [String!]
     """
     Asana team name to choose which issues we should import.
     """
@@ -26750,6 +26788,15 @@ type Mutation {
     """
     labelId: String!
   ): IssuePayload!
+  """
+  [Internal] Requests a coding-agent suitability prediction for an issue without a current one, such as an issue created before predictions existed.
+  """
+  issueRequestSolubilityPrediction(
+    """
+    The identifier of the issue to predict suitability for.
+    """
+    id: String!
+  ): SuccessPayload!
   """
   Shares an issue with a user who would not otherwise be able to access it. The viewer must have native access to the issue's full sub-issue tree and permission to share issues in the issue's team. Issues that inherit sharing from a parent issue cannot be shared directly.
   """
@@ -31692,6 +31739,35 @@ type Organization implements Node {
   """
   logoUrl: String
   """
+  Loops in the workspace that are visible to the requesting user, including team and project loops. Includes enabled and disabled loops.
+  """
+  loops(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): WorkflowDefinitionConnection!
+  """
   The workspace's name.
   """
   name: String!
@@ -31837,6 +31913,10 @@ type Organization implements Node {
   Whether the default prompt for copying an issue or opening it in a coding tool includes a suggested Git branch name.
   """
   suggestedBranchNameEnabled: Boolean!
+  """
+  [Internal] Workspace restrictions for team permissions.
+  """
+  teamSecuritySettings: JSONObject!
   """
   Teams in the workspace. Returns only teams visible to the requesting user (all public teams plus private teams the user is a member of).
   """
@@ -32030,6 +32110,28 @@ input OrganizationCodingAgentSettingsInput {
   [Internal] The default sandbox size used for Coding Sessions.
   """
   sandboxSize: String
+  """
+  [Internal] Approve or remove one external source for coding-session delegation.
+  """
+  trustedExternalSourceUpdate: OrganizationCodingAgentTrustedSourceUpdateInput
+  """
+  [Internal] Approval snapshot. Ignored on writes; use trustedExternalSourceUpdate to change approvals.
+  """
+  trustedExternalSources: [String!]
+}
+
+"""
+[Internal] An approval change for one external coding-session source.
+"""
+input OrganizationCodingAgentTrustedSourceUpdateInput {
+  """
+  [Internal] Whether this source may start coding sessions.
+  """
+  allowed: Boolean!
+  """
+  [Internal] The external source whose approval to change.
+  """
+  key: String!
 }
 
 """
@@ -32850,6 +32952,10 @@ input OrganizationUpdateInput {
   Whether the default prompt for copying an issue or opening it in a coding tool includes a suggested Git branch name.
   """
   suggestedBranchNameEnabled: Boolean
+  """
+  [Internal] Workspace restrictions for team permissions.
+  """
+  teamSecuritySettings: WorkspaceTeamSecuritySettingsInput
   """
   [ALPHA] Theme settings for the workspace.
   """
@@ -35578,7 +35684,7 @@ input ProjectLabelCreateInput {
   """
   description: String
   """
-  The selection mode of the label group. Only singleSelect is currently supported. Null uses single-select behavior.
+  The selection mode of the label group. Null uses single-select behavior.
   """
   groupType: LabelGroupType
   """
@@ -35692,7 +35798,7 @@ input ProjectLabelUpdateInput {
   """
   description: String
   """
-  The selection mode of the label group. Omit to keep the current value. Only singleSelect is currently supported. Null uses single-select behavior.
+  The selection mode of the label group. Omit to keep the current value. Null uses single-select behavior.
   """
   groupType: LabelGroupType
   """
@@ -46809,6 +46915,35 @@ type Team implements Node {
   """
   ledInitiativeCount: Int!
   """
+  Loops owned by the team that are visible to the requesting user. Includes enabled and disabled loops.
+  """
+  loops(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): WorkflowDefinitionConnection!
+  """
   [DEPRECATED] No longer in use. Duplicates are now system-managed via the native duplicate state.
   """
   markedAsDuplicateWorkflowState: WorkflowState
@@ -50904,6 +51039,46 @@ type ViewPreferencesValues {
   """
   documentFieldParent: Boolean
   """
+  [Internal] Whether to show the project column in documents lists.
+  """
+  documentFieldProject: Boolean
+  """
+  [Internal] Direction of a documents list when ordered by created date.
+  """
+  documentsListCreatedDateDirection: String
+  """
+  [Internal] Grouping of a documents list.
+  """
+  documentsListGrouping: String
+  """
+  [Internal] Direction of a documents list when ordered by last edited.
+  """
+  documentsListLastEditedDirection: String
+  """
+  [Internal] Direction of a documents list when ordered by name.
+  """
+  documentsListNameDirection: String
+  """
+  [Internal] Ordering of a documents list.
+  """
+  documentsListOrdering: String
+  """
+  [Internal] Direction of a documents list when ordered by owner.
+  """
+  documentsListOwnerDirection: String
+  """
+  [Internal] Direction of a documents list when ordered by project.
+  """
+  documentsListProjectDirection: String
+  """
+  [Internal] Whether a documents list shows documents from completed or canceled projects.
+  """
+  documentsListShowInactiveProjects: Boolean
+  """
+  [Internal] Whether a documents list only shows documents from projects the user is part of.
+  """
+  documentsListShowOnlyMyProjects: Boolean
+  """
   Whether to show important embedded customer needs first.
   """
   embeddedCustomerNeedsShowImportantFirst: Boolean
@@ -51163,6 +51338,10 @@ type ViewPreferencesValues {
   Whether to show the member teams field.
   """
   memberFieldTeams: Boolean
+  """
+  [Internal] Ordered ids of the documents pinned to the top of a documents list.
+  """
+  pinnedDocumentIds: [String!]
   """
   Whether to show completed issues last in project customer needs.
   """
@@ -51715,6 +51894,10 @@ The client view this custom view is targeting.
 enum ViewType {
   activeIssues
   agents
+  """
+  [Internal] The All tab of the documents page.
+  """
+  allDocuments
   allIssues
   archive
   automationRunHistory
@@ -51751,6 +51934,10 @@ enum ViewType {
   initiativesProposed
   issueIdentifiers
   label
+  """
+  [Internal] The My documents tab of the documents page.
+  """
+  myDocuments
   myIssues
   myIssuesActivity
   myIssuesCreatedByMe
@@ -51777,8 +51964,16 @@ enum ViewType {
   roadmaps
   scheduledPipelineReleases
   search
+  """
+  [Internal] The Shared with me tab of the documents page.
+  """
+  sharedDocuments
   splitSearch
   subIssues
+  """
+  [Internal] The documents list of a team.
+  """
+  teamDocuments
   teams
   triage
   userProfile
@@ -52408,6 +52603,20 @@ type WorkflowDefinition implements Node {
   userContextViewType: UserContextViewType
 }
 
+type WorkflowDefinitionConnection {
+  edges: [WorkflowDefinitionEdge!]!
+  nodes: [WorkflowDefinition!]!
+  pageInfo: PageInfo!
+}
+
+type WorkflowDefinitionEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: WorkflowDefinition!
+}
+
 enum WorkflowDefinitionEditAccess {
   everyone
   owner
@@ -52860,6 +53069,7 @@ input WorkflowStateUpdateInput {
 }
 
 enum WorkflowTrigger {
+  addedToMergeQueue
   chatMessagePosted
   chatReactionAdded
   commentAdded
@@ -52872,6 +53082,7 @@ enum WorkflowTrigger {
   entityRemoved
   entityUnarchived
   entityUpdated
+  removedFromMergeQueue
   reviewSubmitted
   updatePosted
   webhookReceived
@@ -53021,6 +53232,21 @@ type WorkspaceAnnouncementNotification implements Entity & Node & Notification {
   Related workspace announcement.
   """
   workspaceAnnouncementId: String!
+}
+
+input WorkspaceTeamSecuritySettingsInput {
+  """
+  Whether members may join teams without an invitation.
+  """
+  allMembersCanJoin: Boolean
+  """
+  Minimum role required to manage team members.
+  """
+  memberManagement: TeamRoleType
+  """
+  Minimum role required to manage team settings.
+  """
+  teamManagement: TeamRoleType
 }
 
 input ZendeskSettingsInput {

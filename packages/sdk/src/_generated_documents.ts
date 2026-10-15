@@ -1004,6 +1004,8 @@ export type AiConversation = Node & {
   pullRequest?: Maybe<PullRequest>;
   /** The time when the current user marked the conversation as read. Null if the user hasn't read the conversation. */
   readAt?: Maybe<Scalars["DateTime"]>;
+  /** [Internal] The published loop edited by this private setup conversation. */
+  setupWorkflowDefinition?: Maybe<WorkflowDefinition>;
   /** The conversation's unique URL slug. */
   slugId: Scalars["String"];
   /** The materialized conversation-level processing summary used by list and gating surfaces. Assistant response lifecycle is recorded on its turn. */
@@ -2151,6 +2153,24 @@ export type AiConversationRemoveSpendLimitToolCallArgs = {
   summary?: Maybe<Scalars["String"]>;
 };
 
+export type AiConversationRenameAgentChatToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationRenameAgentChatToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationRenameAgentChatToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationRenameAgentChatToolCallArgs = {
+  __typename?: "AiConversationRenameAgentChatToolCallArgs";
+  name: Scalars["String"];
+};
+
 export type AiConversationRerunPullRequestReviewToolCall = AiConversationBaseToolCall & {
   __typename?: "AiConversationRerunPullRequestReviewToolCall";
   /** The arguments to the tool call. */
@@ -2614,6 +2634,7 @@ export enum AiConversationTool {
   ReadSandboxFile = "ReadSandboxFile",
   ReadSetting = "ReadSetting",
   RemoveSpendLimit = "RemoveSpendLimit",
+  RenameAgentChat = "RenameAgentChat",
   RerunPullRequestReview = "RerunPullRequestReview",
   Research = "Research",
   RestoreEntity = "RestoreEntity",
@@ -2668,6 +2689,7 @@ export type AiConversationToolCall =
   | AiConversationReadSandboxFileToolCall
   | AiConversationReadSettingToolCall
   | AiConversationRemoveSpendLimitToolCall
+  | AiConversationRenameAgentChatToolCall
   | AiConversationRerunPullRequestReviewToolCall
   | AiConversationResearchToolCall
   | AiConversationRestoreEntityToolCall
@@ -9140,7 +9162,7 @@ export type InitiativeLabelCreateInput = {
   color?: InputMaybe<Scalars["String"]>;
   /** The description of the label. */
   description?: InputMaybe<Scalars["String"]>;
-  /** The selection mode of the label group. Only singleSelect is currently supported. Null uses single-select behavior. */
+  /** The selection mode of the label group. Null uses single-select behavior. */
   groupType?: InputMaybe<LabelGroupType>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars["String"]>;
@@ -9200,7 +9222,7 @@ export type InitiativeLabelUpdateInput = {
   color?: InputMaybe<Scalars["String"]>;
   /** The description of the label. */
   description?: InputMaybe<Scalars["String"]>;
-  /** The selection mode of the label group. Omit to keep the current value. Only singleSelect is currently supported. Null uses single-select behavior. */
+  /** The selection mode of the label group. Omit to keep the current value. Null uses single-select behavior. */
   groupType?: InputMaybe<LabelGroupType>;
   /** Whether the label is a group. */
   isGroup?: InputMaybe<Scalars["Boolean"]>;
@@ -10472,6 +10494,8 @@ export type Issue = Node & {
   addedToTeamAt?: Maybe<Scalars["DateTime"]>;
   /** [Internal] Agent sessions associated with the issue. */
   agentSessions: AgentSessionConnection;
+  /** [Internal] AI-generated analyses of the issue, keyed by feature, such as coding-agent suitability. Null if no analysis has run. */
+  aiAnalysis?: Maybe<Scalars["JSONObject"]>;
   /** [Internal] AI prompt progresses associated with this issue. */
   aiPromptProgresses: AiPromptProgressConnection;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -12328,6 +12352,8 @@ export type IssueSearchResult = Node & {
   addedToTeamAt?: Maybe<Scalars["DateTime"]>;
   /** [Internal] Agent sessions associated with the issue. */
   agentSessions: AgentSessionConnection;
+  /** [Internal] AI-generated analyses of the issue, keyed by feature, such as coding-agent suitability. Null if no analysis has run. */
+  aiAnalysis?: Maybe<Scalars["JSONObject"]>;
   /** [Internal] AI prompt progresses associated with this issue. */
   aiPromptProgresses: AiPromptProgressConnection;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -14190,6 +14216,8 @@ export type Mutation = {
   issueReminder: IssuePayload;
   /** Removes a label from an issue. */
   issueRemoveLabel: IssuePayload;
+  /** [Internal] Requests a coding-agent suitability prediction for an issue without a current one, such as an issue created before predictions existed. */
+  issueRequestSolubilityPrediction: SuccessPayload;
   /** Shares an issue with a user who would not otherwise be able to access it. The viewer must have native access to the issue's full sub-issue tree and permission to share issues in the issue's team. Issues that inherit sharing from a parent issue cannot be shared directly. */
   issueShare: IssuePayload;
   /** Subscribes a user to an issue. */
@@ -15535,7 +15563,7 @@ export type MutationIssueExternalSyncDisableArgs = {
 };
 
 export type MutationIssueImportCreateAsanaArgs = {
-  asanaProjectName?: InputMaybe<Scalars["String"]>;
+  asanaProjectNames?: InputMaybe<Array<Scalars["String"]>>;
   asanaTeamName: Scalars["String"];
   asanaToken: Scalars["String"];
   id?: InputMaybe<Scalars["String"]>;
@@ -15650,6 +15678,10 @@ export type MutationIssueReminderArgs = {
 export type MutationIssueRemoveLabelArgs = {
   id: Scalars["String"];
   labelId: Scalars["String"];
+};
+
+export type MutationIssueRequestSolubilityPredictionArgs = {
+  id: Scalars["String"];
 };
 
 export type MutationIssueShareArgs = {
@@ -18098,6 +18130,8 @@ export type Organization = Node & {
   linearAgentSettings: Scalars["JSONObject"];
   /** The URL of the workspace's logo image. Null if no logo has been uploaded. */
   logoUrl?: Maybe<Scalars["String"]>;
+  /** Loops in the workspace that are visible to the requesting user, including team and project loops. Includes enabled and disabled loops. */
+  loops: WorkflowDefinitionConnection;
   /** The workspace's name. */
   name: Scalars["String"];
   /** Rolling 30-day total file upload volume for the workspace, measured in megabytes. Used for enforcing upload quotas. */
@@ -18168,6 +18202,8 @@ export type Organization = Node & {
   subscription?: Maybe<PaidSubscription>;
   /** Whether the default prompt for copying an issue or opening it in a coding tool includes a suggested Git branch name. */
   suggestedBranchNameEnabled: Scalars["Boolean"];
+  /** [Internal] Workspace restrictions for team permissions. */
+  teamSecuritySettings: Scalars["JSONObject"];
   /** Teams in the workspace. Returns only teams visible to the requesting user (all public teams plus private teams the user is a member of). */
   teams: TeamConnection;
   /** Workspace-level templates (not associated with any specific team). These templates are available across all teams in the workspace. */
@@ -18208,6 +18244,16 @@ export type OrganizationLabelsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
   filter?: InputMaybe<IssueLabelFilter>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+/** A workspace (referred to as Organization in the API). Workspaces are the root-level container for all teams, users, projects, issues, and settings. Every user belongs to at least one workspace, and all data is scoped within a workspace boundary. */
+export type OrganizationLoopsArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
   first?: InputMaybe<Scalars["Int"]>;
   includeArchived?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
@@ -18295,6 +18341,18 @@ export type OrganizationCodingAgentSettingsInput = {
   regionPinning?: InputMaybe<Scalars["Boolean"]>;
   /** [Internal] The default sandbox size used for Coding Sessions. */
   sandboxSize?: InputMaybe<Scalars["String"]>;
+  /** [Internal] Approve or remove one external source for coding-session delegation. */
+  trustedExternalSourceUpdate?: InputMaybe<OrganizationCodingAgentTrustedSourceUpdateInput>;
+  /** [Internal] Approval snapshot. Ignored on writes; use trustedExternalSourceUpdate to change approvals. */
+  trustedExternalSources?: InputMaybe<Array<Scalars["String"]>>;
+};
+
+/** [Internal] An approval change for one external coding-session source. */
+export type OrganizationCodingAgentTrustedSourceUpdateInput = {
+  /** [Internal] Whether this source may start coding sessions. */
+  allowed: Scalars["Boolean"];
+  /** [Internal] The external source whose approval to change. */
+  key: Scalars["String"];
 };
 
 /** Workspace deletion operation response. */
@@ -18779,6 +18837,8 @@ export type OrganizationUpdateInput = {
   slackProjectChannelsEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** Whether the default prompt for copying an issue or opening it in a coding tool includes a suggested Git branch name. */
   suggestedBranchNameEnabled?: InputMaybe<Scalars["Boolean"]>;
+  /** [Internal] Workspace restrictions for team permissions. */
+  teamSecuritySettings?: InputMaybe<WorkspaceTeamSecuritySettingsInput>;
   /** [ALPHA] Theme settings for the workspace. */
   themeSettings?: InputMaybe<OrganizationThemeSettingsInput>;
   /** The URL key of the workspace. */
@@ -20282,7 +20342,7 @@ export type ProjectLabelCreateInput = {
   color?: InputMaybe<Scalars["String"]>;
   /** The description of the label. */
   description?: InputMaybe<Scalars["String"]>;
-  /** The selection mode of the label group. Only singleSelect is currently supported. Null uses single-select behavior. */
+  /** The selection mode of the label group. Null uses single-select behavior. */
   groupType?: InputMaybe<LabelGroupType>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars["String"]>;
@@ -20346,7 +20406,7 @@ export type ProjectLabelUpdateInput = {
   color?: InputMaybe<Scalars["String"]>;
   /** The description of the label. */
   description?: InputMaybe<Scalars["String"]>;
-  /** The selection mode of the label group. Omit to keep the current value. Only singleSelect is currently supported. Null uses single-select behavior. */
+  /** The selection mode of the label group. Omit to keep the current value. Null uses single-select behavior. */
   groupType?: InputMaybe<LabelGroupType>;
   /** Whether the label is a group. */
   isGroup?: InputMaybe<Scalars["Boolean"]>;
@@ -26177,6 +26237,8 @@ export type Team = Node & {
   labels: IssueLabelConnection;
   /** The number of initiatives led by this team that would be deleted along with it. Counts every led initiative, including ones not otherwise visible to the caller, to mirror what deleting the team cascades. */
   ledInitiativeCount: Scalars["Int"];
+  /** Loops owned by the team that are visible to the requesting user. Includes enabled and disabled loops. */
+  loops: WorkflowDefinitionConnection;
   /**
    * [DEPRECATED] No longer in use. Duplicates are now system-managed via the native duplicate state.
    * @deprecated Duplicates are now system-managed via the native duplicate state.
@@ -26348,6 +26410,16 @@ export type TeamLabelsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
   filter?: InputMaybe<IssueLabelFilter>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+/** A team is the primary organizational unit in Linear. Issues belong to teams, and each team has its own workflow states, cycles, labels, and settings. Teams can be public (visible to all workspace members), private (visible only to team members), or restricted (visible only within an enclosing private-team boundary). Teams can also have sub-teams that inherit settings from their parent. */
+export type TeamLoopsArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
   first?: InputMaybe<Scalars["Int"]>;
   includeArchived?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
@@ -28540,6 +28612,26 @@ export type ViewPreferencesValues = {
   documentFieldOwner?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the parent field for documents. */
   documentFieldParent?: Maybe<Scalars["Boolean"]>;
+  /** [Internal] Whether to show the project column in documents lists. */
+  documentFieldProject?: Maybe<Scalars["Boolean"]>;
+  /** [Internal] Direction of a documents list when ordered by created date. */
+  documentsListCreatedDateDirection?: Maybe<Scalars["String"]>;
+  /** [Internal] Grouping of a documents list. */
+  documentsListGrouping?: Maybe<Scalars["String"]>;
+  /** [Internal] Direction of a documents list when ordered by last edited. */
+  documentsListLastEditedDirection?: Maybe<Scalars["String"]>;
+  /** [Internal] Direction of a documents list when ordered by name. */
+  documentsListNameDirection?: Maybe<Scalars["String"]>;
+  /** [Internal] Ordering of a documents list. */
+  documentsListOrdering?: Maybe<Scalars["String"]>;
+  /** [Internal] Direction of a documents list when ordered by owner. */
+  documentsListOwnerDirection?: Maybe<Scalars["String"]>;
+  /** [Internal] Direction of a documents list when ordered by project. */
+  documentsListProjectDirection?: Maybe<Scalars["String"]>;
+  /** [Internal] Whether a documents list shows documents from completed or canceled projects. */
+  documentsListShowInactiveProjects?: Maybe<Scalars["Boolean"]>;
+  /** [Internal] Whether a documents list only shows documents from projects the user is part of. */
+  documentsListShowOnlyMyProjects?: Maybe<Scalars["Boolean"]>;
   /** Whether to show important embedded customer needs first. */
   embeddedCustomerNeedsShowImportantFirst?: Maybe<Scalars["Boolean"]>;
   /** The embedded customer needs view ordering. */
@@ -28679,6 +28771,8 @@ export type ViewPreferencesValues = {
   memberFieldStatus?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the member teams field. */
   memberFieldTeams?: Maybe<Scalars["Boolean"]>;
+  /** [Internal] Ordered ids of the documents pinned to the top of a documents list. */
+  pinnedDocumentIds?: Maybe<Array<Scalars["String"]>>;
   /** Whether to show completed issues last in project customer needs. */
   projectCustomerNeedsShowCompletedIssuesLast?: Maybe<Scalars["Boolean"]>;
   /** Whether to show important project customer needs first. */
@@ -28963,6 +29057,8 @@ export type ViewPreferencesValues = {
 export enum ViewType {
   ActiveIssues = "activeIssues",
   Agents = "agents",
+  /** [Internal] The All tab of the documents page. */
+  AllDocuments = "allDocuments",
   AllIssues = "allIssues",
   Archive = "archive",
   AutomationRunHistory = "automationRunHistory",
@@ -29000,6 +29096,8 @@ export enum ViewType {
   InitiativesProposed = "initiativesProposed",
   IssueIdentifiers = "issueIdentifiers",
   Label = "label",
+  /** [Internal] The My documents tab of the documents page. */
+  MyDocuments = "myDocuments",
   MyIssues = "myIssues",
   MyIssuesActivity = "myIssuesActivity",
   MyIssuesCreatedByMe = "myIssuesCreatedByMe",
@@ -29026,8 +29124,12 @@ export enum ViewType {
   Roadmaps = "roadmaps",
   ScheduledPipelineReleases = "scheduledPipelineReleases",
   Search = "search",
+  /** [Internal] The Shared with me tab of the documents page. */
+  SharedDocuments = "sharedDocuments",
   SplitSearch = "splitSearch",
   SubIssues = "subIssues",
+  /** [Internal] The documents list of a team. */
+  TeamDocuments = "teamDocuments",
   Teams = "teams",
   Triage = "triage",
   UserProfile = "userProfile",
@@ -29404,6 +29506,20 @@ export type WorkflowDefinition = Node & {
   userContextViewType?: Maybe<UserContextViewType>;
 };
 
+export type WorkflowDefinitionConnection = {
+  __typename?: "WorkflowDefinitionConnection";
+  edges: Array<WorkflowDefinitionEdge>;
+  nodes: Array<WorkflowDefinition>;
+  pageInfo: PageInfo;
+};
+
+export type WorkflowDefinitionEdge = {
+  __typename?: "WorkflowDefinitionEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: WorkflowDefinition;
+};
+
 export enum WorkflowDefinitionEditAccess {
   Everyone = "everyone",
   Owner = "owner",
@@ -29663,6 +29779,7 @@ export type WorkflowStateUpdateInput = {
 };
 
 export enum WorkflowTrigger {
+  AddedToMergeQueue = "addedToMergeQueue",
   ChatMessagePosted = "chatMessagePosted",
   ChatReactionAdded = "chatReactionAdded",
   CommentAdded = "commentAdded",
@@ -29675,6 +29792,7 @@ export enum WorkflowTrigger {
   EntityRemoved = "entityRemoved",
   EntityUnarchived = "entityUnarchived",
   EntityUpdated = "entityUpdated",
+  RemovedFromMergeQueue = "removedFromMergeQueue",
   ReviewSubmitted = "reviewSubmitted",
   UpdatePosted = "updatePosted",
   WebhookReceived = "webhookReceived",
@@ -29770,6 +29888,15 @@ export type WorkspaceAnnouncementNotification = Entity &
     /** Related workspace announcement. */
     workspaceAnnouncementId: Scalars["String"];
   };
+
+export type WorkspaceTeamSecuritySettingsInput = {
+  /** Whether members may join teams without an invitation. */
+  allMembersCanJoin?: InputMaybe<Scalars["Boolean"]>;
+  /** Minimum role required to manage team members. */
+  memberManagement?: InputMaybe<TeamRoleType>;
+  /** Minimum role required to manage team settings. */
+  teamManagement?: InputMaybe<TeamRoleType>;
+};
 
 export type ZendeskSettingsInput = {
   /** Whether a ticket should be automatically reopened when its linked Linear issue is canceled. */
@@ -30560,6 +30687,21 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
               { __typename: "AiConversationRemoveSpendLimitToolCallArgs" } & Pick<
                 AiConversationRemoveSpendLimitToolCallArgs,
                 "summary"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationRenameAgentChatToolCall" } & Pick<
+          AiConversationRenameAgentChatToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationRenameAgentChatToolCallArgs" } & Pick<
+                AiConversationRenameAgentChatToolCallArgs,
+                "name"
               >
             >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
@@ -37144,6 +37286,21 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
               { __typename: "AiConversationRemoveSpendLimitToolCallArgs" } & Pick<
                 AiConversationRemoveSpendLimitToolCallArgs,
                 "summary"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationRenameAgentChatToolCall" } & Pick<
+          AiConversationRenameAgentChatToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationRenameAgentChatToolCallArgs" } & Pick<
+                AiConversationRenameAgentChatToolCallArgs,
+                "name"
               >
             >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
@@ -46010,6 +46167,21 @@ type AiConversationBaseToolCall_AiConversationRemoveSpendLimitToolCall_Fragment 
     >;
   };
 
+type AiConversationBaseToolCall_AiConversationRenameAgentChatToolCall_Fragment = {
+  __typename: "AiConversationRenameAgentChatToolCall";
+} & Pick<AiConversationRenameAgentChatToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationRenameAgentChatToolCallArgs" } & Pick<
+        AiConversationRenameAgentChatToolCallArgs,
+        "name"
+      >
+    >;
+  };
+
 type AiConversationBaseToolCall_AiConversationRerunPullRequestReviewToolCall_Fragment = {
   __typename: "AiConversationRerunPullRequestReviewToolCall";
 } & Pick<AiConversationRerunPullRequestReviewToolCall, "rawArgs" | "name" | "rawResult"> & {
@@ -46512,6 +46684,7 @@ export type AiConversationBaseToolCallFragment =
   | AiConversationBaseToolCall_AiConversationReadSandboxFileToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationReadSettingToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationRemoveSpendLimitToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationRenameAgentChatToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationRerunPullRequestReviewToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationResearchToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationRestoreEntityToolCall_Fragment
@@ -47582,6 +47755,25 @@ export type AiConversationRemoveSpendLimitToolCallFragment = {
 export type AiConversationRemoveSpendLimitToolCallArgsFragment = {
   __typename: "AiConversationRemoveSpendLimitToolCallArgs";
 } & Pick<AiConversationRemoveSpendLimitToolCallArgs, "summary">;
+
+export type AiConversationRenameAgentChatToolCallFragment = {
+  __typename: "AiConversationRenameAgentChatToolCall";
+} & Pick<AiConversationRenameAgentChatToolCall, "rawArgs" | "name" | "rawResult"> & {
+    args?: Maybe<
+      { __typename: "AiConversationRenameAgentChatToolCallArgs" } & Pick<
+        AiConversationRenameAgentChatToolCallArgs,
+        "name"
+      >
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationRenameAgentChatToolCallArgsFragment = {
+  __typename: "AiConversationRenameAgentChatToolCallArgs";
+} & Pick<AiConversationRenameAgentChatToolCallArgs, "name">;
 
 export type AiConversationRerunPullRequestReviewToolCallFragment = {
   __typename: "AiConversationRerunPullRequestReviewToolCall";
@@ -57500,6 +57692,57 @@ export type WebhookConnectionFragment = { __typename: "WebhookConnection" } & {
     > & {
         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
         creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+      }
+  >;
+  pageInfo: { __typename: "PageInfo" } & Pick<
+    PageInfo,
+    "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
+  >;
+};
+
+export type WorkflowDefinitionConnectionFragment = { __typename: "WorkflowDefinitionConnection" } & {
+  nodes: Array<
+    { __typename: "WorkflowDefinition" } & Pick<
+      WorkflowDefinition,
+      | "stats"
+      | "schedule"
+      | "color"
+      | "lastExecutedAt"
+      | "description"
+      | "editAccess"
+      | "triggerType"
+      | "trigger"
+      | "activationMode"
+      | "conditions"
+      | "icon"
+      | "intelligence"
+      | "updatedAt"
+      | "groupName"
+      | "name"
+      | "activities"
+      | "sortOrder"
+      | "archivedAt"
+      | "createdAt"
+      | "type"
+      | "userContextViewType"
+      | "contextViewType"
+      | "id"
+      | "slugId"
+      | "restrictEditing"
+      | "enabled"
+      | "applyToSubTeams"
+      | "runOnce"
+    > & {
+        customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+        cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+        initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+        label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+        project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+        user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+        team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+        creator: { __typename?: "User" } & Pick<User, "id">;
+        lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+        owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
       }
   >;
   pageInfo: { __typename: "PageInfo" } & Pick<
@@ -72610,6 +72853,70 @@ export type Organization_LabelsQuery = { __typename?: "Query" } & {
   };
 };
 
+export type Organization_LoopsQueryVariables = Exact<{
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+}>;
+
+export type Organization_LoopsQuery = { __typename?: "Query" } & {
+  organization: { __typename?: "Organization" } & {
+    loops: { __typename: "WorkflowDefinitionConnection" } & {
+      nodes: Array<
+        { __typename: "WorkflowDefinition" } & Pick<
+          WorkflowDefinition,
+          | "stats"
+          | "schedule"
+          | "color"
+          | "lastExecutedAt"
+          | "description"
+          | "editAccess"
+          | "triggerType"
+          | "trigger"
+          | "activationMode"
+          | "conditions"
+          | "icon"
+          | "intelligence"
+          | "updatedAt"
+          | "groupName"
+          | "name"
+          | "activities"
+          | "sortOrder"
+          | "archivedAt"
+          | "createdAt"
+          | "type"
+          | "userContextViewType"
+          | "contextViewType"
+          | "id"
+          | "slugId"
+          | "restrictEditing"
+          | "enabled"
+          | "applyToSubTeams"
+          | "runOnce"
+        > & {
+            customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+            cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+            initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+            label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+            project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+            user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+            creator: { __typename?: "User" } & Pick<User, "id">;
+            lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          }
+      >;
+      pageInfo: { __typename: "PageInfo" } & Pick<
+        PageInfo,
+        "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
+      >;
+    };
+  };
+};
+
 export type Organization_ProjectLabelsQueryVariables = Exact<{
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -77384,6 +77691,71 @@ export type Team_LabelsQuery = { __typename?: "Query" } & {
             team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
             creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             retiredBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          }
+      >;
+      pageInfo: { __typename: "PageInfo" } & Pick<
+        PageInfo,
+        "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
+      >;
+    };
+  };
+};
+
+export type Team_LoopsQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+}>;
+
+export type Team_LoopsQuery = { __typename?: "Query" } & {
+  team: { __typename?: "Team" } & {
+    loops: { __typename: "WorkflowDefinitionConnection" } & {
+      nodes: Array<
+        { __typename: "WorkflowDefinition" } & Pick<
+          WorkflowDefinition,
+          | "stats"
+          | "schedule"
+          | "color"
+          | "lastExecutedAt"
+          | "description"
+          | "editAccess"
+          | "triggerType"
+          | "trigger"
+          | "activationMode"
+          | "conditions"
+          | "icon"
+          | "intelligence"
+          | "updatedAt"
+          | "groupName"
+          | "name"
+          | "activities"
+          | "sortOrder"
+          | "archivedAt"
+          | "createdAt"
+          | "type"
+          | "userContextViewType"
+          | "contextViewType"
+          | "id"
+          | "slugId"
+          | "restrictEditing"
+          | "enabled"
+          | "applyToSubTeams"
+          | "runOnce"
+        > & {
+            customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+            cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+            initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+            label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+            project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+            user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+            creator: { __typename?: "User" } & Pick<User, "id">;
+            lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           }
       >;
       pageInfo: { __typename: "PageInfo" } & Pick<
@@ -85254,7 +85626,7 @@ export type IssueExternalSyncDisableMutation = { __typename?: "Mutation" } & {
 };
 
 export type IssueImportCreateAsanaMutationVariables = Exact<{
-  asanaProjectName?: InputMaybe<Scalars["String"]>;
+  asanaProjectNames?: InputMaybe<Array<Scalars["String"]> | Scalars["String"]>;
   asanaTeamName: Scalars["String"];
   asanaToken: Scalars["String"];
   id?: InputMaybe<Scalars["String"]>;
@@ -95069,6 +95441,43 @@ fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
 }`,
   { fragmentName: "AiConversationRemoveSpendLimitToolCall" }
 ) as unknown as TypedDocumentString<AiConversationRemoveSpendLimitToolCallFragment, unknown>;
+export const AiConversationRenameAgentChatToolCallArgsFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationRenameAgentChatToolCallArgs on AiConversationRenameAgentChatToolCallArgs {
+  __typename
+  name
+}
+    `,
+  { fragmentName: "AiConversationRenameAgentChatToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationRenameAgentChatToolCallArgsFragment, unknown>;
+export const AiConversationRenameAgentChatToolCallFragmentDoc = new TypedDocumentString(
+  `
+    fragment AiConversationRenameAgentChatToolCall on AiConversationRenameAgentChatToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationRenameAgentChatToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationRenameAgentChatToolCallArgs on AiConversationRenameAgentChatToolCallArgs {
+  __typename
+  name
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationRenameAgentChatToolCall" }
+) as unknown as TypedDocumentString<AiConversationRenameAgentChatToolCallFragment, unknown>;
 export const AiConversationRerunPullRequestReviewToolCallArgsFragmentDoc = new TypedDocumentString(
   `
     fragment AiConversationRerunPullRequestReviewToolCallArgs on AiConversationRerunPullRequestReviewToolCallArgs {
@@ -96336,6 +96745,9 @@ export const AiConversationToolCallPartFragmentDoc = new TypedDocumentString(
     ... on AiConversationRemoveSpendLimitToolCall {
       ...AiConversationRemoveSpendLimitToolCall
     }
+    ... on AiConversationRenameAgentChatToolCall {
+      ...AiConversationRenameAgentChatToolCall
+    }
     ... on AiConversationRerunPullRequestReviewToolCall {
       ...AiConversationRerunPullRequestReviewToolCall
     }
@@ -97013,6 +97425,22 @@ fragment AiConversationRemoveSpendLimitToolCall on AiConversationRemoveSpendLimi
 fragment AiConversationRemoveSpendLimitToolCallArgs on AiConversationRemoveSpendLimitToolCallArgs {
   __typename
   summary
+}
+fragment AiConversationRenameAgentChatToolCall on AiConversationRenameAgentChatToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationRenameAgentChatToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationRenameAgentChatToolCallArgs on AiConversationRenameAgentChatToolCallArgs {
+  __typename
+  name
 }
 fragment AiConversationRerunPullRequestReviewToolCall on AiConversationRerunPullRequestReviewToolCall {
   __typename
@@ -97977,6 +98405,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     ... on AiConversationRemoveSpendLimitToolCall {
       ...AiConversationRemoveSpendLimitToolCall
     }
+    ... on AiConversationRenameAgentChatToolCall {
+      ...AiConversationRenameAgentChatToolCall
+    }
     ... on AiConversationRerunPullRequestReviewToolCall {
       ...AiConversationRerunPullRequestReviewToolCall
     }
@@ -98778,6 +99209,22 @@ fragment AiConversationRemoveSpendLimitToolCall on AiConversationRemoveSpendLimi
 fragment AiConversationRemoveSpendLimitToolCallArgs on AiConversationRemoveSpendLimitToolCallArgs {
   __typename
   summary
+}
+fragment AiConversationRenameAgentChatToolCall on AiConversationRenameAgentChatToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationRenameAgentChatToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationRenameAgentChatToolCallArgs on AiConversationRenameAgentChatToolCallArgs {
+  __typename
+  name
 }
 fragment AiConversationRerunPullRequestReviewToolCall on AiConversationRerunPullRequestReviewToolCall {
   __typename
@@ -112714,6 +113161,9 @@ export const AiConversationBaseToolCallFragmentDoc = new TypedDocumentString(
   ... on AiConversationRemoveSpendLimitToolCall {
     ...AiConversationRemoveSpendLimitToolCall
   }
+  ... on AiConversationRenameAgentChatToolCall {
+    ...AiConversationRenameAgentChatToolCall
+  }
   ... on AiConversationRerunPullRequestReviewToolCall {
     ...AiConversationRerunPullRequestReviewToolCall
   }
@@ -113380,6 +113830,22 @@ fragment AiConversationRemoveSpendLimitToolCall on AiConversationRemoveSpendLimi
 fragment AiConversationRemoveSpendLimitToolCallArgs on AiConversationRemoveSpendLimitToolCallArgs {
   __typename
   summary
+}
+fragment AiConversationRenameAgentChatToolCall on AiConversationRenameAgentChatToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationRenameAgentChatToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationRenameAgentChatToolCallArgs on AiConversationRenameAgentChatToolCallArgs {
+  __typename
+  name
 }
 fragment AiConversationRerunPullRequestReviewToolCall on AiConversationRerunPullRequestReviewToolCall {
   __typename
@@ -124538,6 +125004,87 @@ fragment PageInfo on PageInfo {
 }`,
   { fragmentName: "WebhookConnection" }
 ) as unknown as TypedDocumentString<WebhookConnectionFragment, unknown>;
+export const WorkflowDefinitionConnectionFragmentDoc = new TypedDocumentString(
+  `
+    fragment WorkflowDefinitionConnection on WorkflowDefinitionConnection {
+  __typename
+  nodes {
+    ...WorkflowDefinition
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+    fragment WorkflowDefinition on WorkflowDefinition {
+  __typename
+  stats
+  schedule
+  color
+  customView {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  project {
+    id
+  }
+  user {
+    id
+  }
+  lastExecutedAt
+  description
+  editAccess
+  triggerType
+  trigger
+  activationMode
+  conditions
+  icon
+  intelligence
+  updatedAt
+  groupName
+  name
+  activities
+  sortOrder
+  team {
+    id
+  }
+  archivedAt
+  createdAt
+  type
+  userContextViewType
+  contextViewType
+  id
+  creator {
+    id
+  }
+  lastUpdatedBy {
+    id
+  }
+  owner {
+    id
+  }
+  slugId
+  restrictEditing
+  enabled
+  applyToSubTeams
+  runOnce
+}
+fragment PageInfo on PageInfo {
+  __typename
+  startCursor
+  endCursor
+  hasPreviousPage
+  hasNextPage
+}`,
+  { fragmentName: "WorkflowDefinitionConnection" }
+) as unknown as TypedDocumentString<WorkflowDefinitionConnectionFragment, unknown>;
 export const WorkflowStateFragmentDoc = new TypedDocumentString(
   `
     fragment WorkflowState on WorkflowState {
@@ -142904,6 +143451,98 @@ fragment PageInfo on PageInfo {
   hasPreviousPage
   hasNextPage
 }`) as unknown as TypedDocumentString<Organization_LabelsQuery, Organization_LabelsQueryVariables>;
+export const Organization_LoopsDocument = new TypedDocumentString(`
+    query organization_loops($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  organization {
+    loops(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...WorkflowDefinitionConnection
+    }
+  }
+}
+    fragment WorkflowDefinition on WorkflowDefinition {
+  __typename
+  stats
+  schedule
+  color
+  customView {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  project {
+    id
+  }
+  user {
+    id
+  }
+  lastExecutedAt
+  description
+  editAccess
+  triggerType
+  trigger
+  activationMode
+  conditions
+  icon
+  intelligence
+  updatedAt
+  groupName
+  name
+  activities
+  sortOrder
+  team {
+    id
+  }
+  archivedAt
+  createdAt
+  type
+  userContextViewType
+  contextViewType
+  id
+  creator {
+    id
+  }
+  lastUpdatedBy {
+    id
+  }
+  owner {
+    id
+  }
+  slugId
+  restrictEditing
+  enabled
+  applyToSubTeams
+  runOnce
+}
+fragment PageInfo on PageInfo {
+  __typename
+  startCursor
+  endCursor
+  hasPreviousPage
+  hasNextPage
+}
+fragment WorkflowDefinitionConnection on WorkflowDefinitionConnection {
+  __typename
+  nodes {
+    ...WorkflowDefinition
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}`) as unknown as TypedDocumentString<Organization_LoopsQuery, Organization_LoopsQueryVariables>;
 export const Organization_ProjectLabelsDocument = new TypedDocumentString(`
     query organization_projectLabels($after: String, $before: String, $filter: ProjectLabelFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
   organization {
@@ -150224,6 +150863,98 @@ fragment PageInfo on PageInfo {
   hasPreviousPage
   hasNextPage
 }`) as unknown as TypedDocumentString<Team_LabelsQuery, Team_LabelsQueryVariables>;
+export const Team_LoopsDocument = new TypedDocumentString(`
+    query team_loops($id: String!, $after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  team(id: $id) {
+    loops(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...WorkflowDefinitionConnection
+    }
+  }
+}
+    fragment WorkflowDefinition on WorkflowDefinition {
+  __typename
+  stats
+  schedule
+  color
+  customView {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  project {
+    id
+  }
+  user {
+    id
+  }
+  lastExecutedAt
+  description
+  editAccess
+  triggerType
+  trigger
+  activationMode
+  conditions
+  icon
+  intelligence
+  updatedAt
+  groupName
+  name
+  activities
+  sortOrder
+  team {
+    id
+  }
+  archivedAt
+  createdAt
+  type
+  userContextViewType
+  contextViewType
+  id
+  creator {
+    id
+  }
+  lastUpdatedBy {
+    id
+  }
+  owner {
+    id
+  }
+  slugId
+  restrictEditing
+  enabled
+  applyToSubTeams
+  runOnce
+}
+fragment PageInfo on PageInfo {
+  __typename
+  startCursor
+  endCursor
+  hasPreviousPage
+  hasNextPage
+}
+fragment WorkflowDefinitionConnection on WorkflowDefinitionConnection {
+  __typename
+  nodes {
+    ...WorkflowDefinition
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}`) as unknown as TypedDocumentString<Team_LoopsQuery, Team_LoopsQueryVariables>;
 export const Team_MembersDocument = new TypedDocumentString(`
     query team_members($id: String!, $after: String, $before: String, $filter: UserFilter, $first: Int, $includeArchived: Boolean, $includeDisabled: Boolean, $last: Int, $orderBy: PaginationOrderBy, $sort: [UserSortInput!]) {
   team(id: $id) {
@@ -159705,9 +160436,9 @@ export const IssueExternalSyncDisableDocument = new TypedDocumentString(`
   success
 }`) as unknown as TypedDocumentString<IssueExternalSyncDisableMutation, IssueExternalSyncDisableMutationVariables>;
 export const IssueImportCreateAsanaDocument = new TypedDocumentString(`
-    mutation issueImportCreateAsana($asanaProjectName: String, $asanaTeamName: String!, $asanaToken: String!, $id: String, $includeClosedIssues: Boolean, $instantProcess: Boolean, $teamId: String, $teamName: String) {
+    mutation issueImportCreateAsana($asanaProjectNames: [String!], $asanaTeamName: String!, $asanaToken: String!, $id: String, $includeClosedIssues: Boolean, $instantProcess: Boolean, $teamId: String, $teamName: String) {
   issueImportCreateAsana(
-    asanaProjectName: $asanaProjectName
+    asanaProjectNames: $asanaProjectNames
     asanaTeamName: $asanaTeamName
     asanaToken: $asanaToken
     id: $id

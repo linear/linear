@@ -5662,6 +5662,18 @@
             "deprecationReason": null
           },
           {
+            "name": "setupWorkflowDefinition",
+            "description": "[Internal] The published loop edited by this private setup conversation.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "WorkflowDefinition",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "slugId",
             "description": "The conversation's unique URL slug.",
             "args": [],
@@ -6250,6 +6262,11 @@
           {
             "kind": "OBJECT",
             "name": "AiConversationRemoveSpendLimitToolCall",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "AiConversationRenameAgentChatToolCall",
             "ofType": null
           },
           {
@@ -13070,6 +13087,118 @@
       },
       {
         "kind": "OBJECT",
+        "name": "AiConversationRenameAgentChatToolCall",
+        "description": null,
+        "fields": [
+          {
+            "name": "args",
+            "description": "The arguments to the tool call.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "AiConversationRenameAgentChatToolCallArgs",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "displayInfo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AiConversationToolDisplayInfo",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "The name of the tool that was called.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "AiConversationTool",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rawArgs",
+            "description": "The arguments of the tool call.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rawResult",
+            "description": "The result of the tool call.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "AiConversationBaseToolCall",
+            "ofType": null
+          }
+        ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AiConversationRenameAgentChatToolCallArgs",
+        "description": null,
+        "fields": [
+          {
+            "name": "name",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "AiConversationRerunPullRequestReviewToolCall",
         "description": null,
         "fields": [
@@ -16029,6 +16158,12 @@
             "deprecationReason": null
           },
           {
+            "name": "RenameAgentChat",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "RerunPullRequestReview",
             "description": null,
             "isDeprecated": false,
@@ -16311,6 +16446,11 @@
           {
             "kind": "OBJECT",
             "name": "AiConversationRemoveSpendLimitToolCall",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "AiConversationRenameAgentChatToolCall",
             "ofType": null
           },
           {
@@ -56010,7 +56150,7 @@
           },
           {
             "name": "groupType",
-            "description": "The selection mode of the label group. Only singleSelect is currently supported. Null uses single-select behavior.",
+            "description": "The selection mode of the label group. Null uses single-select behavior.",
             "type": {
               "kind": "ENUM",
               "name": "LabelGroupType",
@@ -56358,7 +56498,7 @@
           },
           {
             "name": "groupType",
-            "description": "The selection mode of the label group. Omit to keep the current value. Only singleSelect is currently supported. Null uses single-select behavior.",
+            "description": "The selection mode of the label group. Omit to keep the current value. Null uses single-select behavior.",
             "type": {
               "kind": "ENUM",
               "name": "LabelGroupType",
@@ -64144,6 +64284,18 @@
                 "name": "AgentSessionConnection",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "aiAnalysis",
+            "description": "[Internal] AI-generated analyses of the issue, keyed by feature, such as coding-agent suitability. Null if no analysis has run.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -76009,6 +76161,18 @@
                 "name": "AgentSessionConnection",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "aiAnalysis",
+            "description": "[Internal] AI-generated analyses of the issue, keyed by feature, such as coding-agent suitability. Null if no analysis has run.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -94535,12 +94699,20 @@
             "description": "Kicks off an Asana import job.",
             "args": [
               {
-                "name": "asanaProjectName",
-                "description": "Name of an Asana project in the team. When set, only tasks from this project are imported.",
+                "name": "asanaProjectNames",
+                "description": "Names of Asana projects in the team. When set, only tasks from these projects are imported. When empty, all projects are imported.",
                 "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
                 },
                 "defaultValue": null,
                 "isDeprecated": false,
@@ -95711,6 +95883,39 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "IssuePayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueRequestSolubilityPrediction",
+            "description": "[Internal] Requests a coding-agent suitability prediction for an issue without a current one, such as an issue created before predictions existed.",
+            "args": [
+              {
+                "name": "id",
+                "description": "The identifier of the issue to predict suitability for.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "SuccessPayload",
                 "ofType": null
               }
             },
@@ -113599,6 +113804,95 @@
             "deprecationReason": null
           },
           {
+            "name": "loops",
+            "description": "Loops in the workspace that are visible to the requesting user, including team and project loops. Includes enabled and disabled loops.",
+            "args": [
+              {
+                "name": "after",
+                "description": "A cursor to be used with first for forward pagination",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "before",
+                "description": "A cursor to be used with last for backward pagination.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "first",
+                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "includeArchived",
+                "description": "Should archived resources be included (default: false)",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "last",
+                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "orderBy",
+                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "PaginationOrderBy",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "WorkflowDefinitionConnection",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "name",
             "description": "The workspace's name.",
             "args": [],
@@ -114125,6 +114419,22 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "teamSecuritySettings",
+            "description": "[Internal] Workspace restrictions for team permissions.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "JSONObject",
                 "ofType": null
               }
             },
@@ -114736,6 +115046,81 @@
               "kind": "SCALAR",
               "name": "String",
               "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "trustedExternalSourceUpdate",
+            "description": "[Internal] Approve or remove one external source for coding-session delegation.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "OrganizationCodingAgentTrustedSourceUpdateInput",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "trustedExternalSources",
+            "description": "[Internal] Approval snapshot. Ignored on writes; use trustedExternalSourceUpdate to change approvals.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "OrganizationCodingAgentTrustedSourceUpdateInput",
+        "description": "[Internal] An approval change for one external coding-session source.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "allowed",
+            "description": "[Internal] Whether this source may start coding sessions.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "key",
+            "description": "[Internal] The external source whose approval to change.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -117585,6 +117970,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "teamSecuritySettings",
+            "description": "[Internal] Workspace restrictions for team permissions.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "WorkspaceTeamSecuritySettingsInput",
               "ofType": null
             },
             "defaultValue": null,
@@ -127035,7 +127432,7 @@
           },
           {
             "name": "groupType",
-            "description": "The selection mode of the label group. Only singleSelect is currently supported. Null uses single-select behavior.",
+            "description": "The selection mode of the label group. Null uses single-select behavior.",
             "type": {
               "kind": "ENUM",
               "name": "LabelGroupType",
@@ -127407,7 +127804,7 @@
           },
           {
             "name": "groupType",
-            "description": "The selection mode of the label group. Omit to keep the current value. Only singleSelect is currently supported. Null uses single-select behavior.",
+            "description": "The selection mode of the label group. Omit to keep the current value. Null uses single-select behavior.",
             "type": {
               "kind": "ENUM",
               "name": "LabelGroupType",
@@ -165709,6 +166106,95 @@
             "deprecationReason": null
           },
           {
+            "name": "loops",
+            "description": "Loops owned by the team that are visible to the requesting user. Includes enabled and disabled loops.",
+            "args": [
+              {
+                "name": "after",
+                "description": "A cursor to be used with first for forward pagination",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "before",
+                "description": "A cursor to be used with last for backward pagination.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "first",
+                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "includeArchived",
+                "description": "Should archived resources be included (default: false)",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "last",
+                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "orderBy",
+                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "PaginationOrderBy",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "WorkflowDefinitionConnection",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "markedAsDuplicateWorkflowState",
             "description": "[DEPRECATED] No longer in use. Duplicates are now system-managed via the native duplicate state.",
             "args": [],
@@ -179586,6 +180072,126 @@
             "deprecationReason": null
           },
           {
+            "name": "documentFieldProject",
+            "description": "[Internal] Whether to show the project column in documents lists.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentsListCreatedDateDirection",
+            "description": "[Internal] Direction of a documents list when ordered by created date.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentsListGrouping",
+            "description": "[Internal] Grouping of a documents list.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentsListLastEditedDirection",
+            "description": "[Internal] Direction of a documents list when ordered by last edited.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentsListNameDirection",
+            "description": "[Internal] Direction of a documents list when ordered by name.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentsListOrdering",
+            "description": "[Internal] Ordering of a documents list.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentsListOwnerDirection",
+            "description": "[Internal] Direction of a documents list when ordered by owner.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentsListProjectDirection",
+            "description": "[Internal] Direction of a documents list when ordered by project.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentsListShowInactiveProjects",
+            "description": "[Internal] Whether a documents list shows documents from completed or canceled projects.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentsListShowOnlyMyProjects",
+            "description": "[Internal] Whether a documents list only shows documents from projects the user is part of.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "embeddedCustomerNeedsShowImportantFirst",
             "description": "Whether to show important embedded customer needs first.",
             "args": [],
@@ -180393,6 +180999,26 @@
               "kind": "SCALAR",
               "name": "Boolean",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pinnedDocumentIds",
+            "description": "[Internal] Ordered ids of the documents pinned to the top of a documents list.",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -182072,6 +182698,12 @@
             "deprecationReason": null
           },
           {
+            "name": "allDocuments",
+            "description": "[Internal] The All tab of the documents page.",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "allIssues",
             "description": null,
             "isDeprecated": false,
@@ -182288,6 +182920,12 @@
             "deprecationReason": null
           },
           {
+            "name": "myDocuments",
+            "description": "[Internal] The My documents tab of the documents page.",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "myIssues",
             "description": null,
             "isDeprecated": false,
@@ -182444,6 +183082,12 @@
             "deprecationReason": null
           },
           {
+            "name": "sharedDocuments",
+            "description": "[Internal] The Shared with me tab of the documents page.",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "splitSearch",
             "description": null,
             "isDeprecated": false,
@@ -182452,6 +183096,12 @@
           {
             "name": "subIssues",
             "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "teamDocuments",
+            "description": "[Internal] The documents list of a team.",
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -184755,6 +185405,124 @@
         "possibleTypes": null
       },
       {
+        "kind": "OBJECT",
+        "name": "WorkflowDefinitionConnection",
+        "description": null,
+        "fields": [
+          {
+            "name": "edges",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "WorkflowDefinitionEdge",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nodes",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "WorkflowDefinition",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pageInfo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PageInfo",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "WorkflowDefinitionEdge",
+        "description": null,
+        "fields": [
+          {
+            "name": "cursor",
+            "description": "Used in `before` and `after` args",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "node",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "WorkflowDefinition",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "ENUM",
         "name": "WorkflowDefinitionEditAccess",
         "description": null,
@@ -186358,6 +187126,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "addedToMergeQueue",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "chatMessagePosted",
             "description": null,
             "isDeprecated": false,
@@ -186425,6 +187199,12 @@
           },
           {
             "name": "entityUpdated",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "removedFromMergeQueue",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -187010,6 +187790,53 @@
             "ofType": null
           }
         ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "WorkspaceTeamSecuritySettingsInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "allMembersCanJoin",
+            "description": "Whether members may join teams without an invitation.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "memberManagement",
+            "description": "Minimum role required to manage team members.",
+            "type": {
+              "kind": "ENUM",
+              "name": "TeamRoleType",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "teamManagement",
+            "description": "Minimum role required to manage team settings.",
+            "type": {
+              "kind": "ENUM",
+              "name": "TeamRoleType",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
