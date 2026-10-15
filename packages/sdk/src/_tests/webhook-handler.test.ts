@@ -263,6 +263,111 @@ describe("webhooks handlers", () => {
     expect(invoked).toBe(0);
   });
 
+  it("accepts a streamed body within maxBodyBytes (fetch-style)", async () => {
+    const secret = "SECRET";
+    const handler = new LinearWebhookClient(secret).createHandler({ maxBodyBytes: 4096 });
+    let invoked = 0;
+    handler.on("*", () => {
+      invoked += 1;
+    });
+
+    const { payload } = generateIssuePayload();
+    const { body, signature } = createSignedBody(secret, payload);
+    const res = await handler(
+      new Request("http://localhost/", {
+        method: "POST",
+        headers: { [LINEAR_WEBHOOK_SIGNATURE_HEADER]: signature },
+        body: body.toString(),
+      })
+    );
+    expect(res.status).toBe(200);
+    expect(invoked).toBe(1);
+  });
+
+  it("rejects a streamed body over maxBodyBytes without reading the rest (fetch-style)", async () => {
+    const handler = new LinearWebhookClient("SECRET").createHandler({ maxBodyBytes: 1024 });
+    let pulled = 0;
+    let cancelled = false;
+    const body = new ReadableStream<Uint8Array>({
+      pull: controller => {
+        pulled += 1;
+        controller.enqueue(new Uint8Array(512));
+      },
+      cancel: () => {
+        cancelled = true;
+      },
+    });
+    const res = await handler(
+      new Request("http://localhost/", {
+        method: "POST",
+        headers: { [LINEAR_WEBHOOK_SIGNATURE_HEADER]: "a".repeat(64) },
+        body,
+        duplex: "half",
+      } as RequestInit)
+    );
+    expect(res.status).toBe(413);
+    expect(cancelled).toBe(true);
+    expect(pulled).toBeLessThan(10);
+  });
+
+  it("rejects bodies over maxBodyBytes (express server)", async () => {
+    const handler = new LinearWebhookClient("SECRET").createHandler({ maxBodyBytes: 1024 });
+    const app = express();
+    const port = await getPort();
+    app.post("/", (req, res) => {
+      void handler(req, res);
+    });
+    const server = app.listen(port);
+    try {
+      // Declared content-length over the limit is rejected before any body is sent or read.
+      const declaredResult = await new Promise<{ status?: number; connection?: string }>((resolve, reject) => {
+        const req = http.request(
+          {
+            method: "POST",
+            hostname: "127.0.0.1",
+            port,
+            path: "/",
+            headers: { [LINEAR_WEBHOOK_SIGNATURE_HEADER]: "a".repeat(64), "content-length": 4 * 1024 * 1024 * 1024 },
+          },
+          res => {
+            resolve({ status: res.statusCode, connection: res.headers.connection });
+            req.destroy();
+          }
+        );
+        req.on("error", reject);
+        req.flushHeaders();
+      });
+      expect(declaredResult).toEqual({ status: 413, connection: "close" });
+
+      // Chunked bodies without content-length are cut off once the limit is exceeded.
+      // The server closes the connection, so the client sees either the 413 or a write error.
+      const chunkedOutcome = await new Promise<number | string | undefined>(resolve => {
+        const req = http.request(
+          {
+            method: "POST",
+            hostname: "127.0.0.1",
+            port,
+            path: "/",
+            headers: { [LINEAR_WEBHOOK_SIGNATURE_HEADER]: "a".repeat(64), "transfer-encoding": "chunked" },
+          },
+          res => resolve(res.statusCode)
+        );
+        req.on("error", (error: NodeJS.ErrnoException) => resolve(error.code));
+        const chunk = Buffer.alloc(512);
+        const write = (): void => {
+          while (!req.destroyed && req.write(chunk)) {
+            // keep writing until the server closes the connection
+          }
+        };
+        req.on("drain", write);
+        write();
+      });
+      expect([413, "EPIPE", "ECONNRESET"]).toContain(chunkedOutcome);
+    } finally {
+      server.close();
+    }
+  });
+
   it("listens to 'Issue' and 'Comment' specifically (express server)", async () => {
     const secret = "SECRET";
     const client = new LinearWebhookClient(secret);

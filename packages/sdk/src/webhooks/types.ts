@@ -100,6 +100,18 @@ export type LinearWebhookEventHandler<T extends LinearWebhookPayload = LinearWeb
 ) => void | Promise<void>;
 
 /**
+ * Options for `LinearWebhookClient.createHandler`.
+ */
+export interface LinearWebhookHandlerOptions {
+  /**
+   * Maximum accepted request body size in bytes. Larger requests are rejected with
+   * `413` before the body is fully read or its signature is verified.
+   * Defaults to `LINEAR_WEBHOOK_DEFAULT_MAX_BODY_BYTES` (5 MiB).
+   */
+  maxBodyBytes?: number;
+}
+
+/**
  * Webhook handler interface that provides event registration capabilities.
  * This interface supports both Fetch API Request/Response and Node.js IncomingMessage/ServerResponse.
  */
