@@ -1,6 +1,7 @@
 import { print } from "graphql/language/printer.js";
 import { parseLinearError } from "./error.js";
 import { GraphQLRequestContext, LinearRawResponse } from "./types.js";
+import { mergeHeaders } from "./utils.js";
 
 /**
  * Identical class to graphql-request ClientError
@@ -69,11 +70,11 @@ export class LinearGraphQLClient {
     const fetch = globalThis.fetch;
     const response = await fetch(this.url, {
       method: "POST",
-      headers: {
-        ...(typeof body === "string" ? { "Content-Type": "application/json" } : {}),
-        ...resolveHeaders(headers),
-        ...resolveHeaders(requestHeaders),
-      },
+      headers: mergeHeaders(
+        typeof body === "string" ? { "Content-Type": "application/json" } : {},
+        headers,
+        requestHeaders
+      ),
       body,
       ...others,
     });
@@ -111,11 +112,11 @@ export class LinearGraphQLClient {
 
     const response = await fetch(this.url, {
       method: "POST",
-      headers: {
-        ...(typeof body === "string" ? { "Content-Type": "application/json" } : {}),
-        ...resolveHeaders(headers),
-        ...resolveHeaders(requestHeaders),
-      },
+      headers: mergeHeaders(
+        typeof body === "string" ? { "Content-Type": "application/json" } : {},
+        headers,
+        requestHeaders
+      ),
       body,
       ...others,
     });
@@ -145,15 +146,7 @@ export class LinearGraphQLClient {
    * Attach a header to the client. All subsequent requests will have this header.
    */
   public setHeader(key: string, value: string): LinearGraphQLClient {
-    const { headers } = this.options;
-
-    if (headers) {
-      // todo what if headers is in nested array form... ?
-      (headers as Record<string, string>)[key] = value;
-    } else {
-      this.options.headers = { [key]: value };
-    }
-
+    this.options.headers = mergeHeaders(this.options.headers, { [key]: value });
     return this;
   }
 }
@@ -170,35 +163,4 @@ function getResult<Data>(response: Response): Promise<LinearRawResponse<Data> | 
   } else {
     return response.text();
   }
-}
-
-/**
- * Convert the given headers configuration into a plain object.
- */
-function resolveHeaders(headers: RequestInit["headers"]): Record<string, string> {
-  let oHeaders: Record<string, string> = {};
-  if (headers) {
-    if (typeof Headers !== "undefined" && headers instanceof Headers) {
-      oHeaders = headersToObject(headers);
-    } else if (Array.isArray(headers)) {
-      headers.forEach(([name, value]) => {
-        oHeaders[name] = value;
-      });
-    } else {
-      oHeaders = headers as Record<string, string>;
-    }
-  }
-
-  return oHeaders;
-}
-
-/**
- * Convert Headers instance into regular object
- */
-function headersToObject(headers: Response["headers"]): Record<string, string> {
-  const o: Record<string, string> = {};
-  headers.forEach((v, k) => {
-    o[k] = v;
-  });
-  return o;
 }

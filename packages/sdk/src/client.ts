@@ -1,7 +1,7 @@
 import { parseLinearError } from "./error.js";
 import { LinearGraphQLClient } from "./graphql-client.js";
 import { LinearClientOptions, LinearClientParsedOptions } from "./types.js";
-import { serializeUserAgent } from "./utils.js";
+import { mergeHeaders, serializeUserAgent } from "./utils.js";
 import { LinearSdk } from "./_generated_sdk.js";
 
 const LOCAL_API_HOSTNAMES = new Set(["localhost", "127.0.0.1", "[::1]"]);
@@ -46,20 +46,24 @@ function parseClientOptions({
   validateApiUrl(resolvedApiUrl);
 
   return {
-    headers: {
-      /** Use bearer if oauth token exists, otherwise use the provided apiKey */
-      Authorization: accessToken
-        ? accessToken.startsWith("Bearer ")
-          ? accessToken
-          : `Bearer ${accessToken}`
-        : (apiKey ?? ""),
+    headers: mergeHeaders(
+      {
+        /** Use bearer if oauth token exists, otherwise use the provided apiKey */
+        Authorization: accessToken
+          ? accessToken.startsWith("Bearer ")
+            ? accessToken
+            : `Bearer ${accessToken}`
+          : (apiKey ?? ""),
+      },
       /** Use configured headers */
-      ...headers,
-      /** Override any user agent with the sdk name and version */
-      "User-Agent": serializeUserAgent({
-        [process.env.npm_package_name ?? "@linear/sdk"]: process.env.npm_package_version ?? "unknown",
-      }),
-    },
+      headers,
+      {
+        /** Override any user agent with the sdk name and version */
+        "User-Agent": serializeUserAgent({
+          [process.env.npm_package_name ?? "@linear/sdk"]: process.env.npm_package_version ?? "unknown",
+        }),
+      }
+    ),
     /** Default to production linear api */
     apiUrl: resolvedApiUrl,
     ...opts,
