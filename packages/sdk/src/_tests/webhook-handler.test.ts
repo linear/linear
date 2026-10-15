@@ -277,7 +277,7 @@ describe("webhooks handlers", () => {
       new Request("http://localhost/", {
         method: "POST",
         headers: { [LINEAR_WEBHOOK_SIGNATURE_HEADER]: signature },
-        body,
+        body: body.toString(),
       })
     );
     expect(res.status).toBe(200);
