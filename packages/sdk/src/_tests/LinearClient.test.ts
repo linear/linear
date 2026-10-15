@@ -1,6 +1,6 @@
 import { describe, beforeEach, it, expect } from "vitest";
 import { JsonObject } from "type-fest";
-import { LinearClient } from "../index.js";
+import { LinearClient, LinearGraphQLClient } from "../index.js";
 import { LinearErrorType } from "../types.js";
 import { createTestServer, MOCK_API_KEY } from "./_mock.js";
 
@@ -58,6 +58,26 @@ describe("LinearClient", () => {
     const response = await client.viewer;
 
     expect(response).toEqual(expect.objectContaining({ id: "viewerId" }));
+  });
+
+  it.each([
+    ["Headers", new Headers({ "X-Test": "expected" })],
+    ["array", [["X-Test", "expected"]]],
+  ] as [string, HeadersInit][])("sends configured headers in %s form", async (_, headers) => {
+    const { requests } = ctx.res(() => ({ body: { data: { viewer: { id: "viewerId" } } } }));
+    const client = new LinearClient({ apiKey: MOCK_API_KEY, apiUrl: ctx.url, headers });
+    await client.viewer;
+
+    expect(requests.at(-1)?.headers["x-test"]).toEqual("expected");
+  });
+
+  it("setHeader replaces headers held in a Headers instance", async () => {
+    const { requests } = ctx.res(() => ({ body: { data: { viewer: { id: "viewerId" } } } }));
+    const client = new LinearGraphQLClient(ctx.url, { headers: new Headers({ Authorization: "old" }) });
+    client.setHeader("Authorization", MOCK_API_KEY);
+    await client.request("query { viewer { id } }");
+
+    expect(requests.at(-1)?.headers.authorization).toEqual(MOCK_API_KEY);
   });
 
   it("has chained api", async () => {
