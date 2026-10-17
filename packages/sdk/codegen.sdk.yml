@@ -29,6 +29,8 @@ generates:
       - typed-document-node
     config:
       documentMode: string
+      # Let bundlers drop documents an app never uses
+      pureMagicComment: true
       namingConvention: "./naming-override#caseify"
       # Prefer `Pick` to reference prior types, rather than pre-resolving types and redefining primitives inline
       # https://the-guild.dev/graphql/codegen/plugins/typescript/typescript-operations#preresolvetypes (changed to
