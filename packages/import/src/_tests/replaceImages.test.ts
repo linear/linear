@@ -222,6 +222,18 @@ describe("replaceImagesInMarkdown", () => {
     expect(result.startsWith("[\\!\\[")).toBe(true);
   });
 
+  it("processes many definitions in linear time", async () => {
+    const markdown = `${"[a]: https://example.com/a.png\n".repeat(50_000)}\n![b][a]`;
+
+    // Quadratic parsing takes several seconds or more for this much text
+    const start = performance.now();
+    const result = await replaceImagesInMarkdown(client, markdown);
+    expect(performance.now() - start).toBeLessThan(1000);
+
+    expect(imageUploadFromUrl).toHaveBeenCalledTimes(1);
+    expect(result.endsWith(`\n![b](${UPLOADED_URL})`)).toBe(true);
+  });
+
   it("processes nested reference images in linear time", async () => {
     const markdown = `[a]: https://example.com/a.png\n\n${"![".repeat(100_000)}b${"]".repeat(100_000)}`;
 
@@ -245,7 +257,7 @@ describe("replaceImagesInMarkdown", () => {
     ["images in unclosed fenced code blocks", "```\n![alt](https://example.com/a.png)"],
     ["unclosed images", "![alt](https://example.com/a.png"],
     ["image markers without a URL", "![not an image] and [link](https://example.com/a.png)"],
-    ["images with a relative URL", "![alt](/a.png)"],
+    ["image tags with a relative URL", '<img src="/a.png">'],
     ["image tags with another src attribute", '<img data-src="https://example.com/a.png">'],
     ["unclosed image tags", '<img src="https://example.com/a.png"'],
     ["image tags with a src inside another attribute", '<img alt="a src="https://example.com/a.png">'],
@@ -253,27 +265,99 @@ describe("replaceImagesInMarkdown", () => {
     ["images with whitespace in parentheses in their URL", "![alt](https://example.com/a( b).png)"],
     ["images with parentheses in a title in parentheses", "![alt](https://example.com/a.png (a (b)))"],
     ["images with a line break in an angle-bracketed URL", "![alt](<https://example.com/a\n.png>)"],
+    ["images in code blocks closed by a longer fence", "```\n![alt](https://example.com/a.png)\n````\n"],
     ["reference images without a definition", "![a][r] ![b][] ![c]"],
-    ["reference images with a definition interrupting a paragraph", "![a][r]\n[r]: https://example.com/a.png"],
     ["reference images with a definition in a code block", "![a][r]\n\n```\n[r]: https://example.com/a.png\n```"],
-    [
-      "reference images whose first definition has a relative URL",
-      "![a][r]\n\n[r]: /a.png\n[r]: https://example.com/a.png",
-    ],
     ["reference images with an undefined label", "![a][r]\n\n[a]: https://example.com/a.png"],
     ["reference images with an escaped label", "![a][r\\!]\n\n[r!]: https://example.com/a.png"],
     ["reference images using alt text with brackets as label", "![a [b]]\n\n[a [b]]: https://example.com/a.png"],
     ["reference images with text after their definition", '![a][r]\n\n[r]: https://example.com/a.png "Preview" text'],
-    [
-      "images with a relative URL and a definition for their alt text",
-      "![a](/a.png)\n\n[a]: https://example.com/a.png",
-    ],
   ])("leaves %s untouched", async (_, markdown) => {
     const result = await replaceImagesInMarkdown(client, markdown, authenticateUrl);
 
     expect(imageUploadFromUrl).not.toHaveBeenCalled();
     expect(result).toBe(markdown);
   });
+
+  it.each([
+    ["backtick runs of different lengths", "``a ![b](https://example.com/b.png) `"],
+    ["an escaped backtick", "\\`a ![b](https://example.com/b.png) `"],
+    ["a code fence with a backtick in its info string", "``` `a\n![b](https://example.com/b.png)"],
+    ["a code fence indented with a tab", "\t```\n\n![b](https://example.com/b.png)"],
+    ["a code block closed by a longer fence", "```\ncode\n````\n![b](https://example.com/b.png)"],
+    ["an empty code block", "```\n```\n![b](https://example.com/b.png)"],
+  ])("replaces images after %s, which doesn't start code", async (_, markdown) => {
+    const result = await replaceImagesInMarkdown(client, markdown);
+
+    expect(imageUploadFromUrl).toHaveBeenCalledWith("https://example.com/b.png");
+    expect(result).toBe(markdown.replace("https://example.com/b.png", UPLOADED_URL));
+  });
+
+  it("keeps non-breaking spaces in image URLs, since they don't end URLs", async () => {
+    const result = await replaceImagesInMarkdown(client, "![a](https://example.com/a\u00a0b.png)");
+
+    expect(imageUploadFromUrl).toHaveBeenCalledWith("https://example.com/a\u00a0b.png");
+    expect(result).toBe(`![a](${UPLOADED_URL})`);
+  });
+
+  it.each([
+    ["markdown images", "![a](HTTPS://example.com/a.png)", `![a](${UPLOADED_URL})`],
+    ["image tags", '<img src="HTTPS://example.com/a.png">', `![](${UPLOADED_URL})`],
+  ])("uploads %s with an uppercase URL scheme", async (_, markdown, expected) => {
+    const result = await replaceImagesInMarkdown(client, markdown);
+
+    expect(imageUploadFromUrl).toHaveBeenCalledWith("HTTPS://example.com/a.png");
+    expect(result).toBe(expected);
+  });
+
+  it.each([
+    ["relative URLs", "![alt](/a.png)", "[alt](/a.png)"],
+    ["protocol-relative URLs", "![a](//example.com/a.png)", "[a](//example.com/a.png)"],
+    ["data URLs", "![a](data:image/png;base64,iVBORw0KGgo=)", "[a](data:image/png;base64,iVBORw0KGgo=)"],
+    [
+      "named character references in URLs",
+      "![a](https&colon;//example.com/a.png)",
+      "[a](https&colon;//example.com/a.png)",
+    ],
+    [
+      "a first definition with a relative URL",
+      "![a][r]\n\n[r]: /a.png\n[r]: https://example.com/a.png",
+      "[a][r]\n\n[r]: /a.png\n[r]: https://example.com/a.png",
+    ],
+    [
+      "a relative URL and a definition for their alt text",
+      "![a](/a.png)\n\n[a]: https://example.com/a.png",
+      "[a](/a.png)\n\n[a]: https://example.com/a.png",
+    ],
+  ])("turns images with %s into links without uploading them", async (_, markdown, expected) => {
+    const result = await replaceImagesInMarkdown(client, markdown, authenticateUrl);
+
+    expect(imageUploadFromUrl).not.toHaveBeenCalled();
+    expect(result).toBe(expected);
+  });
+
+  it.each([
+    [
+      "in an attribute",
+      '<img alt="![a](https://example.com/a.png)" src="https://example.com/b.png">',
+      '<img alt="[a](https://example.com/a.png)" src="https://example.com/b.png">',
+    ],
+    [
+      "starting in an attribute",
+      '<img alt="![a" src="https://example.com/b.png">](https://example.com/a.png)',
+      String.raw`<img alt="[a\" src\=\"https\:\/\/example\.com\/b\.png\"\>](https://example.com/a.png)`,
+    ],
+  ])(
+    "handles markdown images %s of an image tag instead of the tag, since Linear shows tags as text",
+    async (_, markdown, expected) => {
+      imageUploadFromUrl.mockRejectedValue(new Error("Failed to download image"));
+
+      const result = await replaceImagesInMarkdown(client, markdown);
+
+      expect(imageUploadFromUrl.mock.calls).toEqual([["https://example.com/a.png"]]);
+      expect(result).toBe(expected);
+    }
+  );
 
   it("replaces images outside code blocks in the same document", async () => {
     const result = await replaceImagesInMarkdown(
@@ -396,6 +480,31 @@ describe("replaceImagesInMarkdown", () => {
       "definitions in lists",
       "![a][r]\n\n- item\n- [r]: https://example.com/a.png",
       `![a](${UPLOADED_URL})\n\n- item\n- [r]: https://example.com/a.png`,
+    ],
+    [
+      "definitions right after a paragraph",
+      "![a][r]\n[r]: https://example.com/a.png",
+      `![a](${UPLOADED_URL})\n[r]: https://example.com/a.png`,
+    ],
+    [
+      "definitions after a thematic break",
+      "![a][r]\n\n***\n[r]: https://example.com/a.png",
+      `![a](${UPLOADED_URL})\n\n***\n[r]: https://example.com/a.png`,
+    ],
+    [
+      "definitions after a setext heading",
+      "![a][r]\n\nTitle\n===\n[r]: https://example.com/a.png",
+      `![a](${UPLOADED_URL})\n\nTitle\n===\n[r]: https://example.com/a.png`,
+    ],
+    [
+      "definitions after an indented code block",
+      "![a][r]\n\n    code\n[r]: https://example.com/a.png",
+      `![a](${UPLOADED_URL})\n\n    code\n[r]: https://example.com/a.png`,
+    ],
+    [
+      "labels with non-breaking spaces",
+      "![a][x y]\n\n[x\u00a0y]: https://example.com/a.png",
+      `![a](${UPLOADED_URL})\n\n[x\u00a0y]: https://example.com/a.png`,
     ],
     [
       "shortcut reference images after an invalid inline URL",

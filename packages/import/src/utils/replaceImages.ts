@@ -2,14 +2,18 @@
 import { LinearClient } from "@linear/sdk";
 import { findImages } from "./markdownImages.ts";
 
+// URLs that images can be downloaded from
+const DOWNLOADABLE_URL_REGEX = /^https?:\/\//i;
+
 /**
  * Replace markdown image URLs with Linear uploaded ones.
  *
  * Also supports reference images such as `![alt][label]`, which become inline images, and image tags
  * used by GitHub. Images inside code spans and code blocks, and escaped image markers, don't render
- * as images so they are left as-is. Markdown images that fail to upload become links to the source
- * image, so that viewing the content doesn't load it from the source. Image tags that fail to upload
- * are left as-is, since Linear shows HTML as text.
+ * as images so they are left as-is. Markdown images that aren't uploaded, because the upload fails or
+ * their URL isn't an HTTP one, become links to the source image, so that viewing the content doesn't
+ * load it from the source. Image tags that aren't uploaded are left as-is, since Linear shows HTML as
+ * text.
  *
  * @param client Linear API client.
  * @param text Markdown content.
@@ -43,13 +47,17 @@ export const replaceImagesInMarkdown = async (
  * @param client Linear API client
  * @param url URL of the source image
  * @param authenticateUrl Maps the source URL to the URL to download it from
- * @returns URL of the uploaded image, or undefined if the upload failed
+ * @returns URL of the uploaded image, or undefined if the image can't be downloaded or the upload failed
  */
 const replaceImageUrl = async (
   client: LinearClient,
   url: string,
   authenticateUrl?: (url: string) => string
 ): Promise<string | undefined> => {
+  if (!DOWNLOADABLE_URL_REGEX.test(url)) {
+    return undefined;
+  }
+
   try {
     const res = await client.imageUploadFromUrl(authenticateUrl ? authenticateUrl(url) : url);
     if (res?.success === true && res.url) {

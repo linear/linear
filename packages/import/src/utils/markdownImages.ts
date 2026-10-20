@@ -14,20 +14,18 @@ const CONTAINER_PREFIX_REGEX = /(?:[ \t]*(?:>|(?:[-+*]|\d{1,9}[.)])(?=[ \t])))*[
 const DEFINITION_WHITESPACE_REGEX = /[ \t]*(?:\r?\n[ \t]*)?/y;
 // Whitespace until the end of the line
 const BLANK_LINE_END_REGEX = /[ \t\r]*(?=\n|$)/y;
-// Lines that end a paragraph, after which a link reference definition can start: ATX headings and code fences
-const PARAGRAPH_END_REGEX = /^(?:#{1,6}(?:[ \t]|$)|`{3,}|~{3,})/;
 
 export interface Image {
   /** Index of the first character of the image in the text. */
   start: number;
   /** Index after the last character of the image in the text. */
   end: number;
-  /** URL of the source image. */
+  /** URL of the source image, which may be relative or use any scheme. */
   url: string;
   /** Renders the image pointing to the uploaded URL. */
   render: (uploadedUrl: string) => string;
   /**
-   * Renders a link to the source image, which doesn't load it, for images that fail to upload. Image tags don't have
+   * Renders a link to the source image, which doesn't load it, for images that aren't uploaded. Image tags don't have
    * one, since Linear doesn't render HTML and shows them as text.
    */
   renderLink?: () => string;
@@ -66,23 +64,32 @@ function isBackslashEscaped(text: string, index: number): boolean {
   return count % 2 === 1;
 }
 
+/**
+ * Whether the character ends a URL. Spaces and control characters do, but as in Linear's markdown parser, other
+ * whitespace such as non-breaking spaces doesn't.
+ */
+function isUrlEnd(char: string): boolean {
+  return char <= " " || char === "\x7f";
+}
+
 /** Finds the ranges of code blocks and code spans, sorted and without overlaps. */
 function findCodeRanges(text: string): [number, number][] {
   const fences: [number, number][] = [];
 
-  // Fenced code blocks: 3+ backticks or tildes at line start (0-3 spaces of indent).
-  // Unclosed fences extend to end of input.
-  const fence = /(?:^|\n)[ \t]{0,3}(`{3,}|~{3,})[^\n]*(?:\n[\s\S]*?(?:\n[ \t]{0,3}\1[ \t]*(?=\n|$)|$)|$)/g;
+  // Fenced code blocks: 3+ backticks or tildes at line start (0-3 spaces of indent), closed by at least as many of the
+  // same character. Backtick fences can't have backticks in their info string. Unclosed fences extend to end of input.
+  const fence =
+    /(?:^|\n) {0,3}(?:(`{3,})[^`\n]*(?=\n|$)(?:(?:\n[^\n]*)*?\n {0,3}\1`*[ \t]*(?=\n|$)|[\s\S]*)|(~{3,})[^\n]*(?:(?:\n[^\n]*)*?\n {0,3}\2~*[ \t]*(?=\n|$)|[\s\S]*))/g;
   let m: RegExpExecArray | null;
   while ((m = fence.exec(text)) !== null) {
     const start = m[0].startsWith("\n") ? m.index + 1 : m.index;
     fences.push([start, m.index + m[0].length]);
   }
 
-  // Inline code spans: matching runs of backticks on the same line. Spans don't start inside a run of backticks,
-  // which would try each shorter run.
+  // Inline code spans: runs of backticks closed by a run of the same length on the same line. Spans don't start inside
+  // a run of backticks, which would try each shorter run, or after a backslash, which may escape the backtick.
   const spans: [number, number][] = [];
-  const inline = /(?<!`)`+[^`\n]+?`+/g;
+  const inline = /(?<![`\\])(`+)[^`\n]+?\1(?!`)/g;
   while ((m = inline.exec(text)) !== null) {
     const idx = m.index;
     if (inRanges(idx, fences)) {
@@ -117,10 +124,10 @@ function inRanges(index: number, ranges: [number, number][]): boolean {
  * Matches unescaped delimiters, such as brackets, in a single pass over the text. Parsing images with it avoids
  * scanning the rest of the text again for each unclosed delimiter.
  *
- * @param breakOnWhitespace Whether whitespace leaves the delimiters opened before it unmatched
+ * @param breakAtUrlEnd Whether characters that end URLs leave the delimiters opened before them unmatched
  * @returns Index of the closing delimiter matching each opening delimiter, by index of the opening delimiter
  */
-function matchDelimiters(text: string, open: string, close: string, breakOnWhitespace: boolean): Map<number, number> {
+function matchDelimiters(text: string, open: string, close: string, breakAtUrlEnd: boolean): Map<number, number> {
   const matches = new Map<number, number>();
   const openIndexes: number[] = [];
   for (let index = 0; index < text.length; index++) {
@@ -140,14 +147,14 @@ function matchDelimiters(text: string, open: string, close: string, breakOnWhite
       }
       continue;
     }
-    if (breakOnWhitespace && /\s/.test(char)) {
+    if (breakAtUrlEnd && isUrlEnd(char)) {
       openIndexes.length = 0;
     }
   }
   return matches;
 }
 
-/** Finds the end of an image URL, which may contain balanced parentheses but no whitespace. */
+/** Finds the end of an image URL, which may contain balanced parentheses but no spaces or control characters. */
 function findMarkdownImageUrlEnd(text: string, start: number, parentheses: Map<number, number>): number | undefined {
   for (let index = start; index < text.length; index++) {
     const char = text[index];
@@ -163,7 +170,7 @@ function findMarkdownImageUrlEnd(text: string, start: number, parentheses: Map<n
       index = closeIndex;
       continue;
     }
-    if (char === ")" || /\s/.test(char)) {
+    if (char === ")" || isUrlEnd(char)) {
       return index;
     }
   }
@@ -253,9 +260,12 @@ function decodeEscapes(text: string, escapeRegex: RegExp): string {
   });
 }
 
-/** Finds the `]` closing the link label starting at `start`, which has at most 999 characters and no unescaped brackets. */
+/**
+ * Finds the `]` closing the link label starting at `start`, which can't contain unescaped brackets. Unlike CommonMark,
+ * Linear's markdown parser doesn't limit the length of labels.
+ */
 function findLinkLabelEnd(text: string, start: number): number | undefined {
-  for (let index = start + 1; index < text.length && index - start <= 1000; index++) {
+  for (let index = start + 1; index < text.length; index++) {
     const char = text[index];
     if (char === "\\") {
       index++;
@@ -271,14 +281,13 @@ function findLinkLabelEnd(text: string, start: number): number | undefined {
   return undefined;
 }
 
-/** Normalizes a link label so that references match definitions regardless of case and whitespace. */
+/**
+ * Normalizes a link label so that references match definitions regardless of case and whitespace, including Unicode
+ * whitespace such as non-breaking spaces, as Linear's markdown parser does.
+ */
 function normalizeLabel(label: string): string {
-  // Lowercasing then uppercasing approximates Unicode case folding, as the CommonMark reference implementation does
-  return label
-    .replace(/[ \t\r\n]+/g, " ")
-    .trim()
-    .toLowerCase()
-    .toUpperCase();
+  // Lowercasing then uppercasing approximates Unicode case folding
+  return label.trim().replace(/\s+/g, " ").toLowerCase().toUpperCase();
 }
 
 function skipDefinitionWhitespace(text: string, start: number): number {
@@ -296,13 +305,13 @@ function findBlankLineEnd(text: string, start: number): number | undefined {
 /**
  * Parses a link reference definition `[label]: url "title"` or `[label]: <url> "title"` starting at `start`.
  *
- * @returns The definition, with its normalized label and the index of the end of its last line
+ * @returns The definition, with its normalized label
  */
 function parseDefinition(
   text: string,
   start: number,
   parentheses: Map<number, number>
-): (Definition & { label: string; end: number }) | undefined {
+): (Definition & { label: string }) | undefined {
   const labelEnd = findLinkLabelEnd(text, start);
   if (labelEnd === undefined || text[labelEnd + 1] !== ":") {
     return undefined;
@@ -325,21 +334,21 @@ function parseDefinition(
   // A title is separated from the URL by whitespace, and ends its line
   const titleStart = skipDefinitionWhitespace(text, destinationEnd);
   const titleEnd = titleStart > destinationEnd ? findMarkdownImageTitleEnd(text, titleStart) : undefined;
-  const titleLineEnd = titleEnd === undefined ? undefined : findBlankLineEnd(text, titleEnd);
-  if (titleEnd !== undefined && titleLineEnd !== undefined) {
-    return { label, url, title: text.slice(titleStart, titleEnd), end: titleLineEnd };
+  if (titleEnd !== undefined && findBlankLineEnd(text, titleEnd) !== undefined) {
+    return { label, url, title: text.slice(titleStart, titleEnd) };
   }
 
   // Without a title, the URL ends its line
-  const lineEnd = findBlankLineEnd(text, destinationEnd);
-  return lineEnd === undefined ? undefined : { label, url, end: lineEnd };
+  return findBlankLineEnd(text, destinationEnd) === undefined ? undefined : { label, url };
 }
 
 /**
  * Finds the link reference definitions, by normalized label.
  *
- * Definitions can't interrupt a paragraph, so they start the text, a list item or a blockquote, or follow a blank line,
- * a heading, a code fence or another definition.
+ * This finds definitions at the start of every line outside code, including lines that markdown doesn't treat as
+ * definitions, such as those continuing a paragraph or inside another definition. Images that use them are then
+ * uploaded or turned into links even if they don't render, which is harmless, while a missed definition would leave an
+ * image loading from the source host.
  */
 function findDefinitions(
   text: string,
@@ -347,37 +356,20 @@ function findDefinitions(
   parentheses: Map<number, number>
 ): Map<string, Definition> {
   const definitions = new Map<string, Definition>();
-  let canStart = true;
-  let previousQuoteDepth = 0;
   for (let lineStart = 0; lineStart < text.length;) {
     CONTAINER_PREFIX_REGEX.lastIndex = lineStart;
-    const prefix = CONTAINER_PREFIX_REGEX.exec(text)?.[0] ?? "";
-    const contentStart = lineStart + prefix.length;
-    const quoteDepth = prefix.split(">").length - 1;
-
-    // A list item or a blockquote can interrupt a paragraph. The prefix has a list marker if it has anything other than
-    // whitespace and blockquote markers.
-    const startsBlock = canStart || /[^ \t>]/.test(prefix) || quoteDepth > previousQuoteDepth;
-    previousQuoteDepth = quoteDepth;
+    const contentStart = lineStart + (CONTAINER_PREFIX_REGEX.exec(text)?.[0].length ?? 0);
     const definition =
-      startsBlock && text[contentStart] === "[" && !isLiteral(contentStart)
+      text[contentStart] === "[" && !isLiteral(contentStart)
         ? parseDefinition(text, contentStart, parentheses)
         : undefined;
-    if (definition) {
-      // The first definition of a label is the one that applies
-      if (!definitions.has(definition.label)) {
-        definitions.set(definition.label, { url: definition.url, title: definition.title });
-      }
-      canStart = true;
-      lineStart = definition.end + 1;
-      continue;
+    // The first definition of a label is the one that applies
+    if (definition && !definitions.has(definition.label)) {
+      definitions.set(definition.label, { url: definition.url, title: definition.title });
     }
 
     const newline = text.indexOf("\n", contentStart);
-    const lineEnd = newline === -1 ? text.length : newline;
-    const content = text.slice(contentStart, lineEnd).trim();
-    canStart = !content || PARAGRAPH_END_REGEX.test(content);
-    lineStart = lineEnd + 1;
+    lineStart = newline === -1 ? text.length : newline + 1;
   }
   return definitions;
 }
@@ -460,7 +452,7 @@ function parseMarkdownImage(
   // An image is a reference when it isn't followed by a valid inline destination
   const destination =
     parseInlineDestination(text, altEnd, delimiters.parentheses) ?? parseReference(text, start, altEnd, definitions);
-  if (!destination || !/^https?:\/\//.test(destination.url)) {
+  if (!destination) {
     return undefined;
   }
 
@@ -491,7 +483,7 @@ function escapeMarkdown(text: string): string {
 function findMarkdownImages(text: string, isLiteral: (index: number) => boolean): Image[] {
   const delimiters: Delimiters = {
     brackets: matchDelimiters(text, "[", "]", false),
-    // Whitespace ends a URL, so parentheses in a URL can't be matched across it
+    // Spaces end a URL, so parentheses in a URL can't be matched across them
     parentheses: matchDelimiters(text, "(", ")", true),
   };
   const definitions = findDefinitions(text, isLiteral, delimiters.parentheses);
@@ -569,7 +561,7 @@ function findImageTags(text: string, isLiteral: (index: number) => boolean): Ima
     }
 
     const url = tag.src === undefined ? undefined : decodeEscapes(tag.src, HTML_URL_ESCAPE_REGEX);
-    if (url && /^https?:\/\//.test(url)) {
+    if (url) {
       images.push({ start, end: tag.end, url, render: uploadedUrl => `![](${uploadedUrl})` });
     }
 
@@ -588,16 +580,26 @@ export function findImages(text: string): Image[] {
   const codeRanges = findCodeRanges(text);
   const isLiteral = (index: number) => isBackslashEscaped(text, index) || inRanges(index, codeRanges);
 
-  const candidates = [...findMarkdownImages(text, isLiteral), ...findImageTags(text, isLiteral)].sort(
-    (a, b) => a.start - b.start
-  );
-
-  // Drop images nested in another one, such as an image tag in a markdown image's alt text
-  const images: Image[] = [];
-  for (const image of candidates) {
-    if (image.start >= (images.at(-1)?.end ?? 0)) {
-      images.push(image);
+  // Drop markdown images nested in another one, such as in its alt text
+  const markdownImages: Image[] = [];
+  for (const image of findMarkdownImages(text, isLiteral)) {
+    if (image.start >= (markdownImages.at(-1)?.end ?? 0)) {
+      markdownImages.push(image);
     }
   }
-  return images;
+
+  // Linear shows image tags as text, so markdown images in their attributes render. Drop the tags that overlap them
+  // instead, such as tags in a markdown image's alt text.
+  const tags: Image[] = [];
+  let next = 0;
+  for (const tag of findImageTags(text, isLiteral)) {
+    while (next < markdownImages.length && markdownImages[next].end <= tag.start) {
+      next++;
+    }
+    if (next === markdownImages.length || markdownImages[next].start >= tag.end) {
+      tags.push(tag);
+    }
+  }
+
+  return [...markdownImages, ...tags].sort((a, b) => a.start - b.start);
 }
