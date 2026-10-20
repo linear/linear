@@ -109,6 +109,12 @@ describe("replaceImagesInMarkdown", () => {
     expect(result).toBe(`\\\\![alt](${UPLOADED_URL})`);
   });
 
+  it("keeps a ! right before an image", async () => {
+    const result = await replaceImagesInMarkdown(client, "Look!![one](https://example.com/1.png)");
+
+    expect(result).toBe(`Look!![one](${UPLOADED_URL})`);
+  });
+
   it.each([
     ["tables", "| a | b |\n|---|---|\n| x | ![one](https://example.com/1.png) |\n"],
     ["lists", "- item ![one](https://example.com/1.png)\n- next\n"],
@@ -194,6 +200,19 @@ describe("replaceImagesInMarkdown", () => {
     expect(result).toBe(markdown);
   });
 
+  it("processes nested images that fail to upload in linear time", async () => {
+    imageUploadFromUrl.mockRejectedValue(new Error("Failed to download image"));
+    const markdown = `${"![".repeat(100_000)}a${"](https://example.com/a.png)".repeat(100_000)}`;
+
+    // Quadratic parsing takes several seconds or more for this much text
+    const start = performance.now();
+    const result = await replaceImagesInMarkdown(client, markdown);
+    expect(performance.now() - start).toBeLessThan(1000);
+
+    expect(imageUploadFromUrl).toHaveBeenCalledTimes(1);
+    expect(result.startsWith("[\\!\\[")).toBe(true);
+  });
+
   it.each([
     ["links", "[PDF](https://example.com/file.pdf)"],
     ["escaped image markers", "\\![literal](https://example.com/a.png)"],
@@ -233,43 +252,91 @@ describe("replaceImagesInMarkdown", () => {
   });
 
   it.each([
-    ["images", "![one](https://example.com/1.png)"],
-    ["images with parentheses in their URL", "![Screenshot](https://example.com/Screen%20Shot%20(1).png) after"],
-    ["images with a title", '![Image](https://example.com/a.png "Preview")'],
-    ["images in tables", "| a | ![one](https://example.com/1.png) |"],
-    ["image tags", '<img width="100" src="https://example.com/2.png" alt="two">'],
-  ])("leaves %s untouched when the upload fails", async (_, markdown) => {
+    ["images", "![one](https://example.com/1.png)", "[one](https://example.com/1.png)"],
+    [
+      "images with parentheses in their URL",
+      "![Screenshot](https://example.com/Screen%20Shot%20(1).png) after",
+      "[Screenshot](https://example.com/Screen%20Shot%20(1).png) after",
+    ],
+    [
+      "images with a title",
+      '![Image](https://example.com/a.png "Preview")',
+      '[Image](https://example.com/a.png "Preview")',
+    ],
+    ["images in angle brackets", "![a](<https://example.com/a b.png>)", "[a](<https://example.com/a b.png>)"],
+    ["images in tables", "| a | ![one](https://example.com/1.png) |", "| a | [one](https://example.com/1.png) |"],
+    ["images after a !", "Look!![one](https://example.com/1.png)", "Look\\![one](https://example.com/1.png)"],
+    [
+      "images after an escaped !",
+      "Look\\!![one](https://example.com/1.png)",
+      "Look\\![one](https://example.com/1.png)",
+    ],
+    [
+      "images without alt text",
+      "![](https://example.com/1.png)",
+      String.raw`[https\:\/\/example\.com\/1\.png](https://example.com/1.png)`,
+    ],
+    [
+      "images with blank alt text",
+      "![ ](https://example.com/1.png)",
+      String.raw`[https\:\/\/example\.com\/1\.png](https://example.com/1.png)`,
+    ],
+  ])("turns %s into links when the upload fails", async (_, markdown, expected) => {
     imageUploadFromUrl.mockRejectedValue(new Error("Failed to download image"));
 
     const result = await replaceImagesInMarkdown(client, markdown, authenticateUrl);
 
     expect(imageUploadFromUrl).toHaveBeenCalledWith(expect.stringContaining("?token=secret"));
+    expect(result).toBe(expected);
+  });
+
+  it("escapes the alt text of images that fail to upload, so that images and links in it don't render", async () => {
+    imageUploadFromUrl.mockRejectedValue(new Error("Failed to download image"));
+
+    const result = await replaceImagesInMarkdown(
+      client,
+      "![a ![b](https://example.com/b.png) <img src=https://example.com/c.png> \\] &amp; *d*](https://example.com/a.png)"
+    );
+
+    expect(imageUploadFromUrl.mock.calls).toEqual([["https://example.com/a.png"]]);
+    expect(result).toBe(
+      String.raw`[a \!\[b\]\(https\:\/\/example\.com\/b\.png\) \<img src\=https\:\/\/example\.com\/c\.png\> \] \& \*d\*](https://example.com/a.png)`
+    );
+  });
+
+  it("leaves image tags untouched when the upload fails, since Linear shows them as text", async () => {
+    imageUploadFromUrl.mockRejectedValue(new Error("Failed to download image"));
+    const markdown = '<img width="100" src="https://example.com/2.png" alt="two">';
+
+    const result = await replaceImagesInMarkdown(client, markdown, authenticateUrl);
+
+    expect(imageUploadFromUrl).toHaveBeenCalledWith("https://example.com/2.png?token=secret");
     expect(result).toBe(markdown);
   });
 
-  it("leaves images untouched when the upload returns no URL", async () => {
+  it("turns images into links when the upload returns no URL", async () => {
     imageUploadFromUrl.mockResolvedValue({ success: true });
 
     const result = await replaceImagesInMarkdown(client, "![one](https://example.com/1.png)", authenticateUrl);
 
-    expect(result).toBe("![one](https://example.com/1.png)");
+    expect(result).toBe("[one](https://example.com/1.png)");
   });
 
-  it.each([false, undefined])(
-    "leaves images untouched when success is %s even if the upload returns a URL",
-    async success => {
-      imageUploadFromUrl.mockImplementation(async (url: string) => ({ success, url }));
-      const markdown = '![one](https://example.com/1.png) <img src="https://example.com/2.png">';
+  it.each([false, undefined])("doesn't use the returned URL when success is %s", async success => {
+    imageUploadFromUrl.mockImplementation(async (url: string) => ({ success, url }));
 
-      const result = await replaceImagesInMarkdown(client, markdown, authenticateUrl);
+    const result = await replaceImagesInMarkdown(
+      client,
+      '![one](https://example.com/1.png) <img src="https://example.com/2.png">',
+      authenticateUrl
+    );
 
-      expect(imageUploadFromUrl).toHaveBeenCalledWith("https://example.com/1.png?token=secret");
-      expect(imageUploadFromUrl).toHaveBeenCalledWith("https://example.com/2.png?token=secret");
-      expect(result).toBe(markdown);
-    }
-  );
+    expect(imageUploadFromUrl).toHaveBeenCalledWith("https://example.com/1.png?token=secret");
+    expect(imageUploadFromUrl).toHaveBeenCalledWith("https://example.com/2.png?token=secret");
+    expect(result).toBe('[one](https://example.com/1.png) <img src="https://example.com/2.png">');
+  });
 
-  it("only replaces the images that uploaded", async () => {
+  it("only replaces the images that uploaded, and turns the others into links", async () => {
     imageUploadFromUrl.mockImplementation(async (url: string) => {
       if (url.includes("fail")) {
         throw new Error("Failed to download image");
@@ -283,6 +350,6 @@ describe("replaceImagesInMarkdown", () => {
       authenticateUrl
     );
 
-    expect(result).toBe(`![a](https://example.com/fail.png) ![b](${UPLOADED_URL}) ![c](https://example.com/fail.png)`);
+    expect(result).toBe(`[a](https://example.com/fail.png) ![b](${UPLOADED_URL}) [c](https://example.com/fail.png)`);
   });
 });

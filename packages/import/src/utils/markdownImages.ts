@@ -1,7 +1,8 @@
 // Character references decoded in URLs: numeric ones, and the named ones for the characters that HTML escapes
 const HTML_URL_ESCAPE_REGEX = /&(?:#\d{1,7}|#[xX][\da-fA-F]{1,6}|amp|lt|gt|quot|apos);/g;
-// Markdown URLs can also escape ASCII punctuation with a backslash
-const MARKDOWN_URL_ESCAPE_REGEX = /\\[!-/:-@[-`{-~]|&(?:#\d{1,7}|#[xX][\da-fA-F]{1,6}|amp|lt|gt|quot|apos);/g;
+// Markdown can also escape ASCII punctuation with a backslash
+const MARKDOWN_ESCAPE_REGEX = /\\[!-/:-@[-`{-~]|&(?:#\d{1,7}|#[xX][\da-fA-F]{1,6}|amp|lt|gt|quot|apos);/g;
+const ASCII_PUNCTUATION_REGEX = /[!-/:-@[-`{-~]/g;
 
 const NAMED_CHARACTER_REFERENCES: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'" };
 
@@ -16,6 +17,11 @@ export interface Image {
   url: string;
   /** Renders the image pointing to the uploaded URL. */
   render: (uploadedUrl: string) => string;
+  /**
+   * Renders a link to the source image, which doesn't load it, for images that fail to upload. Image tags don't have
+   * one, since Linear doesn't render HTML and shows them as text.
+   */
+  renderLink?: () => string;
 }
 
 /** Indexes of the closing delimiter matching each opening delimiter, by index of the opening delimiter. */
@@ -201,9 +207,9 @@ function findMarkdownImageTitleEnd(text: string, start: number): number | undefi
   return undefined;
 }
 
-/** Decodes the escapes matched by `escapeRegex` in a URL, as markdown and HTML renderers do. */
-function decodeUrl(url: string, escapeRegex: RegExp): string {
-  return url.replace(escapeRegex, escape => {
+/** Decodes the escapes matched by `escapeRegex`, as markdown and HTML renderers do. */
+function decodeEscapes(text: string, escapeRegex: RegExp): string {
+  return text.replace(escapeRegex, escape => {
     if (escape.startsWith("\\")) {
       return escape.slice(1);
     }
@@ -241,13 +247,29 @@ function parseMarkdownImage(text: string, start: number, delimiters: Delimiters)
     return undefined;
   }
 
+  // The image covers a `!` right before it, so that a link replacing it can escape the `!`, which would make it an image
+  const isAfterMarker = text[start - 1] === "!" && !isBackslashEscaped(text, start - 1);
+  const imageStart = isAfterMarker ? start - 1 : start;
+  const url = decodeEscapes(text.slice(urlStart, urlEnd), MARKDOWN_ESCAPE_REGEX);
+
   // Only replace the URL, to keep the alt text and title, and to keep images inside tables and lists
   return {
-    start,
+    start: imageStart,
     end,
-    url: decodeUrl(text.slice(urlStart, urlEnd), MARKDOWN_URL_ESCAPE_REGEX),
-    render: uploadedUrl => `${text.slice(start, urlStart)}${uploadedUrl}${text.slice(urlEnd, end)}`,
+    url,
+    render: uploadedUrl => `${text.slice(imageStart, urlStart)}${uploadedUrl}${text.slice(urlEnd, end)}`,
+    renderLink: () => {
+      // Decoded here rather than for every image, since the alt texts of nested images overlap. The link text escapes
+      // it, so that images and links in it don't render.
+      const alt = decodeEscapes(text.slice(start + 2, altEnd), MARKDOWN_ESCAPE_REGEX);
+      return `${isAfterMarker ? "\\!" : ""}[${escapeMarkdown(alt.trim() ? alt : url)}${text.slice(altEnd, end)}`;
+    },
   };
+}
+
+/** Escapes every ASCII punctuation character, so that markdown shows the text as is. */
+function escapeMarkdown(text: string): string {
+  return text.replace(ASCII_PUNCTUATION_REGEX, "\\$&");
 }
 
 function findMarkdownImages(text: string, isLiteral: (index: number) => boolean): Image[] {
@@ -329,7 +351,7 @@ function findImageTags(text: string, isLiteral: (index: number) => boolean): Ima
       break;
     }
 
-    const url = tag.src === undefined ? undefined : decodeUrl(tag.src, HTML_URL_ESCAPE_REGEX);
+    const url = tag.src === undefined ? undefined : decodeEscapes(tag.src, HTML_URL_ESCAPE_REGEX);
     if (url && /^https?:\/\//.test(url)) {
       images.push({ start, end: tag.end, url, render: uploadedUrl => `![](${uploadedUrl})` });
     }

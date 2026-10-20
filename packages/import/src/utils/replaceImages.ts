@@ -6,7 +6,9 @@ import { findImages } from "./markdownImages.ts";
  * Replace markdown image URLs with Linear uploaded ones.
  *
  * Also supports image tags used by GitHub. Images inside code spans and code blocks, and escaped
- * image markers, don't render as images so they are left as-is. So are images that fail to upload.
+ * image markers, don't render as images so they are left as-is. Markdown images that fail to upload
+ * become links to the source image, so that viewing the content doesn't load it from the source.
+ * Image tags that fail to upload are left as-is, since Linear shows HTML as text.
  *
  * @param client Linear API client.
  * @param text Markdown content.
@@ -25,8 +27,9 @@ export const replaceImagesInMarkdown = async (
   let cursor = 0;
   images.forEach((image, index) => {
     const uploadedUrl = uploadedUrls[index];
-    if (uploadedUrl) {
-      result += text.slice(cursor, image.start) + image.render(uploadedUrl);
+    const replacement = uploadedUrl ? image.render(uploadedUrl) : image.renderLink?.();
+    if (replacement !== undefined) {
+      result += text.slice(cursor, image.start) + replacement;
       cursor = image.end;
     }
   });
