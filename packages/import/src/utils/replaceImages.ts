@@ -5,10 +5,11 @@ import { findImages } from "./markdownImages.ts";
 /**
  * Replace markdown image URLs with Linear uploaded ones.
  *
- * Also supports image tags used by GitHub. Images inside code spans and code blocks, and escaped
- * image markers, don't render as images so they are left as-is. Markdown images that fail to upload
- * become links to the source image, so that viewing the content doesn't load it from the source.
- * Image tags that fail to upload are left as-is, since Linear shows HTML as text.
+ * Also supports reference images such as `![alt][label]`, which become inline images, and image tags
+ * used by GitHub. Images inside code spans and code blocks, and escaped image markers, don't render
+ * as images so they are left as-is. Markdown images that fail to upload become links to the source
+ * image, so that viewing the content doesn't load it from the source. Image tags that fail to upload
+ * are left as-is, since Linear shows HTML as text.
  *
  * @param client Linear API client.
  * @param text Markdown content.

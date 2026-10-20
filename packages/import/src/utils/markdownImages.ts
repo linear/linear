@@ -8,6 +8,15 @@ const NAMED_CHARACTER_REFERENCES: Record<string, string> = { amp: "&", lt: "<", 
 
 const TITLE_CLOSING_DELIMITERS: Record<string, string | undefined> = { '"': '"', "'": "'", "(": ")" };
 
+// Blockquote and list item markers at the start of a line, and the indentation around them
+const CONTAINER_PREFIX_REGEX = /(?:[ \t]*(?:>|(?:[-+*]|\d{1,9}[.)])(?=[ \t])))*[ \t]*/y;
+// Whitespace separating the parts of a link reference definition, which can include one line ending
+const DEFINITION_WHITESPACE_REGEX = /[ \t]*(?:\r?\n[ \t]*)?/y;
+// Whitespace until the end of the line
+const BLANK_LINE_END_REGEX = /[ \t\r]*(?=\n|$)/y;
+// Lines that end a paragraph, after which a link reference definition can start: ATX headings and code fences
+const PARAGRAPH_END_REGEX = /^(?:#{1,6}(?:[ \t]|$)|`{3,}|~{3,})/;
+
 export interface Image {
   /** Index of the first character of the image in the text. */
   start: number;
@@ -28,6 +37,25 @@ export interface Image {
 interface Delimiters {
   brackets: Map<number, number>;
   parentheses: Map<number, number>;
+}
+
+/** A link reference definition `[label]: url "title"`, which reference images can use. */
+interface Definition {
+  url: string;
+  /** Title in quotes or parentheses, as written. */
+  title?: string;
+}
+
+/** The part of a markdown image after its alt text, which gives the URL of the image. */
+interface Destination {
+  /** Index after the last character of the image in the text. */
+  end: number;
+  /** URL of the source image. */
+  url: string;
+  /** Renders the part after the alt text pointing to the uploaded URL. */
+  render: (uploadedUrl: string) => string;
+  /** The part after the text of a link to the source image. */
+  link: string;
 }
 
 function isBackslashEscaped(text: string, index: number): boolean {
@@ -139,7 +167,7 @@ function findMarkdownImageUrlEnd(text: string, start: number, parentheses: Map<n
       return index;
     }
   }
-  return undefined;
+  return text.length;
 }
 
 /** Finds the `>` closing an image URL in angle brackets, which can't contain line breaks or unescaped `<`. */
@@ -225,44 +253,232 @@ function decodeEscapes(text: string, escapeRegex: RegExp): string {
   });
 }
 
-/** Parses a markdown image `![alt](url "title")` or `![alt](<url> "title")` starting at `start`. */
-function parseMarkdownImage(text: string, start: number, delimiters: Delimiters): Image | undefined {
-  const altEnd = delimiters.brackets.get(start + 1);
-  if (altEnd === undefined || text[altEnd + 1] !== "(") {
+/** Finds the `]` closing the link label starting at `start`, which has at most 999 characters and no unescaped brackets. */
+function findLinkLabelEnd(text: string, start: number): number | undefined {
+  for (let index = start + 1; index < text.length && index - start <= 1000; index++) {
+    const char = text[index];
+    if (char === "\\") {
+      index++;
+      continue;
+    }
+    if (char === "]") {
+      return index;
+    }
+    if (char === "[") {
+      return undefined;
+    }
+  }
+  return undefined;
+}
+
+/** Normalizes a link label so that references match definitions regardless of case and whitespace. */
+function normalizeLabel(label: string): string {
+  // Lowercasing then uppercasing approximates Unicode case folding, as the CommonMark reference implementation does
+  return label
+    .replace(/[ \t\r\n]+/g, " ")
+    .trim()
+    .toLowerCase()
+    .toUpperCase();
+}
+
+function skipDefinitionWhitespace(text: string, start: number): number {
+  DEFINITION_WHITESPACE_REGEX.lastIndex = start;
+  DEFINITION_WHITESPACE_REGEX.test(text);
+  return DEFINITION_WHITESPACE_REGEX.lastIndex;
+}
+
+/** Finds the end of the line if only whitespace follows `start` on it. */
+function findBlankLineEnd(text: string, start: number): number | undefined {
+  BLANK_LINE_END_REGEX.lastIndex = start;
+  return BLANK_LINE_END_REGEX.test(text) ? BLANK_LINE_END_REGEX.lastIndex : undefined;
+}
+
+/**
+ * Parses a link reference definition `[label]: url "title"` or `[label]: <url> "title"` starting at `start`.
+ *
+ * @returns The definition, with its normalized label and the index of the end of its last line
+ */
+function parseDefinition(
+  text: string,
+  start: number,
+  parentheses: Map<number, number>
+): (Definition & { label: string; end: number }) | undefined {
+  const labelEnd = findLinkLabelEnd(text, start);
+  if (labelEnd === undefined || text[labelEnd + 1] !== ":") {
+    return undefined;
+  }
+  const label = normalizeLabel(text.slice(start + 1, labelEnd));
+  if (!label) {
+    return undefined;
+  }
+
+  const destinationStart = skipDefinitionWhitespace(text, labelEnd + 2);
+  const bracketed = text[destinationStart] === "<";
+  const urlStart = bracketed ? destinationStart + 1 : destinationStart;
+  const urlEnd = bracketed ? findBracketedUrlEnd(text, urlStart) : findMarkdownImageUrlEnd(text, urlStart, parentheses);
+  if (urlEnd === undefined || (!bracketed && urlEnd === urlStart)) {
+    return undefined;
+  }
+  const destinationEnd = bracketed ? urlEnd + 1 : urlEnd;
+  const url = decodeEscapes(text.slice(urlStart, urlEnd), MARKDOWN_ESCAPE_REGEX);
+
+  // A title is separated from the URL by whitespace, and ends its line
+  const titleStart = skipDefinitionWhitespace(text, destinationEnd);
+  const titleEnd = titleStart > destinationEnd ? findMarkdownImageTitleEnd(text, titleStart) : undefined;
+  const titleLineEnd = titleEnd === undefined ? undefined : findBlankLineEnd(text, titleEnd);
+  if (titleEnd !== undefined && titleLineEnd !== undefined) {
+    return { label, url, title: text.slice(titleStart, titleEnd), end: titleLineEnd };
+  }
+
+  // Without a title, the URL ends its line
+  const lineEnd = findBlankLineEnd(text, destinationEnd);
+  return lineEnd === undefined ? undefined : { label, url, end: lineEnd };
+}
+
+/**
+ * Finds the link reference definitions, by normalized label.
+ *
+ * Definitions can't interrupt a paragraph, so they start the text, a list item or a blockquote, or follow a blank line,
+ * a heading, a code fence or another definition.
+ */
+function findDefinitions(
+  text: string,
+  isLiteral: (index: number) => boolean,
+  parentheses: Map<number, number>
+): Map<string, Definition> {
+  const definitions = new Map<string, Definition>();
+  let canStart = true;
+  let previousQuoteDepth = 0;
+  for (let lineStart = 0; lineStart < text.length;) {
+    CONTAINER_PREFIX_REGEX.lastIndex = lineStart;
+    const prefix = CONTAINER_PREFIX_REGEX.exec(text)?.[0] ?? "";
+    const contentStart = lineStart + prefix.length;
+    const quoteDepth = prefix.split(">").length - 1;
+
+    // A list item or a blockquote can interrupt a paragraph. The prefix has a list marker if it has anything other than
+    // whitespace and blockquote markers.
+    const startsBlock = canStart || /[^ \t>]/.test(prefix) || quoteDepth > previousQuoteDepth;
+    previousQuoteDepth = quoteDepth;
+    const definition =
+      startsBlock && text[contentStart] === "[" && !isLiteral(contentStart)
+        ? parseDefinition(text, contentStart, parentheses)
+        : undefined;
+    if (definition) {
+      // The first definition of a label is the one that applies
+      if (!definitions.has(definition.label)) {
+        definitions.set(definition.label, { url: definition.url, title: definition.title });
+      }
+      canStart = true;
+      lineStart = definition.end + 1;
+      continue;
+    }
+
+    const newline = text.indexOf("\n", contentStart);
+    const lineEnd = newline === -1 ? text.length : newline;
+    const content = text.slice(contentStart, lineEnd).trim();
+    canStart = !content || PARAGRAPH_END_REGEX.test(content);
+    lineStart = lineEnd + 1;
+  }
+  return definitions;
+}
+
+/** Parses the `(url "title")` or `(<url> "title")` after the alt text of an image ending at `altEnd`. */
+function parseInlineDestination(
+  text: string,
+  altEnd: number,
+  parentheses: Map<number, number>
+): Destination | undefined {
+  if (text[altEnd + 1] !== "(") {
     return undefined;
   }
 
   const destinationStart = skipWhitespace(text, altEnd + 2);
   const bracketed = text[destinationStart] === "<";
   const urlStart = bracketed ? destinationStart + 1 : destinationStart;
-  if (!text.startsWith("http://", urlStart) && !text.startsWith("https://", urlStart)) {
+  const urlEnd = bracketed ? findBracketedUrlEnd(text, urlStart) : findMarkdownImageUrlEnd(text, urlStart, parentheses);
+  const end = urlEnd === undefined ? undefined : findMarkdownImageEnd(text, bracketed ? urlEnd + 1 : urlEnd);
+  if (urlEnd === undefined || end === undefined) {
     return undefined;
   }
 
-  const urlEnd = bracketed
-    ? findBracketedUrlEnd(text, urlStart)
-    : findMarkdownImageUrlEnd(text, urlStart, delimiters.parentheses);
-  const end = urlEnd === undefined ? undefined : findMarkdownImageEnd(text, bracketed ? urlEnd + 1 : urlEnd);
-  if (urlEnd === undefined || end === undefined) {
+  // Only replace the URL, to keep the title
+  return {
+    end,
+    url: decodeEscapes(text.slice(urlStart, urlEnd), MARKDOWN_ESCAPE_REGEX),
+    render: uploadedUrl => `${text.slice(altEnd + 1, urlStart)}${uploadedUrl}${text.slice(urlEnd, end)}`,
+    link: text.slice(altEnd + 1, end),
+  };
+}
+
+/**
+ * Parses the reference after the alt text of an image starting at `start` and ending at `altEnd`: a label `[label]`,
+ * or `[]` or nothing to use the alt text as the label.
+ */
+function parseReference(
+  text: string,
+  start: number,
+  altEnd: number,
+  definitions: Map<string, Definition>
+): Destination | undefined {
+  const labelEnd = text[altEnd + 1] === "[" ? findLinkLabelEnd(text, altEnd + 1) : undefined;
+  const hasLabel = labelEnd !== undefined && labelEnd > altEnd + 2;
+  // The alt text can only be used as a label if it is a valid label, without brackets
+  if (!hasLabel && findLinkLabelEnd(text, start + 1) !== altEnd) {
+    return undefined;
+  }
+
+  const label = hasLabel ? text.slice(altEnd + 2, labelEnd) : text.slice(start + 2, altEnd);
+  const definition = definitions.get(normalizeLabel(label));
+  if (!definition) {
+    return undefined;
+  }
+
+  // The uploaded image is inline, since the definition may be used by links too
+  return {
+    end: (labelEnd ?? altEnd) + 1,
+    url: definition.url,
+    render: uploadedUrl => `(${uploadedUrl}${definition.title ? ` ${definition.title}` : ""})`,
+    link: `[${label}]`,
+  };
+}
+
+/**
+ * Parses a markdown image starting at `start`: an inline image `![alt](url "title")`, or a reference image
+ * `![alt][label]`, `![alt][]` or `![alt]` using a definition `[label]: url "title"`.
+ */
+function parseMarkdownImage(
+  text: string,
+  start: number,
+  delimiters: Delimiters,
+  definitions: Map<string, Definition>
+): Image | undefined {
+  const altEnd = delimiters.brackets.get(start + 1);
+  if (altEnd === undefined) {
+    return undefined;
+  }
+
+  // An image is a reference when it isn't followed by a valid inline destination
+  const destination =
+    parseInlineDestination(text, altEnd, delimiters.parentheses) ?? parseReference(text, start, altEnd, definitions);
+  if (!destination || !/^https?:\/\//.test(destination.url)) {
     return undefined;
   }
 
   // The image covers a `!` right before it, so that a link replacing it can escape the `!`, which would make it an image
   const isAfterMarker = text[start - 1] === "!" && !isBackslashEscaped(text, start - 1);
   const imageStart = isAfterMarker ? start - 1 : start;
-  const url = decodeEscapes(text.slice(urlStart, urlEnd), MARKDOWN_ESCAPE_REGEX);
 
-  // Only replace the URL, to keep the alt text and title, and to keep images inside tables and lists
+  // Keep the alt text, and keep images inside tables and lists
   return {
     start: imageStart,
-    end,
-    url,
-    render: uploadedUrl => `${text.slice(imageStart, urlStart)}${uploadedUrl}${text.slice(urlEnd, end)}`,
+    end: destination.end,
+    url: destination.url,
+    render: uploadedUrl => `${text.slice(imageStart, altEnd + 1)}${destination.render(uploadedUrl)}`,
     renderLink: () => {
       // Decoded here rather than for every image, since the alt texts of nested images overlap. The link text escapes
       // it, so that images and links in it don't render.
       const alt = decodeEscapes(text.slice(start + 2, altEnd), MARKDOWN_ESCAPE_REGEX);
-      return `${isAfterMarker ? "\\!" : ""}[${escapeMarkdown(alt.trim() ? alt : url)}${text.slice(altEnd, end)}`;
+      return `${isAfterMarker ? "\\!" : ""}[${escapeMarkdown(alt.trim() ? alt : destination.url)}]${destination.link}`;
     },
   };
 }
@@ -278,10 +494,11 @@ function findMarkdownImages(text: string, isLiteral: (index: number) => boolean)
     // Whitespace ends a URL, so parentheses in a URL can't be matched across it
     parentheses: matchDelimiters(text, "(", ")", true),
   };
+  const definitions = findDefinitions(text, isLiteral, delimiters.parentheses);
 
   const images: Image[] = [];
   for (let start = text.indexOf("!["); start !== -1; start = text.indexOf("![", start + 1)) {
-    const image = isLiteral(start) ? undefined : parseMarkdownImage(text, start, delimiters);
+    const image = isLiteral(start) ? undefined : parseMarkdownImage(text, start, delimiters, definitions);
     if (image) {
       images.push(image);
     }
