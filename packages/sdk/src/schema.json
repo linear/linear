@@ -6141,7 +6141,17 @@
           },
           {
             "kind": "OBJECT",
+            "name": "AiConversationCodeModeToolCall",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
             "name": "AiConversationContactSupportToolCall",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "AiConversationCreateAgentChatToolCall",
             "ofType": null
           },
           {
@@ -6202,6 +6212,11 @@
           {
             "kind": "OBJECT",
             "name": "AiConversationMemoryToolCall",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "AiConversationMessageSubagentToolCall",
             "ofType": null
           },
           {
@@ -6708,8 +6723,120 @@
       },
       {
         "kind": "OBJECT",
+        "name": "AiConversationCodeModeToolCall",
+        "description": null,
+        "fields": [
+          {
+            "name": "args",
+            "description": "The arguments to the tool call.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "AiConversationCodeModeToolCallArgs",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "displayInfo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AiConversationToolDisplayInfo",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "The name of the tool that was called.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "AiConversationTool",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rawArgs",
+            "description": "The arguments of the tool call.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rawResult",
+            "description": "The result of the tool call.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "AiConversationBaseToolCall",
+            "ofType": null
+          }
+        ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AiConversationCodeModeToolCallArgs",
+        "description": null,
+        "fields": [
+          {
+            "name": "description",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "AiConversationConfirmationElicitationResponseData",
-        "description": "The affirmative response recorded for a confirmation elicitation.",
+        "description": "The response recorded for a confirmation elicitation.",
         "fields": [
           {
             "name": "confirmed",
@@ -6819,6 +6946,130 @@
             "ofType": null
           }
         ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AiConversationCreateAgentChatToolCall",
+        "description": null,
+        "fields": [
+          {
+            "name": "args",
+            "description": "The arguments to the tool call.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "displayInfo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AiConversationToolDisplayInfo",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "The name of the tool that was called.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "AiConversationTool",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rawArgs",
+            "description": "The arguments of the tool call.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rawResult",
+            "description": "The result of the tool call.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "result",
+            "description": "The result of the tool call.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "AiConversationCreateAgentChatToolCallResult",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "AiConversationBaseToolCall",
+            "ofType": null
+          }
+        ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AiConversationCreateAgentChatToolCallResult",
+        "description": null,
+        "fields": [
+          {
+            "name": "conversationId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -10489,6 +10740,185 @@
             "deprecationReason": null
           }
         ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AiConversationMessageSubagentToolCall",
+        "description": null,
+        "fields": [
+          {
+            "name": "args",
+            "description": "The arguments to the tool call.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "AiConversationMessageSubagentToolCallArgs",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "displayInfo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AiConversationToolDisplayInfo",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "The name of the tool that was called.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "AiConversationTool",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rawArgs",
+            "description": "The arguments of the tool call.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rawResult",
+            "description": "The result of the tool call.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "result",
+            "description": "The result of the tool call.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "AiConversationMessageSubagentToolCallResult",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "AiConversationBaseToolCall",
+            "ofType": null
+          }
+        ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AiConversationMessageSubagentToolCallArgs",
+        "description": null,
+        "fields": [
+          {
+            "name": "conversationId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "prompt",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "wait",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AiConversationMessageSubagentToolCallResult",
+        "description": null,
+        "fields": [
+          {
+            "name": "turnId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
         "possibleTypes": null
       },
       {
@@ -16008,7 +16438,19 @@
             "deprecationReason": null
           },
           {
+            "name": "CodeMode",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "ContactSupport",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "CreateAgentChat",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -16081,6 +16523,12 @@
           },
           {
             "name": "Memory",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "MessageSubagent",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -16325,7 +16773,17 @@
           },
           {
             "kind": "OBJECT",
+            "name": "AiConversationCodeModeToolCall",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
             "name": "AiConversationContactSupportToolCall",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "AiConversationCreateAgentChatToolCall",
             "ofType": null
           },
           {
@@ -16386,6 +16844,11 @@
           {
             "kind": "OBJECT",
             "name": "AiConversationMemoryToolCall",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "AiConversationMessageSubagentToolCall",
             "ofType": null
           },
           {
@@ -18346,7 +18809,7 @@
       {
         "kind": "ENUM",
         "name": "AiPromptType",
-        "description": "[Internal] The type of AI prompt workflow.",
+        "description": "The type of AI prompt workflow.",
         "fields": null,
         "inputFields": null,
         "interfaces": null,
@@ -23025,6 +23488,35 @@
         "possibleTypes": null
       },
       {
+        "kind": "ENUM",
+        "name": "CodingSessionsDisabledReason",
+        "description": "A reason the workspace cannot trust content from the authenticated OAuth application for Coding Sessions.",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "APP_NOT_TRUSTED",
+            "description": "Coding Sessions and trusted external sources are available, but the application's source is not approved or is no longer available in the workspace.",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "CODING_SESSIONS_DISABLED",
+            "description": "Coding Sessions or Linear Agent are disabled in the workspace, or the workspace's plan does not support Coding Sessions.",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "TRUSTED_EXTERNAL_SOURCES_UNAVAILABLE",
+            "description": "Coding Sessions are enabled, but the workspace cannot use trusted external sources.",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "Comment",
         "description": "A comment associated with an issue, project update, initiative update, document content, post, project, or initiative. Comments support rich text (ProseMirror), emoji reactions, and threaded replies via parentId. Comments can be created by workspace users or by external users through integrations (e.g., Slack, Intercom). Each comment belongs to exactly one parent entity.",
@@ -24644,6 +25136,30 @@
           {
             "name": "initiativeUpdateId",
             "description": "The initiative update to associate the comment with.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "inlineAnchorFrom",
+            "description": "[Internal] Where the commented text starts, as a base64-encoded Y.js relative position created on the commenter's copy of the document content. Requires `inlineAnchorTo` and `documentContentId`.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "inlineAnchorTo",
+            "description": "[Internal] Where the commented text ends, as a base64-encoded Y.js relative position created on the commenter's copy of the document content. Requires `inlineAnchorFrom` and `documentContentId`.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -42189,8 +42705,20 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "comment",
+            "description": "The user can read and comment on the document but not edit it.",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "edit",
             "description": "The user can read, edit, and comment on the document.",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "view",
+            "description": "The user can read the document but not edit or comment on it.",
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -62563,6 +63091,18 @@
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "OpsgenieInput",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "origin",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "OriginSettingsInput",
               "ofType": null
             },
             "defaultValue": null,
@@ -88698,7 +89238,7 @@
           },
           {
             "name": "documentShare",
-            "description": "[Internal] Shares a personal document and its sub-documents with workspace members. Only the owner of the document can share it. New collaborators are subscribed to the document.",
+            "description": "[Internal] Shares a personal document and its sub-documents with workspace members at a role. Only the owner of the document can share it. New collaborators are subscribed to the document. Users who already have another role move to the given one.",
             "args": [
               {
                 "name": "id",
@@ -88718,7 +89258,7 @@
               },
               {
                 "name": "role",
-                "description": "The role of the new collaborators.",
+                "description": "The role of the collaborators. Defaults to edit.",
                 "type": {
                   "kind": "ENUM",
                   "name": "DocumentShareRole",
@@ -88886,6 +89426,176 @@
                     "name": "DocumentUpdateInput",
                     "ofType": null
                   }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DocumentPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentUpdateCollaboratorRole",
+            "description": "[Internal] Changes the role of users a personal document is shared with. Only the owner of the document can change roles. Only users who already collaborate on the document change; no one is added. With applyToSubDocuments, sub-documents where a user has the role they had on this document before the change are also changed.",
+            "args": [
+              {
+                "name": "applyToSubDocuments",
+                "description": "Whether to also change the sub-documents where each user has the role they had on this document before the change. Sub-documents where they have a different role keep it.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": "false",
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "id",
+                "description": "The identifier of the personal document.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "previousRole",
+                "description": "The role the users had on this document when the change was confirmed. When given, the change fails if any of the users has another role on the document now.",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "DocumentShareRole",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "role",
+                "description": "The new role of the collaborators.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "ENUM",
+                    "name": "DocumentShareRole",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "userIds",
+                "description": "The identifiers of the collaborators whose role changes.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DocumentPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentUpdateGeneralAccess",
+            "description": "[Internal] Changes what users other than the owner can do with a document that is not personal: edit, comment, or view. Only the owner of the document or a workspace admin can change it. Comment and view need an owner who can access the document.",
+            "args": [
+              {
+                "name": "applyToSubDocuments",
+                "description": "Whether to also change the sub-documents whose level equals the document's level before the change. Sub-documents with another level, without an owner who can access them, or that the user cannot loosen keep their level.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": "false",
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "generalAccess",
+                "description": "The new general access level: edit, comment, or view.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "id",
+                "description": "The identifier of the document.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "previousGeneralAccess",
+                "description": "The general access level of this document when the change was confirmed. When given, the change fails if the document has another level now.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
                 },
                 "defaultValue": null,
                 "isDeprecated": false,
@@ -111333,6 +112043,45 @@
         "possibleTypes": null
       },
       {
+        "kind": "OBJECT",
+        "name": "OAuthApplicationCodingSessionTrustedSource",
+        "description": "The authenticated OAuth application's trusted-source status for Coding Sessions in the token's workspace. Combines workspace availability with the application's trust setting. This status does not grant permissions or account for team and repository access.",
+        "fields": [
+          {
+            "name": "disabledReason",
+            "description": "The first reason that enabled is false, or null when enabled is true. Checks run in this order: workspace availability, trusted external source availability, then application approval.",
+            "args": [],
+            "type": {
+              "kind": "ENUM",
+              "name": "CodingSessionsDisabledReason",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "enabled",
+            "description": "Whether Coding Sessions are available and enabled in the workspace, trusted external sources are available, and the authenticated OAuth application is trusted. A true value does not guarantee that a specific session can start.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "INPUT_OBJECT",
         "name": "OAuthApplicationCreateInput",
         "description": "Input for creating an OAuth application through the public API.",
@@ -113183,7 +113932,7 @@
           },
           {
             "name": "codingAgentSettings",
-            "description": "[Internal] Settings for Coding Sessions features.",
+            "description": "[Internal] Settings for Coding Sessions features. OAuth responses omit the trusted external source list.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -113805,7 +114554,7 @@
           },
           {
             "name": "loops",
-            "description": "Loops in the workspace that are visible to the requesting user, including team and project loops. Includes enabled and disabled loops.",
+            "description": "Loops in the workspace that are visible to the requesting user, including workspace and team loops. Includes enabled and disabled loops.",
             "args": [
               {
                 "name": "after",
@@ -113886,6 +114635,22 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "WorkflowDefinitionConnection",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "managedTeamFeatures",
+            "description": "[Internal] The teams each managed team feature is limited to, keyed by feature. The workspace's own setting for each feature still applies.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "JSONObject",
                 "ofType": null
               }
             },
@@ -116712,6 +117477,100 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "OrganizationManagedFeatureTeamInput",
+        "description": "[Internal] One team a managed team feature is limited to.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "includeSubTeams",
+            "description": "[Internal] Whether the team's sub-teams, at any depth, can use the feature too.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "teamId",
+            "description": "[Internal] The identifier of the team.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "UUID",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "OrganizationManagedTeamFeaturesInput",
+        "description": "[Internal] The teams each managed team feature is limited to in the workspace.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "codingSessions",
+            "description": "[Internal] The teams coding sessions are limited to. Omit it to not limit coding sessions by team, or pass an empty list to allow no team. `codingAgentEnabled` still turns coding sessions on or off for the workspace.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "OrganizationManagedFeatureTeamInput",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "loops",
+            "description": "[Internal] The teams Loops are limited to. Omit it to not limit Loops by team, or pass an empty list to allow no team. `agentAutomationEnabled` still turns Loops on or off for the workspace.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "OrganizationManagedFeatureTeamInput",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "OrganizationMeta",
         "description": "[INTERNAL] Workspace metadata including region and allowed authentication providers.",
@@ -116899,7 +117758,7 @@
           },
           {
             "name": "limit",
-            "description": "Effective quota limit, including workspace overrides.",
+            "description": "Effective quota limit, including workspace overrides. Scoped quotas apply this limit to each entity.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -116909,6 +117768,18 @@
                 "name": "Float",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "maxUsage",
+            "description": "[Internal] The highest usage of the quota in any team, project, or initiative, and the entity with that usage. Counts include data that the user cannot see. Null for workspace quotas, which return their usage in `usage`. The value is cached because it counts every row in the workspace. It can be up to 1 hour old for `max-issues-per-team` and `max-issues-per-project`, and up to 10 minutes old for other quotas. Changes to the data do not refresh the cache. For a current value, query `usage` with the ID of that entity.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "OrganizationQuotaMaxUsage",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -116925,6 +117796,71 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "scope",
+            "description": "The entity that the limit applies to. Workspace quotas limit the whole workspace. Team, project, and initiative quotas limit each of those entities separately. To get their usage, pass the ID of the entity to `usage`.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "OrganizationQuotaScope",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "usage",
+            "description": "[Internal] Current usage of the quota, counted with the same rules as quota enforcement. The value is not cached. Counts include data that the user cannot see. Workspace quotas ignore the arguments. Team, project, and initiative quotas return null unless you pass `teamId`, `projectId`, or `initiativeId` that matches their scope. The user must have access to that entity.",
+            "args": [
+              {
+                "name": "initiativeId",
+                "description": "The initiative to count usage for initiative quotas in.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "projectId",
+                "description": "The project to count usage for project quotas in.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "teamId",
+                "description": "The team to count usage for team quotas in.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -117062,7 +117998,7 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "OrganizationQuotaFilter",
-        "description": "Filter public workspace quotas by key.",
+        "description": "Filter public workspace quotas by key or scope.",
         "fields": null,
         "inputFields": [
           {
@@ -117116,10 +118052,96 @@
             "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "scope",
+            "description": "Comparator for the quota scope: workspace, team, project, or initiative.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "StringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "interfaces": null,
         "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "OrganizationQuotaMaxUsage",
+        "description": "The team, project, or initiative with the highest usage of a scoped quota. The limit applies to each entity, so this entity is the closest to the limit.",
+        "fields": [
+          {
+            "name": "entityId",
+            "description": "The ID of the entity with the highest usage. Null if the user cannot see the entity, if no entity uses the quota, or if workspace-level templates have the highest usage of a template quota.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "usage",
+            "description": "The usage of the quota in the entity with the highest usage.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "OrganizationQuotaScope",
+        "description": "The entity that a quota limit applies to.",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "initiative",
+            "description": "The limit applies to each initiative separately.",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "project",
+            "description": "The limit applies to each project separately.",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "team",
+            "description": "The limit applies to each team separately.",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "workspace",
+            "description": "The limit applies to the whole workspace.",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
         "possibleTypes": null
       },
       {
@@ -117773,6 +118795,18 @@
             "deprecationReason": null
           },
           {
+            "name": "managedTeamFeatures",
+            "description": "[Internal] The teams each managed team feature is limited to. Replaces the current lists, and updates each team's matching setting.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "OrganizationManagedTeamFeaturesInput",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "name",
             "description": "The name of the workspace.",
             "type": {
@@ -118175,6 +119209,29 @@
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "OriginSettingsInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "ownerSlug",
+            "description": "The slug of the Origin team or user that owns the installation.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -138003,6 +139060,18 @@
             "deprecationReason": null
           },
           {
+            "name": "externalCreator",
+            "description": "[Internal] The external user who opened the pull request, when the author is not mapped to a Linear account, such as a bot. Null if the author is a Linear user.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "ExternalUser",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "hasConflicts",
             "description": "Whether the source branch has conflicts with the target branch. When true, the conflicts must be resolved before the pull request can be merged. This is reported separately from `mergeStatus`, which describes whether the pull request is blocked by required approvals or checks.",
             "args": [],
@@ -143918,6 +144987,47 @@
             "deprecationReason": null
           },
           {
+            "name": "integrationSyncResourceIds",
+            "description": "[INTERNAL] Jira project IDs available for issue sync.",
+            "args": [
+              {
+                "name": "integrationId",
+                "description": "The workspace integration to configure.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "integrationTemplate",
             "description": "Retrieves a single integration template connection by its identifier.",
             "args": [
@@ -145629,6 +146739,22 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "OAuthApplication",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "oauthApplicationCodingSessionTrustedSource",
+            "description": "Returns the authenticated OAuth application's trusted-source status for Coding Sessions in the workspace. Requires an OAuth access token with the `read` scope.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "OAuthApplicationCodingSessionTrustedSource",
                 "ofType": null
               }
             },
@@ -160051,6 +161177,18 @@
             "deprecationReason": null
           },
           {
+            "name": "syncCommentsFromChatter",
+            "description": "Whether replies posted on the Chatter feed of a linked Salesforce case are synced back into the Linear issue's synced comment thread. Requires a managed package version that ships the Chatter feed trigger.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "url",
             "description": "The Salesforce instance URL.",
             "type": {
@@ -164874,7 +166012,7 @@
           },
           {
             "name": "agentAutomationEnabled",
-            "description": "[Internal] Whether the team has enabled agent automation.",
+            "description": "[Internal] Whether the team can use Loops. The workspace's Loops team list sets it.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -165058,7 +166196,7 @@
           },
           {
             "name": "codingAgentEnabled",
-            "description": "[Internal] Whether the team has enabled Coding Sessions.",
+            "description": "[Internal] Whether the team can use coding sessions. The workspace's coding sessions team list sets it.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -169991,18 +171129,6 @@
         "fields": null,
         "inputFields": [
           {
-            "name": "agentAutomationEnabled",
-            "description": "[Internal] Whether the team has enabled agent automation.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Boolean",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "aiDiscussionSummariesEnabled",
             "description": "Whether to enable AI discussion summaries for issues.",
             "type": {
@@ -170092,18 +171218,6 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "codingAgentEnabled",
-            "description": "[Internal] Whether the team has enabled Coding Sessions.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Boolean",
               "ofType": null
             },
             "defaultValue": null,
@@ -175532,7 +176646,24 @@
           {
             "name": "supportsAgentSessions",
             "description": "Whether this agent user supports agent sessions.",
-            "args": [],
+            "args": [
+              {
+                "name": "forCurrentUser",
+                "description": "Whether to require an active webhook for sessions started by the current user.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": "false",
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -179588,6 +180719,18 @@
             "deprecationReason": null
           },
           {
+            "name": "automationShowTemplates",
+            "description": "Whether to show templates above the workspace loops list.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "automationStatsPeriod",
             "description": "The loop stats period.",
             "args": [],
@@ -180006,6 +181149,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentFieldCollaborators",
+            "description": "[Internal] Whether to show the collaborators column in documents lists.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "isDeprecated": false,
@@ -187050,6 +188205,18 @@
               "ofType": null
             },
             "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "typeOnly",
+            "description": "Whether to sort by status type without ordering individual statuses within each type.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": "false",
             "isDeprecated": false,
             "deprecationReason": null
           }

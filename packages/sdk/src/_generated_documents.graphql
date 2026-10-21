@@ -2984,10 +2984,12 @@ fragment AiConversationPromptPart on AiConversationPromptPart {
 # A public resource quota for the current workspace.
 fragment OrganizationQuota on OrganizationQuota {
   __typename
-  # Effective quota limit, including workspace overrides.
+  # Effective quota limit, including workspace overrides. Scoped quotas apply this limit to each entity.
   limit
   # Stable quota key.
   key
+  # The entity that the limit applies to. Workspace quotas limit the whole workspace. Team, project, and initiative quotas limit each of those entities separately. To get their usage, pass the ID of the entity to `usage`.
+  scope
   # The unique identifier of the entity.
   id
   description
@@ -4552,8 +4554,14 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     ... on AiConversationCodeIntelligenceToolCall {
       ...AiConversationCodeIntelligenceToolCall
     }
+    ... on AiConversationCodeModeToolCall {
+      ...AiConversationCodeModeToolCall
+    }
     ... on AiConversationContactSupportToolCall {
       ...AiConversationContactSupportToolCall
+    }
+    ... on AiConversationCreateAgentChatToolCall {
+      ...AiConversationCreateAgentChatToolCall
     }
     ... on AiConversationCreateEntityToolCall {
       ...AiConversationCreateEntityToolCall
@@ -4590,6 +4598,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     }
     ... on AiConversationMemoryToolCall {
       ...AiConversationMemoryToolCall
+    }
+    ... on AiConversationMessageSubagentToolCall {
+      ...AiConversationMessageSubagentToolCall
     }
     ... on AiConversationNavigateToPageToolCall {
       ...AiConversationNavigateToPageToolCall
@@ -9518,13 +9529,15 @@ fragment TeamWithParentWebhookPayload on TeamWithParentWebhookPayload {
   displayName
 }
 
-# The affirmative response recorded for a confirmation elicitation.
-fragment AiConversationConfirmationElicitationResponseData on AiConversationConfirmationElicitationResponseData {
+# The authenticated OAuth application's trusted-source status for Coding Sessions in the token's
+# workspace. Combines workspace availability with the application's trust setting. This status does
+# not grant permissions or account for team and repository access.
+fragment OAuthApplicationCodingSessionTrustedSource on OAuthApplicationCodingSessionTrustedSource {
   __typename
-  # The kind of elicitation that was answered.
-  kind
-  # True when the user confirmed the action.
-  confirmed
+  # The first reason that enabled is false, or null when enabled is true. Checks run in this order: workspace availability, trusted external source availability, then application approval.
+  disabledReason
+  # Whether Coding Sessions are available and enabled in the workspace, trusted external sources are available, and the authenticated OAuth application is trusted. A true value does not guarantee that a specific session can start.
+  enabled
 }
 
 # The billing subscription of a workspace. Represents an active paid plan (e.g., Basic, Business,
@@ -9782,6 +9795,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showSupervisedIssues
   # Whether to show team-level initiatives in the workspace.
   showTeamInitiatives
+  # Whether to show templates above the workspace loops list.
+  automationShowTemplates
   # Whether to show the SLA field.
   fieldSla
   # Whether to show the Sentry issues field.
@@ -10293,6 +10308,15 @@ fragment SemanticSearchPayload on SemanticSearchPayload {
   }
   # Whether the semantic search is enabled.
   enabled
+}
+
+# The response recorded for a confirmation elicitation.
+fragment AiConversationConfirmationElicitationResponseData on AiConversationConfirmationElicitationResponseData {
+  __typename
+  # The kind of elicitation that was answered.
+  kind
+  # True when the user confirmed the action.
+  confirmed
 }
 
 # The result of a Front attachment mutation.
@@ -11148,6 +11172,16 @@ fragment RateLimitResultPayload on RateLimitResultPayload {
   allowedAmount
 }
 
+# The team, project, or initiative with the highest usage of a scoped quota. The limit applies to each
+# entity, so this entity is the closest to the limit.
+fragment OrganizationQuotaMaxUsage on OrganizationQuotaMaxUsage {
+  __typename
+  # The ID of the entity with the highest usage. Null if the user cannot see the entity, if no entity uses the quota, or if workspace-level templates have the highest usage of a template quota.
+  entityId
+  # The usage of the quota in the entity with the highest usage.
+  usage
+}
+
 # The user's resolved theme configuration for a specific color mode and device type.
 fragment UserSettingsTheme on UserSettingsTheme {
   __typename
@@ -11402,8 +11436,16 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
     ...AiConversationCodeIntelligenceToolCall
   }
 
+  ... on AiConversationCodeModeToolCall {
+    ...AiConversationCodeModeToolCall
+  }
+
   ... on AiConversationContactSupportToolCall {
     ...AiConversationContactSupportToolCall
+  }
+
+  ... on AiConversationCreateAgentChatToolCall {
+    ...AiConversationCreateAgentChatToolCall
   }
 
   ... on AiConversationCreateEntityToolCall {
@@ -11452,6 +11494,10 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
 
   ... on AiConversationMemoryToolCall {
     ...AiConversationMemoryToolCall
+  }
+
+  ... on AiConversationMessageSubagentToolCall {
+    ...AiConversationMessageSubagentToolCall
   }
 
   ... on AiConversationNavigateToPageToolCall {
@@ -11667,6 +11713,28 @@ fragment AiConversationCodeIntelligenceToolCallArgs on AiConversationCodeIntelli
   question
 }
 
+fragment AiConversationCodeModeToolCall on AiConversationCodeModeToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationCodeModeToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationCodeModeToolCallArgs on AiConversationCodeModeToolCallArgs {
+  __typename
+  description
+}
+
 fragment AiConversationContactSupportToolCall on AiConversationContactSupportToolCall {
   __typename
   # The arguments of the tool call.
@@ -11678,6 +11746,30 @@ fragment AiConversationContactSupportToolCall on AiConversationContactSupportToo
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
+}
+
+fragment AiConversationCreateAgentChatToolCall on AiConversationCreateAgentChatToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  # The result of the tool call.
+  result {
+    ...AiConversationCreateAgentChatToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationCreateAgentChatToolCallResult on AiConversationCreateAgentChatToolCallResult {
+  __typename
+  conversationId
 }
 
 fragment AiConversationCreateEntityToolCall on AiConversationCreateEntityToolCall {
@@ -12101,6 +12193,39 @@ fragment AiConversationMemoryToolCallArgs on AiConversationMemoryToolCallArgs {
   __typename
   action
   name
+}
+
+fragment AiConversationMessageSubagentToolCall on AiConversationMessageSubagentToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationMessageSubagentToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  # The result of the tool call.
+  result {
+    ...AiConversationMessageSubagentToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationMessageSubagentToolCallArgs on AiConversationMessageSubagentToolCallArgs {
+  __typename
+  conversationId
+  prompt
+  wait
+}
+
+fragment AiConversationMessageSubagentToolCallResult on AiConversationMessageSubagentToolCallResult {
+  __typename
+  turnId
 }
 
 fragment AiConversationNavigateToPageToolCall on AiConversationNavigateToPageToolCall {
@@ -18778,6 +18903,13 @@ query notifications(
     ...NotificationConnection
   }
 }
+# Returns the authenticated OAuth application's trusted-source status for Coding Sessions in the
+# workspace. Requires an OAuth access token with the `read` scope.
+query oauthApplicationCodingSessionTrustedSource {
+  oauthApplicationCodingSessionTrustedSource {
+    ...OAuthApplicationCodingSessionTrustedSource
+  }
+}
 # The authenticated user's workspace.
 query organization {
   organization {
@@ -18844,7 +18976,7 @@ query organization_labels(
     }
   }
 }
-# Loops in the workspace that are visible to the requesting user, including team and project loops.
+# Loops in the workspace that are visible to the requesting user, including workspace and team loops.
 # Includes enabled and disabled loops.
 query organization_loops(
   # A cursor to be used with first for forward pagination
