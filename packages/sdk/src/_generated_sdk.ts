@@ -1332,7 +1332,47 @@ export class AiConversationCodeIntelligenceToolCallArgs extends Request {
   public question: string;
 }
 /**
- * The affirmative response recorded for a confirmation elicitation.
+ * AiConversationCodeModeToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationCodeModeToolCallFragment response data
+ */
+export class AiConversationCodeModeToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationCodeModeToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationCodeModeToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationCodeModeToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationCodeModeToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationCodeModeToolCallArgsFragment response data
+ */
+export class AiConversationCodeModeToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationCodeModeToolCallArgsFragment) {
+    super(request);
+    this.description = data.description;
+  }
+
+  public description: string;
+}
+/**
+ * The response recorded for a confirmation elicitation.
  *
  * @param request - function to call the graphql client
  * @param data - L.AiConversationConfirmationElicitationResponseDataFragment response data
@@ -1371,6 +1411,49 @@ export class AiConversationContactSupportToolCall extends Request {
   public displayInfo: AiConversationToolDisplayInfo;
   /** The name of the tool that was called. */
   public name: L.AiConversationTool;
+}
+/**
+ * AiConversationCreateAgentChatToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationCreateAgentChatToolCallFragment response data
+ */
+export class AiConversationCreateAgentChatToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationCreateAgentChatToolCallFragment) {
+    super(request);
+    this.args = data.args ?? undefined;
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.result = data.result ? new AiConversationCreateAgentChatToolCallResult(request, data.result) : undefined;
+    this.name = data.name;
+  }
+
+  /** The arguments to the tool call. */
+  public args?: L.Scalars["JSONObject"] | null;
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The result of the tool call. */
+  public result?: AiConversationCreateAgentChatToolCallResult | null;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationCreateAgentChatToolCallResult model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationCreateAgentChatToolCallResultFragment response data
+ */
+export class AiConversationCreateAgentChatToolCallResult extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationCreateAgentChatToolCallResultFragment) {
+    super(request);
+    this.conversationId = data.conversationId;
+  }
+
+  public conversationId: string;
 }
 /**
  * AiConversationCreateEntityToolCall model
@@ -2389,6 +2472,67 @@ export class AiConversationMemoryToolCallArgs extends Request {
 
   public name?: string | null;
   public action: L.AiConversationMemoryToolCallArgsAction;
+}
+/**
+ * AiConversationMessageSubagentToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationMessageSubagentToolCallFragment response data
+ */
+export class AiConversationMessageSubagentToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationMessageSubagentToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationMessageSubagentToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.result = data.result ? new AiConversationMessageSubagentToolCallResult(request, data.result) : undefined;
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationMessageSubagentToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The result of the tool call. */
+  public result?: AiConversationMessageSubagentToolCallResult | null;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationMessageSubagentToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationMessageSubagentToolCallArgsFragment response data
+ */
+export class AiConversationMessageSubagentToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationMessageSubagentToolCallArgsFragment) {
+    super(request);
+    this.conversationId = data.conversationId;
+    this.prompt = data.prompt;
+    this.wait = data.wait ?? undefined;
+  }
+
+  public conversationId: string;
+  public prompt: string;
+  public wait?: boolean | null;
+}
+/**
+ * AiConversationMessageSubagentToolCallResult model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationMessageSubagentToolCallResultFragment response data
+ */
+export class AiConversationMessageSubagentToolCallResult extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationMessageSubagentToolCallResultFragment) {
+    super(request);
+    this.turnId = data.turnId;
+  }
+
+  public turnId: string;
 }
 /**
  * The selected option in a multiple-choice AI conversation elicitation.
@@ -16609,6 +16753,24 @@ export class OAuthApplicationArchivePayload extends Request {
   public success: boolean;
 }
 /**
+ * The authenticated OAuth application's trusted-source status for Coding Sessions in the token's workspace. Combines workspace availability with the application's trust setting. This status does not grant permissions or account for team and repository access.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OAuthApplicationCodingSessionTrustedSourceFragment response data
+ */
+export class OAuthApplicationCodingSessionTrustedSource extends Request {
+  public constructor(request: LinearRequest, data: L.OAuthApplicationCodingSessionTrustedSourceFragment) {
+    super(request);
+    this.enabled = data.enabled;
+    this.disabledReason = data.disabledReason ?? undefined;
+  }
+
+  /** Whether Coding Sessions are available and enabled in the workspace, trusted external sources are available, and the authenticated OAuth application is trusted. A true value does not guarantee that a specific session can start. */
+  public enabled: boolean;
+  /** The first reason that enabled is false, or null when enabled is true. Checks run in this order: workspace availability, trusted external source availability, then application approval. */
+  public disabledReason?: L.CodingSessionsDisabledReason | null;
+}
+/**
  * The result of creating an OAuth application.
  *
  * @param request - function to call the graphql client
@@ -17099,7 +17261,7 @@ export class Organization extends Request {
   public labels(variables?: L.Organization_LabelsQueryVariables) {
     return new Organization_LabelsQuery(this._request, variables).fetch(variables);
   }
-  /** Loops in the workspace that are visible to the requesting user, including team and project loops. Includes enabled and disabled loops. */
+  /** Loops in the workspace that are visible to the requesting user, including workspace and team loops. Includes enabled and disabled loops. */
   public loops(variables?: L.Organization_LoopsQueryVariables) {
     return new Organization_LoopsQuery(this._request, variables).fetch(variables);
   }
@@ -17482,6 +17644,7 @@ export class OrganizationQuota extends Request {
     this.key = data.key;
     this.limit = data.limit;
     this.name = data.name;
+    this.scope = data.scope;
   }
 
   public description: string;
@@ -17489,9 +17652,11 @@ export class OrganizationQuota extends Request {
   public id: string;
   /** Stable quota key. */
   public key: string;
-  /** Effective quota limit, including workspace overrides. */
+  /** Effective quota limit, including workspace overrides. Scoped quotas apply this limit to each entity. */
   public limit: number;
   public name: string;
+  /** The entity that the limit applies to. Workspace quotas limit the whole workspace. Team, project, and initiative quotas limit each of those entities separately. To get their usage, pass the ID of the entity to `usage`. */
+  public scope: L.OrganizationQuotaScope;
 }
 /**
  * OrganizationQuotaConnection model
@@ -17513,6 +17678,24 @@ export class OrganizationQuotaConnection extends Connection<OrganizationQuota> {
       new PageInfo(request, data.pageInfo)
     );
   }
+}
+/**
+ * The team, project, or initiative with the highest usage of a scoped quota. The limit applies to each entity, so this entity is the closest to the limit.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OrganizationQuotaMaxUsageFragment response data
+ */
+export class OrganizationQuotaMaxUsage extends Request {
+  public constructor(request: LinearRequest, data: L.OrganizationQuotaMaxUsageFragment) {
+    super(request);
+    this.entityId = data.entityId ?? undefined;
+    this.usage = data.usage;
+  }
+
+  /** The ID of the entity with the highest usage. Null if the user cannot see the entity, if no entity uses the quota, or if workspace-level templates have the highest usage of a template quota. */
+  public entityId?: string | null;
+  /** The usage of the quota in the entity with the highest usage. */
+  public usage: number;
 }
 /**
  * Workspace trial start response.
@@ -25622,6 +25805,7 @@ export class ViewPreferencesValues extends Request {
     this.automationRunHistoryShowProjectIdentifier = data.automationRunHistoryShowProjectIdentifier ?? undefined;
     this.automationShowDescendants = data.automationShowDescendants ?? undefined;
     this.automationShowDisabled = data.automationShowDisabled ?? undefined;
+    this.automationShowTemplates = data.automationShowTemplates ?? undefined;
     this.automationStatsPeriod = data.automationStatsPeriod ?? undefined;
     this.closedIssuesOrderedByRecency = data.closedIssuesOrderedByRecency ?? undefined;
     this.columnOrderBoard = data.columnOrderBoard ?? undefined;
@@ -25891,6 +26075,8 @@ export class ViewPreferencesValues extends Request {
   public automationShowDescendants?: boolean | null;
   /** Whether to show disabled loops. */
   public automationShowDisabled?: boolean | null;
+  /** Whether to show templates above the workspace loops list. */
+  public automationShowTemplates?: boolean | null;
   /** The loop stats period. */
   public automationStatsPeriod?: string | null;
   /** Whether issues in closed columns should be ordered by recency. */
@@ -30169,6 +30355,32 @@ export class NotificationsQuery extends Request {
         ),
       data
     );
+  }
+}
+
+/**
+ * A fetchable OauthApplicationCodingSessionTrustedSource Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class OauthApplicationCodingSessionTrustedSourceQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the OauthApplicationCodingSessionTrustedSource query and return a OAuthApplicationCodingSessionTrustedSource
+   *
+   * @returns parsed response from OauthApplicationCodingSessionTrustedSourceQuery
+   */
+  public async fetch(): LinearFetch<OAuthApplicationCodingSessionTrustedSource> {
+    const response = await this._request<
+      L.OauthApplicationCodingSessionTrustedSourceQuery,
+      L.OauthApplicationCodingSessionTrustedSourceQueryVariables
+    >(L.OauthApplicationCodingSessionTrustedSourceDocument.toString(), {});
+    const data = response.oauthApplicationCodingSessionTrustedSource;
+
+    return new OAuthApplicationCodingSessionTrustedSource(this._request, data);
   }
 }
 
@@ -51685,6 +51897,14 @@ export class LinearSdk extends Request {
     return new NotificationsQuery(this._request).fetch(variables);
   }
   /**
+   * Returns the authenticated OAuth application's trusted-source status for Coding Sessions in the workspace. Requires an OAuth access token with the `read` scope.
+   *
+   * @returns OAuthApplicationCodingSessionTrustedSource
+   */
+  public get oauthApplicationCodingSessionTrustedSource(): LinearFetch<OAuthApplicationCodingSessionTrustedSource> {
+    return new OauthApplicationCodingSessionTrustedSourceQuery(this._request).fetch();
+  }
+  /**
    * The authenticated user's workspace.
    *
    * @returns Organization
@@ -55804,6 +56024,7 @@ export {
   AiPromptProgressStatus,
   AiPromptType,
   AuthenticationSessionType,
+  CodingSessionsDisabledReason,
   ContextViewType,
   CustomerStatusType,
   CustomerVisibilityMode,
@@ -55848,6 +56069,7 @@ export {
   OAuthClientApprovalStatus,
   OrganizationDomainAuthType,
   OrganizationInviteStatus,
+  OrganizationQuotaScope,
   OtherNotificationType,
   PaginationNulls,
   PaginationOrderBy,

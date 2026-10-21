@@ -4588,6 +4588,17 @@ describe("generated", () => {
     });
   });
 
+  /** Test OauthApplicationCodingSessionTrustedSource query */
+  describe("OauthApplicationCodingSessionTrustedSource", () => {
+    /** Test the root model query for OauthApplicationCodingSessionTrustedSource */
+    it("oauthApplicationCodingSessionTrustedSource", async () => {
+      const oauthApplicationCodingSessionTrustedSource:
+        L.OAuthApplicationCodingSessionTrustedSource | undefined | null =
+        await client.oauthApplicationCodingSessionTrustedSource;
+      expect(oauthApplicationCodingSessionTrustedSource instanceof L.OAuthApplicationCodingSessionTrustedSource);
+    });
+  });
+
   /** Test Organization query */
   describe("Organization", () => {
     let _organization: L.Organization | undefined | null;

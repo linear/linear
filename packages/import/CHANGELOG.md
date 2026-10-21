@@ -1,5 +1,14 @@
 # Change Log
 
+## 4.0.4
+
+### Patch Changes
+
+- 785d7bb: Fix the GitLab CSV importer giving the highest-weight issues no priority. Weights now map to Urgent through Low.
+- Updated dependencies
+- Updated dependencies [32f2be4]
+  - @linear/sdk@99.0.0
+
 ## 4.0.3
 
 ### Patch Changes

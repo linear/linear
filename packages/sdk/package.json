@@ -1,7 +1,7 @@
 {
   "name": "@linear/sdk",
   "description": "The Linear Client SDK for interacting with the Linear GraphQL API",
-  "version": "98.0.0",
+  "version": "99.0.0",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
   "repository": "https://github.com/linear/linear",

@@ -1124,7 +1124,25 @@ export type AiConversationCodeIntelligenceToolCallArgs = {
   question: Scalars["String"];
 };
 
-/** The affirmative response recorded for a confirmation elicitation. */
+export type AiConversationCodeModeToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationCodeModeToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationCodeModeToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationCodeModeToolCallArgs = {
+  __typename?: "AiConversationCodeModeToolCallArgs";
+  description: Scalars["String"];
+};
+
+/** The response recorded for a confirmation elicitation. */
 export type AiConversationConfirmationElicitationResponseData = {
   __typename?: "AiConversationConfirmationElicitationResponseData";
   /** True when the user confirmed the action. */
@@ -1142,6 +1160,26 @@ export type AiConversationContactSupportToolCall = AiConversationBaseToolCall & 
   rawArgs?: Maybe<Scalars["JSON"]>;
   /** The result of the tool call. */
   rawResult?: Maybe<Scalars["JSON"]>;
+};
+
+export type AiConversationCreateAgentChatToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationCreateAgentChatToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<Scalars["JSONObject"]>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  result?: Maybe<AiConversationCreateAgentChatToolCallResult>;
+};
+
+export type AiConversationCreateAgentChatToolCallResult = {
+  __typename?: "AiConversationCreateAgentChatToolCallResult";
+  conversationId: Scalars["String"];
 };
 
 export type AiConversationCreateEntityToolCall = AiConversationBaseToolCall & {
@@ -1751,6 +1789,33 @@ export enum AiConversationMemoryToolCallArgsAction {
   Read = "read",
   Save = "save",
 }
+
+export type AiConversationMessageSubagentToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationMessageSubagentToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<AiConversationMessageSubagentToolCallArgs>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  result?: Maybe<AiConversationMessageSubagentToolCallResult>;
+};
+
+export type AiConversationMessageSubagentToolCallArgs = {
+  __typename?: "AiConversationMessageSubagentToolCallArgs";
+  conversationId: Scalars["String"];
+  prompt: Scalars["String"];
+  wait?: Maybe<Scalars["Boolean"]>;
+};
+
+export type AiConversationMessageSubagentToolCallResult = {
+  __typename?: "AiConversationMessageSubagentToolCallResult";
+  turnId: Scalars["String"];
+};
 
 /** The selected option in a multiple-choice AI conversation elicitation. */
 export type AiConversationMultipleChoiceElicitationResponseData = {
@@ -2609,7 +2674,9 @@ export type AiConversationTextPart = AiConversationBasePart & {
 export enum AiConversationTool {
   Bash = "Bash",
   CodeIntelligence = "CodeIntelligence",
+  CodeMode = "CodeMode",
   ContactSupport = "ContactSupport",
+  CreateAgentChat = "CreateAgentChat",
   CreateEntity = "CreateEntity",
   CreateSandbox = "CreateSandbox",
   DeleteEntity = "DeleteEntity",
@@ -2622,6 +2689,7 @@ export enum AiConversationTool {
   InvokeMcpTool = "InvokeMcpTool",
   ListCodingSessions = "ListCodingSessions",
   Memory = "Memory",
+  MessageSubagent = "MessageSubagent",
   NavigateToPage = "NavigateToPage",
   NotifyUsers = "NotifyUsers",
   PatchSettings = "PatchSettings",
@@ -2664,7 +2732,9 @@ export enum AiConversationTool {
 export type AiConversationToolCall =
   | AiConversationBashToolCall
   | AiConversationCodeIntelligenceToolCall
+  | AiConversationCodeModeToolCall
   | AiConversationContactSupportToolCall
+  | AiConversationCreateAgentChatToolCall
   | AiConversationCreateEntityToolCall
   | AiConversationCreateSandboxToolCall
   | AiConversationDeleteEntityToolCall
@@ -2677,6 +2747,7 @@ export type AiConversationToolCall =
   | AiConversationInvokeMcpToolToolCall
   | AiConversationListCodingSessionsToolCall
   | AiConversationMemoryToolCall
+  | AiConversationMessageSubagentToolCall
   | AiConversationNavigateToPageToolCall
   | AiConversationNotifyUsersToolCall
   | AiConversationPatchSettingsToolCall
@@ -2997,7 +3068,7 @@ export type AiPromptRules = Node & {
   updatedBy?: Maybe<User>;
 };
 
-/** [Internal] The type of AI prompt workflow. */
+/** The type of AI prompt workflow. */
 export enum AiPromptType {
   AgentGuidance = "agentGuidance",
   AiConversation = "aiConversation",
@@ -3738,6 +3809,16 @@ export type CodingAgentSandboxPayload = {
   temporalWorkflowsUrl?: Maybe<Scalars["String"]>;
 };
 
+/** A reason the workspace cannot trust content from the authenticated OAuth application for Coding Sessions. */
+export enum CodingSessionsDisabledReason {
+  /** Coding Sessions and trusted external sources are available, but the application's source is not approved or is no longer available in the workspace. */
+  AppNotTrusted = "APP_NOT_TRUSTED",
+  /** Coding Sessions or Linear Agent are disabled in the workspace, or the workspace's plan does not support Coding Sessions. */
+  CodingSessionsDisabled = "CODING_SESSIONS_DISABLED",
+  /** Coding Sessions are enabled, but the workspace cannot use trusted external sources. */
+  TrustedExternalSourcesUnavailable = "TRUSTED_EXTERNAL_SOURCES_UNAVAILABLE",
+}
+
 /** A comment associated with an issue, project update, initiative update, document content, post, project, or initiative. Comments support rich text (ProseMirror), emoji reactions, and threaded replies via parentId. Comments can be created by workspace users or by external users through integrations (e.g., Slack, Intercom). Each comment belongs to exactly one parent entity. */
 export type Comment = Node & {
   __typename?: "Comment";
@@ -3985,6 +4066,10 @@ export type CommentCreateInput = {
   initiativeId?: InputMaybe<Scalars["String"]>;
   /** The initiative update to associate the comment with. */
   initiativeUpdateId?: InputMaybe<Scalars["String"]>;
+  /** [Internal] Where the commented text starts, as a base64-encoded Y.js relative position created on the commenter's copy of the document content. Requires `inlineAnchorTo` and `documentContentId`. */
+  inlineAnchorFrom?: InputMaybe<Scalars["String"]>;
+  /** [Internal] Where the commented text ends, as a base64-encoded Y.js relative position created on the commenter's copy of the document content. Requires `inlineAnchorFrom` and `documentContentId`. */
+  inlineAnchorTo?: InputMaybe<Scalars["String"]>;
   /** The issue to associate the comment with. Can be a UUID or issue identifier (e.g., 'LIN-123'). */
   issueId?: InputMaybe<Scalars["String"]>;
   /** The parent comment under which to nest a current comment. */
@@ -6860,8 +6945,12 @@ export type DocumentSearchResultEdge = {
 
 /** [Internal] The role of a user a personal document is shared with. */
 export enum DocumentShareRole {
+  /** The user can read and comment on the document but not edit it. */
+  Comment = "comment",
   /** The user can read, edit, and comment on the document. */
   Edit = "edit",
+  /** The user can read the document but not edit or comment on it. */
+  View = "view",
 }
 
 /** Document sorting options. */
@@ -10219,6 +10308,7 @@ export type IntegrationSettingsInput = {
   microsoftTeamsProjectPost?: InputMaybe<MicrosoftTeamsPostSettingsInput>;
   notion?: InputMaybe<NotionSettingsInput>;
   opsgenie?: InputMaybe<OpsgenieInput>;
+  origin?: InputMaybe<OriginSettingsInput>;
   pagerDuty?: InputMaybe<PagerDutyInput>;
   salesforce?: InputMaybe<SalesforceSettingsInput>;
   sentry?: InputMaybe<SentrySettingsInput>;
@@ -13904,7 +13994,7 @@ export type Mutation = {
   documentCreate: DocumentPayload;
   /** Deletes (trashes) a document. The document is marked as trashed and archived, but not permanently removed. */
   documentDelete: DocumentArchivePayload;
-  /** [Internal] Shares a personal document and its sub-documents with workspace members. Only the owner of the document can share it. New collaborators are subscribed to the document. */
+  /** [Internal] Shares a personal document and its sub-documents with workspace members at a role. Only the owner of the document can share it. New collaborators are subscribed to the document. Users who already have another role move to the given one. */
   documentShare: DocumentPayload;
   /** Restores a previously trashed document by unarchiving it. */
   documentUnarchive: DocumentArchivePayload;
@@ -13912,6 +14002,10 @@ export type Mutation = {
   documentUnshare: DocumentPayload;
   /** Updates a document. */
   documentUpdate: DocumentPayload;
+  /** [Internal] Changes the role of users a personal document is shared with. Only the owner of the document can change roles. Only users who already collaborate on the document change; no one is added. With applyToSubDocuments, sub-documents where a user has the role they had on this document before the change are also changed. */
+  documentUpdateCollaboratorRole: DocumentPayload;
+  /** [Internal] Changes what users other than the owner can do with a document that is not personal: edit, comment, or view. Only the owner of the document or a workspace admin can change it. Comment and view need an owner who can access the document. */
+  documentUpdateGeneralAccess: DocumentPayload;
   /** Creates a new email intake address. */
   emailIntakeAddressCreate: EmailIntakeAddressPayload;
   /** Deletes an email intake address object. */
@@ -14959,6 +15053,21 @@ export type MutationDocumentUnshareArgs = {
 export type MutationDocumentUpdateArgs = {
   id: Scalars["String"];
   input: DocumentUpdateInput;
+};
+
+export type MutationDocumentUpdateCollaboratorRoleArgs = {
+  applyToSubDocuments?: InputMaybe<Scalars["Boolean"]>;
+  id: Scalars["String"];
+  previousRole?: InputMaybe<DocumentShareRole>;
+  role: DocumentShareRole;
+  userIds: Array<Scalars["String"]>;
+};
+
+export type MutationDocumentUpdateGeneralAccessArgs = {
+  applyToSubDocuments?: InputMaybe<Scalars["Boolean"]>;
+  generalAccess: Scalars["String"];
+  id: Scalars["String"];
+  previousGeneralAccess?: InputMaybe<Scalars["String"]>;
 };
 
 export type MutationEmailIntakeAddressCreateArgs = {
@@ -17759,6 +17868,15 @@ export type OAuthApplicationArchivePayload = {
   success: Scalars["Boolean"];
 };
 
+/** The authenticated OAuth application's trusted-source status for Coding Sessions in the token's workspace. Combines workspace availability with the application's trust setting. This status does not grant permissions or account for team and repository access. */
+export type OAuthApplicationCodingSessionTrustedSource = {
+  __typename?: "OAuthApplicationCodingSessionTrustedSource";
+  /** The first reason that enabled is false, or null when enabled is true. Checks run in this order: workspace availability, trusted external source availability, then application approval. */
+  disabledReason?: Maybe<CodingSessionsDisabledReason>;
+  /** Whether Coding Sessions are available and enabled in the workspace, trusted external sources are available, and the authenticated OAuth application is trusted. A true value does not guarantee that a specific session can start. */
+  enabled: Scalars["Boolean"];
+};
+
 /** Input for creating an OAuth application through the public API. */
 export type OAuthApplicationCreateInput = {
   /** User-facing description of the OAuth application. */
@@ -18067,7 +18185,7 @@ export type Organization = Node & {
   codeIntelligenceRepository?: Maybe<Scalars["String"]>;
   /** [INTERNAL] Whether the workspace has enabled Coding Sessions. */
   codingAgentEnabled: Scalars["Boolean"];
-  /** [Internal] Settings for Coding Sessions features. */
+  /** [Internal] Settings for Coding Sessions features. OAuth responses omit the trusted external source list. */
   codingAgentSettings: Scalars["JSONObject"];
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
@@ -18130,8 +18248,10 @@ export type Organization = Node & {
   linearAgentSettings: Scalars["JSONObject"];
   /** The URL of the workspace's logo image. Null if no logo has been uploaded. */
   logoUrl?: Maybe<Scalars["String"]>;
-  /** Loops in the workspace that are visible to the requesting user, including team and project loops. Includes enabled and disabled loops. */
+  /** Loops in the workspace that are visible to the requesting user, including workspace and team loops. Includes enabled and disabled loops. */
   loops: WorkflowDefinitionConnection;
+  /** [Internal] The teams each managed team feature is limited to, keyed by feature. The workspace's own setting for each feature still applies. */
+  managedTeamFeatures: Scalars["JSONObject"];
   /** The workspace's name. */
   name: Scalars["String"];
   /** Rolling 30-day total file upload volume for the workspace, measured in megabytes. Used for enforcing upload quotas. */
@@ -18627,6 +18747,22 @@ export type OrganizationLinearAgentTrustedSourcesAllowlistEntryInput = {
   key: Scalars["String"];
 };
 
+/** [Internal] One team a managed team feature is limited to. */
+export type OrganizationManagedFeatureTeamInput = {
+  /** [Internal] Whether the team's sub-teams, at any depth, can use the feature too. */
+  includeSubTeams: Scalars["Boolean"];
+  /** [Internal] The identifier of the team. */
+  teamId: Scalars["UUID"];
+};
+
+/** [Internal] The teams each managed team feature is limited to in the workspace. */
+export type OrganizationManagedTeamFeaturesInput = {
+  /** [Internal] The teams coding sessions are limited to. Omit it to not limit coding sessions by team, or pass an empty list to allow no team. `codingAgentEnabled` still turns coding sessions on or off for the workspace. */
+  codingSessions?: InputMaybe<Array<OrganizationManagedFeatureTeamInput>>;
+  /** [Internal] The teams Loops are limited to. Omit it to not limit Loops by team, or pass an empty list to allow no team. `agentAutomationEnabled` still turns Loops on or off for the workspace. */
+  loops?: InputMaybe<Array<OrganizationManagedFeatureTeamInput>>;
+};
+
 /** [INTERNAL] Workspace metadata including region and allowed authentication providers. */
 export type OrganizationMeta = {
   __typename?: "OrganizationMeta";
@@ -18662,9 +18798,22 @@ export type OrganizationQuota = Node & {
   id: Scalars["ID"];
   /** Stable quota key. */
   key: Scalars["String"];
-  /** Effective quota limit, including workspace overrides. */
+  /** Effective quota limit, including workspace overrides. Scoped quotas apply this limit to each entity. */
   limit: Scalars["Float"];
+  /** [Internal] The highest usage of the quota in any team, project, or initiative, and the entity with that usage. Counts include data that the user cannot see. Null for workspace quotas, which return their usage in `usage`. The value is cached because it counts every row in the workspace. It can be up to 1 hour old for `max-issues-per-team` and `max-issues-per-project`, and up to 10 minutes old for other quotas. Changes to the data do not refresh the cache. For a current value, query `usage` with the ID of that entity. */
+  maxUsage?: Maybe<OrganizationQuotaMaxUsage>;
   name: Scalars["String"];
+  /** The entity that the limit applies to. Workspace quotas limit the whole workspace. Team, project, and initiative quotas limit each of those entities separately. To get their usage, pass the ID of the entity to `usage`. */
+  scope: OrganizationQuotaScope;
+  /** [Internal] Current usage of the quota, counted with the same rules as quota enforcement. The value is not cached. Counts include data that the user cannot see. Workspace quotas ignore the arguments. Team, project, and initiative quotas return null unless you pass `teamId`, `projectId`, or `initiativeId` that matches their scope. The user must have access to that entity. */
+  usage?: Maybe<Scalars["Float"]>;
+};
+
+/** A public resource quota for the current workspace. */
+export type OrganizationQuotaUsageArgs = {
+  initiativeId?: InputMaybe<Scalars["String"]>;
+  projectId?: InputMaybe<Scalars["String"]>;
+  teamId?: InputMaybe<Scalars["String"]>;
 };
 
 export type OrganizationQuotaConnection = {
@@ -18681,12 +18830,35 @@ export type OrganizationQuotaEdge = {
   node: OrganizationQuota;
 };
 
-/** Filter public workspace quotas by key. */
+/** Filter public workspace quotas by key or scope. */
 export type OrganizationQuotaFilter = {
   and?: InputMaybe<Array<OrganizationQuotaFilter>>;
   key?: InputMaybe<StringComparator>;
   or?: InputMaybe<Array<OrganizationQuotaFilter>>;
+  /** Comparator for the quota scope: workspace, team, project, or initiative. */
+  scope?: InputMaybe<StringComparator>;
 };
+
+/** The team, project, or initiative with the highest usage of a scoped quota. The limit applies to each entity, so this entity is the closest to the limit. */
+export type OrganizationQuotaMaxUsage = {
+  __typename?: "OrganizationQuotaMaxUsage";
+  /** The ID of the entity with the highest usage. Null if the user cannot see the entity, if no entity uses the quota, or if workspace-level templates have the highest usage of a template quota. */
+  entityId?: Maybe<Scalars["String"]>;
+  /** The usage of the quota in the entity with the highest usage. */
+  usage: Scalars["Float"];
+};
+
+/** The entity that a quota limit applies to. */
+export enum OrganizationQuotaScope {
+  /** The limit applies to each initiative separately. */
+  Initiative = "initiative",
+  /** The limit applies to each project separately. */
+  Project = "project",
+  /** The limit applies to each team separately. */
+  Team = "team",
+  /** The limit applies to the whole workspace. */
+  Workspace = "workspace",
+}
 
 /** Input for updating workspace security settings such as role-based access controls. */
 export type OrganizationSecuritySettingsInput = {
@@ -18803,6 +18975,8 @@ export type OrganizationUpdateInput = {
   linearAgentSettings?: InputMaybe<OrganizationLinearAgentSettingsInput>;
   /** The logo URL of the workspace. */
   logoUrl?: InputMaybe<Scalars["String"]>;
+  /** [Internal] The teams each managed team feature is limited to. Replaces the current lists, and updates each team's matching setting. */
+  managedTeamFeatures?: InputMaybe<OrganizationManagedTeamFeaturesInput>;
   /** The name of the workspace. */
   name?: InputMaybe<Scalars["String"]>;
   /** Whether the workspace has opted for having to approve all OAuth applications for install. */
@@ -18871,6 +19045,11 @@ export type OriginInstallationDetails = {
   ownerType?: Maybe<Scalars["String"]>;
   /** Whether the installation covers `all` repositories of the owner or only `selected` ones. */
   repositorySelection: Scalars["String"];
+};
+
+export type OriginSettingsInput = {
+  /** The slug of the Origin team or user that owns the installation. */
+  ownerSlug?: InputMaybe<Scalars["String"]>;
 };
 
 /** A generic type of notification. */
@@ -21979,6 +22158,8 @@ export type PullRequest = Node & {
   createdAt: Scalars["DateTime"];
   /** [Internal] The Linear user who created the pull request. Null if the creator is an external user not mapped to a Linear account, or if the creator's account has been deleted. */
   creator?: Maybe<User>;
+  /** [Internal] The external user who opened the pull request, when the author is not mapped to a Linear account, such as a bot. Null if the author is a Linear user. */
+  externalCreator?: Maybe<ExternalUser>;
   /** Whether the source branch has conflicts with the target branch. When true, the conflicts must be resolved before the pull request can be merged. This is reported separately from `mergeStatus`, which describes whether the pull request is blocked by required approvals or checks. */
   hasConflicts: Scalars["Boolean"];
   /** The Git SHA of the latest commit on the source branch. Updated as new commits are pushed. Null if not yet synced. */
@@ -22451,6 +22632,8 @@ export type Query = {
   integrationHasScopes: IntegrationHasScopesPayload;
   /** [INTERNAL] Fetches a Jira project's status names, split into issue (non-Epic) and project (Epic) statuses. */
   integrationJiraProjectStatuses: JiraProjectStatusesPayload;
+  /** [INTERNAL] Jira project IDs available for issue sync. */
+  integrationSyncResourceIds: Array<Scalars["String"]>;
   /** Retrieves a single integration template connection by its identifier. */
   integrationTemplate: IntegrationTemplate;
   /** All integration template connections for the workspace, linking templates to integrations. */
@@ -22511,6 +22694,8 @@ export type Query = {
   notificationsUnreadCount: Scalars["Int"];
   /** [ALPHA] A specific OAuth application created by the calling OAuth application through the public API. */
   oauthApplication: OAuthApplication;
+  /** Returns the authenticated OAuth application's trusted-source status for Coding Sessions in the workspace. Requires an OAuth access token with the `read` scope. */
+  oauthApplicationCodingSessionTrustedSource: OAuthApplicationCodingSessionTrustedSource;
   /** [ALPHA] OAuth applications created by the calling OAuth application through the public API. */
   oauthApplications: Array<OAuthApplication>;
   /** The authenticated user's workspace. */
@@ -23082,6 +23267,10 @@ export type QueryIntegrationHasScopesArgs = {
 export type QueryIntegrationJiraProjectStatusesArgs = {
   integrationId: Scalars["String"];
   projectId: Scalars["String"];
+};
+
+export type QueryIntegrationSyncResourceIdsArgs = {
+  integrationId: Scalars["String"];
 };
 
 export type QueryIntegrationTemplateArgs = {
@@ -25321,6 +25510,8 @@ export type SalesforceSettingsInput = {
   sendNoteOnStatusChange?: InputMaybe<Scalars["Boolean"]>;
   /** The Salesforce subdomain. */
   subdomain?: InputMaybe<Scalars["String"]>;
+  /** Whether replies posted on the Chatter feed of a linked Salesforce case are synced back into the Linear issue's synced comment thread. Requires a managed package version that ships the Chatter feed trigger. */
+  syncCommentsFromChatter?: InputMaybe<Scalars["Boolean"]>;
   /** The Salesforce instance URL. */
   url?: InputMaybe<Scalars["String"]>;
 };
@@ -26103,7 +26294,7 @@ export type Team = Node & {
   __typename?: "Team";
   /** Team's currently active cycle. */
   activeCycle?: Maybe<Cycle>;
-  /** [Internal] Whether the team has enabled agent automation. */
+  /** [Internal] Whether the team can use Loops. The workspace's Loops team list sets it. */
   agentAutomationEnabled: Scalars["Boolean"];
   /** Whether to enable AI discussion summaries for issues in this team. */
   aiDiscussionSummariesEnabled: Scalars["Boolean"];
@@ -26127,7 +26318,7 @@ export type Team = Node & {
   autoCloseStateId?: Maybe<Scalars["String"]>;
   /** [Internal] The team's sub-teams. */
   children: Array<Team>;
-  /** [Internal] Whether the team has enabled Coding Sessions. */
+  /** [Internal] Whether the team can use coding sessions. The workspace's coding sessions team list sets it. */
   codingAgentEnabled: Scalars["Boolean"];
   /** The team's color. */
   color?: Maybe<Scalars["String"]>;
@@ -26928,8 +27119,6 @@ export type TeamSort = {
 };
 
 export type TeamUpdateInput = {
-  /** [Internal] Whether the team has enabled agent automation. */
-  agentAutomationEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** Whether to enable AI discussion summaries for issues. */
   aiDiscussionSummariesEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** Whether to enable resolved thread AI summaries. */
@@ -26946,8 +27135,6 @@ export type TeamUpdateInput = {
   autoClosePeriod?: InputMaybe<Scalars["Float"]>;
   /** The canceled workflow state which auto closed issues will be set to. */
   autoCloseStateId?: InputMaybe<Scalars["String"]>;
-  /** [Internal] Whether the team has enabled Coding Sessions. */
-  codingAgentEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** The color of the team. */
   color?: InputMaybe<Scalars["String"]>;
   /** The cooldown time after each cycle in weeks. */
@@ -27851,6 +28038,11 @@ export type UserIssueDraftsArgs = {
 };
 
 /** A user that belongs to a workspace. Users can have different roles (admin, member, guest, or app) that determine their level of access. Users can be members of multiple teams, and can be active or deactivated. Guest users have limited access scoped to specific teams they are invited to. */
+export type UserSupportsAgentSessionsArgs = {
+  forCurrentUser?: Scalars["Boolean"];
+};
+
+/** A user that belongs to a workspace. Users can have different roles (admin, member, guest, or app) that determine their level of access. Users can be members of multiple teams, and can be active or deactivated. Guest users have limited access scoped to specific teams they are invited to. */
 export type UserTeamMembershipsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -28534,6 +28726,8 @@ export type ViewPreferencesValues = {
   automationShowDescendants?: Maybe<Scalars["Boolean"]>;
   /** Whether to show disabled loops. */
   automationShowDisabled?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show templates above the workspace loops list. */
+  automationShowTemplates?: Maybe<Scalars["Boolean"]>;
   /** The loop stats period. */
   automationStatsPeriod?: Maybe<Scalars["String"]>;
   /** Whether issues in closed columns should be ordered by recency. */
@@ -28602,6 +28796,8 @@ export type ViewPreferencesValues = {
   dashboardFieldOwner?: Maybe<Scalars["Boolean"]>;
   /** The dashboards ordering. */
   dashboardsOrdering?: Maybe<Scalars["String"]>;
+  /** [Internal] Whether to show the collaborators column in documents lists. */
+  documentFieldCollaborators?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the creator field for documents. */
   documentFieldCreator?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the created date field for documents. */
@@ -29764,6 +29960,8 @@ export type WorkflowStateSort = {
   nulls?: InputMaybe<PaginationNulls>;
   /** The order for the individual sort */
   order?: InputMaybe<PaginationSortOrder>;
+  /** Whether to sort by status type without ordering individual statuses within each type. */
+  typeOnly?: InputMaybe<Scalars["Boolean"]>;
 };
 
 /** Input for updating an existing workflow state. All fields are optional; only provided fields will be updated. The state type cannot be changed after creation. */
@@ -30146,10 +30344,40 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
               "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
             >;
           })
+      | ({ __typename: "AiConversationCodeModeToolCall" } & Pick<
+          AiConversationCodeModeToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationCodeModeToolCallArgs" } & Pick<
+                AiConversationCodeModeToolCallArgs,
+                "description"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
       | ({ __typename: "AiConversationContactSupportToolCall" } & Pick<
           AiConversationContactSupportToolCall,
           "rawArgs" | "name" | "rawResult"
         > & {
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationCreateAgentChatToolCall" } & Pick<
+          AiConversationCreateAgentChatToolCall,
+          "rawArgs" | "args" | "name" | "rawResult"
+        > & {
+            result?: Maybe<
+              { __typename: "AiConversationCreateAgentChatToolCallResult" } & Pick<
+                AiConversationCreateAgentChatToolCallResult,
+                "conversationId"
+              >
+            >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
               AiConversationToolDisplayInfo,
               "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
@@ -30426,6 +30654,27 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
               { __typename: "AiConversationMemoryToolCallArgs" } & Pick<
                 AiConversationMemoryToolCallArgs,
                 "action" | "name"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationMessageSubagentToolCall" } & Pick<
+          AiConversationMessageSubagentToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationMessageSubagentToolCallArgs" } & Pick<
+                AiConversationMessageSubagentToolCallArgs,
+                "conversationId" | "prompt" | "wait"
+              >
+            >;
+            result?: Maybe<
+              { __typename: "AiConversationMessageSubagentToolCallResult" } & Pick<
+                AiConversationMessageSubagentToolCallResult,
+                "turnId"
               >
             >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
@@ -31679,6 +31928,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "showSubTeamProjects"
         | "showSupervisedIssues"
         | "showTeamInitiatives"
+        | "automationShowTemplates"
         | "fieldSla"
         | "fieldSentryIssues"
         | "fieldUserPresence"
@@ -31953,6 +32203,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "showSubTeamProjects"
             | "showSupervisedIssues"
             | "showTeamInitiatives"
+            | "automationShowTemplates"
             | "fieldSla"
             | "fieldSentryIssues"
             | "fieldUserPresence"
@@ -32232,6 +32483,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "showSubTeamProjects"
             | "showSupervisedIssues"
             | "showTeamInitiatives"
+            | "automationShowTemplates"
             | "fieldSla"
             | "fieldSentryIssues"
             | "fieldUserPresence"
@@ -35651,7 +35903,7 @@ export type AiConversationPromptPartFragment = { __typename: "AiConversationProm
 
 export type OrganizationQuotaFragment = { __typename: "OrganizationQuota" } & Pick<
   OrganizationQuota,
-  "limit" | "key" | "id" | "description" | "name"
+  "limit" | "key" | "scope" | "id" | "description" | "name"
 >;
 
 export type PresentedIssueSuggestionReasonFragment = { __typename: "PresentedIssueSuggestionReason" } & Pick<
@@ -36745,10 +36997,40 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
               "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
             >;
           })
+      | ({ __typename: "AiConversationCodeModeToolCall" } & Pick<
+          AiConversationCodeModeToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationCodeModeToolCallArgs" } & Pick<
+                AiConversationCodeModeToolCallArgs,
+                "description"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
       | ({ __typename: "AiConversationContactSupportToolCall" } & Pick<
           AiConversationContactSupportToolCall,
           "rawArgs" | "name" | "rawResult"
         > & {
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationCreateAgentChatToolCall" } & Pick<
+          AiConversationCreateAgentChatToolCall,
+          "rawArgs" | "args" | "name" | "rawResult"
+        > & {
+            result?: Maybe<
+              { __typename: "AiConversationCreateAgentChatToolCallResult" } & Pick<
+                AiConversationCreateAgentChatToolCallResult,
+                "conversationId"
+              >
+            >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
               AiConversationToolDisplayInfo,
               "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
@@ -37025,6 +37307,27 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
               { __typename: "AiConversationMemoryToolCallArgs" } & Pick<
                 AiConversationMemoryToolCallArgs,
                 "action" | "name"
+              >
+            >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationMessageSubagentToolCall" } & Pick<
+          AiConversationMessageSubagentToolCall,
+          "rawArgs" | "name" | "rawResult"
+        > & {
+            args?: Maybe<
+              { __typename: "AiConversationMessageSubagentToolCallArgs" } & Pick<
+                AiConversationMessageSubagentToolCallArgs,
+                "conversationId" | "prompt" | "wait"
+              >
+            >;
+            result?: Maybe<
+              { __typename: "AiConversationMessageSubagentToolCallResult" } & Pick<
+                AiConversationMessageSubagentToolCallResult,
+                "turnId"
               >
             >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
@@ -43724,9 +44027,9 @@ export type TeamWithParentWebhookPayloadFragment = { __typename: "TeamWithParent
   "id" | "key" | "name" | "parentId" | "displayName"
 >;
 
-export type AiConversationConfirmationElicitationResponseDataFragment = {
-  __typename: "AiConversationConfirmationElicitationResponseData";
-} & Pick<AiConversationConfirmationElicitationResponseData, "kind" | "confirmed">;
+export type OAuthApplicationCodingSessionTrustedSourceFragment = {
+  __typename: "OAuthApplicationCodingSessionTrustedSource";
+} & Pick<OAuthApplicationCodingSessionTrustedSource, "disabledReason" | "enabled">;
 
 export type PaidSubscriptionFragment = { __typename: "PaidSubscription" } & Pick<
   PaidSubscription,
@@ -43849,6 +44152,7 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "showSubTeamProjects"
   | "showSupervisedIssues"
   | "showTeamInitiatives"
+  | "automationShowTemplates"
   | "fieldSla"
   | "fieldSentryIssues"
   | "fieldUserPresence"
@@ -44167,6 +44471,7 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "showSubTeamProjects"
       | "showSupervisedIssues"
       | "showTeamInitiatives"
+      | "automationShowTemplates"
       | "fieldSla"
       | "fieldSentryIssues"
       | "fieldUserPresence"
@@ -44388,6 +44693,10 @@ export type SemanticSearchPayloadFragment = { __typename: "SemanticSearchPayload
         }
     >;
   };
+
+export type AiConversationConfirmationElicitationResponseDataFragment = {
+  __typename: "AiConversationConfirmationElicitationResponseData";
+} & Pick<AiConversationConfirmationElicitationResponseData, "kind" | "confirmed">;
 
 export type FrontAttachmentPayloadFragment = { __typename: "FrontAttachmentPayload" } & Pick<
   FrontAttachmentPayload,
@@ -45006,6 +45315,7 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "showSubTeamProjects"
           | "showSupervisedIssues"
           | "showTeamInitiatives"
+          | "automationShowTemplates"
           | "fieldSla"
           | "fieldSentryIssues"
           | "fieldUserPresence"
@@ -45408,6 +45718,11 @@ export type RateLimitResultPayloadFragment = { __typename: "RateLimitResultPaylo
   "reset" | "period" | "remainingAmount" | "requestedAmount" | "type" | "allowedAmount"
 >;
 
+export type OrganizationQuotaMaxUsageFragment = { __typename: "OrganizationQuotaMaxUsage" } & Pick<
+  OrganizationQuotaMaxUsage,
+  "entityId" | "usage"
+>;
+
 export type UserSettingsThemeFragment = { __typename: "UserSettingsTheme" } & Pick<UserSettingsTheme, "preset"> & {
     custom?: Maybe<
       { __typename: "UserSettingsCustomTheme" } & Pick<UserSettingsCustomTheme, "accent" | "base" | "contrast"> & {
@@ -45628,12 +45943,39 @@ type AiConversationBaseToolCall_AiConversationCodeIntelligenceToolCall_Fragment 
     >;
   };
 
+type AiConversationBaseToolCall_AiConversationCodeModeToolCall_Fragment = {
+  __typename: "AiConversationCodeModeToolCall";
+} & Pick<AiConversationCodeModeToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationCodeModeToolCallArgs" } & Pick<AiConversationCodeModeToolCallArgs, "description">
+    >;
+  };
+
 type AiConversationBaseToolCall_AiConversationContactSupportToolCall_Fragment = {
   __typename: "AiConversationContactSupportToolCall";
 } & Pick<AiConversationContactSupportToolCall, "rawArgs" | "name" | "rawResult"> & {
     displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
       AiConversationToolDisplayInfo,
       "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+type AiConversationBaseToolCall_AiConversationCreateAgentChatToolCall_Fragment = {
+  __typename: "AiConversationCreateAgentChatToolCall";
+} & Pick<AiConversationCreateAgentChatToolCall, "rawArgs" | "name" | "rawResult" | "args"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    result?: Maybe<
+      { __typename: "AiConversationCreateAgentChatToolCallResult" } & Pick<
+        AiConversationCreateAgentChatToolCallResult,
+        "conversationId"
+      >
     >;
   };
 
@@ -45909,6 +46251,27 @@ type AiConversationBaseToolCall_AiConversationMemoryToolCall_Fragment = {
     >;
     args?: Maybe<
       { __typename: "AiConversationMemoryToolCallArgs" } & Pick<AiConversationMemoryToolCallArgs, "action" | "name">
+    >;
+  };
+
+type AiConversationBaseToolCall_AiConversationMessageSubagentToolCall_Fragment = {
+  __typename: "AiConversationMessageSubagentToolCall";
+} & Pick<AiConversationMessageSubagentToolCall, "rawArgs" | "name" | "rawResult"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+    args?: Maybe<
+      { __typename: "AiConversationMessageSubagentToolCallArgs" } & Pick<
+        AiConversationMessageSubagentToolCallArgs,
+        "conversationId" | "prompt" | "wait"
+      >
+    >;
+    result?: Maybe<
+      { __typename: "AiConversationMessageSubagentToolCallResult" } & Pick<
+        AiConversationMessageSubagentToolCallResult,
+        "turnId"
+      >
     >;
   };
 
@@ -46659,7 +47022,9 @@ type AiConversationBaseToolCall_AiConversationWebSearchToolCall_Fragment = {
 export type AiConversationBaseToolCallFragment =
   | AiConversationBaseToolCall_AiConversationBashToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationCodeIntelligenceToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationCodeModeToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationContactSupportToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationCreateAgentChatToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationCreateEntityToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationCreateSandboxToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationDeleteEntityToolCall_Fragment
@@ -46672,6 +47037,7 @@ export type AiConversationBaseToolCallFragment =
   | AiConversationBaseToolCall_AiConversationInvokeMcpToolToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationListCodingSessionsToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationMemoryToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationMessageSubagentToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationNavigateToPageToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationNotifyUsersToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationPatchSettingsToolCall_Fragment
@@ -46802,6 +47168,24 @@ export type AiConversationCodeIntelligenceToolCallArgsFragment = {
   __typename: "AiConversationCodeIntelligenceToolCallArgs";
 } & Pick<AiConversationCodeIntelligenceToolCallArgs, "question">;
 
+export type AiConversationCodeModeToolCallFragment = { __typename: "AiConversationCodeModeToolCall" } & Pick<
+  AiConversationCodeModeToolCall,
+  "rawArgs" | "name" | "rawResult"
+> & {
+    args?: Maybe<
+      { __typename: "AiConversationCodeModeToolCallArgs" } & Pick<AiConversationCodeModeToolCallArgs, "description">
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationCodeModeToolCallArgsFragment = { __typename: "AiConversationCodeModeToolCallArgs" } & Pick<
+  AiConversationCodeModeToolCallArgs,
+  "description"
+>;
+
 export type AiConversationContactSupportToolCallFragment = {
   __typename: "AiConversationContactSupportToolCall";
 } & Pick<AiConversationContactSupportToolCall, "rawArgs" | "name" | "rawResult"> & {
@@ -46810,6 +47194,25 @@ export type AiConversationContactSupportToolCallFragment = {
       "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
     >;
   };
+
+export type AiConversationCreateAgentChatToolCallFragment = {
+  __typename: "AiConversationCreateAgentChatToolCall";
+} & Pick<AiConversationCreateAgentChatToolCall, "rawArgs" | "args" | "name" | "rawResult"> & {
+    result?: Maybe<
+      { __typename: "AiConversationCreateAgentChatToolCallResult" } & Pick<
+        AiConversationCreateAgentChatToolCallResult,
+        "conversationId"
+      >
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationCreateAgentChatToolCallResultFragment = {
+  __typename: "AiConversationCreateAgentChatToolCallResult";
+} & Pick<AiConversationCreateAgentChatToolCallResult, "conversationId">;
 
 export type AiConversationCreateEntityToolCallFragment = { __typename: "AiConversationCreateEntityToolCall" } & Pick<
   AiConversationCreateEntityToolCall,
@@ -47342,6 +47745,35 @@ export type AiConversationMemoryToolCallArgsFragment = { __typename: "AiConversa
   AiConversationMemoryToolCallArgs,
   "action" | "name"
 >;
+
+export type AiConversationMessageSubagentToolCallFragment = {
+  __typename: "AiConversationMessageSubagentToolCall";
+} & Pick<AiConversationMessageSubagentToolCall, "rawArgs" | "name" | "rawResult"> & {
+    args?: Maybe<
+      { __typename: "AiConversationMessageSubagentToolCallArgs" } & Pick<
+        AiConversationMessageSubagentToolCallArgs,
+        "conversationId" | "prompt" | "wait"
+      >
+    >;
+    result?: Maybe<
+      { __typename: "AiConversationMessageSubagentToolCallResult" } & Pick<
+        AiConversationMessageSubagentToolCallResult,
+        "turnId"
+      >
+    >;
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+    >;
+  };
+
+export type AiConversationMessageSubagentToolCallArgsFragment = {
+  __typename: "AiConversationMessageSubagentToolCallArgs";
+} & Pick<AiConversationMessageSubagentToolCallArgs, "conversationId" | "prompt" | "wait">;
+
+export type AiConversationMessageSubagentToolCallResultFragment = {
+  __typename: "AiConversationMessageSubagentToolCallResult";
+} & Pick<AiConversationMessageSubagentToolCallResult, "turnId">;
 
 export type AiConversationNavigateToPageToolCallFragment = {
   __typename: "AiConversationNavigateToPageToolCall";
@@ -49010,6 +49442,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "showSubTeamProjects"
             | "showSupervisedIssues"
             | "showTeamInitiatives"
+            | "automationShowTemplates"
             | "fieldSla"
             | "fieldSentryIssues"
             | "fieldUserPresence"
@@ -49284,6 +49717,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "showSubTeamProjects"
                 | "showSupervisedIssues"
                 | "showTeamInitiatives"
+                | "automationShowTemplates"
                 | "fieldSla"
                 | "fieldSentryIssues"
                 | "fieldUserPresence"
@@ -49563,6 +49997,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "showSubTeamProjects"
                 | "showSupervisedIssues"
                 | "showTeamInitiatives"
+                | "automationShowTemplates"
                 | "fieldSla"
                 | "fieldSentryIssues"
                 | "fieldUserPresence"
@@ -52665,7 +53100,10 @@ export type OrganizationInviteFullDetailsPayloadFragment = {
 
 export type OrganizationQuotaConnectionFragment = { __typename: "OrganizationQuotaConnection" } & {
   nodes: Array<
-    { __typename: "OrganizationQuota" } & Pick<OrganizationQuota, "limit" | "key" | "id" | "description" | "name">
+    { __typename: "OrganizationQuota" } & Pick<
+      OrganizationQuota,
+      "limit" | "key" | "scope" | "id" | "description" | "name"
+    >
   >;
   pageInfo: { __typename: "PageInfo" } & Pick<
     PageInfo,
@@ -60588,6 +61026,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "showSubTeamProjects"
           | "showSupervisedIssues"
           | "showTeamInitiatives"
+          | "automationShowTemplates"
           | "fieldSla"
           | "fieldSentryIssues"
           | "fieldUserPresence"
@@ -60862,6 +61301,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "showSubTeamProjects"
               | "showSupervisedIssues"
               | "showTeamInitiatives"
+              | "automationShowTemplates"
               | "fieldSla"
               | "fieldSentryIssues"
               | "fieldUserPresence"
@@ -61141,6 +61581,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "showSubTeamProjects"
               | "showSupervisedIssues"
               | "showTeamInitiatives"
+              | "automationShowTemplates"
               | "fieldSla"
               | "fieldSentryIssues"
               | "fieldUserPresence"
@@ -61679,6 +62120,7 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "showSubTeamProjects"
             | "showSupervisedIssues"
             | "showTeamInitiatives"
+            | "automationShowTemplates"
             | "fieldSla"
             | "fieldSentryIssues"
             | "fieldUserPresence"
@@ -61960,6 +62402,7 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "showSubTeamProjects"
           | "showSupervisedIssues"
           | "showTeamInitiatives"
+          | "automationShowTemplates"
           | "fieldSla"
           | "fieldSentryIssues"
           | "fieldUserPresence"
@@ -62373,6 +62816,7 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "showSubTeamProjects"
             | "showSupervisedIssues"
             | "showTeamInitiatives"
+            | "automationShowTemplates"
             | "fieldSla"
             | "fieldSentryIssues"
             | "fieldUserPresence"
@@ -62654,6 +63098,7 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "showSubTeamProjects"
           | "showSupervisedIssues"
           | "showTeamInitiatives"
+          | "automationShowTemplates"
           | "fieldSla"
           | "fieldSentryIssues"
           | "fieldUserPresence"
@@ -62934,6 +63379,7 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "showSubTeamProjects"
         | "showSupervisedIssues"
         | "showTeamInitiatives"
+        | "automationShowTemplates"
         | "fieldSla"
         | "fieldSentryIssues"
         | "fieldUserPresence"
@@ -63251,6 +63697,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "showSubTeamProjects"
               | "showSupervisedIssues"
               | "showTeamInitiatives"
+              | "automationShowTemplates"
               | "fieldSla"
               | "fieldSentryIssues"
               | "fieldUserPresence"
@@ -63525,6 +63972,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "showSubTeamProjects"
                   | "showSupervisedIssues"
                   | "showTeamInitiatives"
+                  | "automationShowTemplates"
                   | "fieldSla"
                   | "fieldSentryIssues"
                   | "fieldUserPresence"
@@ -63804,6 +64252,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "showSubTeamProjects"
                   | "showSupervisedIssues"
                   | "showTeamInitiatives"
+                  | "automationShowTemplates"
                   | "fieldSla"
                   | "fieldSentryIssues"
                   | "fieldUserPresence"
@@ -72685,6 +73134,15 @@ export type NotificationsQuery = { __typename?: "Query" } & {
   };
 };
 
+export type OauthApplicationCodingSessionTrustedSourceQueryVariables = Exact<{ [key: string]: never }>;
+
+export type OauthApplicationCodingSessionTrustedSourceQuery = { __typename?: "Query" } & {
+  oauthApplicationCodingSessionTrustedSource: { __typename: "OAuthApplicationCodingSessionTrustedSource" } & Pick<
+    OAuthApplicationCodingSessionTrustedSource,
+    "disabledReason" | "enabled"
+  >;
+};
+
 export type OrganizationQueryVariables = Exact<{ [key: string]: never }>;
 
 export type OrganizationQuery = { __typename?: "Query" } & {
@@ -75490,7 +75948,10 @@ export type QuotasQueryVariables = Exact<{
 export type QuotasQuery = { __typename?: "Query" } & {
   quotas: { __typename: "OrganizationQuotaConnection" } & {
     nodes: Array<
-      { __typename: "OrganizationQuota" } & Pick<OrganizationQuota, "limit" | "key" | "id" | "description" | "name">
+      { __typename: "OrganizationQuota" } & Pick<
+        OrganizationQuota,
+        "limit" | "key" | "scope" | "id" | "description" | "name"
+      >
     >;
     pageInfo: { __typename: "PageInfo" } & Pick<
       PageInfo,
@@ -80268,6 +80729,7 @@ export type UserViewPreferencesQuery = { __typename?: "Query" } & {
           | "showSubTeamProjects"
           | "showSupervisedIssues"
           | "showTeamInitiatives"
+          | "automationShowTemplates"
           | "fieldSla"
           | "fieldSentryIssues"
           | "fieldUserPresence"
@@ -80547,6 +81009,7 @@ export type UserViewPreferences_PreferencesQuery = { __typename?: "Query" } & {
         | "showSubTeamProjects"
         | "showSupervisedIssues"
         | "showTeamInitiatives"
+        | "automationShowTemplates"
         | "fieldSla"
         | "fieldSentryIssues"
         | "fieldUserPresence"
@@ -92949,6 +93412,7 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "showSubTeamProjects"
             | "showSupervisedIssues"
             | "showTeamInitiatives"
+            | "automationShowTemplates"
             | "fieldSla"
             | "fieldSentryIssues"
             | "fieldUserPresence"
@@ -93243,6 +93707,7 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "showSubTeamProjects"
             | "showSupervisedIssues"
             | "showTeamInitiatives"
+            | "automationShowTemplates"
             | "fieldSla"
             | "fieldSentryIssues"
             | "fieldUserPresence"
@@ -93704,11 +94169,6 @@ fragment AiConversationEntitySelectionElicitationResponseData on AiConversationE
   kind
   selectedEntityIds
 }
-fragment AiConversationConfirmationElicitationResponseData on AiConversationConfirmationElicitationResponseData {
-  __typename
-  kind
-  confirmed
-}
 fragment AiConversationMcpServerConnectionElicitationResponseData on AiConversationMcpServerConnectionElicitationResponseData {
   __typename
   integrationId
@@ -93718,6 +94178,11 @@ fragment AiConversationIntegrationConnectionElicitationResponseData on AiConvers
   __typename
   integrationId
   kind
+}
+fragment AiConversationConfirmationElicitationResponseData on AiConversationConfirmationElicitationResponseData {
+  __typename
+  kind
+  confirmed
 }
 fragment AiConversationMultipleChoiceElicitationResponseData on AiConversationMultipleChoiceElicitationResponseData {
   __typename
@@ -93953,6 +94418,43 @@ fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
 }`,
   { fragmentName: "AiConversationCodeIntelligenceToolCall" }
 ) as unknown as TypedDocumentString<AiConversationCodeIntelligenceToolCallFragment, unknown>;
+export const AiConversationCodeModeToolCallArgsFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
+  `
+    fragment AiConversationCodeModeToolCallArgs on AiConversationCodeModeToolCallArgs {
+  __typename
+  description
+}
+    `,
+  { fragmentName: "AiConversationCodeModeToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationCodeModeToolCallArgsFragment, unknown>;
+export const AiConversationCodeModeToolCallFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
+  `
+    fragment AiConversationCodeModeToolCall on AiConversationCodeModeToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationCodeModeToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationCodeModeToolCallArgs on AiConversationCodeModeToolCallArgs {
+  __typename
+  description
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationCodeModeToolCall" }
+) as unknown as TypedDocumentString<AiConversationCodeModeToolCallFragment, unknown>;
 export const AiConversationContactSupportToolCallFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
   `
     fragment AiConversationContactSupportToolCall on AiConversationContactSupportToolCall {
@@ -93974,6 +94476,44 @@ export const AiConversationContactSupportToolCallFragmentDoc = /*#__PURE__*/ new
 }`,
   { fragmentName: "AiConversationContactSupportToolCall" }
 ) as unknown as TypedDocumentString<AiConversationContactSupportToolCallFragment, unknown>;
+export const AiConversationCreateAgentChatToolCallResultFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
+  `
+    fragment AiConversationCreateAgentChatToolCallResult on AiConversationCreateAgentChatToolCallResult {
+  __typename
+  conversationId
+}
+    `,
+  { fragmentName: "AiConversationCreateAgentChatToolCallResult" }
+) as unknown as TypedDocumentString<AiConversationCreateAgentChatToolCallResultFragment, unknown>;
+export const AiConversationCreateAgentChatToolCallFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
+  `
+    fragment AiConversationCreateAgentChatToolCall on AiConversationCreateAgentChatToolCall {
+  __typename
+  rawArgs
+  args
+  name
+  rawResult
+  result {
+    ...AiConversationCreateAgentChatToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationCreateAgentChatToolCallResult on AiConversationCreateAgentChatToolCallResult {
+  __typename
+  conversationId
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationCreateAgentChatToolCall" }
+) as unknown as TypedDocumentString<AiConversationCreateAgentChatToolCallFragment, unknown>;
 export const AiConversationCreateEntityToolCallArgsFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
   `
     fragment AiConversationCreateEntityToolCallArgs on AiConversationCreateEntityToolCallArgs {
@@ -94748,6 +95288,63 @@ fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
 }`,
   { fragmentName: "AiConversationMemoryToolCall" }
 ) as unknown as TypedDocumentString<AiConversationMemoryToolCallFragment, unknown>;
+export const AiConversationMessageSubagentToolCallArgsFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
+  `
+    fragment AiConversationMessageSubagentToolCallArgs on AiConversationMessageSubagentToolCallArgs {
+  __typename
+  conversationId
+  prompt
+  wait
+}
+    `,
+  { fragmentName: "AiConversationMessageSubagentToolCallArgs" }
+) as unknown as TypedDocumentString<AiConversationMessageSubagentToolCallArgsFragment, unknown>;
+export const AiConversationMessageSubagentToolCallResultFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
+  `
+    fragment AiConversationMessageSubagentToolCallResult on AiConversationMessageSubagentToolCallResult {
+  __typename
+  turnId
+}
+    `,
+  { fragmentName: "AiConversationMessageSubagentToolCallResult" }
+) as unknown as TypedDocumentString<AiConversationMessageSubagentToolCallResultFragment, unknown>;
+export const AiConversationMessageSubagentToolCallFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
+  `
+    fragment AiConversationMessageSubagentToolCall on AiConversationMessageSubagentToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationMessageSubagentToolCallArgs
+  }
+  name
+  rawResult
+  result {
+    ...AiConversationMessageSubagentToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationMessageSubagentToolCallArgs on AiConversationMessageSubagentToolCallArgs {
+  __typename
+  conversationId
+  prompt
+  wait
+}
+fragment AiConversationMessageSubagentToolCallResult on AiConversationMessageSubagentToolCallResult {
+  __typename
+  turnId
+}
+fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationMessageSubagentToolCall" }
+) as unknown as TypedDocumentString<AiConversationMessageSubagentToolCallFragment, unknown>;
 export const AiConversationNavigateToPageToolCallArgsEntitiesFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
   `
     fragment AiConversationNavigateToPageToolCallArgsEntities on AiConversationNavigateToPageToolCallArgsEntities {
@@ -96675,8 +97272,14 @@ export const AiConversationToolCallPartFragmentDoc = /*#__PURE__*/ new TypedDocu
     ... on AiConversationCodeIntelligenceToolCall {
       ...AiConversationCodeIntelligenceToolCall
     }
+    ... on AiConversationCodeModeToolCall {
+      ...AiConversationCodeModeToolCall
+    }
     ... on AiConversationContactSupportToolCall {
       ...AiConversationContactSupportToolCall
+    }
+    ... on AiConversationCreateAgentChatToolCall {
+      ...AiConversationCreateAgentChatToolCall
     }
     ... on AiConversationCreateEntityToolCall {
       ...AiConversationCreateEntityToolCall
@@ -96713,6 +97316,9 @@ export const AiConversationToolCallPartFragmentDoc = /*#__PURE__*/ new TypedDocu
     }
     ... on AiConversationMemoryToolCall {
       ...AiConversationMemoryToolCall
+    }
+    ... on AiConversationMessageSubagentToolCall {
+      ...AiConversationMessageSubagentToolCall
     }
     ... on AiConversationNavigateToPageToolCall {
       ...AiConversationNavigateToPageToolCall
@@ -96866,6 +97472,22 @@ fragment AiConversationCodeIntelligenceToolCallArgs on AiConversationCodeIntelli
   __typename
   question
 }
+fragment AiConversationCodeModeToolCall on AiConversationCodeModeToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationCodeModeToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationCodeModeToolCallArgs on AiConversationCodeModeToolCallArgs {
+  __typename
+  description
+}
 fragment AiConversationContactSupportToolCall on AiConversationContactSupportToolCall {
   __typename
   rawArgs
@@ -96874,6 +97496,23 @@ fragment AiConversationContactSupportToolCall on AiConversationContactSupportToo
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
+}
+fragment AiConversationCreateAgentChatToolCall on AiConversationCreateAgentChatToolCall {
+  __typename
+  rawArgs
+  args
+  name
+  rawResult
+  result {
+    ...AiConversationCreateAgentChatToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationCreateAgentChatToolCallResult on AiConversationCreateAgentChatToolCallResult {
+  __typename
+  conversationId
 }
 fragment AiConversationCreateEntityToolCall on AiConversationCreateEntityToolCall {
   __typename
@@ -97152,6 +97791,31 @@ fragment AiConversationMemoryToolCallArgs on AiConversationMemoryToolCallArgs {
   __typename
   action
   name
+}
+fragment AiConversationMessageSubagentToolCall on AiConversationMessageSubagentToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationMessageSubagentToolCallArgs
+  }
+  name
+  rawResult
+  result {
+    ...AiConversationMessageSubagentToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationMessageSubagentToolCallArgs on AiConversationMessageSubagentToolCallArgs {
+  __typename
+  conversationId
+  prompt
+  wait
+}
+fragment AiConversationMessageSubagentToolCallResult on AiConversationMessageSubagentToolCallResult {
+  __typename
+  turnId
 }
 fragment AiConversationNavigateToPageToolCall on AiConversationNavigateToPageToolCall {
   __typename
@@ -98335,8 +98999,14 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     ... on AiConversationCodeIntelligenceToolCall {
       ...AiConversationCodeIntelligenceToolCall
     }
+    ... on AiConversationCodeModeToolCall {
+      ...AiConversationCodeModeToolCall
+    }
     ... on AiConversationContactSupportToolCall {
       ...AiConversationContactSupportToolCall
+    }
+    ... on AiConversationCreateAgentChatToolCall {
+      ...AiConversationCreateAgentChatToolCall
     }
     ... on AiConversationCreateEntityToolCall {
       ...AiConversationCreateEntityToolCall
@@ -98373,6 +99043,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     }
     ... on AiConversationMemoryToolCall {
       ...AiConversationMemoryToolCall
+    }
+    ... on AiConversationMessageSubagentToolCall {
+      ...AiConversationMessageSubagentToolCall
     }
     ... on AiConversationNavigateToPageToolCall {
       ...AiConversationNavigateToPageToolCall
@@ -98544,11 +99217,6 @@ fragment AiConversationEntitySelectionElicitationResponseData on AiConversationE
   kind
   selectedEntityIds
 }
-fragment AiConversationConfirmationElicitationResponseData on AiConversationConfirmationElicitationResponseData {
-  __typename
-  kind
-  confirmed
-}
 fragment AiConversationMcpServerConnectionElicitationResponseData on AiConversationMcpServerConnectionElicitationResponseData {
   __typename
   integrationId
@@ -98570,6 +99238,11 @@ fragment AiConversationMcpServerConnectionScope on AiConversationMcpServerConnec
   workflowDefinitionId
   teamId
   type
+}
+fragment AiConversationConfirmationElicitationResponseData on AiConversationConfirmationElicitationResponseData {
+  __typename
+  kind
+  confirmed
 }
 fragment AiConversationMultipleChoiceElicitationResponseData on AiConversationMultipleChoiceElicitationResponseData {
   __typename
@@ -98608,6 +99281,22 @@ fragment AiConversationCodeIntelligenceToolCallArgs on AiConversationCodeIntelli
   __typename
   question
 }
+fragment AiConversationCodeModeToolCall on AiConversationCodeModeToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationCodeModeToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationCodeModeToolCallArgs on AiConversationCodeModeToolCallArgs {
+  __typename
+  description
+}
 fragment AiConversationContactSupportToolCall on AiConversationContactSupportToolCall {
   __typename
   rawArgs
@@ -98616,6 +99305,23 @@ fragment AiConversationContactSupportToolCall on AiConversationContactSupportToo
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
+}
+fragment AiConversationCreateAgentChatToolCall on AiConversationCreateAgentChatToolCall {
+  __typename
+  rawArgs
+  args
+  name
+  rawResult
+  result {
+    ...AiConversationCreateAgentChatToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationCreateAgentChatToolCallResult on AiConversationCreateAgentChatToolCallResult {
+  __typename
+  conversationId
 }
 fragment AiConversationCreateEntityToolCall on AiConversationCreateEntityToolCall {
   __typename
@@ -98936,6 +99642,31 @@ fragment AiConversationMemoryToolCallArgs on AiConversationMemoryToolCallArgs {
   __typename
   action
   name
+}
+fragment AiConversationMessageSubagentToolCall on AiConversationMessageSubagentToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationMessageSubagentToolCallArgs
+  }
+  name
+  rawResult
+  result {
+    ...AiConversationMessageSubagentToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationMessageSubagentToolCallArgs on AiConversationMessageSubagentToolCallArgs {
+  __typename
+  conversationId
+  prompt
+  wait
+}
+fragment AiConversationMessageSubagentToolCallResult on AiConversationMessageSubagentToolCallResult {
+  __typename
+  turnId
 }
 fragment AiConversationNavigateToPageToolCall on AiConversationNavigateToPageToolCall {
   __typename
@@ -109757,6 +110488,16 @@ export const TeamOriginWebhookPayloadFragmentDoc = /*#__PURE__*/ new TypedDocume
 }`,
   { fragmentName: "TeamOriginWebhookPayload" }
 ) as unknown as TypedDocumentString<TeamOriginWebhookPayloadFragment, unknown>;
+export const OAuthApplicationCodingSessionTrustedSourceFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
+  `
+    fragment OAuthApplicationCodingSessionTrustedSource on OAuthApplicationCodingSessionTrustedSource {
+  __typename
+  disabledReason
+  enabled
+}
+    `,
+  { fragmentName: "OAuthApplicationCodingSessionTrustedSource" }
+) as unknown as TypedDocumentString<OAuthApplicationCodingSessionTrustedSourceFragment, unknown>;
 export const IntegrationsSettingsFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
   `
     fragment IntegrationsSettings on IntegrationsSettings {
@@ -111269,6 +112010,7 @@ export const ViewPreferencesValuesFragmentDoc = /*#__PURE__*/ new TypedDocumentS
   showSubTeamProjects
   showSupervisedIssues
   showTeamInitiatives
+  automationShowTemplates
   fieldSla
   fieldSentryIssues
   fieldUserPresence
@@ -111562,6 +112304,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showSubTeamProjects
   showSupervisedIssues
   showTeamInitiatives
+  automationShowTemplates
   fieldSla
   fieldSentryIssues
   fieldUserPresence
@@ -111841,6 +112584,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showSubTeamProjects
   showSupervisedIssues
   showTeamInitiatives
+  automationShowTemplates
   fieldSla
   fieldSentryIssues
   fieldUserPresence
@@ -112442,6 +113186,16 @@ export const IssueImportJqlCheckPayloadFragmentDoc = /*#__PURE__*/ new TypedDocu
     `,
   { fragmentName: "IssueImportJqlCheckPayload" }
 ) as unknown as TypedDocumentString<IssueImportJqlCheckPayloadFragment, unknown>;
+export const OrganizationQuotaMaxUsageFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
+  `
+    fragment OrganizationQuotaMaxUsage on OrganizationQuotaMaxUsage {
+  __typename
+  entityId
+  usage
+}
+    `,
+  { fragmentName: "OrganizationQuotaMaxUsage" }
+) as unknown as TypedDocumentString<OrganizationQuotaMaxUsageFragment, unknown>;
 export const UserActorWebhookPayloadFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
   `
     fragment UserActorWebhookPayload on UserActorWebhookPayload {
@@ -113091,8 +113845,14 @@ export const AiConversationBaseToolCallFragmentDoc = /*#__PURE__*/ new TypedDocu
   ... on AiConversationCodeIntelligenceToolCall {
     ...AiConversationCodeIntelligenceToolCall
   }
+  ... on AiConversationCodeModeToolCall {
+    ...AiConversationCodeModeToolCall
+  }
   ... on AiConversationContactSupportToolCall {
     ...AiConversationContactSupportToolCall
+  }
+  ... on AiConversationCreateAgentChatToolCall {
+    ...AiConversationCreateAgentChatToolCall
   }
   ... on AiConversationCreateEntityToolCall {
     ...AiConversationCreateEntityToolCall
@@ -113129,6 +113889,9 @@ export const AiConversationBaseToolCallFragmentDoc = /*#__PURE__*/ new TypedDocu
   }
   ... on AiConversationMemoryToolCall {
     ...AiConversationMemoryToolCall
+  }
+  ... on AiConversationMessageSubagentToolCall {
+    ...AiConversationMessageSubagentToolCall
   }
   ... on AiConversationNavigateToPageToolCall {
     ...AiConversationNavigateToPageToolCall
@@ -113271,6 +114034,22 @@ fragment AiConversationCodeIntelligenceToolCallArgs on AiConversationCodeIntelli
   __typename
   question
 }
+fragment AiConversationCodeModeToolCall on AiConversationCodeModeToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationCodeModeToolCallArgs
+  }
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationCodeModeToolCallArgs on AiConversationCodeModeToolCallArgs {
+  __typename
+  description
+}
 fragment AiConversationContactSupportToolCall on AiConversationContactSupportToolCall {
   __typename
   rawArgs
@@ -113279,6 +114058,23 @@ fragment AiConversationContactSupportToolCall on AiConversationContactSupportToo
   displayInfo {
     ...AiConversationToolDisplayInfo
   }
+}
+fragment AiConversationCreateAgentChatToolCall on AiConversationCreateAgentChatToolCall {
+  __typename
+  rawArgs
+  args
+  name
+  rawResult
+  result {
+    ...AiConversationCreateAgentChatToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationCreateAgentChatToolCallResult on AiConversationCreateAgentChatToolCallResult {
+  __typename
+  conversationId
 }
 fragment AiConversationCreateEntityToolCall on AiConversationCreateEntityToolCall {
   __typename
@@ -113557,6 +114353,31 @@ fragment AiConversationMemoryToolCallArgs on AiConversationMemoryToolCallArgs {
   __typename
   action
   name
+}
+fragment AiConversationMessageSubagentToolCall on AiConversationMessageSubagentToolCall {
+  __typename
+  rawArgs
+  args {
+    ...AiConversationMessageSubagentToolCallArgs
+  }
+  name
+  rawResult
+  result {
+    ...AiConversationMessageSubagentToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+fragment AiConversationMessageSubagentToolCallArgs on AiConversationMessageSubagentToolCallArgs {
+  __typename
+  conversationId
+  prompt
+  wait
+}
+fragment AiConversationMessageSubagentToolCallResult on AiConversationMessageSubagentToolCallResult {
+  __typename
+  turnId
 }
 fragment AiConversationNavigateToPageToolCall on AiConversationNavigateToPageToolCall {
   __typename
@@ -115485,6 +116306,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showSubTeamProjects
   showSupervisedIssues
   showTeamInitiatives
+  automationShowTemplates
   fieldSla
   fieldSentryIssues
   fieldUserPresence
@@ -115817,6 +116639,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showSubTeamProjects
   showSupervisedIssues
   showTeamInitiatives
+  automationShowTemplates
   fieldSla
   fieldSentryIssues
   fieldUserPresence
@@ -120689,6 +121512,7 @@ export const OrganizationQuotaFragmentDoc = /*#__PURE__*/ new TypedDocumentStrin
   __typename
   limit
   key
+  scope
   id
   description
   name
@@ -120711,6 +121535,7 @@ export const OrganizationQuotaConnectionFragmentDoc = /*#__PURE__*/ new TypedDoc
   __typename
   limit
   key
+  scope
   id
   description
   name
@@ -129192,6 +130017,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showSubTeamProjects
   showSupervisedIssues
   showTeamInitiatives
+  automationShowTemplates
   fieldSla
   fieldSentryIssues
   fieldUserPresence
@@ -129874,6 +130700,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showSubTeamProjects
   showSupervisedIssues
   showTeamInitiatives
+  automationShowTemplates
   fieldSla
   fieldSentryIssues
   fieldUserPresence
@@ -130166,6 +130993,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showSubTeamProjects
   showSupervisedIssues
   showTeamInitiatives
+  automationShowTemplates
   fieldSla
   fieldSentryIssues
   fieldUserPresence
@@ -130646,6 +131474,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showSubTeamProjects
   showSupervisedIssues
   showTeamInitiatives
+  automationShowTemplates
   fieldSla
   fieldSentryIssues
   fieldUserPresence
@@ -130938,6 +131767,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showSubTeamProjects
   showSupervisedIssues
   showTeamInitiatives
+  automationShowTemplates
   fieldSla
   fieldSentryIssues
   fieldUserPresence
@@ -131216,6 +132046,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showSubTeamProjects
   showSupervisedIssues
   showTeamInitiatives
+  automationShowTemplates
   fieldSla
   fieldSentryIssues
   fieldUserPresence
@@ -131551,6 +132382,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showSubTeamProjects
   showSupervisedIssues
   showTeamInitiatives
+  automationShowTemplates
   fieldSla
   fieldSentryIssues
   fieldUserPresence
@@ -143247,6 +144079,20 @@ fragment PageInfo on PageInfo {
   hasPreviousPage
   hasNextPage
 }`) as unknown as TypedDocumentString<NotificationsQuery, NotificationsQueryVariables>;
+export const OauthApplicationCodingSessionTrustedSourceDocument = /*#__PURE__*/ new TypedDocumentString(`
+    query oauthApplicationCodingSessionTrustedSource {
+  oauthApplicationCodingSessionTrustedSource {
+    ...OAuthApplicationCodingSessionTrustedSource
+  }
+}
+    fragment OAuthApplicationCodingSessionTrustedSource on OAuthApplicationCodingSessionTrustedSource {
+  __typename
+  disabledReason
+  enabled
+}`) as unknown as TypedDocumentString<
+  OauthApplicationCodingSessionTrustedSourceQuery,
+  OauthApplicationCodingSessionTrustedSourceQueryVariables
+>;
 export const OrganizationDocument = /*#__PURE__*/ new TypedDocumentString(`
     query organization {
   organization {
@@ -147473,6 +148319,7 @@ export const QuotasDocument = /*#__PURE__*/ new TypedDocumentString(`
   __typename
   limit
   key
+  scope
   id
   description
   name
@@ -154300,6 +155147,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showSubTeamProjects
   showSupervisedIssues
   showTeamInitiatives
+  automationShowTemplates
   fieldSla
   fieldSentryIssues
   fieldUserPresence
@@ -154587,6 +155435,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showSubTeamProjects
   showSupervisedIssues
   showTeamInitiatives
+  automationShowTemplates
   fieldSla
   fieldSentryIssues
   fieldUserPresence
@@ -168234,6 +169083,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showSubTeamProjects
   showSupervisedIssues
   showTeamInitiatives
+  automationShowTemplates
   fieldSla
   fieldSentryIssues
   fieldUserPresence
@@ -168539,6 +169389,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   showSubTeamProjects
   showSupervisedIssues
   showTeamInitiatives
+  automationShowTemplates
   fieldSla
   fieldSentryIssues
   fieldUserPresence

@@ -1,5 +1,119 @@
 # Change Log
 
+## 99.0.0
+
+### Major Changes
+
+- feat(schema): [breaking] Input field 'agentAutomationEnabled' was removed from input object type 'TeamUpdateInput' (TeamUpdateInput.agentAutomationEnabled)
+
+  feat(schema): [breaking] Input field 'codingAgentEnabled' was removed from input object type 'TeamUpdateInput' (TeamUpdateInput.codingAgentEnabled)
+
+  feat(schema): [breaking] Argument 'forCurrentUser: Boolean!' added to field 'User.supportsAgentSessions' (User.supportsAgentSessions.forCurrentUser)
+
+  feat(schema): [dangerous] Enum value 'CodeMode' was added to enum 'AiConversationTool' (AiConversationTool.CodeMode)
+
+  feat(schema): [dangerous] Enum value 'CreateAgentChat' was added to enum 'AiConversationTool' (AiConversationTool.CreateAgentChat)
+
+  feat(schema): [dangerous] Enum value 'MessageSubagent' was added to enum 'AiConversationTool' (AiConversationTool.MessageSubagent)
+
+  feat(schema): [dangerous] Member 'AiConversationCodeModeToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Member 'AiConversationCreateAgentChatToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Member 'AiConversationMessageSubagentToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Input field 'inlineAnchorFrom' was added to input object type 'CommentCreateInput' (CommentCreateInput.inlineAnchorFrom)
+
+  feat(schema): [dangerous] Input field 'inlineAnchorTo' was added to input object type 'CommentCreateInput' (CommentCreateInput.inlineAnchorTo)
+
+  feat(schema): [dangerous] Enum value 'comment' was added to enum 'DocumentShareRole' (DocumentShareRole.comment)
+
+  feat(schema): [dangerous] Enum value 'view' was added to enum 'DocumentShareRole' (DocumentShareRole.view)
+
+  feat(schema): [dangerous] Input field 'origin' was added to input object type 'IntegrationSettingsInput' (IntegrationSettingsInput.origin)
+
+  feat(schema): [dangerous] Input field 'scope' was added to input object type 'OrganizationQuotaFilter' (OrganizationQuotaFilter.scope)
+
+  feat(schema): [dangerous] Input field 'managedTeamFeatures' was added to input object type 'OrganizationUpdateInput' (OrganizationUpdateInput.managedTeamFeatures)
+
+  feat(schema): [dangerous] Input field 'syncCommentsFromChatter' was added to input object type 'SalesforceSettingsInput' (SalesforceSettingsInput.syncCommentsFromChatter)
+
+  feat(schema): [dangerous] Input field 'typeOnly' was added to input object type 'WorkflowStateSort' (WorkflowStateSort.typeOnly)
+
+  feat(schema): [non_breaking] Type 'AiConversationCodeModeToolCall' was added (AiConversationCodeModeToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationCodeModeToolCallArgs' was added (AiConversationCodeModeToolCallArgs)
+
+  feat(schema): [non_breaking] Type 'AiConversationCreateAgentChatToolCall' was added (AiConversationCreateAgentChatToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationCreateAgentChatToolCallResult' was added (AiConversationCreateAgentChatToolCallResult)
+
+  feat(schema): [non_breaking] Type 'AiConversationMessageSubagentToolCall' was added (AiConversationMessageSubagentToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationMessageSubagentToolCallArgs' was added (AiConversationMessageSubagentToolCallArgs)
+
+  feat(schema): [non_breaking] Type 'AiConversationMessageSubagentToolCallResult' was added (AiConversationMessageSubagentToolCallResult)
+
+  feat(schema): [non_breaking] Type 'CodingSessionsDisabledReason' was added (CodingSessionsDisabledReason)
+
+  feat(schema): [non_breaking] Type 'OAuthApplicationCodingSessionTrustedSource' was added (OAuthApplicationCodingSessionTrustedSource)
+
+  feat(schema): [non_breaking] Type 'OrganizationManagedFeatureTeamInput' was added (OrganizationManagedFeatureTeamInput)
+
+  feat(schema): [non_breaking] Type 'OrganizationManagedTeamFeaturesInput' was added (OrganizationManagedTeamFeaturesInput)
+
+  feat(schema): [non_breaking] Type 'OrganizationQuotaMaxUsage' was added (OrganizationQuotaMaxUsage)
+
+  feat(schema): [non_breaking] Type 'OrganizationQuotaScope' was added (OrganizationQuotaScope)
+
+  feat(schema): [non_breaking] Type 'OriginSettingsInput' was added (OriginSettingsInput)
+
+  feat(schema): [non_breaking] Description 'The affirmative response recorded for a confirmation elicitation.' on type 'AiConversationConfirmationElicitationResponseData' has changed to 'The response recorded for a confirmation elicitation.' (AiConversationConfirmationElicitationResponseData)
+
+  feat(schema): [non_breaking] Description '[Internal] The type of AI prompt workflow.' on type 'AiPromptType' has changed to 'The type of AI prompt workflow.' (AiPromptType)
+
+  feat(schema): [non_breaking] Field 'documentUpdateCollaboratorRole' was added to object type 'Mutation' (Mutation.documentUpdateCollaboratorRole)
+
+  feat(schema): [non_breaking] Field 'documentUpdateGeneralAccess' was added to object type 'Mutation' (Mutation.documentUpdateGeneralAccess)
+
+  feat(schema): [non_breaking] Field 'Mutation.documentShare' description changed from '[Internal] Shares a personal document and its sub-documents with workspace members. Only the owner of the document can share it. New collaborators are subscribed to the document.' to '[Internal] Shares a personal document and its sub-documents with workspace members at a role. Only the owner of the document can share it. New collaborators are subscribed to the document. Users who already have another role move to the given one.' (Mutation.documentShare)
+
+  feat(schema): [non_breaking] Description for argument 'role' on field 'Mutation.documentShare' changed from 'The role of the new collaborators.' to 'The role of the collaborators. Defaults to edit.' (Mutation.documentShare.role)
+
+  feat(schema): [non_breaking] Field 'managedTeamFeatures' was added to object type 'Organization' (Organization.managedTeamFeatures)
+
+  feat(schema): [non_breaking] Field 'Organization.codingAgentSettings' description changed from '[Internal] Settings for Coding Sessions features.' to '[Internal] Settings for Coding Sessions features. OAuth responses omit the trusted external source list.' (Organization.codingAgentSettings)
+
+  feat(schema): [non_breaking] Field 'Organization.loops' description changed from 'Loops in the workspace that are visible to the requesting user, including team and project loops. Includes enabled and disabled loops.' to 'Loops in the workspace that are visible to the requesting user, including workspace and team loops. Includes enabled and disabled loops.' (Organization.loops)
+
+  feat(schema): [non_breaking] Field 'maxUsage' was added to object type 'OrganizationQuota' (OrganizationQuota.maxUsage)
+
+  feat(schema): [non_breaking] Field 'scope' was added to object type 'OrganizationQuota' (OrganizationQuota.scope)
+
+  feat(schema): [non_breaking] Field 'usage' was added to object type 'OrganizationQuota' (OrganizationQuota.usage)
+
+  feat(schema): [non_breaking] Field 'OrganizationQuota.limit' description changed from 'Effective quota limit, including workspace overrides.' to 'Effective quota limit, including workspace overrides. Scoped quotas apply this limit to each entity.' (OrganizationQuota.limit)
+
+  feat(schema): [non_breaking] Description 'Filter public workspace quotas by key.' on type 'OrganizationQuotaFilter' has changed to 'Filter public workspace quotas by key or scope.' (OrganizationQuotaFilter)
+
+  feat(schema): [non_breaking] Field 'externalCreator' was added to object type 'PullRequest' (PullRequest.externalCreator)
+
+  feat(schema): [non_breaking] Field 'integrationSyncResourceIds' was added to object type 'Query' (Query.integrationSyncResourceIds)
+
+  feat(schema): [non_breaking] Field 'oauthApplicationCodingSessionTrustedSource' was added to object type 'Query' (Query.oauthApplicationCodingSessionTrustedSource)
+
+  feat(schema): [non_breaking] Field 'Team.agentAutomationEnabled' description changed from '[Internal] Whether the team has enabled agent automation.' to '[Internal] Whether the team can use Loops. The workspace's Loops team list sets it.' (Team.agentAutomationEnabled)
+
+  feat(schema): [non_breaking] Field 'Team.codingAgentEnabled' description changed from '[Internal] Whether the team has enabled Coding Sessions.' to '[Internal] Whether the team can use coding sessions. The workspace's coding sessions team list sets it.' (Team.codingAgentEnabled)
+
+  feat(schema): [non_breaking] Field 'automationShowTemplates' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.automationShowTemplates)
+
+  feat(schema): [non_breaking] Field 'documentFieldCollaborators' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.documentFieldCollaborators)
+
+### Patch Changes
+
+- 32f2be4: Mark generated GraphQL documents as pure so bundlers can drop the ones an app never uses. An app that only uses `LinearClient` for one query bundles about 40% smaller.
+
 ## 98.0.0
 
 ### Major Changes
