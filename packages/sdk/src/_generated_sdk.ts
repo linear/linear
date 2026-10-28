@@ -312,6 +312,7 @@ export class ActorBot extends Request {
  */
 export class AgentActivity extends Request {
   private _agentSession: L.AgentActivityFragment["agentSession"];
+  private _promptAuthor?: L.AgentActivityFragment["promptAuthor"];
   private _sourceComment?: L.AgentActivityFragment["sourceComment"];
   private _user: L.AgentActivityFragment["user"];
 
@@ -327,6 +328,7 @@ export class AgentActivity extends Request {
     this.signal = data.signal ?? undefined;
     this.content = data.content;
     this._agentSession = data.agentSession;
+    this._promptAuthor = data.promptAuthor ?? undefined;
     this._sourceComment = data.sourceComment ?? undefined;
     this._user = data.user;
   }
@@ -359,6 +361,14 @@ export class AgentActivity extends Request {
   /** The ID of agent session this activity belongs to. */
   public get agentSessionId(): string | undefined {
     return this._agentSession?.id;
+  }
+  /** The user who sent this prompt, including stop requests. Null for other activity types or if the user is not accessible. */
+  public get promptAuthor(): LinearFetch<User> | undefined {
+    return this._promptAuthor?.id ? new UserQuery(this._request).fetch(this._promptAuthor?.id) : undefined;
+  }
+  /** The ID of user who sent this prompt, including stop requests. null for other activity types or if the user is not accessible. */
+  public get promptAuthorId(): string | undefined {
+    return this._promptAuthor?.id;
   }
   /** The source comment this activity is linked to. Null if the activity was not triggered by a comment. */
   public get sourceComment(): LinearFetch<Comment> | undefined {
@@ -1252,6 +1262,86 @@ export class AiConversationBaseWidget extends Request {
   public name: L.AiConversationWidgetName;
 }
 /**
+ * AiConversationBashKillToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationBashKillToolCallFragment response data
+ */
+export class AiConversationBashKillToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationBashKillToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationBashKillToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationBashKillToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationBashKillToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationBashKillToolCallArgsFragment response data
+ */
+export class AiConversationBashKillToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationBashKillToolCallArgsFragment) {
+    super(request);
+    this.jobId = data.jobId;
+  }
+
+  public jobId: string;
+}
+/**
+ * AiConversationBashOutputToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationBashOutputToolCallFragment response data
+ */
+export class AiConversationBashOutputToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationBashOutputToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationBashOutputToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationBashOutputToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationBashOutputToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationBashOutputToolCallArgsFragment response data
+ */
+export class AiConversationBashOutputToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationBashOutputToolCallArgsFragment) {
+    super(request);
+    this.jobId = data.jobId;
+  }
+
+  public jobId: string;
+}
+/**
  * AiConversationBashToolCall model
  *
  * @param request - function to call the graphql client
@@ -1640,6 +1730,86 @@ export class AiConversationDeleteEntityToolCallResult extends Request {
   }
 
   public deletedEntities?: AiConversationCreateEntityToolCallResultCreatedEntities[] | null;
+}
+/**
+ * AiConversationDevServerToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationDevServerToolCallFragment response data
+ */
+export class AiConversationDevServerToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationDevServerToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationDevServerToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationDevServerToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationDevServerToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationDevServerToolCallArgsFragment response data
+ */
+export class AiConversationDevServerToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationDevServerToolCallArgsFragment) {
+    super(request);
+    this.action = data.action;
+  }
+
+  public action: L.AiConversationDevServerToolCallArgsAction;
+}
+/**
+ * AiConversationEditSandboxFileToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationEditSandboxFileToolCallFragment response data
+ */
+export class AiConversationEditSandboxFileToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationEditSandboxFileToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationEditSandboxFileToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationEditSandboxFileToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationEditSandboxFileToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationEditSandboxFileToolCallArgsFragment response data
+ */
+export class AiConversationEditSandboxFileToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationEditSandboxFileToolCallArgsFragment) {
+    super(request);
+    this.path = data.path;
+  }
+
+  public path: string;
 }
 /**
  * A selectable option shown in an AI conversation elicitation.
@@ -2163,6 +2333,46 @@ export class AiConversationGetSlackConversationHistoryToolCallResult extends Req
   public error?: string | null;
   public hasMore?: boolean | null;
   public messageCount?: number | null;
+}
+/**
+ * AiConversationGitPushToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationGitPushToolCallFragment response data
+ */
+export class AiConversationGitPushToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationGitPushToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationGitPushToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationGitPushToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationGitPushToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationGitPushToolCallArgsFragment response data
+ */
+export class AiConversationGitPushToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationGitPushToolCallArgsFragment) {
+    super(request);
+    this.force = data.force ?? undefined;
+  }
+
+  public force?: boolean | null;
 }
 /**
  * AiConversationHandoffToCodingSessionToolCall model
@@ -2822,6 +3032,7 @@ export class AiConversationPostChatMessageToolCallResult extends Request {
     this.error = data.error ?? undefined;
     this.message = data.message ?? undefined;
     this.posted = data.posted;
+    this.snippet = data.snippet ?? undefined;
     this.destination = data.destination
       ? new AiConversationPostChatMessageToolCallResultDestination(request, data.destination)
       : undefined;
@@ -2831,6 +3042,7 @@ export class AiConversationPostChatMessageToolCallResult extends Request {
   public error?: string | null;
   public message?: string | null;
   public posted: boolean;
+  public snippet?: string | null;
   public destination?: AiConversationPostChatMessageToolCallResultDestination | null;
 }
 /**
@@ -3696,6 +3908,65 @@ export class AiConversationSandboxGitHistoryToolCallArgs extends Request {
 
   public paths?: string[] | null;
   public operation: L.AiConversationSandboxGitHistoryToolCallArgsOperation;
+}
+/**
+ * AiConversationSandboxPullRequestToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSandboxPullRequestToolCallFragment response data
+ */
+export class AiConversationSandboxPullRequestToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSandboxPullRequestToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationSandboxPullRequestToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.result = data.result ? new AiConversationSandboxPullRequestToolCallResult(request, data.result) : undefined;
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationSandboxPullRequestToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The result of the tool call. */
+  public result?: AiConversationSandboxPullRequestToolCallResult | null;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationSandboxPullRequestToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSandboxPullRequestToolCallArgsFragment response data
+ */
+export class AiConversationSandboxPullRequestToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSandboxPullRequestToolCallArgsFragment) {
+    super(request);
+    this.title = data.title ?? undefined;
+  }
+
+  public title?: string | null;
+}
+/**
+ * AiConversationSandboxPullRequestToolCallResult model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationSandboxPullRequestToolCallResultFragment response data
+ */
+export class AiConversationSandboxPullRequestToolCallResult extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationSandboxPullRequestToolCallResultFragment) {
+    super(request);
+    this.pullRequest = data.pullRequest
+      ? new AiConversationSearchEntitiesToolCallResultEntities(request, data.pullRequest)
+      : undefined;
+  }
+
+  public pullRequest?: AiConversationSearchEntitiesToolCallResultEntities | null;
 }
 /**
  * AiConversationSearchChatChannelsToolCall model
@@ -4590,6 +4861,46 @@ export class AiConversationWidgetPart extends Request {
   public type: L.AiConversationPartType;
   /** The widget. */
   public widget: L.AiConversationWidgetPartFragment["widget"];
+}
+/**
+ * AiConversationWriteSandboxFileToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationWriteSandboxFileToolCallFragment response data
+ */
+export class AiConversationWriteSandboxFileToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationWriteSandboxFileToolCallFragment) {
+    super(request);
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.args = data.args ? new AiConversationWriteSandboxFileToolCallArgs(request, data.args) : undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  /** The arguments to the tool call. */
+  public args?: AiConversationWriteSandboxFileToolCallArgs | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
+}
+/**
+ * AiConversationWriteSandboxFileToolCallArgs model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationWriteSandboxFileToolCallArgsFragment response data
+ */
+export class AiConversationWriteSandboxFileToolCallArgs extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationWriteSandboxFileToolCallArgsFragment) {
+    super(request);
+    this.path = data.path;
+  }
+
+  public path: string;
 }
 /**
  * Custom rules that guide AI behavior for a specific scope. Rules can be defined at the workspace level, team level, integration level, or user level, and are applied hierarchically (workspace rules first, then parent team rules, then team rules). Rules contain structured content that instructs the AI assistant on how to handle specific types of prompts, such as coding agent guidance or triage intelligence configuration.
@@ -9040,6 +9351,7 @@ export class EmailIntakeAddress extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.customerRequestsEnabled = data.customerRequestsEnabled;
+    this.emailAddress = data.emailAddress;
     this.enabled = data.enabled;
     this.forwardingEmailAddress = data.forwardingEmailAddress ?? undefined;
     this.id = data.id;
@@ -9072,6 +9384,8 @@ export class EmailIntakeAddress extends Request {
   public createdAt: Date;
   /** Whether issues created from emails sent to this address are automatically converted into customer requests, linking the sender as a customer contact. */
   public customerRequestsEnabled: boolean;
+  /** The full email address, including the domain, to which incoming emails can be sent. */
+  public emailAddress: string;
   /** Whether the email address is enabled. */
   public enabled: boolean;
   /** The email address used to forward emails to the intake address. */
@@ -9149,6 +9463,27 @@ export class EmailIntakeAddress extends Request {
   /** Updates an existing email intake address. */
   public update(input: L.EmailIntakeAddressUpdateInput) {
     return new UpdateEmailIntakeAddressMutation(this._request).fetch(this.id, input);
+  }
+}
+/**
+ * EmailIntakeAddressConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this EmailIntakeAddressConnection model
+ * @param data - EmailIntakeAddressConnection response data
+ */
+export class EmailIntakeAddressConnection extends Connection<EmailIntakeAddress> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<EmailIntakeAddress> | undefined>,
+    data: L.EmailIntakeAddressConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new EmailIntakeAddress(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
   }
 }
 /**
@@ -13149,7 +13484,7 @@ export class Issue extends Request {
   public create(input: L.IssueCreateInput) {
     return new CreateIssueMutation(this._request).fetch(input);
   }
-  /** Deletes (trashes) an issue. */
+  /** Deletes (trashes) an issue and its sub-issues. */
   public delete(variables?: Omit<L.DeleteIssueMutationVariables, "id">) {
     return new DeleteIssueMutation(this._request).fetch(this.id, variables);
   }
@@ -25799,6 +26134,8 @@ export class ViewPreferencesValues extends Request {
     this.automationFieldTrigger = data.automationFieldTrigger ?? undefined;
     this.automationGrouping = data.automationGrouping ?? undefined;
     this.automationOrdering = data.automationOrdering ?? undefined;
+    this.automationRunHistoryGroupNoChanges = data.automationRunHistoryGroupNoChanges ?? undefined;
+    this.automationRunHistoryShowChangeCount = data.automationRunHistoryShowChangeCount ?? undefined;
     this.automationRunHistoryShowDuration = data.automationRunHistoryShowDuration ?? undefined;
     this.automationRunHistoryShowInitiativeIdentifier = data.automationRunHistoryShowInitiativeIdentifier ?? undefined;
     this.automationRunHistoryShowIssueIdentifier = data.automationRunHistoryShowIssueIdentifier ?? undefined;
@@ -25910,6 +26247,7 @@ export class ViewPreferencesValues extends Request {
     this.memberFieldJoined = data.memberFieldJoined ?? undefined;
     this.memberFieldStatus = data.memberFieldStatus ?? undefined;
     this.memberFieldTeams = data.memberFieldTeams ?? undefined;
+    this.openInSplitView = data.openInSplitView ?? undefined;
     this.projectCustomerNeedsShowCompletedIssuesLast = data.projectCustomerNeedsShowCompletedIssuesLast ?? undefined;
     this.projectCustomerNeedsShowImportantFirst = data.projectCustomerNeedsShowImportantFirst ?? undefined;
     this.projectCustomerNeedsViewGrouping = data.projectCustomerNeedsViewGrouping ?? undefined;
@@ -25981,6 +26319,7 @@ export class ViewPreferencesValues extends Request {
     this.reviewFieldChecks = data.reviewFieldChecks ?? undefined;
     this.reviewFieldGithubTeam = data.reviewFieldGithubTeam ?? undefined;
     this.reviewFieldIdentifier = data.reviewFieldIdentifier ?? undefined;
+    this.reviewFieldLabels = data.reviewFieldLabels ?? undefined;
     this.reviewFieldOpenedAt = data.reviewFieldOpenedAt ?? undefined;
     this.reviewFieldPreviewLinks = data.reviewFieldPreviewLinks ?? undefined;
     this.reviewFieldQuickToReview = data.reviewFieldQuickToReview ?? undefined;
@@ -26063,6 +26402,10 @@ export class ViewPreferencesValues extends Request {
   public automationGrouping?: string | null;
   /** The loop ordering. */
   public automationOrdering?: string | null;
+  /** Whether to group consecutive runs with no changes in Loop run history. */
+  public automationRunHistoryGroupNoChanges?: boolean | null;
+  /** Whether to show the number of recorded changes in Loop run history. */
+  public automationRunHistoryShowChangeCount?: boolean | null;
   /** Whether to show the run duration in Loop run history. */
   public automationRunHistoryShowDuration?: boolean | null;
   /** Whether to show the initiative identifier in Loop run history. */
@@ -26283,6 +26626,8 @@ export class ViewPreferencesValues extends Request {
   public memberFieldStatus?: boolean | null;
   /** Whether to show the member teams field. */
   public memberFieldTeams?: boolean | null;
+  /** Whether clicking an item in a board or list opens it in a split view panel. */
+  public openInSplitView?: boolean | null;
   /** Whether to show completed issues last in project customer needs. */
   public projectCustomerNeedsShowCompletedIssuesLast?: boolean | null;
   /** Whether to show important project customer needs first. */
@@ -26425,6 +26770,8 @@ export class ViewPreferencesValues extends Request {
   public reviewFieldGithubTeam?: boolean | null;
   /** Whether to show the review identifier field. */
   public reviewFieldIdentifier?: boolean | null;
+  /** Whether to show GitHub labels on review list items. Null if the preference is unset. */
+  public reviewFieldLabels?: boolean | null;
   /** Whether to show the pull request opened timestamp. */
   public reviewFieldOpenedAt?: boolean | null;
   /** No longer used. Previously controlled the review preview links field. */
@@ -26976,6 +27323,7 @@ export class WorkflowDefinition extends Request {
     this.id = data.id;
     this.lastExecutedAt = parseDate(data.lastExecutedAt) ?? undefined;
     this.name = data.name;
+    this.postResultsToEntity = data.postResultsToEntity;
     this.restrictEditing = data.restrictEditing;
     this.runOnce = data.runOnce;
     this.schedule = data.schedule ?? undefined;
@@ -27029,6 +27377,8 @@ export class WorkflowDefinition extends Request {
   public lastExecutedAt?: Date | null;
   /** The name of the workflow. */
   public name: string;
+  /** Whether an issue-triggered workflow posts its results as a comment on the triggering issue. When false, results stay in the run. Approval requests and questions are still posted. */
+  public postResultsToEntity: boolean;
   /** Whether editing the workflow is restricted to its owner, team owners, and workspace administrators. */
   public restrictEditing: boolean;
   /** Whether the workflow should only execute once per entity. When true, the workflow is excluded from matching automations for an entity if it has already been executed for that entity. */
@@ -28693,6 +29043,43 @@ export class EmailIntakeAddressQuery extends Request {
     const data = response.emailIntakeAddress;
 
     return new EmailIntakeAddress(this._request, data);
+  }
+}
+
+/**
+ * A fetchable EmailIntakeAddresses Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class EmailIntakeAddressesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the EmailIntakeAddresses query and return a EmailIntakeAddressConnection
+   *
+   * @param variables - variables to pass into the EmailIntakeAddressesQuery
+   * @returns parsed response from EmailIntakeAddressesQuery
+   */
+  public async fetch(variables?: L.EmailIntakeAddressesQueryVariables): LinearFetch<EmailIntakeAddressConnection> {
+    const response = await this._request<L.EmailIntakeAddressesQuery, L.EmailIntakeAddressesQueryVariables>(
+      L.EmailIntakeAddressesDocument.toString(),
+      variables
+    );
+    const data = response.emailIntakeAddresses;
+
+    return new EmailIntakeAddressConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -51397,6 +51784,17 @@ export class LinearSdk extends Request {
     return new EmailIntakeAddressQuery(this._request).fetch(id);
   }
   /**
+   * Email intake addresses accessible to the user in the workspace.
+   *
+   * @param variables - variables to pass into the EmailIntakeAddressesQuery
+   * @returns EmailIntakeAddressConnection
+   */
+  public emailIntakeAddresses(
+    variables?: L.EmailIntakeAddressesQueryVariables
+  ): LinearFetch<EmailIntakeAddressConnection> {
+    return new EmailIntakeAddressesQuery(this._request).fetch(variables);
+  }
+  /**
    * A specific custom emoji by ID or name.
    *
    * @param id - required id to pass to emoji
@@ -54307,7 +54705,7 @@ export class LinearSdk extends Request {
     return new CreateIssueMutation(this._request).fetch(input);
   }
   /**
-   * Deletes (trashes) an issue.
+   * Deletes (trashes) an issue and its sub-issues.
    *
    * @param id - required id to pass to deleteIssue
    * @param variables - variables without 'id' to pass into the DeleteIssueMutation
@@ -55425,7 +55823,7 @@ export class LinearSdk extends Request {
     return new UpdateReleaseMutation(this._request).fetch(id, input);
   }
   /**
-   * Updates a release by pipeline identifier. Finds the release by version or latest started/planned release, and optionally transitions it to a new stage by name.
+   * Updates a release by pipeline identifier. Finds the release by version, otherwise the latest started release or else the planned release with the earliest target date, and optionally transitions it to a new stage by name.
    *
    * @param input - required input to pass to releaseUpdateByPipeline
    * @returns ReleasePayload
@@ -55999,6 +56397,7 @@ export {
   AgentSessionType,
   AiConversationAckKind,
   AiConversationClientPlatform,
+  AiConversationDevServerToolCallArgsAction,
   AiConversationElicitationKind,
   AiConversationEntityCardWidgetArgsAction,
   AiConversationEntityCardWidgetArgsType,
@@ -56093,6 +56492,7 @@ export {
   ReleaseNoteGenerationStatus,
   ReleasePipelineType,
   ReleaseStageType,
+  RepositoryScope,
   SLADayCountType,
   SLAStartMode,
   SemanticSearchResultType,

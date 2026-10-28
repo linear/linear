@@ -4548,6 +4548,12 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
   }
   # The tool call part.
   toolCall {
+    ... on AiConversationBashKillToolCall {
+      ...AiConversationBashKillToolCall
+    }
+    ... on AiConversationBashOutputToolCall {
+      ...AiConversationBashOutputToolCall
+    }
     ... on AiConversationBashToolCall {
       ...AiConversationBashToolCall
     }
@@ -4572,6 +4578,12 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     ... on AiConversationDeleteEntityToolCall {
       ...AiConversationDeleteEntityToolCall
     }
+    ... on AiConversationDevServerToolCall {
+      ...AiConversationDevServerToolCall
+    }
+    ... on AiConversationEditSandboxFileToolCall {
+      ...AiConversationEditSandboxFileToolCall
+    }
     ... on AiConversationGetMicrosoftTeamsConversationHistoryToolCall {
       ...AiConversationGetMicrosoftTeamsConversationHistoryToolCall
     }
@@ -4586,6 +4598,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     }
     ... on AiConversationGetSlackConversationHistoryToolCall {
       ...AiConversationGetSlackConversationHistoryToolCall
+    }
+    ... on AiConversationGitPushToolCall {
+      ...AiConversationGitPushToolCall
     }
     ... on AiConversationHandoffToCodingSessionToolCall {
       ...AiConversationHandoffToCodingSessionToolCall
@@ -4662,6 +4677,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     ... on AiConversationSandboxGitHistoryToolCall {
       ...AiConversationSandboxGitHistoryToolCall
     }
+    ... on AiConversationSandboxPullRequestToolCall {
+      ...AiConversationSandboxPullRequestToolCall
+    }
     ... on AiConversationSearchChatChannelsToolCall {
       ...AiConversationSearchChatChannelsToolCall
     }
@@ -4709,6 +4727,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     }
     ... on AiConversationWebSearchToolCall {
       ...AiConversationWebSearchToolCall
+    }
+    ... on AiConversationWriteSandboxFileToolCall {
+      ...AiConversationWriteSandboxFileToolCall
     }
   }
   # The type of the part.
@@ -5697,6 +5718,10 @@ fragment AgentActivity on AgentActivity {
   user {
     id
   }
+  # The user who sent this prompt, including stop requests. Null for other activity types or if the user is not accessible.
+  promptAuthor {
+    id
+  }
   # Whether the activity is ephemeral, and should disappear after the next agent activity.
   ephemeral
 }
@@ -5878,6 +5903,8 @@ fragment WorkflowDefinition on WorkflowDefinition {
   }
   # The workflow definition's unique URL slug.
   slugId
+  # Whether an issue-triggered workflow posts its results as a comment on the triggering issue. When false, results stay in the run. Approval requests and questions are still posted.
+  postResultsToEntity
   # Whether editing the workflow is restricted to its owner, team owners, and workspace administrators.
   restrictEditing
   # Whether the workflow is enabled and will execute when its trigger conditions are met.
@@ -5906,6 +5933,8 @@ fragment EmailIntakeAddress on EmailIntakeAddress {
   issueCreatedAutoReply
   # The email address used to forward emails to the intake address.
   forwardingEmailAddress
+  # The full email address, including the domain, to which incoming emails can be sent.
+  emailAddress
   # The last time an inbound email was successfully ingested for this address.
   lastUsedAt
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -9725,6 +9754,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   timelineZoomScale
   # Whether a team's project views show only the projects that team leads. When true, projects the team only contributes to are hidden. Null if the preference is unset.
   showOnlyLeadTeamProjects
+  # Whether clicking an item in a board or list opens it in a split view panel.
+  openInSplitView
   # Whether completed agent sessions are shown and for how long.
   showCompletedAgentSessions
   # Whether completed issues are shown and for how long.
@@ -9737,6 +9768,10 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   closedIssuesOrderedByRecency
   # Whether team reviews are shown in the reviews list.
   showTeamReviews
+  # Whether to group consecutive runs with no changes in Loop run history.
+  automationRunHistoryGroupNoChanges
+  # Whether to show GitHub labels on review list items. Null if the preference is unset.
+  reviewFieldLabels
   # Whether to show archived items.
   showArchivedItems
   # Whether to show completed issues and projects in the customer page.
@@ -9937,6 +9972,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   fieldMilestone
   # Whether to show the most pressing SLA from connected issues on review list items. Null if the preference is unset.
   reviewFieldSla
+  # Whether to show the number of recorded changes in Loop run history.
+  automationRunHistoryShowChangeCount
   # Whether to show the owner field for documents.
   documentFieldOwner
   # Whether to show the parent field for documents.
@@ -11428,6 +11465,14 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
     ...AiConversationToolDisplayInfo
   }
 
+  ... on AiConversationBashKillToolCall {
+    ...AiConversationBashKillToolCall
+  }
+
+  ... on AiConversationBashOutputToolCall {
+    ...AiConversationBashOutputToolCall
+  }
+
   ... on AiConversationBashToolCall {
     ...AiConversationBashToolCall
   }
@@ -11460,6 +11505,14 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
     ...AiConversationDeleteEntityToolCall
   }
 
+  ... on AiConversationDevServerToolCall {
+    ...AiConversationDevServerToolCall
+  }
+
+  ... on AiConversationEditSandboxFileToolCall {
+    ...AiConversationEditSandboxFileToolCall
+  }
+
   ... on AiConversationGetMicrosoftTeamsConversationHistoryToolCall {
     ...AiConversationGetMicrosoftTeamsConversationHistoryToolCall
   }
@@ -11478,6 +11531,10 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
 
   ... on AiConversationGetSlackConversationHistoryToolCall {
     ...AiConversationGetSlackConversationHistoryToolCall
+  }
+
+  ... on AiConversationGitPushToolCall {
+    ...AiConversationGitPushToolCall
   }
 
   ... on AiConversationHandoffToCodingSessionToolCall {
@@ -11580,6 +11637,10 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
     ...AiConversationSandboxGitHistoryToolCall
   }
 
+  ... on AiConversationSandboxPullRequestToolCall {
+    ...AiConversationSandboxPullRequestToolCall
+  }
+
   ... on AiConversationSearchChatChannelsToolCall {
     ...AiConversationSearchChatChannelsToolCall
   }
@@ -11643,6 +11704,10 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
   ... on AiConversationWebSearchToolCall {
     ...AiConversationWebSearchToolCall
   }
+
+  ... on AiConversationWriteSandboxFileToolCall {
+    ...AiConversationWriteSandboxFileToolCall
+  }
 }
 
 fragment AiConversationBaseWidget on AiConversationBaseWidget {
@@ -11667,6 +11732,50 @@ fragment AiConversationBaseWidget on AiConversationBaseWidget {
   ... on AiConversationSettingWidget {
     ...AiConversationSettingWidget
   }
+}
+
+fragment AiConversationBashKillToolCall on AiConversationBashKillToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationBashKillToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationBashKillToolCallArgs on AiConversationBashKillToolCallArgs {
+  __typename
+  jobId
+}
+
+fragment AiConversationBashOutputToolCall on AiConversationBashOutputToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationBashOutputToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationBashOutputToolCallArgs on AiConversationBashOutputToolCallArgs {
+  __typename
+  jobId
 }
 
 fragment AiConversationBashToolCall on AiConversationBashToolCall {
@@ -11876,6 +11985,50 @@ fragment AiConversationDeleteEntityToolCallResult on AiConversationDeleteEntityT
   }
 }
 
+fragment AiConversationDevServerToolCall on AiConversationDevServerToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationDevServerToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationDevServerToolCallArgs on AiConversationDevServerToolCallArgs {
+  __typename
+  action
+}
+
+fragment AiConversationEditSandboxFileToolCall on AiConversationEditSandboxFileToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationEditSandboxFileToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationEditSandboxFileToolCallArgs on AiConversationEditSandboxFileToolCallArgs {
+  __typename
+  path
+}
+
 fragment AiConversationEntityCardWidget on AiConversationEntityCardWidget {
   __typename
   # Display information for the widget, including ProseMirror and Markdown representations.
@@ -12060,6 +12213,28 @@ fragment AiConversationGetSlackConversationHistoryToolCallResult on AiConversati
   error
   hasMore
   messageCount
+}
+
+fragment AiConversationGitPushToolCall on AiConversationGitPushToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationGitPushToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationGitPushToolCallArgs on AiConversationGitPushToolCallArgs {
+  __typename
+  force
 }
 
 fragment AiConversationHandoffToCodingSessionToolCall on AiConversationHandoffToCodingSessionToolCall {
@@ -12362,6 +12537,7 @@ fragment AiConversationPostChatMessageToolCallResult on AiConversationPostChatMe
   error
   message
   posted
+  snippet
 }
 
 fragment AiConversationPostChatMessageToolCallResultDestination on AiConversationPostChatMessageToolCallResultDestination {
@@ -12811,6 +12987,39 @@ fragment AiConversationSandboxGitHistoryToolCallArgs on AiConversationSandboxGit
   __typename
   operation
   paths
+}
+
+fragment AiConversationSandboxPullRequestToolCall on AiConversationSandboxPullRequestToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationSandboxPullRequestToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  # The result of the tool call.
+  result {
+    ...AiConversationSandboxPullRequestToolCallResult
+  }
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationSandboxPullRequestToolCallArgs on AiConversationSandboxPullRequestToolCallArgs {
+  __typename
+  title
+}
+
+fragment AiConversationSandboxPullRequestToolCallResult on AiConversationSandboxPullRequestToolCallResult {
+  __typename
+  pullRequest {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
 }
 
 fragment AiConversationSearchChatChannelsToolCall on AiConversationSearchChatChannelsToolCall {
@@ -13265,6 +13474,28 @@ fragment AiConversationWidgetDisplayInfo on AiConversationWidgetDisplayInfo {
   bodyData
 }
 
+fragment AiConversationWriteSandboxFileToolCall on AiConversationWriteSandboxFileToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args {
+    ...AiConversationWriteSandboxFileToolCallArgs
+  }
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+
+fragment AiConversationWriteSandboxFileToolCallArgs on AiConversationWriteSandboxFileToolCallArgs {
+  __typename
+  path
+}
+
 fragment AsksChannelConnectPayload on AsksChannelConnectPayload {
   __typename
   # GitHub-specific details for the operation. Populated by GitHub-related mutations only.
@@ -13540,6 +13771,16 @@ fragment DraftConnection on DraftConnection {
   __typename
   nodes {
     ...Draft
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment EmailIntakeAddressConnection on EmailIntakeAddressConnection {
+  __typename
+  nodes {
+    ...EmailIntakeAddress
   }
   pageInfo {
     ...PageInfo
@@ -16706,6 +16947,32 @@ query emailIntakeAddress_sesDomainIdentity($id: String!) {
     sesDomainIdentity {
       ...SesDomainIdentity
     }
+  }
+}
+# Email intake addresses accessible to the user in the workspace.
+query emailIntakeAddresses(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  emailIntakeAddresses(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...EmailIntakeAddressConnection
   }
 }
 # A specific custom emoji by ID or name.
@@ -24423,7 +24690,7 @@ mutation issueAddLabel(
 mutation archiveIssue(
   # The identifier of the issue to archive.
   $id: String!
-  # Whether to trash the issue.
+  # Whether to trash the issue and its sub-issues.
   $trash: Boolean
 ) {
   issueArchive(id: $id, trash: $trash) {
@@ -24459,7 +24726,7 @@ mutation createIssue(
     ...IssuePayload
   }
 }
-# Deletes (trashes) an issue.
+# Deletes (trashes) an issue and its sub-issues.
 mutation deleteIssue(
   # The identifier of the issue to delete.
   $id: String!
@@ -25672,8 +25939,9 @@ mutation updateRelease(
     ...ReleasePayload
   }
 }
-# Updates a release by pipeline identifier. Finds the release by version or latest started/planned
-# release, and optionally transitions it to a new stage by name.
+# Updates a release by pipeline identifier. Finds the release by version, otherwise the latest started
+# release or else the planned release with the earliest target date, and optionally transitions it to
+# a new stage by name.
 mutation releaseUpdateByPipeline(
   # The input containing the pipeline ID, optional version, and optional stage name.
   $input: ReleaseUpdateByPipelineInput!

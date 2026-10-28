@@ -234,6 +234,10 @@ type AgentActivity implements Node {
   """
   id: ID!
   """
+  The user who sent this prompt, including stop requests. Null for other activity types or if the user is not accessible.
+  """
+  promptAuthor: User
+  """
   [Internal] What the turn pushed to its branch, captured in the sandbox at push time. Only set on the activity for a successful push.
   """
   pushSummary: AgentActivityPushSummary
@@ -1760,6 +1764,54 @@ interface AiConversationBaseWidget {
   rawArgs: JSON
 }
 
+type AiConversationBashKillToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationBashKillToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationBashKillToolCallArgs {
+  jobId: String!
+}
+
+type AiConversationBashOutputToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationBashOutputToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationBashOutputToolCallArgs {
+  jobId: String!
+}
+
 type AiConversationBashToolCall implements AiConversationBaseToolCall {
   """
   The arguments to the tool call.
@@ -1994,6 +2046,61 @@ type AiConversationDeleteEntityToolCallArgs {
 
 type AiConversationDeleteEntityToolCallResult {
   deletedEntities: [AiConversationCreateEntityToolCallResultCreatedEntities!]
+}
+
+type AiConversationDevServerToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationDevServerToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationDevServerToolCallArgs {
+  action: AiConversationDevServerToolCallArgsAction!
+}
+
+enum AiConversationDevServerToolCallArgsAction {
+  restart
+  start
+  status
+  stop
+}
+
+type AiConversationEditSandboxFileToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationEditSandboxFileToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationEditSandboxFileToolCallArgs {
+  path: String!
 }
 
 """
@@ -2347,6 +2454,7 @@ The category of an error part in an AI conversation.
 """
 enum AiConversationErrorType {
   billing
+  providerPolicy
   unknown
   untrustedSources
   usageLimit
@@ -2512,6 +2620,30 @@ type AiConversationGetSlackConversationHistoryToolCallResult {
   error: String
   hasMore: Boolean
   messageCount: Float
+}
+
+type AiConversationGitPushToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationGitPushToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationGitPushToolCallArgs {
+  force: Boolean
 }
 
 type AiConversationHandoffToCodingSessionToolCall implements AiConversationBaseToolCall {
@@ -2979,6 +3111,7 @@ type AiConversationPostChatMessageToolCallResult {
   error: String
   message: String
   posted: Boolean!
+  snippet: String
 }
 
 type AiConversationPostChatMessageToolCallResultDestination {
@@ -3510,6 +3643,38 @@ enum AiConversationSandboxGitHistoryToolCallArgsOperation {
   show
 }
 
+type AiConversationSandboxPullRequestToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationSandboxPullRequestToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+  """
+  The result of the tool call.
+  """
+  result: AiConversationSandboxPullRequestToolCallResult
+}
+
+type AiConversationSandboxPullRequestToolCallArgs {
+  title: String
+}
+
+type AiConversationSandboxPullRequestToolCallResult {
+  pullRequest: AiConversationSearchEntitiesToolCallResultEntities
+}
+
 type AiConversationSearchChatChannelsToolCall implements AiConversationBaseToolCall {
   """
   The arguments to the tool call.
@@ -3875,6 +4040,8 @@ The name of a tool that was called in an AI conversation.
 """
 enum AiConversationTool {
   Bash
+  BashKill
+  BashOutput
   CodeIntelligence
   CodeMode
   ContactSupport
@@ -3882,11 +4049,14 @@ enum AiConversationTool {
   CreateEntity
   CreateSandbox
   DeleteEntity
+  DevServer
+  EditSandboxFile
   GetMicrosoftTeamsConversationHistory
   GetPullRequestCheckLogs
   GetPullRequestDiff
   GetPullRequestFile
   GetSlackConversationHistory
+  GitPush
   HandoffToCodingSession
   InvokeMcpTool
   ListCodingSessions
@@ -3912,6 +4082,7 @@ enum AiConversationTool {
   RetryPullRequestCheck
   RunLoop
   SandboxGitHistory
+  SandboxPullRequest
   SearchChatChannels
   SearchDocumentation
   SearchEntities
@@ -3928,12 +4099,15 @@ enum AiConversationTool {
   UpdateEntity
   UpdatePullRequestReviewFinding
   WebSearch
+  WriteSandboxFile
 }
 
 """
 The tool call.
 """
 union AiConversationToolCall =
+  | AiConversationBashKillToolCall
+  | AiConversationBashOutputToolCall
   | AiConversationBashToolCall
   | AiConversationCodeIntelligenceToolCall
   | AiConversationCodeModeToolCall
@@ -3942,11 +4116,14 @@ union AiConversationToolCall =
   | AiConversationCreateEntityToolCall
   | AiConversationCreateSandboxToolCall
   | AiConversationDeleteEntityToolCall
+  | AiConversationDevServerToolCall
+  | AiConversationEditSandboxFileToolCall
   | AiConversationGetMicrosoftTeamsConversationHistoryToolCall
   | AiConversationGetPullRequestCheckLogsToolCall
   | AiConversationGetPullRequestDiffToolCall
   | AiConversationGetPullRequestFileToolCall
   | AiConversationGetSlackConversationHistoryToolCall
+  | AiConversationGitPushToolCall
   | AiConversationHandoffToCodingSessionToolCall
   | AiConversationInvokeMcpToolToolCall
   | AiConversationListCodingSessionsToolCall
@@ -3972,6 +4149,7 @@ union AiConversationToolCall =
   | AiConversationRetryPullRequestCheckToolCall
   | AiConversationRunLoopToolCall
   | AiConversationSandboxGitHistoryToolCall
+  | AiConversationSandboxPullRequestToolCall
   | AiConversationSearchChatChannelsToolCall
   | AiConversationSearchDocumentationToolCall
   | AiConversationSearchEntitiesToolCall
@@ -3988,6 +4166,7 @@ union AiConversationToolCall =
   | AiConversationUpdateEntityToolCall
   | AiConversationUpdatePullRequestReviewFindingToolCall
   | AiConversationWebSearchToolCall
+  | AiConversationWriteSandboxFileToolCall
 
 """
 A tool call part in an AI conversation.
@@ -4001,6 +4180,10 @@ type AiConversationToolCallPart implements AiConversationBasePart {
   The metadata of the part.
   """
   metadata: AiConversationPartMetadata!
+  """
+  The tool calls this tool call made, such as those of a code mode program, in the order they completed. Null when it made none.
+  """
+  subParts: [AiConversationToolCallPart!]
   """
   The tool call part.
   """
@@ -4229,6 +4412,30 @@ type AiConversationWidgetPart implements AiConversationBasePart {
   widget: AiConversationWidget!
 }
 
+type AiConversationWriteSandboxFileToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: AiConversationWriteSandboxFileToolCallArgs
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
+}
+
+type AiConversationWriteSandboxFileToolCallArgs {
+  path: String!
+}
+
 """
 [Internal] Tracks the progress and state of an AI prompt workflow execution. Each progress record is associated with an issue or comment and contains the workflow type, current status, metadata about the execution, and optionally the conversation messages exchanged during the workflow. Progress records can form a hierarchy via parent-child relationships for multi-step workflows.
 """
@@ -4452,7 +4659,7 @@ input AiPromptTypeComparator {
 
 input AirbyteConfigurationInput {
   """
-  Linear export API key.
+  Linear export API key. Must be 40 random letters and digits, optionally prefixed with `lin_integration_`.
   """
   apiKey: String!
 }
@@ -5631,6 +5838,57 @@ input CandidateRepository {
 }
 
 """
+[Internal] A sandbox belonging to a coding session or conversation.
+"""
+type CodingAgentSandbox implements Node {
+  """
+  The coding session that owns this container.
+  """
+  agentSession: AgentSession
+  """
+  The conversation that owns this container.
+  """
+  aiConversation: AiConversation
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The coding environment used by this container.
+  """
+  codingEnvironment: CodingEnvironment
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  When this sandbox stopped accepting work.
+  """
+  endedAt: DateTime
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  A user-visible lifecycle failure.
+  """
+  lifecycleError: String
+  """
+  The container lifecycle state.
+  """
+  lifecycleState: String
+  """
+  When the container first became available.
+  """
+  startedAt: DateTime
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+"""
 [Internal] Detailed information about the coding agent sandbox environment associated with an agent session, including cloud infrastructure URLs for debugging and monitoring.
 """
 type CodingAgentSandboxEntry {
@@ -5700,6 +5958,109 @@ type CodingAgentSandboxPayload {
   Temporal URL to view workflows for this session.
   """
   temporalWorkflowsUrl: String
+}
+
+"""
+[Internal] A reusable coding session environment that defines repositories, agent settings, network access, and dependency setup.
+"""
+type CodingEnvironment implements Node {
+  """
+  The coding agent settings that override workspace defaults.
+  """
+  agent: JSONObject!
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  Custom instructions for coding sessions in this environment.
+  """
+  customGuidance: String
+  """
+  Whether generated repository dependency settings supplement user-defined environment settings.
+  """
+  dependencyManagement: String!
+  """
+  The foreground server started when someone opens a coding session preview.
+  """
+  devServer: JSONObject
+  """
+  Mise TOML representation of user-defined global environment settings, such as environment variables.
+  """
+  environmentSettingsMiseConfig: String
+  """
+  [Internal] Mise TOML generated from repository dependencies and retained for debugging.
+  """
+  generatedDependencyMiseConfig: String
+  """
+  The GitHub host shared by every repository in the environment.
+  """
+  gitHubHostName: String!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The environment's display name.
+  """
+  name: String!
+  """
+  The environment's network configuration.
+  """
+  network: JSONObject!
+  """
+  The identifiers of users who can manage this environment.
+  """
+  ownerIds: [String!]!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+"""
+[Internal] A saved workspace inference credential, without the key.
+"""
+type CodingInferenceKey {
+  """
+  The inference endpoint.
+  """
+  baseUrl: String!
+  """
+  The coding harness that uses this credential: codex or claude.
+  """
+  harness: String!
+  """
+  The inference provider: openai, anthropic, or amazon-bedrock.
+  """
+  provider: String!
+  """
+  When the credential was last saved.
+  """
+  updatedAt: DateTime!
+}
+
+"""
+[Internal] Result of testing a workspace inference credential.
+"""
+type CodingInferenceKeyTestPayload {
+  """
+  The endpoint that will be saved, normalized from the input.
+  """
+  baseUrl: String
+  """
+  Why the test failed.
+  """
+  message: String
+  """
+  Whether the provider accepted the request.
+  """
+  success: Boolean!
 }
 
 """
@@ -8152,7 +8513,7 @@ input CustomerNeedUpdateInput {
   """
   customerId: String
   """
-  An optional identifier in UUID v4 format. If provided, will be set as the customer need's ID.
+  Ignored. The mutation's id argument selects the customer need to update.
   """
   id: String
   """
@@ -8933,6 +9294,10 @@ input CustomerTierFilter {
   Comparator for the identifier.
   """
   id: IDComparator
+  """
+  Filter based on the existence of the relation.
+  """
+  null: Boolean
   """
   Compound filters, one of which needs to be matched by the customer tier.
   """
@@ -9971,6 +10336,10 @@ type Dashboard implements Node {
   """
   id: ID!
   """
+  A global initiative filter applied to all dashboard widgets that display initiative data. Individual widgets may apply additional filters on top of this.
+  """
+  initiativeFilter: JSONObject
+  """
   A global issue filter applied to all dashboard widgets that display issue data. Individual widgets may apply additional filters on top of this.
   """
   issueFilter: JSONObject
@@ -9990,6 +10359,10 @@ type Dashboard implements Node {
   A global project filter applied to all dashboard widgets that display project data. Individual widgets may apply additional filters on top of this.
   """
   projectFilter: JSONObject
+  """
+  A global pull request filter applied to all dashboard widgets that display pull request data. Individual widgets may apply additional filters on top of this.
+  """
+  pullRequestFilter: JSONObject
   """
   Whether the dashboard is shared with everyone in the workspace. Shared dashboards are visible to all members; unshared dashboards are only visible to the owner.
   """
@@ -10207,6 +10580,73 @@ type DependencyPackageMetadataResult {
 }
 
 """
+[Internal] A deployment of a pull request's commit reported by the code host, with its latest status. Preview links derive from the latest deployment of each environment.
+"""
+type Deployment implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The environment the deployment targets, as the code host names it.
+  """
+  environment: String!
+  """
+  When the code host created the deployment. Orders the deployments of one environment.
+  """
+  externalCreatedAt: DateTime!
+  """
+  The deployment's id on the code host.
+  """
+  externalId: String!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The URL of the deployer's log from the latest status. Null when that status had none.
+  """
+  logUrl: String
+  """
+  The code host that reported the deployment.
+  """
+  provider: String!
+  """
+  The pull request the deployment belongs to.
+  """
+  pullRequest: PullRequest!
+  """
+  The deployed commit.
+  """
+  sha: String!
+  """
+  The state of the latest status: `pending`, `building`, `success`, `failure`, or `inactive`. Provider states are collapsed to these.
+  """
+  state: String!
+  """
+  When the code host created the latest status.
+  """
+  statusCreatedAt: DateTime!
+  """
+  The id of the latest status on the code host. Null for a status read by a sync.
+  """
+  statusExternalId: String
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The URL of the deployed environment from the latest status. Null when that status had none.
+  """
+  url: String
+}
+
+"""
 [Internal] A first-class code diff. Starts as the live working-tree state of a coding session and is promoted to a review by linking it to a pull request, while continuing to represent local, uncommitted changes.
 """
 type Diff implements Node {
@@ -10222,6 +10662,10 @@ type Diff implements Node {
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
+  """
+  The sandbox the diff belongs to.
+  """
+  codingAgentSandbox: CodingAgentSandbox
   """
   [Internal] The opaque content hash identifying the diff's content in code.storage.
   """
@@ -10898,6 +11342,10 @@ input DocumentCreateInput {
   """
   parentDocumentId: String
   """
+  [Internal] The workspace for a workspace-level document. Must be the acting user's workspace.
+  """
+  parentOrganizationId: String
+  """
   Related project for the document. Can be a UUID or project identifier (e.g., 'P-LIN-123').
   """
   projectId: String
@@ -11519,6 +11967,10 @@ input DocumentUpdateInput {
   """
   parentDocumentId: String
   """
+  [Internal] Moves the document and its sub-documents to the workspace level. Must be the acting user's workspace.
+  """
+  parentOrganizationId: String
+  """
   [Internal] Moves the document and its sub-documents into this user's personal space. Must be the acting user.
   """
   personalUserId: String
@@ -11840,6 +12292,10 @@ type EmailIntakeAddress implements Node {
   """
   customerRequestsEnabled: Boolean!
   """
+  The full email address, including the domain, to which incoming emails can be sent.
+  """
+  emailAddress: String!
+  """
   Whether the email address is enabled.
   """
   enabled: Boolean!
@@ -11922,6 +12378,12 @@ type EmailIntakeAddress implements Node {
   useUserNamesInReplies: Boolean!
 }
 
+type EmailIntakeAddressConnection {
+  edges: [EmailIntakeAddressEdge!]!
+  nodes: [EmailIntakeAddress!]!
+  pageInfo: PageInfo!
+}
+
 """
 Input for creating a new email intake address.
 """
@@ -11990,6 +12452,14 @@ input EmailIntakeAddressCreateInput {
   Whether the commenter's name is included in the email replies.
   """
   useUserNamesInReplies: Boolean
+}
+
+type EmailIntakeAddressEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: EmailIntakeAddress!
 }
 
 """
@@ -17220,6 +17690,7 @@ enum IntegrationService {
   githubImport
   githubPersonal
   gitlab
+  gitlabPersonal
   gong
   googleCalendarPersonal
   googleSheets
@@ -19342,6 +19813,10 @@ type IssueDraft implements Node {
   The date at which the issue would be due.
   """
   dueDate: TimelessDate
+  """
+  Blocking links to other drafts in the same draft tree, recreated when the tree is published. Contains a local identifier for this draft and the local identifiers of the drafts that block it.
+  """
+  embeddedDependencies: JSONObject
   """
   The estimate of the complexity of the draft. Null if no estimate has been set.
   """
@@ -23553,6 +24028,50 @@ type JiraStatusNameCategoriesPayload {
   name: String!
 }
 
+"""
+[INTERNAL] Jira project settings that will make Jira reject the changes Linear sends during sync.
+"""
+type JiraSyncHealthCheckPayload {
+  """
+  Why the check stopped before reading the project, such as Jira rejecting the integration's credentials. Null when the check ran.
+  """
+  blockedReason: String
+  """
+  The steps that failed to read Jira, whose checks are missing from findings.
+  """
+  failedSteps: [String!]!
+  """
+  The problems found, errors first.
+  """
+  findings: [JiraSyncHealthFindingPayload!]!
+  """
+  How the workflow transitions were read: `workflow` (every transition and its validators), `transitions` (only those out of one recent issue's status, without validators), or `none`.
+  """
+  transitionCoverage: String!
+}
+
+"""
+[INTERNAL] A Jira setting that makes Jira reject some of the changes Linear sends.
+"""
+type JiraSyncHealthFindingPayload {
+  """
+  Which check found the problem.
+  """
+  checkId: String!
+  """
+  The Jira fields, permissions, or transitions involved.
+  """
+  details: [String!]!
+  """
+  The Jira issue type the problem applies to, if only one.
+  """
+  issueTypeName: String
+  """
+  `error` when every change of the affected kind fails, `warning` when only some do.
+  """
+  severity: String!
+}
+
 input JiraUpdateInput {
   """
   The Jira personal access token, or the API key of a Jira Cloud service account.
@@ -23814,6 +24333,10 @@ type LoopExecution implements Node {
   [Internal] The team that triggered this Loop execution.
   """
   team: Team
+  """
+  [Internal] The user who manually started this Loop execution.
+  """
+  triggeredBy: User
   """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -24974,11 +25497,11 @@ type Mutation {
     ifParentDocumentId: String
   ): DocumentArchivePayload!
   """
-  [Internal] Shares a personal document and its sub-documents with workspace members at a role. Only the owner of the document can share it. New collaborators are subscribed to the document. Users who already have another role move to the given one.
+  [Internal] Shares a document and its sub-documents with workspace members at a role. On a personal document only the owner can share it. On any other document the owner, an owner of one of its teams, or a workspace admin can, the people must be able to see the document, and the role must be above its general access. New collaborators are subscribed to the document. Users who already have another role move to the given one.
   """
   documentShare(
     """
-    The identifier of the personal document to share.
+    The identifier of the document to share.
     """
     id: String!
     """
@@ -25000,11 +25523,11 @@ type Mutation {
     id: String!
   ): DocumentArchivePayload!
   """
-  [Internal] Stops sharing a personal document and its sub-documents with users. The owner can remove any collaborator; a collaborator can only remove themselves.
+  [Internal] Stops sharing a document and its sub-documents with users. Whoever can manage access to the document can remove any collaborator; a collaborator can only remove themselves.
   """
   documentUnshare(
     """
-    The identifier of the personal document to stop sharing.
+    The identifier of the document to stop sharing.
     """
     id: String!
     """
@@ -25026,7 +25549,7 @@ type Mutation {
     input: DocumentUpdateInput!
   ): DocumentPayload!
   """
-  [Internal] Changes the role of users a personal document is shared with. Only the owner of the document can change roles. Only users who already collaborate on the document change; no one is added. With applyToSubDocuments, sub-documents where a user has the role they had on this document before the change are also changed.
+  [Internal] Changes the role of users a document is shared with. On a personal document only the owner can change roles. On any other document the owner, an owner of one of its teams, or a workspace admin can, and the role must be above its general access. Only users who already collaborate on the document change; no one is added. With applyToSubDocuments, sub-documents where a user has the role they had on this document before the change are also changed.
   """
   documentUpdateCollaboratorRole(
     """
@@ -25034,7 +25557,7 @@ type Mutation {
     """
     applyToSubDocuments: Boolean = false
     """
-    The identifier of the personal document.
+    The identifier of the document.
     """
     id: String!
     """
@@ -25051,7 +25574,7 @@ type Mutation {
     userIds: [String!]!
   ): DocumentPayload!
   """
-  [Internal] Changes what users other than the owner can do with a document that is not personal: edit, comment, or view. Only the owner of the document or a workspace admin can change it. Comment and view need an owner who can access the document.
+  [Internal] Changes what users other than the owner can do with a document that is not personal: edit, comment, or view. Only the owner of the document, an owner of one of its teams, or a workspace admin can change it. Comment and view need an owner who can access the document.
   """
   documentUpdateGeneralAccess(
     """
@@ -26552,7 +27075,7 @@ type Mutation {
     """
     id: String!
     """
-    Whether to trash the issue.
+    Whether to trash the issue and its sub-issues.
     """
     trash: Boolean
   ): IssueArchivePayload!
@@ -26588,7 +27111,7 @@ type Mutation {
     input: IssueCreateInput!
   ): IssuePayload!
   """
-  Deletes (trashes) an issue.
+  Deletes (trashes) an issue and its sub-issues.
   """
   issueDelete(
     """
@@ -27335,6 +27858,23 @@ type Mutation {
   Cancels a previously requested workspace deletion, if the workspace has not yet been fully deleted.
   """
   organizationCancelDelete: OrganizationCancelDeletePayload!
+  """
+  [Internal] Removes a workspace inference credential and switches the harness to Linear inference.
+  """
+  organizationCodingInferenceKeyDelete(
+    """
+    The coding harness whose credential to remove: codex or claude.
+    """
+    harness: String!
+  ): OrganizationPayload!
+  """
+  [Internal] Sends a minimal inference request with a workspace credential without saving it.
+  """
+  organizationCodingInferenceKeyTest(input: OrganizationCodingInferenceKeyInput!): CodingInferenceKeyTestPayload!
+  """
+  [Internal] Tests and stores a workspace inference credential and selects it for new sessions.
+  """
+  organizationCodingInferenceKeyUpdate(input: OrganizationCodingInferenceKeyInput!): OrganizationPayload!
   """
   Permanently deletes the workspace and all its data. Requires a valid deletion code obtained from organizationDeleteChallenge. This action is irreversible.
   """
@@ -28126,7 +28666,7 @@ type Mutation {
     input: ReleaseUpdateInput!
   ): ReleasePayload!
   """
-  Updates a release by pipeline identifier. Finds the release by version or latest started/planned release, and optionally transitions it to a new stage by name.
+  Updates a release by pipeline identifier. Finds the release by version, otherwise the latest started release or else the planned release with the earliest target date, and optionally transitions it to a new stage by name.
   """
   releaseUpdateByPipeline(
     """
@@ -31922,6 +32462,10 @@ type Organization implements Node {
   """
   linearAgentSettings: JSONObject!
   """
+  [Internal] Linear Review settings: whether reviews are on and which repositories they cover. Empty until saved.
+  """
+  linearReviewSettings: JSONObject!
+  """
   The URL of the workspace's logo image. Null if no logo has been uploaded.
   """
   logoUrl: String
@@ -32282,6 +32826,14 @@ type OrganizationCancelDeletePayload {
 """
 input OrganizationCodingAgentSettingsInput {
   """
+  [Internal] Inference credential source for Claude Code.
+  """
+  claudeInference: String
+  """
+  [Internal] Inference credential source for Codex.
+  """
+  codexInference: String
+  """
   [Internal] Whether Coding Sessions require uploaded user commit signing keys.
   """
   commitSigningEnabled: Boolean
@@ -32323,6 +32875,24 @@ input OrganizationCodingAgentTrustedSourceUpdateInput {
   [Internal] The external source whose approval to change.
   """
   key: String!
+}
+
+"""
+[Internal] Workspace inference credential for Codex or Claude Code.
+"""
+input OrganizationCodingInferenceKeyInput {
+  """
+  Provider API key.
+  """
+  apiKey: String!
+  """
+  Inference endpoint. OpenAI-compatible for codex; Anthropic-compatible or Amazon Bedrock runtime for claude. Defaults to the provider's public API.
+  """
+  baseUrl: String
+  """
+  The coding harness that will use this credential: codex or claude.
+  """
+  harness: String!
 }
 
 """
@@ -32771,6 +33341,42 @@ input OrganizationLinearAgentTrustedSourcesAllowlistEntryInput {
 }
 
 """
+[Internal] A repository that Linear Review covers.
+"""
+input OrganizationLinearReviewRepositoryInput {
+  """
+  [Internal] Full name of the repository, such as owner/repo.
+  """
+  fullName: String!
+  """
+  [Internal] Host of the repository, such as github.com.
+  """
+  hostname: String!
+}
+
+"""
+[Internal] Linear Review settings for the workspace.
+"""
+input OrganizationLinearReviewSettingsInput {
+  """
+  [Internal] Whether Linear reviews pull requests.
+  """
+  enabled: Boolean!
+  """
+  [Internal] Repositories Linear reviews when the scope is selected.
+  """
+  repositories: [OrganizationLinearReviewRepositoryInput!]!
+  """
+  [Internal] Whether Linear reviews every connected repository or only the selected ones.
+  """
+  repositoryScope: RepositoryScope!
+  """
+  [Internal] Whether Linear also reviews drafts without being asked.
+  """
+  reviewDrafts: Boolean!
+}
+
+"""
 [Internal] One team a managed team feature is limited to.
 """
 input OrganizationManagedFeatureTeamInput {
@@ -32789,11 +33395,11 @@ input OrganizationManagedFeatureTeamInput {
 """
 input OrganizationManagedTeamFeaturesInput {
   """
-  [Internal] The teams coding sessions are limited to. Omit it to not limit coding sessions by team, or pass an empty list to allow no team. `codingAgentEnabled` still turns coding sessions on or off for the workspace.
+  [Internal] The teams coding sessions are limited to. Omit it to not limit coding sessions by team. A changed list needs at least one team. If every team left in it was deleted, the list is saved empty, so no team can use coding sessions. `codingAgentEnabled` still turns coding sessions on or off for the workspace.
   """
   codingSessions: [OrganizationManagedFeatureTeamInput!]
   """
-  [Internal] The teams Loops are limited to. Omit it to not limit Loops by team, or pass an empty list to allow no team. `agentAutomationEnabled` still turns Loops on or off for the workspace.
+  [Internal] The teams Loops are limited to. Omit it to not limit Loops by team. A changed list needs at least one team. If every team left in it was deleted, the list is saved empty, so only Loops with no team run. `agentAutomationEnabled` still turns Loops on or off for the workspace.
   """
   loops: [OrganizationManagedFeatureTeamInput!]
 }
@@ -33164,6 +33770,10 @@ input OrganizationUpdateInput {
   [Internal] Settings for Linear Agent features.
   """
   linearAgentSettings: OrganizationLinearAgentSettingsInput
+  """
+  [Internal] Linear Review settings: whether reviews are on and which repositories they cover.
+  """
+  linearReviewSettings: OrganizationLinearReviewSettingsInput
   """
   The logo URL of the workspace.
   """
@@ -38293,7 +38903,7 @@ type ProjectUpdate implements Node {
   """
   id: ID!
   """
-  [Internal] A snapshot of project properties at the time the update was posted, including team, milestone, and issue statistics. Used to compute diffs between consecutive updates.
+  [Internal] A snapshot of project properties at the time the update was posted, including milestone and issue progress. Used to compute diffs between consecutive updates.
   """
   infoSnapshot: JSONObject
   """
@@ -39055,6 +39665,10 @@ type PullRequest implements Node {
   """
   creator: User
   """
+  [Internal] The deployments of the pull request's commits, each with its latest status.
+  """
+  deployments: [Deployment!]!
+  """
   [Internal] The external user who opened the pull request, when the author is not mapped to a Linear account, such as a bot. Null if the author is a Linear user.
   """
   externalCreator: ExternalUser
@@ -39529,6 +40143,16 @@ enum PullRequestStatus {
   inReview
   merged
   open
+}
+
+"""
+[Internal] Filter for pull request subscription events.
+"""
+input PullRequestSubscriptionFilter {
+  """
+  [Internal] Filter by pull request ID.
+  """
+  id: IDComparator
 }
 
 """
@@ -40365,6 +40989,35 @@ type Query {
   """
   emailIntakeAddress(id: String!): EmailIntakeAddress!
   """
+  Email intake addresses accessible to the user in the workspace.
+  """
+  emailIntakeAddresses(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): EmailIntakeAddressConnection!
+  """
   A specific custom emoji by ID or name.
   """
   emoji(
@@ -40763,6 +41416,27 @@ type Query {
     """
     projectId: String!
   ): JiraProjectStatusesPayload!
+  """
+  [INTERNAL] Checks a Jira project for settings that will make Jira reject the changes Linear sends during sync. Reads Jira on every call.
+  """
+  integrationJiraSyncHealthCheck(
+    """
+    Whether Linear creates Jira issues for this project.
+    """
+    bidirectional: Boolean!
+    """
+    The id of the Jira integration.
+    """
+    integrationId: String!
+    """
+    The Jira project ID to check.
+    """
+    jiraProjectId: String!
+    """
+    The Linear team the project syncs with.
+    """
+    teamId: String!
+  ): JiraSyncHealthCheckPayload!
   """
   [INTERNAL] Jira project IDs available for issue sync.
   """
@@ -41298,6 +41972,10 @@ type Query {
   The authenticated user's workspace.
   """
   organization: Organization!
+  """
+  [Internal] Saved workspace inference credentials for Coding Sessions, without their keys.
+  """
+  organizationCodingInferenceKeys: [CodingInferenceKey!]!
   """
   [INTERNAL] Checks whether the domain can be claimed.
   """
@@ -44749,7 +45427,7 @@ input ReleaseUpdateByPipelineInput {
   """
   stage: String
   """
-  The version of the release to update. If not provided, the latest started or latest planned release will be updated.
+  The version of the release to update. If not provided, the latest started release is updated, or else the planned release with the earliest target date.
   """
   version: String
 }
@@ -44783,7 +45461,7 @@ input ReleaseUpdateByPipelineInputBase {
   """
   stage: String
   """
-  The version of the release to update. If not provided, the latest started or latest planned release will be updated.
+  The version of the release to update. If not provided, the latest started release is updated, or else the planned release with the earliest target date.
   """
   version: String
 }
@@ -44948,6 +45626,14 @@ input RepositoryDataInput {
   The base URL of the repository on the hosting provider (e.g., 'https://github.com/linear/linear-app').
   """
   url: String!
+}
+
+"""
+[Internal] The scope of repositories that non-repository-members can access when allowNonRepoMembers is enabled. Can be 'all' for all workspace-connected repositories or 'selected' for a curated list.
+"""
+enum RepositoryScope {
+  all
+  selected
 }
 
 """
@@ -45471,17 +46157,9 @@ input SalesforceSettingsInput {
   """
   sendNoteOnStatusChange: Boolean
   """
-  The Salesforce subdomain.
-  """
-  subdomain: String
-  """
   Whether replies posted on the Chatter feed of a linked Salesforce case are synced back into the Linear issue's synced comment thread. Requires a managed package version that ships the Chatter feed trigger.
   """
   syncCommentsFromChatter: Boolean
-  """
-  The Salesforce instance URL.
-  """
-  url: String
 }
 
 """
@@ -46687,7 +47365,12 @@ type Subscription {
   """
   Triggered when a pull request is updated
   """
-  pullRequestUpdated: PullRequest!
+  pullRequestUpdated(
+    """
+    [Internal] Optional filter for pull request subscription events.
+    """
+    filter: PullRequestSubscriptionFilter
+  ): PullRequest!
   """
   Triggered when a roadmap is created
   """
@@ -47083,6 +47766,10 @@ type Team implements Node {
   Whether to group recent issue history entries.
   """
   groupIssueHistory: Boolean!
+  """
+  [Internal] Inheritance requirements that this team applies to its descendants.
+  """
+  hierarchySettings: JSONObject!
   """
   The icon of the team.
   """
@@ -48000,6 +48687,21 @@ input TeamFilter {
   visibility: TeamVisibilityComparator
 }
 
+input TeamHierarchySettingsInput {
+  """
+  Require sub-teams to inherit their parent’s estimate settings.
+  """
+  requireIssueEstimationInheritance: Boolean
+  """
+  Require sub-teams to inherit their parent’s project statuses.
+  """
+  requireProjectStatusInheritance: Boolean
+  """
+  Require sub-teams to inherit their parent’s issue statuses.
+  """
+  requireWorkflowStatusInheritance: Boolean
+}
+
 """
 A join entity that defines a user's membership in a team. Each membership record links a user to a team and tracks whether the user is a team owner. Users can be members of multiple teams, and their memberships determine which teams' issues and resources they can access.
 """
@@ -48482,6 +49184,10 @@ input TeamUpdateInput {
   [Internal] How to handle sub-teams when retiring. Required if the team has active sub-teams.
   """
   handleSubTeamsOnRetirement: TeamRetirementSubTeamHandling
+  """
+  [Internal] Inheritance requirements that this team applies to its descendants. Omitted keys retain their current values.
+  """
+  hierarchySettings: TeamHierarchySettingsInput
   """
   The icon of the team.
   """
@@ -51172,6 +51878,14 @@ type ViewPreferencesValues {
   """
   automationOrdering: String
   """
+  Whether to group consecutive runs with no changes in Loop run history.
+  """
+  automationRunHistoryGroupNoChanges: Boolean
+  """
+  Whether to show the number of recorded changes in Loop run history.
+  """
+  automationRunHistoryShowChangeCount: Boolean
+  """
   Whether to show the run duration in Loop run history.
   """
   automationRunHistoryShowDuration: Boolean
@@ -51660,6 +52374,10 @@ type ViewPreferencesValues {
   """
   memberFieldTeams: Boolean
   """
+  Whether clicking an item in a board or list opens it in a split view panel.
+  """
+  openInSplitView: Boolean
+  """
   [Internal] Ordered ids of the documents pinned to the top of a documents list.
   """
   pinnedDocumentIds: [String!]
@@ -51936,6 +52654,14 @@ type ViewPreferencesValues {
   """
   releasePipelinesViewOrdering: String
   """
+  [Internal] The review grouping on the board layout.
+  """
+  reviewBoardGrouping: String
+  """
+  [Internal] The review sub-grouping on the board layout.
+  """
+  reviewBoardSubGrouping: String
+  """
   Whether to show the review avatar field.
   """
   reviewFieldAvatar: Boolean
@@ -51951,6 +52677,10 @@ type ViewPreferencesValues {
   Whether to show the review identifier field.
   """
   reviewFieldIdentifier: Boolean
+  """
+  Whether to show GitHub labels on review list items. Null if the preference is unset.
+  """
+  reviewFieldLabels: Boolean
   """
   Whether to show the pull request opened timestamp.
   """
@@ -51983,6 +52713,14 @@ type ViewPreferencesValues {
   The review grouping.
   """
   reviewGrouping: String
+  """
+  [Internal] The top-level grouping of the reviews list.
+  """
+  reviewOuterGrouping: String
+  """
+  [Internal] The grouping inside the top-level groups of the reviews list.
+  """
+  reviewSubGrouping: String
   """
   The review view ordering.
   """
@@ -52196,6 +52934,10 @@ type ViewPreferencesValues {
   """
   triageViewOrdering: String
   """
+  [Internal] Which of a user's pull requests the Diffs tab on their profile lists.
+  """
+  userDiffsScope: String
+  """
   The issue ordering.
   """
   viewOrdering: String
@@ -52299,6 +53041,8 @@ enum ViewType {
   triage
   userProfile
   userProfileCreatedByUser
+  userProfileDiffs
+  userProfileProjects
   workspaceMembers
 }
 
@@ -52861,6 +53605,10 @@ type WorkflowDefinition implements Node {
   The user who owns the workflow. If not defined, it means the creator should be considered as the owner.
   """
   owner: User
+  """
+  Whether an issue-triggered workflow posts its results as a comment on the triggering issue. When false, results stay in the run. Approval requests and questions are still posted.
+  """
+  postResultsToEntity: Boolean!
   """
   The contextual project view associated with the workflow.
   """

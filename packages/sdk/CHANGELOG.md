@@ -1,5 +1,217 @@
 # Change Log
 
+## 100.0.0
+
+### Major Changes
+
+- feat(schema): [breaking] Input field 'subdomain' was removed from input object type 'SalesforceSettingsInput' (SalesforceSettingsInput.subdomain)
+
+  feat(schema): [breaking] Input field 'url' was removed from input object type 'SalesforceSettingsInput' (SalesforceSettingsInput.url)
+
+  feat(schema): [dangerous] Enum value 'providerPolicy' was added to enum 'AiConversationErrorType' (AiConversationErrorType.providerPolicy)
+
+  feat(schema): [dangerous] Enum value 'BashKill' was added to enum 'AiConversationTool' (AiConversationTool.BashKill)
+
+  feat(schema): [dangerous] Enum value 'BashOutput' was added to enum 'AiConversationTool' (AiConversationTool.BashOutput)
+
+  feat(schema): [dangerous] Enum value 'DevServer' was added to enum 'AiConversationTool' (AiConversationTool.DevServer)
+
+  feat(schema): [dangerous] Enum value 'EditSandboxFile' was added to enum 'AiConversationTool' (AiConversationTool.EditSandboxFile)
+
+  feat(schema): [dangerous] Enum value 'GitPush' was added to enum 'AiConversationTool' (AiConversationTool.GitPush)
+
+  feat(schema): [dangerous] Enum value 'SandboxPullRequest' was added to enum 'AiConversationTool' (AiConversationTool.SandboxPullRequest)
+
+  feat(schema): [dangerous] Enum value 'WriteSandboxFile' was added to enum 'AiConversationTool' (AiConversationTool.WriteSandboxFile)
+
+  feat(schema): [dangerous] Member 'AiConversationBashKillToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Member 'AiConversationBashOutputToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Member 'AiConversationDevServerToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Member 'AiConversationEditSandboxFileToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Member 'AiConversationGitPushToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Member 'AiConversationSandboxPullRequestToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Member 'AiConversationWriteSandboxFileToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Input field 'null' was added to input object type 'CustomerTierFilter' (CustomerTierFilter.null)
+
+  feat(schema): [dangerous] Input field 'parentOrganizationId' was added to input object type 'DocumentCreateInput' (DocumentCreateInput.parentOrganizationId)
+
+  feat(schema): [dangerous] Input field 'parentOrganizationId' was added to input object type 'DocumentUpdateInput' (DocumentUpdateInput.parentOrganizationId)
+
+  feat(schema): [dangerous] Enum value 'gitlabPersonal' was added to enum 'IntegrationService' (IntegrationService.gitlabPersonal)
+
+  feat(schema): [dangerous] Input field 'claudeInference' was added to input object type 'OrganizationCodingAgentSettingsInput' (OrganizationCodingAgentSettingsInput.claudeInference)
+
+  feat(schema): [dangerous] Input field 'codexInference' was added to input object type 'OrganizationCodingAgentSettingsInput' (OrganizationCodingAgentSettingsInput.codexInference)
+
+  feat(schema): [dangerous] Input field 'linearReviewSettings' was added to input object type 'OrganizationUpdateInput' (OrganizationUpdateInput.linearReviewSettings)
+
+  feat(schema): [dangerous] Argument 'filter: PullRequestSubscriptionFilter' added to field 'Subscription.pullRequestUpdated' (Subscription.pullRequestUpdated.filter)
+
+  feat(schema): [dangerous] Input field 'hierarchySettings' was added to input object type 'TeamUpdateInput' (TeamUpdateInput.hierarchySettings)
+
+  feat(schema): [dangerous] Enum value 'userProfileDiffs' was added to enum 'ViewType' (ViewType.userProfileDiffs)
+
+  feat(schema): [dangerous] Enum value 'userProfileProjects' was added to enum 'ViewType' (ViewType.userProfileProjects)
+
+  feat(schema): [non_breaking] Type 'AiConversationBashKillToolCall' was added (AiConversationBashKillToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationBashKillToolCallArgs' was added (AiConversationBashKillToolCallArgs)
+
+  feat(schema): [non_breaking] Type 'AiConversationBashOutputToolCall' was added (AiConversationBashOutputToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationBashOutputToolCallArgs' was added (AiConversationBashOutputToolCallArgs)
+
+  feat(schema): [non_breaking] Type 'AiConversationDevServerToolCall' was added (AiConversationDevServerToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationDevServerToolCallArgs' was added (AiConversationDevServerToolCallArgs)
+
+  feat(schema): [non_breaking] Type 'AiConversationDevServerToolCallArgsAction' was added (AiConversationDevServerToolCallArgsAction)
+
+  feat(schema): [non_breaking] Type 'AiConversationEditSandboxFileToolCall' was added (AiConversationEditSandboxFileToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationEditSandboxFileToolCallArgs' was added (AiConversationEditSandboxFileToolCallArgs)
+
+  feat(schema): [non_breaking] Type 'AiConversationGitPushToolCall' was added (AiConversationGitPushToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationGitPushToolCallArgs' was added (AiConversationGitPushToolCallArgs)
+
+  feat(schema): [non_breaking] Type 'AiConversationSandboxPullRequestToolCall' was added (AiConversationSandboxPullRequestToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationSandboxPullRequestToolCallArgs' was added (AiConversationSandboxPullRequestToolCallArgs)
+
+  feat(schema): [non_breaking] Type 'AiConversationSandboxPullRequestToolCallResult' was added (AiConversationSandboxPullRequestToolCallResult)
+
+  feat(schema): [non_breaking] Type 'AiConversationWriteSandboxFileToolCall' was added (AiConversationWriteSandboxFileToolCall)
+
+  feat(schema): [non_breaking] Type 'AiConversationWriteSandboxFileToolCallArgs' was added (AiConversationWriteSandboxFileToolCallArgs)
+
+  feat(schema): [non_breaking] Type 'CodingAgentSandbox' was added (CodingAgentSandbox)
+
+  feat(schema): [non_breaking] Type 'CodingEnvironment' was added (CodingEnvironment)
+
+  feat(schema): [non_breaking] Type 'CodingInferenceKey' was added (CodingInferenceKey)
+
+  feat(schema): [non_breaking] Type 'CodingInferenceKeyTestPayload' was added (CodingInferenceKeyTestPayload)
+
+  feat(schema): [non_breaking] Type 'Deployment' was added (Deployment)
+
+  feat(schema): [non_breaking] Type 'EmailIntakeAddressConnection' was added (EmailIntakeAddressConnection)
+
+  feat(schema): [non_breaking] Type 'EmailIntakeAddressEdge' was added (EmailIntakeAddressEdge)
+
+  feat(schema): [non_breaking] Type 'JiraSyncHealthCheckPayload' was added (JiraSyncHealthCheckPayload)
+
+  feat(schema): [non_breaking] Type 'JiraSyncHealthFindingPayload' was added (JiraSyncHealthFindingPayload)
+
+  feat(schema): [non_breaking] Type 'OrganizationCodingInferenceKeyInput' was added (OrganizationCodingInferenceKeyInput)
+
+  feat(schema): [non_breaking] Type 'OrganizationLinearReviewRepositoryInput' was added (OrganizationLinearReviewRepositoryInput)
+
+  feat(schema): [non_breaking] Type 'OrganizationLinearReviewSettingsInput' was added (OrganizationLinearReviewSettingsInput)
+
+  feat(schema): [non_breaking] Type 'PullRequestSubscriptionFilter' was added (PullRequestSubscriptionFilter)
+
+  feat(schema): [non_breaking] Type 'RepositoryScope' was added (RepositoryScope)
+
+  feat(schema): [non_breaking] Type 'TeamHierarchySettingsInput' was added (TeamHierarchySettingsInput)
+
+  feat(schema): [non_breaking] Field 'promptAuthor' was added to object type 'AgentActivity' (AgentActivity.promptAuthor)
+
+  feat(schema): [non_breaking] Field 'snippet' was added to object type 'AiConversationPostChatMessageToolCallResult' (AiConversationPostChatMessageToolCallResult.snippet)
+
+  feat(schema): [non_breaking] Field 'subParts' was added to object type 'AiConversationToolCallPart' (AiConversationToolCallPart.subParts)
+
+  feat(schema): [non_breaking] Input field 'AirbyteConfigurationInput.apiKey' description changed from 'Linear export API key.' to 'Linear export API key. Must be 40 random letters and digits, optionally prefixed with `lin_integration_`.' (AirbyteConfigurationInput.apiKey)
+
+  feat(schema): [non_breaking] Input field 'CustomerNeedUpdateInput.id' description changed from 'An optional identifier in UUID v4 format. If provided, will be set as the customer need's ID.' to 'Ignored. The mutation's id argument selects the customer need to update.' (CustomerNeedUpdateInput.id)
+
+  feat(schema): [non_breaking] Field 'initiativeFilter' was added to object type 'Dashboard' (Dashboard.initiativeFilter)
+
+  feat(schema): [non_breaking] Field 'pullRequestFilter' was added to object type 'Dashboard' (Dashboard.pullRequestFilter)
+
+  feat(schema): [non_breaking] Field 'codingAgentSandbox' was added to object type 'Diff' (Diff.codingAgentSandbox)
+
+  feat(schema): [non_breaking] Field 'emailAddress' was added to object type 'EmailIntakeAddress' (EmailIntakeAddress.emailAddress)
+
+  feat(schema): [non_breaking] Field 'embeddedDependencies' was added to object type 'IssueDraft' (IssueDraft.embeddedDependencies)
+
+  feat(schema): [non_breaking] Field 'triggeredBy' was added to object type 'LoopExecution' (LoopExecution.triggeredBy)
+
+  feat(schema): [non_breaking] Field 'organizationCodingInferenceKeyDelete' was added to object type 'Mutation' (Mutation.organizationCodingInferenceKeyDelete)
+
+  feat(schema): [non_breaking] Field 'organizationCodingInferenceKeyTest' was added to object type 'Mutation' (Mutation.organizationCodingInferenceKeyTest)
+
+  feat(schema): [non_breaking] Field 'organizationCodingInferenceKeyUpdate' was added to object type 'Mutation' (Mutation.organizationCodingInferenceKeyUpdate)
+
+  feat(schema): [non_breaking] Field 'Mutation.documentShare' description changed from '[Internal] Shares a personal document and its sub-documents with workspace members at a role. Only the owner of the document can share it. New collaborators are subscribed to the document. Users who already have another role move to the given one.' to '[Internal] Shares a document and its sub-documents with workspace members at a role. On a personal document only the owner can share it. On any other document the owner, an owner of one of its teams, or a workspace admin can, the people must be able to see the document, and the role must be above its general access. New collaborators are subscribed to the document. Users who already have another role move to the given one.' (Mutation.documentShare)
+
+  feat(schema): [non_breaking] Description for argument 'id' on field 'Mutation.documentShare' changed from 'The identifier of the personal document to share.' to 'The identifier of the document to share.' (Mutation.documentShare.id)
+
+  feat(schema): [non_breaking] Field 'Mutation.documentUnshare' description changed from '[Internal] Stops sharing a personal document and its sub-documents with users. The owner can remove any collaborator; a collaborator can only remove themselves.' to '[Internal] Stops sharing a document and its sub-documents with users. Whoever can manage access to the document can remove any collaborator; a collaborator can only remove themselves.' (Mutation.documentUnshare)
+
+  feat(schema): [non_breaking] Description for argument 'id' on field 'Mutation.documentUnshare' changed from 'The identifier of the personal document to stop sharing.' to 'The identifier of the document to stop sharing.' (Mutation.documentUnshare.id)
+
+  feat(schema): [non_breaking] Field 'Mutation.documentUpdateCollaboratorRole' description changed from '[Internal] Changes the role of users a personal document is shared with. Only the owner of the document can change roles. Only users who already collaborate on the document change; no one is added. With applyToSubDocuments, sub-documents where a user has the role they had on this document before the change are also changed.' to '[Internal] Changes the role of users a document is shared with. On a personal document only the owner can change roles. On any other document the owner, an owner of one of its teams, or a workspace admin can, and the role must be above its general access. Only users who already collaborate on the document change; no one is added. With applyToSubDocuments, sub-documents where a user has the role they had on this document before the change are also changed.' (Mutation.documentUpdateCollaboratorRole)
+
+  feat(schema): [non_breaking] Description for argument 'id' on field 'Mutation.documentUpdateCollaboratorRole' changed from 'The identifier of the personal document.' to 'The identifier of the document.' (Mutation.documentUpdateCollaboratorRole.id)
+
+  feat(schema): [non_breaking] Field 'Mutation.documentUpdateGeneralAccess' description changed from '[Internal] Changes what users other than the owner can do with a document that is not personal: edit, comment, or view. Only the owner of the document or a workspace admin can change it. Comment and view need an owner who can access the document.' to '[Internal] Changes what users other than the owner can do with a document that is not personal: edit, comment, or view. Only the owner of the document, an owner of one of its teams, or a workspace admin can change it. Comment and view need an owner who can access the document.' (Mutation.documentUpdateGeneralAccess)
+
+  feat(schema): [non_breaking] Description for argument 'trash' on field 'Mutation.issueArchive' changed from 'Whether to trash the issue.' to 'Whether to trash the issue and its sub-issues.' (Mutation.issueArchive.trash)
+
+  feat(schema): [non_breaking] Field 'Mutation.issueDelete' description changed from 'Deletes (trashes) an issue.' to 'Deletes (trashes) an issue and its sub-issues.' (Mutation.issueDelete)
+
+  feat(schema): [non_breaking] Field 'Mutation.releaseUpdateByPipeline' description changed from 'Updates a release by pipeline identifier. Finds the release by version or latest started/planned release, and optionally transitions it to a new stage by name.' to 'Updates a release by pipeline identifier. Finds the release by version, otherwise the latest started release or else the planned release with the earliest target date, and optionally transitions it to a new stage by name.' (Mutation.releaseUpdateByPipeline)
+
+  feat(schema): [non_breaking] Field 'linearReviewSettings' was added to object type 'Organization' (Organization.linearReviewSettings)
+
+  feat(schema): [non_breaking] Input field 'OrganizationManagedTeamFeaturesInput.codingSessions' description changed from '[Internal] The teams coding sessions are limited to. Omit it to not limit coding sessions by team, or pass an empty list to allow no team. `codingAgentEnabled` still turns coding sessions on or off for the workspace.' to '[Internal] The teams coding sessions are limited to. Omit it to not limit coding sessions by team. A changed list needs at least one team. If every team left in it was deleted, the list is saved empty, so no team can use coding sessions. `codingAgentEnabled` still turns coding sessions on or off for the workspace.' (OrganizationManagedTeamFeaturesInput.codingSessions)
+
+  feat(schema): [non_breaking] Input field 'OrganizationManagedTeamFeaturesInput.loops' description changed from '[Internal] The teams Loops are limited to. Omit it to not limit Loops by team, or pass an empty list to allow no team. `agentAutomationEnabled` still turns Loops on or off for the workspace.' to '[Internal] The teams Loops are limited to. Omit it to not limit Loops by team. A changed list needs at least one team. If every team left in it was deleted, the list is saved empty, so only Loops with no team run. `agentAutomationEnabled` still turns Loops on or off for the workspace.' (OrganizationManagedTeamFeaturesInput.loops)
+
+  feat(schema): [non_breaking] Field 'ProjectUpdate.infoSnapshot' description changed from '[Internal] A snapshot of project properties at the time the update was posted, including team, milestone, and issue statistics. Used to compute diffs between consecutive updates.' to '[Internal] A snapshot of project properties at the time the update was posted, including milestone and issue progress. Used to compute diffs between consecutive updates.' (ProjectUpdate.infoSnapshot)
+
+  feat(schema): [non_breaking] Field 'deployments' was added to object type 'PullRequest' (PullRequest.deployments)
+
+  feat(schema): [non_breaking] Field 'emailIntakeAddresses' was added to object type 'Query' (Query.emailIntakeAddresses)
+
+  feat(schema): [non_breaking] Field 'integrationJiraSyncHealthCheck' was added to object type 'Query' (Query.integrationJiraSyncHealthCheck)
+
+  feat(schema): [non_breaking] Field 'organizationCodingInferenceKeys' was added to object type 'Query' (Query.organizationCodingInferenceKeys)
+
+  feat(schema): [non_breaking] Input field 'ReleaseUpdateByPipelineInput.version' description changed from 'The version of the release to update. If not provided, the latest started or latest planned release will be updated.' to 'The version of the release to update. If not provided, the latest started release is updated, or else the planned release with the earliest target date.' (ReleaseUpdateByPipelineInput.version)
+
+  feat(schema): [non_breaking] Input field 'ReleaseUpdateByPipelineInputBase.version' description changed from 'The version of the release to update. If not provided, the latest started or latest planned release will be updated.' to 'The version of the release to update. If not provided, the latest started release is updated, or else the planned release with the earliest target date.' (ReleaseUpdateByPipelineInputBase.version)
+
+  feat(schema): [non_breaking] Field 'hierarchySettings' was added to object type 'Team' (Team.hierarchySettings)
+
+  feat(schema): [non_breaking] Field 'automationRunHistoryGroupNoChanges' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.automationRunHistoryGroupNoChanges)
+
+  feat(schema): [non_breaking] Field 'automationRunHistoryShowChangeCount' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.automationRunHistoryShowChangeCount)
+
+  feat(schema): [non_breaking] Field 'openInSplitView' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.openInSplitView)
+
+  feat(schema): [non_breaking] Field 'reviewBoardGrouping' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.reviewBoardGrouping)
+
+  feat(schema): [non_breaking] Field 'reviewBoardSubGrouping' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.reviewBoardSubGrouping)
+
+  feat(schema): [non_breaking] Field 'reviewFieldLabels' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.reviewFieldLabels)
+
+  feat(schema): [non_breaking] Field 'reviewOuterGrouping' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.reviewOuterGrouping)
+
+  feat(schema): [non_breaking] Field 'reviewSubGrouping' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.reviewSubGrouping)
+
+  feat(schema): [non_breaking] Field 'userDiffsScope' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.userDiffsScope)
+
+  feat(schema): [non_breaking] Field 'postResultsToEntity' was added to object type 'WorkflowDefinition' (WorkflowDefinition.postResultsToEntity)
+
 ## 99.0.0
 
 ### Major Changes

@@ -372,6 +372,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the agentActivity.promptAuthor query for L.User */
+    it("agentActivity.promptAuthor", async () => {
+      if (_agentActivity) {
+        const agentActivity_promptAuthor: L.User | undefined | null = await _agentActivity.promptAuthor;
+        expect(agentActivity_promptAuthor instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No AgentActivity found - cannot test agentActivity.promptAuthor query");
+      }
+    });
+
     /** Test the agentActivity.sourceComment query for L.Comment */
     it("agentActivity.sourceComment", async () => {
       if (_agentActivity) {
@@ -1734,15 +1744,32 @@ describe("generated", () => {
     });
   });
 
-  /** Test EmailIntakeAddress query */
-  describe("EmailIntakeAddress", () => {
+  /** Test all EmailIntakeAddress queries */
+  describe("EmailIntakeAddresses", () => {
     let _emailIntakeAddress: L.EmailIntakeAddress | undefined | null;
+    let _emailIntakeAddress_id: string | undefined | null;
 
-    /** Test the root model query for EmailIntakeAddress */
+    /** Test the root connection query for the EmailIntakeAddress */
+    it("emailIntakeAddresses", async () => {
+      const emailIntakeAddresses: L.EmailIntakeAddressConnection | undefined | null =
+        await client.emailIntakeAddresses();
+      const emailIntakeAddress = emailIntakeAddresses?.nodes?.[0];
+      _emailIntakeAddress_id = emailIntakeAddress?.id;
+      expect(emailIntakeAddresses instanceof L.EmailIntakeAddressConnection);
+    });
+
+    /** Test the root query for a single EmailIntakeAddress */
     it("emailIntakeAddress", async () => {
-      const emailIntakeAddress: L.EmailIntakeAddress | undefined | null = await client.emailIntakeAddress("mock-id");
-      _emailIntakeAddress = emailIntakeAddress;
-      expect(emailIntakeAddress instanceof L.EmailIntakeAddress);
+      if (_emailIntakeAddress_id) {
+        const emailIntakeAddress: L.EmailIntakeAddress | undefined | null =
+          await client.emailIntakeAddress(_emailIntakeAddress_id);
+        _emailIntakeAddress = emailIntakeAddress;
+        expect(emailIntakeAddress instanceof L.EmailIntakeAddress);
+      } else {
+        console.warn(
+          "codegen-doc:print: No first EmailIntakeAddress found in connection - cannot test emailIntakeAddress query"
+        );
+      }
     });
 
     /** Test the emailIntakeAddress model query for EmailIntakeAddress_SesDomainIdentity */
@@ -1754,6 +1781,49 @@ describe("generated", () => {
         console.warn(
           "codegen-doc:print: No emailIntakeAddress found - cannot test _emailIntakeAddress.sesDomainIdentity query"
         );
+      }
+    });
+
+    /** Test the emailIntakeAddress.creator query for L.User */
+    it("emailIntakeAddress.creator", async () => {
+      if (_emailIntakeAddress) {
+        const emailIntakeAddress_creator: L.User | undefined | null = await _emailIntakeAddress.creator;
+        expect(emailIntakeAddress_creator instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No EmailIntakeAddress found - cannot test emailIntakeAddress.creator query");
+      }
+    });
+
+    /** Test the emailIntakeAddress.organization query for L.Organization */
+    it("emailIntakeAddress.organization", async () => {
+      if (_emailIntakeAddress) {
+        const emailIntakeAddress_organization: L.Organization | undefined | null =
+          await _emailIntakeAddress.organization;
+        expect(emailIntakeAddress_organization instanceof L.Organization);
+      } else {
+        console.warn(
+          "codegen-doc:print: No EmailIntakeAddress found - cannot test emailIntakeAddress.organization query"
+        );
+      }
+    });
+
+    /** Test the emailIntakeAddress.team query for L.Team */
+    it("emailIntakeAddress.team", async () => {
+      if (_emailIntakeAddress) {
+        const emailIntakeAddress_team: L.Team | undefined | null = await _emailIntakeAddress.team;
+        expect(emailIntakeAddress_team instanceof L.Team);
+      } else {
+        console.warn("codegen-doc:print: No EmailIntakeAddress found - cannot test emailIntakeAddress.team query");
+      }
+    });
+
+    /** Test the emailIntakeAddress.template query for L.Template */
+    it("emailIntakeAddress.template", async () => {
+      if (_emailIntakeAddress) {
+        const emailIntakeAddress_template: L.Template | undefined | null = await _emailIntakeAddress.template;
+        expect(emailIntakeAddress_template instanceof L.Template);
+      } else {
+        console.warn("codegen-doc:print: No EmailIntakeAddress found - cannot test emailIntakeAddress.template query");
       }
     });
   });
