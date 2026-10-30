@@ -1,7 +1,7 @@
 import { createDPoPFetch } from "./dpop.js";
 import { parseLinearError } from "./error.js";
 import { LinearGraphQLClient } from "./graphql-client.js";
-import { LinearClientOptions, LinearClientParsedOptions } from "./types.js";
+import { LinearClientOptions, LinearClientParsedOptions, LinearGraphQLClientOptions } from "./types.js";
 import { mergeHeaders, serializeUserAgent } from "./utils.js";
 import { LinearSdk } from "./_generated_sdk.js";
 
@@ -31,7 +31,10 @@ function parseAuth({
   apiKey,
   accessToken,
   dpop,
-}: Pick<LinearClientOptions, "apiKey" | "accessToken" | "dpop">): Pick<LinearClientParsedOptions, "headers" | "fetch"> {
+}: Pick<LinearClientOptions, "apiKey" | "accessToken" | "dpop">): Pick<
+  LinearGraphQLClientOptions,
+  "headers" | "fetch"
+> {
   if (dpop) {
     if (!accessToken || apiKey) {
       throw new Error("LinearClient dpop requires an OAuth accessToken and cannot be used with an apiKey");
@@ -64,7 +67,7 @@ function parseAuth({
  * Validate and return default LinearGraphQLClient options
  *
  * @param options initial request options to pass to the graphql client
- * @returns parsed graphql client options
+ * @returns parsed graphql client options, and the fetch to send requests with
  */
 function parseClientOptions({
   apiKey,
@@ -73,7 +76,7 @@ function parseClientOptions({
   apiUrl,
   headers,
   ...opts
-}: LinearClientOptions): LinearClientParsedOptions {
+}: LinearClientOptions): LinearClientParsedOptions & Pick<LinearGraphQLClientOptions, "fetch"> {
   const auth = parseAuth({ apiKey, accessToken, dpop });
 
   const resolvedApiUrl = apiUrl ?? "https://api.linear.app/graphql";
@@ -108,8 +111,8 @@ export class LinearClient extends LinearSdk {
   public client: LinearGraphQLClient;
 
   public constructor(options: LinearClientOptions) {
-    const parsedOptions = parseClientOptions(options);
-    const graphQLClient = new LinearGraphQLClient(parsedOptions.apiUrl, parsedOptions);
+    const { fetch, ...parsedOptions } = parseClientOptions(options);
+    const graphQLClient = new LinearGraphQLClient(parsedOptions.apiUrl, { ...parsedOptions, fetch });
 
     super(<Data, Variables extends Record<string, unknown>>(doc: string, vars?: Variables) =>
       /** Call the LinearGraphQLClient */

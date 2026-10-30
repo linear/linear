@@ -165,6 +165,7 @@ describe("LinearClient with dpop", () => {
     const client = new LinearClient({ accessToken: ACCESS_TOKEN, dpop: await createSigner(), apiUrl: API_URL });
 
     expect(await client.viewer).toEqual(expect.objectContaining({ id: "viewerId" }));
+    expect(client.options).not.toHaveProperty("fetch");
 
     const [url, init] = fetch.mock.calls[0];
     const headers = new Headers(init.headers);
