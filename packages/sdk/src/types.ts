@@ -21,7 +21,7 @@ export interface LinearGraphQLClientOptions extends RequestInit {
 /**
  * Validated LinearGraphQLClient options
  */
-export interface LinearClientParsedOptions extends LinearGraphQLClientOptions {
+export interface LinearClientParsedOptions extends RequestInit {
   /** The url to the Linear graphql api defaulted to production */
   apiUrl: string;
 }
