@@ -1,6 +1,6 @@
 import { print } from "graphql/language/printer.js";
 import { parseLinearError } from "./error.js";
-import { GraphQLRequestContext, LinearRawResponse } from "./types.js";
+import { GraphQLRequestContext, LinearGraphQLClientOptions, LinearRawResponse } from "./types.js";
 import { mergeHeaders } from "./utils.js";
 
 /**
@@ -52,9 +52,9 @@ export class GraphQLClientError<Data, Variables extends Record<string, unknown>>
  */
 export class LinearGraphQLClient {
   private url: string;
-  private options: RequestInit;
+  private options: LinearGraphQLClientOptions;
 
-  public constructor(url: string, options?: RequestInit) {
+  public constructor(url: string, options?: LinearGraphQLClientOptions) {
     this.url = url;
     this.options = options || {};
   }
@@ -64,37 +64,10 @@ export class LinearGraphQLClient {
     variables?: Variables,
     requestHeaders?: RequestInit["headers"]
   ): Promise<LinearRawResponse<Data>> {
-    const { headers, ...others } = this.options;
-    const body = JSON.stringify({ query, variables });
-
-    const fetch = globalThis.fetch;
-    const response = await fetch(this.url, {
-      method: "POST",
-      headers: mergeHeaders(
-        typeof body === "string" ? { "Content-Type": "application/json" } : {},
-        headers,
-        requestHeaders
-      ),
-      body,
-      ...others,
+    const { response, result } = await this.send<Data, Variables>(query, variables, requestHeaders).catch(error => {
+      throw error instanceof GraphQLClientError ? parseLinearError(error) : error;
     });
-
-    const result = await getResult<Data>(response);
-
-    if (typeof result !== "string" && response.ok && !result.errors && result.data) {
-      return { ...result, headers: response.headers, status: response.status };
-    } else {
-      throw parseLinearError(
-        new GraphQLClientError(
-          {
-            ...(typeof result === "string" ? { error: result } : result),
-            status: response.status,
-            headers: response.headers,
-          },
-          { query, variables }
-        )
-      );
-    }
+    return { ...result, headers: response.headers, status: response.status };
   }
 
   /**
@@ -105,36 +78,9 @@ export class LinearGraphQLClient {
     variables?: Variables,
     requestHeaders?: RequestInit["headers"]
   ): Promise<Data> {
-    const { headers, ...others } = this.options;
     const query = typeof document === "string" ? document : print(document);
-
-    const body = JSON.stringify({ query, variables });
-
-    const response = await fetch(this.url, {
-      method: "POST",
-      headers: mergeHeaders(
-        typeof body === "string" ? { "Content-Type": "application/json" } : {},
-        headers,
-        requestHeaders
-      ),
-      body,
-      ...others,
-    });
-
-    const result = await getResult<Data>(response);
-
-    if (typeof result !== "string" && response.ok && !result.errors && result.data) {
-      return result.data;
-    } else {
-      throw new GraphQLClientError(
-        {
-          ...(typeof result === "string" ? { error: result } : result),
-          status: response.status,
-          headers: response.headers,
-        },
-        { query, variables }
-      );
-    }
+    const { data } = await this.send<Data, Variables>(query, variables, requestHeaders);
+    return data;
   }
 
   public setHeaders(headers: RequestInit["headers"]): LinearGraphQLClient {
@@ -148,6 +94,40 @@ export class LinearGraphQLClient {
   public setHeader(key: string, value: string): LinearGraphQLClient {
     this.options.headers = mergeHeaders(this.options.headers, { [key]: value });
     return this;
+  }
+
+  /**
+   * Post a GraphQL query, throwing a GraphQLClientError on unsuccessful responses
+   */
+  private async send<Data, Variables extends Record<string, unknown>>(
+    query: string,
+    variables?: Variables,
+    requestHeaders?: RequestInit["headers"]
+  ): Promise<{ response: Response; result: LinearRawResponse<Data>; data: Data }> {
+    const { headers, fetch = globalThis.fetch, ...others } = this.options;
+    const body = JSON.stringify({ query, variables });
+
+    const response = await fetch(this.url, {
+      method: "POST",
+      headers: mergeHeaders({ "Content-Type": "application/json" }, headers, requestHeaders),
+      body,
+      ...others,
+    });
+
+    const result = await getResult<Data>(response);
+
+    if (typeof result !== "string" && response.ok && !result.errors && result.data) {
+      return { response, result, data: result.data };
+    }
+
+    throw new GraphQLClientError(
+      {
+        ...(typeof result === "string" ? { error: result } : result),
+        status: response.status,
+        headers: response.headers,
+      },
+      { query, variables }
+    );
   }
 }
 

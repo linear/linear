@@ -1,4 +1,4 @@
-import { describe, beforeEach, it, expect } from "vitest";
+import { describe, beforeEach, it, expect, vi } from "vitest";
 import { JsonObject } from "type-fest";
 import { LinearClient, LinearGraphQLClient } from "../index.js";
 import { LinearErrorType } from "../types.js";
@@ -78,6 +78,25 @@ describe("LinearClient", () => {
     await client.request("query { viewer { id } }");
 
     expect(requests.at(-1)?.headers.authorization).toEqual(MOCK_API_KEY);
+  });
+
+  it("sends requests through a custom fetch", async () => {
+    const fetch = vi.fn((url: string, init: RequestInit) => {
+      const headers = new Headers(init.headers);
+      headers.set("Authorization", MOCK_API_KEY);
+      return globalThis.fetch(url, { ...init, headers });
+    });
+    const client = new LinearGraphQLClient(ctx.url, { headers: { "X-Test": "expected" }, fetch });
+    const response = await client.rawRequest<{ viewer: { id: string } }, Record<string, never>>(
+      "query { viewer { id } }"
+    );
+
+    expect(response.data?.viewer).toEqual({ id: "viewerId" });
+    expect(fetch).toHaveBeenCalledWith(
+      ctx.url,
+      expect.objectContaining({ method: "POST", headers: expect.objectContaining({ "X-Test": "expected" }) })
+    );
+    expect(fetch.mock.calls[0][1]).not.toHaveProperty("fetch");
   });
 
   it("has chained api", async () => {
