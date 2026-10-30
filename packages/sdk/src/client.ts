@@ -1,3 +1,4 @@
+import { createDPoPFetch } from "./dpop.js";
 import { parseLinearError } from "./error.js";
 import { LinearGraphQLClient } from "./graphql-client.js";
 import { LinearClientOptions, LinearClientParsedOptions } from "./types.js";
@@ -24,6 +25,42 @@ function validateApiUrl(apiUrl: string): void {
 }
 
 /**
+ * Resolve how requests authenticate: a static Authorization header, or a per-request DPoP fetch
+ */
+function parseAuth({
+  apiKey,
+  accessToken,
+  dpop,
+}: Pick<LinearClientOptions, "apiKey" | "accessToken" | "dpop">): Pick<LinearClientParsedOptions, "headers" | "fetch"> {
+  if (dpop) {
+    if (!accessToken || apiKey) {
+      throw new Error("LinearClient dpop requires an OAuth accessToken and cannot be used with an apiKey");
+    }
+    if (accessToken.startsWith("Bearer ")) {
+      throw new Error("LinearClient dpop requires the raw accessToken, without a Bearer prefix");
+    }
+    return { fetch: createDPoPFetch(dpop, accessToken) };
+  }
+
+  if (!accessToken && !apiKey) {
+    throw new Error(
+      "No accessToken or apiKey provided to the LinearClient - create one here: https://linear.app/settings/account/security"
+    );
+  }
+
+  return {
+    headers: {
+      /** Use bearer if oauth token exists, otherwise use the provided apiKey */
+      Authorization: accessToken
+        ? accessToken.startsWith("Bearer ")
+          ? accessToken
+          : `Bearer ${accessToken}`
+        : (apiKey ?? ""),
+    },
+  };
+}
+
+/**
  * Validate and return default LinearGraphQLClient options
  *
  * @param options initial request options to pass to the graphql client
@@ -32,29 +69,19 @@ function validateApiUrl(apiUrl: string): void {
 function parseClientOptions({
   apiKey,
   accessToken,
+  dpop,
   apiUrl,
   headers,
   ...opts
 }: LinearClientOptions): LinearClientParsedOptions {
-  if (!accessToken && !apiKey) {
-    throw new Error(
-      "No accessToken or apiKey provided to the LinearClient - create one here: https://linear.app/settings/account/security"
-    );
-  }
+  const auth = parseAuth({ apiKey, accessToken, dpop });
 
   const resolvedApiUrl = apiUrl ?? "https://api.linear.app/graphql";
   validateApiUrl(resolvedApiUrl);
 
   return {
     headers: mergeHeaders(
-      {
-        /** Use bearer if oauth token exists, otherwise use the provided apiKey */
-        Authorization: accessToken
-          ? accessToken.startsWith("Bearer ")
-            ? accessToken
-            : `Bearer ${accessToken}`
-          : (apiKey ?? ""),
-      },
+      auth.headers,
       /** Use configured headers */
       headers,
       {
@@ -64,6 +91,7 @@ function parseClientOptions({
         }),
       }
     ),
+    fetch: auth.fetch,
     /** Default to production linear api */
     apiUrl: resolvedApiUrl,
     ...opts,

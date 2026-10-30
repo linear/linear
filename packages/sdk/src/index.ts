@@ -1,6 +1,8 @@
 import { LinearWebhookClient } from "./webhooks/index.js";
 
 export * from "./client.js";
+export { createDPoPProof, derToJoseSignature, dpopSignerFromCryptoKeyPair } from "./dpop.js";
+export type { DPoPAlgorithm, DPoPProofClaims, DPoPSigner } from "./dpop.js";
 export * from "./error.js";
 export * from "./graphql-client.js";
 export * from "./types.js";
