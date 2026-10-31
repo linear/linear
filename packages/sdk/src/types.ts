@@ -11,6 +11,14 @@ export interface LinearClientOptions extends RequestInit {
 }
 
 /**
+ * Options for the LinearGraphQLClient
+ */
+export interface LinearGraphQLClientOptions extends RequestInit {
+  /** Custom fetch implementation, called for every request. Defaults to the global fetch */
+  fetch?: (url: string, init: RequestInit) => Promise<Response>;
+}
+
+/**
  * Validated LinearGraphQLClient options
  */
 export interface LinearClientParsedOptions extends RequestInit {
