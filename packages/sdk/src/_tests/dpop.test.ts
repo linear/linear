@@ -275,7 +275,7 @@ describe("createDPoPSigner with an external key", () => {
   });
 });
 
-describe("LinearClient with dpop", () => {
+describe("LinearClient with dpopSigner", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
   });
@@ -305,7 +305,7 @@ describe("LinearClient with dpop", () => {
 
   it("sends the access token with a DPoP proof", async () => {
     const fetch = stubFetch(viewerResponse());
-    const client = new LinearClient({ accessToken: ACCESS_TOKEN, dpop: createSigner(), apiUrl: API_URL });
+    const client = new LinearClient({ accessToken: ACCESS_TOKEN, dpopSigner: createSigner(), apiUrl: API_URL });
 
     expect(await client.viewer).toEqual(expect.objectContaining({ id: "viewerId" }));
     expect(client.options).not.toHaveProperty("fetch");
@@ -324,7 +324,7 @@ describe("LinearClient with dpop", () => {
     const fetch = stubFetch(viewerResponse());
     const client = new LinearClient({
       accessToken: ACCESS_TOKEN,
-      dpop: createSigner(),
+      dpopSigner: createSigner(),
       apiUrl: API_URL,
       headers: { authorization: "Bearer other" },
     });
@@ -336,7 +336,7 @@ describe("LinearClient with dpop", () => {
   it("retries once with the server nonce and reuses it for later requests", async () => {
     const rejected = useNonceResponse("nonce-1");
     const fetch = stubFetch(rejected, viewerResponse(), viewerResponse({ "DPoP-Nonce": "nonce-2" }), viewerResponse());
-    const client = new LinearClient({ accessToken: ACCESS_TOKEN, dpop: createSigner(), apiUrl: API_URL });
+    const client = new LinearClient({ accessToken: ACCESS_TOKEN, dpopSigner: createSigner(), apiUrl: API_URL });
 
     await client.viewer;
     await client.viewer;
@@ -349,7 +349,7 @@ describe("LinearClient with dpop", () => {
 
   it("gives up after one nonce retry", async () => {
     const fetch = stubFetch(useNonceResponse("nonce-1"), useNonceResponse("nonce-1"));
-    const client = new LinearClient({ accessToken: ACCESS_TOKEN, dpop: createSigner(), apiUrl: API_URL });
+    const client = new LinearClient({ accessToken: ACCESS_TOKEN, dpopSigner: createSigner(), apiUrl: API_URL });
 
     await expect(client.viewer).rejects.toEqual(expect.objectContaining({ type: LinearErrorType.AuthenticationError }));
     expect(fetch).toHaveBeenCalledTimes(2);
@@ -360,8 +360,8 @@ describe("LinearClient with dpop", () => {
     [{ accessToken: ACCESS_TOKEN, apiKey: "api-key" }, "requires an OAuth accessToken"],
     [{ accessToken: `Bearer ${ACCESS_TOKEN}` }, "without a Bearer prefix"],
   ])("rejects invalid credentials %o", async (credentials, message) => {
-    const dpop = createSigner();
+    const dpopSigner = createSigner();
 
-    expect(() => new LinearClient({ ...credentials, dpop })).toThrow(message);
+    expect(() => new LinearClient({ ...credentials, dpopSigner })).toThrow(message);
   });
 });

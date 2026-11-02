@@ -30,19 +30,19 @@ function validateApiUrl(apiUrl: string): void {
 function parseAuth({
   apiKey,
   accessToken,
-  dpop,
-}: Pick<LinearClientOptions, "apiKey" | "accessToken" | "dpop">): Pick<
+  dpopSigner,
+}: Pick<LinearClientOptions, "apiKey" | "accessToken" | "dpopSigner">): Pick<
   LinearGraphQLClientOptions,
   "headers" | "fetch"
 > {
-  if (dpop) {
+  if (dpopSigner) {
     if (!accessToken || apiKey) {
-      throw new Error("LinearClient dpop requires an OAuth accessToken and cannot be used with an apiKey");
+      throw new Error("LinearClient dpopSigner requires an OAuth accessToken and cannot be used with an apiKey");
     }
     if (accessToken.startsWith("Bearer ")) {
-      throw new Error("LinearClient dpop requires the raw accessToken, without a Bearer prefix");
+      throw new Error("LinearClient dpopSigner requires the raw accessToken, without a Bearer prefix");
     }
-    return { fetch: createDPoPFetch(dpop, accessToken) };
+    return { fetch: createDPoPFetch(dpopSigner, accessToken) };
   }
 
   if (!accessToken && !apiKey) {
@@ -72,12 +72,12 @@ function parseAuth({
 function parseClientOptions({
   apiKey,
   accessToken,
-  dpop,
+  dpopSigner,
   apiUrl,
   headers,
   ...opts
 }: LinearClientOptions): LinearClientParsedOptions & Pick<LinearGraphQLClientOptions, "fetch"> {
-  const auth = parseAuth({ apiKey, accessToken, dpop });
+  const auth = parseAuth({ apiKey, accessToken, dpopSigner });
 
   const resolvedApiUrl = apiUrl ?? "https://api.linear.app/graphql";
   validateApiUrl(resolvedApiUrl);

@@ -66,7 +66,7 @@ function toPublicJwk({ kty, crv, x, y, n, e }: JsonWebKey): JsonWebKey {
 /**
  * Create a signed DPoP proof JWT for a single request
  *
- * The LinearClient creates these automatically when configured with a `dpop` signer.
+ * The LinearClient creates these automatically when configured with a `dpopSigner`.
  * Use this directly to create proofs for OAuth token endpoint requests.
  *
  * @param signer the signer holding the DPoP key
@@ -253,7 +253,7 @@ async function createExternalSigner(options: DPoPSignerOptions): Promise<DPoPSig
  *   providers return, and converts them for DPoP proofs
  *
  * @param input the WebCrypto key pair, or the algorithm, public key and signing function of an external key
- * @returns a signer for the LinearClient `dpop` option
+ * @returns a signer for the LinearClient `dpopSigner` option
  */
 export function createDPoPSigner(input: CryptoKeyPair | DPoPSignerOptions): Promise<DPoPSigner> {
   /** Key pairs are plain objects rather than class instances, so tell them apart by shape */

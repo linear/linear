@@ -11,7 +11,7 @@ export interface LinearClientOptions extends RequestInit {
   /** The HTTPS URL to the Linear GraphQL API. HTTP is supported only for local development servers. */
   apiUrl?: string;
   /** Sign every request with a DPoP proof, sending `accessToken` as a DPoP-bound token */
-  dpop?: DPoPSigner;
+  dpopSigner?: DPoPSigner;
 }
 
 /**
