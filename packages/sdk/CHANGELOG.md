@@ -1,5 +1,74 @@
 # Change Log
 
+## 101.0.0
+
+### Major Changes
+
+- feat(schema): [breaking] Input field 'customOAuthServerUrl' was removed from input object type 'JiraSettingsInput' (JiraSettingsInput.customOAuthServerUrl)
+
+  feat(schema): [breaking] Input field 'isCustomOAuth' was removed from input object type 'JiraSettingsInput' (JiraSettingsInput.isCustomOAuth)
+
+  feat(schema): [breaking] Input field 'personalOAuthClientId' was removed from input object type 'JiraSettingsInput' (JiraSettingsInput.personalOAuthClientId)
+
+  feat(schema): [breaking] Input field 'projectMapping' was removed from input object type 'JiraSettingsInput' (JiraSettingsInput.projectMapping)
+
+  feat(schema): [dangerous] Member 'AiConversationAgentMessagePart' was added to Union type 'AiConversationPart' (AiConversationPart)
+
+  feat(schema): [dangerous] Enum value 'agentMessage' was added to enum 'AiConversationPartType' (AiConversationPartType.agentMessage)
+
+  feat(schema): [dangerous] Enum value 'ListSubagents' was added to enum 'AiConversationTool' (AiConversationTool.ListSubagents)
+
+  feat(schema): [dangerous] Member 'AiConversationListSubagentsToolCall' was added to Union type 'AiConversationToolCall' (AiConversationToolCall)
+
+  feat(schema): [dangerous] Input field 'requireTokenBinding' was added to input object type 'OAuthApplicationCreateInput' (OAuthApplicationCreateInput.requireTokenBinding)
+
+  feat(schema): [dangerous] Input field 'requireTokenBinding' was added to input object type 'OAuthApplicationUpdateInput' (OAuthApplicationUpdateInput.requireTokenBinding)
+
+  feat(schema): [dangerous] Input field 'resolveDuplicates' was added to input object type 'OrganizationLinearReviewSettingsInput' (OrganizationLinearReviewSettingsInput.resolveDuplicates)
+
+  feat(schema): [dangerous] Input field 'loopWebhooks' was added to input object type 'OrganizationManagedTeamFeaturesInput' (OrganizationManagedTeamFeaturesInput.loopWebhooks)
+
+  feat(schema): [dangerous] Input field 'loopWebhooksEnabled' was added to input object type 'OrganizationUpdateInput' (OrganizationUpdateInput.loopWebhooksEnabled)
+
+  feat(schema): [dangerous] Enum value 'documentCreated' was added to enum 'OtherNotificationType' (OtherNotificationType.documentCreated)
+
+  feat(schema): [dangerous] Enum value 'workspaceSetupCompletedHidden' was added to enum 'UserFlagType' (UserFlagType.workspaceSetupCompletedHidden)
+
+  feat(schema): [non_breaking] Type 'AiConversationAgentMessagePart' was added (AiConversationAgentMessagePart)
+
+  feat(schema): [non_breaking] Type 'AiConversationListSubagentsToolCall' was added (AiConversationListSubagentsToolCall)
+
+  feat(schema): [non_breaking] Field 'sourceMetadata' was added to object type 'AiConversation' (AiConversation.sourceMetadata)
+
+  feat(schema): [non_breaking] Field 'fallbackText' was added to interface 'AiConversationBaseWidget' (AiConversationBaseWidget.fallbackText)
+
+  feat(schema): [non_breaking] Field 'fallbackText' was added to object type 'AiConversationEntityCardWidget' (AiConversationEntityCardWidget.fallbackText)
+
+  feat(schema): [non_breaking] Field 'fallbackText' was added to object type 'AiConversationEntityListWidget' (AiConversationEntityListWidget.fallbackText)
+
+  feat(schema): [non_breaking] Field 'branch' was added to object type 'AiConversationGitPushToolCallArgs' (AiConversationGitPushToolCallArgs.branch)
+
+  feat(schema): [non_breaking] Field 'codingSubagents' was added to object type 'AiConversationListCodingSessionsToolCallResult' (AiConversationListCodingSessionsToolCallResult.codingSubagents)
+
+  feat(schema): [non_breaking] Field 'description' was added to object type 'AiConversationMessageSubagentToolCallArgs' (AiConversationMessageSubagentToolCallArgs.description)
+
+  feat(schema): [non_breaking] Field 'fallbackText' was added to object type 'AiConversationSettingWidget' (AiConversationSettingWidget.fallbackText)
+
+  feat(schema): [non_breaking] Field 'requireTokenBinding' was added to object type 'OAuthApplication' (OAuthApplication.requireTokenBinding)
+
+  feat(schema): [non_breaking] Field 'loopWebhooksEnabled' was added to object type 'Organization' (Organization.loopWebhooksEnabled)
+
+  feat(schema): [non_breaking] Field 'description' was added to object type 'PullRequestCheck' (PullRequestCheck.description)
+
+  feat(schema): [non_breaking] Field 'isLabelMergeQueue' was added to object type 'PullRequestMergeSettings' (PullRequestMergeSettings.isLabelMergeQueue)
+
+  feat(schema): [non_breaking] Field 'loopWebhooksEnabled' was added to object type 'Team' (Team.loopWebhooksEnabled)
+
+### Minor Changes
+
+- e008ca8: `LinearGraphQLClient` accepts a `fetch` option to customize how each request is sent, for example to add per-request headers.
+- 0b6acbc: `LinearClient` accepts a `dpopSigner` to send DPoP-bound access tokens. Each request is signed with a fresh proof, and the client retries once when the server asks for a new nonce. `@linear/sdk/oauth` exports the `DPoPSigner` type, `createDPoPSigner` for WebCrypto key pairs and KMS-backed keys, and `createDPoPProof` for OAuth token endpoint requests.
+
 ## 100.0.0
 
 ### Major Changes

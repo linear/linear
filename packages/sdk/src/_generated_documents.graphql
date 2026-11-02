@@ -110,6 +110,10 @@ fragment AiConversationBasePart on AiConversationBasePart {
     ...AiConversationAckPart
   }
 
+  ... on AiConversationAgentMessagePart {
+    ...AiConversationAgentMessagePart
+  }
+
   ... on AiConversationElicitationPart {
     ...AiConversationElicitationPart
   }
@@ -4611,6 +4615,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     ... on AiConversationListCodingSessionsToolCall {
       ...AiConversationListCodingSessionsToolCall
     }
+    ... on AiConversationListSubagentsToolCall {
+      ...AiConversationListSubagentsToolCall
+    }
     ... on AiConversationMemoryToolCall {
       ...AiConversationMemoryToolCall
     }
@@ -5641,6 +5648,8 @@ fragment OAuthApplication on OAuthApplication {
   description
   # Webhook URL used for delivering webhook payloads. Null if not set.
   webhookUrl
+  # Whether token requests for the OAuth application, including refresh token requests, must include a DPoP proof.
+  requireTokenBinding
   # Whether webhook delivery is enabled for this OAuth application.
   webhookEnabled
 }
@@ -5724,6 +5733,37 @@ fragment AgentActivity on AgentActivity {
   }
   # Whether the activity is ephemeral, and should disappear after the next agent activity.
   ephemeral
+}
+
+# An agent-origin message in a conversation turn.
+fragment AiConversationAgentMessagePart on AiConversationAgentMessagePart {
+  __typename
+  # Source identity, full message and display summary.
+  agentMessage
+  # The ID of the part.
+  id
+  # The accepted substantive reply identity.
+  fulfilledByMessageId
+  # The acknowledged delivery job.
+  deliveryRunId
+  # The human owner whose access authorizes this exchange.
+  ownerUserId
+  # The metadata of the part.
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  # The reserved assistant response identity.
+  assistantTurnId
+  # The type of the part.
+  type
+  # When durable submission was acknowledged.
+  acceptedAt
+  # When the message was saved.
+  createdAt
+  # When the recipient consumed this message.
+  consumedAt
+  # Whether removal canceled the exchange.
+  canceled
 }
 
 # An attachment (link, reference, or integration data) associated with a project. Attachments are
@@ -11549,6 +11589,10 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
     ...AiConversationListCodingSessionsToolCall
   }
 
+  ... on AiConversationListSubagentsToolCall {
+    ...AiConversationListSubagentsToolCall
+  }
+
   ... on AiConversationMemoryToolCall {
     ...AiConversationMemoryToolCall
   }
@@ -11712,6 +11756,8 @@ fragment AiConversationBaseToolCall on AiConversationBaseToolCall {
 
 fragment AiConversationBaseWidget on AiConversationBaseWidget {
   __typename
+  # A Markdown fallback for the widget, for clients that can't render this widget natively. Always present for every widget, and never contains internal model names or identifiers.
+  fallbackText
   # Display information for the widget, including ProseMirror and Markdown representations.
   displayInfo {
     ...AiConversationWidgetDisplayInfo
@@ -12031,6 +12077,8 @@ fragment AiConversationEditSandboxFileToolCallArgs on AiConversationEditSandboxF
 
 fragment AiConversationEntityCardWidget on AiConversationEntityCardWidget {
   __typename
+  # A Markdown fallback for the widget, for clients that can't render this widget natively. Always present for every widget, and never contains internal model names or identifiers.
+  fallbackText
   # Display information for the widget, including ProseMirror and Markdown representations.
   displayInfo {
     ...AiConversationWidgetDisplayInfo
@@ -12059,6 +12107,8 @@ fragment AiConversationEntityCardWidgetArgs on AiConversationEntityCardWidgetArg
 
 fragment AiConversationEntityListWidget on AiConversationEntityListWidget {
   __typename
+  # A Markdown fallback for the widget, for clients that can't render this widget natively. Always present for every widget, and never contains internal model names or identifiers.
+  fallbackText
   # Display information for the widget, including ProseMirror and Markdown representations.
   displayInfo {
     ...AiConversationWidgetDisplayInfo
@@ -12234,6 +12284,7 @@ fragment AiConversationGitPushToolCall on AiConversationGitPushToolCall {
 
 fragment AiConversationGitPushToolCallArgs on AiConversationGitPushToolCallArgs {
   __typename
+  branch
   force
 }
 
@@ -12333,6 +12384,9 @@ fragment AiConversationListCodingSessionsToolCallResult on AiConversationListCod
   agentSessions {
     ...AiConversationListCodingSessionsToolCallResultAgentSessions
   }
+  codingSubagents {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
   entities {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
@@ -12345,6 +12399,21 @@ fragment AiConversationListCodingSessionsToolCallResultAgentSessions on AiConver
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
   type
+}
+
+fragment AiConversationListSubagentsToolCall on AiConversationListSubagentsToolCall {
+  __typename
+  # The arguments of the tool call.
+  rawArgs
+  # The arguments to the tool call.
+  args
+  # The name of the tool that was called.
+  name
+  # The result of the tool call.
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
 }
 
 fragment AiConversationMemoryToolCall on AiConversationMemoryToolCall {
@@ -12394,6 +12463,7 @@ fragment AiConversationMessageSubagentToolCall on AiConversationMessageSubagentT
 fragment AiConversationMessageSubagentToolCallArgs on AiConversationMessageSubagentToolCallArgs {
   __typename
   conversationId
+  description
   prompt
   wait
 }
@@ -13154,6 +13224,8 @@ fragment AiConversationSetSpendLimitToolCallArgs on AiConversationSetSpendLimitT
 
 fragment AiConversationSettingWidget on AiConversationSettingWidget {
   __typename
+  # A Markdown fallback for the widget, for clients that can't render this widget natively. Always present for every widget, and never contains internal model names or identifiers.
+  fallbackText
   # Display information for the widget, including ProseMirror and Markdown representations.
   displayInfo {
     ...AiConversationWidgetDisplayInfo

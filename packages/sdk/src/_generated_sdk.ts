@@ -1197,6 +1197,54 @@ export class AiConversationAckPart extends Request {
   public type: L.AiConversationPartType;
 }
 /**
+ * An agent-origin message in a conversation turn.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationAgentMessagePartFragment response data
+ */
+export class AiConversationAgentMessagePart extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationAgentMessagePartFragment) {
+    super(request);
+    this.acceptedAt = data.acceptedAt ?? undefined;
+    this.agentMessage = data.agentMessage;
+    this.assistantTurnId = data.assistantTurnId;
+    this.canceled = data.canceled ?? undefined;
+    this.consumedAt = data.consumedAt ?? undefined;
+    this.createdAt = data.createdAt;
+    this.deliveryRunId = data.deliveryRunId ?? undefined;
+    this.fulfilledByMessageId = data.fulfilledByMessageId ?? undefined;
+    this.id = data.id;
+    this.ownerUserId = data.ownerUserId;
+    this.metadata = new AiConversationPartMetadata(request, data.metadata);
+    this.type = data.type;
+  }
+
+  /** When durable submission was acknowledged. */
+  public acceptedAt?: string | null;
+  /** Source identity, full message and display summary. */
+  public agentMessage: L.Scalars["JSONObject"];
+  /** The reserved assistant response identity. */
+  public assistantTurnId: string;
+  /** Whether removal canceled the exchange. */
+  public canceled?: boolean | null;
+  /** When the recipient consumed this message. */
+  public consumedAt?: string | null;
+  /** When the message was saved. */
+  public createdAt: string;
+  /** The acknowledged delivery job. */
+  public deliveryRunId?: string | null;
+  /** The accepted substantive reply identity. */
+  public fulfilledByMessageId?: string | null;
+  /** The ID of the part. */
+  public id: string;
+  /** The human owner whose access authorizes this exchange. */
+  public ownerUserId: string;
+  /** The metadata of the part. */
+  public metadata: AiConversationPartMetadata;
+  /** The type of the part. */
+  public type: L.AiConversationPartType;
+}
+/**
  * A base part in an AI conversation.
  *
  * @param request - function to call the graphql client
@@ -1249,11 +1297,14 @@ export class AiConversationBaseToolCall extends Request {
 export class AiConversationBaseWidget extends Request {
   public constructor(request: LinearRequest, data: L.AiConversationBaseWidgetFragment) {
     super(request);
+    this.fallbackText = data.fallbackText;
     this.rawArgs = parseJson(data.rawArgs) ?? undefined;
     this.displayInfo = data.displayInfo ? new AiConversationWidgetDisplayInfo(request, data.displayInfo) : undefined;
     this.name = data.name;
   }
 
+  /** A Markdown fallback for the widget, for clients that can't render this widget natively. Always present for every widget, and never contains internal model names or identifiers. */
+  public fallbackText: string;
   /** The arguments of the widget. */
   public rawArgs?: Record<string, unknown> | null;
   /** Display information for the widget, including ProseMirror and Markdown representations. */
@@ -1930,12 +1981,15 @@ export class AiConversationElicitationResponsePart extends Request {
 export class AiConversationEntityCardWidget extends Request {
   public constructor(request: LinearRequest, data: L.AiConversationEntityCardWidgetFragment) {
     super(request);
+    this.fallbackText = data.fallbackText;
     this.rawArgs = parseJson(data.rawArgs) ?? undefined;
     this.args = data.args ? new AiConversationEntityCardWidgetArgs(request, data.args) : undefined;
     this.displayInfo = data.displayInfo ? new AiConversationWidgetDisplayInfo(request, data.displayInfo) : undefined;
     this.name = data.name;
   }
 
+  /** A Markdown fallback for the widget, for clients that can't render this widget natively. Always present for every widget, and never contains internal model names or identifiers. */
+  public fallbackText: string;
   /** The arguments of the widget. */
   public rawArgs?: Record<string, unknown> | null;
   /** The arguments to the widget. */
@@ -1978,12 +2032,15 @@ export class AiConversationEntityCardWidgetArgs extends Request {
 export class AiConversationEntityListWidget extends Request {
   public constructor(request: LinearRequest, data: L.AiConversationEntityListWidgetFragment) {
     super(request);
+    this.fallbackText = data.fallbackText;
     this.rawArgs = parseJson(data.rawArgs) ?? undefined;
     this.args = data.args ? new AiConversationEntityListWidgetArgs(request, data.args) : undefined;
     this.displayInfo = data.displayInfo ? new AiConversationWidgetDisplayInfo(request, data.displayInfo) : undefined;
     this.name = data.name;
   }
 
+  /** A Markdown fallback for the widget, for clients that can't render this widget natively. Always present for every widget, and never contains internal model names or identifiers. */
+  public fallbackText: string;
   /** The arguments of the widget. */
   public rawArgs?: Record<string, unknown> | null;
   /** The arguments to the widget. */
@@ -2369,9 +2426,11 @@ export class AiConversationGitPushToolCall extends Request {
 export class AiConversationGitPushToolCallArgs extends Request {
   public constructor(request: LinearRequest, data: L.AiConversationGitPushToolCallArgsFragment) {
     super(request);
+    this.branch = data.branch ?? undefined;
     this.force = data.force ?? undefined;
   }
 
+  public branch?: string | null;
   public force?: boolean | null;
 }
 /**
@@ -2568,12 +2627,16 @@ export class AiConversationListCodingSessionsToolCallResult extends Request {
     this.agentSessions = data.agentSessions.map(
       node => new AiConversationListCodingSessionsToolCallResultAgentSessions(request, node)
     );
+    this.codingSubagents = data.codingSubagents
+      ? data.codingSubagents.map(node => new AiConversationSearchEntitiesToolCallResultEntities(request, node))
+      : undefined;
     this.entities = data.entities
       ? data.entities.map(node => new AiConversationSearchEntitiesToolCallResultEntities(request, node))
       : undefined;
   }
 
   public agentSessions: AiConversationListCodingSessionsToolCallResultAgentSessions[];
+  public codingSubagents?: AiConversationSearchEntitiesToolCallResultEntities[] | null;
   public entities?: AiConversationSearchEntitiesToolCallResultEntities[] | null;
 }
 /**
@@ -2598,6 +2661,32 @@ export class AiConversationListCodingSessionsToolCallResultAgentSessions extends
   public id: string;
   public type: string;
   public pullRequests?: AiConversationSearchEntitiesToolCallResultEntities[] | null;
+}
+/**
+ * AiConversationListSubagentsToolCall model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AiConversationListSubagentsToolCallFragment response data
+ */
+export class AiConversationListSubagentsToolCall extends Request {
+  public constructor(request: LinearRequest, data: L.AiConversationListSubagentsToolCallFragment) {
+    super(request);
+    this.args = data.args ?? undefined;
+    this.rawArgs = parseJson(data.rawArgs) ?? undefined;
+    this.rawResult = parseJson(data.rawResult) ?? undefined;
+    this.displayInfo = new AiConversationToolDisplayInfo(request, data.displayInfo);
+    this.name = data.name;
+  }
+
+  /** The arguments to the tool call. */
+  public args?: L.Scalars["JSONObject"] | null;
+  /** The arguments of the tool call. */
+  public rawArgs?: Record<string, unknown> | null;
+  /** The result of the tool call. */
+  public rawResult?: Record<string, unknown> | null;
+  public displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  public name: L.AiConversationTool;
 }
 /**
  * The integration connected by an MCP server connection elicitation.
@@ -2722,11 +2811,13 @@ export class AiConversationMessageSubagentToolCallArgs extends Request {
   public constructor(request: LinearRequest, data: L.AiConversationMessageSubagentToolCallArgsFragment) {
     super(request);
     this.conversationId = data.conversationId;
+    this.description = data.description ?? undefined;
     this.prompt = data.prompt;
     this.wait = data.wait ?? undefined;
   }
 
   public conversationId: string;
+  public description?: string | null;
   public prompt: string;
   public wait?: boolean | null;
 }
@@ -4216,12 +4307,15 @@ export class AiConversationSetSpendLimitToolCallArgs extends Request {
 export class AiConversationSettingWidget extends Request {
   public constructor(request: LinearRequest, data: L.AiConversationSettingWidgetFragment) {
     super(request);
+    this.fallbackText = data.fallbackText;
     this.rawArgs = parseJson(data.rawArgs) ?? undefined;
     this.args = data.args ? new AiConversationSettingWidgetArgs(request, data.args) : undefined;
     this.displayInfo = data.displayInfo ? new AiConversationWidgetDisplayInfo(request, data.displayInfo) : undefined;
     this.name = data.name;
   }
 
+  /** A Markdown fallback for the widget, for clients that can't render this widget natively. Always present for every widget, and never contains internal model names or identifiers. */
+  public fallbackText: string;
   /** The arguments of the widget. */
   public rawArgs?: Record<string, unknown> | null;
   /** The arguments to the widget. */
@@ -17033,6 +17127,7 @@ export class OAuthApplication extends Request {
     this.imageUrl = data.imageUrl ?? undefined;
     this.name = data.name;
     this.redirectUris = data.redirectUris;
+    this.requireTokenBinding = data.requireTokenBinding;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.webhookEnabled = data.webhookEnabled;
     this.webhookUrl = data.webhookUrl ?? undefined;
@@ -17059,6 +17154,8 @@ export class OAuthApplication extends Request {
   public name: string;
   /** Allowed redirect URIs for OAuth authorization flows. */
   public redirectUris: string[];
+  /** Whether token requests for the OAuth application, including refresh token requests, must include a DPoP proof. */
+  public requireTokenBinding: boolean;
   /** The time at which the OAuth application was last updated. */
   public updatedAt: Date;
   /** Whether webhook delivery is enabled for this OAuth application. */
