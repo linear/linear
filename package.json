@@ -27,8 +27,7 @@
     "test:watch": "pnpm -r test -w",
     "test": "pnpm -r test",
     "update:dependencies": "pnpm up && pnpm run -r generate:changeset:dependencies",
-    "update:schema": "pnpm run -r generate:schema && pnpm run -r generate:changeset:schema",
-    "ci:publish": "pnpm publish -r && changeset tag"
+    "update:schema": "pnpm run -r generate:schema && pnpm run -r generate:changeset:schema"
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.1",

@@ -15,17 +15,16 @@ concurrency:
 permissions: {}
 
 jobs:
-  release:
-    name: Release
+  # Builds and packs the packages without publish credentials, so the tarballs are uploaded before lint, tests and npx
+  # tools run. The release job then publishes these tarballs without installing dependencies or running repo code.
+  build:
+    name: Build
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      id-token: write # Required for OIDC (https://docs.npmjs.com/trusted-publishers#github-actions-configuration)
-      pull-requests: read
+      contents: read
     outputs:
-      published: ${{ steps.publish.outputs.published }}
-      published_packages: ${{ steps.publish.outputs.publishedPackages }}
+      publish: ${{ steps.release.outputs.publish }}
     env:
       SKIP_RELEASE: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[skip release]') }}
     steps:
@@ -36,7 +35,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
-          fetch-depth: 0
           persist-credentials: false
 
       - name: Install pnpm
@@ -48,23 +46,35 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
-          registry-url: "https://registry.npmjs.org"
           cache: "pnpm"
-
-      # Ensure npm >= 11.5.1 for OIDC trusted publishers (https://docs.npmjs.com/trusted-publishers#github-actions-configuration)
-      # Two-step upgrade works around broken npm in Node 22.22.2 (nodejs/node#62425)
-      - name: Update npm
-        run: |
-          npm_major=$(npm --version | cut -d. -f1)
-          if [ "$npm_major" -lt 11 ]; then
-            npm install -g npm@10 && npm install -g npm@latest
-          fi
 
       - name: Install dependencies
         run: pnpm install
 
       - name: Build packages
         run: pnpm build
+
+      - name: Check for no generated changes
+        run: test -z "$(git status --porcelain)"
+
+      # schema.yaml is the only workflow that prepares release pull requests; pending changesets must be versioned there.
+      - name: Check for release
+        id: release
+        if: env.SKIP_RELEASE != 'true' && hashFiles('.changeset/*.md', '!.changeset/README.md') == ''
+        run: echo "publish=true" >> "$GITHUB_OUTPUT"
+
+      - name: Package for npm
+        run: |
+          pnpm --dir packages/sdk pack --out "$RUNNER_TEMP/npm/linear-sdk.tgz"
+          pnpm --dir packages/import pack --out "$RUNNER_TEMP/npm/linear-import.tgz"
+
+      - name: Upload npm artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: npm
+          path: ${{ runner.temp }}/npm
+          if-no-files-found: error
+          retention-days: 1
 
       - name: Run lint
         run: pnpm lint
@@ -76,33 +86,86 @@ jobs:
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-npm-arethetypeswrong-0.18.2
+          key: ${{ runner.os }}-npm-arethetypeswrong-0.18.5
 
       - name: Validate CJS and ESM resolution for SDK
         # Catch issues like https://github.com/linear/linear/issues/830
         # The SDK is ESM-only, so CommonJS consumers on node16 resolution are expected to resolve to ESM
-        run: npx @arethetypeswrong/cli@0.18.2 --pack packages/sdk --ignore-rules cjs-resolves-to-esm
+        run: npx @arethetypeswrong/cli@0.18.5 "$RUNNER_TEMP/npm/linear-sdk.tgz" --ignore-rules cjs-resolves-to-esm
 
-      - name: Check for no generated changes
-        run: test -z "$(git status --porcelain)"
+  # Every step here can mint npm publish tokens, so it only runs Node's bundled npm on the tarballs from the build job.
+  release:
+    name: Release
+    needs: [build]
+    if: needs.build.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: npm
+    permissions:
+      id-token: write # Required for OIDC (https://docs.npmjs.com/trusted-publishers#github-actions-configuration)
+    outputs:
+      published_packages: ${{ steps.publish.outputs.published_packages }}
+    steps:
+      # Node 24 bundles npm >= 11.5.1, which OIDC trusted publishing requires.
+      - name: Use node 24
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
 
-      # schema.yaml is the only workflow that prepares release pull requests; pending changesets must be versioned there.
+      - name: Download npm artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: npm
+
+      # Publishes the SDK first because @linear/import depends on it. Skips versions that are already on npm.
       - name: Publish to npm
         id: publish
-        if: env.SKIP_RELEASE != 'true' && hashFiles('.changeset/*.md', '!.changeset/README.md') == ''
-        uses: changesets/action@63a615b9cd06ba9a3e6d13796c7fbcb080a60a0b # v1.8.0
+        run: |
+          published='[]'
+          for tarball in linear-sdk.tgz linear-import.tgz; do
+            package=$(tar -xOzf "$tarball" package/package.json | jq -c '{name, version}')
+            name=$(jq -r .name <<< "$package")
+            version=$(jq -r .version <<< "$package")
+            if ! npm view "$name@$version" version > /dev/null 2>&1; then
+              npm publish "$tarball"
+              published=$(jq -c --argjson package "$package" '. + [$package]' <<< "$published")
+            fi
+          done
+          echo "published_packages=$published" >> "$GITHUB_OUTPUT"
+
+  # Tags and announces the release apart from the release job, so nothing that can push to the repo can mint npm tokens.
+  github-release:
+    name: GitHub release
+    needs: [release]
+    if: needs.release.outputs.published_packages != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: read
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PUBLISHED_PACKAGES: ${{ needs.release.outputs.published_packages }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
-          publish: pnpm ci:publish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: false
+
+      - name: Create GitHub releases
+        run: |
+          jq -r '.[] | "\(.name) \(.version)"' <<< "$PUBLISHED_PACKAGES" |
+            while read -r name version; do
+              notes="$RUNNER_TEMP/notes.md"
+              awk -v heading="## $version" '/^## / { found = ($0 == heading); next } found' "packages/${name#@linear/}/CHANGELOG.md" > "$notes"
+              gh release create "$name@$version" --target "$GITHUB_SHA" --title "$name@$version" --notes-file "$notes"
+            done
 
       - name: Notify Slack
-        if: steps.publish.outputs.published == 'true'
         continue-on-error: true
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CLI_CHANNEL_WEBHOOK_URL }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PUBLISHED_PACKAGES: ${{ steps.publish.outputs.publishedPackages }}
         run: |
           node .github/scripts/create-release-slack-message.mjs
           curl -s -X POST "$SLACK_WEBHOOK_URL" -H 'Content-Type: application/json' --data @"$RUNNER_TEMP/sdk-release-slack.json"
@@ -114,7 +177,7 @@ jobs:
   linear-release:
     name: Linear release
     needs: [release]
-    if: needs.release.outputs.published == 'true'
+    if: needs.release.outputs.published_packages != '[]'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -176,7 +239,7 @@ jobs:
   notify-slack:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: [release]
+    needs: [build, release, github-release]
     permissions:
       actions: read
       contents: read
