@@ -122,17 +122,18 @@ jobs:
       - name: Publish to npm
         id: publish
         run: |
-          published='[]'
+          touch published.jsonl
           for tarball in linear-sdk.tgz linear-import.tgz; do
             package=$(tar -xOzf "$tarball" package/package.json | jq -c '{name, version}')
-            name=$(jq -r .name <<< "$package")
-            version=$(jq -r .version <<< "$package")
-            if ! npm view "$name@$version" version > /dev/null 2>&1; then
+            spec=$(jq -r '"\(.name)@\(.version)"' <<< "$package")
+            if npm view "$spec" version > /dev/null 2>&1; then
+              echo "Skipping $spec because it is already on npm"
+            else
               npm publish "$tarball"
-              published=$(jq -c --argjson package "$package" '. + [$package]' <<< "$published")
+              echo "$package" >> published.jsonl
             fi
           done
-          echo "published_packages=$published" >> "$GITHUB_OUTPUT"
+          echo "published_packages=$(jq -cs . published.jsonl)" >> "$GITHUB_OUTPUT"
 
   # Tags and announces the release apart from the release job, so nothing that can push to the repo can mint npm tokens.
   github-release:
@@ -157,9 +158,8 @@ jobs:
         run: |
           jq -r '.[] | "\(.name) \(.version)"' <<< "$PUBLISHED_PACKAGES" |
             while read -r name version; do
-              notes="$RUNNER_TEMP/notes.md"
-              awk -v heading="## $version" '/^## / { found = ($0 == heading); next } found' "packages/${name#@linear/}/CHANGELOG.md" > "$notes"
-              gh release create "$name@$version" --target "$GITHUB_SHA" --title "$name@$version" --notes-file "$notes"
+              .github/scripts/release-notes.sh "${name#@linear/}" "$version" |
+                gh release create "$name@$version" --target "$GITHUB_SHA" --title "$name@$version" --notes-file -
             done
 
       - name: Notify Slack
@@ -198,9 +198,8 @@ jobs:
             while read -r package version; do
               echo "$package=$version" >> "$GITHUB_OUTPUT"
 
-              # Lines under the "## <version>" heading, up to the next "## " heading.
               notes="$RUNNER_TEMP/$package-notes.md"
-              awk -v heading="## $version" '/^## / { found = ($0 == heading); next } found' "packages/$package/CHANGELOG.md" > "$notes"
+              .github/scripts/release-notes.sh "$package" "$version" > "$notes"
               if [ -s "$notes" ]; then
                 echo "${package}_notes=$notes" >> "$GITHUB_OUTPUT"
               fi
