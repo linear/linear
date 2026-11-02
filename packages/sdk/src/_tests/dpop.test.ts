@@ -69,6 +69,17 @@ describe("createDPoPProof", () => {
     });
   });
 
+  it.each([
+    ["post", "POST"],
+    ["Get", "GET"],
+    ["patch", "patch"],
+  ])("normalizes method %s to %s like fetch does", async (htm, expected) => {
+    const proof = await createDPoPProof(await createSigner(), { htm, htu: API_URL });
+    const { payload } = await decodeProof(proof);
+
+    expect(payload.htm).toEqual(expected);
+  });
+
   it("omits ath and nonce when not provided", async () => {
     const proof = await createDPoPProof(await createSigner(), {
       htm: "POST",

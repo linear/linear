@@ -37,6 +37,17 @@ export interface DPoPProofClaims {
 
 const textEncoder = new TextEncoder();
 
+/** Methods fetch uppercases before sending. Others are sent as given */
+const NORMALIZED_METHODS = new Set(["DELETE", "GET", "HEAD", "OPTIONS", "POST", "PUT"]);
+
+/**
+ * Normalize a method the way fetch does, so the proof's `htm` matches the method actually sent
+ */
+function normalizeMethod(method: string): string {
+  const upper = method.toUpperCase();
+  return NORMALIZED_METHODS.has(upper) ? upper : method;
+}
+
 function base64UrlEncode(input: Uint8Array | string): string {
   const bytes = typeof input === "string" ? textEncoder.encode(input) : input;
   let binary = "";
@@ -72,7 +83,7 @@ export async function createDPoPProof(
   const header = { typ: "dpop+jwt", alg: signer.alg, jwk: toPublicJwk(signer.publicJwk) };
   const payload = {
     jti: crypto.randomUUID(),
-    htm,
+    htm: normalizeMethod(htm),
     htu: `${origin}${pathname}`,
     iat: Math.floor(Date.now() / 1000),
     ...(accessToken
