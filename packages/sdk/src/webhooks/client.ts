@@ -22,7 +22,7 @@ class WebhookBodyTooLargeError extends Error {}
  * Not exported on purpose: this is an implementation detail of
  * `LinearWebhookClient` and should not be relied upon by SDK consumers.
  *
- * - `method`, `signature`, `timestamp` and `contentLength` expose the necessary request metadata.
+ * - `method`, `signature` and `contentLength` expose the necessary request metadata.
  * - `readRawBody` defers reading/streaming the raw body until invoked and
  *   throws `WebhookBodyTooLargeError` once more than `maxBytes` are received.
  * - `send` unifies writing responses in both environments.
@@ -30,7 +30,6 @@ class WebhookBodyTooLargeError extends Error {}
 interface HttpAdapter {
   method: string;
   signature: string | null;
-  timestamp: string | null;
   contentLength: string | null;
   readRawBody: (maxBytes: number) => Promise<Buffer>;
   send: (status: number, body: string) => Response | void;
@@ -92,6 +91,9 @@ export class LinearWebhookClient {
    * @returns A webhook handler function with event registration capabilities.
    * Supports both Fetch API `(request: Request) => Promise<Response>` and
    * Node.js `(request: IncomingMessage, response: ServerResponse) => Promise<void>`
+   *
+   * A signed delivery can be replayed within the 1-minute timestamp window. Handlers with side effects
+   * should deduplicate deliveries, e.g. by `linear-signature`. `webhookId` is not unique per delivery.
    */
   public createHandler(options?: LinearWebhookHandlerOptions): LinearWebhookHandler {
     const maxBodyBytes = options?.maxBodyBytes ?? LINEAR_WEBHOOK_DEFAULT_MAX_BODY_BYTES;
@@ -124,7 +126,7 @@ export class LinearWebhookClient {
 
         let parsedPayload: LinearWebhookPayload;
         try {
-          parsedPayload = this.parseVerifiedPayload(rawBody, signature, adapter.timestamp);
+          parsedPayload = this.parseData(rawBody, signature);
         } catch {
           return adapter.send(400, "Invalid webhook");
         }
@@ -204,7 +206,6 @@ export class LinearWebhookClient {
     return {
       method: request.method,
       signature: request.headers.get(LINEAR_WEBHOOK_SIGNATURE_HEADER),
-      timestamp: request.headers.get(LINEAR_WEBHOOK_TS_HEADER),
       contentLength: request.headers.get("content-length"),
       readRawBody: async maxBytes =>
         request.body
@@ -227,14 +228,9 @@ export class LinearWebhookClient {
     const signature = Array.isArray(signatureHeader)
       ? (signatureHeader[0] ?? null)
       : ((signatureHeader ?? null) as string | null);
-    const timestampHeader = incomingMessage.headers[LINEAR_WEBHOOK_TS_HEADER];
-    const timestamp = Array.isArray(timestampHeader)
-      ? (timestampHeader[0] ?? null)
-      : ((timestampHeader ?? null) as string | null);
     return {
       method: incomingMessage.method || "",
       signature,
-      timestamp,
       contentLength: incomingMessage.headers["content-length"] ?? null,
       readRawBody: maxBytes => readBodyWithLimit(incomingMessage, maxBytes),
       send: (status, body) => {
@@ -260,32 +256,6 @@ export class LinearWebhookClient {
     return this.isFetchRequest(requestOrMessage)
       ? this.createFetchAdapter(requestOrMessage)
       : this.createNodeAdapter(requestOrMessage as IncomingMessage, response as ServerResponse);
-  }
-
-  /**
-   * Parses the JSON body and verifies signature and signed body timestamp.
-   *
-   * Throws if the JSON is invalid, the signature is invalid, or the timestamp check fails.
-   *
-   * @param rawBody - Raw request body as a Buffer
-   * @param signature - The value of the `linear-signature` header
-   * @param timestampHeader - Legacy timestamp header; verify() only trusts the signed body timestamp.
-   * @returns The verified and parsed webhook payload
-   */
-  private parseVerifiedPayload(
-    rawBody: Buffer,
-    signature: string,
-    timestampHeader: string | null
-  ): LinearWebhookPayload {
-    const parsedBody = this.parseBodyAsWebhookPayload(rawBody);
-    const timestamp = parsedBody.webhookTimestamp ?? timestampHeader;
-
-    const verified = this.verify(rawBody, signature, timestamp);
-    if (!verified) {
-      throw new Error("Invalid webhook signature");
-    }
-
-    return parsedBody;
   }
 
   /**
