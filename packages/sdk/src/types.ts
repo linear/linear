@@ -1,3 +1,5 @@
+import type { DPoPSigner } from "./oauth/dpop.js";
+
 /**
  * Input options for creating a Linear Client
  */
@@ -8,6 +10,8 @@ export interface LinearClientOptions extends RequestInit {
   accessToken?: string;
   /** The HTTPS URL to the Linear GraphQL API. HTTP is supported only for local development servers. */
   apiUrl?: string;
+  /** Sign every request with a DPoP proof, sending `accessToken` as a DPoP-bound token */
+  dpopSigner?: DPoPSigner;
 }
 
 /**

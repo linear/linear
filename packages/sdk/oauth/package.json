@@ -1,0 +1,6 @@
+{
+  "name": "@linear/sdk/oauth",
+  "private": true,
+  "types": "../dist/oauth/index.d.mts",
+  "main": "../dist/oauth/index.mjs"
+}
