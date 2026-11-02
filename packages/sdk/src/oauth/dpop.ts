@@ -94,6 +94,13 @@ export async function createDPoPProof(
   const signingInput = `${base64UrlEncode(JSON.stringify(header))}.${base64UrlEncode(JSON.stringify(payload))}`;
   const signature = await signer.sign(textEncoder.encode(signingInput));
 
+  /** A DER signature would otherwise only surface as an opaque invalid_dpop_proof from the server */
+  if (signer.alg === "ES256" && signature.length !== 64) {
+    throw new Error(
+      `Invalid ES256 signature: expected 64 raw bytes (r || s), got ${signature.length}. Use createDPoPSigner with signatureEncoding "der" for DER signatures`
+    );
+  }
+
   return `${signingInput}.${base64UrlEncode(signature)}`;
 }
 
@@ -206,11 +213,17 @@ function derToRawEs256Signature(der: Uint8Array): Uint8Array {
   if (der[offset++] !== 0x30) {
     throw new Error("Invalid DER signature: expected a SEQUENCE");
   }
-  readLength();
+  if (readLength() !== der.length - offset) {
+    throw new Error("Invalid DER signature: SEQUENCE length does not match the signature");
+  }
 
   const signature = new Uint8Array(size * 2);
   signature.set(readInteger(), 0);
   signature.set(readInteger(), size);
+
+  if (offset !== der.length) {
+    throw new Error("Invalid DER signature: unexpected trailing bytes");
+  }
   return signature;
 }
 
@@ -281,6 +294,8 @@ export function createDPoPFetch(
     const { response, nonceUsed } = await send(url, init);
 
     if (response.status === 401 && nonce !== nonceUsed && requiresDPoPNonce(response.headers.get("WWW-Authenticate"))) {
+      /** Release the connection held by the discarded response before retrying */
+      await response.body?.cancel();
       return (await send(url, init)).response;
     }
 

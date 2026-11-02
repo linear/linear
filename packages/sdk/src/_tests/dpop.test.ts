@@ -94,6 +94,19 @@ describe("createDPoPProof", () => {
     expect(header.jwk).toEqual({ kty: "EC", crv: "P-256", x: expect.any(String), y: expect.any(String) });
   });
 
+  it("rejects ES256 signers that return DER signatures", async () => {
+    const { privateKey, publicKey } = generateKeyPairSync("ec", { namedCurve: "P-256" });
+    const signer: DPoPSigner = {
+      alg: "ES256",
+      publicJwk: publicKey.export({ format: "jwk" }),
+      sign: async data => sign("sha256", data, privateKey),
+    };
+
+    await expect(createDPoPProof(signer, { htm: "POST", htu: API_URL })).rejects.toThrow(
+      "Invalid ES256 signature: expected 64 raw bytes"
+    );
+  });
+
   it("omits ath and nonce when not provided", async () => {
     const proof = await createDPoPProof(createSigner(), {
       htm: "POST",
@@ -226,6 +239,29 @@ describe("createDPoPSigner", () => {
     ).rejects.toThrow("expected a PEM-encoded SPKI key");
   });
 
+  it.each([
+    [
+      "trailing bytes inside the SEQUENCE",
+      (der: Buffer) => Buffer.from([der[0], der[1] + 1, ...der.subarray(2), 0]),
+      "unexpected trailing bytes",
+    ],
+    [
+      "a wrong SEQUENCE length",
+      (der: Buffer) => Buffer.from([der[0], der[1] - 1, ...der.subarray(2)]),
+      "SEQUENCE length",
+    ],
+  ])("rejects DER signatures with %s", async (_, corrupt, message) => {
+    const { privateKey, publicKey } = generateKeyPairSync("ec", { namedCurve: "P-256" });
+    const signer = await createDPoPSigner({
+      alg: "ES256",
+      publicKey: publicKey.export({ type: "spki", format: "pem" }),
+      signatureEncoding: "der",
+      sign: async data => corrupt(sign("sha256", data, privateKey)),
+    });
+
+    await expect(createDPoPProof(signer, { htm: "POST", htu: API_URL })).rejects.toThrow(message);
+  });
+
   it("rejects raw signatures when DER is expected", async () => {
     const { privateKey, publicKey } = generateKeyPairSync("ec", { namedCurve: "P-256" });
     const signer = await createDPoPSigner({
@@ -256,7 +292,7 @@ describe("LinearClient with dpop", () => {
   }
 
   function useNonceResponse(nonce: string) {
-    return new Response(null, {
+    return new Response(JSON.stringify({ error: "use_dpop_nonce" }), {
       status: 401,
       headers: { "DPoP-Nonce": nonce, "WWW-Authenticate": 'DPoP error="use_dpop_nonce"' },
     });
@@ -298,12 +334,8 @@ describe("LinearClient with dpop", () => {
   });
 
   it("retries once with the server nonce and reuses it for later requests", async () => {
-    const fetch = stubFetch(
-      useNonceResponse("nonce-1"),
-      viewerResponse(),
-      viewerResponse({ "DPoP-Nonce": "nonce-2" }),
-      viewerResponse()
-    );
+    const rejected = useNonceResponse("nonce-1");
+    const fetch = stubFetch(rejected, viewerResponse(), viewerResponse({ "DPoP-Nonce": "nonce-2" }), viewerResponse());
     const client = new LinearClient({ accessToken: ACCESS_TOKEN, dpop: createSigner(), apiUrl: API_URL });
 
     await client.viewer;
@@ -312,6 +344,7 @@ describe("LinearClient with dpop", () => {
 
     const nonces = await Promise.all(fetch.mock.calls.map(([, init]) => proofNonce(init)));
     expect(nonces).toEqual([undefined, "nonce-1", "nonce-1", "nonce-2"]);
+    expect(rejected.bodyUsed).toBe(true);
   });
 
   it("gives up after one nonce retry", async () => {
