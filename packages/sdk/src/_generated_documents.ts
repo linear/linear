@@ -1010,6 +1010,8 @@ export type AiConversation = Node & {
   setupWorkflowDefinition?: Maybe<WorkflowDefinition>;
   /** The conversation's unique URL slug. */
   slugId: Scalars["String"];
+  /** The immutable special-purpose UI launch that created this conversation, if recorded. */
+  sourceMetadata?: Maybe<Scalars["JSONObject"]>;
   /** The materialized conversation-level processing summary used by list and gating surfaces. Assistant response lifecycle is recorded on its turn. */
   status: AiConversationStatus;
   /** [Internal] Users subscribed to this run. */
@@ -1054,6 +1056,35 @@ export type AiConversationAckPart = AiConversationBasePart & {
   type: AiConversationPartType;
 };
 
+/** An agent-origin message in a conversation turn. */
+export type AiConversationAgentMessagePart = AiConversationBasePart & {
+  __typename?: "AiConversationAgentMessagePart";
+  /** When durable submission was acknowledged. */
+  acceptedAt?: Maybe<Scalars["String"]>;
+  /** Source identity, full message and display summary. */
+  agentMessage: Scalars["JSONObject"];
+  /** The reserved assistant response identity. */
+  assistantTurnId: Scalars["String"];
+  /** Whether removal canceled the exchange. */
+  canceled?: Maybe<Scalars["Boolean"]>;
+  /** When the recipient consumed this message. */
+  consumedAt?: Maybe<Scalars["String"]>;
+  /** When the message was saved. */
+  createdAt: Scalars["String"];
+  /** The acknowledged delivery job. */
+  deliveryRunId?: Maybe<Scalars["String"]>;
+  /** The accepted substantive reply identity. */
+  fulfilledByMessageId?: Maybe<Scalars["String"]>;
+  /** The ID of the part. */
+  id: Scalars["String"];
+  /** The metadata of the part. */
+  metadata: AiConversationPartMetadata;
+  /** The human owner whose access authorizes this exchange. */
+  ownerUserId: Scalars["String"];
+  /** The type of the part. */
+  type: AiConversationPartType;
+};
+
 /** A base part in an AI conversation. */
 export type AiConversationBasePart = {
   /** The ID of the part. */
@@ -1077,6 +1108,8 @@ export type AiConversationBaseToolCall = {
 export type AiConversationBaseWidget = {
   /** Display information for the widget, including ProseMirror and Markdown representations. */
   displayInfo?: Maybe<AiConversationWidgetDisplayInfo>;
+  /** A Markdown fallback for the widget, for clients that can't render this widget natively. Always present for every widget, and never contains internal model names or identifiers. */
+  fallbackText: Scalars["String"];
   /** The name of the widget. */
   name: AiConversationWidgetName;
   /** The arguments of the widget. */
@@ -1423,6 +1456,8 @@ export type AiConversationEntityCardWidget = AiConversationBaseWidget & {
   args?: Maybe<AiConversationEntityCardWidgetArgs>;
   /** Display information for the widget, including ProseMirror and Markdown representations. */
   displayInfo?: Maybe<AiConversationWidgetDisplayInfo>;
+  /** A Markdown fallback for the widget, for clients that can't render this widget natively. Always present for every widget, and never contains internal model names or identifiers. */
+  fallbackText: Scalars["String"];
   /** The name of the widget. */
   name: AiConversationWidgetName;
   /** The arguments of the widget. */
@@ -1490,6 +1525,8 @@ export type AiConversationEntityListWidget = AiConversationBaseWidget & {
   args?: Maybe<AiConversationEntityListWidgetArgs>;
   /** Display information for the widget, including ProseMirror and Markdown representations. */
   displayInfo?: Maybe<AiConversationWidgetDisplayInfo>;
+  /** A Markdown fallback for the widget, for clients that can't render this widget natively. Always present for every widget, and never contains internal model names or identifiers. */
+  fallbackText: Scalars["String"];
   /** The name of the widget. */
   name: AiConversationWidgetName;
   /** The arguments of the widget. */
@@ -1724,6 +1761,7 @@ export type AiConversationGitPushToolCall = AiConversationBaseToolCall & {
 
 export type AiConversationGitPushToolCallArgs = {
   __typename?: "AiConversationGitPushToolCallArgs";
+  branch?: Maybe<Scalars["String"]>;
   force?: Maybe<Scalars["Boolean"]>;
 };
 
@@ -1824,6 +1862,7 @@ export type AiConversationListCodingSessionsToolCallArgs = {
 export type AiConversationListCodingSessionsToolCallResult = {
   __typename?: "AiConversationListCodingSessionsToolCallResult";
   agentSessions: Array<AiConversationListCodingSessionsToolCallResultAgentSessions>;
+  codingSubagents?: Maybe<Array<AiConversationSearchEntitiesToolCallResultEntities>>;
   entities?: Maybe<Array<AiConversationSearchEntitiesToolCallResultEntities>>;
 };
 
@@ -1832,6 +1871,19 @@ export type AiConversationListCodingSessionsToolCallResultAgentSessions = {
   id: Scalars["String"];
   pullRequests?: Maybe<Array<AiConversationSearchEntitiesToolCallResultEntities>>;
   type: Scalars["String"];
+};
+
+export type AiConversationListSubagentsToolCall = AiConversationBaseToolCall & {
+  __typename?: "AiConversationListSubagentsToolCall";
+  /** The arguments to the tool call. */
+  args?: Maybe<Scalars["JSONObject"]>;
+  displayInfo: AiConversationToolDisplayInfo;
+  /** The name of the tool that was called. */
+  name: AiConversationTool;
+  /** The arguments of the tool call. */
+  rawArgs?: Maybe<Scalars["JSON"]>;
+  /** The result of the tool call. */
+  rawResult?: Maybe<Scalars["JSON"]>;
 };
 
 /** The integration connected by an MCP server connection elicitation. */
@@ -1908,6 +1960,7 @@ export type AiConversationMessageSubagentToolCall = AiConversationBaseToolCall &
 export type AiConversationMessageSubagentToolCallArgs = {
   __typename?: "AiConversationMessageSubagentToolCallArgs";
   conversationId: Scalars["String"];
+  description?: Maybe<Scalars["String"]>;
   prompt: Scalars["String"];
   wait?: Maybe<Scalars["Boolean"]>;
 };
@@ -1988,6 +2041,7 @@ export type AiConversationNotifyUsersToolCallResult = {
 /** A part in an AI conversation. */
 export type AiConversationPart =
   | AiConversationAckPart
+  | AiConversationAgentMessagePart
   | AiConversationElicitationPart
   | AiConversationElicitationResponsePart
   | AiConversationErrorPart
@@ -2024,6 +2078,7 @@ export enum AiConversationPartPhase {
 /** The type of a part in an AI conversation. */
 export enum AiConversationPartType {
   Ack = "ack",
+  AgentMessage = "agentMessage",
   Elicitation = "elicitation",
   ElicitationResponse = "elicitationResponse",
   Error = "error",
@@ -2635,6 +2690,8 @@ export type AiConversationSettingWidget = AiConversationBaseWidget & {
   args?: Maybe<AiConversationSettingWidgetArgs>;
   /** Display information for the widget, including ProseMirror and Markdown representations. */
   displayInfo?: Maybe<AiConversationWidgetDisplayInfo>;
+  /** A Markdown fallback for the widget, for clients that can't render this widget natively. Always present for every widget, and never contains internal model names or identifiers. */
+  fallbackText: Scalars["String"];
   /** The name of the widget. */
   name: AiConversationWidgetName;
   /** The arguments of the widget. */
@@ -2819,6 +2876,7 @@ export enum AiConversationTool {
   HandoffToCodingSession = "HandoffToCodingSession",
   InvokeMcpTool = "InvokeMcpTool",
   ListCodingSessions = "ListCodingSessions",
+  ListSubagents = "ListSubagents",
   Memory = "Memory",
   MessageSubagent = "MessageSubagent",
   NavigateToPage = "NavigateToPage",
@@ -2884,6 +2942,7 @@ export type AiConversationToolCall =
   | AiConversationHandoffToCodingSessionToolCall
   | AiConversationInvokeMcpToolToolCall
   | AiConversationListCodingSessionsToolCall
+  | AiConversationListSubagentsToolCall
   | AiConversationMemoryToolCall
   | AiConversationMessageSubagentToolCall
   | AiConversationNavigateToPageToolCall
@@ -13868,22 +13927,14 @@ export type JiraProjectStatusesPayload = {
 };
 
 export type JiraSettingsInput = {
-  /** The custom OAuth server token endpoint URL (enterprise SSO). */
-  customOAuthServerUrl?: InputMaybe<Scalars["String"]>;
   /** Whether this integration authenticates with a Jira Cloud service account API key. */
   isCloudServiceAccount?: InputMaybe<Scalars["Boolean"]>;
-  /** Whether this integration uses custom OAuth authentication (enterprise SSO). */
-  isCustomOAuth?: InputMaybe<Scalars["Boolean"]>;
   /** Whether this integration is for Jira Server or not. */
   isJiraServer?: InputMaybe<Scalars["Boolean"]>;
   /** The label of the Jira instance, for visual identification purposes only */
   label?: InputMaybe<Scalars["String"]>;
   /** Whether this integration is using a manual setup flow. */
   manualSetup?: InputMaybe<Scalars["Boolean"]>;
-  /** The OAuth client ID for the personal connection OAuth app, when using custom OAuth. */
-  personalOAuthClientId?: InputMaybe<Scalars["String"]>;
-  /** The mapping of Jira project id => Linear team id. */
-  projectMapping?: InputMaybe<Array<JiraLinearMappingInput>>;
   /** The Jira projects for the organization. */
   projects: Array<JiraProjectDataInput>;
   /** Whether the user needs to provide setup information about the webhook to complete the integration setup. Only relevant for integrations that use a manual setup flow */
@@ -18216,6 +18267,8 @@ export type OAuthApplication = {
   name: Scalars["String"];
   /** Allowed redirect URIs for OAuth authorization flows. */
   redirectUris: Array<Scalars["String"]>;
+  /** Whether token requests for the OAuth application, including refresh token requests, must include a DPoP proof. */
+  requireTokenBinding: Scalars["Boolean"];
   /** The time at which the OAuth application was last updated. */
   updatedAt: Scalars["DateTime"];
   /** Whether webhook delivery is enabled for this OAuth application. */
@@ -18260,6 +18313,8 @@ export type OAuthApplicationCreateInput = {
   name: Scalars["String"];
   /** Allowed redirect URIs for OAuth authorization flows. */
   redirectUris: Array<Scalars["String"]>;
+  /** Whether token requests for the OAuth application, including refresh token requests, must include a DPoP proof. Defaults to false. */
+  requireTokenBinding?: InputMaybe<Scalars["Boolean"]>;
   /** Resource types the OAuth application's webhooks subscribe to. */
   webhookResourceTypes?: InputMaybe<Array<WebhookResourceType>>;
   /** Webhook URL used for delivering webhook payloads. */
@@ -18334,6 +18389,8 @@ export type OAuthApplicationUpdateInput = {
   name?: InputMaybe<Scalars["String"]>;
   /** Allowed redirect URIs for OAuth authorization flows. */
   redirectUris?: InputMaybe<Array<Scalars["String"]>>;
+  /** Whether token requests for the OAuth application, including refresh token requests, must include a DPoP proof. Access tokens issued before this is enabled are not affected. */
+  requireTokenBinding?: InputMaybe<Scalars["Boolean"]>;
   /** Whether webhook delivery is enabled for this OAuth application. */
   webhookEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** Resource types the OAuth application's webhooks subscribe to. */
@@ -18615,6 +18672,8 @@ export type Organization = Node & {
   linearReviewSettings: Scalars["JSONObject"];
   /** The URL of the workspace's logo image. Null if no logo has been uploaded. */
   logoUrl?: Maybe<Scalars["String"]>;
+  /** [Internal] Whether Loop webhook triggers are enabled. */
+  loopWebhooksEnabled: Scalars["Boolean"];
   /** Loops in the workspace that are visible to the requesting user, including workspace and team loops. Includes enabled and disabled loops. */
   loops: WorkflowDefinitionConnection;
   /** [Internal] The teams each managed team feature is limited to, keyed by feature. The workspace's own setting for each feature still applies. */
@@ -19144,6 +19203,8 @@ export type OrganizationLinearReviewSettingsInput = {
   repositories: Array<OrganizationLinearReviewRepositoryInput>;
   /** [Internal] Whether Linear reviews every connected repository or only the selected ones. */
   repositoryScope: RepositoryScope;
+  /** [Internal] Whether Linear resolves other bots' comments that raise a problem Linear already reported. Defaults to true. */
+  resolveDuplicates?: InputMaybe<Scalars["Boolean"]>;
   /** [Internal] Whether Linear also reviews drafts without being asked. */
   reviewDrafts: Scalars["Boolean"];
 };
@@ -19160,6 +19221,8 @@ export type OrganizationManagedFeatureTeamInput = {
 export type OrganizationManagedTeamFeaturesInput = {
   /** [Internal] The teams coding sessions are limited to. Omit it to not limit coding sessions by team. A changed list needs at least one team. If every team left in it was deleted, the list is saved empty, so no team can use coding sessions. `codingAgentEnabled` still turns coding sessions on or off for the workspace. */
   codingSessions?: InputMaybe<Array<OrganizationManagedFeatureTeamInput>>;
+  /** [Internal] The teams Loop webhook triggers are limited to. Omit it to allow all teams. A changed list needs at least one team. If every team left in it was deleted, the list is saved empty, so no Loop can use webhook triggers. `loopWebhooksEnabled` turns webhook triggers on or off for the workspace. */
+  loopWebhooks?: InputMaybe<Array<OrganizationManagedFeatureTeamInput>>;
   /** [Internal] The teams Loops are limited to. Omit it to not limit Loops by team. A changed list needs at least one team. If every team left in it was deleted, the list is saved empty, so only Loops with no team run. `agentAutomationEnabled` still turns Loops on or off for the workspace. */
   loops?: InputMaybe<Array<OrganizationManagedFeatureTeamInput>>;
 };
@@ -19378,6 +19441,8 @@ export type OrganizationUpdateInput = {
   linearReviewSettings?: InputMaybe<OrganizationLinearReviewSettingsInput>;
   /** The logo URL of the workspace. */
   logoUrl?: InputMaybe<Scalars["String"]>;
+  /** [Internal] Whether Loop webhook triggers are enabled. */
+  loopWebhooksEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** [Internal] The teams each managed team feature is limited to. Replaces the current lists, and updates each team's matching setting. */
   managedTeamFeatures?: InputMaybe<OrganizationManagedTeamFeaturesInput>;
   /** The name of the workspace. */
@@ -19466,6 +19531,7 @@ export enum OtherNotificationType {
   DocumentCommentMention = "documentCommentMention",
   DocumentCommentReaction = "documentCommentReaction",
   DocumentContentChange = "documentContentChange",
+  DocumentCreated = "documentCreated",
   DocumentDeleted = "documentDeleted",
   DocumentMention = "documentMention",
   DocumentMoved = "documentMoved",
@@ -22629,6 +22695,8 @@ export type PullRequestCheck = {
   __typename?: "PullRequestCheck";
   /** The date and time when the check finished running. Null if the check has not completed yet. */
   completedAt?: Maybe<Scalars["DateTime"]>;
+  /** A short description the hosting provider shows next to the check. Null if the provider did not supply one. */
+  description?: Maybe<Scalars["String"]>;
   /** Whether this check is required to pass before the pull request can be merged. Null if the required status is unknown. */
   isRequired?: Maybe<Scalars["Boolean"]>;
   /** The name of the check. */
@@ -22717,6 +22785,8 @@ export type PullRequestMergeSettings = {
   autoMergeAllowed: Scalars["Boolean"];
   /** Whether the branch will be deleted when the pull request is merged. */
   deleteBranchOnMerge: Scalars["Boolean"];
+  /** Whether the merge queue takes pull requests that carry a label, such as Trunk's, instead of GitHub's merge queue. Such a queue merges a native stack's pull requests below a queued one together with it. */
+  isLabelMergeQueue?: Maybe<Scalars["Boolean"]>;
   /** Whether a merge queue is enabled for pull requests in this repository. When enabled, merges go through an ordered queue rather than being merged directly. */
   isMergeQueueEnabled: Scalars["Boolean"];
   /** Whether merge commits are allowed for pull requests PR's repository. */
@@ -26869,6 +26939,8 @@ export type Team = Node & {
   labels: IssueLabelConnection;
   /** The number of initiatives led by this team that would be deleted along with it. Counts every led initiative, including ones not otherwise visible to the caller, to mirror what deleting the team cascades. */
   ledInitiativeCount: Scalars["Int"];
+  /** [Internal] Whether Loop webhook triggers are enabled. */
+  loopWebhooksEnabled: Scalars["Boolean"];
   /** Loops owned by the team that are visible to the requesting user. Includes enabled and disabled loops. */
   loops: WorkflowDefinitionConnection;
   /**
@@ -28722,6 +28794,7 @@ export enum UserFlagType {
   TryRoadmapsDismissed = "tryRoadmapsDismissed",
   TryTriageDismissed = "tryTriageDismissed",
   UpdatedSlackThreadSyncIntegration = "updatedSlackThreadSyncIntegration",
+  WorkspaceSetupCompletedHidden = "workspaceSetupCompletedHidden",
 }
 
 /** Operations that can be applied to UserFlagType. */
@@ -30664,6 +30737,28 @@ type AiConversationBasePart_AiConversationAckPart_Fragment = { __typename: "AiCo
     >;
   };
 
+type AiConversationBasePart_AiConversationAgentMessagePart_Fragment = {
+  __typename: "AiConversationAgentMessagePart";
+} & Pick<
+  AiConversationAgentMessagePart,
+  | "id"
+  | "type"
+  | "agentMessage"
+  | "fulfilledByMessageId"
+  | "deliveryRunId"
+  | "ownerUserId"
+  | "assistantTurnId"
+  | "acceptedAt"
+  | "createdAt"
+  | "consumedAt"
+  | "canceled"
+> & {
+    metadata: { __typename: "AiConversationPartMetadata" } & Pick<
+      AiConversationPartMetadata,
+      "feedback" | "evalLogId" | "phase" | "endedAt" | "startedAt" | "turnId"
+    >;
+  };
+
 type AiConversationBasePart_AiConversationElicitationPart_Fragment = {
   __typename: "AiConversationElicitationPart";
 } & Pick<
@@ -31099,7 +31194,10 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
           "rawArgs" | "name" | "rawResult"
         > & {
             args?: Maybe<
-              { __typename: "AiConversationGitPushToolCallArgs" } & Pick<AiConversationGitPushToolCallArgs, "force">
+              { __typename: "AiConversationGitPushToolCallArgs" } & Pick<
+                AiConversationGitPushToolCallArgs,
+                "branch" | "force"
+              >
             >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
               AiConversationToolDisplayInfo,
@@ -31174,6 +31272,14 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
                       >;
                     }
                 >;
+                codingSubagents?: Maybe<
+                  Array<
+                    { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                      AiConversationSearchEntitiesToolCallResultEntities,
+                      "id" | "type"
+                    >
+                  >
+                >;
                 entities?: Maybe<
                   Array<
                     { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
@@ -31184,6 +31290,15 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
                 >;
               }
             >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationListSubagentsToolCall" } & Pick<
+          AiConversationListSubagentsToolCall,
+          "rawArgs" | "args" | "name" | "rawResult"
+        > & {
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
               AiConversationToolDisplayInfo,
               "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
@@ -31211,7 +31326,7 @@ type AiConversationBasePart_AiConversationToolCallPart_Fragment = { __typename: 
             args?: Maybe<
               { __typename: "AiConversationMessageSubagentToolCallArgs" } & Pick<
                 AiConversationMessageSubagentToolCallArgs,
-                "conversationId" | "prompt" | "wait"
+                "conversationId" | "description" | "prompt" | "wait"
               >
             >;
             result?: Maybe<
@@ -32032,7 +32147,10 @@ type AiConversationBasePart_AiConversationWidgetPart_Fragment = { __typename: "A
       "feedback" | "evalLogId" | "phase" | "endedAt" | "startedAt" | "turnId"
     >;
     widget:
-      | ({ __typename: "AiConversationEntityCardWidget" } & Pick<AiConversationEntityCardWidget, "rawArgs" | "name"> & {
+      | ({ __typename: "AiConversationEntityCardWidget" } & Pick<
+          AiConversationEntityCardWidget,
+          "fallbackText" | "rawArgs" | "name"
+        > & {
             displayInfo?: Maybe<
               { __typename: "AiConversationWidgetDisplayInfo" } & Pick<
                 AiConversationWidgetDisplayInfo,
@@ -32046,7 +32164,10 @@ type AiConversationBasePart_AiConversationWidgetPart_Fragment = { __typename: "A
               >
             >;
           })
-      | ({ __typename: "AiConversationEntityListWidget" } & Pick<AiConversationEntityListWidget, "rawArgs" | "name"> & {
+      | ({ __typename: "AiConversationEntityListWidget" } & Pick<
+          AiConversationEntityListWidget,
+          "fallbackText" | "rawArgs" | "name"
+        > & {
             displayInfo?: Maybe<
               { __typename: "AiConversationWidgetDisplayInfo" } & Pick<
                 AiConversationWidgetDisplayInfo,
@@ -32067,7 +32188,10 @@ type AiConversationBasePart_AiConversationWidgetPart_Fragment = { __typename: "A
                 }
             >;
           })
-      | ({ __typename: "AiConversationSettingWidget" } & Pick<AiConversationSettingWidget, "rawArgs" | "name"> & {
+      | ({ __typename: "AiConversationSettingWidget" } & Pick<
+          AiConversationSettingWidget,
+          "fallbackText" | "rawArgs" | "name"
+        > & {
             displayInfo?: Maybe<
               { __typename: "AiConversationWidgetDisplayInfo" } & Pick<
                 AiConversationWidgetDisplayInfo,
@@ -32089,6 +32213,7 @@ type AiConversationBasePart_AiConversationWidgetPart_Fragment = { __typename: "A
 
 export type AiConversationBasePartFragment =
   | AiConversationBasePart_AiConversationAckPart_Fragment
+  | AiConversationBasePart_AiConversationAgentMessagePart_Fragment
   | AiConversationBasePart_AiConversationElicitationPart_Fragment
   | AiConversationBasePart_AiConversationElicitationResponsePart_Fragment
   | AiConversationBasePart_AiConversationErrorPart_Fragment
@@ -37877,7 +38002,10 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
           "rawArgs" | "name" | "rawResult"
         > & {
             args?: Maybe<
-              { __typename: "AiConversationGitPushToolCallArgs" } & Pick<AiConversationGitPushToolCallArgs, "force">
+              { __typename: "AiConversationGitPushToolCallArgs" } & Pick<
+                AiConversationGitPushToolCallArgs,
+                "branch" | "force"
+              >
             >;
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
               AiConversationToolDisplayInfo,
@@ -37952,6 +38080,14 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
                       >;
                     }
                 >;
+                codingSubagents?: Maybe<
+                  Array<
+                    { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+                      AiConversationSearchEntitiesToolCallResultEntities,
+                      "id" | "type"
+                    >
+                  >
+                >;
                 entities?: Maybe<
                   Array<
                     { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
@@ -37962,6 +38098,15 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
                 >;
               }
             >;
+            displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+              AiConversationToolDisplayInfo,
+              "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
+            >;
+          })
+      | ({ __typename: "AiConversationListSubagentsToolCall" } & Pick<
+          AiConversationListSubagentsToolCall,
+          "rawArgs" | "args" | "name" | "rawResult"
+        > & {
             displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
               AiConversationToolDisplayInfo,
               "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
@@ -37989,7 +38134,7 @@ export type AiConversationToolCallPartFragment = { __typename: "AiConversationTo
             args?: Maybe<
               { __typename: "AiConversationMessageSubagentToolCallArgs" } & Pick<
                 AiConversationMessageSubagentToolCallArgs,
-                "conversationId" | "prompt" | "wait"
+                "conversationId" | "description" | "prompt" | "wait"
               >
             >;
             result?: Maybe<
@@ -39226,7 +39371,10 @@ export type AiConversationWidgetPartFragment = { __typename: "AiConversationWidg
       "feedback" | "evalLogId" | "phase" | "endedAt" | "startedAt" | "turnId"
     >;
     widget:
-      | ({ __typename: "AiConversationEntityCardWidget" } & Pick<AiConversationEntityCardWidget, "rawArgs" | "name"> & {
+      | ({ __typename: "AiConversationEntityCardWidget" } & Pick<
+          AiConversationEntityCardWidget,
+          "fallbackText" | "rawArgs" | "name"
+        > & {
             displayInfo?: Maybe<
               { __typename: "AiConversationWidgetDisplayInfo" } & Pick<
                 AiConversationWidgetDisplayInfo,
@@ -39240,7 +39388,10 @@ export type AiConversationWidgetPartFragment = { __typename: "AiConversationWidg
               >
             >;
           })
-      | ({ __typename: "AiConversationEntityListWidget" } & Pick<AiConversationEntityListWidget, "rawArgs" | "name"> & {
+      | ({ __typename: "AiConversationEntityListWidget" } & Pick<
+          AiConversationEntityListWidget,
+          "fallbackText" | "rawArgs" | "name"
+        > & {
             displayInfo?: Maybe<
               { __typename: "AiConversationWidgetDisplayInfo" } & Pick<
                 AiConversationWidgetDisplayInfo,
@@ -39261,7 +39412,10 @@ export type AiConversationWidgetPartFragment = { __typename: "AiConversationWidg
                 }
             >;
           })
-      | ({ __typename: "AiConversationSettingWidget" } & Pick<AiConversationSettingWidget, "rawArgs" | "name"> & {
+      | ({ __typename: "AiConversationSettingWidget" } & Pick<
+          AiConversationSettingWidget,
+          "fallbackText" | "rawArgs" | "name"
+        > & {
             displayInfo?: Maybe<
               { __typename: "AiConversationWidgetDisplayInfo" } & Pick<
                 AiConversationWidgetDisplayInfo,
@@ -39450,6 +39604,7 @@ export type OAuthApplicationFragment = { __typename: "OAuthApplication" } & Pick
   | "developerUrl"
   | "description"
   | "webhookUrl"
+  | "requireTokenBinding"
   | "webhookEnabled"
 >;
 
@@ -39476,6 +39631,26 @@ export type AgentActivityFragment = { __typename: "AgentActivity" } & Pick<
     sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
     user: { __typename?: "User" } & Pick<User, "id">;
     promptAuthor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+  };
+
+export type AiConversationAgentMessagePartFragment = { __typename: "AiConversationAgentMessagePart" } & Pick<
+  AiConversationAgentMessagePart,
+  | "agentMessage"
+  | "id"
+  | "fulfilledByMessageId"
+  | "deliveryRunId"
+  | "ownerUserId"
+  | "assistantTurnId"
+  | "type"
+  | "acceptedAt"
+  | "createdAt"
+  | "consumedAt"
+  | "canceled"
+> & {
+    metadata: { __typename: "AiConversationPartMetadata" } & Pick<
+      AiConversationPartMetadata,
+      "feedback" | "evalLogId" | "phase" | "endedAt" | "startedAt" | "turnId"
+    >;
   };
 
 export type ProjectAttachmentFragment = { __typename: "ProjectAttachment" } & Pick<
@@ -46949,7 +47124,7 @@ type AiConversationBaseToolCall_AiConversationGitPushToolCall_Fragment = {
       "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
     >;
     args?: Maybe<
-      { __typename: "AiConversationGitPushToolCallArgs" } & Pick<AiConversationGitPushToolCallArgs, "force">
+      { __typename: "AiConversationGitPushToolCallArgs" } & Pick<AiConversationGitPushToolCallArgs, "branch" | "force">
     >;
   };
 
@@ -47024,6 +47199,14 @@ type AiConversationBaseToolCall_AiConversationListCodingSessionsToolCall_Fragmen
               >;
             }
         >;
+        codingSubagents?: Maybe<
+          Array<
+            { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+              AiConversationSearchEntitiesToolCallResultEntities,
+              "id" | "type"
+            >
+          >
+        >;
         entities?: Maybe<
           Array<
             { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
@@ -47033,6 +47216,15 @@ type AiConversationBaseToolCall_AiConversationListCodingSessionsToolCall_Fragmen
           >
         >;
       }
+    >;
+  };
+
+type AiConversationBaseToolCall_AiConversationListSubagentsToolCall_Fragment = {
+  __typename: "AiConversationListSubagentsToolCall";
+} & Pick<AiConversationListSubagentsToolCall, "rawArgs" | "name" | "rawResult" | "args"> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
     >;
   };
 
@@ -47058,7 +47250,7 @@ type AiConversationBaseToolCall_AiConversationMessageSubagentToolCall_Fragment =
     args?: Maybe<
       { __typename: "AiConversationMessageSubagentToolCallArgs" } & Pick<
         AiConversationMessageSubagentToolCallArgs,
-        "conversationId" | "prompt" | "wait"
+        "conversationId" | "description" | "prompt" | "wait"
       >
     >;
     result?: Maybe<
@@ -47875,6 +48067,7 @@ export type AiConversationBaseToolCallFragment =
   | AiConversationBaseToolCall_AiConversationHandoffToCodingSessionToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationInvokeMcpToolToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationListCodingSessionsToolCall_Fragment
+  | AiConversationBaseToolCall_AiConversationListSubagentsToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationMemoryToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationMessageSubagentToolCall_Fragment
   | AiConversationBaseToolCall_AiConversationNavigateToPageToolCall_Fragment
@@ -47918,7 +48111,7 @@ export type AiConversationBaseToolCallFragment =
 
 type AiConversationBaseWidget_AiConversationEntityCardWidget_Fragment = {
   __typename: "AiConversationEntityCardWidget";
-} & Pick<AiConversationEntityCardWidget, "rawArgs" | "name"> & {
+} & Pick<AiConversationEntityCardWidget, "fallbackText" | "rawArgs" | "name"> & {
     displayInfo?: Maybe<
       { __typename: "AiConversationWidgetDisplayInfo" } & Pick<AiConversationWidgetDisplayInfo, "body" | "bodyData">
     >;
@@ -47932,7 +48125,7 @@ type AiConversationBaseWidget_AiConversationEntityCardWidget_Fragment = {
 
 type AiConversationBaseWidget_AiConversationEntityListWidget_Fragment = {
   __typename: "AiConversationEntityListWidget";
-} & Pick<AiConversationEntityListWidget, "rawArgs" | "name"> & {
+} & Pick<AiConversationEntityListWidget, "fallbackText" | "rawArgs" | "name"> & {
     displayInfo?: Maybe<
       { __typename: "AiConversationWidgetDisplayInfo" } & Pick<AiConversationWidgetDisplayInfo, "body" | "bodyData">
     >;
@@ -47953,7 +48146,7 @@ type AiConversationBaseWidget_AiConversationEntityListWidget_Fragment = {
 
 type AiConversationBaseWidget_AiConversationSettingWidget_Fragment = {
   __typename: "AiConversationSettingWidget";
-} & Pick<AiConversationSettingWidget, "rawArgs" | "name"> & {
+} & Pick<AiConversationSettingWidget, "fallbackText" | "rawArgs" | "name"> & {
     displayInfo?: Maybe<
       { __typename: "AiConversationWidgetDisplayInfo" } & Pick<AiConversationWidgetDisplayInfo, "body" | "bodyData">
     >;
@@ -48301,7 +48494,7 @@ export type AiConversationEditSandboxFileToolCallArgsFragment = {
 
 export type AiConversationEntityCardWidgetFragment = { __typename: "AiConversationEntityCardWidget" } & Pick<
   AiConversationEntityCardWidget,
-  "rawArgs" | "name"
+  "fallbackText" | "rawArgs" | "name"
 > & {
     displayInfo?: Maybe<
       { __typename: "AiConversationWidgetDisplayInfo" } & Pick<AiConversationWidgetDisplayInfo, "body" | "bodyData">
@@ -48321,7 +48514,7 @@ export type AiConversationEntityCardWidgetArgsFragment = { __typename: "AiConver
 
 export type AiConversationEntityListWidgetFragment = { __typename: "AiConversationEntityListWidget" } & Pick<
   AiConversationEntityListWidget,
-  "rawArgs" | "name"
+  "fallbackText" | "rawArgs" | "name"
 > & {
     displayInfo?: Maybe<
       { __typename: "AiConversationWidgetDisplayInfo" } & Pick<AiConversationWidgetDisplayInfo, "body" | "bodyData">
@@ -48487,7 +48680,7 @@ export type AiConversationGitPushToolCallFragment = { __typename: "AiConversatio
   "rawArgs" | "name" | "rawResult"
 > & {
     args?: Maybe<
-      { __typename: "AiConversationGitPushToolCallArgs" } & Pick<AiConversationGitPushToolCallArgs, "force">
+      { __typename: "AiConversationGitPushToolCallArgs" } & Pick<AiConversationGitPushToolCallArgs, "branch" | "force">
     >;
     displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
       AiConversationToolDisplayInfo,
@@ -48497,7 +48690,7 @@ export type AiConversationGitPushToolCallFragment = { __typename: "AiConversatio
 
 export type AiConversationGitPushToolCallArgsFragment = { __typename: "AiConversationGitPushToolCallArgs" } & Pick<
   AiConversationGitPushToolCallArgs,
-  "force"
+  "branch" | "force"
 >;
 
 export type AiConversationHandoffToCodingSessionToolCallFragment = {
@@ -48598,6 +48791,14 @@ export type AiConversationListCodingSessionsToolCallFragment = {
               >;
             }
         >;
+        codingSubagents?: Maybe<
+          Array<
+            { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+              AiConversationSearchEntitiesToolCallResultEntities,
+              "id" | "type"
+            >
+          >
+        >;
         entities?: Maybe<
           Array<
             { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
@@ -48636,6 +48837,14 @@ export type AiConversationListCodingSessionsToolCallResultFragment = {
         >;
       }
   >;
+  codingSubagents?: Maybe<
+    Array<
+      { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
+        AiConversationSearchEntitiesToolCallResultEntities,
+        "id" | "type"
+      >
+    >
+  >;
   entities?: Maybe<
     Array<
       { __typename: "AiConversationSearchEntitiesToolCallResultEntities" } & Pick<
@@ -48656,6 +48865,16 @@ export type AiConversationListCodingSessionsToolCallResultAgentSessionsFragment 
           "id" | "type"
         >
       >
+    >;
+  };
+
+export type AiConversationListSubagentsToolCallFragment = { __typename: "AiConversationListSubagentsToolCall" } & Pick<
+  AiConversationListSubagentsToolCall,
+  "rawArgs" | "args" | "name" | "rawResult"
+> & {
+    displayInfo: { __typename: "AiConversationToolDisplayInfo" } & Pick<
+      AiConversationToolDisplayInfo,
+      "activeLabel" | "detail" | "icon" | "inactiveLabel" | "result"
     >;
   };
 
@@ -48683,7 +48902,7 @@ export type AiConversationMessageSubagentToolCallFragment = {
     args?: Maybe<
       { __typename: "AiConversationMessageSubagentToolCallArgs" } & Pick<
         AiConversationMessageSubagentToolCallArgs,
-        "conversationId" | "prompt" | "wait"
+        "conversationId" | "description" | "prompt" | "wait"
       >
     >;
     result?: Maybe<
@@ -48700,7 +48919,7 @@ export type AiConversationMessageSubagentToolCallFragment = {
 
 export type AiConversationMessageSubagentToolCallArgsFragment = {
   __typename: "AiConversationMessageSubagentToolCallArgs";
-} & Pick<AiConversationMessageSubagentToolCallArgs, "conversationId" | "prompt" | "wait">;
+} & Pick<AiConversationMessageSubagentToolCallArgs, "conversationId" | "description" | "prompt" | "wait">;
 
 export type AiConversationMessageSubagentToolCallResultFragment = {
   __typename: "AiConversationMessageSubagentToolCallResult";
@@ -49584,7 +49803,7 @@ export type AiConversationSetSpendLimitToolCallArgsFragment = {
 
 export type AiConversationSettingWidgetFragment = { __typename: "AiConversationSettingWidget" } & Pick<
   AiConversationSettingWidget,
-  "rawArgs" | "name"
+  "fallbackText" | "rawArgs" | "name"
 > & {
     displayInfo?: Maybe<
       { __typename: "AiConversationWidgetDisplayInfo" } & Pick<AiConversationWidgetDisplayInfo, "body" | "bodyData">
@@ -95220,6 +95439,36 @@ export const AiConversationAckPartFragmentDoc = /*#__PURE__*/ new TypedDocumentS
 }`,
   { fragmentName: "AiConversationAckPart" }
 ) as unknown as TypedDocumentString<AiConversationAckPartFragment, unknown>;
+export const AiConversationAgentMessagePartFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
+  `
+    fragment AiConversationAgentMessagePart on AiConversationAgentMessagePart {
+  __typename
+  agentMessage
+  id
+  fulfilledByMessageId
+  deliveryRunId
+  ownerUserId
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  assistantTurnId
+  type
+  acceptedAt
+  createdAt
+  consumedAt
+  canceled
+}
+    fragment AiConversationPartMetadata on AiConversationPartMetadata {
+  __typename
+  feedback
+  evalLogId
+  phase
+  endedAt
+  startedAt
+  turnId
+}`,
+  { fragmentName: "AiConversationAgentMessagePart" }
+) as unknown as TypedDocumentString<AiConversationAgentMessagePartFragment, unknown>;
 export const AiConversationMcpServerConnectionScopeFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
   `
     fragment AiConversationMcpServerConnectionScope on AiConversationMcpServerConnectionScope {
@@ -96372,6 +96621,7 @@ export const AiConversationGitPushToolCallArgsFragmentDoc = /*#__PURE__*/ new Ty
   `
     fragment AiConversationGitPushToolCallArgs on AiConversationGitPushToolCallArgs {
   __typename
+  branch
   force
 }
     `,
@@ -96393,6 +96643,7 @@ export const AiConversationGitPushToolCallFragmentDoc = /*#__PURE__*/ new TypedD
 }
     fragment AiConversationGitPushToolCallArgs on AiConversationGitPushToolCallArgs {
   __typename
+  branch
   force
 }
 fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
@@ -96580,6 +96831,9 @@ export const AiConversationListCodingSessionsToolCallResultFragmentDoc = /*#__PU
   agentSessions {
     ...AiConversationListCodingSessionsToolCallResultAgentSessions
   }
+  codingSubagents {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
   entities {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
@@ -96625,6 +96879,9 @@ fragment AiConversationListCodingSessionsToolCallResult on AiConversationListCod
   agentSessions {
     ...AiConversationListCodingSessionsToolCallResultAgentSessions
   }
+  codingSubagents {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
   entities {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
@@ -96652,6 +96909,28 @@ fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
 }`,
   { fragmentName: "AiConversationListCodingSessionsToolCall" }
 ) as unknown as TypedDocumentString<AiConversationListCodingSessionsToolCallFragment, unknown>;
+export const AiConversationListSubagentsToolCallFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
+  `
+    fragment AiConversationListSubagentsToolCall on AiConversationListSubagentsToolCall {
+  __typename
+  rawArgs
+  args
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
+}
+    fragment AiConversationToolDisplayInfo on AiConversationToolDisplayInfo {
+  __typename
+  activeLabel
+  detail
+  icon
+  inactiveLabel
+  result
+}`,
+  { fragmentName: "AiConversationListSubagentsToolCall" }
+) as unknown as TypedDocumentString<AiConversationListSubagentsToolCallFragment, unknown>;
 export const AiConversationMemoryToolCallArgsFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
   `
     fragment AiConversationMemoryToolCallArgs on AiConversationMemoryToolCallArgs {
@@ -96696,6 +96975,7 @@ export const AiConversationMessageSubagentToolCallArgsFragmentDoc = /*#__PURE__*
     fragment AiConversationMessageSubagentToolCallArgs on AiConversationMessageSubagentToolCallArgs {
   __typename
   conversationId
+  description
   prompt
   wait
 }
@@ -96731,6 +97011,7 @@ export const AiConversationMessageSubagentToolCallFragmentDoc = /*#__PURE__*/ ne
     fragment AiConversationMessageSubagentToolCallArgs on AiConversationMessageSubagentToolCallArgs {
   __typename
   conversationId
+  description
   prompt
   wait
 }
@@ -98837,6 +99118,9 @@ export const AiConversationToolCallPartFragmentDoc = /*#__PURE__*/ new TypedDocu
     ... on AiConversationListCodingSessionsToolCall {
       ...AiConversationListCodingSessionsToolCall
     }
+    ... on AiConversationListSubagentsToolCall {
+      ...AiConversationListSubagentsToolCall
+    }
     ... on AiConversationMemoryToolCall {
       ...AiConversationMemoryToolCall
     }
@@ -99295,6 +99579,7 @@ fragment AiConversationGitPushToolCall on AiConversationGitPushToolCall {
 }
 fragment AiConversationGitPushToolCallArgs on AiConversationGitPushToolCallArgs {
   __typename
+  branch
   force
 }
 fragment AiConversationHandoffToCodingSessionToolCall on AiConversationHandoffToCodingSessionToolCall {
@@ -99372,6 +99657,9 @@ fragment AiConversationListCodingSessionsToolCallResult on AiConversationListCod
   agentSessions {
     ...AiConversationListCodingSessionsToolCallResultAgentSessions
   }
+  codingSubagents {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
   entities {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
@@ -99383,6 +99671,16 @@ fragment AiConversationListCodingSessionsToolCallResultAgentSessions on AiConver
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
   type
+}
+fragment AiConversationListSubagentsToolCall on AiConversationListSubagentsToolCall {
+  __typename
+  rawArgs
+  args
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
 }
 fragment AiConversationMemoryToolCall on AiConversationMemoryToolCall {
   __typename
@@ -99419,6 +99717,7 @@ fragment AiConversationMessageSubagentToolCall on AiConversationMessageSubagentT
 fragment AiConversationMessageSubagentToolCallArgs on AiConversationMessageSubagentToolCallArgs {
   __typename
   conversationId
+  description
   prompt
   wait
 }
@@ -100254,6 +100553,7 @@ export const AiConversationEntityCardWidgetFragmentDoc = /*#__PURE__*/ new Typed
   `
     fragment AiConversationEntityCardWidget on AiConversationEntityCardWidget {
   __typename
+  fallbackText
   displayInfo {
     ...AiConversationWidgetDisplayInfo
   }
@@ -100308,6 +100608,7 @@ export const AiConversationEntityListWidgetFragmentDoc = /*#__PURE__*/ new Typed
   `
     fragment AiConversationEntityListWidget on AiConversationEntityListWidget {
   __typename
+  fallbackText
   displayInfo {
     ...AiConversationWidgetDisplayInfo
   }
@@ -100367,6 +100668,7 @@ export const AiConversationSettingWidgetFragmentDoc = /*#__PURE__*/ new TypedDoc
   `
     fragment AiConversationSettingWidget on AiConversationSettingWidget {
   __typename
+  fallbackText
   displayInfo {
     ...AiConversationWidgetDisplayInfo
   }
@@ -100427,6 +100729,7 @@ export const AiConversationWidgetPartFragmentDoc = /*#__PURE__*/ new TypedDocume
 }
 fragment AiConversationEntityCardWidget on AiConversationEntityCardWidget {
   __typename
+  fallbackText
   displayInfo {
     ...AiConversationWidgetDisplayInfo
   }
@@ -100445,6 +100748,7 @@ fragment AiConversationEntityCardWidgetArgs on AiConversationEntityCardWidgetArg
 }
 fragment AiConversationEntityListWidget on AiConversationEntityListWidget {
   __typename
+  fallbackText
   displayInfo {
     ...AiConversationWidgetDisplayInfo
   }
@@ -100469,6 +100773,7 @@ fragment AiConversationEntityListWidgetArgsEntities on AiConversationEntityListW
 }
 fragment AiConversationSettingWidget on AiConversationSettingWidget {
   __typename
+  fallbackText
   displayInfo {
     ...AiConversationWidgetDisplayInfo
   }
@@ -100508,6 +100813,9 @@ export const AiConversationBasePartFragmentDoc = /*#__PURE__*/ new TypedDocument
   type
   ... on AiConversationAckPart {
     ...AiConversationAckPart
+  }
+  ... on AiConversationAgentMessagePart {
+    ...AiConversationAgentMessagePart
   }
   ... on AiConversationElicitationPart {
     ...AiConversationElicitationPart
@@ -100707,6 +101015,9 @@ fragment AiConversationToolCallPart on AiConversationToolCallPart {
     ... on AiConversationListCodingSessionsToolCall {
       ...AiConversationListCodingSessionsToolCall
     }
+    ... on AiConversationListSubagentsToolCall {
+      ...AiConversationListSubagentsToolCall
+    }
     ... on AiConversationMemoryToolCall {
       ...AiConversationMemoryToolCall
     }
@@ -100848,6 +101159,23 @@ fragment AiConversationWidgetPart on AiConversationWidgetPart {
       ...AiConversationSettingWidget
     }
   }
+}
+fragment AiConversationAgentMessagePart on AiConversationAgentMessagePart {
+  __typename
+  agentMessage
+  id
+  fulfilledByMessageId
+  deliveryRunId
+  ownerUserId
+  metadata {
+    ...AiConversationPartMetadata
+  }
+  assistantTurnId
+  type
+  acceptedAt
+  createdAt
+  consumedAt
+  canceled
 }
 fragment AiConversationErrorPart on AiConversationErrorPart {
   __typename
@@ -101142,6 +101470,7 @@ fragment AiConversationEditSandboxFileToolCallArgs on AiConversationEditSandboxF
 }
 fragment AiConversationEntityCardWidget on AiConversationEntityCardWidget {
   __typename
+  fallbackText
   displayInfo {
     ...AiConversationWidgetDisplayInfo
   }
@@ -101160,6 +101489,7 @@ fragment AiConversationEntityCardWidgetArgs on AiConversationEntityCardWidgetArg
 }
 fragment AiConversationEntityListWidget on AiConversationEntityListWidget {
   __typename
+  fallbackText
   displayInfo {
     ...AiConversationWidgetDisplayInfo
   }
@@ -101289,6 +101619,7 @@ fragment AiConversationGitPushToolCall on AiConversationGitPushToolCall {
 }
 fragment AiConversationGitPushToolCallArgs on AiConversationGitPushToolCallArgs {
   __typename
+  branch
   force
 }
 fragment AiConversationHandoffToCodingSessionToolCall on AiConversationHandoffToCodingSessionToolCall {
@@ -101366,6 +101697,9 @@ fragment AiConversationListCodingSessionsToolCallResult on AiConversationListCod
   agentSessions {
     ...AiConversationListCodingSessionsToolCallResultAgentSessions
   }
+  codingSubagents {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
   entities {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
@@ -101377,6 +101711,16 @@ fragment AiConversationListCodingSessionsToolCallResultAgentSessions on AiConver
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
   type
+}
+fragment AiConversationListSubagentsToolCall on AiConversationListSubagentsToolCall {
+  __typename
+  rawArgs
+  args
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
 }
 fragment AiConversationMemoryToolCall on AiConversationMemoryToolCall {
   __typename
@@ -101413,6 +101757,7 @@ fragment AiConversationMessageSubagentToolCall on AiConversationMessageSubagentT
 fragment AiConversationMessageSubagentToolCallArgs on AiConversationMessageSubagentToolCallArgs {
   __typename
   conversationId
+  description
   prompt
   wait
 }
@@ -101993,6 +102338,7 @@ fragment AiConversationSetSpendLimitToolCallArgs on AiConversationSetSpendLimitT
 }
 fragment AiConversationSettingWidget on AiConversationSettingWidget {
   __typename
+  fallbackText
   displayInfo {
     ...AiConversationWidgetDisplayInfo
   }
@@ -106316,6 +106662,7 @@ export const OAuthApplicationFragmentDoc = /*#__PURE__*/ new TypedDocumentString
   developerUrl
   description
   webhookUrl
+  requireTokenBinding
   webhookEnabled
 }
     `,
@@ -115623,6 +115970,9 @@ export const AiConversationBaseToolCallFragmentDoc = /*#__PURE__*/ new TypedDocu
   ... on AiConversationListCodingSessionsToolCall {
     ...AiConversationListCodingSessionsToolCall
   }
+  ... on AiConversationListSubagentsToolCall {
+    ...AiConversationListSubagentsToolCall
+  }
   ... on AiConversationMemoryToolCall {
     ...AiConversationMemoryToolCall
   }
@@ -116070,6 +116420,7 @@ fragment AiConversationGitPushToolCall on AiConversationGitPushToolCall {
 }
 fragment AiConversationGitPushToolCallArgs on AiConversationGitPushToolCallArgs {
   __typename
+  branch
   force
 }
 fragment AiConversationHandoffToCodingSessionToolCall on AiConversationHandoffToCodingSessionToolCall {
@@ -116147,6 +116498,9 @@ fragment AiConversationListCodingSessionsToolCallResult on AiConversationListCod
   agentSessions {
     ...AiConversationListCodingSessionsToolCallResultAgentSessions
   }
+  codingSubagents {
+    ...AiConversationSearchEntitiesToolCallResultEntities
+  }
   entities {
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
@@ -116158,6 +116512,16 @@ fragment AiConversationListCodingSessionsToolCallResultAgentSessions on AiConver
     ...AiConversationSearchEntitiesToolCallResultEntities
   }
   type
+}
+fragment AiConversationListSubagentsToolCall on AiConversationListSubagentsToolCall {
+  __typename
+  rawArgs
+  args
+  name
+  rawResult
+  displayInfo {
+    ...AiConversationToolDisplayInfo
+  }
 }
 fragment AiConversationMemoryToolCall on AiConversationMemoryToolCall {
   __typename
@@ -116194,6 +116558,7 @@ fragment AiConversationMessageSubagentToolCall on AiConversationMessageSubagentT
 fragment AiConversationMessageSubagentToolCallArgs on AiConversationMessageSubagentToolCallArgs {
   __typename
   conversationId
+  description
   prompt
   wait
 }
@@ -117007,6 +117372,7 @@ export const AiConversationBaseWidgetFragmentDoc = /*#__PURE__*/ new TypedDocume
   `
     fragment AiConversationBaseWidget on AiConversationBaseWidget {
   __typename
+  fallbackText
   displayInfo {
     ...AiConversationWidgetDisplayInfo
   }
@@ -117024,6 +117390,7 @@ export const AiConversationBaseWidgetFragmentDoc = /*#__PURE__*/ new TypedDocume
 }
     fragment AiConversationEntityCardWidget on AiConversationEntityCardWidget {
   __typename
+  fallbackText
   displayInfo {
     ...AiConversationWidgetDisplayInfo
   }
@@ -117042,6 +117409,7 @@ fragment AiConversationEntityCardWidgetArgs on AiConversationEntityCardWidgetArg
 }
 fragment AiConversationEntityListWidget on AiConversationEntityListWidget {
   __typename
+  fallbackText
   displayInfo {
     ...AiConversationWidgetDisplayInfo
   }
@@ -117066,6 +117434,7 @@ fragment AiConversationEntityListWidgetArgsEntities on AiConversationEntityListW
 }
 fragment AiConversationSettingWidget on AiConversationSettingWidget {
   __typename
+  fallbackText
   displayInfo {
     ...AiConversationWidgetDisplayInfo
   }

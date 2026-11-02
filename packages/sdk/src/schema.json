@@ -5702,6 +5702,18 @@
             "deprecationReason": null
           },
           {
+            "name": "sourceMetadata",
+            "description": "The immutable special-purpose UI launch that created this conversation, if recorded.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "status",
             "description": "The materialized conversation-level processing summary used by list and gating surfaces. Assistant response lifecycle is recorded on its turn.",
             "args": [],
@@ -5966,6 +5978,195 @@
         "possibleTypes": null
       },
       {
+        "kind": "OBJECT",
+        "name": "AiConversationAgentMessagePart",
+        "description": "An agent-origin message in a conversation turn.",
+        "fields": [
+          {
+            "name": "acceptedAt",
+            "description": "When durable submission was acknowledged.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "agentMessage",
+            "description": "Source identity, full message and display summary.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "JSONObject",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "assistantTurnId",
+            "description": "The reserved assistant response identity.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "canceled",
+            "description": "Whether removal canceled the exchange.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "consumedAt",
+            "description": "When the recipient consumed this message.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdAt",
+            "description": "When the message was saved.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "deliveryRunId",
+            "description": "The acknowledged delivery job.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "fulfilledByMessageId",
+            "description": "The accepted substantive reply identity.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "id",
+            "description": "The ID of the part.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "metadata",
+            "description": "The metadata of the part.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AiConversationPartMetadata",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "ownerUserId",
+            "description": "The human owner whose access authorizes this exchange.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "type",
+            "description": "The type of the part.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "AiConversationPartType",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "AiConversationBasePart",
+            "ofType": null
+          }
+        ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "INTERFACE",
         "name": "AiConversationBasePart",
         "description": "A base part in an AI conversation.",
@@ -6026,6 +6227,11 @@
           {
             "kind": "OBJECT",
             "name": "AiConversationAckPart",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "AiConversationAgentMessagePart",
             "ofType": null
           },
           {
@@ -6248,6 +6454,11 @@
           },
           {
             "kind": "OBJECT",
+            "name": "AiConversationListSubagentsToolCall",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
             "name": "AiConversationMemoryToolCall",
             "ofType": null
           },
@@ -6461,6 +6672,22 @@
               "kind": "OBJECT",
               "name": "AiConversationWidgetDisplayInfo",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "fallbackText",
+            "description": "A Markdown fallback for the widget, for clients that can't render this widget natively. Always present for every widget, and never contains internal model names or identifiers.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -8596,6 +8823,22 @@
             "deprecationReason": null
           },
           {
+            "name": "fallbackText",
+            "description": "A Markdown fallback for the widget, for clients that can't render this widget natively. Always present for every widget, and never contains internal model names or identifiers.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "name",
             "description": "The name of the widget.",
             "args": [],
@@ -8941,6 +9184,22 @@
               "kind": "OBJECT",
               "name": "AiConversationWidgetDisplayInfo",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "fallbackText",
+            "description": "A Markdown fallback for the widget, for clients that can't render this widget natively. Always present for every widget, and never contains internal model names or identifiers.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -10371,6 +10630,18 @@
         "description": null,
         "fields": [
           {
+            "name": "branch",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "force",
             "description": null,
             "args": [],
@@ -10998,6 +11269,26 @@
             "deprecationReason": null
           },
           {
+            "name": "codingSubagents",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "AiConversationSearchEntitiesToolCallResultEntities",
+                  "ofType": null
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "entities",
             "description": null,
             "args": [],
@@ -11083,6 +11374,91 @@
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AiConversationListSubagentsToolCall",
+        "description": null,
+        "fields": [
+          {
+            "name": "args",
+            "description": "The arguments to the tool call.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "displayInfo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AiConversationToolDisplayInfo",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "The name of the tool that was called.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "AiConversationTool",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rawArgs",
+            "description": "The arguments of the tool call.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rawResult",
+            "description": "The result of the tool call.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "AiConversationBaseToolCall",
+            "ofType": null
+          }
+        ],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -11500,6 +11876,18 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "description",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -12041,6 +12429,11 @@
           },
           {
             "kind": "OBJECT",
+            "name": "AiConversationAgentMessagePart",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
             "name": "AiConversationElicitationPart",
             "ofType": null
           },
@@ -12206,6 +12599,12 @@
         "enumValues": [
           {
             "name": "ack",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "agentMessage",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -16210,6 +16609,22 @@
             "deprecationReason": null
           },
           {
+            "name": "fallbackText",
+            "description": "A Markdown fallback for the widget, for clients that can't render this widget natively. Always present for every widget, and never contains internal model names or identifiers.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "name",
             "description": "The name of the widget.",
             "args": [],
@@ -17351,6 +17766,12 @@
             "deprecationReason": null
           },
           {
+            "name": "ListSubagents",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "Memory",
             "description": null,
             "isDeprecated": false,
@@ -17705,6 +18126,11 @@
           {
             "kind": "OBJECT",
             "name": "AiConversationListCodingSessionsToolCall",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "AiConversationListSubagentsToolCall",
             "ofType": null
           },
           {
@@ -86083,32 +86509,8 @@
         "fields": null,
         "inputFields": [
           {
-            "name": "customOAuthServerUrl",
-            "description": "The custom OAuth server token endpoint URL (enterprise SSO).",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "isCloudServiceAccount",
             "description": "Whether this integration authenticates with a Jira Cloud service account API key.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Boolean",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "isCustomOAuth",
-            "description": "Whether this integration uses custom OAuth authentication (enterprise SSO).",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -86149,38 +86551,6 @@
               "kind": "SCALAR",
               "name": "Boolean",
               "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "personalOAuthClientId",
-            "description": "The OAuth client ID for the personal connection OAuth app, when using custom OAuth.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "projectMapping",
-            "description": "The mapping of Jira project id => Linear team id.",
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "INPUT_OBJECT",
-                  "name": "JiraLinearMappingInput",
-                  "ofType": null
-                }
-              }
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -114223,6 +114593,22 @@
             "deprecationReason": null
           },
           {
+            "name": "requireTokenBinding",
+            "description": "Whether token requests for the OAuth application, including refresh token requests, must include a DPoP proof.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "updatedAt",
             "description": "The time at which the OAuth application was last updated.",
             "args": [],
@@ -114487,6 +114873,18 @@
                   }
                 }
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "requireTokenBinding",
+            "description": "Whether token requests for the OAuth application, including refresh token requests, must include a DPoP proof. Defaults to false.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -114872,6 +115270,18 @@
                   "ofType": null
                 }
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "requireTokenBinding",
+            "description": "Whether token requests for the OAuth application, including refresh token requests, must include a DPoP proof. Access tokens issued before this is enabled are not affected.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -116845,6 +117255,22 @@
               "kind": "SCALAR",
               "name": "String",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "loopWebhooksEnabled",
+            "description": "[Internal] Whether Loop webhook triggers are enabled.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -119958,6 +120384,18 @@
             "deprecationReason": null
           },
           {
+            "name": "resolveDuplicates",
+            "description": "[Internal] Whether Linear resolves other bots' comments that raise a problem Linear already reported. Defaults to true.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "reviewDrafts",
             "description": "[Internal] Whether Linear also reviews drafts without being asked.",
             "type": {
@@ -120030,6 +120468,26 @@
           {
             "name": "codingSessions",
             "description": "[Internal] The teams coding sessions are limited to. Omit it to not limit coding sessions by team. A changed list needs at least one team. If every team left in it was deleted, the list is saved empty, so no team can use coding sessions. `codingAgentEnabled` still turns coding sessions on or off for the workspace.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "OrganizationManagedFeatureTeamInput",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "loopWebhooks",
+            "description": "[Internal] The teams Loop webhook triggers are limited to. Omit it to allow all teams. A changed list needs at least one team. If every team left in it was deleted, the list is saved empty, so no Loop can use webhook triggers. `loopWebhooksEnabled` turns webhook triggers on or off for the workspace.",
             "type": {
               "kind": "LIST",
               "name": null,
@@ -121309,6 +121767,18 @@
             "deprecationReason": null
           },
           {
+            "name": "loopWebhooksEnabled",
+            "description": "[Internal] Whether Loop webhook triggers are enabled.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "managedTeamFeatures",
             "description": "[Internal] The teams each managed team feature is limited to. Replaces the current lists, and updates each team's matching setting.",
             "type": {
@@ -121807,6 +122277,12 @@
           },
           {
             "name": "documentContentChange",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentCreated",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -142043,6 +142519,18 @@
             "deprecationReason": null
           },
           {
+            "name": "description",
+            "description": "A short description the hosting provider shows next to the check. Null if the provider did not supply one.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "isRequired",
             "description": "Whether this check is required to pass before the pull request can be merged. Null if the required status is unknown.",
             "args": [],
@@ -142563,6 +143051,18 @@
                 "name": "Boolean",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "isLabelMergeQueue",
+            "description": "Whether the merge queue takes pull requests that carry a label, such as Trunk's, instead of GitHub's merge queue. Such a queue merges a native stack's pull requests below a queued one together with it.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -170027,6 +170527,22 @@
             "deprecationReason": null
           },
           {
+            "name": "loopWebhooksEnabled",
+            "description": "[Internal] Whether Loop webhook triggers are enabled.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "loops",
             "description": "Loops owned by the team that are visible to the requesting user. Includes enabled and disabled loops.",
             "args": [
@@ -181013,6 +181529,12 @@
           },
           {
             "name": "updatedSlackThreadSyncIntegration",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "workspaceSetupCompletedHidden",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null

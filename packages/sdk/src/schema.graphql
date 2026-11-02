@@ -1645,6 +1645,10 @@ type AiConversation implements Node {
   """
   slugId: String!
   """
+  The immutable special-purpose UI launch that created this conversation, if recorded.
+  """
+  sourceMetadata: JSONObject
+  """
   The materialized conversation-level processing summary used by list and gating surfaces. Assistant response lifecycle is recorded on its turn.
   """
   status: AiConversationStatus!
@@ -1716,6 +1720,60 @@ type AiConversationAckPart implements AiConversationBasePart {
 }
 
 """
+An agent-origin message in a conversation turn.
+"""
+type AiConversationAgentMessagePart implements AiConversationBasePart {
+  """
+  When durable submission was acknowledged.
+  """
+  acceptedAt: String
+  """
+  Source identity, full message and display summary.
+  """
+  agentMessage: JSONObject!
+  """
+  The reserved assistant response identity.
+  """
+  assistantTurnId: String!
+  """
+  Whether removal canceled the exchange.
+  """
+  canceled: Boolean
+  """
+  When the recipient consumed this message.
+  """
+  consumedAt: String
+  """
+  When the message was saved.
+  """
+  createdAt: String!
+  """
+  The acknowledged delivery job.
+  """
+  deliveryRunId: String
+  """
+  The accepted substantive reply identity.
+  """
+  fulfilledByMessageId: String
+  """
+  The ID of the part.
+  """
+  id: String!
+  """
+  The metadata of the part.
+  """
+  metadata: AiConversationPartMetadata!
+  """
+  The human owner whose access authorizes this exchange.
+  """
+  ownerUserId: String!
+  """
+  The type of the part.
+  """
+  type: AiConversationPartType!
+}
+
+"""
 A base part in an AI conversation.
 """
 interface AiConversationBasePart {
@@ -1754,6 +1812,10 @@ interface AiConversationBaseWidget {
   Display information for the widget, including ProseMirror and Markdown representations.
   """
   displayInfo: AiConversationWidgetDisplayInfo
+  """
+  A Markdown fallback for the widget, for clients that can't render this widget natively. Always present for every widget, and never contains internal model names or identifiers.
+  """
+  fallbackText: String!
   """
   The name of the widget.
   """
@@ -2240,6 +2302,10 @@ type AiConversationEntityCardWidget implements AiConversationBaseWidget {
   """
   displayInfo: AiConversationWidgetDisplayInfo
   """
+  A Markdown fallback for the widget, for clients that can't render this widget natively. Always present for every widget, and never contains internal model names or identifiers.
+  """
+  fallbackText: String!
+  """
   The name of the widget.
   """
   name: AiConversationWidgetName!
@@ -2325,6 +2391,10 @@ type AiConversationEntityListWidget implements AiConversationBaseWidget {
   Display information for the widget, including ProseMirror and Markdown representations.
   """
   displayInfo: AiConversationWidgetDisplayInfo
+  """
+  A Markdown fallback for the widget, for clients that can't render this widget natively. Always present for every widget, and never contains internal model names or identifiers.
+  """
+  fallbackText: String!
   """
   The name of the widget.
   """
@@ -2643,6 +2713,7 @@ type AiConversationGitPushToolCall implements AiConversationBaseToolCall {
 }
 
 type AiConversationGitPushToolCallArgs {
+  branch: String
   force: Boolean
 }
 
@@ -2767,6 +2838,7 @@ type AiConversationListCodingSessionsToolCallArgs {
 
 type AiConversationListCodingSessionsToolCallResult {
   agentSessions: [AiConversationListCodingSessionsToolCallResultAgentSessions!]!
+  codingSubagents: [AiConversationSearchEntitiesToolCallResultEntities!]
   entities: [AiConversationSearchEntitiesToolCallResultEntities!]
 }
 
@@ -2774,6 +2846,26 @@ type AiConversationListCodingSessionsToolCallResultAgentSessions {
   id: String!
   pullRequests: [AiConversationSearchEntitiesToolCallResultEntities!]
   type: String!
+}
+
+type AiConversationListSubagentsToolCall implements AiConversationBaseToolCall {
+  """
+  The arguments to the tool call.
+  """
+  args: JSONObject
+  displayInfo: AiConversationToolDisplayInfo!
+  """
+  The name of the tool that was called.
+  """
+  name: AiConversationTool!
+  """
+  The arguments of the tool call.
+  """
+  rawArgs: JSON
+  """
+  The result of the tool call.
+  """
+  rawResult: JSON
 }
 
 """
@@ -2880,6 +2972,7 @@ type AiConversationMessageSubagentToolCall implements AiConversationBaseToolCall
 
 type AiConversationMessageSubagentToolCallArgs {
   conversationId: String!
+  description: String
   prompt: String!
   wait: Boolean
 }
@@ -2979,6 +3072,7 @@ A part in an AI conversation.
 """
 union AiConversationPart =
   | AiConversationAckPart
+  | AiConversationAgentMessagePart
   | AiConversationElicitationPart
   | AiConversationElicitationResponsePart
   | AiConversationErrorPart
@@ -3032,6 +3126,7 @@ The type of a part in an AI conversation.
 """
 enum AiConversationPartType {
   ack
+  agentMessage
   elicitation
   elicitationResponse
   error
@@ -3821,6 +3916,10 @@ type AiConversationSettingWidget implements AiConversationBaseWidget {
   """
   displayInfo: AiConversationWidgetDisplayInfo
   """
+  A Markdown fallback for the widget, for clients that can't render this widget natively. Always present for every widget, and never contains internal model names or identifiers.
+  """
+  fallbackText: String!
+  """
   The name of the widget.
   """
   name: AiConversationWidgetName!
@@ -4060,6 +4159,7 @@ enum AiConversationTool {
   HandoffToCodingSession
   InvokeMcpTool
   ListCodingSessions
+  ListSubagents
   Memory
   MessageSubagent
   NavigateToPage
@@ -4127,6 +4227,7 @@ union AiConversationToolCall =
   | AiConversationHandoffToCodingSessionToolCall
   | AiConversationInvokeMcpToolToolCall
   | AiConversationListCodingSessionsToolCall
+  | AiConversationListSubagentsToolCall
   | AiConversationMemoryToolCall
   | AiConversationMessageSubagentToolCall
   | AiConversationNavigateToPageToolCall
@@ -23976,17 +24077,9 @@ type JiraProjectStatusesPayload {
 
 input JiraSettingsInput {
   """
-  The custom OAuth server token endpoint URL (enterprise SSO).
-  """
-  customOAuthServerUrl: String
-  """
   Whether this integration authenticates with a Jira Cloud service account API key.
   """
   isCloudServiceAccount: Boolean
-  """
-  Whether this integration uses custom OAuth authentication (enterprise SSO).
-  """
-  isCustomOAuth: Boolean
   """
   Whether this integration is for Jira Server or not.
   """
@@ -23999,14 +24092,6 @@ input JiraSettingsInput {
   Whether this integration is using a manual setup flow.
   """
   manualSetup: Boolean
-  """
-  The OAuth client ID for the personal connection OAuth app, when using custom OAuth.
-  """
-  personalOAuthClientId: String
-  """
-  The mapping of Jira project id => Linear team id.
-  """
-  projectMapping: [JiraLinearMappingInput!]
   """
   The Jira projects for the organization.
   """
@@ -31729,6 +31814,10 @@ type OAuthApplication {
   """
   redirectUris: [String!]!
   """
+  Whether token requests for the OAuth application, including refresh token requests, must include a DPoP proof.
+  """
+  requireTokenBinding: Boolean!
+  """
   The time at which the OAuth application was last updated.
   """
   updatedAt: DateTime!
@@ -31806,6 +31895,10 @@ input OAuthApplicationCreateInput {
   Allowed redirect URIs for OAuth authorization flows.
   """
   redirectUris: [String!]!
+  """
+  Whether token requests for the OAuth application, including refresh token requests, must include a DPoP proof. Defaults to false.
+  """
+  requireTokenBinding: Boolean
   """
   Resource types the OAuth application's webhooks subscribe to.
   """
@@ -31928,6 +32021,10 @@ input OAuthApplicationUpdateInput {
   Allowed redirect URIs for OAuth authorization flows.
   """
   redirectUris: [String!]
+  """
+  Whether token requests for the OAuth application, including refresh token requests, must include a DPoP proof. Access tokens issued before this is enabled are not affected.
+  """
+  requireTokenBinding: Boolean
   """
   Whether webhook delivery is enabled for this OAuth application.
   """
@@ -32469,6 +32566,10 @@ type Organization implements Node {
   The URL of the workspace's logo image. Null if no logo has been uploaded.
   """
   logoUrl: String
+  """
+  [Internal] Whether Loop webhook triggers are enabled.
+  """
+  loopWebhooksEnabled: Boolean!
   """
   Loops in the workspace that are visible to the requesting user, including workspace and team loops. Includes enabled and disabled loops.
   """
@@ -33371,6 +33472,10 @@ input OrganizationLinearReviewSettingsInput {
   """
   repositoryScope: RepositoryScope!
   """
+  [Internal] Whether Linear resolves other bots' comments that raise a problem Linear already reported. Defaults to true.
+  """
+  resolveDuplicates: Boolean
+  """
   [Internal] Whether Linear also reviews drafts without being asked.
   """
   reviewDrafts: Boolean!
@@ -33398,6 +33503,10 @@ input OrganizationManagedTeamFeaturesInput {
   [Internal] The teams coding sessions are limited to. Omit it to not limit coding sessions by team. A changed list needs at least one team. If every team left in it was deleted, the list is saved empty, so no team can use coding sessions. `codingAgentEnabled` still turns coding sessions on or off for the workspace.
   """
   codingSessions: [OrganizationManagedFeatureTeamInput!]
+  """
+  [Internal] The teams Loop webhook triggers are limited to. Omit it to allow all teams. A changed list needs at least one team. If every team left in it was deleted, the list is saved empty, so no Loop can use webhook triggers. `loopWebhooksEnabled` turns webhook triggers on or off for the workspace.
+  """
+  loopWebhooks: [OrganizationManagedFeatureTeamInput!]
   """
   [Internal] The teams Loops are limited to. Omit it to not limit Loops by team. A changed list needs at least one team. If every team left in it was deleted, the list is saved empty, so only Loops with no team run. `agentAutomationEnabled` still turns Loops on or off for the workspace.
   """
@@ -33779,6 +33888,10 @@ input OrganizationUpdateInput {
   """
   logoUrl: String
   """
+  [Internal] Whether Loop webhook triggers are enabled.
+  """
+  loopWebhooksEnabled: Boolean
+  """
   [Internal] The teams each managed team feature is limited to. Replaces the current lists, and updates each team's matching setting.
   """
   managedTeamFeatures: OrganizationManagedTeamFeaturesInput
@@ -33925,6 +34038,7 @@ enum OtherNotificationType {
   documentCommentMention
   documentCommentReaction
   documentContentChange
+  documentCreated
   documentDeleted
   documentMention
   documentMoved
@@ -39792,6 +39906,10 @@ type PullRequestCheck {
   """
   completedAt: DateTime
   """
+  A short description the hosting provider shows next to the check. Null if the provider did not supply one.
+  """
+  description: String
+  """
   Whether this check is required to pass before the pull request can be merged. Null if the required status is unknown.
   """
   isRequired: Boolean
@@ -39944,6 +40062,10 @@ type PullRequestMergeSettings {
   Whether the branch will be deleted when the pull request is merged.
   """
   deleteBranchOnMerge: Boolean!
+  """
+  Whether the merge queue takes pull requests that carry a label, such as Trunk's, instead of GitHub's merge queue. Such a queue merges a native stack's pull requests below a queued one together with it.
+  """
+  isLabelMergeQueue: Boolean
   """
   Whether a merge queue is enabled for pull requests in this repository. When enabled, merges go through an ordered queue rather than being merged directly.
   """
@@ -47918,6 +48040,10 @@ type Team implements Node {
   """
   ledInitiativeCount: Int!
   """
+  [Internal] Whether Loop webhook triggers are enabled.
+  """
+  loopWebhooksEnabled: Boolean!
+  """
   Loops owned by the team that are visible to the requesting user. Includes enabled and disabled loops.
   """
   loops(
@@ -51123,6 +51249,7 @@ enum UserFlagType {
   tryRoadmapsDismissed
   tryTriageDismissed
   updatedSlackThreadSyncIntegration
+  workspaceSetupCompletedHidden
 }
 
 """
