@@ -92,8 +92,8 @@ export class LinearWebhookClient {
    * Supports both Fetch API `(request: Request) => Promise<Response>` and
    * Node.js `(request: IncomingMessage, response: ServerResponse) => Promise<void>`
    *
-   * A signed delivery can be replayed within the 1-minute timestamp window. Handlers with side effects
-   * should deduplicate deliveries, e.g. by `linear-signature`. `webhookId` is not unique per delivery.
+   * The handler accepts a resent copy of a request for up to 1 minute after Linear sent it.
+   * If an event must not be processed twice, skip requests with a `linear-signature` you already saw.
    */
   public createHandler(options?: LinearWebhookHandlerOptions): LinearWebhookHandler {
     const maxBodyBytes = options?.maxBodyBytes ?? LINEAR_WEBHOOK_DEFAULT_MAX_BODY_BYTES;
