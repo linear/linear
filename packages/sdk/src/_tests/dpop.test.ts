@@ -1,12 +1,7 @@
 import { createHash, generateKeyPairSync, sign, verify } from "crypto";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-  createDPoPProof,
-  derToJoseSignature,
-  dpopSignerFromCryptoKeyPair,
-  DPoPSigner,
-  LinearClient,
-} from "../index.js";
+import { LinearClient } from "../index.js";
+import { createDPoPProof, derToJoseSignature, dpopSignerFromCryptoKeyPair, DPoPSigner } from "../oauth/index.js";
 import { LinearErrorType } from "../types.js";
 
 const API_URL = "https://api.example.com/graphql";
