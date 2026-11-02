@@ -24,6 +24,7 @@ jobs:
       contents: read
     outputs:
       publish: ${{ steps.release.outputs.publish }}
+      packages: ${{ steps.pack.outputs.packages }}
     env:
       SKIP_RELEASE: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[skip release]') }}
     steps:
@@ -63,9 +64,11 @@ jobs:
         run: echo "publish=true" >> "$GITHUB_OUTPUT"
 
       - name: Package for npm
+        id: pack
         run: |
           pnpm --dir packages/sdk pack --out "$RUNNER_TEMP/npm/linear-sdk.tgz"
           pnpm --dir packages/import pack --out "$RUNNER_TEMP/npm/linear-import.tgz"
+          echo "packages=$(jq -cs 'map({name, version})' packages/sdk/package.json packages/import/package.json)" >> "$GITHUB_OUTPUT"
 
       - name: Upload npm artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -101,8 +104,6 @@ jobs:
     environment: npm
     permissions:
       id-token: write # Required for OIDC (https://docs.npmjs.com/trusted-publishers#github-actions-configuration)
-    outputs:
-      published_packages: ${{ steps.publish.outputs.published_packages }}
     steps:
       # Node 24 bundles npm >= 11.5.1, which OIDC trusted publishing requires.
       - name: Use node 24
@@ -118,34 +119,30 @@ jobs:
 
       # Publishes the SDK first because @linear/import depends on it. Skips versions that are already on npm.
       - name: Publish to npm
-        id: publish
         run: |
-          touch published.jsonl
           for tarball in linear-sdk.tgz linear-import.tgz; do
-            package=$(tar -xOzf "$tarball" package/package.json | jq -c '{name, version}')
-            spec=$(jq -r '"\(.name)@\(.version)"' <<< "$package")
+            spec=$(tar -xOzf "$tarball" package/package.json | jq -r '"\(.name)@\(.version)"')
             if npm view "$spec" version > /dev/null 2>&1; then
               echo "Skipping $spec because it is already on npm"
             else
               npm publish "$tarball"
-              echo "$package" >> published.jsonl
             fi
           done
-          echo "published_packages=$(jq -cs . published.jsonl)" >> "$GITHUB_OUTPUT"
 
   # Tags and announces the release apart from the release job, so nothing that can push to the repo can mint npm tokens.
+  # Releases every version without a GitHub release, so a rerun after a partly failed publish still announces all of them.
   github-release:
     name: GitHub release
-    needs: [release]
-    if: needs.release.outputs.published_packages != '[]'
+    needs: [build, release]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       contents: write
       pull-requests: read
+    outputs:
+      released_packages: ${{ steps.releases.outputs.released_packages }}
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      PUBLISHED_PACKAGES: ${{ needs.release.outputs.published_packages }}
     steps:
       - name: Checkout code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
@@ -153,17 +150,32 @@ jobs:
           persist-credentials: false
 
       - name: Create GitHub releases
+        id: releases
+        env:
+          PACKAGES: ${{ needs.build.outputs.packages }}
         run: |
-          jq -r '.[] | "\(.name) \(.version)"' <<< "$PUBLISHED_PACKAGES" |
-            while read -r name version; do
-              .github/scripts/release-notes.sh "${name#@linear/}" "$version" |
-                gh release create "$name@$version" --target "$GITHUB_SHA" --title "$name@$version" --notes-file -
+          released="$RUNNER_TEMP/released.jsonl"
+          touch "$released"
+          jq -c '.[]' <<< "$PACKAGES" |
+            while read -r package; do
+              name=$(jq -r .name <<< "$package")
+              version=$(jq -r .version <<< "$package")
+              if gh release view "$name@$version" > /dev/null 2>&1; then
+                echo "Skipping $name@$version because its GitHub release exists"
+              else
+                .github/scripts/release-notes.sh "${name#@linear/}" "$version" |
+                  gh release create "$name@$version" --target "$GITHUB_SHA" --title "$name@$version" --notes-file -
+                echo "$package" >> "$released"
+              fi
             done
+          echo "released_packages=$(jq -cs . "$released")" >> "$GITHUB_OUTPUT"
 
       - name: Notify Slack
+        if: steps.releases.outputs.released_packages != '[]'
         continue-on-error: true
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CLI_CHANNEL_WEBHOOK_URL }}
+          PUBLISHED_PACKAGES: ${{ steps.releases.outputs.released_packages }}
         run: |
           node .github/scripts/create-release-slack-message.mjs
           curl -s -X POST "$SLACK_WEBHOOK_URL" -H 'Content-Type: application/json' --data @"$RUNNER_TEMP/sdk-release-slack.json"
@@ -174,8 +186,8 @@ jobs:
   # This job runs apart from the release job so the Linear action and CLI can't mint npm tokens or push to the repo.
   linear-release:
     name: Linear release
-    needs: [release]
-    if: needs.release.outputs.published_packages != '[]'
+    needs: [github-release]
+    if: needs.github-release.outputs.released_packages != '[]'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -190,7 +202,7 @@ jobs:
       - name: Prepare Linear releases
         id: versions
         env:
-          PUBLISHED_PACKAGES: ${{ needs.release.outputs.published_packages }}
+          PUBLISHED_PACKAGES: ${{ needs.github-release.outputs.released_packages }}
         run: |
           jq -r '.[] | "\(.name | ltrimstr("@linear/")) \(.version)"' <<< "$PUBLISHED_PACKAGES" |
             while read -r package version; do
