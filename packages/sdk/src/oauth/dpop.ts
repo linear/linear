@@ -98,6 +98,40 @@ export async function createDPoPProof(
 }
 
 /**
+ * Resolve the JWS algorithm and WebCrypto sign parameters for a key
+ */
+function getWebCryptoSignParams(key: CryptoKey): { alg: DPoPAlgorithm; params: AlgorithmIdentifier | EcdsaParams } {
+  const { name } = key.algorithm;
+
+  if (name === "ECDSA" && (key.algorithm as EcKeyAlgorithm).namedCurve === "P-256") {
+    return { alg: "ES256", params: { name, hash: "SHA-256" } };
+  }
+
+  if (name === "RSASSA-PKCS1-v1_5" && (key.algorithm as RsaHashedKeyAlgorithm).hash.name === "SHA-256") {
+    return { alg: "RS256", params: { name } };
+  }
+
+  throw new Error("Unsupported DPoP key: use an ECDSA P-256 (ES256) or RSASSA-PKCS1-v1_5 SHA-256 (RS256) key");
+}
+
+/**
+ * Create a DPoP signer backed by a WebCrypto key pair. The private key may be non-extractable
+ *
+ * @param keyPair an ECDSA P-256 or RSASSA-PKCS1-v1_5 SHA-256 key pair
+ * @returns a signer for the LinearClient `dpop` option
+ */
+export async function createWebCryptoDPoPSigner({ privateKey, publicKey }: CryptoKeyPair): Promise<DPoPSigner> {
+  const { alg, params } = getWebCryptoSignParams(privateKey);
+  const publicJwk = toPublicJwk(await crypto.subtle.exportKey("jwk", publicKey));
+
+  return {
+    alg,
+    publicJwk,
+    sign: async signingInput => new Uint8Array(await crypto.subtle.sign(params, privateKey, signingInput)),
+  };
+}
+
+/**
  * Whether a `WWW-Authenticate` header asks the client to retry with a server-provided DPoP nonce
  */
 function requiresDPoPNonce(wwwAuthenticate: string | null): boolean {

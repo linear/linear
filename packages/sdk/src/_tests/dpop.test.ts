@@ -1,7 +1,7 @@
 import { createHash, generateKeyPairSync, sign } from "crypto";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { LinearClient } from "../index.js";
-import { createDPoPProof, DPoPSigner } from "../oauth/index.js";
+import { createDPoPProof, createWebCryptoDPoPSigner, DPoPSigner } from "../oauth/index.js";
 import { LinearErrorType } from "../types.js";
 
 const API_URL = "https://api.example.com/graphql";
@@ -111,6 +111,43 @@ describe("createDPoPProof", () => {
     const [first, second] = await Promise.all(proofs.map(decodeProof));
 
     expect(first.payload.jti).not.toEqual(second.payload.jti);
+  });
+});
+
+const RSA_PARAMS = { modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]) };
+
+describe("createWebCryptoDPoPSigner", () => {
+  it("signs proofs with a non-extractable key", async () => {
+    const keyPair = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, false, ["sign", "verify"]);
+    const signer = await createWebCryptoDPoPSigner(keyPair);
+    const { header, valid } = await decodeProof(await createDPoPProof(signer, { htm: "POST", htu: API_URL }));
+
+    expect(valid).toBe(true);
+    expect(header).toEqual(expect.objectContaining({ alg: "ES256" }));
+    expect(header.jwk).toEqual({ kty: "EC", crv: "P-256", x: expect.any(String), y: expect.any(String) });
+  });
+
+  it("creates RS256 signers from RSASSA-PKCS1-v1_5 SHA-256 keys", async () => {
+    const keyPair = await crypto.subtle.generateKey(
+      { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256", ...RSA_PARAMS },
+      false,
+      ["sign", "verify"]
+    );
+    const signer = await createWebCryptoDPoPSigner(keyPair);
+
+    expect(signer.alg).toEqual("RS256");
+    expect(signer.publicJwk).toEqual({ kty: "RSA", n: expect.any(String), e: "AQAB" });
+  });
+
+  it.each([
+    ["ECDSA P-384", { name: "ECDSA", namedCurve: "P-384" }],
+    ["RSASSA-PKCS1-v1_5 SHA-512", { name: "RSASSA-PKCS1-v1_5", hash: "SHA-512", ...RSA_PARAMS }],
+    ["RSA-PSS", { name: "RSA-PSS", hash: "SHA-256", ...RSA_PARAMS }],
+    ["Ed25519", { name: "Ed25519" }],
+  ] as const)("rejects %s keys", async (_, params) => {
+    const keyPair = (await crypto.subtle.generateKey(params, false, ["sign", "verify"])) as CryptoKeyPair;
+
+    await expect(createWebCryptoDPoPSigner(keyPair)).rejects.toThrow("Unsupported DPoP key");
   });
 });
 
