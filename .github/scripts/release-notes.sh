@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Prints the lines under a version's "## <version>" heading in a package's CHANGELOG.md, up to the next "## " heading.
-# Usage: release-notes.sh <package directory under packages/> <version>
+# Prints one version's section of a package's CHANGELOG.md, for example: release-notes.sh sdk 101.0.0
 set -euo pipefail
 
 package=$1

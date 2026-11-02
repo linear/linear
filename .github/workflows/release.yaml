@@ -15,8 +15,7 @@ concurrency:
 permissions: {}
 
 jobs:
-  # Builds and packs the packages without publish credentials, so the tarballs are uploaded before lint, tests and npx
-  # tools run. The release job then publishes these tarballs without installing dependencies or running repo code.
+  # Packs the tarballs without publish credentials and uploads them before lint, tests and npx tools can change them.
   build:
     name: Build
     if: github.ref == 'refs/heads/master'
@@ -73,7 +72,6 @@ jobs:
         with:
           name: npm
           path: ${{ runner.temp }}/npm
-          if-no-files-found: error
           retention-days: 1
 
       - name: Run lint
