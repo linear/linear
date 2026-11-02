@@ -1,2 +1,2 @@
-export { createDPoPProof, derToJoseSignature, dpopSignerFromCryptoKeyPair } from "./dpop.js";
-export type { DPoPAlgorithm, DPoPProofClaims, DPoPSigner } from "./dpop.js";
+export { createDPoPProof } from "./dpop.js";
+export type { DPoPSigner } from "./dpop.js";

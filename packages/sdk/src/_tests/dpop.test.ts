@@ -1,15 +1,21 @@
-import { createHash, generateKeyPairSync, sign, verify } from "crypto";
+import { createHash, generateKeyPairSync, sign } from "crypto";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { LinearClient } from "../index.js";
-import { createDPoPProof, derToJoseSignature, dpopSignerFromCryptoKeyPair, DPoPSigner } from "../oauth/index.js";
+import { createDPoPProof, DPoPSigner } from "../oauth/index.js";
 import { LinearErrorType } from "../types.js";
 
 const API_URL = "https://api.example.com/graphql";
 const ACCESS_TOKEN = "dpop-access-token";
 
-async function createSigner(): Promise<DPoPSigner> {
-  const keyPair = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, false, ["sign", "verify"]);
-  return dpopSignerFromCryptoKeyPair(keyPair);
+/** An ES256 signer holding its key outside the SDK, like a KMS-backed signer would */
+function createSigner(): DPoPSigner {
+  const { privateKey, publicKey } = generateKeyPairSync("ec", { namedCurve: "P-256" });
+
+  return {
+    alg: "ES256",
+    publicJwk: publicKey.export({ format: "jwk" }),
+    sign: async signingInput => sign("sha256", signingInput, { key: privateKey, dsaEncoding: "ieee-p1363" }),
+  };
 }
 
 function decodeSegment(segment: string): Record<string, unknown> {
@@ -39,7 +45,7 @@ async function decodeProof(proof: string) {
 
 describe("createDPoPProof", () => {
   it("creates a signed proof bound to the request and access token", async () => {
-    const signer = await createSigner();
+    const signer = createSigner();
     const proof = await createDPoPProof(signer, {
       htm: "POST",
       htu: `${API_URL}?query=1#fragment`,
@@ -69,14 +75,27 @@ describe("createDPoPProof", () => {
     ["Get", "GET"],
     ["patch", "patch"],
   ])("normalizes method %s to %s like fetch does", async (htm, expected) => {
-    const proof = await createDPoPProof(await createSigner(), { htm, htu: API_URL });
+    const proof = await createDPoPProof(createSigner(), { htm, htu: API_URL });
     const { payload } = await decodeProof(proof);
 
     expect(payload.htm).toEqual(expected);
   });
 
+  it("only embeds the public members of the signer's key", async () => {
+    const { privateKey } = generateKeyPairSync("ec", { namedCurve: "P-256" });
+    const signer: DPoPSigner = {
+      alg: "ES256",
+      publicJwk: { ...privateKey.export({ format: "jwk" }), key_ops: ["sign"], ext: true },
+      sign: async signingInput => sign("sha256", signingInput, { key: privateKey, dsaEncoding: "ieee-p1363" }),
+    };
+    const { header, valid } = await decodeProof(await createDPoPProof(signer, { htm: "POST", htu: API_URL }));
+
+    expect(valid).toBe(true);
+    expect(header.jwk).toEqual({ kty: "EC", crv: "P-256", x: expect.any(String), y: expect.any(String) });
+  });
+
   it("omits ath and nonce when not provided", async () => {
-    const proof = await createDPoPProof(await createSigner(), {
+    const proof = await createDPoPProof(createSigner(), {
       htm: "POST",
       htu: "https://api.example.com/oauth/token",
     });
@@ -87,58 +106,11 @@ describe("createDPoPProof", () => {
   });
 
   it("uses a unique jti for every proof", async () => {
-    const signer = await createSigner();
+    const signer = createSigner();
     const proofs = await Promise.all([1, 2].map(() => createDPoPProof(signer, { htm: "POST", htu: API_URL })));
     const [first, second] = await Promise.all(proofs.map(decodeProof));
 
     expect(first.payload.jti).not.toEqual(second.payload.jti);
-  });
-});
-
-const RSA_PARAMS = { modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]) };
-
-describe("dpopSignerFromCryptoKeyPair", () => {
-  it.each([
-    ["ES256", { name: "ECDSA", namedCurve: "P-256" }],
-    ["RS256", { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256", ...RSA_PARAMS }],
-  ] as const)("maps the key algorithm to %s", async (alg, params) => {
-    const keyPair = (await crypto.subtle.generateKey(params, false, ["sign", "verify"])) as CryptoKeyPair;
-    const signer = await dpopSignerFromCryptoKeyPair(keyPair);
-
-    expect(signer.alg).toEqual(alg);
-    expect(signer.publicJwk).not.toHaveProperty("d");
-    expect(signer.publicJwk).not.toHaveProperty("key_ops");
-  });
-
-  it.each([
-    ["ECDSA P-384", { name: "ECDSA", namedCurve: "P-384" }],
-    ["RSASSA-PKCS1-v1_5 SHA-512", { name: "RSASSA-PKCS1-v1_5", hash: "SHA-512", ...RSA_PARAMS }],
-    ["RSA-PSS", { name: "RSA-PSS", hash: "SHA-256", ...RSA_PARAMS }],
-    ["Ed25519", { name: "Ed25519" }],
-  ] as const)("rejects %s keys", async (_, params) => {
-    const keyPair = (await crypto.subtle.generateKey(params, false, ["sign", "verify"])) as CryptoKeyPair;
-
-    await expect(dpopSignerFromCryptoKeyPair(keyPair)).rejects.toThrow("Unsupported DPoP key");
-  });
-});
-
-describe("derToJoseSignature", () => {
-  it("converts DER ES256 signatures to the JWS encoding", () => {
-    const { privateKey, publicKey } = generateKeyPairSync("ec", { namedCurve: "P-256" });
-    const data = Buffer.from("signing input");
-
-    /** Signatures vary in length, so sign repeatedly to cover padded and stripped integers */
-    for (let i = 0; i < 20; i++) {
-      const der = sign("sha256", data, { key: privateKey, dsaEncoding: "der" });
-      const jose = derToJoseSignature(der);
-
-      expect(jose.length).toEqual(64);
-      expect(verify("sha256", data, { key: publicKey, dsaEncoding: "ieee-p1363" }, jose)).toBe(true);
-    }
-  });
-
-  it("rejects input that is not a DER signature", () => {
-    expect(() => derToJoseSignature(new Uint8Array(64))).toThrow("expected a SEQUENCE");
   });
 });
 
@@ -172,7 +144,7 @@ describe("LinearClient with dpop", () => {
 
   it("sends the access token with a DPoP proof", async () => {
     const fetch = stubFetch(viewerResponse());
-    const client = new LinearClient({ accessToken: ACCESS_TOKEN, dpop: await createSigner(), apiUrl: API_URL });
+    const client = new LinearClient({ accessToken: ACCESS_TOKEN, dpop: createSigner(), apiUrl: API_URL });
 
     expect(await client.viewer).toEqual(expect.objectContaining({ id: "viewerId" }));
     expect(client.options).not.toHaveProperty("fetch");
@@ -191,7 +163,7 @@ describe("LinearClient with dpop", () => {
     const fetch = stubFetch(viewerResponse());
     const client = new LinearClient({
       accessToken: ACCESS_TOKEN,
-      dpop: await createSigner(),
+      dpop: createSigner(),
       apiUrl: API_URL,
       headers: { authorization: "Bearer other" },
     });
@@ -207,7 +179,7 @@ describe("LinearClient with dpop", () => {
       viewerResponse({ "DPoP-Nonce": "nonce-2" }),
       viewerResponse()
     );
-    const client = new LinearClient({ accessToken: ACCESS_TOKEN, dpop: await createSigner(), apiUrl: API_URL });
+    const client = new LinearClient({ accessToken: ACCESS_TOKEN, dpop: createSigner(), apiUrl: API_URL });
 
     await client.viewer;
     await client.viewer;
@@ -219,7 +191,7 @@ describe("LinearClient with dpop", () => {
 
   it("gives up after one nonce retry", async () => {
     const fetch = stubFetch(useNonceResponse("nonce-1"), useNonceResponse("nonce-1"));
-    const client = new LinearClient({ accessToken: ACCESS_TOKEN, dpop: await createSigner(), apiUrl: API_URL });
+    const client = new LinearClient({ accessToken: ACCESS_TOKEN, dpop: createSigner(), apiUrl: API_URL });
 
     await expect(client.viewer).rejects.toEqual(expect.objectContaining({ type: LinearErrorType.AuthenticationError }));
     expect(fetch).toHaveBeenCalledTimes(2);
@@ -230,7 +202,7 @@ describe("LinearClient with dpop", () => {
     [{ accessToken: ACCESS_TOKEN, apiKey: "api-key" }, "requires an OAuth accessToken"],
     [{ accessToken: `Bearer ${ACCESS_TOKEN}` }, "without a Bearer prefix"],
   ])("rejects invalid credentials %o", async (credentials, message) => {
-    const dpop = await createSigner();
+    const dpop = createSigner();
 
     expect(() => new LinearClient({ ...credentials, dpop })).toThrow(message);
   });

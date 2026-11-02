@@ -15,7 +15,7 @@ export interface DPoPSigner {
    * Sign the JWS signing input (`base64url(header).base64url(payload)`)
    *
    * Must return a JWS-encoded signature. For ES256 this is the raw `r || s` concatenation,
-   * not the DER encoding most KMS providers return: see `derToJoseSignature`.
+   * not the DER encoding most KMS providers return.
    */
   sign(signingInput: Uint8Array<ArrayBuffer>): Promise<Uint8Array>;
 }
@@ -95,90 +95,6 @@ export async function createDPoPProof(
   const signature = await signer.sign(textEncoder.encode(signingInput));
 
   return `${signingInput}.${base64UrlEncode(signature)}`;
-}
-
-/**
- * Resolve the JWS algorithm and WebCrypto sign parameters for a key
- */
-function getWebCryptoSignParams(key: CryptoKey): { alg: DPoPAlgorithm; params: AlgorithmIdentifier | EcdsaParams } {
-  const { name } = key.algorithm;
-
-  if (name === "ECDSA" && (key.algorithm as EcKeyAlgorithm).namedCurve === "P-256") {
-    return { alg: "ES256", params: { name, hash: "SHA-256" } };
-  }
-
-  if (name === "RSASSA-PKCS1-v1_5" && (key.algorithm as RsaHashedKeyAlgorithm).hash.name === "SHA-256") {
-    return { alg: "RS256", params: { name } };
-  }
-
-  throw new Error("Unsupported DPoP key: use an ECDSA P-256 (ES256) or RSASSA-PKCS1-v1_5 SHA-256 (RS256) key");
-}
-
-/**
- * Create a DPoP signer from a WebCrypto key pair. The private key may be non-extractable
- *
- * @param keyPair the key pair to sign proofs with
- * @returns a signer for the LinearClient `dpop` option
- */
-export async function dpopSignerFromCryptoKeyPair({ privateKey, publicKey }: CryptoKeyPair): Promise<DPoPSigner> {
-  const { alg, params } = getWebCryptoSignParams(privateKey);
-  const publicJwk = toPublicJwk(await crypto.subtle.exportKey("jwk", publicKey));
-
-  return {
-    alg,
-    publicJwk,
-    sign: async signingInput => new Uint8Array(await crypto.subtle.sign(params, privateKey, signingInput)),
-  };
-}
-
-/**
- * Convert a DER-encoded ES256 signature, as returned by most KMS providers, into the JWS `r || s` encoding
- *
- * @param der the DER-encoded ECDSA P-256 signature
- * @returns the JWS-encoded signature
- */
-export function derToJoseSignature(der: Uint8Array): Uint8Array {
-  const size = 32;
-  let offset = 0;
-
-  /** ES256 signatures are at most 72 bytes, so every DER length uses the short form */
-  function readLength(): number {
-    const length = der[offset++];
-    if (length >= 0x80) {
-      throw new Error("Invalid DER signature: unexpected length encoding for ES256");
-    }
-    return length;
-  }
-
-  function readInteger(): Uint8Array {
-    if (der[offset++] !== 0x02) {
-      throw new Error("Invalid DER signature: expected an INTEGER");
-    }
-    const length = readLength();
-    let value = der.subarray(offset, offset + length);
-    offset += length;
-
-    /** Strip the sign padding and left-pad to the fixed component size */
-    while (value.length > size && value[0] === 0) {
-      value = value.subarray(1);
-    }
-    if (value.length > size) {
-      throw new Error("Invalid DER signature: component too long for ES256");
-    }
-    const padded = new Uint8Array(size);
-    padded.set(value, size - value.length);
-    return padded;
-  }
-
-  if (der[offset++] !== 0x30) {
-    throw new Error("Invalid DER signature: expected a SEQUENCE");
-  }
-  readLength();
-
-  const signature = new Uint8Array(size * 2);
-  signature.set(readInteger(), 0);
-  signature.set(readInteger(), size);
-  return signature;
 }
 
 /**
