@@ -122,12 +122,9 @@ function getWebCryptoSignParams(key: CryptoKey): { alg: DPoPAlgorithm; params: A
 }
 
 /**
- * Create a DPoP signer backed by a WebCrypto key pair. The private key may be non-extractable
- *
- * @param keyPair an ECDSA P-256 or RSASSA-PKCS1-v1_5 SHA-256 key pair
- * @returns a signer for the LinearClient `dpop` option
+ * Create a DPoP signer backed by a WebCrypto key pair
  */
-export async function createWebCryptoDPoPSigner({ privateKey, publicKey }: CryptoKeyPair): Promise<DPoPSigner> {
+async function createWebCryptoSigner({ privateKey, publicKey }: CryptoKeyPair): Promise<DPoPSigner> {
   const { alg, params } = getWebCryptoSignParams(privateKey);
   const publicJwk = toPublicJwk(await crypto.subtle.exportKey("jwk", publicKey));
 
@@ -228,14 +225,9 @@ function derToRawEs256Signature(der: Uint8Array): Uint8Array {
 }
 
 /**
- * Create a DPoP signer backed by a key held elsewhere, such as a remote KMS or an HSM
- *
- * Takes the public key and signatures in the formats KMS providers return, and converts them for DPoP proofs.
- *
- * @param options the algorithm, public key and signing function of the key
- * @returns a signer for the LinearClient `dpop` option
+ * Create a DPoP signer backed by a key held elsewhere, converting KMS key and signature formats
  */
-export async function createDPoPSigner(options: DPoPSignerOptions): Promise<DPoPSigner> {
+async function createExternalSigner(options: DPoPSignerOptions): Promise<DPoPSigner> {
   const { alg, publicKey, sign } = options;
   const spki = typeof publicKey === "string" ? decodeSpkiPem(publicKey) : new Uint8Array(publicKey);
   const key = await crypto.subtle.importKey("spki", spki, SPKI_IMPORT_PARAMS[alg], true, ["verify"]);
@@ -250,6 +242,22 @@ export async function createDPoPSigner(options: DPoPSignerOptions): Promise<DPoP
       return convertDer ? derToRawEs256Signature(signature) : signature;
     },
   };
+}
+
+/**
+ * Create a DPoP signer from either:
+ *
+ * - a WebCrypto key pair, an ECDSA P-256 (ES256) or RSASSA-PKCS1-v1_5 SHA-256 (RS256) key. The private key may be
+ *   non-extractable
+ * - a key held elsewhere, such as a remote KMS or an HSM. Takes the public key and signatures in the formats KMS
+ *   providers return, and converts them for DPoP proofs
+ *
+ * @param input the WebCrypto key pair, or the algorithm, public key and signing function of an external key
+ * @returns a signer for the LinearClient `dpop` option
+ */
+export function createDPoPSigner(input: CryptoKeyPair | DPoPSignerOptions): Promise<DPoPSigner> {
+  /** Key pairs are plain objects rather than class instances, so tell them apart by shape */
+  return "privateKey" in input ? createWebCryptoSigner(input) : createExternalSigner(input);
 }
 
 /**

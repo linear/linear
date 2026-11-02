@@ -1,7 +1,7 @@
 import { createHash, generateKeyPairSync, KeyObject, sign } from "crypto";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { LinearClient } from "../index.js";
-import { createDPoPProof, createDPoPSigner, createWebCryptoDPoPSigner, DPoPSigner } from "../oauth/index.js";
+import { createDPoPProof, createDPoPSigner, DPoPSigner } from "../oauth/index.js";
 import { LinearErrorType } from "../types.js";
 
 const API_URL = "https://api.example.com/graphql";
@@ -129,10 +129,10 @@ describe("createDPoPProof", () => {
 
 const RSA_PARAMS = { modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]) };
 
-describe("createWebCryptoDPoPSigner", () => {
+describe("createDPoPSigner with a WebCrypto key pair", () => {
   it("signs proofs with a non-extractable key", async () => {
     const keyPair = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, false, ["sign", "verify"]);
-    const signer = await createWebCryptoDPoPSigner(keyPair);
+    const signer = await createDPoPSigner(keyPair);
     const { header, valid } = await decodeProof(await createDPoPProof(signer, { htm: "POST", htu: API_URL }));
 
     expect(valid).toBe(true);
@@ -146,7 +146,7 @@ describe("createWebCryptoDPoPSigner", () => {
       false,
       ["sign", "verify"]
     );
-    const signer = await createWebCryptoDPoPSigner(keyPair);
+    const signer = await createDPoPSigner(keyPair);
 
     expect(signer.alg).toEqual("RS256");
     expect(signer.publicJwk).toEqual({ kty: "RSA", n: expect.any(String), e: "AQAB" });
@@ -160,11 +160,11 @@ describe("createWebCryptoDPoPSigner", () => {
   ] as const)("rejects %s keys", async (_, params) => {
     const keyPair = (await crypto.subtle.generateKey(params, false, ["sign", "verify"])) as CryptoKeyPair;
 
-    await expect(createWebCryptoDPoPSigner(keyPair)).rejects.toThrow("Unsupported DPoP key");
+    await expect(createDPoPSigner(keyPair)).rejects.toThrow("Unsupported DPoP key");
   });
 });
 
-describe("createDPoPSigner", () => {
+describe("createDPoPSigner with an external key", () => {
   /** Node signs ECDSA as DER by default, like AWS KMS and Google Cloud KMS */
   function kmsSign(privateKey: KeyObject) {
     return async (data: Uint8Array) => sign("sha256", data, privateKey);
