@@ -9,7 +9,7 @@ export type DPoPAlgorithm = "ES256" | "RS256";
 export interface DPoPSigner {
   /** The JWS algorithm the key signs with */
   alg: DPoPAlgorithm;
-  /** The public key, embedded in every proof. Must not contain private key members */
+  /** The public key, embedded in every proof. Private key members are dropped before embedding */
   publicJwk: JsonWebKey;
   /**
    * Sign the JWS signing input (`base64url(header).base64url(payload)`)
