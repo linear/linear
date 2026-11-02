@@ -1,8 +1,7 @@
 /**
- * Asymmetric JWS algorithms usable for DPoP proofs
+ * JWS algorithms the Linear API accepts for DPoP proofs
  */
-export type DPoPAlgorithm =
-  "ES256" | "ES384" | "ES512" | "PS256" | "PS384" | "PS512" | "RS256" | "RS384" | "RS512" | "EdDSA";
+export type DPoPAlgorithm = "ES256" | "RS256";
 
 /**
  * Signs DPoP proofs (RFC 9449) with a key held anywhere: in memory, WebCrypto, a remote KMS or an HSM
@@ -15,7 +14,7 @@ export interface DPoPSigner {
   /**
    * Sign the JWS signing input (`base64url(header).base64url(payload)`)
    *
-   * Must return a JWS-encoded signature. For ECDSA this is the raw `r || s` concatenation,
+   * Must return a JWS-encoded signature. For ES256 this is the raw `r || s` concatenation,
    * not the DER encoding most KMS providers return: see `derToJoseSignature`.
    */
   sign(signingInput: Uint8Array<ArrayBuffer>): Promise<Uint8Array>;
@@ -101,40 +100,18 @@ export async function createDPoPProof(
 /**
  * Resolve the JWS algorithm and WebCrypto sign parameters for a key
  */
-function getWebCryptoSignParams(key: CryptoKey): {
-  alg: DPoPAlgorithm;
-  params: AlgorithmIdentifier | EcdsaParams | RsaPssParams;
-} {
+function getWebCryptoSignParams(key: CryptoKey): { alg: DPoPAlgorithm; params: AlgorithmIdentifier | EcdsaParams } {
   const { name } = key.algorithm;
 
-  if (name === "ECDSA") {
-    const { namedCurve } = key.algorithm as EcKeyAlgorithm;
-    const curves: Record<string, [DPoPAlgorithm, string]> = {
-      "P-256": ["ES256", "SHA-256"],
-      "P-384": ["ES384", "SHA-384"],
-      "P-521": ["ES512", "SHA-512"],
-    };
-    const curve = curves[namedCurve];
-    if (curve) {
-      return { alg: curve[0], params: { name, hash: curve[1] } };
-    }
+  if (name === "ECDSA" && (key.algorithm as EcKeyAlgorithm).namedCurve === "P-256") {
+    return { alg: "ES256", params: { name, hash: "SHA-256" } };
   }
 
-  if (name === "RSA-PSS" || name === "RSASSA-PKCS1-v1_5") {
-    const hash = (key.algorithm as RsaHashedKeyAlgorithm).hash.name;
-    const bits = { "SHA-256": 256, "SHA-384": 384, "SHA-512": 512 }[hash];
-    if (bits) {
-      return name === "RSA-PSS"
-        ? { alg: `PS${bits}` as DPoPAlgorithm, params: { name, saltLength: bits / 8 } }
-        : { alg: `RS${bits}` as DPoPAlgorithm, params: { name } };
-    }
+  if (name === "RSASSA-PKCS1-v1_5" && (key.algorithm as RsaHashedKeyAlgorithm).hash.name === "SHA-256") {
+    return { alg: "RS256", params: { name } };
   }
 
-  if (name === "Ed25519") {
-    return { alg: "EdDSA", params: { name } };
-  }
-
-  throw new Error(`Unsupported DPoP key algorithm: ${name}`);
+  throw new Error("Unsupported DPoP key: use an ECDSA P-256 (ES256) or RSASSA-PKCS1-v1_5 SHA-256 (RS256) key");
 }
 
 /**
@@ -155,24 +132,20 @@ export async function dpopSignerFromCryptoKeyPair({ privateKey, publicKey }: Cry
 }
 
 /**
- * Convert a DER-encoded ECDSA signature, as returned by most KMS providers, into the JWS `r || s` encoding
+ * Convert a DER-encoded ES256 signature, as returned by most KMS providers, into the JWS `r || s` encoding
  *
- * @param der the DER-encoded ECDSA signature
- * @param alg the ECDSA algorithm the signature was created with
+ * @param der the DER-encoded ECDSA P-256 signature
  * @returns the JWS-encoded signature
  */
-export function derToJoseSignature(der: Uint8Array, alg: "ES256" | "ES384" | "ES512"): Uint8Array {
-  const size = { ES256: 32, ES384: 48, ES512: 66 }[alg];
+export function derToJoseSignature(der: Uint8Array): Uint8Array {
+  const size = 32;
   let offset = 0;
 
+  /** ES256 signatures are at most 72 bytes, so every DER length uses the short form */
   function readLength(): number {
-    const first = der[offset++];
-    if (first < 0x80) {
-      return first;
-    }
-    let length = 0;
-    for (let i = 0; i < (first & 0x7f); i++) {
-      length = (length << 8) | der[offset++];
+    const length = der[offset++];
+    if (length >= 0x80) {
+      throw new Error("Invalid DER signature: unexpected length encoding for ES256");
     }
     return length;
   }
@@ -190,7 +163,7 @@ export function derToJoseSignature(der: Uint8Array, alg: "ES256" | "ES384" | "ES
       value = value.subarray(1);
     }
     if (value.length > size) {
-      throw new Error(`Invalid DER signature: component too long for ${alg}`);
+      throw new Error("Invalid DER signature: component too long for ES256");
     }
     const padded = new Uint8Array(size);
     padded.set(value, size - value.length);

@@ -1,4 +1,4 @@
-import { createDPoPFetch } from "./dpop.js";
+import { createDPoPFetch } from "./oauth/dpop.js";
 import { parseLinearError } from "./error.js";
 import { LinearGraphQLClient } from "./graphql-client.js";
 import { LinearClientOptions, LinearClientParsedOptions, LinearGraphQLClientOptions } from "./types.js";

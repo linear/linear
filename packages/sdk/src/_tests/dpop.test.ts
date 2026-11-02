@@ -100,15 +100,12 @@ describe("createDPoPProof", () => {
   });
 });
 
+const RSA_PARAMS = { modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]) };
+
 describe("dpopSignerFromCryptoKeyPair", () => {
   it.each([
-    ["ES384", { name: "ECDSA", namedCurve: "P-384" }],
-    ["PS256", { name: "RSA-PSS", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-256" }],
-    [
-      "RS512",
-      { name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-512" },
-    ],
-    ["EdDSA", { name: "Ed25519" }],
+    ["ES256", { name: "ECDSA", namedCurve: "P-256" }],
+    ["RS256", { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256", ...RSA_PARAMS }],
   ] as const)("maps the key algorithm to %s", async (alg, params) => {
     const keyPair = (await crypto.subtle.generateKey(params, false, ["sign", "verify"])) as CryptoKeyPair;
     const signer = await dpopSignerFromCryptoKeyPair(keyPair);
@@ -117,29 +114,36 @@ describe("dpopSignerFromCryptoKeyPair", () => {
     expect(signer.publicJwk).not.toHaveProperty("d");
     expect(signer.publicJwk).not.toHaveProperty("key_ops");
   });
+
+  it.each([
+    ["ECDSA P-384", { name: "ECDSA", namedCurve: "P-384" }],
+    ["RSASSA-PKCS1-v1_5 SHA-512", { name: "RSASSA-PKCS1-v1_5", hash: "SHA-512", ...RSA_PARAMS }],
+    ["RSA-PSS", { name: "RSA-PSS", hash: "SHA-256", ...RSA_PARAMS }],
+    ["Ed25519", { name: "Ed25519" }],
+  ] as const)("rejects %s keys", async (_, params) => {
+    const keyPair = (await crypto.subtle.generateKey(params, false, ["sign", "verify"])) as CryptoKeyPair;
+
+    await expect(dpopSignerFromCryptoKeyPair(keyPair)).rejects.toThrow("Unsupported DPoP key");
+  });
 });
 
 describe("derToJoseSignature", () => {
-  it.each([
-    ["ES256", "P-256", "sha256"],
-    ["ES384", "P-384", "sha384"],
-    ["ES512", "P-521", "sha512"],
-  ] as const)("converts DER %s signatures to the JWS encoding", (alg, namedCurve, hash) => {
-    const { privateKey, publicKey } = generateKeyPairSync("ec", { namedCurve });
+  it("converts DER ES256 signatures to the JWS encoding", () => {
+    const { privateKey, publicKey } = generateKeyPairSync("ec", { namedCurve: "P-256" });
     const data = Buffer.from("signing input");
 
     /** Signatures vary in length, so sign repeatedly to cover padded and stripped integers */
     for (let i = 0; i < 20; i++) {
-      const der = sign(hash, data, { key: privateKey, dsaEncoding: "der" });
-      const jose = derToJoseSignature(der, alg);
+      const der = sign("sha256", data, { key: privateKey, dsaEncoding: "der" });
+      const jose = derToJoseSignature(der);
 
-      expect(jose.length).toEqual({ ES256: 64, ES384: 96, ES512: 132 }[alg]);
-      expect(verify(hash, data, { key: publicKey, dsaEncoding: "ieee-p1363" }, jose)).toBe(true);
+      expect(jose.length).toEqual(64);
+      expect(verify("sha256", data, { key: publicKey, dsaEncoding: "ieee-p1363" }, jose)).toBe(true);
     }
   });
 
   it("rejects input that is not a DER signature", () => {
-    expect(() => derToJoseSignature(new Uint8Array(64), "ES256")).toThrow("expected a SEQUENCE");
+    expect(() => derToJoseSignature(new Uint8Array(64))).toThrow("expected a SEQUENCE");
   });
 });
 

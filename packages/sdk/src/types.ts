@@ -1,4 +1,4 @@
-import type { DPoPSigner } from "./dpop.js";
+import type { DPoPSigner } from "./oauth/dpop.js";
 
 /**
  * Input options for creating a Linear Client
