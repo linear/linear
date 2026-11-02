@@ -15,7 +15,7 @@ export interface DPoPSigner {
    * Sign the JWS signing input (`base64url(header).base64url(payload)`)
    *
    * Must return a JWS-encoded signature. For ES256 this is the raw `r || s` concatenation,
-   * not the DER encoding most KMS providers return.
+   * not the DER encoding most KMS providers return: use `createDPoPSigner` for those.
    */
   sign(signingInput: Uint8Array<ArrayBuffer>): Promise<Uint8Array>;
 }
@@ -128,6 +128,114 @@ export async function createWebCryptoDPoPSigner({ privateKey, publicKey }: Crypt
     alg,
     publicJwk,
     sign: async signingInput => new Uint8Array(await crypto.subtle.sign(params, privateKey, signingInput)),
+  };
+}
+
+/**
+ * Options for a DPoP signer backed by a key held elsewhere, such as a remote KMS
+ */
+export type DPoPSignerOptions = (
+  | {
+      alg: "ES256";
+      /**
+       * How `sign` encodes signatures: `der` for AWS KMS, Google Cloud KMS and Vault transit,
+       * `raw` (`r || s`) for Azure Key Vault and most local keys
+       */
+      signatureEncoding: "der" | "raw";
+    }
+  | { alg: "RS256" }
+) & {
+  /** The SPKI public key, as PEM (`-----BEGIN PUBLIC KEY-----`) or DER bytes. KMS providers return this format */
+  publicKey: string | Uint8Array;
+  /** Sign the bytes with the private key, hashing them with SHA-256 */
+  sign(data: Uint8Array<ArrayBuffer>): Promise<Uint8Array>;
+};
+
+const SPKI_IMPORT_PARAMS: Record<DPoPAlgorithm, EcKeyImportParams | RsaHashedImportParams> = {
+  ES256: { name: "ECDSA", namedCurve: "P-256" },
+  RS256: { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+};
+
+/**
+ * Decode a PEM-encoded SPKI public key into DER bytes
+ */
+function decodeSpkiPem(pem: string): Uint8Array<ArrayBuffer> {
+  const match = /-----BEGIN PUBLIC KEY-----([A-Za-z0-9+/=\s]+)-----END PUBLIC KEY-----/.exec(pem);
+  if (!match) {
+    throw new Error("Invalid DPoP public key: expected a PEM-encoded SPKI key (-----BEGIN PUBLIC KEY-----)");
+  }
+  return Uint8Array.from(atob(match[1].replace(/\s/g, "")), char => char.charCodeAt(0));
+}
+
+/**
+ * Convert a DER-encoded ES256 signature into the JWS `r || s` encoding
+ */
+function derToRawEs256Signature(der: Uint8Array): Uint8Array {
+  const size = 32;
+  let offset = 0;
+
+  /** ES256 signatures are at most 72 bytes, so every DER length uses the short form */
+  function readLength(): number {
+    const length = der[offset++];
+    if (length === undefined || length >= 0x80) {
+      throw new Error("Invalid DER signature: unexpected length encoding for ES256");
+    }
+    return length;
+  }
+
+  function readInteger(): Uint8Array {
+    if (der[offset++] !== 0x02) {
+      throw new Error("Invalid DER signature: expected an INTEGER");
+    }
+    const length = readLength();
+    let value = der.subarray(offset, offset + length);
+    offset += length;
+
+    /** Strip the sign padding and left-pad to the fixed component size */
+    while (value.length > size && value[0] === 0) {
+      value = value.subarray(1);
+    }
+    if (value.length > size) {
+      throw new Error("Invalid DER signature: component too long for ES256");
+    }
+    const padded = new Uint8Array(size);
+    padded.set(value, size - value.length);
+    return padded;
+  }
+
+  if (der[offset++] !== 0x30) {
+    throw new Error("Invalid DER signature: expected a SEQUENCE");
+  }
+  readLength();
+
+  const signature = new Uint8Array(size * 2);
+  signature.set(readInteger(), 0);
+  signature.set(readInteger(), size);
+  return signature;
+}
+
+/**
+ * Create a DPoP signer backed by a key held elsewhere, such as a remote KMS or an HSM
+ *
+ * Takes the public key and signatures in the formats KMS providers return, and converts them for DPoP proofs.
+ *
+ * @param options the algorithm, public key and signing function of the key
+ * @returns a signer for the LinearClient `dpop` option
+ */
+export async function createDPoPSigner(options: DPoPSignerOptions): Promise<DPoPSigner> {
+  const { alg, publicKey, sign } = options;
+  const spki = typeof publicKey === "string" ? decodeSpkiPem(publicKey) : new Uint8Array(publicKey);
+  const key = await crypto.subtle.importKey("spki", spki, SPKI_IMPORT_PARAMS[alg], true, ["verify"]);
+  const publicJwk = toPublicJwk(await crypto.subtle.exportKey("jwk", key));
+  const convertDer = options.alg === "ES256" && options.signatureEncoding === "der";
+
+  return {
+    alg,
+    publicJwk,
+    sign: async signingInput => {
+      const signature = await sign(signingInput);
+      return convertDer ? derToRawEs256Signature(signature) : signature;
+    },
   };
 }
 

@@ -1,7 +1,7 @@
-import { createHash, generateKeyPairSync, sign } from "crypto";
+import { createHash, generateKeyPairSync, KeyObject, sign } from "crypto";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { LinearClient } from "../index.js";
-import { createDPoPProof, createWebCryptoDPoPSigner, DPoPSigner } from "../oauth/index.js";
+import { createDPoPProof, createDPoPSigner, createWebCryptoDPoPSigner, DPoPSigner } from "../oauth/index.js";
 import { LinearErrorType } from "../types.js";
 
 const API_URL = "https://api.example.com/graphql";
@@ -22,19 +22,19 @@ function decodeSegment(segment: string): Record<string, unknown> {
   return JSON.parse(Buffer.from(segment, "base64url").toString());
 }
 
+const VERIFY_PARAMS = {
+  ES256: { name: "ECDSA", namedCurve: "P-256", hash: "SHA-256" },
+  RS256: { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+};
+
 /** Decode a proof and check its signature against the embedded public key */
 async function decodeProof(proof: string) {
   const [header, payload, signature] = proof.split(".");
   const decodedHeader = decodeSegment(header);
-  const publicKey = await crypto.subtle.importKey(
-    "jwk",
-    decodedHeader.jwk as JsonWebKey,
-    { name: "ECDSA", namedCurve: "P-256" },
-    false,
-    ["verify"]
-  );
+  const params = VERIFY_PARAMS[decodedHeader.alg as keyof typeof VERIFY_PARAMS];
+  const publicKey = await crypto.subtle.importKey("jwk", decodedHeader.jwk as JsonWebKey, params, false, ["verify"]);
   const valid = await crypto.subtle.verify(
-    { name: "ECDSA", hash: "SHA-256" },
+    params,
     publicKey,
     Buffer.from(signature, "base64url"),
     new TextEncoder().encode(`${header}.${payload}`)
@@ -148,6 +148,94 @@ describe("createWebCryptoDPoPSigner", () => {
     const keyPair = (await crypto.subtle.generateKey(params, false, ["sign", "verify"])) as CryptoKeyPair;
 
     await expect(createWebCryptoDPoPSigner(keyPair)).rejects.toThrow("Unsupported DPoP key");
+  });
+});
+
+describe("createDPoPSigner", () => {
+  /** Node signs ECDSA as DER by default, like AWS KMS and Google Cloud KMS */
+  function kmsSign(privateKey: KeyObject) {
+    return async (data: Uint8Array) => sign("sha256", data, privateKey);
+  }
+
+  it("signs ES256 proofs from a PEM public key and DER signatures", async () => {
+    const { privateKey, publicKey } = generateKeyPairSync("ec", { namedCurve: "P-256" });
+    const signer = await createDPoPSigner({
+      alg: "ES256",
+      publicKey: publicKey.export({ type: "spki", format: "pem" }),
+      signatureEncoding: "der",
+      sign: kmsSign(privateKey),
+    });
+
+    /** DER signature lengths vary, so sign repeatedly to cover padded and stripped integers */
+    for (let i = 0; i < 20; i++) {
+      const { header, valid } = await decodeProof(await createDPoPProof(signer, { htm: "POST", htu: API_URL }));
+
+      expect(valid).toBe(true);
+      expect(header.jwk).toEqual(publicKey.export({ format: "jwk" }));
+    }
+  });
+
+  it("signs ES256 proofs from a DER public key and raw signatures", async () => {
+    const { privateKey, publicKey } = generateKeyPairSync("ec", { namedCurve: "P-256" });
+    const signer = await createDPoPSigner({
+      alg: "ES256",
+      publicKey: publicKey.export({ type: "spki", format: "der" }),
+      signatureEncoding: "raw",
+      sign: async data => sign("sha256", data, { key: privateKey, dsaEncoding: "ieee-p1363" }),
+    });
+    const { valid } = await decodeProof(await createDPoPProof(signer, { htm: "POST", htu: API_URL }));
+
+    expect(valid).toBe(true);
+  });
+
+  it("signs RS256 proofs", async () => {
+    const { privateKey, publicKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
+    const signer = await createDPoPSigner({
+      alg: "RS256",
+      publicKey: publicKey.export({ type: "spki", format: "pem" }),
+      sign: kmsSign(privateKey),
+    });
+    const { header, valid } = await decodeProof(await createDPoPProof(signer, { htm: "POST", htu: API_URL }));
+
+    expect(valid).toBe(true);
+    expect(header).toEqual(expect.objectContaining({ alg: "RS256" }));
+  });
+
+  it("rejects a public key that does not match the algorithm", async () => {
+    const { publicKey } = generateKeyPairSync("ec", { namedCurve: "P-384" });
+
+    await expect(
+      createDPoPSigner({
+        alg: "ES256",
+        publicKey: publicKey.export({ type: "spki", format: "pem" }),
+        signatureEncoding: "der",
+        sign: async () => new Uint8Array(),
+      })
+    ).rejects.toThrow();
+  });
+
+  it("rejects PEM keys that are not SPKI", async () => {
+    const { publicKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
+
+    await expect(
+      createDPoPSigner({
+        alg: "RS256",
+        publicKey: publicKey.export({ type: "pkcs1", format: "pem" }),
+        sign: async () => new Uint8Array(),
+      })
+    ).rejects.toThrow("expected a PEM-encoded SPKI key");
+  });
+
+  it("rejects raw signatures when DER is expected", async () => {
+    const { privateKey, publicKey } = generateKeyPairSync("ec", { namedCurve: "P-256" });
+    const signer = await createDPoPSigner({
+      alg: "ES256",
+      publicKey: publicKey.export({ type: "spki", format: "pem" }),
+      signatureEncoding: "der",
+      sign: async data => sign("sha256", data, { key: privateKey, dsaEncoding: "ieee-p1363" }),
+    });
+
+    await expect(createDPoPProof(signer, { htm: "POST", htu: API_URL })).rejects.toThrow("Invalid DER signature");
   });
 });
 
