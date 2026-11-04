@@ -852,6 +852,93 @@ export class AgentSessionExternalLink extends Request {
   public url: string;
 }
 /**
+ * A notification about an agent session awaiting input, failing, or completing a turn.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentSessionNotificationFragment response data
+ */
+export class AgentSessionNotification extends Request {
+  private _actor?: L.AgentSessionNotificationFragment["actor"];
+  private _externalUserActor?: L.AgentSessionNotificationFragment["externalUserActor"];
+  private _user: L.AgentSessionNotificationFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.AgentSessionNotificationFragment) {
+    super(request);
+    this.agentActivityId = data.agentActivityId ?? undefined;
+    this.agentSessionId = data.agentSessionId;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.emailedAt = parseDate(data.emailedAt) ?? undefined;
+    this.id = data.id;
+    this.readAt = parseDate(data.readAt) ?? undefined;
+    this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
+    this.type = data.type;
+    this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.category = data.category;
+    this._actor = data.actor ?? undefined;
+    this._externalUserActor = data.externalUserActor ?? undefined;
+    this._user = data.user;
+  }
+
+  /** The activity that produced the notification. */
+  public agentActivityId?: string | null;
+  /** The session that produced the notification. */
+  public agentSessionId: string;
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent. */
+  public emailedAt?: Date | null;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The time at which the user marked the notification as read. Null if the notification is unread. */
+  public readAt?: Date | null;
+  /** The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed. */
+  public snoozedUntilAt?: Date | null;
+  /** Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated. */
+  public type: string;
+  /** The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed. */
+  public unsnoozedAt?: Date | null;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The bot that caused the notification. */
+  public botActor?: ActorBot | null;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
+  /** The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
+  public get actor(): LinearFetch<User> | undefined {
+    return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
+  }
+  /** The ID of user that caused the notification. null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
+  public get actorId(): string | undefined {
+    return this._actor?.id;
+  }
+  /** The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member. */
+  public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
+    return this._externalUserActor?.id
+      ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
+      : undefined;
+  }
+  /** The ID of external user that caused the notification. populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like slack or github) rather than a linear workspace member. */
+  public get externalUserActorId(): string | undefined {
+    return this._externalUserActor?.id;
+  }
+  /** The recipient user of this notification. */
+  public get user(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._user.id);
+  }
+  /** The ID of recipient user of this notification. */
+  public get userId(): string | undefined {
+    return this._user?.id;
+  }
+}
+/**
  * AgentSessionPayload model
  *
  * @param request - function to call the graphql client
@@ -6971,11 +7058,11 @@ export class CustomerNeed extends Request {
   public get customerId(): string | undefined {
     return this._customer?.id;
   }
-  /** The issue this need is linked to. Either issueId or projectId must be set. When set, the need's projectId is denormalized from the issue's project. */
+  /** The issue this need is linked to. Either issueId or projectId must be set, unless the need is linked to an internal customer signal. When set, the need's projectId is denormalized from the issue's project. */
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
-  /** The ID of issue this need is linked to. either issueid or projectid must be set. when set, the need's projectid is denormalized from the issue's project. */
+  /** The ID of issue this need is linked to. either issueid or projectid must be set, unless the need is linked to an internal customer signal. when set, the need's projectid is denormalized from the issue's project. */
   public get issueId(): string | undefined {
     return this._issue?.id;
   }
@@ -16654,6 +16741,7 @@ export class NotificationChannelPreferences extends Request {
  * @param data - NotificationConnection response data
  */
 export class NotificationConnection extends Connection<
+  | AgentSessionNotification
   | CustomerNeedNotification
   | CustomerNotification
   | DocumentNotification
@@ -16676,6 +16764,7 @@ export class NotificationConnection extends Connection<
       connection?: LinearConnectionVariables
     ) => LinearFetch<
       | LinearConnection<
+          | AgentSessionNotification
           | CustomerNeedNotification
           | CustomerNotification
           | DocumentNotification
@@ -16701,6 +16790,8 @@ export class NotificationConnection extends Connection<
       fetch,
       data.nodes.map(node => {
         switch (node.__typename) {
+          case "AgentSessionNotification":
+            return new AgentSessionNotification(request, node as L.AgentSessionNotificationFragment);
           case "CustomerNeedNotification":
             return new CustomerNeedNotification(request, node as L.CustomerNeedNotificationFragment);
           case "CustomerNotification":
@@ -30636,6 +30727,7 @@ export class NotificationQuery extends Request {
   public async fetch(
     id: string
   ): LinearFetch<
+    | AgentSessionNotification
     | CustomerNeedNotification
     | CustomerNotification
     | DocumentNotification
@@ -30661,6 +30753,8 @@ export class NotificationQuery extends Request {
     const data = response.notification;
 
     switch (data.__typename) {
+      case "AgentSessionNotification":
+        return new AgentSessionNotification(this._request, data as L.AgentSessionNotificationFragment);
       case "CustomerNeedNotification":
         return new CustomerNeedNotification(this._request, data as L.CustomerNeedNotificationFragment);
       case "CustomerNotification":
@@ -52332,6 +52426,7 @@ export class LinearSdk extends Request {
   public notification(
     id: string
   ): LinearFetch<
+    | AgentSessionNotification
     | CustomerNeedNotification
     | CustomerNotification
     | DocumentNotification

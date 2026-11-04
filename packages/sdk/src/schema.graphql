@@ -832,6 +832,10 @@ type AgentSession implements Node {
   """
   issue: Issue
   """
+  [Internal] The time the agent last replied in this session with a response, elicitation, or error. Null if the agent has not replied.
+  """
+  lastAgentReplyAt: DateTime
+  """
   [Internal] How Adaptive selected the model route used by this coding session.
   """
   modelSelection: JSON
@@ -1094,6 +1098,133 @@ input AgentSessionExternalUrlInput {
   The URL of the external resource.
   """
   url: String!
+}
+
+"""
+A notification about an agent session awaiting input, failing, or completing a turn.
+"""
+type AgentSessionNotification implements Entity & Node & Notification {
+  """
+  The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event.
+  """
+  actor: User
+  """
+  [Internal] Notification actor initials if avatar is not available.
+  """
+  actorAvatarColor: String!
+  """
+  [Internal] Notification avatar URL.
+  """
+  actorAvatarUrl: String
+  """
+  [Internal] Whether the notification's user actor is deactivated in the workspace.
+  """
+  actorInactive: Boolean!
+  """
+  [Internal] Notification actor initials if avatar is not available.
+  """
+  actorInitials: String
+  """
+  The activity that produced the notification.
+  """
+  agentActivityId: String
+  """
+  The session that produced the notification.
+  """
+  agentSessionId: String!
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The bot that caused the notification.
+  """
+  botActor: ActorBot
+  """
+  The category of the notification.
+  """
+  category: NotificationCategory!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent.
+  """
+  emailedAt: DateTime
+  """
+  The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member.
+  """
+  externalUserActor: ExternalUser
+  """
+  [Internal] Notifications with the same grouping key will be grouped together in the UI.
+  """
+  groupingKey: String!
+  """
+  [Internal] Priority of the notification with the same grouping key. Higher number means higher priority. If priority is the same, notifications should be sorted by `createdAt`.
+  """
+  groupingPriority: Float!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  [Internal] Inbox URL for the notification.
+  """
+  inboxUrl: String!
+  """
+  [Internal] Initiative update health for new updates.
+  """
+  initiativeUpdateHealth: String
+  """
+  [Internal] If notification actor was Linear.
+  """
+  isLinearActor: Boolean!
+  """
+  [Internal] Issue's status type for issue notifications.
+  """
+  issueStatusType: String
+  """
+  [Internal] Project update health for new updates.
+  """
+  projectUpdateHealth: String
+  """
+  The time at which the user marked the notification as read. Null if the notification is unread.
+  """
+  readAt: DateTime
+  """
+  The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed.
+  """
+  snoozedUntilAt: DateTime
+  """
+  [Internal] Notification subtitle.
+  """
+  subtitle: String!
+  """
+  [Internal] Notification title.
+  """
+  title: String!
+  """
+  Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated.
+  """
+  type: String!
+  """
+  The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed.
+  """
+  unsnoozedAt: DateTime
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  [Internal] URL to the target of the notification.
+  """
+  url: String!
+  """
+  The recipient user of this notification.
+  """
+  user: User!
 }
 
 type AgentSessionPayload {
@@ -7021,6 +7152,10 @@ input ContactCreateInput {
   """
   operatingSystem: String
   """
+  [INTERNAL] Where the message was sent from: `app` (default) or `website`.
+  """
+  source: String
+  """
   The type of support contact.
   """
   type: String!
@@ -8168,7 +8303,7 @@ type CustomerNeed implements Node {
   """
   id: ID!
   """
-  The issue this need is linked to. Either issueId or projectId must be set. When set, the need's projectId is denormalized from the issue's project.
+  The issue this need is linked to. Either issueId or projectId must be set, unless the need is linked to an internal customer signal. When set, the need's projectId is denormalized from the issue's project.
   """
   issue: Issue
   """
@@ -10871,6 +11006,10 @@ type Document implements Node {
   """
   archivedAt: DateTime
   """
+  [Internal] The users the document is shared with and their roles, in the order they were shared within each role: editors, then commenters, then viewers. The owner of a personal document is its `personalUser` and is not listed.
+  """
+  collaborators: [DocumentCollaborator!]!
+  """
   The hex color of the document icon. Null if no custom color has been set.
   """
   color: String
@@ -10932,6 +11071,10 @@ type Document implements Node {
   """
   documentContentId: String
   """
+  [Internal] What users other than the owner can do with a document that is not personal: edit, comment, or view. People shared on the document with a higher role keep it. Null on a personal document, which only its owner and collaborators can access.
+  """
+  generalAccess: DocumentShareRole
+  """
   The time at which the document was hidden from the default view. Null if the document has not been hidden.
   """
   hiddenAt: DateTime
@@ -10963,6 +11106,10 @@ type Document implements Node {
   [Internal] The parent document. Null if the document is not a sub-document.
   """
   parentDocument: Document
+  """
+  [Internal] The user whose personal space holds the document, who owns and manages it. Null if the document belongs to a different parent entity type.
+  """
+  personalUser: User
   """
   The project that the document is associated with. Null if the document belongs to a different parent entity type.
   """
@@ -11049,6 +11196,18 @@ type Document implements Node {
   The canonical url for the document.
   """
   url: String!
+  """
+  [Internal] Whether the viewer can comment on the document. On a personal document, the owner and people it is shared with as editors or commenters can. On any other document, its owner can, and so can everyone else when its general access is edit or comment or they are shared on it as editors or commenters. False when the request has no user.
+  """
+  viewerCanComment: Boolean!
+  """
+  [Internal] Whether the viewer can edit the document's fields and content. On a personal document, the owner and people it is shared with as editors can. On any other document, its owner can, and so can everyone else when its general access is edit or they are shared on it as editors. False when the request has no user.
+  """
+  viewerCanEdit: Boolean!
+  """
+  [Internal] Whether the viewer can change who has access to the document: share it, change collaborator roles, and set its general access. On a personal document, only the owner can. On any other document, its owner, an owner of a team it belongs to, or a workspace admin can. False when the request has no user.
+  """
+  viewerCanManageAccess: Boolean!
 }
 
 """
@@ -11097,6 +11256,20 @@ type DocumentChildWebhookPayload {
   The title of the document.
   """
   title: String!
+}
+
+"""
+[Internal] A user a document is shared with, and their role on it.
+"""
+type DocumentCollaborator {
+  """
+  What the user can do with the document.
+  """
+  role: DocumentShareRole!
+  """
+  The user the document is shared with.
+  """
+  user: User!
 }
 
 type DocumentConnection {
@@ -11773,6 +11946,10 @@ type DocumentSearchResult implements Node {
   """
   archivedAt: DateTime
   """
+  [Internal] The users the document is shared with and their roles, in the order they were shared within each role: editors, then commenters, then viewers. The owner of a personal document is its `personalUser` and is not listed.
+  """
+  collaborators: [DocumentCollaborator!]!
+  """
   The hex color of the document icon. Null if no custom color has been set.
   """
   color: String
@@ -11834,6 +12011,10 @@ type DocumentSearchResult implements Node {
   """
   documentContentId: String
   """
+  [Internal] What users other than the owner can do with a document that is not personal: edit, comment, or view. People shared on the document with a higher role keep it. Null on a personal document, which only its owner and collaborators can access.
+  """
+  generalAccess: DocumentShareRole
+  """
   The time at which the document was hidden from the default view. Null if the document has not been hidden.
   """
   hiddenAt: DateTime
@@ -11869,6 +12050,10 @@ type DocumentSearchResult implements Node {
   [Internal] The parent document. Null if the document is not a sub-document.
   """
   parentDocument: Document
+  """
+  [Internal] The user whose personal space holds the document, who owns and manages it. Null if the document belongs to a different parent entity type.
+  """
+  personalUser: User
   """
   The project that the document is associated with. Null if the document belongs to a different parent entity type.
   """
@@ -11955,6 +12140,18 @@ type DocumentSearchResult implements Node {
   The canonical url for the document.
   """
   url: String!
+  """
+  [Internal] Whether the viewer can comment on the document. On a personal document, the owner and people it is shared with as editors or commenters can. On any other document, its owner can, and so can everyone else when its general access is edit or comment or they are shared on it as editors or commenters. False when the request has no user.
+  """
+  viewerCanComment: Boolean!
+  """
+  [Internal] Whether the viewer can edit the document's fields and content. On a personal document, the owner and people it is shared with as editors can. On any other document, its owner can, and so can everyone else when its general access is edit or they are shared on it as editors. False when the request has no user.
+  """
+  viewerCanEdit: Boolean!
+  """
+  [Internal] Whether the viewer can change who has access to the document: share it, change collaborator roles, and set its general access. On a personal document, only the owner can. On any other document, its owner, an owner of a team it belongs to, or a workspace admin can. False when the request has no user.
+  """
+  viewerCanManageAccess: Boolean!
 }
 
 type DocumentSearchResultEdge {
@@ -11966,7 +12163,7 @@ type DocumentSearchResultEdge {
 }
 
 """
-[Internal] The role of a user a personal document is shared with.
+[Internal] What a user can do with a document: edit, comment, or view.
 """
 enum DocumentShareRole {
   """
@@ -17778,6 +17975,7 @@ Linear supported integration services.
 enum IntegrationService {
   airbyte
   asksWeb
+  claudeSecurity
   datadog
   discord
   email
@@ -32604,6 +32802,10 @@ type Organization implements Node {
   """
   managedTeamFeatures: JSONObject!
   """
+  [Internal] Workspace admin policy for the Linear MCP server, such as the teams MCP connections can access. Empty until saved, which allows every team.
+  """
+  mcpSettings: JSONObject!
+  """
   The workspace's name.
   """
   name: String!
@@ -33514,6 +33716,16 @@ input OrganizationManagedTeamFeaturesInput {
 }
 
 """
+[Internal] Workspace admin policy for the Linear MCP server.
+"""
+input OrganizationMcpSettingsInput {
+  """
+  [Internal] The teams MCP connections can access. Omit it to allow every team, including teams created later. A changed list needs at least one team, and teams created later are not added to it. Workspace-level data, such as users and initiatives, stays available.
+  """
+  allowedTeamIds: [UUID!]
+}
+
+"""
 [INTERNAL] Workspace metadata including region and allowed authentication providers.
 """
 type OrganizationMeta {
@@ -33896,6 +34108,10 @@ input OrganizationUpdateInput {
   """
   managedTeamFeatures: OrganizationManagedTeamFeaturesInput
   """
+  [Internal] Workspace admin policy for the Linear MCP server. Replaces the current policy, so omitted settings return to their defaults.
+  """
+  mcpSettings: OrganizationMcpSettingsInput
+  """
   The name of the workspace.
   """
   name: String
@@ -34046,6 +34262,7 @@ enum OtherNotificationType {
   documentReminder
   documentRemovedAsOwner
   documentRestored
+  documentRoleChanged
   documentSharedWithYou
   documentSubscribed
   documentThreadResolved
@@ -40058,6 +40275,10 @@ type PullRequestMergeSettings {
   Whether auto-merge is allowed for the PR's repository.
   """
   autoMergeAllowed: Boolean!
+  """
+  The merge method the repository uses by default. GitLab projects report one through their squash option. Null for GitHub, which has no default, and for settings synced before Linear stored it.
+  """
+  defaultMergeMethod: PullRequestMergeMethod
   """
   Whether the branch will be deleted when the pull request is merged.
   """
@@ -51429,7 +51650,11 @@ type UserSettings implements Node {
   """
   notificationDeliveryPreferences: NotificationDeliveryPreferences!
   """
-  [Internal] The user's preferred merge method for pull requests. Null if the user chooses a method for each pull request.
+  [Internal] Whether the user merges each pull request with its repository's default merge method, as `mergeSettings.defaultMergeMethod` reports it. When true, `pullRequestMergeStrategyPreference` reports squash.
+  """
+  pullRequestMergeStrategyIsRepositoryDefault: Boolean!
+  """
+  [Internal] The user's preferred merge method for pull requests. Null if the user chooses a method for each pull request. Squash when the user merges with each repository's default method.
   """
   pullRequestMergeStrategyPreference: PullRequestMergeMethod
   """
@@ -52176,6 +52401,10 @@ type ViewPreferencesValues {
   The dashboards ordering.
   """
   dashboardsOrdering: String
+  """
+  [Internal] Whether to show the viewer's access column in documents lists.
+  """
+  documentFieldAccess: Boolean
   """
   [Internal] Whether to show the collaborators column in documents lists.
   """
@@ -54289,6 +54518,7 @@ enum WorkflowTrigger {
 }
 
 enum WorkflowTriggerType {
+  aiConversation
   chat
   cycle
   document
@@ -54439,6 +54669,10 @@ input WorkspaceTeamSecuritySettingsInput {
   Whether members may join teams without an invitation.
   """
   allMembersCanJoin: Boolean
+  """
+  Minimum role required to manage team loops.
+  """
+  automationManagement: TeamRoleType
   """
   Minimum role required to manage team members.
   """

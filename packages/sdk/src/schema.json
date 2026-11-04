@@ -2774,6 +2774,18 @@
             "deprecationReason": null
           },
           {
+            "name": "lastAgentReplyAt",
+            "description": "[Internal] The time the agent last replied in this session with a response, elicitation, or error. Null if the agent has not replied.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "modelSelection",
             "description": "[Internal] How Adaptive selected the model route used by this coding session.",
             "args": [],
@@ -3723,6 +3735,457 @@
           }
         ],
         "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AgentSessionNotification",
+        "description": "A notification about an agent session awaiting input, failing, or completing a turn.",
+        "fields": [
+          {
+            "name": "actor",
+            "description": "The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "User",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "actorAvatarColor",
+            "description": "[Internal] Notification actor initials if avatar is not available.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "actorAvatarUrl",
+            "description": "[Internal] Notification avatar URL.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "actorInactive",
+            "description": "[Internal] Whether the notification's user actor is deactivated in the workspace.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "actorInitials",
+            "description": "[Internal] Notification actor initials if avatar is not available.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "agentActivityId",
+            "description": "The activity that produced the notification.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "agentSessionId",
+            "description": "The session that produced the notification.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "archivedAt",
+            "description": "The time at which the entity was archived. Null if the entity has not been archived.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "botActor",
+            "description": "The bot that caused the notification.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "ActorBot",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "category",
+            "description": "The category of the notification.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "NotificationCategory",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdAt",
+            "description": "The time at which the entity was created.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "emailedAt",
+            "description": "The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "externalUserActor",
+            "description": "The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "ExternalUser",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "groupingKey",
+            "description": "[Internal] Notifications with the same grouping key will be grouped together in the UI.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "groupingPriority",
+            "description": "[Internal] Priority of the notification with the same grouping key. Higher number means higher priority. If priority is the same, notifications should be sorted by `createdAt`.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "id",
+            "description": "The unique identifier of the entity.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "inboxUrl",
+            "description": "[Internal] Inbox URL for the notification.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "initiativeUpdateHealth",
+            "description": "[Internal] Initiative update health for new updates.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "isLinearActor",
+            "description": "[Internal] If notification actor was Linear.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueStatusType",
+            "description": "[Internal] Issue's status type for issue notifications.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectUpdateHealth",
+            "description": "[Internal] Project update health for new updates.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "readAt",
+            "description": "The time at which the user marked the notification as read. Null if the notification is unread.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "snoozedUntilAt",
+            "description": "The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "subtitle",
+            "description": "[Internal] Notification subtitle.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "title",
+            "description": "[Internal] Notification title.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "type",
+            "description": "Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "unsnoozedAt",
+            "description": "The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedAt",
+            "description": "The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't\n    been updated after creation.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "url",
+            "description": "[Internal] URL to the target of the notification.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "user",
+            "description": "The recipient user of this notification.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "User",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "Entity",
+            "ofType": null
+          },
+          {
+            "kind": "INTERFACE",
+            "name": "Node",
+            "ofType": null
+          },
+          {
+            "kind": "INTERFACE",
+            "name": "Notification",
+            "ofType": null
+          }
+        ],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -28149,6 +28612,18 @@
             "deprecationReason": null
           },
           {
+            "name": "source",
+            "description": "[INTERNAL] Where the message was sent from: `app` (default) or `website`.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "type",
             "description": "The type of support contact.",
             "type": {
@@ -31945,7 +32420,7 @@
           },
           {
             "name": "issue",
-            "description": "The issue this need is linked to. Either issueId or projectId must be set. When set, the need's projectId is denormalized from the issue's project.",
+            "description": "The issue this need is linked to. Either issueId or projectId must be set, unless the need is linked to an internal customer signal. When set, the need's projectId is denormalized from the issue's project.",
             "args": [],
             "type": {
               "kind": "OBJECT",
@@ -41201,6 +41676,30 @@
             "deprecationReason": null
           },
           {
+            "name": "collaborators",
+            "description": "[Internal] The users the document is shared with and their roles, in the order they were shared within each role: editors, then commenters, then viewers. The owner of a personal document is its `personalUser` and is not listed.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "DocumentCollaborator",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "color",
             "description": "The hex color of the document icon. Null if no custom color has been set.",
             "args": [],
@@ -41390,6 +41889,18 @@
             "deprecationReason": null
           },
           {
+            "name": "generalAccess",
+            "description": "[Internal] What users other than the owner can do with a document that is not personal: edit, comment, or view. People shared on the document with a higher role keep it. Null on a personal document, which only its owner and collaborators can access.",
+            "args": [],
+            "type": {
+              "kind": "ENUM",
+              "name": "DocumentShareRole",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "hiddenAt",
             "description": "The time at which the document was hidden from the default view. Null if the document has not been hidden.",
             "args": [],
@@ -41484,6 +41995,18 @@
             "type": {
               "kind": "OBJECT",
               "name": "Document",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "personalUser",
+            "description": "[Internal] The user whose personal space holds the document, who owns and manages it. Null if the document belongs to a different parent entity type.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "User",
               "ofType": null
             },
             "isDeprecated": false,
@@ -41765,6 +42288,54 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "viewerCanComment",
+            "description": "[Internal] Whether the viewer can comment on the document. On a personal document, the owner and people it is shared with as editors or commenters can. On any other document, its owner can, and so can everyone else when its general access is edit or comment or they are shared on it as editors or commenters. False when the request has no user.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "viewerCanEdit",
+            "description": "[Internal] Whether the viewer can edit the document's fields and content. On a personal document, the owner and people it is shared with as editors can. On any other document, its owner can, and so can everyone else when its general access is edit or they are shared on it as editors. False when the request has no user.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "viewerCanManageAccess",
+            "description": "[Internal] Whether the viewer can change who has access to the document: share it, change collaborator roles, and set its general access. On a personal document, only the owner can. On any other document, its owner, an owner of a team it belongs to, or a workspace admin can. False when the request has no user.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -41918,6 +42489,49 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "DocumentCollaborator",
+        "description": "[Internal] A user a document is shared with, and their role on it.",
+        "fields": [
+          {
+            "name": "role",
+            "description": "What the user can do with the document.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "DocumentShareRole",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "user",
+            "description": "The user the document is shared with.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "User",
                 "ofType": null
               }
             },
@@ -44311,6 +44925,30 @@
             "deprecationReason": null
           },
           {
+            "name": "collaborators",
+            "description": "[Internal] The users the document is shared with and their roles, in the order they were shared within each role: editors, then commenters, then viewers. The owner of a personal document is its `personalUser` and is not listed.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "DocumentCollaborator",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "color",
             "description": "The hex color of the document icon. Null if no custom color has been set.",
             "args": [],
@@ -44500,6 +45138,18 @@
             "deprecationReason": null
           },
           {
+            "name": "generalAccess",
+            "description": "[Internal] What users other than the owner can do with a document that is not personal: edit, comment, or view. People shared on the document with a higher role keep it. Null on a personal document, which only its owner and collaborators can access.",
+            "args": [],
+            "type": {
+              "kind": "ENUM",
+              "name": "DocumentShareRole",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "hiddenAt",
             "description": "The time at which the document was hidden from the default view. Null if the document has not been hidden.",
             "args": [],
@@ -44610,6 +45260,18 @@
             "type": {
               "kind": "OBJECT",
               "name": "Document",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "personalUser",
+            "description": "[Internal] The user whose personal space holds the document, who owns and manages it. Null if the document belongs to a different parent entity type.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "User",
               "ofType": null
             },
             "isDeprecated": false,
@@ -44891,6 +45553,54 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "viewerCanComment",
+            "description": "[Internal] Whether the viewer can comment on the document. On a personal document, the owner and people it is shared with as editors or commenters can. On any other document, its owner can, and so can everyone else when its general access is edit or comment or they are shared on it as editors or commenters. False when the request has no user.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "viewerCanEdit",
+            "description": "[Internal] Whether the viewer can edit the document's fields and content. On a personal document, the owner and people it is shared with as editors can. On any other document, its owner can, and so can everyone else when its general access is edit or they are shared on it as editors. False when the request has no user.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "viewerCanManageAccess",
+            "description": "[Internal] Whether the viewer can change who has access to the document: share it, change collaborator roles, and set its general access. On a personal document, only the owner can. On any other document, its owner, an owner of a team it belongs to, or a workspace admin can. False when the request has no user.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -44950,7 +45660,7 @@
       {
         "kind": "ENUM",
         "name": "DocumentShareRole",
-        "description": "[Internal] The role of a user a personal document is shared with.",
+        "description": "[Internal] What a user can do with a document: edit, comment, or view.",
         "fields": null,
         "inputFields": null,
         "interfaces": null,
@@ -48099,6 +48809,11 @@
         ],
         "enumValues": null,
         "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "AgentSessionNotification",
+            "ofType": null
+          },
           {
             "kind": "OBJECT",
             "name": "CustomViewNotificationSubscription",
@@ -65025,6 +65740,12 @@
           },
           {
             "name": "asksWeb",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "claudeSecurity",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -105863,6 +106584,11 @@
           },
           {
             "kind": "OBJECT",
+            "name": "AgentSessionNotification",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
             "name": "AgentSessionToPullRequest",
             "ofType": null
           },
@@ -106895,6 +107621,11 @@
         ],
         "enumValues": null,
         "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "AgentSessionNotification",
+            "ofType": null
+          },
           {
             "kind": "OBJECT",
             "name": "CustomerNeedNotification",
@@ -117381,6 +118112,22 @@
             "deprecationReason": null
           },
           {
+            "name": "mcpSettings",
+            "description": "[Internal] Workspace admin policy for the Linear MCP server, such as the teams MCP connections can access. Empty until saved, which allows every team.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "JSONObject",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "name",
             "description": "The workspace's name.",
             "args": [],
@@ -120531,6 +121278,37 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "OrganizationMcpSettingsInput",
+        "description": "[Internal] Workspace admin policy for the Linear MCP server.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "allowedTeamIds",
+            "description": "[Internal] The teams MCP connections can access. Omit it to allow every team, including teams created later. A changed list needs at least one team, and teams created later are not added to it. Workspace-level data, such as users and initiatives, stays available.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "UUID",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "OrganizationMeta",
         "description": "[INTERNAL] Workspace metadata including region and allowed authentication providers.",
@@ -121791,6 +122569,18 @@
             "deprecationReason": null
           },
           {
+            "name": "mcpSettings",
+            "description": "[Internal] Workspace admin policy for the Linear MCP server. Replaces the current policy, so omitted settings return to their defaults.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "OrganizationMcpSettingsInput",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "name",
             "description": "The name of the workspace.",
             "type": {
@@ -122325,6 +123115,12 @@
           },
           {
             "name": "documentRestored",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentRoleChanged",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -143035,6 +143831,18 @@
                 "name": "Boolean",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "defaultMergeMethod",
+            "description": "The merge method the repository uses by default. GitLab projects report one through their squash option. Null for GitHub, which has no default, and for settings synced before Linear stored it.",
+            "args": [],
+            "type": {
+              "kind": "ENUM",
+              "name": "PullRequestMergeMethod",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -182141,8 +182949,24 @@
             "deprecationReason": null
           },
           {
+            "name": "pullRequestMergeStrategyIsRepositoryDefault",
+            "description": "[Internal] Whether the user merges each pull request with its repository's default merge method, as `mergeSettings.defaultMergeMethod` reports it. When true, `pullRequestMergeStrategyPreference` reports squash.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "pullRequestMergeStrategyPreference",
-            "description": "[Internal] The user's preferred merge method for pull requests. Null if the user chooses a method for each pull request.",
+            "description": "[Internal] The user's preferred merge method for pull requests. Null if the user chooses a method for each pull request. Squash when the user merges with each repository's default method.",
             "args": [],
             "type": {
               "kind": "ENUM",
@@ -184537,6 +185361,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentFieldAccess",
+            "description": "[Internal] Whether to show the viewer's access column in documents lists.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "isDeprecated": false,
@@ -191906,6 +192742,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "aiConversation",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "chat",
             "description": null,
             "isDeprecated": false,
@@ -192472,6 +193314,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "automationManagement",
+            "description": "Minimum role required to manage team loops.",
+            "type": {
+              "kind": "ENUM",
+              "name": "TeamRoleType",
               "ofType": null
             },
             "defaultValue": null,
