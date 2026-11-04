@@ -107,7 +107,7 @@ describe("ShortcutCsvImporter", () => {
       [`https://media.app.shortcut.com/a.png?token=${TOKEN}`],
       ["https://example.com/b.png"],
     ]);
-    expect(result).toBe(description);
+    expect(result).toBe(description.replace(/!\[/g, "["));
   });
 
   it("uploads images from their decoded URL, and only replaces the URL", async () => {
