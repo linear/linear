@@ -2146,6 +2146,7 @@ describe("generated", () => {
   describe("InboxNotifications", () => {
     let _notification:
       | L.Notification
+      | L.AgentSessionNotification
       | L.CustomerNeedNotification
       | L.CustomerNotification
       | L.DocumentNotification
@@ -2177,6 +2178,7 @@ describe("generated", () => {
       if (_notification_id) {
         const notification:
           | L.Notification
+          | L.AgentSessionNotification
           | L.CustomerNeedNotification
           | L.CustomerNotification
           | L.DocumentNotification
@@ -4573,6 +4575,7 @@ describe("generated", () => {
   describe("Notifications", () => {
     let _notification:
       | L.Notification
+      | L.AgentSessionNotification
       | L.CustomerNeedNotification
       | L.CustomerNotification
       | L.DocumentNotification
@@ -4604,6 +4607,7 @@ describe("generated", () => {
       if (_notification_id) {
         const notification:
           | L.Notification
+          | L.AgentSessionNotification
           | L.CustomerNeedNotification
           | L.CustomerNotification
           | L.DocumentNotification

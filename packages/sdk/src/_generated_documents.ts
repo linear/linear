@@ -518,6 +518,8 @@ export type AgentSession = Node & {
   id: Scalars["ID"];
   /** The issue this agent session is associated with. */
   issue?: Maybe<Issue>;
+  /** [Internal] The time the agent last replied in this session with a response, elicitation, or error. Null if the agent has not replied. */
+  lastAgentReplyAt?: Maybe<Scalars["DateTime"]>;
   /** [Internal] How Adaptive selected the model route used by this coding session. */
   modelSelection?: Maybe<Scalars["JSON"]>;
   /** A dynamically updated plan describing the agent's execution strategy, including steps to be taken and their current status. Updated as the agent progresses through its work. Null if no plan has been set. */
@@ -690,6 +692,76 @@ export type AgentSessionExternalUrlInput = {
   /** The URL of the external resource. */
   url: Scalars["String"];
 };
+
+/** A notification about an agent session awaiting input, failing, or completing a turn. */
+export type AgentSessionNotification = Entity &
+  Node &
+  Notification & {
+    __typename?: "AgentSessionNotification";
+    /** The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event. */
+    actor?: Maybe<User>;
+    /** [Internal] Notification actor initials if avatar is not available. */
+    actorAvatarColor: Scalars["String"];
+    /** [Internal] Notification avatar URL. */
+    actorAvatarUrl?: Maybe<Scalars["String"]>;
+    /** [Internal] Whether the notification's user actor is deactivated in the workspace. */
+    actorInactive: Scalars["Boolean"];
+    /** [Internal] Notification actor initials if avatar is not available. */
+    actorInitials?: Maybe<Scalars["String"]>;
+    /** The activity that produced the notification. */
+    agentActivityId?: Maybe<Scalars["String"]>;
+    /** The session that produced the notification. */
+    agentSessionId: Scalars["String"];
+    /** The time at which the entity was archived. Null if the entity has not been archived. */
+    archivedAt?: Maybe<Scalars["DateTime"]>;
+    /** The bot that caused the notification. */
+    botActor?: Maybe<ActorBot>;
+    /** The category of the notification. */
+    category: NotificationCategory;
+    /** The time at which the entity was created. */
+    createdAt: Scalars["DateTime"];
+    /** The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent. */
+    emailedAt?: Maybe<Scalars["DateTime"]>;
+    /** The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member. */
+    externalUserActor?: Maybe<ExternalUser>;
+    /** [Internal] Notifications with the same grouping key will be grouped together in the UI. */
+    groupingKey: Scalars["String"];
+    /** [Internal] Priority of the notification with the same grouping key. Higher number means higher priority. If priority is the same, notifications should be sorted by `createdAt`. */
+    groupingPriority: Scalars["Float"];
+    /** The unique identifier of the entity. */
+    id: Scalars["ID"];
+    /** [Internal] Inbox URL for the notification. */
+    inboxUrl: Scalars["String"];
+    /** [Internal] Initiative update health for new updates. */
+    initiativeUpdateHealth?: Maybe<Scalars["String"]>;
+    /** [Internal] If notification actor was Linear. */
+    isLinearActor: Scalars["Boolean"];
+    /** [Internal] Issue's status type for issue notifications. */
+    issueStatusType?: Maybe<Scalars["String"]>;
+    /** [Internal] Project update health for new updates. */
+    projectUpdateHealth?: Maybe<Scalars["String"]>;
+    /** The time at which the user marked the notification as read. Null if the notification is unread. */
+    readAt?: Maybe<Scalars["DateTime"]>;
+    /** The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed. */
+    snoozedUntilAt?: Maybe<Scalars["DateTime"]>;
+    /** [Internal] Notification subtitle. */
+    subtitle: Scalars["String"];
+    /** [Internal] Notification title. */
+    title: Scalars["String"];
+    /** Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated. */
+    type: Scalars["String"];
+    /** The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed. */
+    unsnoozedAt?: Maybe<Scalars["DateTime"]>;
+    /**
+     * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+     *     been updated after creation.
+     */
+    updatedAt: Scalars["DateTime"];
+    /** [Internal] URL to the target of the notification. */
+    url: Scalars["String"];
+    /** The recipient user of this notification. */
+    user: User;
+  };
 
 export type AgentSessionPayload = {
   __typename?: "AgentSessionPayload";
@@ -4554,6 +4626,8 @@ export type ContactCreateInput = {
   message: Scalars["String"];
   /** The user's operating system name and version (e.g., 'macOS 14.0'). */
   operatingSystem?: InputMaybe<Scalars["String"]>;
+  /** [INTERNAL] Where the message was sent from: `app` (default) or `website`. */
+  source?: InputMaybe<Scalars["String"]>;
   /** The type of support contact. */
   type: Scalars["String"];
 };
@@ -5181,7 +5255,7 @@ export type CustomerNeed = Node & {
   customer?: Maybe<Customer>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
-  /** The issue this need is linked to. Either issueId or projectId must be set. When set, the need's projectId is denormalized from the issue's project. */
+  /** The issue this need is linked to. Either issueId or projectId must be set, unless the need is linked to an internal customer signal. When set, the need's projectId is denormalized from the issue's project. */
   issue?: Maybe<Issue>;
   /** The issue this customer need was originally created on, before being moved to a different issue or project. Null if the customer need has not been moved from its original location. */
   originalIssue?: Maybe<Issue>;
@@ -6704,6 +6778,8 @@ export type Document = Node & {
   __typename?: "Document";
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** [Internal] The users the document is shared with and their roles, in the order they were shared within each role: editors, then commenters, then viewers. The owner of a personal document is its `personalUser` and is not listed. */
+  collaborators: Array<DocumentCollaborator>;
   /** The hex color of the document icon. Null if no custom color has been set. */
   color?: Maybe<Scalars["String"]>;
   /** Comments associated with the document. */
@@ -6720,6 +6796,8 @@ export type Document = Node & {
   cycle?: Maybe<Cycle>;
   /** The ID of the document content associated with the document. */
   documentContentId?: Maybe<Scalars["String"]>;
+  /** [Internal] What users other than the owner can do with a document that is not personal: edit, comment, or view. People shared on the document with a higher role keep it. Null on a personal document, which only its owner and collaborators can access. */
+  generalAccess?: Maybe<DocumentShareRole>;
   /** The time at which the document was hidden from the default view. Null if the document has not been hidden. */
   hiddenAt?: Maybe<Scalars["DateTime"]>;
   /** The icon of the document, either a decorative icon type or an emoji string. Null if no icon has been set. */
@@ -6736,6 +6814,8 @@ export type Document = Node & {
   owner?: Maybe<User>;
   /** [Internal] The parent document. Null if the document is not a sub-document. */
   parentDocument?: Maybe<Document>;
+  /** [Internal] The user whose personal space holds the document, who owns and manages it. Null if the document belongs to a different parent entity type. */
+  personalUser?: Maybe<User>;
   /** The project that the document is associated with. Null if the document belongs to a different parent entity type. */
   project?: Maybe<Project>;
   /** The release that the document is associated with. Null if the document belongs to a different parent entity type. */
@@ -6765,6 +6845,12 @@ export type Document = Node & {
   updatedBy?: Maybe<User>;
   /** The canonical url for the document. */
   url: Scalars["String"];
+  /** [Internal] Whether the viewer can comment on the document. On a personal document, the owner and people it is shared with as editors or commenters can. On any other document, its owner can, and so can everyone else when its general access is edit or comment or they are shared on it as editors or commenters. False when the request has no user. */
+  viewerCanComment: Scalars["Boolean"];
+  /** [Internal] Whether the viewer can edit the document's fields and content. On a personal document, the owner and people it is shared with as editors can. On any other document, its owner can, and so can everyone else when its general access is edit or they are shared on it as editors. False when the request has no user. */
+  viewerCanEdit: Scalars["Boolean"];
+  /** [Internal] Whether the viewer can change who has access to the document: share it, change collaborator roles, and set its general access. On a personal document, only the owner can. On any other document, its owner, an owner of a team it belongs to, or a workspace admin can. False when the request has no user. */
+  viewerCanManageAccess: Scalars["Boolean"];
 };
 
 /** A rich-text document that lives within a project, initiative, team, issue, release, or cycle. Documents support collaborative editing via ProseMirror/Yjs and store their content in a separate DocumentContent entity. Each document is associated with exactly one parent entity. */
@@ -6816,6 +6902,15 @@ export type DocumentChildWebhookPayload = {
   projectId?: Maybe<Scalars["String"]>;
   /** The title of the document. */
   title: Scalars["String"];
+};
+
+/** [Internal] A user a document is shared with, and their role on it. */
+export type DocumentCollaborator = {
+  __typename?: "DocumentCollaborator";
+  /** What the user can do with the document. */
+  role: DocumentShareRole;
+  /** The user the document is shared with. */
+  user: User;
 };
 
 export type DocumentConnection = {
@@ -7207,6 +7302,8 @@ export type DocumentSearchResult = Node & {
   __typename?: "DocumentSearchResult";
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** [Internal] The users the document is shared with and their roles, in the order they were shared within each role: editors, then commenters, then viewers. The owner of a personal document is its `personalUser` and is not listed. */
+  collaborators: Array<DocumentCollaborator>;
   /** The hex color of the document icon. Null if no custom color has been set. */
   color?: Maybe<Scalars["String"]>;
   /** Comments associated with the document. */
@@ -7223,6 +7320,8 @@ export type DocumentSearchResult = Node & {
   cycle?: Maybe<Cycle>;
   /** The ID of the document content associated with the document. */
   documentContentId?: Maybe<Scalars["String"]>;
+  /** [Internal] What users other than the owner can do with a document that is not personal: edit, comment, or view. People shared on the document with a higher role keep it. Null on a personal document, which only its owner and collaborators can access. */
+  generalAccess?: Maybe<DocumentShareRole>;
   /** The time at which the document was hidden from the default view. Null if the document has not been hidden. */
   hiddenAt?: Maybe<Scalars["DateTime"]>;
   /** The icon of the document, either a decorative icon type or an emoji string. Null if no icon has been set. */
@@ -7241,6 +7340,8 @@ export type DocumentSearchResult = Node & {
   owner?: Maybe<User>;
   /** [Internal] The parent document. Null if the document is not a sub-document. */
   parentDocument?: Maybe<Document>;
+  /** [Internal] The user whose personal space holds the document, who owns and manages it. Null if the document belongs to a different parent entity type. */
+  personalUser?: Maybe<User>;
   /** The project that the document is associated with. Null if the document belongs to a different parent entity type. */
   project?: Maybe<Project>;
   /** The release that the document is associated with. Null if the document belongs to a different parent entity type. */
@@ -7270,6 +7371,12 @@ export type DocumentSearchResult = Node & {
   updatedBy?: Maybe<User>;
   /** The canonical url for the document. */
   url: Scalars["String"];
+  /** [Internal] Whether the viewer can comment on the document. On a personal document, the owner and people it is shared with as editors or commenters can. On any other document, its owner can, and so can everyone else when its general access is edit or comment or they are shared on it as editors or commenters. False when the request has no user. */
+  viewerCanComment: Scalars["Boolean"];
+  /** [Internal] Whether the viewer can edit the document's fields and content. On a personal document, the owner and people it is shared with as editors can. On any other document, its owner can, and so can everyone else when its general access is edit or they are shared on it as editors. False when the request has no user. */
+  viewerCanEdit: Scalars["Boolean"];
+  /** [Internal] Whether the viewer can change who has access to the document: share it, change collaborator roles, and set its general access. On a personal document, only the owner can. On any other document, its owner, an owner of a team it belongs to, or a workspace admin can. False when the request has no user. */
+  viewerCanManageAccess: Scalars["Boolean"];
 };
 
 export type DocumentSearchResultCommentsArgs = {
@@ -7300,7 +7407,7 @@ export type DocumentSearchResultEdge = {
   node: DocumentSearchResult;
 };
 
-/** [Internal] The role of a user a personal document is shared with. */
+/** [Internal] What a user can do with a document: edit, comment, or view. */
 export enum DocumentShareRole {
   /** The user can read and comment on the document but not edit it. */
   Comment = "comment",
@@ -10619,6 +10726,7 @@ export type IntegrationRequestPayload = {
 export enum IntegrationService {
   Airbyte = "airbyte",
   AsksWeb = "asksWeb",
+  ClaudeSecurity = "claudeSecurity",
   Datadog = "datadog",
   Discord = "discord",
   Email = "email",
@@ -18678,6 +18786,8 @@ export type Organization = Node & {
   loops: WorkflowDefinitionConnection;
   /** [Internal] The teams each managed team feature is limited to, keyed by feature. The workspace's own setting for each feature still applies. */
   managedTeamFeatures: Scalars["JSONObject"];
+  /** [Internal] Workspace admin policy for the Linear MCP server, such as the teams MCP connections can access. Empty until saved, which allows every team. */
+  mcpSettings: Scalars["JSONObject"];
   /** The workspace's name. */
   name: Scalars["String"];
   /** Rolling 30-day total file upload volume for the workspace, measured in megabytes. Used for enforcing upload quotas. */
@@ -19227,6 +19337,12 @@ export type OrganizationManagedTeamFeaturesInput = {
   loops?: InputMaybe<Array<OrganizationManagedFeatureTeamInput>>;
 };
 
+/** [Internal] Workspace admin policy for the Linear MCP server. */
+export type OrganizationMcpSettingsInput = {
+  /** [Internal] The teams MCP connections can access. Omit it to allow every team, including teams created later. A changed list needs at least one team, and teams created later are not added to it. Workspace-level data, such as users and initiatives, stays available. */
+  allowedTeamIds?: InputMaybe<Array<Scalars["UUID"]>>;
+};
+
 /** [INTERNAL] Workspace metadata including region and allowed authentication providers. */
 export type OrganizationMeta = {
   __typename?: "OrganizationMeta";
@@ -19445,6 +19561,8 @@ export type OrganizationUpdateInput = {
   loopWebhooksEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** [Internal] The teams each managed team feature is limited to. Replaces the current lists, and updates each team's matching setting. */
   managedTeamFeatures?: InputMaybe<OrganizationManagedTeamFeaturesInput>;
+  /** [Internal] Workspace admin policy for the Linear MCP server. Replaces the current policy, so omitted settings return to their defaults. */
+  mcpSettings?: InputMaybe<OrganizationMcpSettingsInput>;
   /** The name of the workspace. */
   name?: InputMaybe<Scalars["String"]>;
   /** Whether the workspace has opted for having to approve all OAuth applications for install. */
@@ -19539,6 +19657,7 @@ export enum OtherNotificationType {
   DocumentReminder = "documentReminder",
   DocumentRemovedAsOwner = "documentRemovedAsOwner",
   DocumentRestored = "documentRestored",
+  DocumentRoleChanged = "documentRoleChanged",
   DocumentSharedWithYou = "documentSharedWithYou",
   DocumentSubscribed = "documentSubscribed",
   DocumentThreadResolved = "documentThreadResolved",
@@ -22783,6 +22902,8 @@ export type PullRequestMergeSettings = {
   __typename?: "PullRequestMergeSettings";
   /** Whether auto-merge is allowed for the PR's repository. */
   autoMergeAllowed: Scalars["Boolean"];
+  /** The merge method the repository uses by default. GitLab projects report one through their squash option. Null for GitHub, which has no default, and for settings synced before Linear stored it. */
+  defaultMergeMethod?: Maybe<PullRequestMergeMethod>;
   /** Whether the branch will be deleted when the pull request is merged. */
   deleteBranchOnMerge: Scalars["Boolean"];
   /** Whether the merge queue takes pull requests that carry a label, such as Trunk's, instead of GitHub's merge queue. Such a queue merges a native stack's pull requests below a queued one together with it. */
@@ -28902,7 +29023,9 @@ export type UserSettings = Node & {
   notificationChannelPreferences: NotificationChannelPreferences;
   /** The notification delivery preferences for the user. Note: notificationDisabled field is deprecated in favor of notificationChannelPreferences. */
   notificationDeliveryPreferences: NotificationDeliveryPreferences;
-  /** [Internal] The user's preferred merge method for pull requests. Null if the user chooses a method for each pull request. */
+  /** [Internal] Whether the user merges each pull request with its repository's default merge method, as `mergeSettings.defaultMergeMethod` reports it. When true, `pullRequestMergeStrategyPreference` reports squash. */
+  pullRequestMergeStrategyIsRepositoryDefault: Scalars["Boolean"];
+  /** [Internal] The user's preferred merge method for pull requests. Null if the user chooses a method for each pull request. Squash when the user merges with each repository's default method. */
   pullRequestMergeStrategyPreference?: Maybe<PullRequestMergeMethod>;
   /** Whether to show line numbers in code blocks. */
   showCodeBlockLineNumbers: Scalars["Boolean"];
@@ -29325,6 +29448,8 @@ export type ViewPreferencesValues = {
   dashboardFieldOwner?: Maybe<Scalars["Boolean"]>;
   /** The dashboards ordering. */
   dashboardsOrdering?: Maybe<Scalars["String"]>;
+  /** [Internal] Whether to show the viewer's access column in documents lists. */
+  documentFieldAccess?: Maybe<Scalars["Boolean"]>;
   /** [Internal] Whether to show the collaborators column in documents lists. */
   documentFieldCollaborators?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the creator field for documents. */
@@ -30544,6 +30669,7 @@ export enum WorkflowTrigger {
 }
 
 export enum WorkflowTriggerType {
+  AiConversation = "aiConversation",
   Chat = "chat",
   Cycle = "cycle",
   Document = "document",
@@ -30637,6 +30763,8 @@ export type WorkspaceAnnouncementNotification = Entity &
 export type WorkspaceTeamSecuritySettingsInput = {
   /** Whether members may join teams without an invitation. */
   allMembersCanJoin?: InputMaybe<Scalars["Boolean"]>;
+  /** Minimum role required to manage team loops. */
+  automationManagement?: InputMaybe<TeamRoleType>;
   /** Minimum role required to manage team members. */
   memberManagement?: InputMaybe<TeamRoleType>;
   /** Minimum role required to manage team settings. */
@@ -32224,6 +32352,11 @@ export type AiConversationBasePartFragment =
   | AiConversationBasePart_AiConversationToolCallPart_Fragment
   | AiConversationBasePart_AiConversationWidgetPart_Fragment;
 
+type Entity_AgentSessionNotification_Fragment = { __typename: "AgentSessionNotification" } & Pick<
+  AgentSessionNotification,
+  "updatedAt" | "archivedAt" | "createdAt" | "id"
+>;
+
 type Entity_CustomViewNotificationSubscription_Fragment = { __typename: "CustomViewNotificationSubscription" } & Pick<
   CustomViewNotificationSubscription,
   "updatedAt" | "archivedAt" | "createdAt" | "id"
@@ -32335,6 +32468,7 @@ type Entity_WorkspaceAnnouncementNotification_Fragment = { __typename: "Workspac
 >;
 
 export type EntityFragment =
+  | Entity_AgentSessionNotification_Fragment
   | Entity_CustomViewNotificationSubscription_Fragment
   | Entity_CustomerNeedNotification_Fragment
   | Entity_CustomerNotification_Fragment
@@ -33564,6 +33698,31 @@ export type NotificationArchivePayloadFragment = { __typename: "NotificationArch
   "lastSyncId" | "success"
 > & {
     entity?: Maybe<
+      | ({ __typename: "AgentSessionNotification" } & Pick<
+          AgentSessionNotification,
+          | "type"
+          | "category"
+          | "updatedAt"
+          | "unsnoozedAt"
+          | "emailedAt"
+          | "archivedAt"
+          | "createdAt"
+          | "readAt"
+          | "snoozedUntilAt"
+          | "id"
+          | "agentActivityId"
+          | "agentSessionId"
+        > & {
+            botActor?: Maybe<
+              { __typename: "ActorBot" } & Pick<
+                ActorBot,
+                "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+              >
+            >;
+            externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+            user: { __typename?: "User" } & Pick<User, "id">;
+            actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          })
       | ({ __typename: "CustomerNeedNotification" } & Pick<
           CustomerNeedNotification,
           | "type"
@@ -34268,6 +34427,31 @@ type ArchivePayload_NotificationArchivePayload_Fragment = { __typename: "Notific
   "lastSyncId" | "success"
 > & {
     entity?: Maybe<
+      | ({ __typename: "AgentSessionNotification" } & Pick<
+          AgentSessionNotification,
+          | "type"
+          | "category"
+          | "updatedAt"
+          | "unsnoozedAt"
+          | "emailedAt"
+          | "archivedAt"
+          | "createdAt"
+          | "readAt"
+          | "snoozedUntilAt"
+          | "id"
+          | "agentActivityId"
+          | "agentSessionId"
+        > & {
+            botActor?: Maybe<
+              { __typename: "ActorBot" } & Pick<
+                ActorBot,
+                "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+              >
+            >;
+            externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+            user: { __typename?: "User" } & Pick<User, "id">;
+            actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          })
       | ({ __typename: "CustomerNeedNotification" } & Pick<
           CustomerNeedNotification,
           | "type"
@@ -35103,6 +35287,29 @@ export type ReleaseNoteFragment = { __typename: "ReleaseNote" } & Pick<
     pipeline: { __typename?: "ReleasePipeline" } & Pick<ReleasePipeline, "id">;
   };
 
+export type AgentSessionNotificationFragment = { __typename: "AgentSessionNotification" } & Pick<
+  AgentSessionNotification,
+  | "type"
+  | "agentActivityId"
+  | "category"
+  | "updatedAt"
+  | "agentSessionId"
+  | "unsnoozedAt"
+  | "emailedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "readAt"
+  | "snoozedUntilAt"
+  | "id"
+> & {
+    botActor?: Maybe<
+      { __typename: "ActorBot" } & Pick<ActorBot, "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type">
+    >;
+    externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+    user: { __typename?: "User" } & Pick<User, "id">;
+    actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+  };
+
 export type WelcomeMessageNotificationFragment = { __typename: "WelcomeMessageNotification" } & Pick<
   WelcomeMessageNotification,
   | "type"
@@ -35116,6 +35323,29 @@ export type WelcomeMessageNotificationFragment = { __typename: "WelcomeMessageNo
   | "readAt"
   | "snoozedUntilAt"
   | "id"
+> & {
+    botActor?: Maybe<
+      { __typename: "ActorBot" } & Pick<ActorBot, "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type">
+    >;
+    externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+    user: { __typename?: "User" } & Pick<User, "id">;
+    actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+  };
+
+type Notification_AgentSessionNotification_Fragment = { __typename: "AgentSessionNotification" } & Pick<
+  AgentSessionNotification,
+  | "type"
+  | "category"
+  | "updatedAt"
+  | "unsnoozedAt"
+  | "emailedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "readAt"
+  | "snoozedUntilAt"
+  | "id"
+  | "agentActivityId"
+  | "agentSessionId"
 > & {
     botActor?: Maybe<
       { __typename: "ActorBot" } & Pick<ActorBot, "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type">
@@ -35708,6 +35938,7 @@ type Notification_WorkspaceAnnouncementNotification_Fragment = {
   };
 
 export type NotificationFragment =
+  | Notification_AgentSessionNotification_Fragment
   | Notification_CustomerNeedNotification_Fragment
   | Notification_CustomerNotification_Fragment
   | Notification_DocumentNotification_Fragment
@@ -42326,6 +42557,31 @@ export type NotificationBatchActionPayloadFragment = { __typename: "Notification
   "lastSyncId" | "success"
 > & {
     notifications: Array<
+      | ({ __typename: "AgentSessionNotification" } & Pick<
+          AgentSessionNotification,
+          | "type"
+          | "category"
+          | "updatedAt"
+          | "unsnoozedAt"
+          | "emailedAt"
+          | "archivedAt"
+          | "createdAt"
+          | "readAt"
+          | "snoozedUntilAt"
+          | "id"
+          | "agentActivityId"
+          | "agentSessionId"
+        > & {
+            botActor?: Maybe<
+              { __typename: "ActorBot" } & Pick<
+                ActorBot,
+                "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+              >
+            >;
+            externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+            user: { __typename?: "User" } & Pick<User, "id">;
+            actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          })
       | ({ __typename: "CustomerNeedNotification" } & Pick<
           CustomerNeedNotification,
           | "type"
@@ -43013,6 +43269,31 @@ export type InboxNotificationUpdatePayloadFragment = { __typename: "InboxNotific
   "lastSyncId" | "success"
 > & {
     updatedNotifications: Array<
+      | ({ __typename: "AgentSessionNotification" } & Pick<
+          AgentSessionNotification,
+          | "type"
+          | "category"
+          | "updatedAt"
+          | "unsnoozedAt"
+          | "emailedAt"
+          | "archivedAt"
+          | "createdAt"
+          | "readAt"
+          | "snoozedUntilAt"
+          | "id"
+          | "agentActivityId"
+          | "agentSessionId"
+        > & {
+            botActor?: Maybe<
+              { __typename: "ActorBot" } & Pick<
+                ActorBot,
+                "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+              >
+            >;
+            externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+            user: { __typename?: "User" } & Pick<User, "id">;
+            actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          })
       | ({ __typename: "CustomerNeedNotification" } & Pick<
           CustomerNeedNotification,
           | "type"
@@ -43631,6 +43912,31 @@ export type InboxNotificationUpdatePayloadFragment = { __typename: "InboxNotific
           })
     >;
     notification:
+      | ({ __typename: "AgentSessionNotification" } & Pick<
+          AgentSessionNotification,
+          | "type"
+          | "category"
+          | "updatedAt"
+          | "unsnoozedAt"
+          | "emailedAt"
+          | "archivedAt"
+          | "createdAt"
+          | "readAt"
+          | "snoozedUntilAt"
+          | "id"
+          | "agentActivityId"
+          | "agentSessionId"
+        > & {
+            botActor?: Maybe<
+              { __typename: "ActorBot" } & Pick<
+                ActorBot,
+                "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+              >
+            >;
+            externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+            user: { __typename?: "User" } & Pick<User, "id">;
+            actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          })
       | ({ __typename: "CustomerNeedNotification" } & Pick<
           CustomerNeedNotification,
           | "type"
@@ -44254,6 +44560,31 @@ export type NotificationPayloadFragment = { __typename: "NotificationPayload" } 
   "lastSyncId" | "success"
 > & {
     notification:
+      | ({ __typename: "AgentSessionNotification" } & Pick<
+          AgentSessionNotification,
+          | "type"
+          | "category"
+          | "updatedAt"
+          | "unsnoozedAt"
+          | "emailedAt"
+          | "archivedAt"
+          | "createdAt"
+          | "readAt"
+          | "snoozedUntilAt"
+          | "id"
+          | "agentActivityId"
+          | "agentSessionId"
+        > & {
+            botActor?: Maybe<
+              { __typename: "ActorBot" } & Pick<
+                ActorBot,
+                "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+              >
+            >;
+            externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+            user: { __typename?: "User" } & Pick<User, "id">;
+            actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          })
       | ({ __typename: "CustomerNeedNotification" } & Pick<
           CustomerNeedNotification,
           | "type"
@@ -53100,6 +53431,11 @@ type Node_AgentActivity_Fragment = { __typename: "AgentActivity" } & Pick<AgentA
 
 type Node_AgentSession_Fragment = { __typename: "AgentSession" } & Pick<AgentSession, "id">;
 
+type Node_AgentSessionNotification_Fragment = { __typename: "AgentSessionNotification" } & Pick<
+  AgentSessionNotification,
+  "id"
+>;
+
 type Node_AgentSessionToPullRequest_Fragment = { __typename: "AgentSessionToPullRequest" } & Pick<
   AgentSessionToPullRequest,
   "id"
@@ -53412,6 +53748,7 @@ type Node_WorkspaceAnnouncementNotification_Fragment = { __typename: "WorkspaceA
 export type NodeFragment =
   | Node_AgentActivity_Fragment
   | Node_AgentSession_Fragment
+  | Node_AgentSessionNotification_Fragment
   | Node_AgentSessionToPullRequest_Fragment
   | Node_AgentSkill_Fragment
   | Node_AiConversation_Fragment
@@ -53538,6 +53875,31 @@ export type NodeFragment =
 
 export type NotificationConnectionFragment = { __typename: "NotificationConnection" } & {
   nodes: Array<
+    | ({ __typename: "AgentSessionNotification" } & Pick<
+        AgentSessionNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "unsnoozedAt"
+        | "emailedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "readAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "agentActivityId"
+        | "agentSessionId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+        })
     | ({ __typename: "CustomerNeedNotification" } & Pick<
         CustomerNeedNotification,
         | "type"
@@ -55499,6 +55861,31 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
   favoriteDeleted: { __typename?: "Favorite" } & Pick<Favorite, "id">;
   favoriteUpdated: { __typename?: "Favorite" } & Pick<Favorite, "id">;
   notificationArchived:
+    | ({ __typename: "AgentSessionNotification" } & Pick<
+        AgentSessionNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "unsnoozedAt"
+        | "emailedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "readAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "agentActivityId"
+        | "agentSessionId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+        })
     | ({ __typename: "CustomerNeedNotification" } & Pick<
         CustomerNeedNotification,
         | "type"
@@ -56116,6 +56503,31 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
           actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
         });
   notificationCreated:
+    | ({ __typename: "AgentSessionNotification" } & Pick<
+        AgentSessionNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "unsnoozedAt"
+        | "emailedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "readAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "agentActivityId"
+        | "agentSessionId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+        })
     | ({ __typename: "CustomerNeedNotification" } & Pick<
         CustomerNeedNotification,
         | "type"
@@ -56733,6 +57145,31 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
           actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
         });
   notificationDeleted:
+    | ({ __typename: "AgentSessionNotification" } & Pick<
+        AgentSessionNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "unsnoozedAt"
+        | "emailedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "readAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "agentActivityId"
+        | "agentSessionId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+        })
     | ({ __typename: "CustomerNeedNotification" } & Pick<
         CustomerNeedNotification,
         | "type"
@@ -57350,6 +57787,31 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
           actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
         });
   notificationUnarchived:
+    | ({ __typename: "AgentSessionNotification" } & Pick<
+        AgentSessionNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "unsnoozedAt"
+        | "emailedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "readAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "agentActivityId"
+        | "agentSessionId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+        })
     | ({ __typename: "CustomerNeedNotification" } & Pick<
         CustomerNeedNotification,
         | "type"
@@ -57967,6 +58429,31 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
           actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
         });
   notificationUpdated:
+    | ({ __typename: "AgentSessionNotification" } & Pick<
+        AgentSessionNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "unsnoozedAt"
+        | "emailedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "readAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "agentActivityId"
+        | "agentSessionId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+        })
     | ({ __typename: "CustomerNeedNotification" } & Pick<
         CustomerNeedNotification,
         | "type"
@@ -67391,6 +67878,31 @@ export type InboxNotificationsQueryVariables = Exact<{
 export type InboxNotificationsQuery = { __typename?: "Query" } & {
   inboxNotifications: { __typename: "NotificationConnection" } & {
     nodes: Array<
+      | ({ __typename: "AgentSessionNotification" } & Pick<
+          AgentSessionNotification,
+          | "type"
+          | "category"
+          | "updatedAt"
+          | "unsnoozedAt"
+          | "emailedAt"
+          | "archivedAt"
+          | "createdAt"
+          | "readAt"
+          | "snoozedUntilAt"
+          | "id"
+          | "agentActivityId"
+          | "agentSessionId"
+        > & {
+            botActor?: Maybe<
+              { __typename: "ActorBot" } & Pick<
+                ActorBot,
+                "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+              >
+            >;
+            externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+            user: { __typename?: "User" } & Pick<User, "id">;
+            actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          })
       | ({ __typename: "CustomerNeedNotification" } & Pick<
           CustomerNeedNotification,
           | "type"
@@ -72924,6 +73436,31 @@ export type NotificationQueryVariables = Exact<{
 
 export type NotificationQuery = { __typename?: "Query" } & {
   notification:
+    | ({ __typename: "AgentSessionNotification" } & Pick<
+        AgentSessionNotification,
+        | "type"
+        | "category"
+        | "updatedAt"
+        | "unsnoozedAt"
+        | "emailedAt"
+        | "archivedAt"
+        | "createdAt"
+        | "readAt"
+        | "snoozedUntilAt"
+        | "id"
+        | "agentActivityId"
+        | "agentSessionId"
+      > & {
+          botActor?: Maybe<
+            { __typename: "ActorBot" } & Pick<
+              ActorBot,
+              "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+            >
+          >;
+          externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+          user: { __typename?: "User" } & Pick<User, "id">;
+          actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+        })
     | ({ __typename: "CustomerNeedNotification" } & Pick<
         CustomerNeedNotification,
         | "type"
@@ -73919,6 +74456,31 @@ export type NotificationsQueryVariables = Exact<{
 export type NotificationsQuery = { __typename?: "Query" } & {
   notifications: { __typename: "NotificationConnection" } & {
     nodes: Array<
+      | ({ __typename: "AgentSessionNotification" } & Pick<
+          AgentSessionNotification,
+          | "type"
+          | "category"
+          | "updatedAt"
+          | "unsnoozedAt"
+          | "emailedAt"
+          | "archivedAt"
+          | "createdAt"
+          | "readAt"
+          | "snoozedUntilAt"
+          | "id"
+          | "agentActivityId"
+          | "agentSessionId"
+        > & {
+            botActor?: Maybe<
+              { __typename: "ActorBot" } & Pick<
+                ActorBot,
+                "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+              >
+            >;
+            externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+            user: { __typename?: "User" } & Pick<User, "id">;
+            actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          })
       | ({ __typename: "CustomerNeedNotification" } & Pick<
           CustomerNeedNotification,
           | "type"
@@ -84980,6 +85542,31 @@ export type UpdateInboxNotificationMutation = { __typename?: "Mutation" } & {
     "lastSyncId" | "success"
   > & {
       updatedNotifications: Array<
+        | ({ __typename: "AgentSessionNotification" } & Pick<
+            AgentSessionNotification,
+            | "type"
+            | "category"
+            | "updatedAt"
+            | "unsnoozedAt"
+            | "emailedAt"
+            | "archivedAt"
+            | "createdAt"
+            | "readAt"
+            | "snoozedUntilAt"
+            | "id"
+            | "agentActivityId"
+            | "agentSessionId"
+          > & {
+              botActor?: Maybe<
+                { __typename: "ActorBot" } & Pick<
+                  ActorBot,
+                  "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+                >
+              >;
+              externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+              user: { __typename?: "User" } & Pick<User, "id">;
+              actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            })
         | ({ __typename: "CustomerNeedNotification" } & Pick<
             CustomerNeedNotification,
             | "type"
@@ -85598,6 +86185,31 @@ export type UpdateInboxNotificationMutation = { __typename?: "Mutation" } & {
             })
       >;
       notification:
+        | ({ __typename: "AgentSessionNotification" } & Pick<
+            AgentSessionNotification,
+            | "type"
+            | "category"
+            | "updatedAt"
+            | "unsnoozedAt"
+            | "emailedAt"
+            | "archivedAt"
+            | "createdAt"
+            | "readAt"
+            | "snoozedUntilAt"
+            | "id"
+            | "agentActivityId"
+            | "agentSessionId"
+          > & {
+              botActor?: Maybe<
+                { __typename: "ActorBot" } & Pick<
+                  ActorBot,
+                  "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+                >
+              >;
+              externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+              user: { __typename?: "User" } & Pick<User, "id">;
+              actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            })
         | ({ __typename: "CustomerNeedNotification" } & Pick<
             CustomerNeedNotification,
             | "type"
@@ -88027,6 +88639,31 @@ export type ArchiveNotificationMutation = { __typename?: "Mutation" } & {
     "lastSyncId" | "success"
   > & {
       entity?: Maybe<
+        | ({ __typename: "AgentSessionNotification" } & Pick<
+            AgentSessionNotification,
+            | "type"
+            | "category"
+            | "updatedAt"
+            | "unsnoozedAt"
+            | "emailedAt"
+            | "archivedAt"
+            | "createdAt"
+            | "readAt"
+            | "snoozedUntilAt"
+            | "id"
+            | "agentActivityId"
+            | "agentSessionId"
+          > & {
+              botActor?: Maybe<
+                { __typename: "ActorBot" } & Pick<
+                  ActorBot,
+                  "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+                >
+              >;
+              externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+              user: { __typename?: "User" } & Pick<User, "id">;
+              actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            })
         | ({ __typename: "CustomerNeedNotification" } & Pick<
             CustomerNeedNotification,
             | "type"
@@ -88657,6 +89294,31 @@ export type NotificationArchiveAllMutation = { __typename?: "Mutation" } & {
     "lastSyncId" | "success"
   > & {
       notifications: Array<
+        | ({ __typename: "AgentSessionNotification" } & Pick<
+            AgentSessionNotification,
+            | "type"
+            | "category"
+            | "updatedAt"
+            | "unsnoozedAt"
+            | "emailedAt"
+            | "archivedAt"
+            | "createdAt"
+            | "readAt"
+            | "snoozedUntilAt"
+            | "id"
+            | "agentActivityId"
+            | "agentSessionId"
+          > & {
+              botActor?: Maybe<
+                { __typename: "ActorBot" } & Pick<
+                  ActorBot,
+                  "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+                >
+              >;
+              externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+              user: { __typename?: "User" } & Pick<User, "id">;
+              actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            })
         | ({ __typename: "CustomerNeedNotification" } & Pick<
             CustomerNeedNotification,
             | "type"
@@ -89301,6 +89963,31 @@ export type NotificationMarkReadAllMutation = { __typename?: "Mutation" } & {
     "lastSyncId" | "success"
   > & {
       notifications: Array<
+        | ({ __typename: "AgentSessionNotification" } & Pick<
+            AgentSessionNotification,
+            | "type"
+            | "category"
+            | "updatedAt"
+            | "unsnoozedAt"
+            | "emailedAt"
+            | "archivedAt"
+            | "createdAt"
+            | "readAt"
+            | "snoozedUntilAt"
+            | "id"
+            | "agentActivityId"
+            | "agentSessionId"
+          > & {
+              botActor?: Maybe<
+                { __typename: "ActorBot" } & Pick<
+                  ActorBot,
+                  "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+                >
+              >;
+              externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+              user: { __typename?: "User" } & Pick<User, "id">;
+              actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            })
         | ({ __typename: "CustomerNeedNotification" } & Pick<
             CustomerNeedNotification,
             | "type"
@@ -89931,6 +90618,31 @@ export type NotificationMarkUnreadAllMutation = { __typename?: "Mutation" } & {
     "lastSyncId" | "success"
   > & {
       notifications: Array<
+        | ({ __typename: "AgentSessionNotification" } & Pick<
+            AgentSessionNotification,
+            | "type"
+            | "category"
+            | "updatedAt"
+            | "unsnoozedAt"
+            | "emailedAt"
+            | "archivedAt"
+            | "createdAt"
+            | "readAt"
+            | "snoozedUntilAt"
+            | "id"
+            | "agentActivityId"
+            | "agentSessionId"
+          > & {
+              botActor?: Maybe<
+                { __typename: "ActorBot" } & Pick<
+                  ActorBot,
+                  "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+                >
+              >;
+              externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+              user: { __typename?: "User" } & Pick<User, "id">;
+              actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            })
         | ({ __typename: "CustomerNeedNotification" } & Pick<
             CustomerNeedNotification,
             | "type"
@@ -90562,6 +91274,31 @@ export type NotificationSnoozeAllMutation = { __typename?: "Mutation" } & {
     "lastSyncId" | "success"
   > & {
       notifications: Array<
+        | ({ __typename: "AgentSessionNotification" } & Pick<
+            AgentSessionNotification,
+            | "type"
+            | "category"
+            | "updatedAt"
+            | "unsnoozedAt"
+            | "emailedAt"
+            | "archivedAt"
+            | "createdAt"
+            | "readAt"
+            | "snoozedUntilAt"
+            | "id"
+            | "agentActivityId"
+            | "agentSessionId"
+          > & {
+              botActor?: Maybe<
+                { __typename: "ActorBot" } & Pick<
+                  ActorBot,
+                  "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+                >
+              >;
+              externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+              user: { __typename?: "User" } & Pick<User, "id">;
+              actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            })
         | ({ __typename: "CustomerNeedNotification" } & Pick<
             CustomerNeedNotification,
             | "type"
@@ -91566,6 +92303,31 @@ export type UnarchiveNotificationMutation = { __typename?: "Mutation" } & {
     "lastSyncId" | "success"
   > & {
       entity?: Maybe<
+        | ({ __typename: "AgentSessionNotification" } & Pick<
+            AgentSessionNotification,
+            | "type"
+            | "category"
+            | "updatedAt"
+            | "unsnoozedAt"
+            | "emailedAt"
+            | "archivedAt"
+            | "createdAt"
+            | "readAt"
+            | "snoozedUntilAt"
+            | "id"
+            | "agentActivityId"
+            | "agentSessionId"
+          > & {
+              botActor?: Maybe<
+                { __typename: "ActorBot" } & Pick<
+                  ActorBot,
+                  "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+                >
+              >;
+              externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+              user: { __typename?: "User" } & Pick<User, "id">;
+              actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            })
         | ({ __typename: "CustomerNeedNotification" } & Pick<
             CustomerNeedNotification,
             | "type"
@@ -92197,6 +92959,31 @@ export type NotificationUnsnoozeAllMutation = { __typename?: "Mutation" } & {
     "lastSyncId" | "success"
   > & {
       notifications: Array<
+        | ({ __typename: "AgentSessionNotification" } & Pick<
+            AgentSessionNotification,
+            | "type"
+            | "category"
+            | "updatedAt"
+            | "unsnoozedAt"
+            | "emailedAt"
+            | "archivedAt"
+            | "createdAt"
+            | "readAt"
+            | "snoozedUntilAt"
+            | "id"
+            | "agentActivityId"
+            | "agentSessionId"
+          > & {
+              botActor?: Maybe<
+                { __typename: "ActorBot" } & Pick<
+                  ActorBot,
+                  "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+                >
+              >;
+              externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+              user: { __typename?: "User" } & Pick<User, "id">;
+              actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            })
         | ({ __typename: "CustomerNeedNotification" } & Pick<
             CustomerNeedNotification,
             | "type"
@@ -92825,6 +93612,31 @@ export type UpdateNotificationMutationVariables = Exact<{
 export type UpdateNotificationMutation = { __typename?: "Mutation" } & {
   notificationUpdate: { __typename: "NotificationPayload" } & Pick<NotificationPayload, "lastSyncId" | "success"> & {
       notification:
+        | ({ __typename: "AgentSessionNotification" } & Pick<
+            AgentSessionNotification,
+            | "type"
+            | "category"
+            | "updatedAt"
+            | "unsnoozedAt"
+            | "emailedAt"
+            | "archivedAt"
+            | "createdAt"
+            | "readAt"
+            | "snoozedUntilAt"
+            | "id"
+            | "agentActivityId"
+            | "agentSessionId"
+          > & {
+              botActor?: Maybe<
+                { __typename: "ActorBot" } & Pick<
+                  ActorBot,
+                  "avatarUrl" | "subType" | "id" | "name" | "userDisplayName" | "type"
+                >
+              >;
+              externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+              user: { __typename?: "User" } & Pick<User, "id">;
+              actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            })
         | ({ __typename: "CustomerNeedNotification" } & Pick<
             CustomerNeedNotification,
             | "type"
@@ -102711,6 +103523,46 @@ export const ActorBotFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
     `,
   { fragmentName: "ActorBot" }
 ) as unknown as TypedDocumentString<ActorBotFragment, unknown>;
+export const AgentSessionNotificationFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
+  `
+    fragment AgentSessionNotification on AgentSessionNotification {
+  __typename
+  type
+  agentActivityId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  agentSessionId
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+}
+    fragment ActorBot on ActorBot {
+  __typename
+  avatarUrl
+  subType
+  id
+  name
+  userDisplayName
+  type
+}`,
+  { fragmentName: "AgentSessionNotification" }
+) as unknown as TypedDocumentString<AgentSessionNotificationFragment, unknown>;
 export const CustomerNeedNotificationFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
   `
     fragment CustomerNeedNotification on CustomerNeedNotification {
@@ -103645,6 +104497,9 @@ export const NotificationFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
   actor {
     id
   }
+  ... on AgentSessionNotification {
+    ...AgentSessionNotification
+  }
   ... on CustomerNeedNotification {
     ...CustomerNeedNotification
   }
@@ -103696,6 +104551,33 @@ export const NotificationFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
   name
   userDisplayName
   type
+}
+fragment AgentSessionNotification on AgentSessionNotification {
+  __typename
+  type
+  agentActivityId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  agentSessionId
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
 }
 fragment WelcomeMessageNotification on WelcomeMessageNotification {
   __typename
@@ -104297,6 +105179,33 @@ export const NotificationArchivePayloadFragmentDoc = /*#__PURE__*/ new TypedDocu
   userDisplayName
   type
 }
+fragment AgentSessionNotification on AgentSessionNotification {
+  __typename
+  type
+  agentActivityId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  agentSessionId
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+}
 fragment WelcomeMessageNotification on WelcomeMessageNotification {
   __typename
   type
@@ -104346,6 +105255,9 @@ fragment Notification on Notification {
   id
   actor {
     id
+  }
+  ... on AgentSessionNotification {
+    ...AgentSessionNotification
   }
   ... on CustomerNeedNotification {
     ...CustomerNeedNotification
@@ -105263,6 +106175,33 @@ fragment DeletePayload on DeletePayload {
   lastSyncId
   success
 }
+fragment AgentSessionNotification on AgentSessionNotification {
+  __typename
+  type
+  agentActivityId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  agentSessionId
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+}
 fragment WelcomeMessageNotification on WelcomeMessageNotification {
   __typename
   type
@@ -105312,6 +106251,9 @@ fragment Notification on Notification {
   id
   actor {
     id
+  }
+  ... on AgentSessionNotification {
+    ...AgentSessionNotification
   }
   ... on CustomerNeedNotification {
     ...CustomerNeedNotification
@@ -110225,6 +111167,33 @@ export const NotificationBatchActionPayloadFragmentDoc = /*#__PURE__*/ new Typed
   userDisplayName
   type
 }
+fragment AgentSessionNotification on AgentSessionNotification {
+  __typename
+  type
+  agentActivityId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  agentSessionId
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+}
 fragment WelcomeMessageNotification on WelcomeMessageNotification {
   __typename
   type
@@ -110274,6 +111243,9 @@ fragment Notification on Notification {
   id
   actor {
     id
+  }
+  ... on AgentSessionNotification {
+    ...AgentSessionNotification
   }
   ... on CustomerNeedNotification {
     ...CustomerNeedNotification
@@ -111111,6 +112083,33 @@ export const InboxNotificationUpdatePayloadFragmentDoc = /*#__PURE__*/ new Typed
   userDisplayName
   type
 }
+fragment AgentSessionNotification on AgentSessionNotification {
+  __typename
+  type
+  agentActivityId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  agentSessionId
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+}
 fragment WelcomeMessageNotification on WelcomeMessageNotification {
   __typename
   type
@@ -111160,6 +112159,9 @@ fragment Notification on Notification {
   id
   actor {
     id
+  }
+  ... on AgentSessionNotification {
+    ...AgentSessionNotification
   }
   ... on CustomerNeedNotification {
     ...CustomerNeedNotification
@@ -111778,6 +112780,33 @@ export const NotificationPayloadFragmentDoc = /*#__PURE__*/ new TypedDocumentStr
   userDisplayName
   type
 }
+fragment AgentSessionNotification on AgentSessionNotification {
+  __typename
+  type
+  agentActivityId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  agentSessionId
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+}
 fragment WelcomeMessageNotification on WelcomeMessageNotification {
   __typename
   type
@@ -111827,6 +112856,9 @@ fragment Notification on Notification {
   id
   actor {
     id
+  }
+  ... on AgentSessionNotification {
+    ...AgentSessionNotification
   }
   ... on CustomerNeedNotification {
     ...CustomerNeedNotification
@@ -123127,6 +124159,33 @@ export const NotificationConnectionFragmentDoc = /*#__PURE__*/ new TypedDocument
   userDisplayName
   type
 }
+fragment AgentSessionNotification on AgentSessionNotification {
+  __typename
+  type
+  agentActivityId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  agentSessionId
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+}
 fragment WelcomeMessageNotification on WelcomeMessageNotification {
   __typename
   type
@@ -123176,6 +124235,9 @@ fragment Notification on Notification {
   id
   actor {
     id
+  }
+  ... on AgentSessionNotification {
+    ...AgentSessionNotification
   }
   ... on CustomerNeedNotification {
     ...CustomerNeedNotification
@@ -126533,6 +127595,33 @@ fragment Draft on Draft {
   }
   isAutogenerated
 }
+fragment AgentSessionNotification on AgentSessionNotification {
+  __typename
+  type
+  agentActivityId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  agentSessionId
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+}
 fragment WelcomeMessageNotification on WelcomeMessageNotification {
   __typename
   type
@@ -126582,6 +127671,9 @@ fragment Notification on Notification {
   id
   actor {
     id
+  }
+  ... on AgentSessionNotification {
+    ...AgentSessionNotification
   }
   ... on CustomerNeedNotification {
     ...CustomerNeedNotification
@@ -137476,6 +138568,33 @@ export const InboxNotificationsDocument = /*#__PURE__*/ new TypedDocumentString(
   userDisplayName
   type
 }
+fragment AgentSessionNotification on AgentSessionNotification {
+  __typename
+  type
+  agentActivityId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  agentSessionId
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+}
 fragment WelcomeMessageNotification on WelcomeMessageNotification {
   __typename
   type
@@ -137525,6 +138644,9 @@ fragment Notification on Notification {
   id
   actor {
     id
+  }
+  ... on AgentSessionNotification {
+    ...AgentSessionNotification
   }
   ... on CustomerNeedNotification {
     ...CustomerNeedNotification
@@ -145197,6 +146319,33 @@ export const NotificationDocument = /*#__PURE__*/ new TypedDocumentString(`
   userDisplayName
   type
 }
+fragment AgentSessionNotification on AgentSessionNotification {
+  __typename
+  type
+  agentActivityId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  agentSessionId
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+}
 fragment WelcomeMessageNotification on WelcomeMessageNotification {
   __typename
   type
@@ -145246,6 +146395,9 @@ fragment Notification on Notification {
   id
   actor {
     id
+  }
+  ... on AgentSessionNotification {
+    ...AgentSessionNotification
   }
   ... on CustomerNeedNotification {
     ...CustomerNeedNotification
@@ -145977,6 +147129,33 @@ export const NotificationsDocument = /*#__PURE__*/ new TypedDocumentString(`
   userDisplayName
   type
 }
+fragment AgentSessionNotification on AgentSessionNotification {
+  __typename
+  type
+  agentActivityId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  agentSessionId
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+}
 fragment WelcomeMessageNotification on WelcomeMessageNotification {
   __typename
   type
@@ -146026,6 +147205,9 @@ fragment Notification on Notification {
   id
   actor {
     id
+  }
+  ... on AgentSessionNotification {
+    ...AgentSessionNotification
   }
   ... on CustomerNeedNotification {
     ...CustomerNeedNotification
@@ -161331,6 +162513,33 @@ export const UpdateInboxNotificationDocument = /*#__PURE__*/ new TypedDocumentSt
   userDisplayName
   type
 }
+fragment AgentSessionNotification on AgentSessionNotification {
+  __typename
+  type
+  agentActivityId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  agentSessionId
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+}
 fragment WelcomeMessageNotification on WelcomeMessageNotification {
   __typename
   type
@@ -161380,6 +162589,9 @@ fragment Notification on Notification {
   id
   actor {
     id
+  }
+  ... on AgentSessionNotification {
+    ...AgentSessionNotification
   }
   ... on CustomerNeedNotification {
     ...CustomerNeedNotification
@@ -164496,6 +165708,33 @@ fragment NotificationArchivePayload on NotificationArchivePayload {
   lastSyncId
   success
 }
+fragment AgentSessionNotification on AgentSessionNotification {
+  __typename
+  type
+  agentActivityId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  agentSessionId
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+}
 fragment WelcomeMessageNotification on WelcomeMessageNotification {
   __typename
   type
@@ -164545,6 +165784,9 @@ fragment Notification on Notification {
   id
   actor {
     id
+  }
+  ... on AgentSessionNotification {
+    ...AgentSessionNotification
   }
   ... on CustomerNeedNotification {
     ...CustomerNeedNotification
@@ -165157,6 +166399,33 @@ export const NotificationArchiveAllDocument = /*#__PURE__*/ new TypedDocumentStr
   userDisplayName
   type
 }
+fragment AgentSessionNotification on AgentSessionNotification {
+  __typename
+  type
+  agentActivityId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  agentSessionId
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+}
 fragment WelcomeMessageNotification on WelcomeMessageNotification {
   __typename
   type
@@ -165206,6 +166475,9 @@ fragment Notification on Notification {
   id
   actor {
     id
+  }
+  ... on AgentSessionNotification {
+    ...AgentSessionNotification
   }
   ... on CustomerNeedNotification {
     ...CustomerNeedNotification
@@ -165844,6 +167116,33 @@ export const NotificationMarkReadAllDocument = /*#__PURE__*/ new TypedDocumentSt
   userDisplayName
   type
 }
+fragment AgentSessionNotification on AgentSessionNotification {
+  __typename
+  type
+  agentActivityId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  agentSessionId
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+}
 fragment WelcomeMessageNotification on WelcomeMessageNotification {
   __typename
   type
@@ -165893,6 +167192,9 @@ fragment Notification on Notification {
   id
   actor {
     id
+  }
+  ... on AgentSessionNotification {
+    ...AgentSessionNotification
   }
   ... on CustomerNeedNotification {
     ...CustomerNeedNotification
@@ -166513,6 +167815,33 @@ export const NotificationMarkUnreadAllDocument = /*#__PURE__*/ new TypedDocument
   userDisplayName
   type
 }
+fragment AgentSessionNotification on AgentSessionNotification {
+  __typename
+  type
+  agentActivityId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  agentSessionId
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+}
 fragment WelcomeMessageNotification on WelcomeMessageNotification {
   __typename
   type
@@ -166562,6 +167891,9 @@ fragment Notification on Notification {
   id
   actor {
     id
+  }
+  ... on AgentSessionNotification {
+    ...AgentSessionNotification
   }
   ... on CustomerNeedNotification {
     ...CustomerNeedNotification
@@ -167182,6 +168514,33 @@ export const NotificationSnoozeAllDocument = /*#__PURE__*/ new TypedDocumentStri
   userDisplayName
   type
 }
+fragment AgentSessionNotification on AgentSessionNotification {
+  __typename
+  type
+  agentActivityId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  agentSessionId
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+}
 fragment WelcomeMessageNotification on WelcomeMessageNotification {
   __typename
   type
@@ -167231,6 +168590,9 @@ fragment Notification on Notification {
   id
   actor {
     id
+  }
+  ... on AgentSessionNotification {
+    ...AgentSessionNotification
   }
   ... on CustomerNeedNotification {
     ...CustomerNeedNotification
@@ -167984,6 +169346,33 @@ fragment NotificationArchivePayload on NotificationArchivePayload {
   lastSyncId
   success
 }
+fragment AgentSessionNotification on AgentSessionNotification {
+  __typename
+  type
+  agentActivityId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  agentSessionId
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+}
 fragment WelcomeMessageNotification on WelcomeMessageNotification {
   __typename
   type
@@ -168033,6 +169422,9 @@ fragment Notification on Notification {
   id
   actor {
     id
+  }
+  ... on AgentSessionNotification {
+    ...AgentSessionNotification
   }
   ... on CustomerNeedNotification {
     ...CustomerNeedNotification
@@ -168645,6 +170037,33 @@ export const NotificationUnsnoozeAllDocument = /*#__PURE__*/ new TypedDocumentSt
   userDisplayName
   type
 }
+fragment AgentSessionNotification on AgentSessionNotification {
+  __typename
+  type
+  agentActivityId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  agentSessionId
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+}
 fragment WelcomeMessageNotification on WelcomeMessageNotification {
   __typename
   type
@@ -168694,6 +170113,9 @@ fragment Notification on Notification {
   id
   actor {
     id
+  }
+  ... on AgentSessionNotification {
+    ...AgentSessionNotification
   }
   ... on CustomerNeedNotification {
     ...CustomerNeedNotification
@@ -169314,6 +170736,33 @@ export const UpdateNotificationDocument = /*#__PURE__*/ new TypedDocumentString(
   userDisplayName
   type
 }
+fragment AgentSessionNotification on AgentSessionNotification {
+  __typename
+  type
+  agentActivityId
+  botActor {
+    ...ActorBot
+  }
+  category
+  externalUserActor {
+    id
+  }
+  updatedAt
+  user {
+    id
+  }
+  agentSessionId
+  unsnoozedAt
+  emailedAt
+  archivedAt
+  createdAt
+  readAt
+  snoozedUntilAt
+  id
+  actor {
+    id
+  }
+}
 fragment WelcomeMessageNotification on WelcomeMessageNotification {
   __typename
   type
@@ -169363,6 +170812,9 @@ fragment Notification on Notification {
   id
   actor {
     id
+  }
+  ... on AgentSessionNotification {
+    ...AgentSessionNotification
   }
   ... on CustomerNeedNotification {
     ...CustomerNeedNotification

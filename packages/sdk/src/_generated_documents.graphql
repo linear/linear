@@ -513,7 +513,7 @@ fragment CustomerNeed on CustomerNeed {
   originalIssue {
     id
   }
-  # The issue this need is linked to. Either issueId or projectId must be set. When set, the need's projectId is denormalized from the issue's project.
+  # The issue this need is linked to. Either issueId or projectId must be set, unless the need is linked to an internal customer signal. When set, the need's projectId is denormalized from the issue's project.
   issue {
     id
   }
@@ -1399,6 +1399,52 @@ fragment ReleaseNote on ReleaseNote {
   title
 }
 
+# A notification about an agent session awaiting input, failing, or completing a turn.
+fragment AgentSessionNotification on AgentSessionNotification {
+  __typename
+  # Notification type. Determines the kind of event that triggered this notification and which associated entity fields will be populated.
+  type
+  # The activity that produced the notification.
+  agentActivityId
+  # The bot that caused the notification.
+  botActor {
+    ...ActorBot
+  }
+  # The category of the notification.
+  category
+  # The external user that caused the notification. Populated when the notification was triggered by an external user (e.g., a commenter from a connected integration like Slack or GitHub) rather than a Linear workspace member.
+  externalUserActor {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The recipient user of this notification.
+  user {
+    id
+  }
+  # The session that produced the notification.
+  agentSessionId
+  # The time at which a notification was unsnoozed. Null if the notification has not been unsnoozed.
+  unsnoozedAt
+  # The time at which an email reminder for this notification was sent to the user. Null if no email reminder has been sent.
+  emailedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the user marked the notification as read. Null if the notification is unread.
+  readAt
+  # The time until which a notification is snoozed. After this time, the notification reappears in the user's inbox. Null if the notification is not currently snoozed.
+  snoozedUntilAt
+  # The unique identifier of the entity.
+  id
+  # The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event.
+  actor {
+    id
+  }
+}
+
 # A notification containing a workspace welcome message, sent to newly joined users.
 fragment WelcomeMessageNotification on WelcomeMessageNotification {
   __typename
@@ -1485,6 +1531,10 @@ fragment Notification on Notification {
   # The user that caused the notification. Null if the notification was triggered by a non-user actor such as an integration, external user, or system event.
   actor {
     id
+  }
+
+  ... on AgentSessionNotification {
+    ...AgentSessionNotification
   }
 
   ... on CustomerNeedNotification {
