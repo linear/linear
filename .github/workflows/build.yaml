@@ -57,7 +57,6 @@ jobs:
       - name: Validate CJS and ESM resolution for SDK
         # Catch issues like https://github.com/linear/linear/issues/830
         # The SDK is ESM-only, so CommonJS consumers on node16 resolution are expected to resolve to ESM
-        # Runs the locked workspace devDependency, never npx, so no unlocked code is fetched in this job.
         run: pnpm check:exports
 
       - name: Compare schema for changes
