@@ -1,5 +1,72 @@
 # Change Log
 
+## 101.1.0
+
+### Minor Changes
+
+- feat(schema): [dangerous] Input field 'source' was added to input object type 'ContactCreateInput' (ContactCreateInput.source)
+
+  feat(schema): [dangerous] Enum value 'claudeSecurity' was added to enum 'IntegrationService' (IntegrationService.claudeSecurity)
+
+  feat(schema): [dangerous] Input field 'mcpSettings' was added to input object type 'OrganizationUpdateInput' (OrganizationUpdateInput.mcpSettings)
+
+  feat(schema): [dangerous] Enum value 'documentRoleChanged' was added to enum 'OtherNotificationType' (OtherNotificationType.documentRoleChanged)
+
+  feat(schema): [dangerous] Enum value 'aiConversation' was added to enum 'WorkflowTriggerType' (WorkflowTriggerType.aiConversation)
+
+  feat(schema): [dangerous] Input field 'automationManagement' was added to input object type 'WorkspaceTeamSecuritySettingsInput' (WorkspaceTeamSecuritySettingsInput.automationManagement)
+
+  feat(schema): [non_breaking] Type 'AgentSessionNotification' was added (AgentSessionNotification)
+
+  feat(schema): [non_breaking] Type 'DocumentCollaborator' was added (DocumentCollaborator)
+
+  feat(schema): [non_breaking] Type 'OrganizationMcpSettingsInput' was added (OrganizationMcpSettingsInput)
+
+  feat(schema): [non_breaking] Field 'lastAgentReplyAt' was added to object type 'AgentSession' (AgentSession.lastAgentReplyAt)
+
+  feat(schema): [non_breaking] Field 'CustomerNeed.issue' description changed from 'The issue this need is linked to. Either issueId or projectId must be set. When set, the need's projectId is denormalized from the issue's project.' to 'The issue this need is linked to. Either issueId or projectId must be set, unless the need is linked to an internal customer signal. When set, the need's projectId is denormalized from the issue's project.' (CustomerNeed.issue)
+
+  feat(schema): [non_breaking] Field 'collaborators' was added to object type 'Document' (Document.collaborators)
+
+  feat(schema): [non_breaking] Field 'generalAccess' was added to object type 'Document' (Document.generalAccess)
+
+  feat(schema): [non_breaking] Field 'personalUser' was added to object type 'Document' (Document.personalUser)
+
+  feat(schema): [non_breaking] Field 'viewerCanComment' was added to object type 'Document' (Document.viewerCanComment)
+
+  feat(schema): [non_breaking] Field 'viewerCanEdit' was added to object type 'Document' (Document.viewerCanEdit)
+
+  feat(schema): [non_breaking] Field 'viewerCanManageAccess' was added to object type 'Document' (Document.viewerCanManageAccess)
+
+  feat(schema): [non_breaking] Field 'collaborators' was added to object type 'DocumentSearchResult' (DocumentSearchResult.collaborators)
+
+  feat(schema): [non_breaking] Field 'generalAccess' was added to object type 'DocumentSearchResult' (DocumentSearchResult.generalAccess)
+
+  feat(schema): [non_breaking] Field 'personalUser' was added to object type 'DocumentSearchResult' (DocumentSearchResult.personalUser)
+
+  feat(schema): [non_breaking] Field 'viewerCanComment' was added to object type 'DocumentSearchResult' (DocumentSearchResult.viewerCanComment)
+
+  feat(schema): [non_breaking] Field 'viewerCanEdit' was added to object type 'DocumentSearchResult' (DocumentSearchResult.viewerCanEdit)
+
+  feat(schema): [non_breaking] Field 'viewerCanManageAccess' was added to object type 'DocumentSearchResult' (DocumentSearchResult.viewerCanManageAccess)
+
+  feat(schema): [non_breaking] Description '[Internal] The role of a user a personal document is shared with.' on type 'DocumentShareRole' has changed to '[Internal] What a user can do with a document: edit, comment, or view.' (DocumentShareRole)
+
+  feat(schema): [non_breaking] Field 'mcpSettings' was added to object type 'Organization' (Organization.mcpSettings)
+
+  feat(schema): [non_breaking] Field 'defaultMergeMethod' was added to object type 'PullRequestMergeSettings' (PullRequestMergeSettings.defaultMergeMethod)
+
+  feat(schema): [non_breaking] Field 'pullRequestMergeStrategyIsRepositoryDefault' was added to object type 'UserSettings' (UserSettings.pullRequestMergeStrategyIsRepositoryDefault)
+
+  feat(schema): [non_breaking] Field 'UserSettings.pullRequestMergeStrategyPreference' description changed from '[Internal] The user's preferred merge method for pull requests. Null if the user chooses a method for each pull request.' to '[Internal] The user's preferred merge method for pull requests. Null if the user chooses a method for each pull request. Squash when the user merges with each repository's default method.' (UserSettings.pullRequestMergeStrategyPreference)
+
+  feat(schema): [non_breaking] Field 'documentFieldAccess' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.documentFieldAccess)
+
+### Patch Changes
+
+- f5d04b9: Keep the `apiKey` and `accessToken` out of `LinearClient` options, so logging or serializing the client no longer exposes them. `client.options.headers` no longer includes `Authorization`. The client adds it to each request unless the request already sets one through the `headers` option, `client.client.setHeader` or `client.client.setHeaders`.
+- 3ce13b6: Verify the webhook signature in `createHandler()` before parsing the request body, so requests with an invalid signature are rejected without being parsed.
+
 ## 101.0.0
 
 ### Major Changes

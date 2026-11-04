@@ -25,16 +25,26 @@ function validateApiUrl(apiUrl: string): void {
 }
 
 /**
- * Resolve how requests authenticate: a static Authorization header, or a per-request DPoP fetch
+ * Create a fetch that adds the Authorization header to requests without one, keeping the credential out of client options
+ */
+function createAuthorizationFetch(authorization: string): (url: string, init: RequestInit) => Promise<Response> {
+  return (url, init) => {
+    const headers = new Headers(init.headers);
+    if (!headers.has("Authorization")) {
+      headers.set("Authorization", authorization);
+    }
+    return globalThis.fetch(url, { ...init, headers });
+  };
+}
+
+/**
+ * Resolve how requests authenticate: a per-request fetch sending a static Authorization header or a DPoP proof
  */
 function parseAuth({
   apiKey,
   accessToken,
   dpopSigner,
-}: Pick<LinearClientOptions, "apiKey" | "accessToken" | "dpopSigner">): Pick<
-  LinearGraphQLClientOptions,
-  "headers" | "fetch"
-> {
+}: Pick<LinearClientOptions, "apiKey" | "accessToken" | "dpopSigner">): Pick<LinearGraphQLClientOptions, "fetch"> {
   if (dpopSigner) {
     if (!accessToken || apiKey) {
       throw new Error("LinearClient dpopSigner requires an OAuth accessToken and cannot be used with an apiKey");
@@ -52,14 +62,10 @@ function parseAuth({
   }
 
   return {
-    headers: {
+    fetch: createAuthorizationFetch(
       /** Use bearer if oauth token exists, otherwise use the provided apiKey */
-      Authorization: accessToken
-        ? accessToken.startsWith("Bearer ")
-          ? accessToken
-          : `Bearer ${accessToken}`
-        : (apiKey ?? ""),
-    },
+      accessToken ? (accessToken.startsWith("Bearer ") ? accessToken : `Bearer ${accessToken}`) : (apiKey ?? "")
+    ),
   };
 }
 
@@ -84,7 +90,6 @@ function parseClientOptions({
 
   return {
     headers: mergeHeaders(
-      auth.headers,
       /** Use configured headers */
       headers,
       {

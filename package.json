@@ -12,6 +12,7 @@
     "build:sdk": "pnpm run -r build:sdk",
     "build:types": "pnpm run -r build:types",
     "build": "run-s generate build:sdk generate:test build:import build:types docs",
+    "check:exports": "attw --pack packages/sdk --ignore-rules cjs-resolves-to-esm",
     "dev": "NODE_ENV=development pnpm build",
     "docs": "md-magic 'packages/**/README.md' --config ./docs/markdown-magic.config.js",
     "generate:clean": "pnpm run -r generate:clean",
@@ -30,6 +31,7 @@
     "update:schema": "pnpm run -r generate:schema && pnpm run -r generate:changeset:schema"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "0.18.5",
     "@changesets/cli": "^2.31.1",
     "@commitlint/cli": "^17.8.1",
     "@commitlint/config-conventional": "^11.0.0",

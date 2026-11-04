@@ -15,7 +15,7 @@ concurrency:
 permissions: {}
 
 jobs:
-  # Packs the tarballs without publish credentials and uploads them before lint, tests and npx tools can change them.
+  # Packs the tarballs without publish credentials and uploads them before lint, tests and attw can change them.
   build:
     name: Build
     if: github.ref == 'refs/heads/master'
@@ -83,18 +83,11 @@ jobs:
       - name: Run tests
         run: pnpm test
 
-      - name: Cache npx tools
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-npm-arethetypeswrong-0.18.5
-
       - name: Validate CJS and ESM resolution for SDK
         # Catch issues like https://github.com/linear/linear/issues/830
         # The SDK is ESM-only, so CommonJS consumers on node16 resolution are expected to resolve to ESM
-        run: npx @arethetypeswrong/cli@0.18.5 "$RUNNER_TEMP/npm/linear-sdk.tgz" --ignore-rules cjs-resolves-to-esm
+        run: pnpm check:exports
 
-  # Every step here can mint npm publish tokens, so it only runs Node's bundled npm on the tarballs from the build job.
   release:
     name: Release
     needs: [build]
@@ -105,12 +98,19 @@ jobs:
     permissions:
       id-token: write # Required for OIDC (https://docs.npmjs.com/trusted-publishers#github-actions-configuration)
     steps:
-      # Node 24 bundles npm >= 11.5.1, which OIDC trusted publishing requires.
+      # This job can mint npm publish tokens, so every tool it runs must be an exact version. Pin an exact Node release
+      # whose bundled npm (11.19.1) meets the >= 11.5.1 needed for OIDC trusted publishers, instead of installing
+      # npm@latest (https://docs.npmjs.com/trusted-publishers#github-actions-configuration).
       - name: Use node 24
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: "24"
+          node-version: "24.22.2"
           registry-url: "https://registry.npmjs.org"
+
+      - name: Check bundled npm supports trusted publishing
+        run: |
+          npm --version
+          node -e 'const [major, minor] = process.argv[1].split(".").map(Number); process.exit(major > 11 || (major === 11 && minor >= 5) ? 0 : 1)' "$(npm --version)"
 
       - name: Download npm artifact
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0

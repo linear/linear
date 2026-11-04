@@ -3,7 +3,7 @@ import express from "express";
 import getPort from "get-port";
 import http from "http";
 import { v4 as uuidv4 } from "uuid";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { LINEAR_WEBHOOK_SIGNATURE_HEADER, LINEAR_WEBHOOK_TS_HEADER, LinearWebhookClient } from "../webhooks/index.js";
 
 export interface SignedBody {
@@ -261,6 +261,24 @@ describe("webhooks handlers", () => {
     const res = await handler(req);
     expect(res.status).toBe(400);
     expect(invoked).toBe(0);
+  });
+
+  it("rejects an invalid signature without parsing the body (fetch-style)", async () => {
+    const handler = new LinearWebhookClient("SECRET").createHandler();
+    const parseSpy = vi.spyOn(JSON, "parse");
+    try {
+      const res = await handler(
+        new Request("http://localhost/", {
+          method: "POST",
+          headers: { [LINEAR_WEBHOOK_SIGNATURE_HEADER]: "a".repeat(64) },
+          body: "not json",
+        })
+      );
+      expect(res.status).toBe(400);
+      expect(parseSpy).not.toHaveBeenCalled();
+    } finally {
+      parseSpy.mockRestore();
+    }
   });
 
   it("accepts a streamed body within maxBodyBytes (fetch-style)", async () => {

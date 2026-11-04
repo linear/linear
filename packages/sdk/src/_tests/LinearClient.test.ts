@@ -1,4 +1,4 @@
-import { describe, beforeEach, it, expect, vi } from "vitest";
+import { describe, beforeEach, afterEach, it, expect, vi } from "vitest";
 import { JsonObject } from "type-fest";
 import { LinearClient, LinearGraphQLClient } from "../index.js";
 import { LinearErrorType } from "../types.js";
@@ -22,6 +22,10 @@ describe("LinearClient", () => {
         },
       };
     });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it.each([
@@ -55,6 +59,38 @@ describe("LinearClient", () => {
 
   it("supports overriding headers", async () => {
     const client = new LinearClient({ apiKey: MOCK_API_KEY, apiUrl: ctx.url, headers: { user: "asd" } });
+    const response = await client.viewer;
+
+    expect(response).toEqual(expect.objectContaining({ id: "viewerId" }));
+  });
+
+  it.each([
+    ["apiKey", { apiKey: "secret" }, "secret"],
+    ["accessToken", { accessToken: "secret" }, "Bearer secret"],
+    ["Bearer accessToken", { accessToken: "Bearer secret" }, "Bearer secret"],
+  ])("sends the %s as Authorization without storing it in options", async (_, auth, authorization) => {
+    const fetch = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(Response.json({ data: { viewer: { id: "viewerId" } } }));
+    const client = new LinearClient({ ...auth, apiUrl: ctx.url });
+    await client.viewer;
+
+    expect(new Headers(fetch.mock.calls[0][1]?.headers).get("Authorization")).toEqual(authorization);
+    expect(client.options.headers).not.toHaveProperty("Authorization");
+    expect(JSON.stringify(client.options)).not.toContain("secret");
+    expect(JSON.stringify(client.client)).not.toContain("secret");
+  });
+
+  it("lets configured headers override the Authorization", async () => {
+    const client = new LinearClient({ apiKey: "asd", apiUrl: ctx.url, headers: { authorization: MOCK_API_KEY } });
+    const response = await client.viewer;
+
+    expect(response).toEqual(expect.objectContaining({ id: "viewerId" }));
+  });
+
+  it("lets setHeader override the Authorization", async () => {
+    const client = new LinearClient({ apiKey: "asd", apiUrl: ctx.url });
+    client.client.setHeader("Authorization", MOCK_API_KEY);
     const response = await client.viewer;
 
     expect(response).toEqual(expect.objectContaining({ id: "viewerId" }));
