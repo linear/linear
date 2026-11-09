@@ -53,7 +53,7 @@ const handleIssueLabels = async (
     const labelData = importData.labels[labelId];
     const parsed = parseLabelName(labelData.name);
     const group = parsed[0];
-    let labelName = parsed[1];
+    const labelName = parsed[1];
 
     // If this label's group is already used in this issue, or if it was previously mapped as a child label
     // and its group is in use, create/use a root label with the full name.
@@ -128,21 +128,13 @@ const handleIssueLabels = async (
       continue;
     }
 
-    // Handle as root label
-    labelName = labelData.name;
-    let rootLabelName = labelName;
-
-    // Check for conflicts with existing group labels
-    if (manager.getGroupLabel({ name: labelName })) {
-      rootLabelName = renameConflictingLabel(labelName);
-    }
-
-    // Check for existing root label
-    const rootLabel = manager.getRootLabel({ name: rootLabelName });
+    // Handle as root label, renaming it if the name is taken by a group or child label
+    const resolvedRoot = resolveImportedName(manager, labelData.name, teamId, name => manager.getRootLabel({ name }));
+    const rootLabel = resolvedRoot.label;
     actualLabelId = rootLabel?.id;
 
     if (!actualLabelId) {
-      const created = await createLabel(client, { name: rootLabelName, teamId, isGroup: false });
+      const created = await createLabel(client, { name: resolvedRoot.name, teamId, isGroup: false });
       actualLabelId = created.id;
       manager.addLabel({ label: new Label(created.id, created.name), teamId });
     }
@@ -255,7 +247,9 @@ class LabelManager {
    * @returns Label instance if found
    */
   public getRootLabel(props: { name: string } | { id: Id }): Label | undefined {
-    return this.getLabel(props, Label);
+    const label = this.getLabel(props, Label);
+    // Group and child labels extend Label, so exclude them explicitly
+    return label instanceof GroupLabel || label instanceof SubgroupLabel ? undefined : label;
   }
 
   /**
@@ -315,7 +309,7 @@ class LabelManager {
         const group = parent ? this.idToLabel[parent.id]?.[teamId] : undefined;
 
         if (group instanceof GroupLabel) {
-          this.addLabel({ label: new Label(existingLabel.id, labelName, isExisting), parent: group, teamId });
+          this.addLabel({ label: new SubgroupLabel(existingLabel.id, labelName, isExisting), parent: group, teamId });
         } else {
           this.addLabel({ label: new Label(existingLabel.id, labelName, isExisting), teamId });
         }
