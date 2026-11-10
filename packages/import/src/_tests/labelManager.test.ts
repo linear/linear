@@ -166,6 +166,39 @@ describe("handleLabels", () => {
     expect(mapping["csv-0"]).toMatchObject({ type: "child", id: child?.id });
   });
 
+  it("doesn't map a root label onto an existing child label with the same name", async () => {
+    const api = new FakeLabelApi();
+    const group = api.add({ name: "Priority", isGroup: true, teamId: TEAM_ID });
+    const existingChild = api.add({ name: "High", isGroup: false, teamId: TEAM_ID, parentId: group.id });
+    const importData = importWithLabels(["High", "Priority/Low"]);
+
+    const first = await api.import(importData);
+    const root = api.find("High (imported)");
+    expect(root?.parentId).toBeUndefined();
+    expect(first["csv-0"]).toMatchObject({ type: "root", id: root?.id });
+    expect(first["csv-0"]?.id).not.toBe(existingChild.id);
+    expect(first["csv-1"]).toMatchObject({ type: "child", id: api.find("Low")?.id });
+    const labelCount = api.labels.length;
+
+    const second = await api.import(importData);
+
+    expect(second["csv-0"]).toMatchObject({ type: "root", id: root?.id });
+    expect(api.labels).toHaveLength(labelCount);
+  });
+
+  it("doesn't map a root label onto an existing group label with the renamed name", async () => {
+    const api = new FakeLabelApi();
+    api.add({ name: "Priority", isGroup: true, teamId: TEAM_ID });
+    const renamedGroup = api.add({ name: "Priority (imported)", isGroup: true, teamId: TEAM_ID });
+
+    const mapping = await api.import(importWithLabels(["Priority"]));
+
+    const root = api.find("Priority (imported) (imported)");
+    expect(root?.isGroup).toBe(false);
+    expect(mapping["csv-0"]).toMatchObject({ type: "root", id: root?.id });
+    expect(mapping["csv-0"]?.id).not.toBe(renamedGroup.id);
+  });
+
   it("picks the next free name when the renamed name is taken outside the group", async () => {
     const api = new FakeLabelApi();
     api.add({ name: "Critical", isGroup: false, teamId: TEAM_ID });
