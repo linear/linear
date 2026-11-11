@@ -6,8 +6,15 @@ import { safeParseInt } from "../../utils/parseInt.ts";
 
 type ShortcutStoryType = "feature" | "bug" | "chore";
 
-// Hosts serving Shortcut attachments gated by the API token. The token is never sent to any other host.
-const SHORTCUT_HOST_SUFFIXES = ["shortcut.com", "clubhouse.io"];
+// Host that serves Shortcut attachments, which is the only one the API token is sent to. Descriptions refer to the legacy
+// Clubhouse host with this one.
+const SHORTCUT_ATTACHMENT_HOST = "media.app.shortcut.com";
+// Path of attachments on that host, which also serves Shortcut's API that the token gives access to
+const SHORTCUT_ATTACHMENT_PATH = "/api/attachments/";
+// Parts of a decoded path that a server could resolve to another path: separators, parameters, dot segments, escapes that
+// it could decode again, and control characters
+// eslint-disable-next-line no-control-regex
+const PATH_TRAVERSAL_REGEX = /[\\;%\x00-\x1f\x7f]|\/\/|\/\.\.?(?:\/|$)/;
 
 interface ShortcutIssueType {
   id: string;
@@ -180,20 +187,33 @@ export class ShortcutCsvImporter implements Importer {
 }
 
 /**
- * Adds the API token to an https Shortcut URL so that its attachment can be downloaded.
- * Any other URL is returned unchanged, so the token is never sent to a third-party host.
+ * Adds the API token to an https Shortcut attachment URL so that the attachment can be downloaded.
+ * Any other URL is returned unchanged, so the token is never sent to another host, such as another
+ * Shortcut subdomain that a third party serves, or to Shortcut's API on the attachment host.
  */
 const authenticateShortcutUrl = (url: string, apiToken: string): string => {
   let parsed: URL;
+  let path: string;
   try {
     parsed = new URL(url);
+    path = decodeURIComponent(parsed.pathname);
   } catch {
     return url;
   }
 
-  const host = parsed.hostname;
-  const isShortcutHost = SHORTCUT_HOST_SUFFIXES.some(suffix => host === suffix || host.endsWith("." + suffix));
-  if (parsed.protocol !== "https:" || !isShortcutHost) {
+  if (
+    !apiToken ||
+    parsed.protocol !== "https:" ||
+    parsed.port !== "" ||
+    parsed.username !== "" ||
+    parsed.password !== "" ||
+    parsed.hostname !== SHORTCUT_ATTACHMENT_HOST ||
+    // The path is checked as it is sent, and as a server could decode and normalize it
+    !parsed.pathname.startsWith(SHORTCUT_ATTACHMENT_PATH) ||
+    !path.startsWith(SHORTCUT_ATTACHMENT_PATH) ||
+    PATH_TRAVERSAL_REGEX.test(path) ||
+    PATH_TRAVERSAL_REGEX.test(path.normalize("NFKC"))
+  ) {
     return url;
   }
 

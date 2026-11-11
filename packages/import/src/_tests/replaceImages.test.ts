@@ -285,4 +285,102 @@ describe("replaceImagesInMarkdown", () => {
 
     expect(result).toBe(`![a](https://example.com/fail.png) ![b](${UPLOADED_URL}) ![c](https://example.com/fail.png)`);
   });
+
+  it.each([
+    ["the URL the image was downloaded from", "https://example.com/1.png?token=secret"],
+    ["the source URL", "https://example.com/1.png"],
+    ["another host", "https://cdn.example.com/1.png"],
+    ["a host that only looks like Linear's", "https://uploads.linear.app.example.com/1.png"],
+    ["an insecure Linear URL", "http://uploads.linear.app/1.png"],
+    [
+      "a query with the credentials",
+      "https://uploads.linear.app/proxy?url=https%3A%2F%2Fexample.com%2F1.png%3Ftoken%3Dsecret",
+    ],
+    ["a host that changes once markdown decodes it", "https://example.com&sol;.linear.app/1.png"],
+    ["spaces", "https://uploads.linear.app/a b.png"],
+    ["parentheses", "https://uploads.linear.app/a).png"],
+    ["another scheme", "javascript:alert(1)"],
+  ])("leaves images untouched when the upload returns %s", async (_, url) => {
+    imageUploadFromUrl.mockResolvedValue({ success: true, url });
+    const markdown = "![one](https://example.com/1.png)";
+
+    const result = await replaceImagesInMarkdown(client, markdown, authenticateUrl);
+
+    expect(result).toBe(markdown);
+  });
+
+  it("uses uploaded URLs on the domain of a development API", async () => {
+    imageUploadFromUrl.mockResolvedValue({ success: true, url: "https://uploads.linear.dev/1.png" });
+    const developmentClient = { imageUploadFromUrl, options: { apiUrl: "https://local.linear.dev:8090/graphql" } };
+
+    const result = await replaceImagesInMarkdown(
+      developmentClient as unknown as LinearClient,
+      "![one](https://example.com/1.png)"
+    );
+
+    expect(result).toBe("![one](https://uploads.linear.dev/1.png)");
+  });
+
+  it.each([
+    [
+      "the credentials",
+      authenticateUrl,
+      "Unable to determine file type (https://example.com/1.png?token=secret)",
+      "Unable to determine file type (https://example.com/1.png?token=[redacted])",
+    ],
+    [
+      "credentials padded with spaces",
+      (url: string) => `${url}?token=+secret+`,
+      "Invalid token secret for https://example.com/1.png?token=+secret+",
+      "Invalid token [redacted] for https://example.com/1.png?token=+[redacted]+",
+    ],
+    [
+      "percent-encoded credentials",
+      (url: string) => `${url}?token=${encodeURIComponent("se/cret")}`,
+      "Failed to download https://example.com/1.png?token=se%2Fcret",
+      "Failed to download https://example.com/1.png?token=[redacted]",
+    ],
+    [
+      "credentials in the user info",
+      (url: string) => url.replace("https://", "https://user:secret@"),
+      "Failed to download https://user:secret@example.com/1.png",
+      "Failed to download https://[redacted]:[redacted]@example.com/1.png",
+    ],
+    [
+      "a download URL whose credentials can't be told apart",
+      (url: string) => `${url}#${"a".repeat(100_000)}`,
+      `Failed to download https://example.com/1.png#${"a".repeat(100_000)}`,
+      "Failed to download [redacted]",
+    ],
+  ])("doesn't log %s when the upload fails", async (_, authenticate, message, logged) => {
+    const consoleError = vi.spyOn(console, "error");
+    imageUploadFromUrl.mockRejectedValue(new Error(message));
+
+    await replaceImagesInMarkdown(client, "![one](https://example.com/1.png)", authenticate);
+
+    expect(consoleError).toHaveBeenCalledWith("Failed to replace image", logged);
+  });
+
+  it("logs the message of failed uploads that don't use credentials", async () => {
+    const consoleError = vi.spyOn(console, "error");
+    imageUploadFromUrl.mockRejectedValue(new Error("Failed to download https://example.com/1.png"));
+
+    await replaceImagesInMarkdown(client, "![one](https://example.com/1.png)");
+
+    expect(consoleError).toHaveBeenCalledWith(
+      "Failed to replace image",
+      "Failed to download https://example.com/1.png"
+    );
+  });
+
+  it("logs uploads that fail with something other than an error", async () => {
+    const consoleError = vi.spyOn(console, "error");
+    imageUploadFromUrl.mockRejectedValue(Object.create(null));
+    const markdown = "![one](https://example.com/1.png)";
+
+    const result = await replaceImagesInMarkdown(client, markdown, authenticateUrl);
+
+    expect(consoleError).toHaveBeenCalledWith("Failed to replace image", "Unknown error");
+    expect(result).toBe(markdown);
+  });
 });
