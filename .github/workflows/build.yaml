@@ -65,6 +65,11 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           schema: "master:packages/sdk/src/schema.graphql"
           fail-on-breaking: false
+          # The action sends every change as an annotation in parallel batches of 50, which fails the step when a schema
+          # update has thousands of changes. Description changes are most of them and are not API changes.
+          rules: |
+            ignoreDescriptionChanges
+            simplifyChanges
 
       - name: Check for no generated changes
         run: git update-index --refresh && git diff-index HEAD
