@@ -361,6 +361,18 @@ describe("replaceImagesInMarkdown", () => {
     expect(consoleError).toHaveBeenCalledWith("Failed to replace image", logged);
   });
 
+  it("redacts credentials from logs in linear time for long queries", { timeout: 1_000 }, async () => {
+    const consoleError = vi.spyOn(console, "error");
+    const url = `https://example.com/1.png?${Array.from({ length: 25_000 }, (_, index) => `p=${index}`).join("&")}`;
+    imageUploadFromUrl.mockImplementation(async (downloadUrl: string) => {
+      throw new Error(`Failed to download ${downloadUrl}`);
+    });
+
+    await replaceImagesInMarkdown(client, `![one](${url})`, source => `${source}&token=secret`);
+
+    expect(consoleError).toHaveBeenCalledWith("Failed to replace image", `Failed to download ${url}&token=[redacted]`);
+  });
+
   it("logs the message of failed uploads that don't use credentials", async () => {
     const consoleError = vi.spyOn(console, "error");
     imageUploadFromUrl.mockRejectedValue(new Error("Failed to download https://example.com/1.png"));

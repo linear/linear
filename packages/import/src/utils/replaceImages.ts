@@ -116,8 +116,10 @@ const findAddedCredentials = (url: string, downloadUrl: string): string[] => {
   try {
     const source = new URL(url);
     const download = new URL(downloadUrl);
+    // Indexed once, since looking each parameter up in the query would take quadratic time for long queries
+    const sourceParameters = new Set([...source.searchParams].map(parameter => JSON.stringify(parameter)));
     const added = [...download.searchParams]
-      .filter(([name, value]) => !source.searchParams.getAll(name).includes(value))
+      .filter(parameter => !sourceParameters.has(JSON.stringify(parameter)))
       .map(([, value]) => value);
     for (const part of ["username", "password"] as const) {
       if (download[part] !== source[part]) {
