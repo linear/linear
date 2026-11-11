@@ -118,6 +118,9 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           schema: "master:packages/sdk/src/schema.graphql"
           fail-on-breaking: false
+          # The action sends every change as an annotation in parallel batches of 50, which fails the step on large
+          # schema updates. The check summary still lists the changes.
+          annotations: false
 
       - name: Create or update release pull request
         if: ${{ !inputs.dry_run }}
