@@ -758,6 +758,15 @@ describe("generated", () => {
     });
   });
 
+  /** Test AttachmentSources query */
+  describe("AttachmentSources", () => {
+    /** Test the root model query for AttachmentSources */
+    it("attachmentSources", async () => {
+      const attachmentSources: L.AttachmentSourcesPayload | undefined | null = await client.attachmentSources();
+      expect(attachmentSources instanceof L.AttachmentSourcesPayload);
+    });
+  });
+
   /** Test all Attachment queries */
   describe("Attachments", () => {
     let _attachment: L.Attachment | undefined | null;
@@ -1069,6 +1078,16 @@ describe("generated", () => {
         expect(comment_issue instanceof L.Issue);
       } else {
         console.warn("codegen-doc:print: No Comment found - cannot test comment.issue query");
+      }
+    });
+
+    /** Test the comment.onBehalfOf query for L.User */
+    it("comment.onBehalfOf", async () => {
+      if (_comment) {
+        const comment_onBehalfOf: L.User | undefined | null = await _comment.onBehalfOf;
+        expect(comment_onBehalfOf instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Comment found - cannot test comment.onBehalfOf query");
       }
     });
 
@@ -4381,6 +4400,81 @@ describe("generated", () => {
         expect(issue_team instanceof L.Team);
       } else {
         console.warn("codegen-doc:print: No Issue found - cannot test issue.team query");
+      }
+    });
+  });
+
+  /** Test all JiraProject queries */
+  describe("JiraProjects", () => {
+    let _jiraProject: L.JiraProject | undefined | null;
+    let _jiraProject_id: string | undefined | null;
+
+    /** Test the root connection query for the JiraProject */
+    it("jiraProjects", async () => {
+      const jiraProjects: L.JiraProjectConnection | undefined | null = await client.jiraProjects();
+      const jiraProject = jiraProjects?.nodes?.[0];
+      _jiraProject_id = jiraProject?.id;
+      expect(jiraProjects instanceof L.JiraProjectConnection);
+    });
+
+    /** Test the root query for a single JiraProject */
+    it("jiraProject", async () => {
+      if (_jiraProject_id) {
+        const jiraProject: L.JiraProject | undefined | null = await client.jiraProject(_jiraProject_id);
+        _jiraProject = jiraProject;
+        expect(jiraProject instanceof L.JiraProject);
+      } else {
+        console.warn("codegen-doc:print: No first JiraProject found in connection - cannot test jiraProject query");
+      }
+    });
+
+    /** Test the jiraProject model query for JiraProject_LatestImport */
+    it("jiraProject.latestImport", async () => {
+      if (_jiraProject) {
+        const latestImport: L.IssueImport | undefined | null = _jiraProject.latestImport;
+        expect(latestImport instanceof L.IssueImport);
+      } else {
+        console.warn("codegen-doc:print: No jiraProject found - cannot test _jiraProject.latestImport query");
+      }
+    });
+
+    /** Test the jiraProject.creator query for L.User */
+    it("jiraProject.creator", async () => {
+      if (_jiraProject) {
+        const jiraProject_creator: L.User | undefined | null = await _jiraProject.creator;
+        expect(jiraProject_creator instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No JiraProject found - cannot test jiraProject.creator query");
+      }
+    });
+
+    /** Test the jiraProject.integration query for L.Integration */
+    it("jiraProject.integration", async () => {
+      if (_jiraProject) {
+        const jiraProject_integration: L.Integration | undefined | null = await _jiraProject.integration;
+        expect(jiraProject_integration instanceof L.Integration);
+      } else {
+        console.warn("codegen-doc:print: No JiraProject found - cannot test jiraProject.integration query");
+      }
+    });
+
+    /** Test the jiraProject.linearTeam query for L.Team */
+    it("jiraProject.linearTeam", async () => {
+      if (_jiraProject) {
+        const jiraProject_linearTeam: L.Team | undefined | null = await _jiraProject.linearTeam;
+        expect(jiraProject_linearTeam instanceof L.Team);
+      } else {
+        console.warn("codegen-doc:print: No JiraProject found - cannot test jiraProject.linearTeam query");
+      }
+    });
+
+    /** Test the jiraProject.team query for L.Team */
+    it("jiraProject.team", async () => {
+      if (_jiraProject) {
+        const jiraProject_team: L.Team | undefined | null = await _jiraProject.team;
+        expect(jiraProject_team instanceof L.Team);
+      } else {
+        console.warn("codegen-doc:print: No JiraProject found - cannot test jiraProject.team query");
       }
     });
   });

@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.0.8
+
+### Patch Changes
+
+- 2e5e05a: Stop mapping an imported ungrouped label onto an existing group or grouped label with the same name. The import now creates an ungrouped label named with " (imported)" and reuses it on later imports.
+- Updated dependencies
+  - @linear/sdk@102.0.0
+
 ## 4.0.7
 
 ### Patch Changes
