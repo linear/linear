@@ -35,6 +35,7 @@ const questions = [
   {
     type: "input",
     name: "shortcutAPIToken",
+    filter: (input: string) => input.trim(),
     message:
       "To transfer files from Shortcut, enter a Shortcut API token (https://app.shortcut.com/settings/account/api-tokens):",
   },
