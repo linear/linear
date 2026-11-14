@@ -1,4 +1,5 @@
 import csv from "csvtojson";
+import { isValid, parse } from "date-fns";
 import j2m from "jira2md";
 import type { Importer, ImportResult, IssuePriority } from "../../types.ts";
 import { safeParseInt } from "../../utils/parseInt.ts";
@@ -18,6 +19,9 @@ interface JiraIssueType {
   Summary: string;
   Assignee: string;
   Created: string;
+  Updated?: string;
+  Resolved?: string;
+  "Status Category"?: string;
   Release: string;
   [estimateCustomField]?: string;
 }
@@ -87,6 +91,13 @@ export class JiraCsvImporter implements Importer {
       const assigneeId = row.Assignee && row.Assignee.length > 0 ? row.Assignee : undefined;
       const status = row.Status;
       const estimate = safeParseInt(row[estimateCustomField]);
+      const createdAt = parseJiraDate(row.Created);
+      // Jira statuses are free-form; the category says whether the issue was finished or in progress,
+      // so a status Linear doesn't have yet is created with the matching state type.
+      const statusCategory = row["Status Category"];
+      const completedAt =
+        statusCategory === "Done" ? (parseJiraDate(row.Resolved) ?? parseJiraDate(row.Updated)) : undefined;
+      const startedAt = statusCategory === "In Progress" ? parseJiraDate(row.Updated) : undefined;
 
       const labels = [type];
       if (release) {
@@ -102,6 +113,9 @@ export class JiraCsvImporter implements Importer {
         assigneeId,
         labels,
         estimate,
+        createdAt,
+        completedAt,
+        startedAt,
       });
 
       for (const lab of labels) {
@@ -122,6 +136,21 @@ export class JiraCsvImporter implements Importer {
   private customJiraUrl: string;
   private jiraSiteName?: string;
 }
+
+// Jira's default CSV date format, e.g. "05/Mar/24 3:12 PM". Instances with a custom format often export ISO dates.
+const JIRA_DATE_FORMAT = "dd/MMM/yy h:mm a";
+
+const parseJiraDate = (value: string | undefined): Date | undefined => {
+  if (!value) {
+    return undefined;
+  }
+  const jiraDate = parse(value, JIRA_DATE_FORMAT, new Date());
+  if (isValid(jiraDate)) {
+    return jiraDate;
+  }
+  const isoDate = new Date(value);
+  return isValid(isoDate) ? isoDate : undefined;
+};
 
 const mapPriority = (input: JiraPriority): IssuePriority => {
   const priorityMap: { [k: string]: IssuePriority } = {
