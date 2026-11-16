@@ -1,4 +1,5 @@
 import csv from "csvtojson";
+import { isValid, parse, parseISO } from "date-fns";
 import j2m from "jira2md";
 import type { Importer, ImportResult, IssuePriority } from "../../types.ts";
 import { safeParseInt } from "../../utils/parseInt.ts";
@@ -18,9 +19,69 @@ interface JiraIssueType {
   Summary: string;
   Assignee: string;
   Created: string;
+  Updated?: string;
+  Resolved?: string;
+  "Status Category"?: string;
+  "Status Category Changed"?: string;
   Release: string;
   [estimateCustomField]?: string;
 }
+
+// Date formats Jira uses in CSV exports, with its default format (e.g. "05/Mar/24 3:12 PM") first
+const jiraDateFormats = [
+  "d/MMM/yy h:mm a",
+  "d/MMM/yyyy h:mm a",
+  "d/MMM/yy H:mm",
+  "d/MMM/yyyy H:mm",
+  "d/MMM/yy",
+  "d/MMM/yyyy",
+  "yyyy-MM-dd HH:mm:ss",
+  "yyyy-MM-dd HH:mm",
+];
+
+/**
+ * Parses a date from a Jira CSV export, in the time zone of the machine running the import.
+ *
+ * @returns The date, or undefined when the value is empty or not in a known format
+ */
+export const parseJiraDate = (value?: string): Date | undefined => {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  const referenceDate = new Date();
+  for (const format of jiraDateFormats) {
+    const date = parse(trimmed, format, referenceDate);
+    if (isValid(date)) {
+      return date;
+    }
+  }
+
+  const isoDate = parseISO(trimmed);
+  return isValid(isoDate) ? isoDate : undefined;
+};
+
+/**
+ * Maps a Jira issue's status category to when it was started or completed, so issues finished in Jira are imported as
+ * completed and issues in progress as started. Issues in the "To Do" category, or any other category, get neither.
+ */
+export const mapStatusCategoryDates = (
+  row: Pick<JiraIssueType, "Status Category" | "Status Category Changed" | "Resolved" | "Updated" | "Created">
+): { startedAt?: Date; completedAt?: Date } => {
+  const category = row["Status Category"]?.trim().toLowerCase();
+  const categoryChangedAt = parseJiraDate(row["Status Category Changed"]);
+  const updatedAt = parseJiraDate(row.Updated);
+  const createdAt = parseJiraDate(row.Created);
+
+  if (category === "done") {
+    return { completedAt: parseJiraDate(row.Resolved) ?? categoryChangedAt ?? updatedAt ?? createdAt };
+  }
+  if (category === "in progress") {
+    return { startedAt: categoryChangedAt ?? updatedAt ?? createdAt };
+  }
+  return {};
+};
 
 /**
  * Import issues from a Jira CSV export.
@@ -87,6 +148,8 @@ export class JiraCsvImporter implements Importer {
       const assigneeId = row.Assignee && row.Assignee.length > 0 ? row.Assignee : undefined;
       const status = row.Status;
       const estimate = safeParseInt(row[estimateCustomField]);
+      const createdAt = parseJiraDate(row.Created);
+      const { startedAt, completedAt } = mapStatusCategoryDates(row);
 
       const labels = [type];
       if (release) {
@@ -102,6 +165,9 @@ export class JiraCsvImporter implements Importer {
         assigneeId,
         labels,
         estimate,
+        createdAt,
+        startedAt,
+        completedAt,
       });
 
       for (const lab of labels) {
