@@ -7,7 +7,7 @@ import inquirer from "inquirer";
 import uniq from "lodash/uniq.js";
 import ora from "ora";
 import { handleLabels } from "./helpers/labelManager.ts";
-import type { Comment, Importer, ImportResult } from "./types.ts";
+import type { Comment, Importer, ImportResult, Issue } from "./types.ts";
 import { replaceImagesInMarkdown } from "./utils/replaceImages.ts";
 
 type Id = string;
@@ -33,6 +33,23 @@ const defaultStateColors: Record<IssueStatus, string> = {
   [IssueStatus.Backlog]: "#bec2c8",
   [IssueStatus.Started]: "#f2c94c",
   [IssueStatus.Completed]: "#5e6ad2",
+};
+
+/**
+ * Returns the completion date to send when creating an issue in a status of the given type. The API only accepts a
+ * completion date for issues in a completed status that are also sent with a creation date, and not before it, so a
+ * date that doesn't meet those conditions is left out rather than failing the import, and one that falls before the
+ * creation date (e.g. a date-only resolution on the creation day) is moved to the creation date.
+ */
+export const completedAtForState = (
+  issue: Pick<Issue, "createdAt" | "completedAt">,
+  stateType: string | undefined
+): Date | undefined => {
+  const { createdAt, completedAt } = issue;
+  if (stateType !== "completed" || !createdAt || !completedAt) {
+    return undefined;
+  }
+  return completedAt < createdAt ? createdAt : completedAt;
 };
 
 interface NonInteractiveFlags {
@@ -260,7 +277,7 @@ export const importIssues = async (
   const projectId = resolvedProjectIdFlag || importAnswers.targetProjectId;
   const labelMapping = await handleLabels(client, importData, teamId, [...allTeamLabels, ...allWorkspaceLabels]);
 
-  const existingStateMap = {} as { [name: string]: string };
+  const existingStateMap = {} as { [name: string]: { id: Id; type: string } };
   const canceledStateId = workflowStates?.nodes?.find(state => state.type === "canceled")?.id;
   for (const state of workflowStates?.nodes ?? []) {
     const stateName = state.name?.toLowerCase();
@@ -270,12 +287,12 @@ export const importIssues = async (
     if (state.type === "duplicate") {
       // duplicate-type states are rejected by createIssue; route incoming statuses with this name to canceled instead
       if (canceledStateId && !existingStateMap[stateName]) {
-        existingStateMap[stateName] = canceledStateId;
+        existingStateMap[stateName] = { id: canceledStateId, type: "canceled" };
       }
       continue;
     }
     if (!existingStateMap[stateName]) {
-      existingStateMap[stateName] = state.id;
+      existingStateMap[stateName] = { id: state.id, type: state.type };
     }
   }
 
@@ -311,26 +328,29 @@ export const importIssues = async (
 
     const labelIds = issue.labels ? uniq(issue.labels.map(labelId => labelMapping[labelId].id)) : undefined;
 
-    let stateId = !!issue.status ? existingStateMap[issue.status.toLowerCase()] : undefined;
+    const existingState = !!issue.status ? existingStateMap[issue.status.toLowerCase()] : undefined;
+    let stateId = existingState?.id;
+    let stateType: string | undefined = existingState?.type;
     // Create a new state since one doesn't already exist with this name
     if (!stateId && issue.status) {
-      let stateType = IssueStatus.Backlog;
+      let newStateType = IssueStatus.Backlog;
       if (issue.completedAt) {
-        stateType = IssueStatus.Completed;
+        newStateType = IssueStatus.Completed;
       } else if (issue.startedAt) {
-        stateType = IssueStatus.Started;
+        newStateType = IssueStatus.Started;
       }
       const newStateResult = await client.createWorkflowState({
         name: issue.status,
         teamId,
-        color: defaultStateColors[stateType],
-        type: stateType,
+        color: defaultStateColors[newStateType],
+        type: newStateType,
       });
       if (newStateResult?.success) {
         const newState = await newStateResult.workflowState;
         if (newState?.id) {
-          existingStateMap[issue.status.toLowerCase()] = newState.id;
+          existingStateMap[issue.status.toLowerCase()] = { id: newState.id, type: newStateType };
           stateId = newState.id;
+          stateType = newStateType;
         }
       }
     }
@@ -362,7 +382,7 @@ export const importIssues = async (
         stateId,
         assigneeId,
         createdAt: issue.createdAt,
-        completedAt: issue.completedAt,
+        completedAt: completedAtForState(issue, stateType),
         dueDate: formattedDueDate,
         estimate: issue.estimate,
       });
