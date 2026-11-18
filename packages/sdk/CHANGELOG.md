@@ -1,5 +1,103 @@
 # Change Log
 
+## 103.0.0
+
+### Major Changes
+
+- feat(schema): [breaking] Type 'DocumentContentDraft' was removed (DocumentContentDraft)
+
+  feat(schema): [breaking] Argument 'organizationSlug: String!' was removed from field 'Mutation.integrationSentryConnect' (Mutation.integrationSentryConnect.organizationSlug)
+
+  feat(schema): [breaking] Field 'documentContentDraftCreated' was removed from object type 'Subscription' (Subscription.documentContentDraftCreated)
+
+  feat(schema): [breaking] Field 'documentContentDraftDeleted' was removed from object type 'Subscription' (Subscription.documentContentDraftDeleted)
+
+  feat(schema): [breaking] Field 'documentContentDraftUpdated' was removed from object type 'Subscription' (Subscription.documentContentDraftUpdated)
+
+  feat(schema): [dangerous] Input field 'searchableContent' was added to input object type 'InitiativeCollectionFilter' (InitiativeCollectionFilter.searchableContent)
+
+  feat(schema): [dangerous] Input field 'searchableContent' was added to input object type 'InitiativeFilter' (InitiativeFilter.searchableContent)
+
+  feat(schema): [dangerous] Input field 'searchableContent' was added to input object type 'NullableInitiativeFilter' (NullableInitiativeFilter.searchableContent)
+
+  feat(schema): [dangerous] Argument 'after: String' added to field 'Query.recentReleasesByAccessKey' (Query.recentReleasesByAccessKey.after)
+
+  feat(schema): [dangerous] Argument 'includeArchived: Boolean' added to field 'Query.recentReleasesByAccessKey' (Query.recentReleasesByAccessKey.includeArchived)
+
+  feat(schema): [dangerous] Argument 'filter: DocumentFilter' added to field 'Query.searchDocuments' (Query.searchDocuments.filter)
+
+  feat(schema): [dangerous] Enum value 'spendLimitReached' was added to enum 'UsageAlertType' (UsageAlertType.spendLimitReached)
+
+  feat(schema): [dangerous] Enum value 'homeCardsEmptyStateDismissed' was added to enum 'UserFlagType' (UserFlagType.homeCardsEmptyStateDismissed)
+
+  feat(schema): [non_breaking] Type 'ProjectMilestoneMoveInput' was added (ProjectMilestoneMoveInput)
+
+  feat(schema): [non_breaking] Type 'ProjectMilestoneMoveIssueToTeam' was added (ProjectMilestoneMoveIssueToTeam)
+
+  feat(schema): [non_breaking] Type 'ProjectMilestoneMoveIssueToTeamInput' was added (ProjectMilestoneMoveIssueToTeamInput)
+
+  feat(schema): [non_breaking] Type 'ProjectMilestoneMovePayload' was added (ProjectMilestoneMovePayload)
+
+  feat(schema): [non_breaking] Type 'ProjectMilestoneMoveProjectTeams' was added (ProjectMilestoneMoveProjectTeams)
+
+  feat(schema): [non_breaking] Type 'ProjectMilestoneMoveProjectTeamsInput' was added (ProjectMilestoneMoveProjectTeamsInput)
+
+  feat(schema): [non_breaking] Type 'WebhookFailureEvent' was added (WebhookFailureEvent)
+
+  feat(schema): [non_breaking] Description 'A request or piece of feedback associated with a customer and linked to an issue or project. It can include a written message, priority, and an attachment pointing to the original conversation. Multiple needs can connect the same customer to the same work, preserving each source of feedback.' on type 'CustomerNeed' has changed to 'A request or piece of feedback optionally associated with a customer and linked to work. It can include a written message, priority, and an attachment pointing to the original conversation. Multiple needs can connect the same customer to the same work, preserving each source of feedback.' (CustomerNeed)
+
+  feat(schema): [non_breaking] Input field 'CustomerNeedCreateInput.issueId' description changed from 'The issue UUID or identifier, such as LIN-123. Required for public API calls.' to 'The optional issue UUID or identifier, such as LIN-123.' (CustomerNeedCreateInput.issueId)
+
+  feat(schema): [non_breaking] Description 'The issue and optional customer details for a new request. Provide issueId when using the public API. You can include Markdown feedback and a source attachment, and identify the customer by either its UUID or external-system ID.' on type 'CustomerNeedCreateInput' has changed to 'The feedback and optional customer and work links for a new request. Requests may be created without a linked issue, project, or signal when Customer Signals is enabled. You can include Markdown feedback and a source attachment, and identify the customer by either its UUID or external-system ID.' (CustomerNeedCreateInput)
+
+  feat(schema): [non_breaking] Field 'DocumentSearchPayload.totalCount' description changed from 'Number of candidates retrieved before filtering and pagination. Search caps candidates, so this is not an exact count of all matching documents.' to 'Number of candidates retrieved that match the document filter, before pagination. Search caps candidates, so this is not an exact count of all matching documents.' (DocumentSearchPayload.totalCount)
+
+  feat(schema): [non_breaking] Input field 'InitiativeCollectionFilter.activityType' description changed from 'Comparator for the initiative activity type.' to 'Not supported. Initiative activity is not stored on the server, so filters that set this field are rejected.' (InitiativeCollectionFilter.activityType)
+
+  feat(schema): [non_breaking] Input field 'InitiativeFilter.activityType' description changed from 'Comparator for the initiative activity type.' to 'Not supported. Initiative activity is not stored on the server, so filters that set this field are rejected.' (InitiativeFilter.activityType)
+
+  feat(schema): [non_breaking] Input field 'IssueCollectionFilter.ageTime' description changed from 'Age (created -> now) comparator, defined if the issue is still open.' to 'Compares the elapsed time from creation to the start of the query's database transaction. The duration is null for completed or canceled issues. Accepts ISO 8601 durations or milliseconds.' (IssueCollectionFilter.ageTime)
+
+  feat(schema): [non_breaking] Input field 'IssueCollectionFilter.cycleTime' description changed from 'Cycle time (started -> completed) comparator.' to 'Compares the elapsed time from work starting to completion. The duration is null if either timestamp is missing. Accepts ISO 8601 durations or milliseconds.' (IssueCollectionFilter.cycleTime)
+
+  feat(schema): [non_breaking] Input field 'IssueCollectionFilter.leadTime' description changed from 'Lead time (created -> completed) comparator.' to 'Compares the elapsed time from creation to completion. The duration is null for issues without a completion time. Accepts ISO 8601 durations or milliseconds.' (IssueCollectionFilter.leadTime)
+
+  feat(schema): [non_breaking] Input field 'IssueCollectionFilter.triageTime' description changed from 'Triage time (entered triaged -> triaged) comparator.' to 'Compares the elapsed time from entering triage to leaving triage. The duration is null if either timestamp is missing. Accepts ISO 8601 durations or milliseconds.' (IssueCollectionFilter.triageTime)
+
+  feat(schema): [non_breaking] Input field 'IssueFilter.ageTime' description changed from 'Age (created -> now) comparator, defined if the issue is still open.' to 'Compares the elapsed time from creation to the start of the query's database transaction. The duration is null for completed or canceled issues. Accepts ISO 8601 durations or milliseconds.' (IssueFilter.ageTime)
+
+  feat(schema): [non_breaking] Input field 'IssueFilter.cycleTime' description changed from 'Cycle time (started -> completed) comparator.' to 'Compares the elapsed time from work starting to completion. The duration is null if either timestamp is missing. Accepts ISO 8601 durations or milliseconds.' (IssueFilter.cycleTime)
+
+  feat(schema): [non_breaking] Input field 'IssueFilter.leadTime' description changed from 'Lead time (created -> completed) comparator.' to 'Compares the elapsed time from creation to completion. The duration is null for issues without a completion time. Accepts ISO 8601 durations or milliseconds.' (IssueFilter.leadTime)
+
+  feat(schema): [non_breaking] Input field 'IssueFilter.triageTime' description changed from 'Triage time (entered triaged -> triaged) comparator.' to 'Compares the elapsed time from entering triage to leaving triage. The duration is null if either timestamp is missing. Accepts ISO 8601 durations or milliseconds.' (IssueFilter.triageTime)
+
+  feat(schema): [non_breaking] Field 'projectMilestoneMove' was added to object type 'Mutation' (Mutation.projectMilestoneMove)
+
+  feat(schema): [non_breaking] Field 'Mutation.customerNeedCreate' description changed from 'Records a customer request against an issue. Provide input.issueId and optionally identify the customer, add Markdown feedback, or link a source attachment. Multiple needs can be recorded for the same customer and issue.' to 'Records customer feedback, optionally linked to an issue. Unlinked requests require Customer Signals to be enabled. You can identify the customer, add Markdown feedback, or link a source attachment. Multiple requests can be recorded for the same customer and issue.' (Mutation.customerNeedCreate)
+
+  feat(schema): [non_breaking] Field 'Mutation.cycleArchive' description changed from 'Archives a cycle and removes its current issues from it. The issues themselves are not archived. An inherited cycle must be managed through its parent team.' to 'Archives a cycle and removes its current issues from it. The issues themselves are not archived. An inherited cycle must be managed through its parent team. Requires permission to manage the team.' (Mutation.cycleArchive)
+
+  feat(schema): [non_breaking] Field 'Mutation.cycleStartUpcomingCycleToday' description changed from 'Starts the upcoming cycle as of midnight today. Completes the previous cycle if it has not yet ended. Only the next upcoming (not yet started) cycle for the team can be started.' to 'Starts the upcoming cycle as of midnight today. Completes the previous cycle if it has not yet ended. Only the next upcoming (not yet started) cycle for the team can be started. Requires permission to manage the team.' (Mutation.cycleStartUpcomingCycleToday)
+
+  feat(schema): [non_breaking] Field 'Mutation.cycleUpdate' description changed from 'Updates a cycle’s name, description, or schedule and returns the resulting cycle. Date changes can shorten adjacent cycles to prevent overlap. You cannot change an active cycle’s start or a completed cycle’s dates, or edit inherited cycles directly.' to 'Updates a cycle’s name, description, or schedule and returns the resulting cycle. Date changes can shorten adjacent cycles to prevent overlap. You cannot change an active cycle’s start or a completed cycle’s dates, or edit inherited cycles directly. Requires permission to manage the team.' (Mutation.cycleUpdate)
+
+  feat(schema): [non_breaking] Input field 'NullableInitiativeFilter.activityType' description changed from 'Comparator for the initiative activity type.' to 'Not supported. Initiative activity is not stored on the server, so filters that set this field are rejected.' (NullableInitiativeFilter.activityType)
+
+  feat(schema): [non_breaking] Input field 'NullableIssueFilter.ageTime' description changed from 'Age (created -> now) comparator, defined if the issue is still open.' to 'Compares the elapsed time from creation to the start of the query's database transaction. The duration is null for completed or canceled issues. Accepts ISO 8601 durations or milliseconds.' (NullableIssueFilter.ageTime)
+
+  feat(schema): [non_breaking] Input field 'NullableIssueFilter.cycleTime' description changed from 'Cycle time (started -> completed) comparator.' to 'Compares the elapsed time from work starting to completion. The duration is null if either timestamp is missing. Accepts ISO 8601 durations or milliseconds.' (NullableIssueFilter.cycleTime)
+
+  feat(schema): [non_breaking] Input field 'NullableIssueFilter.leadTime' description changed from 'Lead time (created -> completed) comparator.' to 'Compares the elapsed time from creation to completion. The duration is null for issues without a completion time. Accepts ISO 8601 durations or milliseconds.' (NullableIssueFilter.leadTime)
+
+  feat(schema): [non_breaking] Input field 'NullableIssueFilter.triageTime' description changed from 'Triage time (entered triaged -> triaged) comparator.' to 'Compares the elapsed time from entering triage to leaving triage. The duration is null if either timestamp is missing. Accepts ISO 8601 durations or milliseconds.' (NullableIssueFilter.triageTime)
+
+  feat(schema): [non_breaking] Field 'ViewPreferencesValues.projectGrouping' description changed from 'The project grouping. Values: statusType, activity, leadTeam, lead, member, health, none, status, priority, label, labelGroup, roadmap, initiative, subInitiative, team, startDate, targetDate, rolloutStage.' to 'The project grouping. Values: statusType, activity, leadTeam, lead, member, health, none, status, priority, label, labelGroup, roadmap, initiative, subInitiative, team, startDate, targetDate, rolloutStage, customer.' (ViewPreferencesValues.projectGrouping)
+
+  feat(schema): [non_breaking] Field 'ViewPreferencesValues.projectSubGrouping' description changed from 'The project sub-grouping. Values: statusType, activity, leadTeam, lead, member, health, none, status, priority, label, labelGroup, roadmap, initiative, subInitiative, team, startDate, targetDate, rolloutStage.' to 'The project sub-grouping. Values: statusType, activity, leadTeam, lead, member, health, none, status, priority, label, labelGroup, roadmap, initiative, subInitiative, team, startDate, targetDate, rolloutStage, customer.' (ViewPreferencesValues.projectSubGrouping)
+
+  feat(schema): [non_breaking] Field 'failures' was added to object type 'Webhook' (Webhook.failures)
+
 ## 102.0.0
 
 ### Major Changes

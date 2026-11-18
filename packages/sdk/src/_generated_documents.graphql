@@ -2717,7 +2717,7 @@ fragment DocumentSearchPayload on DocumentSearchPayload {
   pageInfo {
     ...PageInfo
   }
-  # Number of candidates retrieved before filtering and pagination. Search caps candidates, so this is not an exact count of all matching documents.
+  # Number of candidates retrieved that match the document filter, before pagination. Search caps candidates, so this is not an exact count of all matching documents.
   totalCount
   # Serialized archived documents on this page and their archived projects, for Linear’s client. For normal API reads, select the document fields you need from nodes instead.
   archivePayload {
@@ -4286,6 +4286,30 @@ fragment ArchivedIntegrationPayload on ArchivedIntegrationPayload {
   codeAccess
 }
 
+# A record of a failed webhook delivery attempt. Created when a webhook payload could not be
+# successfully delivered to the destination URL, either due to an HTTP error response or a network
+# failure. Each failure event captures the HTTP status code (if available), the response body or error
+# message, and a stable execution ID that is shared across retries of the same delivery.
+fragment WebhookFailureEvent on WebhookFailureEvent {
+  __typename
+  # A stable identifier for the webhook delivery attempt. This ID remains the same across retries of the same payload, making it useful for correlating multiple failure events that belong to the same logical delivery.
+  executionId
+  # The HTTP response body returned by the recipient, or the error message if the request failed before receiving a response. Truncated to 1000 characters.
+  responseOrError
+  # The HTTP status code returned by the webhook recipient. Null if the request failed before receiving a response (e.g., DNS resolution failure, connection timeout).
+  httpStatus
+  # The URL that the webhook was trying to push to.
+  url
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The webhook that this failure event is associated with.
+  webhook {
+    id
+  }
+}
+
 # A record of an agent’s work and its conversation with users. A session belongs to one app user and
 # may be linked to an issue or comment thread. Your agent publishes activities to report progress and
 # results, and can attach external links and a plan. status reflects the latest activity, so the same
@@ -4727,7 +4751,7 @@ fragment OauthClientApproval on OauthClientApproval {
   updatedAt
 }
 
-# A request or piece of feedback associated with a customer and linked to an issue or project. It can
+# A request or piece of feedback optionally associated with a customer and linked to work. It can
 # include a written message, priority, and an attachment pointing to the original conversation.
 # Multiple needs can connect the same customer to the same work, preserving each source of feedback.
 fragment CustomerNeed on CustomerNeed {
@@ -5331,6 +5355,10 @@ fragment Webhook on Webhook {
   creator {
     id
   }
+  # Up to 50 recorded delivery failures for this webhook in the current workspace, newest first.
+  failures {
+    ...WebhookFailureEvent
+  }
   # When the resource was archived, in UTC. Null while active, including after unarchiving. Archived resources still exist but are normally excluded from lists unless `includeArchived` is true.
   archivedAt
   # When the resource was last meaningfully updated, in UTC. Some background or housekeeping changes do not advance this timestamp.
@@ -5620,35 +5648,6 @@ fragment NotificationSubscription on NotificationSubscription {
   includeSubInitiativeUpdates
   # Whether the subscription is active. When inactive, no notifications are generated from this subscription even though it still exists.
   active
-}
-
-# A user’s unpublished changes to a DocumentContent record. Each user can have one active draft for
-# the same content, and the live body stays unchanged until the draft is applied. Use
-# documentContentId to associate the draft with the resource being edited.
-fragment DocumentContentDraft on DocumentContentDraft {
-  __typename
-  # The document content that this draft is a revision of.
-  documentContent {
-    ...DocumentContent
-  }
-  # The draft’s full content as a base64-encoded Yjs update. This is the unpublished version, not a Markdown string or a list of changed lines.
-  contentState
-  # The identifier of the document content that this draft is a revision of.
-  documentContentId
-  # The identifier of the user who owns this draft.
-  userId
-  # The resource's unique UUID. This stays unchanged when the resource is renamed or moved; use it for stored references and mutations.
-  id
-  # The resource’s recorded creation time, in UTC. Imports may preserve an earlier creation time.
-  createdAt
-  # The user who created or owns this draft.
-  user {
-    id
-  }
-  # When the resource was archived, in UTC. Null while active, including after unarchiving. Archived resources still exist but are normally excluded from lists unless `includeArchived` is true.
-  archivedAt
-  # When the resource was last meaningfully updated, in UTC. Some background or housekeeping changes do not advance this timestamp.
-  updatedAt
 }
 
 # A weekly mobile notification schedule in your user time zone. Supply all seven days, using an empty
@@ -7625,13 +7624,13 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectCustomerNeedsViewGrouping
   # The project customer needs view ordering. Values: createdAt, customerName, customerRevenue.
   projectCustomerNeedsViewOrdering
-  # The project grouping. Values: statusType, activity, leadTeam, lead, member, health, none, status, priority, label, labelGroup, roadmap, initiative, subInitiative, team, startDate, targetDate, rolloutStage.
+  # The project grouping. Values: statusType, activity, leadTeam, lead, member, health, none, status, priority, label, labelGroup, roadmap, initiative, subInitiative, team, startDate, targetDate, rolloutStage, customer.
   projectGrouping
   # The project layout type. Values: list, timeline, board.
   projectLayout
   # The project ordering. Values: sortOrder, name, createdAt, updatedAt, healthUpdatedAt, startDate, targetDate, status, priority, customerCount, customerImportantCount, customerRevenue, activity.
   projectViewOrdering
-  # The project sub-grouping. Values: statusType, activity, leadTeam, lead, member, health, none, status, priority, label, labelGroup, roadmap, initiative, subInitiative, team, startDate, targetDate, rolloutStage.
+  # The project sub-grouping. Values: statusType, activity, leadTeam, lead, member, health, none, status, priority, label, labelGroup, roadmap, initiative, subInitiative, team, startDate, targetDate, rolloutStage, customer.
   projectSubGrouping
   # The project-label groups to expose as columns in a project list. Each entry identifies a group and whether its column is active.
   projectLabelGroupColumns {
@@ -11128,6 +11127,27 @@ fragment ProjectLabelPayload on ProjectLabelPayload {
   success
 }
 
+# The result of a project milestone move mutation.
+fragment ProjectMilestoneMovePayload on ProjectMilestoneMovePayload {
+  __typename
+  # A snapshot of the issues that were moved to new teams, if the user selected to do it, containing an array of mappings between an issue and its previous team. Store on the client to use for undoing a previous milestone move.
+  previousIssueTeamIds {
+    ...ProjectMilestoneMoveIssueToTeam
+  }
+  # A snapshot of the project that had new teams added to it, if the user selected to do it, containing an array of mappings between a project and its previous teams. Store on the client to use for undoing a previous milestone move.
+  previousProjectTeamIds {
+    ...ProjectMilestoneMoveProjectTeams
+  }
+  # Synchronization cursor used by Linear clients. External integrations can ignore this field.
+  lastSyncId
+  # The project milestone that was created or updated.
+  projectMilestone {
+    id
+  }
+  # Whether the operation was successful.
+  success
+}
+
 # The result of a project milestone mutation.
 fragment ProjectMilestonePayload on ProjectMilestonePayload {
   __typename
@@ -12688,6 +12708,22 @@ fragment FileUploadDeletePayload on FileUploadDeletePayload {
   success
 }
 
+fragment ProjectMilestoneMoveIssueToTeam on ProjectMilestoneMoveIssueToTeam {
+  __typename
+  # The identifier of the issue to restore to its previous team. Must match an issue in the milestone.
+  issueId
+  # The team id in this relationship
+  teamId
+}
+
+fragment ProjectMilestoneMoveProjectTeams on ProjectMilestoneMoveProjectTeams {
+  __typename
+  # The project id
+  projectId
+  # The team ids for the project
+  teamIds
+}
+
 fragment Subscription on Subscription {
   __typename
   # Triggered when a comment is archived
@@ -12721,18 +12757,6 @@ fragment Subscription on Subscription {
   # Triggered when a cycle is updated
   cycleUpdated {
     id
-  }
-  # Triggered when a document content draft is created
-  documentContentDraftCreated {
-    ...DocumentContentDraft
-  }
-  # Triggered when a document content draft is deleted
-  documentContentDraftDeleted {
-    ...DocumentContentDraft
-  }
-  # Triggered when a document content draft is updated
-  documentContentDraftUpdated {
-    ...DocumentContentDraft
   }
   # Triggered when a document content is created
   documentContentCreated {
@@ -18288,10 +18312,14 @@ query rateLimitStatus {
 # Returns releases for the pipeline associated with the access key, ordered with the most recently
 # completed or updated first.
 query recentReleasesByAccessKey(
+  # Returns releases after this release in the same order. Pass the ID of the last release from the previous page, and keep `includeArchived` unchanged between pages. A started release moves up when it is updated, so it can be skipped or repeated while you page.
+  $after: String
+  # Includes archived releases alongside active ones. Defaults to false. Completed releases are archived automatically six months after completion when they have no unarchived issues. Deleted releases and releases of archived pipelines are never returned.
+  $includeArchived: Boolean
   # Maximum number of releases to return. Defaults to 20 and is capped at 100.
   $limit: Int
 ) {
-  recentReleasesByAccessKey(limit: $limit) {
+  recentReleasesByAccessKey(after: $after, includeArchived: $includeArchived, limit: $limit) {
     ...AccessKeyRelease
   }
 }
@@ -18874,6 +18902,8 @@ query searchDocuments(
   $after: String
   # Returns results before this cursor. Pair with `last` to paginate backward, using a cursor returned by the same connection. Keep the filters and ordering unchanged between pages. Cannot be combined with `first` or `after`.
   $before: String
+  # Filter returned documents.
+  $filter: DocumentFilter
   # The maximum number of results to return, starting after `after` if supplied. Between 1 and 250. Defaults to 50 when neither `first` nor `last` is supplied. Cannot be combined with `last` or `before`.
   $first: Int
   # Includes archived resources alongside active ones. Defaults to false, which returns only active resources. This does not include deleted resources.
@@ -18892,6 +18922,7 @@ query searchDocuments(
   searchDocuments(
     after: $after
     before: $before
+    filter: $filter
     first: $first
     includeArchived: $includeArchived
     includeComments: $includeComments
@@ -18910,6 +18941,8 @@ query searchDocuments_archivePayload(
   $after: String
   # Returns results before this cursor. Pair with `last` to paginate backward, using a cursor returned by the same connection. Keep the filters and ordering unchanged between pages. Cannot be combined with `first` or `after`.
   $before: String
+  # Filter returned documents.
+  $filter: DocumentFilter
   # The maximum number of results to return, starting after `after` if supplied. Between 1 and 250. Defaults to 50 when neither `first` nor `last` is supplied. Cannot be combined with `last` or `before`.
   $first: Int
   # Includes archived resources alongside active ones. Defaults to false, which returns only active resources. This does not include deleted resources.
@@ -18928,6 +18961,7 @@ query searchDocuments_archivePayload(
   searchDocuments(
     after: $after
     before: $before
+    filter: $filter
     first: $first
     includeArchived: $includeArchived
     includeComments: $includeComments
@@ -21405,9 +21439,9 @@ mutation archiveCustomerNeed(
     ...CustomerNeedArchivePayload
   }
 }
-# Records a customer request against an issue. Provide input.issueId and optionally identify the
-# customer, add Markdown feedback, or link a source attachment. Multiple needs can be recorded for the
-# same customer and issue.
+# Records customer feedback, optionally linked to an issue. Unlinked requests require Customer Signals
+# to be enabled. You can identify the customer, add Markdown feedback, or link a source attachment.
+# Multiple requests can be recorded for the same customer and issue.
 mutation createCustomerNeed(
   # The customer need to create.
   $input: CustomerNeedCreateInput!
@@ -21564,7 +21598,7 @@ mutation customerUpsert(
   }
 }
 # Archives a cycle and removes its current issues from it. The issues themselves are not archived. An
-# inherited cycle must be managed through its parent team.
+# inherited cycle must be managed through its parent team. Requires permission to manage the team.
 mutation archiveCycle(
   # The identifier of the cycle to archive.
   $id: String!
@@ -21595,7 +21629,8 @@ mutation cycleShiftAll(
   }
 }
 # Starts the upcoming cycle as of midnight today. Completes the previous cycle if it has not yet
-# ended. Only the next upcoming (not yet started) cycle for the team can be started.
+# ended. Only the next upcoming (not yet started) cycle for the team can be started. Requires
+# permission to manage the team.
 mutation cycleStartUpcomingCycleToday(
   # The identifier of the cycle to start as of midnight today. Must be the upcoming cycle.
   $id: String!
@@ -21606,7 +21641,7 @@ mutation cycleStartUpcomingCycleToday(
 }
 # Updates a cycle’s name, description, or schedule and returns the resulting cycle. Date changes can
 # shorten adjacent cycles to prevent overlap. You cannot change an active cycle’s start or a completed
-# cycle’s dates, or edit inherited cycles directly.
+# cycle’s dates, or edit inherited cycles directly. Requires permission to manage the team.
 mutation updateCycle(
   # The identifier of the cycle to update.
   $id: String!
@@ -22642,10 +22677,8 @@ mutation integrationSentryConnect(
   $code: String!
   # The Sentry installationId to connect with.
   $installationId: String!
-  # The slug of the Sentry organization being connected.
-  $organizationSlug: String!
 ) {
-  integrationSentryConnect(code: $code, installationId: $installationId, organizationSlug: $organizationSlug) {
+  integrationSentryConnect(code: $code, installationId: $installationId) {
     ...IntegrationPayload
   }
 }
@@ -23817,6 +23850,21 @@ mutation deleteProjectMilestone(
 ) {
   projectMilestoneDelete(id: $id) {
     ...DeletePayload
+  }
+}
+# Moves a milestone and its issues to another project, including archived issues. The caller must have
+# access to every issue in the milestone, and the milestone and destination project must be writable.
+# If an issue's team is not part of the destination project, provide newIssueTeamId or
+# addIssueTeamToProject. The returned team snapshots can be passed to the undo inputs when moving the
+# milestone back to its original project.
+mutation projectMilestoneMove(
+  # The identifier of the project milestone to move.
+  $id: String!
+  # The project to move the milestone to, as well as any additional options need to make a successful move, or undo a previous move.
+  $input: ProjectMilestoneMoveInput!
+) {
+  projectMilestoneMove(id: $id, input: $input) {
+    ...ProjectMilestoneMovePayload
   }
 }
 # Updates a milestone in a project you can edit, including an archived milestone. Omitted fields keep

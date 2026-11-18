@@ -2403,7 +2403,7 @@ export type CustomerImportantCountSort = {
   order?: InputMaybe<PaginationSortOrder>;
 };
 
-/** A request or piece of feedback associated with a customer and linked to an issue or project. It can include a written message, priority, and an attachment pointing to the original conversation. Multiple needs can connect the same customer to the same work, preserving each source of feedback. */
+/** A request or piece of feedback optionally associated with a customer and linked to work. It can include a written message, priority, and an attachment pointing to the original conversation. Multiple needs can connect the same customer to the same work, preserving each source of feedback. */
 export type CustomerNeed = Node & {
   __typename?: "CustomerNeed";
   /** When the resource was archived, in UTC. Null while active, including after unarchiving. Archived resources still exist but are normally excluded from lists unless `includeArchived` is true. */
@@ -2513,7 +2513,7 @@ export type CustomerNeedCreateFromAttachmentInput = {
   attachmentId: Scalars["String"];
 };
 
-/** The issue and optional customer details for a new request. Provide issueId when using the public API. You can include Markdown feedback and a source attachment, and identify the customer by either its UUID or external-system ID. */
+/** The feedback and optional customer and work links for a new request. Requests may be created without a linked issue, project, or signal when Customer Signals is enabled. You can include Markdown feedback and a source attachment, and identify the customer by either its UUID or external-system ID. */
 export type CustomerNeedCreateInput = {
   /** The UUID of an existing attachment to associate with this need as its source. */
   attachmentId?: InputMaybe<Scalars["String"]>;
@@ -2535,7 +2535,7 @@ export type CustomerNeedCreateInput = {
   displayIconUrl?: InputMaybe<Scalars["String"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars["String"]>;
-  /** The issue UUID or identifier, such as LIN-123. Required for public API calls. */
+  /** The optional issue UUID or identifier, such as LIN-123. */
   issueId?: InputMaybe<Scalars["String"]>;
   /** Whether the customer need is important or not. 0 = Not important, 1 = Important. */
   priority?: InputMaybe<Scalars["Float"]>;
@@ -3814,29 +3814,6 @@ export type DocumentContentChildWebhookPayload = {
   project?: Maybe<ProjectChildWebhookPayload>;
 };
 
-/** A user’s unpublished changes to a DocumentContent record. Each user can have one active draft for the same content, and the live body stays unchanged until the draft is applied. Use documentContentId to associate the draft with the resource being edited. */
-export type DocumentContentDraft = Node & {
-  __typename?: "DocumentContentDraft";
-  /** When the resource was archived, in UTC. Null while active, including after unarchiving. Archived resources still exist but are normally excluded from lists unless `includeArchived` is true. */
-  archivedAt?: Maybe<Scalars["DateTime"]>;
-  /** The draft’s full content as a base64-encoded Yjs update. This is the unpublished version, not a Markdown string or a list of changed lines. */
-  contentState: Scalars["String"];
-  /** The resource’s recorded creation time, in UTC. Imports may preserve an earlier creation time. */
-  createdAt: Scalars["DateTime"];
-  /** The document content that this draft is a revision of. */
-  documentContent: DocumentContent;
-  /** The identifier of the document content that this draft is a revision of. */
-  documentContentId: Scalars["String"];
-  /** The resource's unique UUID. This stays unchanged when the resource is renamed or moved; use it for stored references and mutations. */
-  id: Scalars["ID"];
-  /** When the resource was last meaningfully updated, in UTC. Some background or housekeeping changes do not advance this timestamp. */
-  updatedAt: Scalars["DateTime"];
-  /** The user who created or owns this draft. */
-  user: User;
-  /** The identifier of the user who owns this draft. */
-  userId: Scalars["String"];
-};
-
 /** A saved version of rich-text content, with its capture time and contributors. */
 export type DocumentContentHistory = Node & {
   __typename?: "DocumentContentHistory";
@@ -4073,7 +4050,7 @@ export type DocumentSearchPayload = {
   nodes: Array<DocumentSearchResult>;
   /** Cursors and availability of pages before and after this one. */
   pageInfo: PageInfo;
-  /** Number of candidates retrieved before filtering and pagination. Search caps candidates, so this is not an exact count of all matching documents. */
+  /** Number of candidates retrieved that match the document filter, before pagination. Search caps candidates, so this is not an exact count of all matching documents. */
   totalCount: Scalars["Float"];
 };
 
@@ -5887,7 +5864,7 @@ export type InitiativeChildWebhookPayload = {
 
 /** Filters a related collection of initiatives. Use some or every to test its members and length to test its size, for example length: { eq: 0 } for an empty collection. Direct property filters act as some only when no collection clause is supplied. */
 export type InitiativeCollectionFilter = {
-  /** Comparator for the initiative activity type. */
+  /** Not supported. Initiative activity is not stored on the server, so filters that set this field are rejected. */
   activityType?: InputMaybe<StringComparator>;
   /** Conditions on this initiative’s parent initiatives and their ancestors. For example, some: { id: { eq: ID } } finds descendants of the specified initiative. */
   ancestors?: InputMaybe<InitiativeCollectionFilter>;
@@ -5929,6 +5906,8 @@ export type InitiativeCollectionFilter = {
   priority?: InputMaybe<NullableNumberComparator>;
   /** Conditions on distinct accessible projects linked to this initiative or its sub-initiatives. A project linked through several sub-initiatives is counted once. */
   projects?: InputMaybe<ProjectCollectionFilter>;
+  /** Comparator for the initiative's name and summary. */
+  searchableContent?: InputMaybe<ContentComparator>;
   /** Comparator for the initiative slug ID. */
   slugId?: InputMaybe<StringComparator>;
   /** Filters that needs to be matched by some initiatives. */
@@ -6009,7 +5988,7 @@ export type InitiativeEdge = {
 
 /** Filters initiatives by status, health, dates, ownership, labels, hierarchy, or related projects. Supplied conditions must match together; use and and or to combine nested filters. */
 export type InitiativeFilter = {
-  /** Comparator for the initiative activity type. */
+  /** Not supported. Initiative activity is not stored on the server, so filters that set this field are rejected. */
   activityType?: InputMaybe<StringComparator>;
   /** Conditions on this initiative’s parent initiatives and their ancestors. For example, some: { id: { eq: ID } } finds descendants of the specified initiative. */
   ancestors?: InputMaybe<InitiativeCollectionFilter>;
@@ -6047,6 +6026,8 @@ export type InitiativeFilter = {
   priority?: InputMaybe<NullableNumberComparator>;
   /** Conditions on distinct accessible projects linked to this initiative or its sub-initiatives. A project linked through several sub-initiatives is counted once. */
   projects?: InputMaybe<ProjectCollectionFilter>;
+  /** Comparator for the initiative's name and summary. */
+  searchableContent?: InputMaybe<ContentComparator>;
   /** Comparator for the initiative slug ID. */
   slugId?: InputMaybe<StringComparator>;
   /** Comparator for the initiative started at date. */
@@ -7845,7 +7826,7 @@ export type IssueCollectionFilter = {
   addedToCycleAt?: InputMaybe<NullableDateComparator>;
   /** Conditions on when the issue joined its cycle. before includes the cycle’s first 24 hours; during covers the remaining time before closure, and after covers times at or after closure. */
   addedToCyclePeriod?: InputMaybe<CyclePeriodComparator>;
-  /** Age (created -> now) comparator, defined if the issue is still open. */
+  /** Compares the elapsed time from creation to the start of the query's database transaction. The duration is null for completed or canceled issues. Accepts ISO 8601 durations or milliseconds. */
   ageTime?: InputMaybe<NullableDurationComparator>;
   /** Collection conditions that must all match. Different some branches can be satisfied by different issues. */
   and?: InputMaybe<Array<IssueCollectionFilter>>;
@@ -7877,7 +7858,7 @@ export type IssueCollectionFilter = {
   customerImportantCount?: InputMaybe<NumberComparator>;
   /** Conditions on the assigned cycle. Use null: true for issues without a cycle or whose team has cycles disabled. Use null: false to require an assigned cycle on a team with cycles enabled. Other cycle comparisons do not require cycles to be enabled. */
   cycle?: InputMaybe<NullableCycleFilter>;
-  /** Cycle time (started -> completed) comparator. */
+  /** Compares the elapsed time from work starting to completion. The duration is null if either timestamp is missing. Accepts ISO 8601 durations or milliseconds. */
   cycleTime?: InputMaybe<NullableDurationComparator>;
   /** Filters that the issue's delegated agent must satisfy. */
   delegate?: InputMaybe<NullableUserFilter>;
@@ -7925,7 +7906,7 @@ export type IssueCollectionFilter = {
   labels?: InputMaybe<IssueLabelCollectionFilter>;
   /** Filters that the last applied template must satisfy. */
   lastAppliedTemplate?: InputMaybe<NullableTemplateFilter>;
-  /** Lead time (created -> completed) comparator. */
+  /** Compares the elapsed time from creation to completion. The duration is null for issues without a completion time. Accepts ISO 8601 durations or milliseconds. */
   leadTime?: InputMaybe<NullableDurationComparator>;
   /** Conditions on the total number of related issues, independent of some or every. Use eq: 0 to find an empty collection. */
   length?: InputMaybe<NumberComparator>;
@@ -7977,7 +7958,7 @@ export type IssueCollectionFilter = {
   team?: InputMaybe<TeamFilter>;
   /** Conditions on the issue title. This does not search descriptions or comments. */
   title?: InputMaybe<StringComparator>;
-  /** Triage time (entered triaged -> triaged) comparator. */
+  /** Compares the elapsed time from entering triage to leaving triage. The duration is null if either timestamp is missing. Accepts ISO 8601 durations or milliseconds. */
   triageTime?: InputMaybe<NullableDurationComparator>;
   /** Conditions on when the issue last left triage. The value is unset before triage is completed and after re-entering triage. */
   triagedAt?: InputMaybe<NullableDateComparator>;
@@ -8182,7 +8163,7 @@ export type IssueFilter = {
   addedToCycleAt?: InputMaybe<NullableDateComparator>;
   /** Conditions on when the issue joined its cycle. before includes the cycle’s first 24 hours; during covers the remaining time before closure, and after covers times at or after closure. */
   addedToCyclePeriod?: InputMaybe<CyclePeriodComparator>;
-  /** Age (created -> now) comparator, defined if the issue is still open. */
+  /** Compares the elapsed time from creation to the start of the query's database transaction. The duration is null for completed or canceled issues. Accepts ISO 8601 durations or milliseconds. */
   ageTime?: InputMaybe<NullableDurationComparator>;
   /** Conditions that the issue must all match. These are combined with the other fields in this filter. */
   and?: InputMaybe<Array<IssueFilter>>;
@@ -8214,7 +8195,7 @@ export type IssueFilter = {
   customerImportantCount?: InputMaybe<NumberComparator>;
   /** Conditions on the assigned cycle. Use null: true for issues without a cycle or whose team has cycles disabled. Use null: false to require an assigned cycle on a team with cycles enabled. Other cycle comparisons do not require cycles to be enabled. */
   cycle?: InputMaybe<NullableCycleFilter>;
-  /** Cycle time (started -> completed) comparator. */
+  /** Compares the elapsed time from work starting to completion. The duration is null if either timestamp is missing. Accepts ISO 8601 durations or milliseconds. */
   cycleTime?: InputMaybe<NullableDurationComparator>;
   /** Filters that the issue's delegated agent must satisfy. */
   delegate?: InputMaybe<NullableUserFilter>;
@@ -8260,7 +8241,7 @@ export type IssueFilter = {
   labels?: InputMaybe<IssueLabelCollectionFilter>;
   /** Filters that the last applied template must satisfy. */
   lastAppliedTemplate?: InputMaybe<NullableTemplateFilter>;
-  /** Lead time (created -> completed) comparator. */
+  /** Compares the elapsed time from creation to completion. The duration is null for issues without a completion time. Accepts ISO 8601 durations or milliseconds. */
   leadTime?: InputMaybe<NullableDurationComparator>;
   /** Conditions on customer requests linked to the issue. Use some to require a matching request or length to count linked requests. */
   needs?: InputMaybe<CustomerNeedCollectionFilter>;
@@ -8308,7 +8289,7 @@ export type IssueFilter = {
   team?: InputMaybe<TeamFilter>;
   /** Conditions on the issue title. This does not search descriptions or comments. */
   title?: InputMaybe<StringComparator>;
-  /** Triage time (entered triaged -> triaged) comparator. */
+  /** Compares the elapsed time from entering triage to leaving triage. The duration is null if either timestamp is missing. Accepts ISO 8601 durations or milliseconds. */
   triageTime?: InputMaybe<NullableDurationComparator>;
   /** Conditions on when the issue last left triage. The value is unset before triage is completed and after re-entering triage. */
   triagedAt?: InputMaybe<NullableDateComparator>;
@@ -10409,7 +10390,7 @@ export type Mutation = {
   customerMerge: CustomerPayload;
   /** Archives a customer need so it can be removed from active request lists without permanently deleting it. Use customerNeedUnarchive to restore the saved need. */
   customerNeedArchive: CustomerNeedArchivePayload;
-  /** Records a customer request against an issue. Provide input.issueId and optionally identify the customer, add Markdown feedback, or link a source attachment. Multiple needs can be recorded for the same customer and issue. */
+  /** Records customer feedback, optionally linked to an issue. Unlinked requests require Customer Signals to be enabled. You can identify the customer, add Markdown feedback, or link a source attachment. Multiple requests can be recorded for the same customer and issue. */
   customerNeedCreate: CustomerNeedPayload;
   /** Creates a customer need from an existing issue attachment. If that attachment already has an archived need, the need is restored and follows the attachment’s current issue. An existing active need is not duplicated. */
   customerNeedCreateFromAttachment: CustomerNeedPayload;
@@ -10437,7 +10418,7 @@ export type Mutation = {
   customerUpdate: CustomerPayload;
   /** Finds a customer using the supplied UUID, external ID, Slack channel, or domains, and updates it; otherwise creates one. A name is required when no customer matches. Unlike customerUpdate, this operation can override integration-managed fields, and a tierName can create a new customer tier. */
   customerUpsert: CustomerPayload;
-  /** Archives a cycle and removes its current issues from it. The issues themselves are not archived. An inherited cycle must be managed through its parent team. */
+  /** Archives a cycle and removes its current issues from it. The issues themselves are not archived. An inherited cycle must be managed through its parent team. Requires permission to manage the team. */
   cycleArchive: CycleArchivePayload;
   /**
    * Unsupported. This mutation always returns an error; cycles are generated from the team’s cycle settings.
@@ -10446,9 +10427,9 @@ export type Mutation = {
   cycleCreate: CyclePayload;
   /** Shifts an upcoming cycle and every later cycle in the team by the same number of days. Local times are preserved in the team’s time zone, and the team’s cycle start day is updated. Use this when moving the schedule as a whole; it requires permission to manage the team. */
   cycleShiftAll: CyclePayload;
-  /** Starts the upcoming cycle as of midnight today. Completes the previous cycle if it has not yet ended. Only the next upcoming (not yet started) cycle for the team can be started. */
+  /** Starts the upcoming cycle as of midnight today. Completes the previous cycle if it has not yet ended. Only the next upcoming (not yet started) cycle for the team can be started. Requires permission to manage the team. */
   cycleStartUpcomingCycleToday: CyclePayload;
-  /** Updates a cycle’s name, description, or schedule and returns the resulting cycle. Date changes can shorten adjacent cycles to prevent overlap. You cannot change an active cycle’s start or a completed cycle’s dates, or edit inherited cycles directly. */
+  /** Updates a cycle’s name, description, or schedule and returns the resulting cycle. Date changes can shorten adjacent cycles to prevent overlap. You cannot change an active cycle’s start or a completed cycle’s dates, or edit inherited cycles directly. Requires permission to manage the team. */
   cycleUpdate: CyclePayload;
   /** Creates a document in a project, issue, or release, with optional initial Markdown content. The returned document includes its assigned UUID and metadata; select content to read the resulting body. */
   documentCreate: DocumentPayload;
@@ -10821,6 +10802,8 @@ export type Mutation = {
   projectMilestoneCreate: ProjectMilestonePayload;
   /** Permanently deletes a milestone from a project you can edit. The issues are kept in the project, but their milestone association is removed. */
   projectMilestoneDelete: DeletePayload;
+  /** Moves a milestone and its issues to another project, including archived issues. The caller must have access to every issue in the milestone, and the milestone and destination project must be writable. If an issue's team is not part of the destination project, provide newIssueTeamId or addIssueTeamToProject. The returned team snapshots can be passed to the undo inputs when moving the milestone back to its original project. */
+  projectMilestoneMove: ProjectMilestoneMovePayload;
   /** Updates a milestone in a project you can edit, including an archived milestone. Omitted fields keep their current values. Changing projectId moves the milestone and clears its links from issue drafts in the previous project. */
   projectMilestoneUpdate: ProjectMilestonePayload;
   /** Creates a dependency between two different projects using date or milestone anchors. */
@@ -11739,7 +11722,6 @@ export type MutationIntegrationSalesforceArgs = {
 export type MutationIntegrationSentryConnectArgs = {
   code: Scalars["String"];
   installationId: Scalars["String"];
-  organizationSlug: Scalars["String"];
 };
 
 export type MutationIntegrationSlackArgs = {
@@ -12197,6 +12179,11 @@ export type MutationProjectMilestoneCreateArgs = {
 
 export type MutationProjectMilestoneDeleteArgs = {
   id: Scalars["String"];
+};
+
+export type MutationProjectMilestoneMoveArgs = {
+  id: Scalars["String"];
+  input: ProjectMilestoneMoveInput;
 };
 
 export type MutationProjectMilestoneUpdateArgs = {
@@ -13365,7 +13352,7 @@ export type NullableDurationComparator = {
 
 /** Filters an optional relation to initiatives. Use null to test whether the relation is set, or supply property conditions to filter the related object. */
 export type NullableInitiativeFilter = {
-  /** Comparator for the initiative activity type. */
+  /** Not supported. Initiative activity is not stored on the server, so filters that set this field are rejected. */
   activityType?: InputMaybe<StringComparator>;
   /** Conditions on this initiative’s parent initiatives and their ancestors. For example, some: { id: { eq: ID } } finds descendants of the specified initiative. */
   ancestors?: InputMaybe<InitiativeCollectionFilter>;
@@ -13405,6 +13392,8 @@ export type NullableInitiativeFilter = {
   priority?: InputMaybe<NullableNumberComparator>;
   /** Conditions on distinct accessible projects linked to this initiative or its sub-initiatives. A project linked through several sub-initiatives is counted once. */
   projects?: InputMaybe<ProjectCollectionFilter>;
+  /** Comparator for the initiative's name and summary. */
+  searchableContent?: InputMaybe<ContentComparator>;
   /** Comparator for the initiative slug ID. */
   slugId?: InputMaybe<StringComparator>;
   /** Comparator for the initiative started at date. */
@@ -13451,7 +13440,7 @@ export type NullableIssueFilter = {
   addedToCycleAt?: InputMaybe<NullableDateComparator>;
   /** Conditions on when the issue joined its cycle. before includes the cycle’s first 24 hours; during covers the remaining time before closure, and after covers times at or after closure. */
   addedToCyclePeriod?: InputMaybe<CyclePeriodComparator>;
-  /** Age (created -> now) comparator, defined if the issue is still open. */
+  /** Compares the elapsed time from creation to the start of the query's database transaction. The duration is null for completed or canceled issues. Accepts ISO 8601 durations or milliseconds. */
   ageTime?: InputMaybe<NullableDurationComparator>;
   /** Conditions that the issue must all match. These are combined with the other fields in this filter. */
   and?: InputMaybe<Array<NullableIssueFilter>>;
@@ -13483,7 +13472,7 @@ export type NullableIssueFilter = {
   customerImportantCount?: InputMaybe<NumberComparator>;
   /** Conditions on the assigned cycle. Use null: true for issues without a cycle or whose team has cycles disabled. Use null: false to require an assigned cycle on a team with cycles enabled. Other cycle comparisons do not require cycles to be enabled. */
   cycle?: InputMaybe<NullableCycleFilter>;
-  /** Cycle time (started -> completed) comparator. */
+  /** Compares the elapsed time from work starting to completion. The duration is null if either timestamp is missing. Accepts ISO 8601 durations or milliseconds. */
   cycleTime?: InputMaybe<NullableDurationComparator>;
   /** Filters that the issue's delegated agent must satisfy. */
   delegate?: InputMaybe<NullableUserFilter>;
@@ -13529,7 +13518,7 @@ export type NullableIssueFilter = {
   labels?: InputMaybe<IssueLabelCollectionFilter>;
   /** Filters that the last applied template must satisfy. */
   lastAppliedTemplate?: InputMaybe<NullableTemplateFilter>;
-  /** Lead time (created -> completed) comparator. */
+  /** Compares the elapsed time from creation to completion. The duration is null for issues without a completion time. Accepts ISO 8601 durations or milliseconds. */
   leadTime?: InputMaybe<NullableDurationComparator>;
   /** Conditions on customer requests linked to the issue. Use some to require a matching request or length to count linked requests. */
   needs?: InputMaybe<CustomerNeedCollectionFilter>;
@@ -13579,7 +13568,7 @@ export type NullableIssueFilter = {
   team?: InputMaybe<TeamFilter>;
   /** Conditions on the issue title. This does not search descriptions or comments. */
   title?: InputMaybe<StringComparator>;
-  /** Triage time (entered triaged -> triaged) comparator. */
+  /** Compares the elapsed time from entering triage to leaving triage. The duration is null if either timestamp is missing. Accepts ISO 8601 durations or milliseconds. */
   triageTime?: InputMaybe<NullableDurationComparator>;
   /** Conditions on when the issue last left triage. The value is unset before triage is completed and after re-entering triage. */
   triagedAt?: InputMaybe<NullableDateComparator>;
@@ -16307,6 +16296,67 @@ export type ProjectMilestoneFilter = {
   updatedAt?: InputMaybe<DateComparator>;
 };
 
+/** Input for moving a project milestone to another project. */
+export type ProjectMilestoneMoveInput = {
+  /** Whether to add each milestone issue's team to the project. This is needed when there is a mismatch between a project's teams and the milestone's issues' teams. Either this or newIssueTeamId is required in that situation to resolve constraints. */
+  addIssueTeamToProject?: InputMaybe<Scalars["Boolean"]>;
+  /** The team id to move the attached issues to. This is needed when there is a mismatch between a project's teams and the milestone's issues' teams. Either this or addIssueTeamToProject is required in that situation to resolve constraints. */
+  newIssueTeamId?: InputMaybe<Scalars["String"]>;
+  /** The identifier of the project to move the milestone to. */
+  projectId: Scalars["String"];
+  /** A list of issue id to team ids, used for undoing a previous milestone move where the specified issues were moved from the specified teams. */
+  undoIssueTeamIds?: InputMaybe<Array<ProjectMilestoneMoveIssueToTeamInput>>;
+  /** A mapping of project id to a previous set of team ids, used for undoing a previous milestone move where the specified teams were added to the project. */
+  undoProjectTeamIds?: InputMaybe<ProjectMilestoneMoveProjectTeamsInput>;
+};
+
+export type ProjectMilestoneMoveIssueToTeam = {
+  __typename?: "ProjectMilestoneMoveIssueToTeam";
+  /** The identifier of the issue to restore to its previous team. Must match an issue in the milestone. */
+  issueId: Scalars["String"];
+  /** The team id in this relationship */
+  teamId: Scalars["String"];
+};
+
+/** Used for ProjectMilestoneMoveInput to describe a mapping between an issue and its team. */
+export type ProjectMilestoneMoveIssueToTeamInput = {
+  /** The identifier of the issue to restore to its previous team. Must match an issue in the milestone. */
+  issueId: Scalars["String"];
+  /** The team id in this relationship */
+  teamId: Scalars["String"];
+};
+
+/** The result of a project milestone move mutation. */
+export type ProjectMilestoneMovePayload = {
+  __typename?: "ProjectMilestoneMovePayload";
+  /** Synchronization cursor used by Linear clients. External integrations can ignore this field. */
+  lastSyncId: Scalars["Float"];
+  /** A snapshot of the issues that were moved to new teams, if the user selected to do it, containing an array of mappings between an issue and its previous team. Store on the client to use for undoing a previous milestone move. */
+  previousIssueTeamIds?: Maybe<Array<ProjectMilestoneMoveIssueToTeam>>;
+  /** A snapshot of the project that had new teams added to it, if the user selected to do it, containing an array of mappings between a project and its previous teams. Store on the client to use for undoing a previous milestone move. */
+  previousProjectTeamIds?: Maybe<ProjectMilestoneMoveProjectTeams>;
+  /** The project milestone that was created or updated. */
+  projectMilestone: ProjectMilestone;
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
+};
+
+export type ProjectMilestoneMoveProjectTeams = {
+  __typename?: "ProjectMilestoneMoveProjectTeams";
+  /** The project id */
+  projectId: Scalars["String"];
+  /** The team ids for the project */
+  teamIds: Array<Scalars["String"]>;
+};
+
+/** Used for ProjectMilestoneMoveInput to describe a snapshot of a project and its team ids */
+export type ProjectMilestoneMoveProjectTeamsInput = {
+  /** The project id */
+  projectId: Scalars["String"];
+  /** The team ids for the project */
+  teamIds: Array<Scalars["String"]>;
+};
+
 /** The result of a project milestone mutation. */
 export type ProjectMilestonePayload = {
   __typename?: "ProjectMilestonePayload";
@@ -18749,6 +18799,8 @@ export type QueryQuotasArgs = {
 };
 
 export type QueryRecentReleasesByAccessKeyArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
   limit?: InputMaybe<Scalars["Int"]>;
 };
 
@@ -18845,6 +18897,7 @@ export type QueryRoadmapsArgs = {
 export type QuerySearchDocumentsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
+  filter?: InputMaybe<DocumentFilter>;
   first?: InputMaybe<Scalars["Int"]>;
   includeArchived?: InputMaybe<Scalars["Boolean"]>;
   includeComments?: InputMaybe<Scalars["Boolean"]>;
@@ -21059,12 +21112,6 @@ export type Subscription = {
   documentArchived: Document;
   /** Triggered when a document content is created */
   documentContentCreated: DocumentContent;
-  /** Triggered when a document content draft is created */
-  documentContentDraftCreated: DocumentContentDraft;
-  /** Triggered when a document content draft is deleted */
-  documentContentDraftDeleted: DocumentContentDraft;
-  /** Triggered when a document content draft is updated */
-  documentContentDraftUpdated: DocumentContentDraft;
   /** Triggered when a document content revision is created */
   documentContentRevisionCreated: DocumentContentRevision;
   /** Triggered when a document content revision is deleted */
@@ -22724,6 +22771,8 @@ export enum UsageAlertType {
   ExpiringPromoCredit = "expiringPromoCredit",
   /** Prepaid usage credits crossed below the low-balance threshold. */
   LowBalance = "lowBalance",
+  /** Workspace spend reached a workspace spend limit. */
+  SpendLimitReached = "spendLimitReached",
 }
 
 /** Comparator for the condition a usage alert was triggered by. */
@@ -23073,6 +23122,7 @@ export enum UserFlagType {
   FigmaPluginBannerDismissed = "figmaPluginBannerDismissed",
   FigmaPromptDismissed = "figmaPromptDismissed",
   HelpIslandFeatureInsightsDismissed = "helpIslandFeatureInsightsDismissed",
+  HomeCardsEmptyStateDismissed = "homeCardsEmptyStateDismissed",
   ImportBannerDismissed = "importBannerDismissed",
   InitiativesBannerDismissed = "initiativesBannerDismissed",
   InsightsHelpDismissed = "insightsHelpDismissed",
@@ -23863,7 +23913,7 @@ export type ViewPreferencesValues = {
    * @deprecated Use groupOrderingMode instead.
    */
   projectGroupOrdering?: Maybe<Scalars["String"]>;
-  /** The project grouping. Values: statusType, activity, leadTeam, lead, member, health, none, status, priority, label, labelGroup, roadmap, initiative, subInitiative, team, startDate, targetDate, rolloutStage. */
+  /** The project grouping. Values: statusType, activity, leadTeam, lead, member, health, none, status, priority, label, labelGroup, roadmap, initiative, subInitiative, team, startDate, targetDate, rolloutStage, customer. */
   projectGrouping?: Maybe<Scalars["String"]>;
   /** Date grouping interval: month, quarter, halfYear, or year. */
   projectGroupingDateResolution?: Maybe<Scalars["String"]>;
@@ -23889,7 +23939,7 @@ export type ViewPreferencesValues = {
   projectShowEmptySubGroupsList?: Maybe<Scalars["String"]>;
   /** How to show empty project sub-groups on the timeline layout. Values: all, none, upcoming. */
   projectShowEmptySubGroupsTimeline?: Maybe<Scalars["String"]>;
-  /** The project sub-grouping. Values: statusType, activity, leadTeam, lead, member, health, none, status, priority, label, labelGroup, roadmap, initiative, subInitiative, team, startDate, targetDate, rolloutStage. */
+  /** The project sub-grouping. Values: statusType, activity, leadTeam, lead, member, health, none, status, priority, label, labelGroup, roadmap, initiative, subInitiative, team, startDate, targetDate, rolloutStage, customer. */
   projectSubGrouping?: Maybe<Scalars["String"]>;
   /** The UUID of the project-label group to use when projectSubGrouping is labelGroup. Its child labels define the second level of grouping. */
   projectSubGroupingLabelGroupId?: Maybe<Scalars["String"]>;
@@ -24154,6 +24204,8 @@ export type Webhook = Node & {
   creator?: Maybe<User>;
   /** Whether the webhook is enabled. When disabled, no payloads will be delivered even if matching events occur. */
   enabled: Scalars["Boolean"];
+  /** Up to 50 recorded delivery failures for this webhook in the current workspace, newest first. */
+  failures: Array<WebhookFailureEvent>;
   /** The resource's unique UUID. This stays unchanged when the resource is renamed or moved; use it for stored references and mutations. */
   id: Scalars["ID"];
   /** A human-readable label for the webhook, used for identification in the UI. Null if no label has been set. */
@@ -24208,6 +24260,25 @@ export type WebhookEdge = {
   cursor: Scalars["String"];
   /** The resource at this position in the result list. */
   node: Webhook;
+};
+
+/** A record of a failed webhook delivery attempt. Created when a webhook payload could not be successfully delivered to the destination URL, either due to an HTTP error response or a network failure. Each failure event captures the HTTP status code (if available), the response body or error message, and a stable execution ID that is shared across retries of the same delivery. */
+export type WebhookFailureEvent = {
+  __typename?: "WebhookFailureEvent";
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** A stable identifier for the webhook delivery attempt. This ID remains the same across retries of the same payload, making it useful for correlating multiple failure events that belong to the same logical delivery. */
+  executionId: Scalars["String"];
+  /** The HTTP status code returned by the webhook recipient. Null if the request failed before receiving a response (e.g., DNS resolution failure, connection timeout). */
+  httpStatus?: Maybe<Scalars["Float"]>;
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The HTTP response body returned by the recipient, or the error message if the request failed before receiving a response. Truncated to 1000 characters. */
+  responseOrError?: Maybe<Scalars["String"]>;
+  /** The URL that the webhook was trying to push to. */
+  url: Scalars["String"];
+  /** The webhook that this failure event is associated with. */
+  webhook: Webhook;
 };
 
 /** The result of a webhook mutation. */
@@ -30618,6 +30689,12 @@ export type WebhookConnectionFragment = { __typename: "WebhookConnection" } & {
     > & {
         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
         creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+        failures: Array<
+          { __typename: "WebhookFailureEvent" } & Pick<
+            WebhookFailureEvent,
+            "executionId" | "responseOrError" | "httpStatus" | "url" | "createdAt" | "id"
+          > & { webhook: { __typename?: "Webhook" } & Pick<Webhook, "id"> }
+        >;
       }
   >;
 };
@@ -31020,6 +31097,11 @@ export type ArchivedIntegrationPayloadFragment = { __typename: "ArchivedIntegrat
   ArchivedIntegrationPayload,
   "orgAvatarUrl" | "enterpriseUrl" | "externalOrgId" | "service" | "orgLogin" | "archivedAt" | "id" | "codeAccess"
 >;
+
+export type WebhookFailureEventFragment = { __typename: "WebhookFailureEvent" } & Pick<
+  WebhookFailureEvent,
+  "executionId" | "responseOrError" | "httpStatus" | "url" | "createdAt" | "id"
+> & { webhook: { __typename?: "Webhook" } & Pick<Webhook, "id"> };
 
 export type AgentSessionFragment = { __typename: "AgentSession" } & Pick<
   AgentSession,
@@ -31492,8 +31574,6 @@ type Node_Document_Fragment = { __typename: "Document" } & Pick<Document, "id">;
 
 type Node_DocumentContent_Fragment = { __typename: "DocumentContent" } & Pick<DocumentContent, "id">;
 
-type Node_DocumentContentDraft_Fragment = { __typename: "DocumentContentDraft" } & Pick<DocumentContentDraft, "id">;
-
 type Node_DocumentContentHistory_Fragment = { __typename: "DocumentContentHistory" } & Pick<
   DocumentContentHistory,
   "id"
@@ -31762,7 +31842,6 @@ export type NodeFragment =
   | Node_CycleNotificationSubscription_Fragment
   | Node_Document_Fragment
   | Node_DocumentContent_Fragment
-  | Node_DocumentContentDraft_Fragment
   | Node_DocumentContentHistory_Fragment
   | Node_DocumentContentRevision_Fragment
   | Node_DocumentNotification_Fragment
@@ -33384,6 +33463,12 @@ export type WebhookFragment = { __typename: "Webhook" } & Pick<
 > & {
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+    failures: Array<
+      { __typename: "WebhookFailureEvent" } & Pick<
+        WebhookFailureEvent,
+        "executionId" | "responseOrError" | "httpStatus" | "url" | "createdAt" | "id"
+      > & { webhook: { __typename?: "Webhook" } & Pick<Webhook, "id"> }
+    >;
   };
 
 export type RepositorySuggestionFragment = { __typename: "RepositorySuggestion" } & Pick<
@@ -33800,34 +33885,6 @@ export type NotificationSubscriptionFragment =
   | NotificationSubscription_ProjectNotificationSubscription_Fragment
   | NotificationSubscription_TeamNotificationSubscription_Fragment
   | NotificationSubscription_UserNotificationSubscription_Fragment;
-
-export type DocumentContentDraftFragment = { __typename: "DocumentContentDraft" } & Pick<
-  DocumentContentDraft,
-  "contentState" | "documentContentId" | "userId" | "id" | "createdAt" | "archivedAt" | "updatedAt"
-> & {
-    documentContent: { __typename: "DocumentContent" } & Pick<
-      DocumentContent,
-      "contentState" | "content" | "id" | "createdAt" | "restoredAt" | "archivedAt" | "updatedAt"
-    > & {
-        aiPromptRules?: Maybe<
-          { __typename: "AiPromptRules" } & Pick<AiPromptRules, "id" | "createdAt" | "archivedAt" | "updatedAt"> & {
-              updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-            }
-        >;
-        document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
-        initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-        issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-        projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
-        project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-        welcomeMessage?: Maybe<
-          { __typename: "WelcomeMessage" } & Pick<
-            WelcomeMessage,
-            "title" | "id" | "createdAt" | "archivedAt" | "updatedAt" | "enabled"
-          > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
-        >;
-      };
-    user: { __typename?: "User" } & Pick<User, "id">;
-  };
 
 export type NotificationDeliveryPreferencesScheduleFragment = {
   __typename: "NotificationDeliveryPreferencesSchedule";
@@ -40820,6 +40877,24 @@ export type ProjectLabelPayloadFragment = { __typename: "ProjectLabelPayload" } 
   "lastSyncId" | "success"
 > & { projectLabel: { __typename?: "ProjectLabel" } & Pick<ProjectLabel, "id"> };
 
+export type ProjectMilestoneMovePayloadFragment = { __typename: "ProjectMilestoneMovePayload" } & Pick<
+  ProjectMilestoneMovePayload,
+  "lastSyncId" | "success"
+> & {
+    previousIssueTeamIds?: Maybe<
+      Array<
+        { __typename: "ProjectMilestoneMoveIssueToTeam" } & Pick<ProjectMilestoneMoveIssueToTeam, "issueId" | "teamId">
+      >
+    >;
+    previousProjectTeamIds?: Maybe<
+      { __typename: "ProjectMilestoneMoveProjectTeams" } & Pick<
+        ProjectMilestoneMoveProjectTeams,
+        "projectId" | "teamIds"
+      >
+    >;
+    projectMilestone: { __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">;
+  };
+
 export type ProjectMilestonePayloadFragment = { __typename: "ProjectMilestonePayload" } & Pick<
   ProjectMilestonePayload,
   "lastSyncId" | "success"
@@ -43372,6 +43447,16 @@ export type FileUploadDeletePayloadFragment = { __typename: "FileUploadDeletePay
   "success"
 >;
 
+export type ProjectMilestoneMoveIssueToTeamFragment = { __typename: "ProjectMilestoneMoveIssueToTeam" } & Pick<
+  ProjectMilestoneMoveIssueToTeam,
+  "issueId" | "teamId"
+>;
+
+export type ProjectMilestoneMoveProjectTeamsFragment = { __typename: "ProjectMilestoneMoveProjectTeams" } & Pick<
+  ProjectMilestoneMoveProjectTeams,
+  "projectId" | "teamIds"
+>;
+
 export type SubscriptionFragment = { __typename: "Subscription" } & {
   commentArchived: { __typename?: "Comment" } & Pick<Comment, "id">;
   commentCreated: { __typename?: "Comment" } & Pick<Comment, "id">;
@@ -43381,87 +43466,6 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
   cycleArchived: { __typename?: "Cycle" } & Pick<Cycle, "id">;
   cycleCreated: { __typename?: "Cycle" } & Pick<Cycle, "id">;
   cycleUpdated: { __typename?: "Cycle" } & Pick<Cycle, "id">;
-  documentContentDraftCreated: { __typename: "DocumentContentDraft" } & Pick<
-    DocumentContentDraft,
-    "contentState" | "documentContentId" | "userId" | "id" | "createdAt" | "archivedAt" | "updatedAt"
-  > & {
-      documentContent: { __typename: "DocumentContent" } & Pick<
-        DocumentContent,
-        "contentState" | "content" | "id" | "createdAt" | "restoredAt" | "archivedAt" | "updatedAt"
-      > & {
-          aiPromptRules?: Maybe<
-            { __typename: "AiPromptRules" } & Pick<AiPromptRules, "id" | "createdAt" | "archivedAt" | "updatedAt"> & {
-                updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-              }
-          >;
-          document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
-          initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-          issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-          projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
-          project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-          welcomeMessage?: Maybe<
-            { __typename: "WelcomeMessage" } & Pick<
-              WelcomeMessage,
-              "title" | "id" | "createdAt" | "archivedAt" | "updatedAt" | "enabled"
-            > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
-          >;
-        };
-      user: { __typename?: "User" } & Pick<User, "id">;
-    };
-  documentContentDraftDeleted: { __typename: "DocumentContentDraft" } & Pick<
-    DocumentContentDraft,
-    "contentState" | "documentContentId" | "userId" | "id" | "createdAt" | "archivedAt" | "updatedAt"
-  > & {
-      documentContent: { __typename: "DocumentContent" } & Pick<
-        DocumentContent,
-        "contentState" | "content" | "id" | "createdAt" | "restoredAt" | "archivedAt" | "updatedAt"
-      > & {
-          aiPromptRules?: Maybe<
-            { __typename: "AiPromptRules" } & Pick<AiPromptRules, "id" | "createdAt" | "archivedAt" | "updatedAt"> & {
-                updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-              }
-          >;
-          document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
-          initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-          issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-          projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
-          project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-          welcomeMessage?: Maybe<
-            { __typename: "WelcomeMessage" } & Pick<
-              WelcomeMessage,
-              "title" | "id" | "createdAt" | "archivedAt" | "updatedAt" | "enabled"
-            > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
-          >;
-        };
-      user: { __typename?: "User" } & Pick<User, "id">;
-    };
-  documentContentDraftUpdated: { __typename: "DocumentContentDraft" } & Pick<
-    DocumentContentDraft,
-    "contentState" | "documentContentId" | "userId" | "id" | "createdAt" | "archivedAt" | "updatedAt"
-  > & {
-      documentContent: { __typename: "DocumentContent" } & Pick<
-        DocumentContent,
-        "contentState" | "content" | "id" | "createdAt" | "restoredAt" | "archivedAt" | "updatedAt"
-      > & {
-          aiPromptRules?: Maybe<
-            { __typename: "AiPromptRules" } & Pick<AiPromptRules, "id" | "createdAt" | "archivedAt" | "updatedAt"> & {
-                updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-              }
-          >;
-          document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
-          initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-          issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
-          projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
-          project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-          welcomeMessage?: Maybe<
-            { __typename: "WelcomeMessage" } & Pick<
-              WelcomeMessage,
-              "title" | "id" | "createdAt" | "archivedAt" | "updatedAt" | "enabled"
-            > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> }
-          >;
-        };
-      user: { __typename?: "User" } & Pick<User, "id">;
-    };
   documentContentCreated: { __typename: "DocumentContent" } & Pick<
     DocumentContent,
     "contentState" | "content" | "id" | "createdAt" | "restoredAt" | "archivedAt" | "updatedAt"
@@ -65601,6 +65605,8 @@ export type RateLimitStatusQuery = { __typename?: "Query" } & {
 };
 
 export type RecentReleasesByAccessKeyQueryVariables = Exact<{
+  after?: InputMaybe<Scalars["String"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
   limit?: InputMaybe<Scalars["Int"]>;
 }>;
 
@@ -66948,6 +66954,7 @@ export type RoadmapsQuery = { __typename?: "Query" } & {
 export type SearchDocumentsQueryVariables = Exact<{
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
+  filter?: InputMaybe<DocumentFilter>;
   first?: InputMaybe<Scalars["Int"]>;
   includeArchived?: InputMaybe<Scalars["Boolean"]>;
   includeComments?: InputMaybe<Scalars["Boolean"]>;
@@ -67002,6 +67009,7 @@ export type SearchDocumentsQuery = { __typename?: "Query" } & {
 export type SearchDocuments_ArchivePayloadQueryVariables = Exact<{
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
+  filter?: InputMaybe<DocumentFilter>;
   first?: InputMaybe<Scalars["Int"]>;
   includeArchived?: InputMaybe<Scalars["Boolean"]>;
   includeComments?: InputMaybe<Scalars["Boolean"]>;
@@ -68229,6 +68237,12 @@ export type Team_WebhooksQuery = { __typename?: "Query" } & {
         > & {
             team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
             creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            failures: Array<
+              { __typename: "WebhookFailureEvent" } & Pick<
+                WebhookFailureEvent,
+                "executionId" | "responseOrError" | "httpStatus" | "url" | "createdAt" | "id"
+              > & { webhook: { __typename?: "Webhook" } & Pick<Webhook, "id"> }
+            >;
           }
       >;
     };
@@ -71611,6 +71625,12 @@ export type WebhookQuery = { __typename?: "Query" } & {
   > & {
       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
       creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+      failures: Array<
+        { __typename: "WebhookFailureEvent" } & Pick<
+          WebhookFailureEvent,
+          "executionId" | "responseOrError" | "httpStatus" | "url" | "createdAt" | "id"
+        > & { webhook: { __typename?: "Webhook" } & Pick<Webhook, "id"> }
+      >;
     };
 };
 
@@ -71645,6 +71665,12 @@ export type WebhooksQuery = { __typename?: "Query" } & {
       > & {
           team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
           creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          failures: Array<
+            { __typename: "WebhookFailureEvent" } & Pick<
+              WebhookFailureEvent,
+              "executionId" | "responseOrError" | "httpStatus" | "url" | "createdAt" | "id"
+            > & { webhook: { __typename?: "Webhook" } & Pick<Webhook, "id"> }
+          >;
         }
     >;
   };
@@ -75192,7 +75218,6 @@ export type IntegrationSalesforceMutation = { __typename?: "Mutation" } & {
 export type IntegrationSentryConnectMutationVariables = Exact<{
   code: Scalars["String"];
   installationId: Scalars["String"];
-  organizationSlug: Scalars["String"];
 }>;
 
 export type IntegrationSentryConnectMutation = { __typename?: "Mutation" } & {
@@ -82198,6 +82223,34 @@ export type DeleteProjectMilestoneMutationVariables = Exact<{
 
 export type DeleteProjectMilestoneMutation = { __typename?: "Mutation" } & {
   projectMilestoneDelete: { __typename: "DeletePayload" } & Pick<DeletePayload, "lastSyncId" | "entityId" | "success">;
+};
+
+export type ProjectMilestoneMoveMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: ProjectMilestoneMoveInput;
+}>;
+
+export type ProjectMilestoneMoveMutation = { __typename?: "Mutation" } & {
+  projectMilestoneMove: { __typename: "ProjectMilestoneMovePayload" } & Pick<
+    ProjectMilestoneMovePayload,
+    "lastSyncId" | "success"
+  > & {
+      previousIssueTeamIds?: Maybe<
+        Array<
+          { __typename: "ProjectMilestoneMoveIssueToTeam" } & Pick<
+            ProjectMilestoneMoveIssueToTeam,
+            "issueId" | "teamId"
+          >
+        >
+      >;
+      previousProjectTeamIds?: Maybe<
+        { __typename: "ProjectMilestoneMoveProjectTeams" } & Pick<
+          ProjectMilestoneMoveProjectTeams,
+          "projectId" | "teamIds"
+        >
+      >;
+      projectMilestone: { __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">;
+    };
 };
 
 export type UpdateProjectMilestoneMutationVariables = Exact<{
@@ -96335,6 +96388,23 @@ fragment PageInfo on PageInfo {
 }`,
   { fragmentName: "UserConnection" }
 ) as unknown as TypedDocumentString<UserConnectionFragment, unknown>;
+export const WebhookFailureEventFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
+  `
+    fragment WebhookFailureEvent on WebhookFailureEvent {
+  __typename
+  executionId
+  responseOrError
+  httpStatus
+  url
+  createdAt
+  id
+  webhook {
+    id
+  }
+}
+    `,
+  { fragmentName: "WebhookFailureEvent" }
+) as unknown as TypedDocumentString<WebhookFailureEventFragment, unknown>;
 export const WebhookFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
   `
     fragment Webhook on Webhook {
@@ -96351,12 +96421,26 @@ export const WebhookFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
   creator {
     id
   }
+  failures {
+    ...WebhookFailureEvent
+  }
   archivedAt
   updatedAt
   enabled
   allPublicTeams
 }
-    `,
+    fragment WebhookFailureEvent on WebhookFailureEvent {
+  __typename
+  executionId
+  responseOrError
+  httpStatus
+  url
+  createdAt
+  id
+  webhook {
+    id
+  }
+}`,
   { fragmentName: "Webhook" }
 ) as unknown as TypedDocumentString<WebhookFragment, unknown>;
 export const WebhookConnectionFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
@@ -96370,7 +96454,19 @@ export const WebhookConnectionFragmentDoc = /*#__PURE__*/ new TypedDocumentStrin
     ...Webhook
   }
 }
-    fragment Webhook on Webhook {
+    fragment WebhookFailureEvent on WebhookFailureEvent {
+  __typename
+  executionId
+  responseOrError
+  httpStatus
+  url
+  createdAt
+  id
+  webhook {
+    id
+  }
+}
+fragment Webhook on Webhook {
   __typename
   label
   url
@@ -96383,6 +96479,9 @@ export const WebhookConnectionFragmentDoc = /*#__PURE__*/ new TypedDocumentStrin
   }
   creator {
     id
+  }
+  failures {
+    ...WebhookFailureEvent
   }
   archivedAt
   updatedAt
@@ -103546,6 +103645,54 @@ export const ProjectLabelPayloadFragmentDoc = /*#__PURE__*/ new TypedDocumentStr
     `,
   { fragmentName: "ProjectLabelPayload" }
 ) as unknown as TypedDocumentString<ProjectLabelPayloadFragment, unknown>;
+export const ProjectMilestoneMoveIssueToTeamFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
+  `
+    fragment ProjectMilestoneMoveIssueToTeam on ProjectMilestoneMoveIssueToTeam {
+  __typename
+  issueId
+  teamId
+}
+    `,
+  { fragmentName: "ProjectMilestoneMoveIssueToTeam" }
+) as unknown as TypedDocumentString<ProjectMilestoneMoveIssueToTeamFragment, unknown>;
+export const ProjectMilestoneMoveProjectTeamsFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
+  `
+    fragment ProjectMilestoneMoveProjectTeams on ProjectMilestoneMoveProjectTeams {
+  __typename
+  projectId
+  teamIds
+}
+    `,
+  { fragmentName: "ProjectMilestoneMoveProjectTeams" }
+) as unknown as TypedDocumentString<ProjectMilestoneMoveProjectTeamsFragment, unknown>;
+export const ProjectMilestoneMovePayloadFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
+  `
+    fragment ProjectMilestoneMovePayload on ProjectMilestoneMovePayload {
+  __typename
+  previousIssueTeamIds {
+    ...ProjectMilestoneMoveIssueToTeam
+  }
+  previousProjectTeamIds {
+    ...ProjectMilestoneMoveProjectTeams
+  }
+  lastSyncId
+  projectMilestone {
+    id
+  }
+  success
+}
+    fragment ProjectMilestoneMoveIssueToTeam on ProjectMilestoneMoveIssueToTeam {
+  __typename
+  issueId
+  teamId
+}
+fragment ProjectMilestoneMoveProjectTeams on ProjectMilestoneMoveProjectTeams {
+  __typename
+  projectId
+  teamIds
+}`,
+  { fragmentName: "ProjectMilestoneMovePayload" }
+) as unknown as TypedDocumentString<ProjectMilestoneMovePayloadFragment, unknown>;
 export const ProjectMilestonePayloadFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
   `
     fragment ProjectMilestonePayload on ProjectMilestonePayload {
@@ -106824,79 +106971,6 @@ export const FileUploadDeletePayloadFragmentDoc = /*#__PURE__*/ new TypedDocumen
     `,
   { fragmentName: "FileUploadDeletePayload" }
 ) as unknown as TypedDocumentString<FileUploadDeletePayloadFragment, unknown>;
-export const DocumentContentDraftFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
-  `
-    fragment DocumentContentDraft on DocumentContentDraft {
-  __typename
-  documentContent {
-    ...DocumentContent
-  }
-  contentState
-  documentContentId
-  userId
-  id
-  createdAt
-  user {
-    id
-  }
-  archivedAt
-  updatedAt
-}
-    fragment AiPromptRules on AiPromptRules {
-  __typename
-  id
-  createdAt
-  updatedBy {
-    id
-  }
-  archivedAt
-  updatedAt
-}
-fragment DocumentContent on DocumentContent {
-  __typename
-  aiPromptRules {
-    ...AiPromptRules
-  }
-  contentState
-  content
-  document {
-    id
-  }
-  initiative {
-    id
-  }
-  issue {
-    id
-  }
-  projectMilestone {
-    id
-  }
-  project {
-    id
-  }
-  id
-  createdAt
-  restoredAt
-  welcomeMessage {
-    ...WelcomeMessage
-  }
-  archivedAt
-  updatedAt
-}
-fragment WelcomeMessage on WelcomeMessage {
-  __typename
-  title
-  id
-  createdAt
-  updatedBy {
-    id
-  }
-  archivedAt
-  updatedAt
-  enabled
-}`,
-  { fragmentName: "DocumentContentDraft" }
-) as unknown as TypedDocumentString<DocumentContentDraftFragment, unknown>;
 export const DocumentContentRevisionFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
   `
     fragment DocumentContentRevision on DocumentContentRevision {
@@ -106998,15 +107072,6 @@ export const SubscriptionFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
   }
   cycleUpdated {
     id
-  }
-  documentContentDraftCreated {
-    ...DocumentContentDraft
-  }
-  documentContentDraftDeleted {
-    ...DocumentContentDraft
-  }
-  documentContentDraftUpdated {
-    ...DocumentContentDraft
   }
   documentContentCreated {
     ...DocumentContent
@@ -107944,22 +108009,6 @@ fragment NotificationSubscription on NotificationSubscription {
   updatedAt
   includeSubInitiativeUpdates
   active
-}
-fragment DocumentContentDraft on DocumentContentDraft {
-  __typename
-  documentContent {
-    ...DocumentContent
-  }
-  contentState
-  documentContentId
-  userId
-  id
-  createdAt
-  user {
-    id
-  }
-  archivedAt
-  updatedAt
 }
 fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
   __typename
@@ -131070,8 +131119,12 @@ fragment RateLimitResultPayload on RateLimitResultPayload {
   reset
 }`) as unknown as TypedDocumentString<RateLimitStatusQuery, RateLimitStatusQueryVariables>;
 export const RecentReleasesByAccessKeyDocument = /*#__PURE__*/ new TypedDocumentString(`
-    query recentReleasesByAccessKey($limit: Int) {
-  recentReleasesByAccessKey(limit: $limit) {
+    query recentReleasesByAccessKey($after: String, $includeArchived: Boolean, $limit: Int) {
+  recentReleasesByAccessKey(
+    after: $after
+    includeArchived: $includeArchived
+    limit: $limit
+  ) {
     ...AccessKeyRelease
   }
 }
@@ -133161,10 +133214,11 @@ fragment PageInfo on PageInfo {
   hasNextPage
 }`) as unknown as TypedDocumentString<RoadmapsQuery, RoadmapsQueryVariables>;
 export const SearchDocumentsDocument = /*#__PURE__*/ new TypedDocumentString(`
-    query searchDocuments($after: String, $before: String, $first: Int, $includeArchived: Boolean, $includeComments: Boolean, $last: Int, $orderBy: PaginationOrderBy, $teamId: String, $term: String!) {
+    query searchDocuments($after: String, $before: String, $filter: DocumentFilter, $first: Int, $includeArchived: Boolean, $includeComments: Boolean, $last: Int, $orderBy: PaginationOrderBy, $teamId: String, $term: String!) {
   searchDocuments(
     after: $after
     before: $before
+    filter: $filter
     first: $first
     includeArchived: $includeArchived
     includeComments: $includeComments
@@ -133246,10 +133300,11 @@ fragment PageInfo on PageInfo {
   hasNextPage
 }`) as unknown as TypedDocumentString<SearchDocumentsQuery, SearchDocumentsQueryVariables>;
 export const SearchDocuments_ArchivePayloadDocument = /*#__PURE__*/ new TypedDocumentString(`
-    query searchDocuments_archivePayload($after: String, $before: String, $first: Int, $includeArchived: Boolean, $includeComments: Boolean, $last: Int, $orderBy: PaginationOrderBy, $teamId: String, $term: String!) {
+    query searchDocuments_archivePayload($after: String, $before: String, $filter: DocumentFilter, $first: Int, $includeArchived: Boolean, $includeComments: Boolean, $last: Int, $orderBy: PaginationOrderBy, $teamId: String, $term: String!) {
   searchDocuments(
     after: $after
     before: $before
+    filter: $filter
     first: $first
     includeArchived: $includeArchived
     includeComments: $includeComments
@@ -135026,6 +135081,18 @@ export const Team_WebhooksDocument = /*#__PURE__*/ new TypedDocumentString(`
     ...Webhook
   }
 }
+fragment WebhookFailureEvent on WebhookFailureEvent {
+  __typename
+  executionId
+  responseOrError
+  httpStatus
+  url
+  createdAt
+  id
+  webhook {
+    id
+  }
+}
 fragment Webhook on Webhook {
   __typename
   label
@@ -135039,6 +135106,9 @@ fragment Webhook on Webhook {
   }
   creator {
     id
+  }
+  failures {
+    ...WebhookFailureEvent
   }
   archivedAt
   updatedAt
@@ -139465,7 +139535,19 @@ export const WebhookDocument = /*#__PURE__*/ new TypedDocumentString(`
     ...Webhook
   }
 }
-    fragment Webhook on Webhook {
+    fragment WebhookFailureEvent on WebhookFailureEvent {
+  __typename
+  executionId
+  responseOrError
+  httpStatus
+  url
+  createdAt
+  id
+  webhook {
+    id
+  }
+}
+fragment Webhook on Webhook {
   __typename
   label
   url
@@ -139478,6 +139560,9 @@ export const WebhookDocument = /*#__PURE__*/ new TypedDocumentString(`
   }
   creator {
     id
+  }
+  failures {
+    ...WebhookFailureEvent
   }
   archivedAt
   updatedAt
@@ -139506,6 +139591,18 @@ export const WebhooksDocument = /*#__PURE__*/ new TypedDocumentString(`
     ...Webhook
   }
 }
+fragment WebhookFailureEvent on WebhookFailureEvent {
+  __typename
+  executionId
+  responseOrError
+  httpStatus
+  url
+  createdAt
+  id
+  webhook {
+    id
+  }
+}
 fragment Webhook on Webhook {
   __typename
   label
@@ -139519,6 +139616,9 @@ fragment Webhook on Webhook {
   }
   creator {
     id
+  }
+  failures {
+    ...WebhookFailureEvent
   }
   archivedAt
   updatedAt
@@ -143170,12 +143270,8 @@ fragment IntegrationPayload on IntegrationPayload {
   success
 }`) as unknown as TypedDocumentString<IntegrationSalesforceMutation, IntegrationSalesforceMutationVariables>;
 export const IntegrationSentryConnectDocument = /*#__PURE__*/ new TypedDocumentString(`
-    mutation integrationSentryConnect($code: String!, $installationId: String!, $organizationSlug: String!) {
-  integrationSentryConnect(
-    code: $code
-    installationId: $installationId
-    organizationSlug: $organizationSlug
-  ) {
+    mutation integrationSentryConnect($code: String!, $installationId: String!) {
+  integrationSentryConnect(code: $code, installationId: $installationId) {
     ...IntegrationPayload
   }
 }
@@ -150758,6 +150854,36 @@ export const DeleteProjectMilestoneDocument = /*#__PURE__*/ new TypedDocumentStr
   entityId
   success
 }`) as unknown as TypedDocumentString<DeleteProjectMilestoneMutation, DeleteProjectMilestoneMutationVariables>;
+export const ProjectMilestoneMoveDocument = /*#__PURE__*/ new TypedDocumentString(`
+    mutation projectMilestoneMove($id: String!, $input: ProjectMilestoneMoveInput!) {
+  projectMilestoneMove(id: $id, input: $input) {
+    ...ProjectMilestoneMovePayload
+  }
+}
+    fragment ProjectMilestoneMovePayload on ProjectMilestoneMovePayload {
+  __typename
+  previousIssueTeamIds {
+    ...ProjectMilestoneMoveIssueToTeam
+  }
+  previousProjectTeamIds {
+    ...ProjectMilestoneMoveProjectTeams
+  }
+  lastSyncId
+  projectMilestone {
+    id
+  }
+  success
+}
+fragment ProjectMilestoneMoveIssueToTeam on ProjectMilestoneMoveIssueToTeam {
+  __typename
+  issueId
+  teamId
+}
+fragment ProjectMilestoneMoveProjectTeams on ProjectMilestoneMoveProjectTeams {
+  __typename
+  projectId
+  teamIds
+}`) as unknown as TypedDocumentString<ProjectMilestoneMoveMutation, ProjectMilestoneMoveMutationVariables>;
 export const UpdateProjectMilestoneDocument = /*#__PURE__*/ new TypedDocumentString(`
     mutation updateProjectMilestone($id: String!, $input: ProjectMilestoneUpdateInput!) {
   projectMilestoneUpdate(id: $id, input: $input) {
