@@ -3019,7 +3019,7 @@ export class CustomerConnection extends Connection<Customer> {
   }
 }
 /**
- * A request or piece of feedback associated with a customer and linked to an issue or project. It can include a written message, priority, and an attachment pointing to the original conversation. Multiple needs can connect the same customer to the same work, preserving each source of feedback.
+ * A request or piece of feedback optionally associated with a customer and linked to work. It can include a written message, priority, and an attachment pointing to the original conversation. Multiple needs can connect the same customer to the same work, preserving each source of feedback.
  *
  * @param request - function to call the graphql client
  * @param data - L.CustomerNeedFragment response data
@@ -3134,7 +3134,7 @@ export class CustomerNeed extends Request {
   public archive() {
     return new ArchiveCustomerNeedMutation(this._request).fetch(this.id);
   }
-  /** Records a customer request against an issue. Provide input.issueId and optionally identify the customer, add Markdown feedback, or link a source attachment. Multiple needs can be recorded for the same customer and issue. */
+  /** Records customer feedback, optionally linked to an issue. Unlinked requests require Customer Signals to be enabled. You can identify the customer, add Markdown feedback, or link a source attachment. Multiple requests can be recorded for the same customer and issue. */
   public create(input: L.CustomerNeedCreateInput) {
     return new CreateCustomerNeedMutation(this._request).fetch(input);
   }
@@ -4143,7 +4143,7 @@ export class Cycle extends Request {
   public uncompletedIssuesUponClose(variables?: Omit<L.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">) {
     return new Cycle_UncompletedIssuesUponCloseQuery(this._request, this.id, variables).fetch(variables);
   }
-  /** Archives a cycle and removes its current issues from it. The issues themselves are not archived. An inherited cycle must be managed through its parent team. */
+  /** Archives a cycle and removes its current issues from it. The issues themselves are not archived. An inherited cycle must be managed through its parent team. Requires permission to manage the team. */
   public archive() {
     return new ArchiveCycleMutation(this._request).fetch(this.id);
   }
@@ -4151,7 +4151,7 @@ export class Cycle extends Request {
   public create(input: L.CycleCreateInput) {
     return new CreateCycleMutation(this._request).fetch(input);
   }
-  /** Updates a cycle’s name, description, or schedule and returns the resulting cycle. Date changes can shorten adjacent cycles to prevent overlap. You cannot change an active cycle’s start or a completed cycle’s dates, or edit inherited cycles directly. */
+  /** Updates a cycle’s name, description, or schedule and returns the resulting cycle. Date changes can shorten adjacent cycles to prevent overlap. You cannot change an active cycle’s start or a completed cycle’s dates, or edit inherited cycles directly. Requires permission to manage the team. */
   public update(input: L.CycleUpdateInput) {
     return new UpdateCycleMutation(this._request).fetch(this.id, input);
   }
@@ -4853,49 +4853,6 @@ export class DocumentContentChildWebhookPayload {
   public project?: ProjectChildWebhookPayload | null;
 }
 /**
- * A user’s unpublished changes to a DocumentContent record. Each user can have one active draft for the same content, and the live body stays unchanged until the draft is applied. Use documentContentId to associate the draft with the resource being edited.
- *
- * @param request - function to call the graphql client
- * @param data - L.DocumentContentDraftFragment response data
- */
-export class DocumentContentDraft extends Request {
-  private _user: L.DocumentContentDraftFragment["user"];
-
-  public constructor(request: LinearRequest, data: L.DocumentContentDraftFragment) {
-    super(request);
-    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.contentState = data.contentState;
-    this.createdAt = parseDate(data.createdAt) ?? new Date();
-    this.documentContentId = data.documentContentId;
-    this.id = data.id;
-    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
-    this.userId = data.userId;
-    this.documentContent = new DocumentContent(request, data.documentContent);
-    this._user = data.user;
-  }
-
-  /** When the resource was archived, in UTC. Null while active, including after unarchiving. Archived resources still exist but are normally excluded from lists unless `includeArchived` is true. */
-  public archivedAt?: Date | null;
-  /** The draft’s full content as a base64-encoded Yjs update. This is the unpublished version, not a Markdown string or a list of changed lines. */
-  public contentState: string;
-  /** The resource’s recorded creation time, in UTC. Imports may preserve an earlier creation time. */
-  public createdAt: Date;
-  /** The identifier of the document content that this draft is a revision of. */
-  public documentContentId: string;
-  /** The resource's unique UUID. This stays unchanged when the resource is renamed or moved; use it for stored references and mutations. */
-  public id: string;
-  /** When the resource was last meaningfully updated, in UTC. Some background or housekeeping changes do not advance this timestamp. */
-  public updatedAt: Date;
-  /** The identifier of the user who owns this draft. */
-  public userId: string;
-  /** The document content that this draft is a revision of. */
-  public documentContent: DocumentContent;
-  /** The user who created or owns this draft. */
-  public get user(): LinearFetch<User> | undefined {
-    return new UserQuery(this._request).fetch(this._user.id);
-  }
-}
-/**
  * A saved version of rich-text content, with its capture time and contributors.
  *
  * @param request - function to call the graphql client
@@ -5155,7 +5112,7 @@ export class DocumentSearchPayload extends Request {
     this.nodes = data.nodes.map(node => new DocumentSearchResult(request, node));
   }
 
-  /** Number of candidates retrieved before filtering and pagination. Search caps candidates, so this is not an exact count of all matching documents. */
+  /** Number of candidates retrieved that match the document filter, before pagination. Search caps candidates, so this is not an exact count of all matching documents. */
   public totalCount: number;
   /** The resources on this page, in the same order as `edges`. Empty when no results match or no more results remain in the requested direction. */
   public nodes: DocumentSearchResult[];
@@ -15369,6 +15326,81 @@ export class ProjectMilestoneConnection extends Connection<ProjectMilestone> {
   }
 }
 /**
+ * ProjectMilestoneMoveIssueToTeam model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ProjectMilestoneMoveIssueToTeamFragment response data
+ */
+export class ProjectMilestoneMoveIssueToTeam extends Request {
+  public constructor(request: LinearRequest, data: L.ProjectMilestoneMoveIssueToTeamFragment) {
+    super(request);
+    this.issueId = data.issueId;
+    this.teamId = data.teamId;
+  }
+
+  /** The identifier of the issue to restore to its previous team. Must match an issue in the milestone. */
+  public issueId: string;
+  /** The team id in this relationship */
+  public teamId: string;
+}
+/**
+ * The result of a project milestone move mutation.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ProjectMilestoneMovePayloadFragment response data
+ */
+export class ProjectMilestoneMovePayload extends Request {
+  private _projectMilestone: L.ProjectMilestoneMovePayloadFragment["projectMilestone"];
+
+  public constructor(request: LinearRequest, data: L.ProjectMilestoneMovePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this.previousProjectTeamIds = data.previousProjectTeamIds
+      ? new ProjectMilestoneMoveProjectTeams(request, data.previousProjectTeamIds)
+      : undefined;
+    this.previousIssueTeamIds = data.previousIssueTeamIds
+      ? data.previousIssueTeamIds.map(node => new ProjectMilestoneMoveIssueToTeam(request, node))
+      : undefined;
+    this._projectMilestone = data.projectMilestone;
+  }
+
+  /** Synchronization cursor used by Linear clients. External integrations can ignore this field. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** A snapshot of the issues that were moved to new teams, if the user selected to do it, containing an array of mappings between an issue and its previous team. Store on the client to use for undoing a previous milestone move. */
+  public previousIssueTeamIds?: ProjectMilestoneMoveIssueToTeam[] | null;
+  /** A snapshot of the project that had new teams added to it, if the user selected to do it, containing an array of mappings between a project and its previous teams. Store on the client to use for undoing a previous milestone move. */
+  public previousProjectTeamIds?: ProjectMilestoneMoveProjectTeams | null;
+  /** The project milestone that was created or updated. */
+  public get projectMilestone(): LinearFetch<ProjectMilestone> | undefined {
+    return new ProjectMilestoneQuery(this._request).fetch(this._projectMilestone.id);
+  }
+  /** The ID of project milestone that was created or updated. */
+  public get projectMilestoneId(): string | undefined {
+    return this._projectMilestone?.id;
+  }
+}
+/**
+ * ProjectMilestoneMoveProjectTeams model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ProjectMilestoneMoveProjectTeamsFragment response data
+ */
+export class ProjectMilestoneMoveProjectTeams extends Request {
+  public constructor(request: LinearRequest, data: L.ProjectMilestoneMoveProjectTeamsFragment) {
+    super(request);
+    this.projectId = data.projectId;
+    this.teamIds = data.teamIds;
+  }
+
+  /** The project id */
+  public projectId: string;
+  /** The team ids for the project */
+  public teamIds: string[];
+}
+/**
  * The result of a project milestone mutation.
  *
  * @param request - function to call the graphql client
@@ -18892,9 +18924,6 @@ export class Subscription extends Request {
   public constructor(request: LinearRequest, data: L.SubscriptionFragment) {
     super(request);
     this.documentContentCreated = new DocumentContent(request, data.documentContentCreated);
-    this.documentContentDraftCreated = new DocumentContentDraft(request, data.documentContentDraftCreated);
-    this.documentContentDraftDeleted = new DocumentContentDraft(request, data.documentContentDraftDeleted);
-    this.documentContentDraftUpdated = new DocumentContentDraft(request, data.documentContentDraftUpdated);
     this.documentContentRevisionCreated = new DocumentContentRevision(request, data.documentContentRevisionCreated);
     this.documentContentRevisionDeleted = new DocumentContentRevision(request, data.documentContentRevisionDeleted);
     this.documentContentRevisionUpdated = new DocumentContentRevision(request, data.documentContentRevisionUpdated);
@@ -18966,12 +18995,6 @@ export class Subscription extends Request {
 
   /** Triggered when a document content is created */
   public documentContentCreated: DocumentContent;
-  /** Triggered when a document content draft is created */
-  public documentContentDraftCreated: DocumentContentDraft;
-  /** Triggered when a document content draft is deleted */
-  public documentContentDraftDeleted: DocumentContentDraft;
-  /** Triggered when a document content draft is updated */
-  public documentContentDraftUpdated: DocumentContentDraft;
   /** Triggered when a document content revision is created */
   public documentContentRevisionCreated: DocumentContentRevision;
   /** Triggered when a document content revision is deleted */
@@ -22593,7 +22616,7 @@ export class ViewPreferencesValues extends Request {
   public projectFieldTeamsTimeline?: boolean | null;
   /** The ordering of project groups. */
   public projectGroupOrdering?: string | null;
-  /** The project grouping. Values: statusType, activity, leadTeam, lead, member, health, none, status, priority, label, labelGroup, roadmap, initiative, subInitiative, team, startDate, targetDate, rolloutStage. */
+  /** The project grouping. Values: statusType, activity, leadTeam, lead, member, health, none, status, priority, label, labelGroup, roadmap, initiative, subInitiative, team, startDate, targetDate, rolloutStage, customer. */
   public projectGrouping?: string | null;
   /** Date grouping interval: month, quarter, halfYear, or year. */
   public projectGroupingDateResolution?: string | null;
@@ -22617,7 +22640,7 @@ export class ViewPreferencesValues extends Request {
   public projectShowEmptySubGroupsList?: string | null;
   /** How to show empty project sub-groups on the timeline layout. Values: all, none, upcoming. */
   public projectShowEmptySubGroupsTimeline?: string | null;
-  /** The project sub-grouping. Values: statusType, activity, leadTeam, lead, member, health, none, status, priority, label, labelGroup, roadmap, initiative, subInitiative, team, startDate, targetDate, rolloutStage. */
+  /** The project sub-grouping. Values: statusType, activity, leadTeam, lead, member, health, none, status, priority, label, labelGroup, roadmap, initiative, subInitiative, team, startDate, targetDate, rolloutStage, customer. */
   public projectSubGrouping?: string | null;
   /** The UUID of the project-label group to use when projectSubGrouping is labelGroup. Its child labels define the second level of grouping. */
   public projectSubGroupingLabelGroupId?: string | null;
@@ -22798,6 +22821,7 @@ export class Webhook extends Request {
     this.secret = data.secret ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url ?? undefined;
+    this.failures = data.failures.map(node => new WebhookFailureEvent(request, node));
     this._creator = data.creator ?? undefined;
     this._team = data.team ?? undefined;
   }
@@ -22822,6 +22846,8 @@ export class Webhook extends Request {
   public updatedAt: Date;
   /** The destination URL where webhook payloads will be sent via HTTP POST. Null for OAuth application webhooks, which use the webhook URL configured on the OAuth client instead. */
   public url?: string | null;
+  /** Up to 50 recorded delivery failures for this webhook in the current workspace, newest first. */
+  public failures: WebhookFailureEvent[];
   /** The user who created the webhook. Null if the creator is unavailable or it was created for an OAuth application. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
@@ -22875,6 +22901,47 @@ export class WebhookConnection extends Connection<Webhook> {
       data.nodes.map(node => new Webhook(request, node)),
       new PageInfo(request, data.pageInfo)
     );
+  }
+}
+/**
+ * A record of a failed webhook delivery attempt. Created when a webhook payload could not be successfully delivered to the destination URL, either due to an HTTP error response or a network failure. Each failure event captures the HTTP status code (if available), the response body or error message, and a stable execution ID that is shared across retries of the same delivery.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.WebhookFailureEventFragment response data
+ */
+export class WebhookFailureEvent extends Request {
+  private _webhook: L.WebhookFailureEventFragment["webhook"];
+
+  public constructor(request: LinearRequest, data: L.WebhookFailureEventFragment) {
+    super(request);
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.executionId = data.executionId;
+    this.httpStatus = data.httpStatus ?? undefined;
+    this.id = data.id;
+    this.responseOrError = data.responseOrError ?? undefined;
+    this.url = data.url;
+    this._webhook = data.webhook;
+  }
+
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** A stable identifier for the webhook delivery attempt. This ID remains the same across retries of the same payload, making it useful for correlating multiple failure events that belong to the same logical delivery. */
+  public executionId: string;
+  /** The HTTP status code returned by the webhook recipient. Null if the request failed before receiving a response (e.g., DNS resolution failure, connection timeout). */
+  public httpStatus?: number | null;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The HTTP response body returned by the recipient, or the error message if the request failed before receiving a response. Truncated to 1000 characters. */
+  public responseOrError?: string | null;
+  /** The URL that the webhook was trying to push to. */
+  public url: string;
+  /** The webhook that this failure event is associated with. */
+  public get webhook(): LinearFetch<Webhook> | undefined {
+    return new WebhookQuery(this._request).fetch(this._webhook.id);
+  }
+  /** The ID of webhook that this failure event is associated with. */
+  public get webhookId(): string | undefined {
+    return this._webhook?.id;
   }
 }
 /**
@@ -33170,17 +33237,15 @@ export class IntegrationSentryConnectMutation extends Request {
    *
    * @param code - required code to pass to integrationSentryConnect
    * @param installationId - required installationId to pass to integrationSentryConnect
-   * @param organizationSlug - required organizationSlug to pass to integrationSentryConnect
    * @returns parsed response from IntegrationSentryConnectMutation
    */
-  public async fetch(code: string, installationId: string, organizationSlug: string): LinearFetch<IntegrationPayload> {
+  public async fetch(code: string, installationId: string): LinearFetch<IntegrationPayload> {
     const response = await this._request<
       L.IntegrationSentryConnectMutation,
       L.IntegrationSentryConnectMutationVariables
     >(L.IntegrationSentryConnectDocument.toString(), {
       code,
       installationId,
-      organizationSlug,
     });
     const data = response.integrationSentryConnect;
 
@@ -35927,6 +35992,37 @@ export class DeleteProjectMilestoneMutation extends Request {
     const data = response.projectMilestoneDelete;
 
     return new DeletePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ProjectMilestoneMove Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class ProjectMilestoneMoveMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ProjectMilestoneMove mutation and return a ProjectMilestoneMovePayload
+   *
+   * @param id - required id to pass to projectMilestoneMove
+   * @param input - required input to pass to projectMilestoneMove
+   * @returns parsed response from ProjectMilestoneMoveMutation
+   */
+  public async fetch(id: string, input: L.ProjectMilestoneMoveInput): LinearFetch<ProjectMilestoneMovePayload> {
+    const response = await this._request<L.ProjectMilestoneMoveMutation, L.ProjectMilestoneMoveMutationVariables>(
+      L.ProjectMilestoneMoveDocument.toString(),
+      {
+        id,
+        input,
+      }
+    );
+    const data = response.projectMilestoneMove;
+
+    return new ProjectMilestoneMovePayload(this._request, data);
   }
 }
 
@@ -49424,7 +49520,7 @@ export class LinearSdk extends Request {
     return new ArchiveCustomerNeedMutation(this._request).fetch(id);
   }
   /**
-   * Records a customer request against an issue. Provide input.issueId and optionally identify the customer, add Markdown feedback, or link a source attachment. Multiple needs can be recorded for the same customer and issue.
+   * Records customer feedback, optionally linked to an issue. Unlinked requests require Customer Signals to be enabled. You can identify the customer, add Markdown feedback, or link a source attachment. Multiple requests can be recorded for the same customer and issue.
    *
    * @param input - required input to pass to createCustomerNeed
    * @returns CustomerNeedPayload
@@ -49565,7 +49661,7 @@ export class LinearSdk extends Request {
     return new CustomerUpsertMutation(this._request).fetch(input);
   }
   /**
-   * Archives a cycle and removes its current issues from it. The issues themselves are not archived. An inherited cycle must be managed through its parent team.
+   * Archives a cycle and removes its current issues from it. The issues themselves are not archived. An inherited cycle must be managed through its parent team. Requires permission to manage the team.
    *
    * @param id - required id to pass to archiveCycle
    * @returns CycleArchivePayload
@@ -49592,7 +49688,7 @@ export class LinearSdk extends Request {
     return new CycleShiftAllMutation(this._request).fetch(input);
   }
   /**
-   * Starts the upcoming cycle as of midnight today. Completes the previous cycle if it has not yet ended. Only the next upcoming (not yet started) cycle for the team can be started.
+   * Starts the upcoming cycle as of midnight today. Completes the previous cycle if it has not yet ended. Only the next upcoming (not yet started) cycle for the team can be started. Requires permission to manage the team.
    *
    * @param id - required id to pass to cycleStartUpcomingCycleToday
    * @returns CyclePayload
@@ -49601,7 +49697,7 @@ export class LinearSdk extends Request {
     return new CycleStartUpcomingCycleTodayMutation(this._request).fetch(id);
   }
   /**
-   * Updates a cycle’s name, description, or schedule and returns the resulting cycle. Date changes can shorten adjacent cycles to prevent overlap. You cannot change an active cycle’s start or a completed cycle’s dates, or edit inherited cycles directly.
+   * Updates a cycle’s name, description, or schedule and returns the resulting cycle. Date changes can shorten adjacent cycles to prevent overlap. You cannot change an active cycle’s start or a completed cycle’s dates, or edit inherited cycles directly. Requires permission to manage the team.
    *
    * @param id - required id to pass to updateCycle
    * @param input - required input to pass to updateCycle
@@ -50483,15 +50579,10 @@ export class LinearSdk extends Request {
    *
    * @param code - required code to pass to integrationSentryConnect
    * @param installationId - required installationId to pass to integrationSentryConnect
-   * @param organizationSlug - required organizationSlug to pass to integrationSentryConnect
    * @returns IntegrationPayload
    */
-  public integrationSentryConnect(
-    code: string,
-    installationId: string,
-    organizationSlug: string
-  ): LinearFetch<IntegrationPayload> {
-    return new IntegrationSentryConnectMutation(this._request).fetch(code, installationId, organizationSlug);
+  public integrationSentryConnect(code: string, installationId: string): LinearFetch<IntegrationPayload> {
+    return new IntegrationSentryConnectMutation(this._request).fetch(code, installationId);
   }
   /**
    * Connects a Slack workspace to the main Linear Slack app using an OAuth grant. Reconnecting an archived connection restores it with fresh credentials. Connecting multiple Slack workspaces requires the corresponding plan feature; the same Slack workspace cannot have two active connections or belong to another Linear workspace's connection.
@@ -51468,6 +51559,19 @@ export class LinearSdk extends Request {
    */
   public deleteProjectMilestone(id: string): LinearFetch<DeletePayload> {
     return new DeleteProjectMilestoneMutation(this._request).fetch(id);
+  }
+  /**
+   * Moves a milestone and its issues to another project, including archived issues. The caller must have access to every issue in the milestone, and the milestone and destination project must be writable. If an issue's team is not part of the destination project, provide newIssueTeamId or addIssueTeamToProject. The returned team snapshots can be passed to the undo inputs when moving the milestone back to its original project.
+   *
+   * @param id - required id to pass to projectMilestoneMove
+   * @param input - required input to pass to projectMilestoneMove
+   * @returns ProjectMilestoneMovePayload
+   */
+  public projectMilestoneMove(
+    id: string,
+    input: L.ProjectMilestoneMoveInput
+  ): LinearFetch<ProjectMilestoneMovePayload> {
+    return new ProjectMilestoneMoveMutation(this._request).fetch(id, input);
   }
   /**
    * Updates a milestone in a project you can edit, including an archived milestone. Omitted fields keep their current values. Changing projectId moves the milestone and clears its links from issue drafts in the previous project.

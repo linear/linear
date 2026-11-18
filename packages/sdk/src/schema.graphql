@@ -4306,7 +4306,7 @@ input CustomerImportantCountSort {
 }
 
 """
-A request or piece of feedback associated with a customer and linked to an issue or project. It can include a written message, priority, and an attachment pointing to the original conversation. Multiple needs can connect the same customer to the same work, preserving each source of feedback.
+A request or piece of feedback optionally associated with a customer and linked to work. It can include a written message, priority, and an attachment pointing to the original conversation. Multiple needs can connect the same customer to the same work, preserving each source of feedback.
 """
 type CustomerNeed implements Node {
   """
@@ -4506,7 +4506,7 @@ input CustomerNeedCreateFromAttachmentInput {
 }
 
 """
-The issue and optional customer details for a new request. Provide issueId when using the public API. You can include Markdown feedback and a source attachment, and identify the customer by either its UUID or external-system ID.
+The feedback and optional customer and work links for a new request. Requests may be created without a linked issue, project, or signal when Customer Signals is enabled. You can include Markdown feedback and a source attachment, and identify the customer by either its UUID or external-system ID.
 """
 input CustomerNeedCreateInput {
   """
@@ -4550,7 +4550,7 @@ input CustomerNeedCreateInput {
   """
   id: String
   """
-  The issue UUID or identifier, such as LIN-123. Required for public API calls.
+  The optional issue UUID or identifier, such as LIN-123.
   """
   issueId: String
   """
@@ -6885,48 +6885,6 @@ type DocumentContentChildWebhookPayload {
 }
 
 """
-A user’s unpublished changes to a DocumentContent record. Each user can have one active draft for the same content, and the live body stays unchanged until the draft is applied. Use documentContentId to associate the draft with the resource being edited.
-"""
-type DocumentContentDraft implements Node {
-  """
-  When the resource was archived, in UTC. Null while active, including after unarchiving. Archived resources still exist but are normally excluded from lists unless `includeArchived` is true.
-  """
-  archivedAt: DateTime
-  """
-  The draft’s full content as a base64-encoded Yjs update. This is the unpublished version, not a Markdown string or a list of changed lines.
-  """
-  contentState: String!
-  """
-  The resource’s recorded creation time, in UTC. Imports may preserve an earlier creation time.
-  """
-  createdAt: DateTime!
-  """
-  The document content that this draft is a revision of.
-  """
-  documentContent: DocumentContent!
-  """
-  The identifier of the document content that this draft is a revision of.
-  """
-  documentContentId: String!
-  """
-  The resource's unique UUID. This stays unchanged when the resource is renamed or moved; use it for stored references and mutations.
-  """
-  id: ID!
-  """
-  When the resource was last meaningfully updated, in UTC. Some background or housekeeping changes do not advance this timestamp.
-  """
-  updatedAt: DateTime!
-  """
-  The user who created or owns this draft.
-  """
-  user: User!
-  """
-  The identifier of the user who owns this draft.
-  """
-  userId: String!
-}
-
-"""
 A saved version of rich-text content, with its capture time and contributors.
 """
 type DocumentContentHistory implements Node {
@@ -7355,7 +7313,7 @@ type DocumentSearchPayload {
   """
   pageInfo: PageInfo!
   """
-  Number of candidates retrieved before filtering and pagination. Search caps candidates, so this is not an exact count of all matching documents.
+  Number of candidates retrieved that match the document filter, before pagination. Search caps candidates, so this is not an exact count of all matching documents.
   """
   totalCount: Float!
 }
@@ -10679,7 +10637,7 @@ Filters a related collection of initiatives. Use some or every to test its membe
 """
 input InitiativeCollectionFilter {
   """
-  Comparator for the initiative activity type.
+  Not supported. Initiative activity is not stored on the server, so filters that set this field are rejected.
   """
   activityType: StringComparator
   """
@@ -10762,6 +10720,10 @@ input InitiativeCollectionFilter {
   Conditions on distinct accessible projects linked to this initiative or its sub-initiatives. A project linked through several sub-initiatives is counted once.
   """
   projects: ProjectCollectionFilter
+  """
+  Comparator for the initiative's name and summary.
+  """
+  searchableContent: ContentComparator
   """
   Comparator for the initiative slug ID.
   """
@@ -10909,7 +10871,7 @@ Filters initiatives by status, health, dates, ownership, labels, hierarchy, or r
 """
 input InitiativeFilter {
   """
-  Comparator for the initiative activity type.
+  Not supported. Initiative activity is not stored on the server, so filters that set this field are rejected.
   """
   activityType: StringComparator
   """
@@ -10984,6 +10946,10 @@ input InitiativeFilter {
   Conditions on distinct accessible projects linked to this initiative or its sub-initiatives. A project linked through several sub-initiatives is counted once.
   """
   projects: ProjectCollectionFilter
+  """
+  Comparator for the initiative's name and summary.
+  """
+  searchableContent: ContentComparator
   """
   Comparator for the initiative slug ID.
   """
@@ -14341,7 +14307,7 @@ input IssueCollectionFilter {
   """
   addedToCyclePeriod: CyclePeriodComparator
   """
-  Age (created -> now) comparator, defined if the issue is still open.
+  Compares the elapsed time from creation to the start of the query's database transaction. The duration is null for completed or canceled issues. Accepts ISO 8601 durations or milliseconds.
   """
   ageTime: NullableDurationComparator
   """
@@ -14405,7 +14371,7 @@ input IssueCollectionFilter {
   """
   cycle: NullableCycleFilter
   """
-  Cycle time (started -> completed) comparator.
+  Compares the elapsed time from work starting to completion. The duration is null if either timestamp is missing. Accepts ISO 8601 durations or milliseconds.
   """
   cycleTime: NullableDurationComparator
   """
@@ -14501,7 +14467,7 @@ input IssueCollectionFilter {
   """
   lastAppliedTemplate: NullableTemplateFilter
   """
-  Lead time (created -> completed) comparator.
+  Compares the elapsed time from creation to completion. The duration is null for issues without a completion time. Accepts ISO 8601 durations or milliseconds.
   """
   leadTime: NullableDurationComparator
   """
@@ -14605,7 +14571,7 @@ input IssueCollectionFilter {
   """
   title: StringComparator
   """
-  Triage time (entered triaged -> triaged) comparator.
+  Compares the elapsed time from entering triage to leaving triage. The duration is null if either timestamp is missing. Accepts ISO 8601 durations or milliseconds.
   """
   triageTime: NullableDurationComparator
   """
@@ -15006,7 +14972,7 @@ input IssueFilter {
   """
   addedToCyclePeriod: CyclePeriodComparator
   """
-  Age (created -> now) comparator, defined if the issue is still open.
+  Compares the elapsed time from creation to the start of the query's database transaction. The duration is null for completed or canceled issues. Accepts ISO 8601 durations or milliseconds.
   """
   ageTime: NullableDurationComparator
   """
@@ -15070,7 +15036,7 @@ input IssueFilter {
   """
   cycle: NullableCycleFilter
   """
-  Cycle time (started -> completed) comparator.
+  Compares the elapsed time from work starting to completion. The duration is null if either timestamp is missing. Accepts ISO 8601 durations or milliseconds.
   """
   cycleTime: NullableDurationComparator
   """
@@ -15162,7 +15128,7 @@ input IssueFilter {
   """
   lastAppliedTemplate: NullableTemplateFilter
   """
-  Lead time (created -> completed) comparator.
+  Compares the elapsed time from creation to completion. The duration is null for issues without a completion time. Accepts ISO 8601 durations or milliseconds.
   """
   leadTime: NullableDurationComparator
   """
@@ -15258,7 +15224,7 @@ input IssueFilter {
   """
   title: StringComparator
   """
-  Triage time (entered triaged -> triaged) comparator.
+  Compares the elapsed time from entering triage to leaving triage. The duration is null if either timestamp is missing. Accepts ISO 8601 durations or milliseconds.
   """
   triageTime: NullableDurationComparator
   """
@@ -19776,7 +19742,7 @@ type Mutation {
     id: String!
   ): CustomerNeedArchivePayload!
   """
-  Records a customer request against an issue. Provide input.issueId and optionally identify the customer, add Markdown feedback, or link a source attachment. Multiple needs can be recorded for the same customer and issue.
+  Records customer feedback, optionally linked to an issue. Unlinked requests require Customer Signals to be enabled. You can identify the customer, add Markdown feedback, or link a source attachment. Multiple requests can be recorded for the same customer and issue.
   """
   customerNeedCreate(
     """
@@ -19926,7 +19892,7 @@ type Mutation {
     input: CustomerUpsertInput!
   ): CustomerPayload!
   """
-  Archives a cycle and removes its current issues from it. The issues themselves are not archived. An inherited cycle must be managed through its parent team.
+  Archives a cycle and removes its current issues from it. The issues themselves are not archived. An inherited cycle must be managed through its parent team. Requires permission to manage the team.
   """
   cycleArchive(
     """
@@ -19953,7 +19919,7 @@ type Mutation {
     input: CycleShiftAllInput!
   ): CyclePayload!
   """
-  Starts the upcoming cycle as of midnight today. Completes the previous cycle if it has not yet ended. Only the next upcoming (not yet started) cycle for the team can be started.
+  Starts the upcoming cycle as of midnight today. Completes the previous cycle if it has not yet ended. Only the next upcoming (not yet started) cycle for the team can be started. Requires permission to manage the team.
   """
   cycleStartUpcomingCycleToday(
     """
@@ -19962,7 +19928,7 @@ type Mutation {
     id: String!
   ): CyclePayload!
   """
-  Updates a cycle’s name, description, or schedule and returns the resulting cycle. Date changes can shorten adjacent cycles to prevent overlap. You cannot change an active cycle’s start or a completed cycle’s dates, or edit inherited cycles directly.
+  Updates a cycle’s name, description, or schedule and returns the resulting cycle. Date changes can shorten adjacent cycles to prevent overlap. You cannot change an active cycle’s start or a completed cycle’s dates, or edit inherited cycles directly. Requires permission to manage the team.
   """
   cycleUpdate(
     """
@@ -20951,10 +20917,6 @@ type Mutation {
     The Sentry installationId to connect with.
     """
     installationId: String!
-    """
-    The slug of the Sentry organization being connected.
-    """
-    organizationSlug: String!
   ): IntegrationPayload!
   """
   Connects a Slack workspace to the main Linear Slack app using an OAuth grant. Reconnecting an archived connection restores it with fresh credentials. Connecting multiple Slack workspaces requires the corresponding plan feature; the same Slack workspace cannot have two active connections or belong to another Linear workspace's connection.
@@ -22166,6 +22128,19 @@ type Mutation {
     """
     id: String!
   ): DeletePayload!
+  """
+  Moves a milestone and its issues to another project, including archived issues. The caller must have access to every issue in the milestone, and the milestone and destination project must be writable. If an issue's team is not part of the destination project, provide newIssueTeamId or addIssueTeamToProject. The returned team snapshots can be passed to the undo inputs when moving the milestone back to its original project.
+  """
+  projectMilestoneMove(
+    """
+    The identifier of the project milestone to move.
+    """
+    id: String!
+    """
+    The project to move the milestone to, as well as any additional options need to make a successful move, or undo a previous move.
+    """
+    input: ProjectMilestoneMoveInput!
+  ): ProjectMilestoneMovePayload!
   """
   Updates a milestone in a project you can edit, including an archived milestone. Omitted fields keep their current values. Changing projectId moves the milestone and clears its links from issue drafts in the previous project.
   """
@@ -24510,7 +24485,7 @@ Filters an optional relation to initiatives. Use null to test whether the relati
 """
 input NullableInitiativeFilter {
   """
-  Comparator for the initiative activity type.
+  Not supported. Initiative activity is not stored on the server, so filters that set this field are rejected.
   """
   activityType: StringComparator
   """
@@ -24589,6 +24564,10 @@ input NullableInitiativeFilter {
   Conditions on distinct accessible projects linked to this initiative or its sub-initiatives. A project linked through several sub-initiatives is counted once.
   """
   projects: ProjectCollectionFilter
+  """
+  Comparator for the initiative's name and summary.
+  """
+  searchableContent: ContentComparator
   """
   Comparator for the initiative slug ID.
   """
@@ -24678,7 +24657,7 @@ input NullableIssueFilter {
   """
   addedToCyclePeriod: CyclePeriodComparator
   """
-  Age (created -> now) comparator, defined if the issue is still open.
+  Compares the elapsed time from creation to the start of the query's database transaction. The duration is null for completed or canceled issues. Accepts ISO 8601 durations or milliseconds.
   """
   ageTime: NullableDurationComparator
   """
@@ -24742,7 +24721,7 @@ input NullableIssueFilter {
   """
   cycle: NullableCycleFilter
   """
-  Cycle time (started -> completed) comparator.
+  Compares the elapsed time from work starting to completion. The duration is null if either timestamp is missing. Accepts ISO 8601 durations or milliseconds.
   """
   cycleTime: NullableDurationComparator
   """
@@ -24834,7 +24813,7 @@ input NullableIssueFilter {
   """
   lastAppliedTemplate: NullableTemplateFilter
   """
-  Lead time (created -> completed) comparator.
+  Compares the elapsed time from creation to completion. The duration is null for issues without a completion time. Accepts ISO 8601 durations or milliseconds.
   """
   leadTime: NullableDurationComparator
   """
@@ -24934,7 +24913,7 @@ input NullableIssueFilter {
   """
   title: StringComparator
   """
-  Triage time (entered triaged -> triaged) comparator.
+  Compares the elapsed time from entering triage to leaving triage. The duration is null if either timestamp is missing. Accepts ISO 8601 durations or milliseconds.
   """
   triageTime: NullableDurationComparator
   """
@@ -30043,6 +30022,108 @@ input ProjectMilestoneFilter {
 }
 
 """
+Input for moving a project milestone to another project.
+"""
+input ProjectMilestoneMoveInput {
+  """
+  Whether to add each milestone issue's team to the project. This is needed when there is a mismatch between a project's teams and the milestone's issues' teams. Either this or newIssueTeamId is required in that situation to resolve constraints.
+  """
+  addIssueTeamToProject: Boolean
+  """
+  The team id to move the attached issues to. This is needed when there is a mismatch between a project's teams and the milestone's issues' teams. Either this or addIssueTeamToProject is required in that situation to resolve constraints.
+  """
+  newIssueTeamId: String
+  """
+  The identifier of the project to move the milestone to.
+  """
+  projectId: String!
+  """
+  A list of issue id to team ids, used for undoing a previous milestone move where the specified issues were moved from the specified teams.
+  """
+  undoIssueTeamIds: [ProjectMilestoneMoveIssueToTeamInput!]
+  """
+  A mapping of project id to a previous set of team ids, used for undoing a previous milestone move where the specified teams were added to the project.
+  """
+  undoProjectTeamIds: ProjectMilestoneMoveProjectTeamsInput
+}
+
+type ProjectMilestoneMoveIssueToTeam {
+  """
+  The identifier of the issue to restore to its previous team. Must match an issue in the milestone.
+  """
+  issueId: String!
+  """
+  The team id in this relationship
+  """
+  teamId: String!
+}
+
+"""
+Used for ProjectMilestoneMoveInput to describe a mapping between an issue and its team.
+"""
+input ProjectMilestoneMoveIssueToTeamInput {
+  """
+  The identifier of the issue to restore to its previous team. Must match an issue in the milestone.
+  """
+  issueId: String!
+  """
+  The team id in this relationship
+  """
+  teamId: String!
+}
+
+"""
+The result of a project milestone move mutation.
+"""
+type ProjectMilestoneMovePayload {
+  """
+  Synchronization cursor used by Linear clients. External integrations can ignore this field.
+  """
+  lastSyncId: Float!
+  """
+  A snapshot of the issues that were moved to new teams, if the user selected to do it, containing an array of mappings between an issue and its previous team. Store on the client to use for undoing a previous milestone move.
+  """
+  previousIssueTeamIds: [ProjectMilestoneMoveIssueToTeam!]
+  """
+  A snapshot of the project that had new teams added to it, if the user selected to do it, containing an array of mappings between a project and its previous teams. Store on the client to use for undoing a previous milestone move.
+  """
+  previousProjectTeamIds: ProjectMilestoneMoveProjectTeams
+  """
+  The project milestone that was created or updated.
+  """
+  projectMilestone: ProjectMilestone!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+type ProjectMilestoneMoveProjectTeams {
+  """
+  The project id
+  """
+  projectId: String!
+  """
+  The team ids for the project
+  """
+  teamIds: [String!]!
+}
+
+"""
+Used for ProjectMilestoneMoveInput to describe a snapshot of a project and its team ids
+"""
+input ProjectMilestoneMoveProjectTeamsInput {
+  """
+  The project id
+  """
+  projectId: String!
+  """
+  The team ids for the project
+  """
+  teamIds: [String!]!
+}
+
+"""
 The result of a project milestone mutation.
 """
 type ProjectMilestonePayload {
@@ -34781,6 +34862,14 @@ type Query {
   """
   recentReleasesByAccessKey(
     """
+    Returns releases after this release in the same order. Pass the ID of the last release from the previous page, and keep `includeArchived` unchanged between pages. A started release moves up when it is updated, so it can be skipped or repeated while you page.
+    """
+    after: String
+    """
+    Includes archived releases alongside active ones. Defaults to false. Completed releases are archived automatically six months after completion when they have no unarchived issues. Deleted releases and releases of archived pipelines are never returned.
+    """
+    includeArchived: Boolean = false
+    """
     Maximum number of releases to return. Defaults to 20 and is capped at 100.
     """
     limit: Int
@@ -35070,6 +35159,10 @@ type Query {
     Returns results before this cursor. Pair with `last` to paginate backward, using a cursor returned by the same connection. Keep the filters and ordering unchanged between pages. Cannot be combined with `first` or `after`.
     """
     before: String
+    """
+    Filter returned documents.
+    """
+    filter: DocumentFilter
     """
     The maximum number of results to return, starting after `after` if supplied. Between 1 and 250. Defaults to 50 when neither `first` nor `last` is supplied. Cannot be combined with `last` or `before`.
     """
@@ -39370,18 +39463,6 @@ type Subscription {
   """
   documentContentCreated: DocumentContent!
   """
-  Triggered when a document content draft is created
-  """
-  documentContentDraftCreated: DocumentContentDraft!
-  """
-  Triggered when a document content draft is deleted
-  """
-  documentContentDraftDeleted: DocumentContentDraft!
-  """
-  Triggered when a document content draft is updated
-  """
-  documentContentDraftUpdated: DocumentContentDraft!
-  """
   Triggered when a document content revision is created
   """
   documentContentRevisionCreated: DocumentContentRevision!
@@ -42451,6 +42532,10 @@ enum UsageAlertType {
   Prepaid usage credits crossed below the low-balance threshold.
   """
   lowBalance
+  """
+  Workspace spend reached a workspace spend limit.
+  """
+  spendLimitReached
 }
 
 """
@@ -43113,6 +43198,7 @@ enum UserFlagType {
   figmaPluginBannerDismissed
   figmaPromptDismissed
   helpIslandFeatureInsightsDismissed
+  homeCardsEmptyStateDismissed
   importBannerDismissed
   initiativesBannerDismissed
   insightsHelpDismissed
@@ -44514,7 +44600,7 @@ type ViewPreferencesValues {
   """
   projectGroupOrdering: String @deprecated(reason: "Use groupOrderingMode instead.")
   """
-  The project grouping. Values: statusType, activity, leadTeam, lead, member, health, none, status, priority, label, labelGroup, roadmap, initiative, subInitiative, team, startDate, targetDate, rolloutStage.
+  The project grouping. Values: statusType, activity, leadTeam, lead, member, health, none, status, priority, label, labelGroup, roadmap, initiative, subInitiative, team, startDate, targetDate, rolloutStage, customer.
   """
   projectGrouping: String
   """
@@ -44566,7 +44652,7 @@ type ViewPreferencesValues {
   """
   projectShowEmptySubGroupsTimeline: String
   """
-  The project sub-grouping. Values: statusType, activity, leadTeam, lead, member, health, none, status, priority, label, labelGroup, roadmap, initiative, subInitiative, team, startDate, targetDate, rolloutStage.
+  The project sub-grouping. Values: statusType, activity, leadTeam, lead, member, health, none, status, priority, label, labelGroup, roadmap, initiative, subInitiative, team, startDate, targetDate, rolloutStage, customer.
   """
   projectSubGrouping: String
   """
@@ -45008,6 +45094,10 @@ type Webhook implements Node {
   """
   enabled: Boolean!
   """
+  Up to 50 recorded delivery failures for this webhook in the current workspace, newest first.
+  """
+  failures: [WebhookFailureEvent!]!
+  """
   The resource's unique UUID. This stays unchanged when the resource is renamed or moved; use it for stored references and mutations.
   """
   id: ID!
@@ -45105,6 +45195,40 @@ type WebhookEdge {
   The resource at this position in the result list.
   """
   node: Webhook!
+}
+
+"""
+A record of a failed webhook delivery attempt. Created when a webhook payload could not be successfully delivered to the destination URL, either due to an HTTP error response or a network failure. Each failure event captures the HTTP status code (if available), the response body or error message, and a stable execution ID that is shared across retries of the same delivery.
+"""
+type WebhookFailureEvent {
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  A stable identifier for the webhook delivery attempt. This ID remains the same across retries of the same payload, making it useful for correlating multiple failure events that belong to the same logical delivery.
+  """
+  executionId: String!
+  """
+  The HTTP status code returned by the webhook recipient. Null if the request failed before receiving a response (e.g., DNS resolution failure, connection timeout).
+  """
+  httpStatus: Float
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The HTTP response body returned by the recipient, or the error message if the request failed before receiving a response. Truncated to 1000 characters.
+  """
+  responseOrError: String
+  """
+  The URL that the webhook was trying to push to.
+  """
+  url: String!
+  """
+  The webhook that this failure event is associated with.
+  """
+  webhook: Webhook!
 }
 
 """

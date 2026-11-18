@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.0.9
+
+### Patch Changes
+
+- 4a8d94a: fix(import): only send the Shortcut API token to Shortcut attachment URLs on `media.app.shortcut.com`, and never when it is empty. Only use uploaded image URLs on Linear's hosts, so that the URL an image was downloaded from never ends up in imported content, and keep the token out of the logs of failed uploads.
+- Updated dependencies
+  - @linear/sdk@103.0.0
+
 ## 4.0.8
 
 ### Patch Changes
