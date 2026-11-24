@@ -1,5 +1,4 @@
 import csv from "csvtojson";
-import j2m from "jira2md";
 import type { Importer, ImportResult } from "../../types.ts";
 import { safeParseInt } from "../../utils/parseInt.ts";
 
@@ -76,7 +75,7 @@ export class PivotalCsvImporter implements Importer {
       }
 
       const url = row.URL;
-      const mdDesc = j2m.to_markdown(row.Description);
+      const mdDesc = row.Description;
       const description = url ? `${mdDesc}\n\n[View original issue in Pivotal](${url})` : mdDesc;
 
       // eslint-disable-next-line @typescript-eslint/dot-notation
