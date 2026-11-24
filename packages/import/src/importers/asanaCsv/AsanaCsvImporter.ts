@@ -1,5 +1,4 @@
 import csv from "csvtojson";
-import j2m from "jira2md";
 import type { Importer, ImportResult, IssuePriority } from "../../types.ts";
 
 type AsanaPriority = "High" | "Med" | "Low";
@@ -66,7 +65,7 @@ export class AsanaCsvImporter implements Importer {
       }
 
       const url = this.organizationName ? `${this.organizationName}${row["Task ID"]}` : undefined;
-      const mdDesc = j2m.to_markdown(row.Notes);
+      const mdDesc = row.Notes;
       const description = url ? `${mdDesc}\n\n[View original issue in Asana](${url})` : mdDesc;
 
       const priority = mapPriority(row.Priority);
