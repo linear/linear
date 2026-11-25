@@ -58,6 +58,34 @@ describe("GithubImporter", () => {
     expect(JSON.parse(fetchMock.mock.calls[1][1]?.body as string).variables.cursor).toBe("cursor-1");
   });
 
+  it("fetches every page of an issue's comments", async () => {
+    const author = { id: "u1", login: "octocat", avatarUrl: "https://avatars/u1", email: "" };
+    const comment = (id: string) => ({
+      id,
+      body: id,
+      createdAt: "2026-01-02T00:00:00Z",
+      url: "https://github.com/c",
+      author,
+    });
+    const firstPage = issuesPage(["1"], false, "cursor-1", [comment("c1")]);
+    const body = JSON.parse(await firstPage.text());
+    body.data.repository.issues.edges[0].node.comments.pageInfo = { hasNextPage: true, endCursor: "comments-1" };
+    const commentsPage = (id: string, hasNextPage: boolean, endCursor: string) =>
+      jsonResponse({ data: { node: { comments: { nodes: [comment(id)], pageInfo: { hasNextPage, endCursor } } } } });
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(body))
+      .mockResolvedValueOnce(commentsPage("c2", true, "comments-2"))
+      .mockResolvedValueOnce(commentsPage("c3", false, "comments-3"));
+
+    const result = await new GithubImporter("token", "owner", "repo").import();
+
+    expect(result.issues[0].comments?.map(c => c.body)).toEqual(["c1", "c2", "c3"]);
+    expect(fetchMock.mock.calls.slice(1).map(call => JSON.parse(call[1]?.body as string).variables)).toEqual([
+      { id: "1", cursor: "comments-1" },
+      { id: "1", cursor: "comments-2" },
+    ]);
+  });
+
   it("skips comments whose author account was deleted", async () => {
     const comment = { body: "Hello", createdAt: "2026-01-02T00:00:00Z", url: "https://github.com/c" };
     fetchMock.mockResolvedValueOnce(

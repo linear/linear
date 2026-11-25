@@ -31,8 +31,30 @@ interface GITHUB_ISSUE {
         email?: string;
       } | null;
     }[];
+    pageInfo?: { hasNextPage: boolean; endCursor: string | null };
   };
 }
+
+const COMMENT_FIELDS = `
+  nodes {
+    id
+    body
+    createdAt
+    url
+    author {
+      login
+      avatarUrl(size: 255)
+      ... on User {
+        id
+        name
+        email
+      }
+    }
+  }
+  pageInfo {
+    hasNextPage
+    endCursor
+  }`;
 
 /**
  * Fetch and paginate through all GitHub issues.
@@ -79,22 +101,7 @@ export class GithubImporter implements Importer {
                       description
                     }
                   }
-                  comments(first: 100) {
-                    nodes {
-                      id
-                      body
-                      createdAt
-                      url
-                      author {
-                        login
-                        avatarUrl(size: 255)
-                        ... on User {
-                          id
-                          name
-                          email
-                        }                        
-                      }
-                    }
+                  comments(first: 100) {${COMMENT_FIELDS}
                   }
                 }
               }
@@ -126,6 +133,25 @@ export class GithubImporter implements Importer {
 
       if (!data.repository.issues.pageInfo.hasNextPage) {
         break;
+      }
+    }
+
+    for (const issue of issueData) {
+      let comments = issue.comments;
+      while (comments.pageInfo?.hasNextPage) {
+        const page = (await github(
+          `query moreComments($id: ID!, $cursor: String) {
+            node(id: $id) {
+              ... on Issue {
+                comments(first: 100, after: $cursor) {${COMMENT_FIELDS}
+                }
+              }
+            }
+          }`,
+          { id: issue.id, cursor: comments.pageInfo.endCursor }
+        )) as any;
+        comments = page.node.comments;
+        issue.comments.nodes = [...(issue.comments.nodes ?? []), ...(comments.nodes ?? [])];
       }
     }
 
