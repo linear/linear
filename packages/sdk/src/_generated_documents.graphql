@@ -510,10 +510,18 @@ fragment Document on Document {
   updatedBy {
     id
   }
+  # The user whose personal space holds the document, who owns and manages it. Null if the document belongs to a different parent entity type.
+  personalUser {
+    id
+  }
   # True if the document is in the trash; null otherwise. Trashed documents are archived and can be restored.
   trashed
   # Unique short identifier used in the document’s URL.
   slugId
+  # What people who can open a document in a public team, or in a project with a public team, but are not members of its teams can do with it: edit, comment, or view. Never above general access. Null means the same as general access, and is always null on a personal document.
+  workspaceAccess
+  # What users other than the owner can do with a document that is not personal: edit, comment, or view. People shared on the document with a higher role keep it. Null on a personal document, which only its owner and the people it is shared with can access.
+  generalAccess
   # When the resource was archived, in UTC. Null while active, including after unarchiving. Archived resources still exist but are normally excluded from lists unless `includeArchived` is true.
   archivedAt
   # When the resource was last meaningfully updated, in UTC. Some background or housekeeping changes do not advance this timestamp.
@@ -576,10 +584,18 @@ fragment DocumentSearchResult on DocumentSearchResult {
   updatedBy {
     id
   }
+  # The user whose personal space holds the document, who owns and manages it. Null if the document belongs to a different parent entity type.
+  personalUser {
+    id
+  }
   # True if the document is in the trash; null otherwise. Trashed documents are archived and can be restored.
   trashed
   # Unique short identifier used in the document’s URL.
   slugId
+  # What people who can open a document in a public team, or in a project with a public team, but are not members of its teams can do with it: edit, comment, or view. Never above general access. Null means the same as general access, and is always null on a personal document.
+  workspaceAccess
+  # What users other than the owner can do with a document that is not personal: edit, comment, or view. People shared on the document with a higher role keep it. Null on a personal document, which only its owner and the people it is shared with can access.
+  generalAccess
   # When the resource was archived, in UTC. Null while active, including after unarchiving. Archived resources still exist but are normally excluded from lists unless `includeArchived` is true.
   archivedAt
   # When the resource was last meaningfully updated, in UTC. Some background or housekeeping changes do not advance this timestamp.
@@ -2232,7 +2248,7 @@ fragment IssueNotification on IssueNotification {
 # for events matching the custom view's filter criteria.
 fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
   __typename
-  # The custom view subscribed to.
+  # The custom view subscribed to. Null if the subscriber can no longer access it.
   customView {
     id
   }
@@ -2296,7 +2312,7 @@ fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
   customView {
     id
   }
-  # The customer subscribed to.
+  # The customer subscribed to. Null if the subscriber can no longer access it.
   customer {
     id
   }
@@ -2360,7 +2376,7 @@ fragment CycleNotificationSubscription on CycleNotificationSubscription {
   customer {
     id
   }
-  # The cycle subscribed to.
+  # The cycle subscribed to. Null if the subscriber can no longer access it.
   cycle {
     id
   }
@@ -2424,7 +2440,7 @@ fragment InitiativeNotificationSubscription on InitiativeNotificationSubscriptio
   cycle {
     id
   }
-  # The initiative subscribed to.
+  # The initiative subscribed to. Null if the subscriber can no longer access it.
   initiative {
     id
   }
@@ -2488,7 +2504,7 @@ fragment LabelNotificationSubscription on LabelNotificationSubscription {
   initiative {
     id
   }
-  # The label subscribed to.
+  # The label subscribed to. Null if the subscriber can no longer access it.
   label {
     id
   }
@@ -2554,7 +2570,7 @@ fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
   }
   # The notification event types that this subscription will deliver to the subscriber.
   notificationSubscriptionTypes
-  # The project subscribed to.
+  # The project subscribed to. Null if the subscriber can no longer access it.
   project {
     id
   }
@@ -2622,7 +2638,7 @@ fragment TeamNotificationSubscription on TeamNotificationSubscription {
   id
   # The resource’s recorded creation time, in UTC. Imports may preserve an earlier creation time.
   createdAt
-  # The team subscribed to.
+  # The team subscribed to. Null if the subscriber can no longer access it.
   team {
     id
   }
@@ -2690,7 +2706,7 @@ fragment UserNotificationSubscription on UserNotificationSubscription {
   contextViewType
   # The type of user-specific view that further scopes a user notification subscription. Null if the subscription is not associated with a user view type.
   userContextViewType
-  # The user subscribed to.
+  # The user subscribed to. Null if the subscriber can no longer access it.
   user {
     id
   }
@@ -5648,6 +5664,38 @@ fragment NotificationSubscription on NotificationSubscription {
   includeSubInitiativeUpdates
   # Whether the subscription is active. When inactive, no notifications are generated from this subscription even though it still exists.
   active
+
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 
 # A weekly mobile notification schedule in your user time zone. Supply all seven days, using an empty
@@ -7974,6 +8022,8 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   timelineShowProjectsAside
   # Whether to show the pull request opened timestamp.
   reviewFieldOpenedAt
+  # Whether to show the pull request risk level on review list items. Null if the preference is unset.
+  reviewFieldRisk
   # Whether to show the pull requests field.
   fieldPullRequests
   # Whether to show the quick-to-review badge on review list items. Null if the preference is unset.
@@ -20912,7 +20962,7 @@ mutation attachmentLinkDiscord(
   $createAsUser: String
   # Avatar URL for createAsUser. Requires createAsUser and an OAuth application using actor=app.
   $displayIconUrl: String
-  # Optional attachment ID that may be provided through the API.
+  # The identifier in UUID format. If none is provided, the backend will generate one.
   $id: String
   # The issue for which to link the Discord message. Can be a UUID or issue identifier (e.g., 'LIN-123').
   $issueId: String!
@@ -20944,7 +20994,7 @@ mutation attachmentLinkFront(
   $createAsUser: String
   # Avatar URL for createAsUser. Requires createAsUser and an OAuth application using actor=app.
   $displayIconUrl: String
-  # Optional attachment ID that may be provided through the API.
+  # The identifier in UUID format. If none is provided, the backend will generate one.
   $id: String
   # The issue for which to link the Front conversation. Can be a UUID or issue identifier (e.g., 'LIN-123').
   $issueId: String!
@@ -20969,7 +21019,7 @@ mutation attachmentLinkGitHubIssue(
   $createAsUser: String
   # Avatar URL for createAsUser. Requires createAsUser and an OAuth application using actor=app.
   $displayIconUrl: String
-  # Optional attachment ID that may be provided through the API.
+  # The identifier in UUID format. If none is provided, the backend will generate one.
   $id: String
   # The Linear issue for which to link the GitHub issue. Can be a UUID or issue identifier (e.g., 'LIN-123').
   $issueId: String!
@@ -20996,7 +21046,7 @@ mutation attachmentLinkGitHubPR(
   $createAsUser: String
   # Avatar URL for createAsUser. Requires createAsUser and an OAuth application using actor=app.
   $displayIconUrl: String
-  # Optional attachment ID that may be provided through the API.
+  # The identifier in UUID format. If none is provided, the backend will generate one.
   $id: String
   # The issue for which to link the GitHub pull request. Can be a UUID or issue identifier (e.g., 'LIN-123').
   $issueId: String!
@@ -21027,7 +21077,7 @@ mutation attachmentLinkGitLabMR(
   $createAsUser: String
   # Avatar URL for createAsUser. Requires createAsUser and an OAuth application using actor=app.
   $displayIconUrl: String
-  # Optional attachment ID that may be provided through the API.
+  # The identifier in UUID format. If none is provided, the backend will generate one.
   $id: String
   # The issue for which to link the GitLab merge request. Can be a UUID or issue identifier (e.g., 'LIN-123').
   $issueId: String!
@@ -21061,7 +21111,7 @@ mutation attachmentLinkIntercom(
   $createAsUser: String
   # Avatar URL for createAsUser. Requires createAsUser and an OAuth application using actor=app.
   $displayIconUrl: String
-  # Optional attachment ID that may be provided through the API.
+  # The identifier in UUID format. If none is provided, the backend will generate one.
   $id: String
   # The issue for which to link the Intercom conversation. Can be a UUID or issue identifier (e.g., 'LIN-123').
   $issueId: String!
@@ -21090,7 +21140,7 @@ mutation attachmentLinkJiraIssue(
   $createAsUser: String
   # Avatar URL for createAsUser. Requires createAsUser and an OAuth application using actor=app.
   $displayIconUrl: String
-  # Optional attachment ID that may be provided through the API.
+  # The identifier in UUID format. If none is provided, the backend will generate one.
   $id: String
   # The issue for which to link the Jira issue. Can be a UUID or issue identifier (e.g., 'LIN-123').
   $issueId: String!
@@ -21120,7 +21170,7 @@ mutation attachmentLinkSalesforce(
   $createAsUser: String
   # Avatar URL for createAsUser. Requires createAsUser and an OAuth application using actor=app.
   $displayIconUrl: String
-  # Optional attachment ID that may be provided through the API.
+  # The identifier in UUID format. If none is provided, the backend will generate one.
   $id: String
   # The issue for which to link the Salesforce case. Can be a UUID or issue identifier (e.g., 'LIN-123').
   $issueId: String!
@@ -21147,7 +21197,7 @@ mutation attachmentLinkSlack(
   $createAsUser: String
   # Avatar URL for createAsUser. Requires createAsUser and an OAuth application using actor=app.
   $displayIconUrl: String
-  # Optional attachment ID that may be provided through the API.
+  # The identifier in UUID format. If none is provided, the backend will generate one.
   $id: String
   # The issue to which to link the Slack message. Can be a UUID or issue identifier (e.g., 'LIN-123').
   $issueId: String!
@@ -21178,7 +21228,7 @@ mutation attachmentLinkURL(
   $createAsUser: String
   # Avatar URL for createAsUser. Requires createAsUser and an OAuth application using actor=app.
   $displayIconUrl: String
-  # The id for the attachment.
+  # The identifier in UUID format. If none is provided, the backend will generate one.
   $id: String
   # The issue for which to link the url. Can be a UUID or issue identifier (e.g., 'LIN-123').
   $issueId: String!
@@ -21204,7 +21254,7 @@ mutation attachmentLinkZendesk(
   $createAsUser: String
   # Avatar URL for createAsUser. Requires createAsUser and an OAuth application using actor=app.
   $displayIconUrl: String
-  # Optional attachment ID that may be provided through the API.
+  # The identifier in UUID format. If none is provided, the backend will generate one.
   $id: String
   # The issue for which to link the Zendesk ticket. Can be a UUID or issue identifier (e.g., 'LIN-123').
   $issueId: String!
@@ -21588,7 +21638,8 @@ mutation updateCustomer(
 }
 # Finds a customer using the supplied UUID, external ID, Slack channel, or domains, and updates it;
 # otherwise creates one. A name is required when no customer matches. Unlike customerUpdate, this
-# operation can override integration-managed fields, and a tierName can create a new customer tier.
+# operation can override integration-managed fields, and a tierName can create a new customer tier
+# when the caller has permission to manage customer settings.
 mutation customerUpsert(
   # The customer to create.
   $input: CustomerUpsertInput!
@@ -21652,9 +21703,9 @@ mutation updateCycle(
     ...CyclePayload
   }
 }
-# Creates a document in a project, issue, or release, with optional initial Markdown content. The
-# returned document includes its assigned UUID and metadata; select content to read the resulting
-# body.
+# Creates a document in a project, issue, or release, or in your private documents with
+# personalUserId, with optional initial Markdown content. The returned document includes its assigned
+# UUID and metadata; select content to read the resulting body.
 mutation createDocument(
   # The document to create.
   $input: DocumentCreateInput!
@@ -21664,8 +21715,8 @@ mutation createDocument(
   }
 }
 # Moves a document to the trash and archives it, including the sub-documents covered by its archive
-# cascade. It is not permanently removed by this mutation. You must be allowed to manage the document;
-# use documentUnarchive to restore it.
+# cascade. It is not permanently removed by this mutation. You must be allowed to manage the document,
+# or to edit it when it is a page of a private document; use documentUnarchive to restore it.
 mutation deleteDocument(
   # The identifier of the document to delete.
   $id: String!
@@ -21676,14 +21727,44 @@ mutation deleteDocument(
     ...DocumentArchivePayload
   }
 }
+# Shares a document and its sub-documents with workspace members at a role. On a personal document
+# only the owner can share it. On any other document the owner, an owner of one of its teams, or a
+# workspace admin can, the people must be able to see the document, and the role must be above its
+# general access. People it is newly shared with are subscribed to the document. Users who already
+# have another role move to the given one.
+mutation documentShare(
+  # The identifier of the document to share.
+  $id: String!
+  # The role to share the document at. Defaults to edit.
+  $role: DocumentShareRole
+  # The identifiers of the users to share the document with.
+  $userIds: [String!]!
+) {
+  documentShare(id: $id, role: $role, userIds: $userIds) {
+    ...DocumentPayload
+  }
+}
 # Restores a trashed document and its eligible sub-documents. You must be allowed to manage the
-# restored documents. If the containing resource is archived, restore that resource first.
+# restored documents, or to edit them when they are pages of a private document. If the containing
+# resource is archived, restore that resource first.
 mutation unarchiveDocument(
   # The identifier of the document to restore.
   $id: String!
 ) {
   documentUnarchive(id: $id) {
     ...DocumentArchivePayload
+  }
+}
+# Stops sharing a document and its sub-documents with users. Whoever can manage access to the document
+# can remove anyone it is shared with; anyone else can only remove themselves.
+mutation documentUnshare(
+  # The identifier of the document to stop sharing.
+  $id: String!
+  # The identifiers of the users to remove from the document.
+  $userIds: [String!]!
+) {
+  documentUnshare(id: $id, userIds: $userIds) {
+    ...DocumentPayload
   }
 }
 # Updates a document’s metadata or replaces its Markdown body. You must have edit access to the
@@ -21696,6 +21777,54 @@ mutation updateDocument(
   $input: DocumentUpdateInput!
 ) {
   documentUpdate(id: $id, input: $input) {
+    ...DocumentPayload
+  }
+}
+# Changes what users other than the owner can do with a document that is not personal: edit, comment,
+# or view. Only the owner of the document, an owner of one of its teams, or a workspace admin can
+# change it. Comment and view need an owner who can access the document.
+mutation documentUpdateGeneralAccess(
+  # Whether to also change the sub-documents whose level equals the document's level before the change. Sub-documents with another level, without an owner who can access them, or that the user cannot loosen keep their level.
+  $applyToSubDocuments: Boolean
+  # The new general access level: edit, comment, or view.
+  $generalAccess: String!
+  # The identifier of the document.
+  $id: String!
+  # The general access level of this document when the change was confirmed. When given, the change fails if the document has another level now.
+  $previousGeneralAccess: String
+  # The users whose roles to remove where this change makes the role give more access than the new level. It removes only those roles from this document and from each sub-document this change also changes. It leaves roles that were already above the document's previous level. Users who can't open the document's container keep their roles, because a role is their only access to it. If the change leaves a document's levels as they are, no role is removed from it.
+  $removeCollaboratorIds: [String!]
+) {
+  documentUpdateGeneralAccess(
+    applyToSubDocuments: $applyToSubDocuments
+    generalAccess: $generalAccess
+    id: $id
+    previousGeneralAccess: $previousGeneralAccess
+    removeCollaboratorIds: $removeCollaboratorIds
+  ) {
+    ...DocumentPayload
+  }
+}
+# Changes what people outside a document's teams can do with a document in a public team or in a
+# project with a public team: edit, comment, or view. It can't be above the document's general access.
+# Only the owner of the document, an owner of one of its teams, or a workspace admin can change it.
+# Comment and view need an owner who can access the document.
+mutation documentUpdateWorkspaceAccess(
+  # Whether to also change the sub-documents whose levels equal the document's levels before the change. Sub-documents with other levels, without an owner who can access them, or that the user cannot loosen keep their level.
+  $applyToSubDocuments: Boolean
+  # The identifier of the document.
+  $id: String!
+  # The workspace access level of this document when the change was confirmed. When given, the change fails if the document has another level now.
+  $previousWorkspaceAccess: String
+  # The new workspace access level: edit, comment, or view.
+  $workspaceAccess: String!
+) {
+  documentUpdateWorkspaceAccess(
+    applyToSubDocuments: $applyToSubDocuments
+    id: $id
+    previousWorkspaceAccess: $previousWorkspaceAccess
+    workspaceAccess: $workspaceAccess
+  ) {
     ...DocumentPayload
   }
 }
@@ -22397,6 +22526,8 @@ mutation createIntegrationGithubCommit {
 # to true to accept the change. GitHub Enterprise Cloud connections require the corresponding
 # workspace plan feature.
 mutation integrationGithubConnect(
+  # [Internal] Set to true to keep the organization's code access integration and use this basic GitHub App installation for pull request linking and GitHub Issues sync in the repositories that the code access app cannot read.
+  $addLinkingInstallation: Boolean
   # The GitHub grant code that's exchanged for OAuth tokens.
   $code: String!
   # Whether to connect the GitHub App with repository code access. Defaults to false.
@@ -22409,6 +22540,7 @@ mutation integrationGithubConnect(
   $installationId: String!
 ) {
   integrationGithubConnect(
+    addLinkingInstallation: $addLinkingInstallation
     code: $code
     codeAccess: $codeAccess
     confirmReplace: $confirmReplace
@@ -23176,9 +23308,10 @@ mutation deleteIssueImport(
   }
 }
 # Saves the supplied mappings and schedules creation of Linear records from the fetched source data.
-# The import must be inProgress; otherwise the mappings are saved but success is false. A successful
-# response means processing was accepted, not that it has finished. Linear-to-Linear migrations can
-# only be managed from the Linear app.
+# Fails without saving the mappings when an external-service import has not finished fetching its
+# source data. The import must be inProgress; otherwise the mappings are saved but success is false. A
+# successful response means processing was accepted, not that it has finished. Linear-to-Linear
+# migrations can only be managed from the Linear app.
 mutation issueImportProcess(
   # ID of the issue import which we're going to process.
   $issueImportId: String!
@@ -23190,8 +23323,8 @@ mutation issueImportProcess(
   }
 }
 # Saves mapping choices without starting the import. For external-service imports, supply the full
-# replacement mapping. Requires workspace import permission; Linear-to-Linear migrations can only be
-# managed from the Linear app.
+# replacement mapping, and wait until the import has fetched its source data. Requires workspace
+# import permission; Linear-to-Linear migrations can only be managed from the Linear app.
 mutation updateIssueImport(
   # The identifier of the issue import.
   $id: String!

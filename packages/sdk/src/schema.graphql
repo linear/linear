@@ -282,7 +282,7 @@ type AgentActivity implements Node {
   """
   JSON object attributing the activity to the integration, application, or automation that created it. Available properties depend on the source type. Null means no external source was recorded; user identifies the activity's author separately.
   """
-  sourceMetadata: JSON
+  sourceMetadata: JSONObject
   """
   When the resource was last meaningfully updated, in UTC. Some background or housekeeping changes do not advance this timestamp.
   """
@@ -650,7 +650,7 @@ type AgentSession implements Node {
   """
   JSON array of entity references supplied as context to the session, such as issues or projects referenced in chat. These provide additional context beyond the session's primary issue or comment. An empty array means no such entity context is recorded.
   """
-  context: JSON!
+  context: JSONObject!
   """
   The resource’s recorded creation time, in UTC. Imports may preserve an earlier creation time.
   """
@@ -694,7 +694,7 @@ type AgentSession implements Node {
   """
   The agent's current plan as a JSON object with entries and updatedAt. entries contains each step's content and status (pending, inProgress, completed, or canceled); updatedAt is the ISO timestamp when Linear accepted the plan. The owning app updates the entries through agentSessionUpdate. Null means no plan is stored. Entering error or stale status clears the plan.
   """
-  plan: JSON
+  plan: JSONObject
   """
   The agent session's unique URL slug.
   """
@@ -706,7 +706,7 @@ type AgentSession implements Node {
   """
   JSON object describing the integration, application, or automation that created this session. Available keys depend on the source type; agentSessionMetadata.sourceCommentId can identify the comment that converted an existing thread into a session. Null when no source metadata is recorded.
   """
-  sourceMetadata: JSON
+  sourceMetadata: JSONObject
   """
   The time this session most recently became active. A new user turn can make a completed session active again and replace this value, so it is not necessarily the session’s original start time. Null means the session has not started.
   """
@@ -3441,6 +3441,10 @@ type CustomView implements Node {
   """
   filterData: JSONObject!
   """
+  [Internal] The timezone captured when the view was created. Missing values use UTC.
+  """
+  filterTimezone: String
+  """
   The legacy serialized filters applied to issues in the custom view.
   """
   filters: JSONObject! @deprecated(reason: "Will be replaced by `filterData` in a future update")
@@ -3828,9 +3832,9 @@ type CustomViewNotificationSubscription implements Entity & Node & NotificationS
   """
   createdAt: DateTime!
   """
-  The custom view subscribed to.
+  The custom view subscribed to. Null if the subscriber can no longer access it.
   """
-  customView: CustomView!
+  customView: CustomView
   """
   The customer that this notification subscription is scoped to. Null if the subscription targets a different entity type.
   """
@@ -4948,9 +4952,9 @@ type CustomerNotificationSubscription implements Entity & Node & NotificationSub
   """
   customView: CustomView
   """
-  The customer subscribed to.
+  The customer subscribed to. Null if the subscriber can no longer access it.
   """
-  customer: Customer!
+  customer: Customer
   """
   The cycle that this notification subscription is scoped to. Null if the subscription targets a different entity type.
   """
@@ -5654,7 +5658,7 @@ input CustomerUpsertInput {
   """
   tierId: String
   """
-  The customer tier’s name or display name. An existing matching tier is reused; otherwise a tier is created. Use this when importing named tiers, or use tierId to select a known tier. The two fields cannot be combined.
+  The customer tier’s name or display name. An existing matching tier is reused; otherwise a tier is created, which requires permission to manage customer settings. Use this when importing named tiers, or use tierId to select a known tier. The two fields cannot be combined.
   """
   tierName: String
 }
@@ -6134,9 +6138,9 @@ type CycleNotificationSubscription implements Entity & Node & NotificationSubscr
   """
   customer: Customer
   """
-  The cycle subscribed to.
+  The cycle subscribed to. Null if the subscriber can no longer access it.
   """
-  cycle: Cycle!
+  cycle: Cycle
   """
   The resource's unique UUID. This stays unchanged when the resource is renamed or moved; use it for stored references and mutations.
   """
@@ -6411,7 +6415,7 @@ union DataWebhookPayload =
   | UserWebhookPayload
 
 """
-Compares timestamps at millisecond precision. Accepts ISO 8601 timestamps or durations relative to when the filter runs; `{ gte: "-P7D" }` includes times from seven days ago onward. Combine `gte` and `lt` for a time window. A YYYY-MM-DD value means midnight UTC, so equality with a date does not match the whole day.
+Compares timestamps at millisecond precision. Accepts ISO 8601 timestamps or durations relative to when the filter runs; `{ gte: "-P7D" }` includes times from seven days ago onward. Combine `gte` and `lt` for a time window. A YYYY-MM-DD value means midnight in `timezone`, or UTC by default, so equality with a date does not match the whole day. Use `today` to match the whole current day.
 """
 input DateComparator {
   """
@@ -6446,6 +6450,14 @@ input DateComparator {
   Values to exclude from the match. For scalar comparisons, an empty list adds no restriction.
   """
   nin: [DateTimeOrDuration!]
+  """
+  Timezone for calendar dates. Saved views use one timezone for all date filters.
+  """
+  timezone: String
+  """
+  Matches today's calendar day, or its complement when false. Uses timezone, defaulting to UTC.
+  """
+  today: Boolean
 }
 
 """
@@ -6636,6 +6648,10 @@ type Document implements Node {
   """
   documentContentId: String
   """
+  What users other than the owner can do with a document that is not personal: edit, comment, or view. People shared on the document with a higher role keep it. Null on a personal document, which only its owner and the people it is shared with can access.
+  """
+  generalAccess: DocumentShareRole
+  """
   The time the document was hidden from its default resource view. Null when it is not hidden. Hiding is separate from trashing or archiving and does not remove the document’s content.
   """
   hiddenAt: DateTime
@@ -6663,6 +6679,10 @@ type Document implements Node {
   The user responsible for the document. Assigning an owner also subscribes them to updates. Null if no owner is assigned or the account was deleted; ownership is distinct from who last edited the document.
   """
   owner: User
+  """
+  The user whose personal space holds the document, who owns and manages it. Null if the document belongs to a different parent entity type.
+  """
+  personalUser: User
   """
   The project that the document is associated with. Null if the document belongs to a different parent entity type.
   """
@@ -6737,7 +6757,7 @@ type Document implements Node {
   """
   url: String!
   """
-  [Internal] What people who can open a document in a public team, or in a project with a public team, but are not members of its teams can do with it: edit, comment, or view. Never above general access. Null means the same as general access, and is always null on a personal document.
+  What people who can open a document in a public team, or in a project with a public team, but are not members of its teams can do with it: edit, comment, or view. Never above general access. Null means the same as general access, and is always null on a personal document.
   """
   workspaceAccess: DocumentShareRole
 }
@@ -7044,6 +7064,10 @@ input DocumentCreateInput {
   The UUID of an active, non-app user who can access the document. Defaults to the acting user for human-authored requests and to no owner for app-authored requests. Pass null to create it without an owner; assigning an owner also subscribes them.
   """
   ownerId: String
+  """
+  Creates the document in this user's private documents. Must be the acting user, or for a sub-document the owner of its private parent document.
+  """
+  personalUserId: String
   """
   UUID or identifier of the containing project, such as P-LIN-123. Cannot be combined with another parent resource.
   """
@@ -7380,6 +7404,10 @@ type DocumentSearchResult implements Node {
   """
   documentContentId: String
   """
+  What users other than the owner can do with a document that is not personal: edit, comment, or view. People shared on the document with a higher role keep it. Null on a personal document, which only its owner and the people it is shared with can access.
+  """
+  generalAccess: DocumentShareRole
+  """
   The time the document was hidden from its default resource view. Null when it is not hidden. Hiding is separate from trashing or archiving and does not remove the document’s content.
   """
   hiddenAt: DateTime
@@ -7411,6 +7439,10 @@ type DocumentSearchResult implements Node {
   The user responsible for the document. Assigning an owner also subscribes them to updates. Null if no owner is assigned or the account was deleted; ownership is distinct from who last edited the document.
   """
   owner: User
+  """
+  The user whose personal space holds the document, who owns and manages it. Null if the document belongs to a different parent entity type.
+  """
+  personalUser: User
   """
   The project that the document is associated with. Null if the document belongs to a different parent entity type.
   """
@@ -7485,7 +7517,7 @@ type DocumentSearchResult implements Node {
   """
   url: String!
   """
-  [Internal] What people who can open a document in a public team, or in a project with a public team, but are not members of its teams can do with it: edit, comment, or view. Never above general access. Null means the same as general access, and is always null on a personal document.
+  What people who can open a document in a public team, or in a project with a public team, but are not members of its teams can do with it: edit, comment, or view. Never above general access. Null means the same as general access, and is always null on a personal document.
   """
   workspaceAccess: DocumentShareRole
 }
@@ -7594,6 +7626,10 @@ input DocumentUpdateInput {
   The UUID of an active, non-app user who can access the document. Assigning an owner also subscribes them. Pass null to clear ownership where the document’s access settings allow it; personal documents keep their owner.
   """
   ownerId: String
+  """
+  Moves the document and its sub-documents into this user's personal space. Must be the acting user.
+  """
+  personalUserId: String
   """
   UUID or identifier of the destination project, such as P-LIN-123. Moves the document out of its previous container. Omitted or null values do not move it.
   """
@@ -11673,9 +11709,9 @@ type InitiativeNotificationSubscription implements Entity & Node & NotificationS
   """
   includeSubInitiativeUpdates: Boolean!
   """
-  The initiative subscribed to.
+  The initiative subscribed to. Null if the subscriber can no longer access it.
   """
-  initiative: Initiative!
+  initiative: Initiative
   """
   The issue label that this notification subscription is scoped to. Null if the subscription targets a different entity type.
   """
@@ -18977,9 +19013,9 @@ type LabelNotificationSubscription implements Entity & Node & NotificationSubscr
   """
   initiative: Initiative
   """
-  The label subscribed to.
+  The label subscribed to. Null if the subscriber can no longer access it.
   """
-  label: IssueLabel!
+  label: IssueLabel
   """
   The notification event types that this subscription will deliver to the subscriber.
   """
@@ -19205,7 +19241,7 @@ type Mutation {
     """
     displayIconUrl: String
     """
-    Optional attachment ID that may be provided through the API.
+    The identifier in UUID format. If none is provided, the backend will generate one.
     """
     id: String
     """
@@ -19242,7 +19278,7 @@ type Mutation {
     """
     displayIconUrl: String
     """
-    Optional attachment ID that may be provided through the API.
+    The identifier in UUID format. If none is provided, the backend will generate one.
     """
     id: String
     """
@@ -19267,7 +19303,7 @@ type Mutation {
     """
     displayIconUrl: String
     """
-    Optional attachment ID that may be provided through the API.
+    The identifier in UUID format. If none is provided, the backend will generate one.
     """
     id: String
     """
@@ -19296,7 +19332,7 @@ type Mutation {
     """
     displayIconUrl: String
     """
-    Optional attachment ID that may be provided through the API.
+    The identifier in UUID format. If none is provided, the backend will generate one.
     """
     id: String
     """
@@ -19329,7 +19365,7 @@ type Mutation {
     """
     displayIconUrl: String
     """
-    Optional attachment ID that may be provided through the API.
+    The identifier in UUID format. If none is provided, the backend will generate one.
     """
     id: String
     """
@@ -19370,7 +19406,7 @@ type Mutation {
     """
     displayIconUrl: String
     """
-    Optional attachment ID that may be provided through the API.
+    The identifier in UUID format. If none is provided, the backend will generate one.
     """
     id: String
     """
@@ -19399,7 +19435,7 @@ type Mutation {
     """
     displayIconUrl: String
     """
-    Optional attachment ID that may be provided through the API.
+    The identifier in UUID format. If none is provided, the backend will generate one.
     """
     id: String
     """
@@ -19432,7 +19468,7 @@ type Mutation {
     """
     displayIconUrl: String
     """
-    Optional attachment ID that may be provided through the API.
+    The identifier in UUID format. If none is provided, the backend will generate one.
     """
     id: String
     """
@@ -19461,7 +19497,7 @@ type Mutation {
     """
     displayIconUrl: String
     """
-    Optional attachment ID that may be provided through the API.
+    The identifier in UUID format. If none is provided, the backend will generate one.
     """
     id: String
     """
@@ -19494,7 +19530,7 @@ type Mutation {
     """
     displayIconUrl: String
     """
-    The id for the attachment.
+    The identifier in UUID format. If none is provided, the backend will generate one.
     """
     id: String
     """
@@ -19523,7 +19559,7 @@ type Mutation {
     """
     displayIconUrl: String
     """
-    Optional attachment ID that may be provided through the API.
+    The identifier in UUID format. If none is provided, the backend will generate one.
     """
     id: String
     """
@@ -19883,7 +19919,7 @@ type Mutation {
     input: CustomerUpdateInput!
   ): CustomerPayload!
   """
-  Finds a customer using the supplied UUID, external ID, Slack channel, or domains, and updates it; otherwise creates one. A name is required when no customer matches. Unlike customerUpdate, this operation can override integration-managed fields, and a tierName can create a new customer tier.
+  Finds a customer using the supplied UUID, external ID, Slack channel, or domains, and updates it; otherwise creates one. A name is required when no customer matches. Unlike customerUpdate, this operation can override integration-managed fields, and a tierName can create a new customer tier when the caller has permission to manage customer settings.
   """
   customerUpsert(
     """
@@ -19941,7 +19977,7 @@ type Mutation {
     input: CycleUpdateInput!
   ): CyclePayload!
   """
-  Creates a document in a project, issue, or release, with optional initial Markdown content. The returned document includes its assigned UUID and metadata; select content to read the resulting body.
+  Creates a document in a project, issue, or release, or in your private documents with personalUserId, with optional initial Markdown content. The returned document includes its assigned UUID and metadata; select content to read the resulting body.
   """
   documentCreate(
     """
@@ -19950,7 +19986,7 @@ type Mutation {
     input: DocumentCreateInput!
   ): DocumentPayload!
   """
-  Moves a document to the trash and archives it, including the sub-documents covered by its archive cascade. It is not permanently removed by this mutation. You must be allowed to manage the document; use documentUnarchive to restore it.
+  Moves a document to the trash and archives it, including the sub-documents covered by its archive cascade. It is not permanently removed by this mutation. You must be allowed to manage the document, or to edit it when it is a page of a private document; use documentUnarchive to restore it.
   """
   documentDelete(
     """
@@ -19963,7 +19999,24 @@ type Mutation {
     ifParentDocumentId: String
   ): DocumentArchivePayload!
   """
-  Restores a trashed document and its eligible sub-documents. You must be allowed to manage the restored documents. If the containing resource is archived, restore that resource first.
+  Shares a document and its sub-documents with workspace members at a role. On a personal document only the owner can share it. On any other document the owner, an owner of one of its teams, or a workspace admin can, the people must be able to see the document, and the role must be above its general access. People it is newly shared with are subscribed to the document. Users who already have another role move to the given one.
+  """
+  documentShare(
+    """
+    The identifier of the document to share.
+    """
+    id: String!
+    """
+    The role to share the document at. Defaults to edit.
+    """
+    role: DocumentShareRole = edit
+    """
+    The identifiers of the users to share the document with.
+    """
+    userIds: [String!]!
+  ): DocumentPayload!
+  """
+  Restores a trashed document and its eligible sub-documents. You must be allowed to manage the restored documents, or to edit them when they are pages of a private document. If the containing resource is archived, restore that resource first.
   """
   documentUnarchive(
     """
@@ -19971,6 +20024,19 @@ type Mutation {
     """
     id: String!
   ): DocumentArchivePayload!
+  """
+  Stops sharing a document and its sub-documents with users. Whoever can manage access to the document can remove anyone it is shared with; anyone else can only remove themselves.
+  """
+  documentUnshare(
+    """
+    The identifier of the document to stop sharing.
+    """
+    id: String!
+    """
+    The identifiers of the users to remove from the document.
+    """
+    userIds: [String!]!
+  ): DocumentPayload!
   """
   Updates a document’s metadata or replaces its Markdown body. You must have edit access to the document. Supplying a different container moves the document there, which can affect access; omitted fields are left unchanged.
   """
@@ -19985,7 +20051,32 @@ type Mutation {
     input: DocumentUpdateInput!
   ): DocumentPayload!
   """
-  [Internal] Changes what people outside a document's teams can do with a document in a public team or in a project with a public team: edit, comment, or view. It can't be above the document's general access. Only the owner of the document, an owner of one of its teams, or a workspace admin can change it. Comment and view need an owner who can access the document.
+  Changes what users other than the owner can do with a document that is not personal: edit, comment, or view. Only the owner of the document, an owner of one of its teams, or a workspace admin can change it. Comment and view need an owner who can access the document.
+  """
+  documentUpdateGeneralAccess(
+    """
+    Whether to also change the sub-documents whose level equals the document's level before the change. Sub-documents with another level, without an owner who can access them, or that the user cannot loosen keep their level.
+    """
+    applyToSubDocuments: Boolean = false
+    """
+    The new general access level: edit, comment, or view.
+    """
+    generalAccess: String!
+    """
+    The identifier of the document.
+    """
+    id: String!
+    """
+    The general access level of this document when the change was confirmed. When given, the change fails if the document has another level now.
+    """
+    previousGeneralAccess: String
+    """
+    The users whose roles to remove where this change makes the role give more access than the new level. It removes only those roles from this document and from each sub-document this change also changes. It leaves roles that were already above the document's previous level. Users who can't open the document's container keep their roles, because a role is their only access to it. If the change leaves a document's levels as they are, no role is removed from it.
+    """
+    removeCollaboratorIds: [String!]
+  ): DocumentPayload!
+  """
+  Changes what people outside a document's teams can do with a document in a public team or in a project with a public team: edit, comment, or view. It can't be above the document's general access. Only the owner of the document, an owner of one of its teams, or a workspace admin can change it. Comment and view need an owner who can access the document.
   """
   documentUpdateWorkspaceAccess(
     """
@@ -20647,6 +20738,10 @@ type Mutation {
   Connects a GitHub App installation to the workspace using its installation ID and OAuth grant. If replacing a connection would make repositories used by GitHub Issues sync inaccessible, the call stops and returns gitHub.lostRepositoryNames. Review that list, then repeat with confirmReplace set to true to accept the change. GitHub Enterprise Cloud connections require the corresponding workspace plan feature.
   """
   integrationGithubConnect(
+    """
+    [Internal] Set to true to keep the organization's code access integration and use this basic GitHub App installation for pull request linking and GitHub Issues sync in the repositories that the code access app cannot read.
+    """
+    addLinkingInstallation: Boolean = false
     """
     The GitHub grant code that's exchanged for OAuth tokens.
     """
@@ -21419,7 +21514,7 @@ type Mutation {
     issueImportId: String!
   ): IssueImportDeletePayload!
   """
-  Saves the supplied mappings and schedules creation of Linear records from the fetched source data. The import must be inProgress; otherwise the mappings are saved but success is false. A successful response means processing was accepted, not that it has finished. Linear-to-Linear migrations can only be managed from the Linear app.
+  Saves the supplied mappings and schedules creation of Linear records from the fetched source data. Fails without saving the mappings when an external-service import has not finished fetching its source data. The import must be inProgress; otherwise the mappings are saved but success is false. A successful response means processing was accepted, not that it has finished. Linear-to-Linear migrations can only be managed from the Linear app.
   """
   issueImportProcess(
     """
@@ -21432,7 +21527,7 @@ type Mutation {
     mapping: JSONObject!
   ): IssueImportPayload!
   """
-  Saves mapping choices without starting the import. For external-service imports, supply the full replacement mapping. Requires workspace import permission; Linear-to-Linear migrations can only be managed from the Linear app.
+  Saves mapping choices without starting the import. For external-service imports, supply the full replacement mapping, and wait until the import has fetched its source data. Requires workspace import permission; Linear-to-Linear migrations can only be managed from the Linear app.
   """
   issueImportUpdate(
     """
@@ -21875,7 +21970,7 @@ type Mutation {
     input: OAuthApplicationCreateInput!
   ): OAuthApplicationCreatePayload!
   """
-  [ALPHA] Replaces the client secret for an application created by the caller and returns the new secret. Store it before discarding the response; it cannot be retrieved later. Tokens issued through client_credentials are revoked, while tokens from the authorization-code flow remain valid. The caller must be able to manage the application’s credentials, including its private-team access, as well as have workspace API management permission.
+  [ALPHA] Replaces the client secret for an application created by the caller and returns the new secret. Store it before discarding the response; it cannot be retrieved later. The old secret stops working at once, as does a previous secret that a planned rotation kept working. Tokens issued through client_credentials are revoked, while tokens from the authorization-code flow remain valid. The caller must be able to manage the application’s credentials, including its private-team access, as well as have workspace API management permission.
   """
   oauthApplicationRotateSecret(
     """
@@ -24300,6 +24395,14 @@ input NullableDateComparator {
   Set to true to match resources with no value, or false to require a value. For example, `{ null: true }` finds unset values; `{ eq: null }` is not a substitute.
   """
   null: Boolean
+  """
+  Timezone for calendar dates. Saved views use one timezone for all date filters.
+  """
+  timezone: String
+  """
+  Matches today's calendar day, or its complement when false. Uses timezone, defaulting to UTC.
+  """
+  today: Boolean
 }
 
 """
@@ -25480,6 +25583,14 @@ input NullableTimelessDateComparator {
   Set to true to match resources with no value, or false to require a value. For example, `{ null: true }` finds unset values; `{ eq: null }` is not a substitute.
   """
   null: Boolean
+  """
+  Timezone for calendar dates. Saved views use one timezone for all date filters.
+  """
+  timezone: String
+  """
+  Matches today's calendar day, or its complement when false. Uses timezone, defaulting to UTC.
+  """
+  today: Boolean
 }
 
 """
@@ -30350,9 +30461,9 @@ type ProjectNotificationSubscription implements Entity & Node & NotificationSubs
   """
   notificationSubscriptionTypes: [String!]!
   """
-  The project subscribed to.
+  The project subscribed to. Null if the subscriber can no longer access it.
   """
-  project: Project!
+  project: Project
   """
   The user who will receive notifications from this subscription.
   """
@@ -41067,9 +41178,9 @@ type TeamNotificationSubscription implements Entity & Node & NotificationSubscri
   """
   subscriber: User!
   """
-  The team subscribed to.
+  The team subscribed to. Null if the subscriber can no longer access it.
   """
-  team: Team!
+  team: Team
   """
   When the resource was last meaningfully updated, in UTC. Some background or housekeeping changes do not advance this timestamp.
   """
@@ -43332,9 +43443,9 @@ type UserNotificationSubscription implements Entity & Node & NotificationSubscri
   """
   updatedAt: DateTime!
   """
-  The user subscribed to.
+  The user subscribed to. Null if the subscriber can no longer access it.
   """
-  user: User!
+  user: User
   """
   The type of user-specific view that further scopes a user notification subscription. Null if the subscription is not associated with a user view type.
   """
@@ -44731,6 +44842,10 @@ type ViewPreferencesValues {
   Whether to show reviewer avatars on review list items. Null if the preference is unset.
   """
   reviewFieldReviewers: Boolean
+  """
+  Whether to show the pull request risk level on review list items. Null if the preference is unset.
+  """
+  reviewFieldRisk: Boolean
   """
   Whether to show the most pressing SLA from connected issues on review list items. Null if the preference is unset.
   """

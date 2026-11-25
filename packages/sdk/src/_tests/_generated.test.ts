@@ -1732,6 +1732,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the document.personalUser query for L.User */
+    it("document.personalUser", async () => {
+      if (_document) {
+        const document_personalUser: L.User | undefined | null = await _document.personalUser;
+        expect(document_personalUser instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Document found - cannot test document.personalUser query");
+      }
+    });
+
     /** Test the document.project query for L.Project */
     it("document.project", async () => {
       if (_document) {

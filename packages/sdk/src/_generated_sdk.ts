@@ -368,7 +368,7 @@ export class AgentActivity extends Request {
     this.ephemeral = data.ephemeral;
     this.id = data.id;
     this.signalMetadata = parseJson(data.signalMetadata) ?? undefined;
-    this.sourceMetadata = parseJson(data.sourceMetadata) ?? undefined;
+    this.sourceMetadata = data.sourceMetadata ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.signal = data.signal ?? undefined;
     this.content = data.content;
@@ -389,7 +389,7 @@ export class AgentActivity extends Request {
   /** JSON-encoded details for the activity’s signal. auth metadata contains the authentication URL and may identify a provider and user. select metadata contains the available options; Linear may add display labels for recognized URLs. Null means no signal metadata was recorded. */
   public signalMetadata?: Record<string, unknown> | null;
   /** JSON object attributing the activity to the integration, application, or automation that created it. Available properties depend on the source type. Null means no external source was recorded; user identifies the activity's author separately. */
-  public sourceMetadata?: Record<string, unknown> | null;
+  public sourceMetadata?: L.Scalars["JSONObject"] | null;
   /** When the resource was last meaningfully updated, in UTC. Some background or housekeeping changes do not advance this timestamp. */
   public updatedAt: Date;
   /** How Linear or the agent should handle this activity beyond its content type. continue keeps a response from ending the turn; auth and select turn an elicitation into an authentication or selection request; stop appears on user prompts that request cancellation. Null means normal handling for the content type. */
@@ -664,16 +664,16 @@ export class AgentSession extends Request {
   public constructor(request: LinearRequest, data: L.AgentSessionFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.context = parseJson(data.context) ?? {};
+    this.context = data.context;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.dismissedAt = parseDate(data.dismissedAt) ?? undefined;
     this.endedAt = parseDate(data.endedAt) ?? undefined;
     this.externalLink = data.externalLink ?? undefined;
     this.externalUrls = parseJson(data.externalUrls) ?? {};
     this.id = data.id;
-    this.plan = parseJson(data.plan) ?? undefined;
+    this.plan = data.plan ?? undefined;
     this.slugId = data.slugId;
-    this.sourceMetadata = parseJson(data.sourceMetadata) ?? undefined;
+    this.sourceMetadata = data.sourceMetadata ?? undefined;
     this.startedAt = parseDate(data.startedAt) ?? undefined;
     this.summary = data.summary ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
@@ -692,7 +692,7 @@ export class AgentSession extends Request {
   /** When the resource was archived, in UTC. Null while active, including after unarchiving. Archived resources still exist but are normally excluded from lists unless `includeArchived` is true. */
   public archivedAt?: Date | null;
   /** JSON array of entity references supplied as context to the session, such as issues or projects referenced in chat. These provide additional context beyond the session's primary issue or comment. An empty array means no such entity context is recorded. */
-  public context: Record<string, unknown>;
+  public context: L.Scalars["JSONObject"];
   /** The resource’s recorded creation time, in UTC. Imports may preserve an earlier creation time. */
   public createdAt: Date;
   /** The time the session was dismissed. Dismissal stops its work and removes the issue delegate if no other active session needs it. Null if not dismissed. */
@@ -706,11 +706,11 @@ export class AgentSession extends Request {
   /** The resource's unique UUID. This stays unchanged when the resource is renamed or moved; use it for stored references and mutations. */
   public id: string;
   /** The agent's current plan as a JSON object with entries and updatedAt. entries contains each step's content and status (pending, inProgress, completed, or canceled); updatedAt is the ISO timestamp when Linear accepted the plan. The owning app updates the entries through agentSessionUpdate. Null means no plan is stored. Entering error or stale status clears the plan. */
-  public plan?: Record<string, unknown> | null;
+  public plan?: L.Scalars["JSONObject"] | null;
   /** The agent session's unique URL slug. */
   public slugId: string;
   /** JSON object describing the integration, application, or automation that created this session. Available keys depend on the source type; agentSessionMetadata.sourceCommentId can identify the comment that converted an existing thread into a session. Null when no source metadata is recorded. */
-  public sourceMetadata?: Record<string, unknown> | null;
+  public sourceMetadata?: L.Scalars["JSONObject"] | null;
   /** The time this session most recently became active. A new user turn can make a completed session active again and replace this value, so it is not necessarily the session’s original start time. Null means the session has not started. */
   public startedAt?: Date | null;
   /** The session title, generated automatically, set by the owning OAuth application, or set by the session's creator. Null if no title is set. */
@@ -2709,7 +2709,7 @@ export class CustomViewHasSubscribersPayload extends Request {
  * @param data - L.CustomViewNotificationSubscriptionFragment response data
  */
 export class CustomViewNotificationSubscription extends Request {
-  private _customView: L.CustomViewNotificationSubscriptionFragment["customView"];
+  private _customView?: L.CustomViewNotificationSubscriptionFragment["customView"];
   private _customer?: L.CustomViewNotificationSubscriptionFragment["customer"];
   private _cycle?: L.CustomViewNotificationSubscriptionFragment["cycle"];
   private _initiative?: L.CustomViewNotificationSubscriptionFragment["initiative"];
@@ -2730,7 +2730,7 @@ export class CustomViewNotificationSubscription extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.contextViewType = data.contextViewType ?? undefined;
     this.userContextViewType = data.userContextViewType ?? undefined;
-    this._customView = data.customView;
+    this._customView = data.customView ?? undefined;
     this._customer = data.customer ?? undefined;
     this._cycle = data.cycle ?? undefined;
     this._initiative = data.initiative ?? undefined;
@@ -2759,11 +2759,11 @@ export class CustomViewNotificationSubscription extends Request {
   public contextViewType?: L.ContextViewType | null;
   /** The type of user-specific view that further scopes a user notification subscription. Null if the subscription is not associated with a user view type. */
   public userContextViewType?: L.UserContextViewType | null;
-  /** The custom view subscribed to. */
+  /** The custom view subscribed to. Null if the subscriber can no longer access it. */
   public get customView(): LinearFetch<CustomView> | undefined {
-    return new CustomViewQuery(this._request).fetch(this._customView.id);
+    return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
-  /** The ID of custom view subscribed to. */
+  /** The ID of custom view subscribed to. null if the subscriber can no longer access it. */
   public get customViewId(): string | undefined {
     return this._customView?.id;
   }
@@ -3556,7 +3556,7 @@ export class CustomerNotification extends Request {
  */
 export class CustomerNotificationSubscription extends Request {
   private _customView?: L.CustomerNotificationSubscriptionFragment["customView"];
-  private _customer: L.CustomerNotificationSubscriptionFragment["customer"];
+  private _customer?: L.CustomerNotificationSubscriptionFragment["customer"];
   private _cycle?: L.CustomerNotificationSubscriptionFragment["cycle"];
   private _initiative?: L.CustomerNotificationSubscriptionFragment["initiative"];
   private _label?: L.CustomerNotificationSubscriptionFragment["label"];
@@ -3577,7 +3577,7 @@ export class CustomerNotificationSubscription extends Request {
     this.contextViewType = data.contextViewType ?? undefined;
     this.userContextViewType = data.userContextViewType ?? undefined;
     this._customView = data.customView ?? undefined;
-    this._customer = data.customer;
+    this._customer = data.customer ?? undefined;
     this._cycle = data.cycle ?? undefined;
     this._initiative = data.initiative ?? undefined;
     this._label = data.label ?? undefined;
@@ -3613,11 +3613,11 @@ export class CustomerNotificationSubscription extends Request {
   public get customViewId(): string | undefined {
     return this._customView?.id;
   }
-  /** The customer subscribed to. */
+  /** The customer subscribed to. Null if the subscriber can no longer access it. */
   public get customer(): LinearFetch<Customer> | undefined {
-    return new CustomerQuery(this._request).fetch(this._customer.id);
+    return this._customer?.id ? new CustomerQuery(this._request).fetch(this._customer?.id) : undefined;
   }
-  /** The ID of customer subscribed to. */
+  /** The ID of customer subscribed to. null if the subscriber can no longer access it. */
   public get customerId(): string | undefined {
     return this._customer?.id;
   }
@@ -4240,7 +4240,7 @@ export class CycleConnection extends Connection<Cycle> {
 export class CycleNotificationSubscription extends Request {
   private _customView?: L.CycleNotificationSubscriptionFragment["customView"];
   private _customer?: L.CycleNotificationSubscriptionFragment["customer"];
-  private _cycle: L.CycleNotificationSubscriptionFragment["cycle"];
+  private _cycle?: L.CycleNotificationSubscriptionFragment["cycle"];
   private _initiative?: L.CycleNotificationSubscriptionFragment["initiative"];
   private _label?: L.CycleNotificationSubscriptionFragment["label"];
   private _project?: L.CycleNotificationSubscriptionFragment["project"];
@@ -4261,7 +4261,7 @@ export class CycleNotificationSubscription extends Request {
     this.userContextViewType = data.userContextViewType ?? undefined;
     this._customView = data.customView ?? undefined;
     this._customer = data.customer ?? undefined;
-    this._cycle = data.cycle;
+    this._cycle = data.cycle ?? undefined;
     this._initiative = data.initiative ?? undefined;
     this._label = data.label ?? undefined;
     this._project = data.project ?? undefined;
@@ -4304,11 +4304,11 @@ export class CycleNotificationSubscription extends Request {
   public get customerId(): string | undefined {
     return this._customer?.id;
   }
-  /** The cycle subscribed to. */
+  /** The cycle subscribed to. Null if the subscriber can no longer access it. */
   public get cycle(): LinearFetch<Cycle> | undefined {
-    return new CycleQuery(this._request).fetch(this._cycle.id);
+    return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
-  /** The ID of cycle subscribed to. */
+  /** The ID of cycle subscribed to. null if the subscriber can no longer access it. */
   public get cycleId(): string | undefined {
     return this._cycle?.id;
   }
@@ -4517,6 +4517,7 @@ export class Document extends Request {
   private _issue?: L.DocumentFragment["issue"];
   private _lastAppliedTemplate?: L.DocumentFragment["lastAppliedTemplate"];
   private _owner?: L.DocumentFragment["owner"];
+  private _personalUser?: L.DocumentFragment["personalUser"];
   private _project?: L.DocumentFragment["project"];
   private _release?: L.DocumentFragment["release"];
   private _updatedBy?: L.DocumentFragment["updatedBy"];
@@ -4537,11 +4538,14 @@ export class Document extends Request {
     this.trashed = data.trashed ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
+    this.generalAccess = data.generalAccess ?? undefined;
+    this.workspaceAccess = data.workspaceAccess ?? undefined;
     this._creator = data.creator ?? undefined;
     this._initiative = data.initiative ?? undefined;
     this._issue = data.issue ?? undefined;
     this._lastAppliedTemplate = data.lastAppliedTemplate ?? undefined;
     this._owner = data.owner ?? undefined;
+    this._personalUser = data.personalUser ?? undefined;
     this._project = data.project ?? undefined;
     this._release = data.release ?? undefined;
     this._updatedBy = data.updatedBy ?? undefined;
@@ -4575,6 +4579,10 @@ export class Document extends Request {
   public updatedAt: Date;
   /** The canonical url for the document. */
   public url: string;
+  /** What users other than the owner can do with a document that is not personal: edit, comment, or view. People shared on the document with a higher role keep it. Null on a personal document, which only its owner and the people it is shared with can access. */
+  public generalAccess?: L.DocumentShareRole | null;
+  /** What people who can open a document in a public team, or in a project with a public team, but are not members of its teams can do with it: edit, comment, or view. Never above general access. Null means the same as general access, and is always null on a personal document. */
+  public workspaceAccess?: L.DocumentShareRole | null;
   /** The user who created the document. Null if the creator's account has been deleted. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
@@ -4617,6 +4625,14 @@ export class Document extends Request {
   public get ownerId(): string | undefined {
     return this._owner?.id;
   }
+  /** The user whose personal space holds the document, who owns and manages it. Null if the document belongs to a different parent entity type. */
+  public get personalUser(): LinearFetch<User> | undefined {
+    return this._personalUser?.id ? new UserQuery(this._request).fetch(this._personalUser?.id) : undefined;
+  }
+  /** The ID of user whose personal space holds the document, who owns and manages it. null if the document belongs to a different parent entity type. */
+  public get personalUserId(): string | undefined {
+    return this._personalUser?.id;
+  }
   /** The project that the document is associated with. Null if the document belongs to a different parent entity type. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
@@ -4649,15 +4665,15 @@ export class Document extends Request {
   public subscribers(variables?: Omit<L.Document_SubscribersQueryVariables, "id">) {
     return new Document_SubscribersQuery(this._request, this.id, variables).fetch(variables);
   }
-  /** Creates a document in a project, issue, or release, with optional initial Markdown content. The returned document includes its assigned UUID and metadata; select content to read the resulting body. */
+  /** Creates a document in a project, issue, or release, or in your private documents with personalUserId, with optional initial Markdown content. The returned document includes its assigned UUID and metadata; select content to read the resulting body. */
   public create(input: L.DocumentCreateInput) {
     return new CreateDocumentMutation(this._request).fetch(input);
   }
-  /** Moves a document to the trash and archives it, including the sub-documents covered by its archive cascade. It is not permanently removed by this mutation. You must be allowed to manage the document; use documentUnarchive to restore it. */
+  /** Moves a document to the trash and archives it, including the sub-documents covered by its archive cascade. It is not permanently removed by this mutation. You must be allowed to manage the document, or to edit it when it is a page of a private document; use documentUnarchive to restore it. */
   public delete(variables?: Omit<L.DeleteDocumentMutationVariables, "id">) {
     return new DeleteDocumentMutation(this._request).fetch(this.id, variables);
   }
-  /** Restores a trashed document and its eligible sub-documents. You must be allowed to manage the restored documents. If the containing resource is archived, restore that resource first. */
+  /** Restores a trashed document and its eligible sub-documents. You must be allowed to manage the restored documents, or to edit them when they are pages of a private document. If the containing resource is archived, restore that resource first. */
   public unarchive() {
     return new UnarchiveDocumentMutation(this._request).fetch(this.id);
   }
@@ -5133,6 +5149,7 @@ export class DocumentSearchResult extends Request {
   private _issue?: L.DocumentSearchResultFragment["issue"];
   private _lastAppliedTemplate?: L.DocumentSearchResultFragment["lastAppliedTemplate"];
   private _owner?: L.DocumentSearchResultFragment["owner"];
+  private _personalUser?: L.DocumentSearchResultFragment["personalUser"];
   private _project?: L.DocumentSearchResultFragment["project"];
   private _release?: L.DocumentSearchResultFragment["release"];
   private _updatedBy?: L.DocumentSearchResultFragment["updatedBy"];
@@ -5154,11 +5171,14 @@ export class DocumentSearchResult extends Request {
     this.trashed = data.trashed ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
+    this.generalAccess = data.generalAccess ?? undefined;
+    this.workspaceAccess = data.workspaceAccess ?? undefined;
     this._creator = data.creator ?? undefined;
     this._initiative = data.initiative ?? undefined;
     this._issue = data.issue ?? undefined;
     this._lastAppliedTemplate = data.lastAppliedTemplate ?? undefined;
     this._owner = data.owner ?? undefined;
+    this._personalUser = data.personalUser ?? undefined;
     this._project = data.project ?? undefined;
     this._release = data.release ?? undefined;
     this._updatedBy = data.updatedBy ?? undefined;
@@ -5194,6 +5214,10 @@ export class DocumentSearchResult extends Request {
   public updatedAt: Date;
   /** The canonical url for the document. */
   public url: string;
+  /** What users other than the owner can do with a document that is not personal: edit, comment, or view. People shared on the document with a higher role keep it. Null on a personal document, which only its owner and the people it is shared with can access. */
+  public generalAccess?: L.DocumentShareRole | null;
+  /** What people who can open a document in a public team, or in a project with a public team, but are not members of its teams can do with it: edit, comment, or view. Never above general access. Null means the same as general access, and is always null on a personal document. */
+  public workspaceAccess?: L.DocumentShareRole | null;
   /** The user who created the document. Null if the creator's account has been deleted. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
@@ -5235,6 +5259,14 @@ export class DocumentSearchResult extends Request {
   /** The ID of user responsible for the document. assigning an owner also subscribes them to updates. null if no owner is assigned or the account was deleted; ownership is distinct from who last edited the document. */
   public get ownerId(): string | undefined {
     return this._owner?.id;
+  }
+  /** The user whose personal space holds the document, who owns and manages it. Null if the document belongs to a different parent entity type. */
+  public get personalUser(): LinearFetch<User> | undefined {
+    return this._personalUser?.id ? new UserQuery(this._request).fetch(this._personalUser?.id) : undefined;
+  }
+  /** The ID of user whose personal space holds the document, who owns and manages it. null if the document belongs to a different parent entity type. */
+  public get personalUserId(): string | undefined {
+    return this._personalUser?.id;
   }
   /** The project that the document is associated with. Null if the document belongs to a different parent entity type. */
   public get project(): LinearFetch<Project> | undefined {
@@ -7930,7 +7962,7 @@ export class InitiativeNotificationSubscription extends Request {
   private _customView?: L.InitiativeNotificationSubscriptionFragment["customView"];
   private _customer?: L.InitiativeNotificationSubscriptionFragment["customer"];
   private _cycle?: L.InitiativeNotificationSubscriptionFragment["cycle"];
-  private _initiative: L.InitiativeNotificationSubscriptionFragment["initiative"];
+  private _initiative?: L.InitiativeNotificationSubscriptionFragment["initiative"];
   private _label?: L.InitiativeNotificationSubscriptionFragment["label"];
   private _project?: L.InitiativeNotificationSubscriptionFragment["project"];
   private _subscriber: L.InitiativeNotificationSubscriptionFragment["subscriber"];
@@ -7951,7 +7983,7 @@ export class InitiativeNotificationSubscription extends Request {
     this._customView = data.customView ?? undefined;
     this._customer = data.customer ?? undefined;
     this._cycle = data.cycle ?? undefined;
-    this._initiative = data.initiative;
+    this._initiative = data.initiative ?? undefined;
     this._label = data.label ?? undefined;
     this._project = data.project ?? undefined;
     this._subscriber = data.subscriber;
@@ -8001,11 +8033,11 @@ export class InitiativeNotificationSubscription extends Request {
   public get cycleId(): string | undefined {
     return this._cycle?.id;
   }
-  /** The initiative subscribed to. */
+  /** The initiative subscribed to. Null if the subscriber can no longer access it. */
   public get initiative(): LinearFetch<Initiative> | undefined {
-    return new InitiativeQuery(this._request).fetch(this._initiative.id);
+    return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
-  /** The ID of initiative subscribed to. */
+  /** The ID of initiative subscribed to. null if the subscriber can no longer access it. */
   public get initiativeId(): string | undefined {
     return this._initiative?.id;
   }
@@ -10346,7 +10378,7 @@ export class IssueImport extends Request {
   public delete(issueImportId: string) {
     return new DeleteIssueImportMutation(this._request).fetch(issueImportId);
   }
-  /** Saves mapping choices without starting the import. For external-service imports, supply the full replacement mapping. Requires workspace import permission; Linear-to-Linear migrations can only be managed from the Linear app. */
+  /** Saves mapping choices without starting the import. For external-service imports, supply the full replacement mapping, and wait until the import has fetched its source data. Requires workspace import permission; Linear-to-Linear migrations can only be managed from the Linear app. */
   public update(input: L.IssueImportUpdateInput) {
     return new UpdateIssueImportMutation(this._request).fetch(this.id, input);
   }
@@ -12214,7 +12246,7 @@ export class LabelNotificationSubscription extends Request {
   private _customer?: L.LabelNotificationSubscriptionFragment["customer"];
   private _cycle?: L.LabelNotificationSubscriptionFragment["cycle"];
   private _initiative?: L.LabelNotificationSubscriptionFragment["initiative"];
-  private _label: L.LabelNotificationSubscriptionFragment["label"];
+  private _label?: L.LabelNotificationSubscriptionFragment["label"];
   private _project?: L.LabelNotificationSubscriptionFragment["project"];
   private _subscriber: L.LabelNotificationSubscriptionFragment["subscriber"];
   private _team?: L.LabelNotificationSubscriptionFragment["team"];
@@ -12235,7 +12267,7 @@ export class LabelNotificationSubscription extends Request {
     this._customer = data.customer ?? undefined;
     this._cycle = data.cycle ?? undefined;
     this._initiative = data.initiative ?? undefined;
-    this._label = data.label;
+    this._label = data.label ?? undefined;
     this._project = data.project ?? undefined;
     this._subscriber = data.subscriber;
     this._team = data.team ?? undefined;
@@ -12292,11 +12324,11 @@ export class LabelNotificationSubscription extends Request {
   public get initiativeId(): string | undefined {
     return this._initiative?.id;
   }
-  /** The label subscribed to. */
+  /** The label subscribed to. Null if the subscriber can no longer access it. */
   public get label(): LinearFetch<IssueLabel> | undefined {
-    return new IssueLabelQuery(this._request).fetch(this._label.id);
+    return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
-  /** The ID of label subscribed to. */
+  /** The ID of label subscribed to. null if the subscriber can no longer access it. */
   public get labelId(): string | undefined {
     return this._label?.id;
   }
@@ -15571,7 +15603,7 @@ export class ProjectNotificationSubscription extends Request {
   private _cycle?: L.ProjectNotificationSubscriptionFragment["cycle"];
   private _initiative?: L.ProjectNotificationSubscriptionFragment["initiative"];
   private _label?: L.ProjectNotificationSubscriptionFragment["label"];
-  private _project: L.ProjectNotificationSubscriptionFragment["project"];
+  private _project?: L.ProjectNotificationSubscriptionFragment["project"];
   private _subscriber: L.ProjectNotificationSubscriptionFragment["subscriber"];
   private _team?: L.ProjectNotificationSubscriptionFragment["team"];
   private _user?: L.ProjectNotificationSubscriptionFragment["user"];
@@ -15592,7 +15624,7 @@ export class ProjectNotificationSubscription extends Request {
     this._cycle = data.cycle ?? undefined;
     this._initiative = data.initiative ?? undefined;
     this._label = data.label ?? undefined;
-    this._project = data.project;
+    this._project = data.project ?? undefined;
     this._subscriber = data.subscriber;
     this._team = data.team ?? undefined;
     this._user = data.user ?? undefined;
@@ -15656,11 +15688,11 @@ export class ProjectNotificationSubscription extends Request {
   public get labelId(): string | undefined {
     return this._label?.id;
   }
-  /** The project subscribed to. */
+  /** The project subscribed to. Null if the subscriber can no longer access it. */
   public get project(): LinearFetch<Project> | undefined {
-    return new ProjectQuery(this._request).fetch(this._project.id);
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
-  /** The ID of project subscribed to. */
+  /** The ID of project subscribed to. null if the subscriber can no longer access it. */
   public get projectId(): string | undefined {
     return this._project?.id;
   }
@@ -20221,7 +20253,7 @@ export class TeamNotificationSubscription extends Request {
   private _label?: L.TeamNotificationSubscriptionFragment["label"];
   private _project?: L.TeamNotificationSubscriptionFragment["project"];
   private _subscriber: L.TeamNotificationSubscriptionFragment["subscriber"];
-  private _team: L.TeamNotificationSubscriptionFragment["team"];
+  private _team?: L.TeamNotificationSubscriptionFragment["team"];
   private _user?: L.TeamNotificationSubscriptionFragment["user"];
 
   public constructor(request: LinearRequest, data: L.TeamNotificationSubscriptionFragment) {
@@ -20242,7 +20274,7 @@ export class TeamNotificationSubscription extends Request {
     this._label = data.label ?? undefined;
     this._project = data.project ?? undefined;
     this._subscriber = data.subscriber;
-    this._team = data.team;
+    this._team = data.team ?? undefined;
     this._user = data.user ?? undefined;
   }
 
@@ -20320,11 +20352,11 @@ export class TeamNotificationSubscription extends Request {
   public get subscriberId(): string | undefined {
     return this._subscriber?.id;
   }
-  /** The team subscribed to. */
+  /** The team subscribed to. Null if the subscriber can no longer access it. */
   public get team(): LinearFetch<Team> | undefined {
-    return new TeamQuery(this._request).fetch(this._team.id);
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
-  /** The ID of team subscribed to. */
+  /** The ID of team subscribed to. null if the subscriber can no longer access it. */
   public get teamId(): string | undefined {
     return this._team?.id;
   }
@@ -21488,7 +21520,7 @@ export class UserNotificationSubscription extends Request {
   private _project?: L.UserNotificationSubscriptionFragment["project"];
   private _subscriber: L.UserNotificationSubscriptionFragment["subscriber"];
   private _team?: L.UserNotificationSubscriptionFragment["team"];
-  private _user: L.UserNotificationSubscriptionFragment["user"];
+  private _user?: L.UserNotificationSubscriptionFragment["user"];
 
   public constructor(request: LinearRequest, data: L.UserNotificationSubscriptionFragment) {
     super(request);
@@ -21509,7 +21541,7 @@ export class UserNotificationSubscription extends Request {
     this._project = data.project ?? undefined;
     this._subscriber = data.subscriber;
     this._team = data.team ?? undefined;
-    this._user = data.user;
+    this._user = data.user ?? undefined;
   }
 
   /** Whether the subscription is active. When inactive, no notifications are generated from this subscription even though it still exists. */
@@ -21594,11 +21626,11 @@ export class UserNotificationSubscription extends Request {
   public get teamId(): string | undefined {
     return this._team?.id;
   }
-  /** The user subscribed to. */
+  /** The user subscribed to. Null if the subscriber can no longer access it. */
   public get user(): LinearFetch<User> | undefined {
-    return new UserQuery(this._request).fetch(this._user.id);
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
-  /** The ID of user subscribed to. */
+  /** The ID of user subscribed to. null if the subscriber can no longer access it. */
   public get userId(): string | undefined {
     return this._user?.id;
   }
@@ -22223,6 +22255,7 @@ export class ViewPreferencesValues extends Request {
     this.reviewFieldQuickToReview = data.reviewFieldQuickToReview ?? undefined;
     this.reviewFieldRepository = data.reviewFieldRepository ?? undefined;
     this.reviewFieldReviewers = data.reviewFieldReviewers ?? undefined;
+    this.reviewFieldRisk = data.reviewFieldRisk ?? undefined;
     this.reviewFieldSla = data.reviewFieldSla ?? undefined;
     this.reviewFieldStatusDetails = data.reviewFieldStatusDetails ?? undefined;
     this.reviewGrouping = data.reviewGrouping ?? undefined;
@@ -22680,6 +22713,8 @@ export class ViewPreferencesValues extends Request {
   public reviewFieldRepository?: boolean | null;
   /** Whether to show reviewer avatars on review list items. Null if the preference is unset. */
   public reviewFieldReviewers?: boolean | null;
+  /** Whether to show the pull request risk level on review list items. Null if the preference is unset. */
+  public reviewFieldRisk?: boolean | null;
   /** Whether to show the most pressing SLA from connected issues on review list items. Null if the preference is unset. */
   public reviewFieldSla?: boolean | null;
   /** Whether to show review status details on a second line. */
@@ -30759,6 +30794,43 @@ export class DeleteDocumentMutation extends Request {
 }
 
 /**
+ * A fetchable DocumentShare Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class DocumentShareMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DocumentShare mutation and return a DocumentPayload
+   *
+   * @param id - required id to pass to documentShare
+   * @param userIds - required userIds to pass to documentShare
+   * @param variables - variables without 'id', 'userIds' to pass into the DocumentShareMutation
+   * @returns parsed response from DocumentShareMutation
+   */
+  public async fetch(
+    id: string,
+    userIds: string[],
+    variables?: Omit<L.DocumentShareMutationVariables, "id" | "userIds">
+  ): LinearFetch<DocumentPayload> {
+    const response = await this._request<L.DocumentShareMutation, L.DocumentShareMutationVariables>(
+      L.DocumentShareDocument.toString(),
+      {
+        id,
+        userIds,
+        ...variables,
+      }
+    );
+    const data = response.documentShare;
+
+    return new DocumentPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable UnarchiveDocument Mutation
  *
  * @param request - function to call the graphql client
@@ -30788,6 +30860,37 @@ export class UnarchiveDocumentMutation extends Request {
 }
 
 /**
+ * A fetchable DocumentUnshare Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class DocumentUnshareMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DocumentUnshare mutation and return a DocumentPayload
+   *
+   * @param id - required id to pass to documentUnshare
+   * @param userIds - required userIds to pass to documentUnshare
+   * @returns parsed response from DocumentUnshareMutation
+   */
+  public async fetch(id: string, userIds: string[]): LinearFetch<DocumentPayload> {
+    const response = await this._request<L.DocumentUnshareMutation, L.DocumentUnshareMutationVariables>(
+      L.DocumentUnshareDocument.toString(),
+      {
+        id,
+        userIds,
+      }
+    );
+    const data = response.documentUnshare;
+
+    return new DocumentPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable UpdateDocument Mutation
  *
  * @param request - function to call the graphql client
@@ -30813,6 +30916,80 @@ export class UpdateDocumentMutation extends Request {
       }
     );
     const data = response.documentUpdate;
+
+    return new DocumentPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable DocumentUpdateGeneralAccess Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class DocumentUpdateGeneralAccessMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DocumentUpdateGeneralAccess mutation and return a DocumentPayload
+   *
+   * @param generalAccess - required generalAccess to pass to documentUpdateGeneralAccess
+   * @param id - required id to pass to documentUpdateGeneralAccess
+   * @param variables - variables without 'generalAccess', 'id' to pass into the DocumentUpdateGeneralAccessMutation
+   * @returns parsed response from DocumentUpdateGeneralAccessMutation
+   */
+  public async fetch(
+    generalAccess: string,
+    id: string,
+    variables?: Omit<L.DocumentUpdateGeneralAccessMutationVariables, "generalAccess" | "id">
+  ): LinearFetch<DocumentPayload> {
+    const response = await this._request<
+      L.DocumentUpdateGeneralAccessMutation,
+      L.DocumentUpdateGeneralAccessMutationVariables
+    >(L.DocumentUpdateGeneralAccessDocument.toString(), {
+      generalAccess,
+      id,
+      ...variables,
+    });
+    const data = response.documentUpdateGeneralAccess;
+
+    return new DocumentPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable DocumentUpdateWorkspaceAccess Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class DocumentUpdateWorkspaceAccessMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DocumentUpdateWorkspaceAccess mutation and return a DocumentPayload
+   *
+   * @param id - required id to pass to documentUpdateWorkspaceAccess
+   * @param workspaceAccess - required workspaceAccess to pass to documentUpdateWorkspaceAccess
+   * @param variables - variables without 'id', 'workspaceAccess' to pass into the DocumentUpdateWorkspaceAccessMutation
+   * @returns parsed response from DocumentUpdateWorkspaceAccessMutation
+   */
+  public async fetch(
+    id: string,
+    workspaceAccess: string,
+    variables?: Omit<L.DocumentUpdateWorkspaceAccessMutationVariables, "id" | "workspaceAccess">
+  ): LinearFetch<DocumentPayload> {
+    const response = await this._request<
+      L.DocumentUpdateWorkspaceAccessMutation,
+      L.DocumentUpdateWorkspaceAccessMutationVariables
+    >(L.DocumentUpdateWorkspaceAccessDocument.toString(), {
+      id,
+      workspaceAccess,
+      ...variables,
+    });
+    const data = response.documentUpdateWorkspaceAccess;
 
     return new DocumentPayload(this._request, data);
   }
@@ -49652,7 +49829,7 @@ export class LinearSdk extends Request {
     return new UpdateCustomerMutation(this._request).fetch(id, input);
   }
   /**
-   * Finds a customer using the supplied UUID, external ID, Slack channel, or domains, and updates it; otherwise creates one. A name is required when no customer matches. Unlike customerUpdate, this operation can override integration-managed fields, and a tierName can create a new customer tier.
+   * Finds a customer using the supplied UUID, external ID, Slack channel, or domains, and updates it; otherwise creates one. A name is required when no customer matches. Unlike customerUpdate, this operation can override integration-managed fields, and a tierName can create a new customer tier when the caller has permission to manage customer settings.
    *
    * @param input - required input to pass to customerUpsert
    * @returns CustomerPayload
@@ -49707,7 +49884,7 @@ export class LinearSdk extends Request {
     return new UpdateCycleMutation(this._request).fetch(id, input);
   }
   /**
-   * Creates a document in a project, issue, or release, with optional initial Markdown content. The returned document includes its assigned UUID and metadata; select content to read the resulting body.
+   * Creates a document in a project, issue, or release, or in your private documents with personalUserId, with optional initial Markdown content. The returned document includes its assigned UUID and metadata; select content to read the resulting body.
    *
    * @param input - required input to pass to createDocument
    * @returns DocumentPayload
@@ -49716,7 +49893,7 @@ export class LinearSdk extends Request {
     return new CreateDocumentMutation(this._request).fetch(input);
   }
   /**
-   * Moves a document to the trash and archives it, including the sub-documents covered by its archive cascade. It is not permanently removed by this mutation. You must be allowed to manage the document; use documentUnarchive to restore it.
+   * Moves a document to the trash and archives it, including the sub-documents covered by its archive cascade. It is not permanently removed by this mutation. You must be allowed to manage the document, or to edit it when it is a page of a private document; use documentUnarchive to restore it.
    *
    * @param id - required id to pass to deleteDocument
    * @param variables - variables without 'id' to pass into the DeleteDocumentMutation
@@ -49729,13 +49906,38 @@ export class LinearSdk extends Request {
     return new DeleteDocumentMutation(this._request).fetch(id, variables);
   }
   /**
-   * Restores a trashed document and its eligible sub-documents. You must be allowed to manage the restored documents. If the containing resource is archived, restore that resource first.
+   * Shares a document and its sub-documents with workspace members at a role. On a personal document only the owner can share it. On any other document the owner, an owner of one of its teams, or a workspace admin can, the people must be able to see the document, and the role must be above its general access. People it is newly shared with are subscribed to the document. Users who already have another role move to the given one.
+   *
+   * @param id - required id to pass to documentShare
+   * @param userIds - required userIds to pass to documentShare
+   * @param variables - variables without 'id', 'userIds' to pass into the DocumentShareMutation
+   * @returns DocumentPayload
+   */
+  public documentShare(
+    id: string,
+    userIds: string[],
+    variables?: Omit<L.DocumentShareMutationVariables, "id" | "userIds">
+  ): LinearFetch<DocumentPayload> {
+    return new DocumentShareMutation(this._request).fetch(id, userIds, variables);
+  }
+  /**
+   * Restores a trashed document and its eligible sub-documents. You must be allowed to manage the restored documents, or to edit them when they are pages of a private document. If the containing resource is archived, restore that resource first.
    *
    * @param id - required id to pass to unarchiveDocument
    * @returns DocumentArchivePayload
    */
   public unarchiveDocument(id: string): LinearFetch<DocumentArchivePayload> {
     return new UnarchiveDocumentMutation(this._request).fetch(id);
+  }
+  /**
+   * Stops sharing a document and its sub-documents with users. Whoever can manage access to the document can remove anyone it is shared with; anyone else can only remove themselves.
+   *
+   * @param id - required id to pass to documentUnshare
+   * @param userIds - required userIds to pass to documentUnshare
+   * @returns DocumentPayload
+   */
+  public documentUnshare(id: string, userIds: string[]): LinearFetch<DocumentPayload> {
+    return new DocumentUnshareMutation(this._request).fetch(id, userIds);
   }
   /**
    * Updates a document’s metadata or replaces its Markdown body. You must have edit access to the document. Supplying a different container moves the document there, which can affect access; omitted fields are left unchanged.
@@ -49746,6 +49948,36 @@ export class LinearSdk extends Request {
    */
   public updateDocument(id: string, input: L.DocumentUpdateInput): LinearFetch<DocumentPayload> {
     return new UpdateDocumentMutation(this._request).fetch(id, input);
+  }
+  /**
+   * Changes what users other than the owner can do with a document that is not personal: edit, comment, or view. Only the owner of the document, an owner of one of its teams, or a workspace admin can change it. Comment and view need an owner who can access the document.
+   *
+   * @param generalAccess - required generalAccess to pass to documentUpdateGeneralAccess
+   * @param id - required id to pass to documentUpdateGeneralAccess
+   * @param variables - variables without 'generalAccess', 'id' to pass into the DocumentUpdateGeneralAccessMutation
+   * @returns DocumentPayload
+   */
+  public documentUpdateGeneralAccess(
+    generalAccess: string,
+    id: string,
+    variables?: Omit<L.DocumentUpdateGeneralAccessMutationVariables, "generalAccess" | "id">
+  ): LinearFetch<DocumentPayload> {
+    return new DocumentUpdateGeneralAccessMutation(this._request).fetch(generalAccess, id, variables);
+  }
+  /**
+   * Changes what people outside a document's teams can do with a document in a public team or in a project with a public team: edit, comment, or view. It can't be above the document's general access. Only the owner of the document, an owner of one of its teams, or a workspace admin can change it. Comment and view need an owner who can access the document.
+   *
+   * @param id - required id to pass to documentUpdateWorkspaceAccess
+   * @param workspaceAccess - required workspaceAccess to pass to documentUpdateWorkspaceAccess
+   * @param variables - variables without 'id', 'workspaceAccess' to pass into the DocumentUpdateWorkspaceAccessMutation
+   * @returns DocumentPayload
+   */
+  public documentUpdateWorkspaceAccess(
+    id: string,
+    workspaceAccess: string,
+    variables?: Omit<L.DocumentUpdateWorkspaceAccessMutationVariables, "id" | "workspaceAccess">
+  ): LinearFetch<DocumentPayload> {
+    return new DocumentUpdateWorkspaceAccessMutation(this._request).fetch(id, workspaceAccess, variables);
   }
   /**
    * Creates an address that accepts email for one team or issue template. For team and template types, an existing active address for that destination is returned instead of creating another. Use the returned emailAddress as the forwarding destination in your mail provider. Asks creation requires the appropriate plan and integration management permission; team and template addresses require permission to manage their destination. Form templates cannot be used for template intake.
@@ -50942,7 +51174,7 @@ export class LinearSdk extends Request {
     return new DeleteIssueImportMutation(this._request).fetch(issueImportId);
   }
   /**
-   * Saves the supplied mappings and schedules creation of Linear records from the fetched source data. The import must be inProgress; otherwise the mappings are saved but success is false. A successful response means processing was accepted, not that it has finished. Linear-to-Linear migrations can only be managed from the Linear app.
+   * Saves the supplied mappings and schedules creation of Linear records from the fetched source data. Fails without saving the mappings when an external-service import has not finished fetching its source data. The import must be inProgress; otherwise the mappings are saved but success is false. A successful response means processing was accepted, not that it has finished. Linear-to-Linear migrations can only be managed from the Linear app.
    *
    * @param issueImportId - required issueImportId to pass to issueImportProcess
    * @param mapping - required mapping to pass to issueImportProcess
@@ -50952,7 +51184,7 @@ export class LinearSdk extends Request {
     return new IssueImportProcessMutation(this._request).fetch(issueImportId, mapping);
   }
   /**
-   * Saves mapping choices without starting the import. For external-service imports, supply the full replacement mapping. Requires workspace import permission; Linear-to-Linear migrations can only be managed from the Linear app.
+   * Saves mapping choices without starting the import. For external-service imports, supply the full replacement mapping, and wait until the import has fetched its source data. Requires workspace import permission; Linear-to-Linear migrations can only be managed from the Linear app.
    *
    * @param id - required id to pass to updateIssueImport
    * @param input - required input to pass to updateIssueImport

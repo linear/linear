@@ -197,7 +197,7 @@ export type AgentActivity = Node & {
   /** The source comment this activity is linked to. Null if the activity was not triggered by a comment. */
   sourceComment?: Maybe<Comment>;
   /** JSON object attributing the activity to the integration, application, or automation that created it. Available properties depend on the source type. Null means no external source was recorded; user identifies the activity's author separately. */
-  sourceMetadata?: Maybe<Scalars["JSON"]>;
+  sourceMetadata?: Maybe<Scalars["JSONObject"]>;
   /** When the resource was last meaningfully updated, in UTC. Some background or housekeeping changes do not advance this timestamp. */
   updatedAt: Scalars["DateTime"];
   /** The author: the app user for agent output, or the person who sent a prompt. */
@@ -401,7 +401,7 @@ export type AgentSession = Node & {
   /** The root comment of the session's thread. Null for sessions without a comment thread. */
   comment?: Maybe<Comment>;
   /** JSON array of entity references supplied as context to the session, such as issues or projects referenced in chat. These provide additional context beyond the session's primary issue or comment. An empty array means no such entity context is recorded. */
-  context: Scalars["JSON"];
+  context: Scalars["JSONObject"];
   /** The resource’s recorded creation time, in UTC. Imports may preserve an earlier creation time. */
   createdAt: Scalars["DateTime"];
   /** The human user responsible for the agent session. When a person starts the session, this is that person. When an automation such as a Loop or a triage rule delegates an issue to a third-party agent, this is the issue assignee, on whose behalf the agent works. Null when the session has no responsible human user, such as a session an automation starts for the Linear agent, or a session started by an agent user. */
@@ -429,13 +429,13 @@ export type AgentSession = Node & {
   /** The issue the agent is working on. Null for sessions not associated with an issue. */
   issue?: Maybe<Issue>;
   /** The agent's current plan as a JSON object with entries and updatedAt. entries contains each step's content and status (pending, inProgress, completed, or canceled); updatedAt is the ISO timestamp when Linear accepted the plan. The owning app updates the entries through agentSessionUpdate. Null means no plan is stored. Entering error or stale status clears the plan. */
-  plan?: Maybe<Scalars["JSON"]>;
+  plan?: Maybe<Scalars["JSONObject"]>;
   /** The agent session's unique URL slug. */
   slugId: Scalars["String"];
   /** The comment in another thread that started this session. Use comment for the session’s own thread. Null means no separate source comment is recorded, or that comment is no longer available. */
   sourceComment?: Maybe<Comment>;
   /** JSON object describing the integration, application, or automation that created this session. Available keys depend on the source type; agentSessionMetadata.sourceCommentId can identify the comment that converted an existing thread into a session. Null when no source metadata is recorded. */
-  sourceMetadata?: Maybe<Scalars["JSON"]>;
+  sourceMetadata?: Maybe<Scalars["JSONObject"]>;
   /** The time this session most recently became active. A new user turn can make a completed session active again and replace this value, so it is not necessarily the session’s original start time. Null means the session has not started. */
   startedAt?: Maybe<Scalars["DateTime"]>;
   /** The current session status: pending, active, stopping, awaitingInput, complete, error, or stale. A completed session can become active again when a new turn starts. */
@@ -1948,6 +1948,8 @@ export type CustomView = Node & {
   feedItemFilterData?: Maybe<Scalars["JSONObject"]>;
   /** The saved issue filter used when modelName is Issue. This selects matching issues; layout, grouping, and ordering are stored in view preferences rather than this filter. */
   filterData: Scalars["JSONObject"];
+  /** [Internal] The timezone captured when the view was created. Missing values use UTC. */
+  filterTimezone?: Maybe<Scalars["String"]>;
   /**
    * The legacy serialized filters applied to issues in the custom view.
    * @deprecated Will be replaced by `filterData` in a future update
@@ -2144,8 +2146,8 @@ export type CustomViewNotificationSubscription = Entity &
     contextViewType?: Maybe<ContextViewType>;
     /** The resource’s recorded creation time, in UTC. Imports may preserve an earlier creation time. */
     createdAt: Scalars["DateTime"];
-    /** The custom view subscribed to. */
-    customView: CustomView;
+    /** The custom view subscribed to. Null if the subscriber can no longer access it. */
+    customView?: Maybe<CustomView>;
     /** The customer that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
     customer?: Maybe<Customer>;
     /** The cycle that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
@@ -2756,8 +2758,8 @@ export type CustomerNotificationSubscription = Entity &
     createdAt: Scalars["DateTime"];
     /** The custom view that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
     customView?: Maybe<CustomView>;
-    /** The customer subscribed to. */
-    customer: Customer;
+    /** The customer subscribed to. Null if the subscriber can no longer access it. */
+    customer?: Maybe<Customer>;
     /** The cycle that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
     cycle?: Maybe<Cycle>;
     /** The resource's unique UUID. This stays unchanged when the resource is renamed or moved; use it for stored references and mutations. */
@@ -3151,7 +3153,7 @@ export type CustomerUpsertInput = {
   statusId?: InputMaybe<Scalars["String"]>;
   /** The identifier of the customer tier to assign. Cannot be used together with tierName. */
   tierId?: InputMaybe<Scalars["String"]>;
-  /** The customer tier’s name or display name. An existing matching tier is reused; otherwise a tier is created. Use this when importing named tiers, or use tierId to select a known tier. The two fields cannot be combined. */
+  /** The customer tier’s name or display name. An existing matching tier is reused; otherwise a tier is created, which requires permission to manage customer settings. Use this when importing named tiers, or use tierId to select a known tier. The two fields cannot be combined. */
   tierName?: InputMaybe<Scalars["String"]>;
 };
 
@@ -3402,8 +3404,8 @@ export type CycleNotificationSubscription = Entity &
     customView?: Maybe<CustomView>;
     /** The customer that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
     customer?: Maybe<Customer>;
-    /** The cycle subscribed to. */
-    cycle: Cycle;
+    /** The cycle subscribed to. Null if the subscriber can no longer access it. */
+    cycle?: Maybe<Cycle>;
     /** The resource's unique UUID. This stays unchanged when the resource is renamed or moved; use it for stored references and mutations. */
     id: Scalars["ID"];
     /** Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives. */
@@ -3561,7 +3563,7 @@ export type DataWebhookPayload =
   | ReleaseWebhookPayload
   | UserWebhookPayload;
 
-/** Compares timestamps at millisecond precision. Accepts ISO 8601 timestamps or durations relative to when the filter runs; `{ gte: "-P7D" }` includes times from seven days ago onward. Combine `gte` and `lt` for a time window. A YYYY-MM-DD value means midnight UTC, so equality with a date does not match the whole day. */
+/** Compares timestamps at millisecond precision. Accepts ISO 8601 timestamps or durations relative to when the filter runs; `{ gte: "-P7D" }` includes times from seven days ago onward. Combine `gte` and `lt` for a time window. A YYYY-MM-DD value means midnight in `timezone`, or UTC by default, so equality with a date does not match the whole day. Use `today` to match the whole current day. */
 export type DateComparator = {
   /** Matches the given value. */
   eq?: InputMaybe<Scalars["DateTimeOrDuration"]>;
@@ -3579,6 +3581,10 @@ export type DateComparator = {
   neq?: InputMaybe<Scalars["DateTimeOrDuration"]>;
   /** Values to exclude from the match. For scalar comparisons, an empty list adds no restriction. */
   nin?: InputMaybe<Array<Scalars["DateTimeOrDuration"]>>;
+  /** Timezone for calendar dates. Saved views use one timezone for all date filters. */
+  timezone?: InputMaybe<Scalars["String"]>;
+  /** Matches today's calendar day, or its complement when false. Uses timezone, defaulting to UTC. */
+  today?: InputMaybe<Scalars["Boolean"]>;
 };
 
 /** By which resolution is a date defined. */
@@ -3672,6 +3678,8 @@ export type Document = Node & {
   creator?: Maybe<User>;
   /** The UUID of the document’s separate content record. Use this ID for document-content history or comments attached to the content, rather than the document’s own UUID. Null if no content record exists. */
   documentContentId?: Maybe<Scalars["String"]>;
+  /** What users other than the owner can do with a document that is not personal: edit, comment, or view. People shared on the document with a higher role keep it. Null on a personal document, which only its owner and the people it is shared with can access. */
+  generalAccess?: Maybe<DocumentShareRole>;
   /** The time the document was hidden from its default resource view. Null when it is not hidden. Hiding is separate from trashing or archiving and does not remove the document’s content. */
   hiddenAt?: Maybe<Scalars["DateTime"]>;
   /** The icon of the document, either a decorative icon type or an emoji string. Null if no icon has been set. */
@@ -3686,6 +3694,8 @@ export type Document = Node & {
   lastAppliedTemplate?: Maybe<Template>;
   /** The user responsible for the document. Assigning an owner also subscribes them to updates. Null if no owner is assigned or the account was deleted; ownership is distinct from who last edited the document. */
   owner?: Maybe<User>;
+  /** The user whose personal space holds the document, who owns and manages it. Null if the document belongs to a different parent entity type. */
+  personalUser?: Maybe<User>;
   /** The project that the document is associated with. Null if the document belongs to a different parent entity type. */
   project?: Maybe<Project>;
   /** The release that the document is associated with. Null if the document belongs to a different parent entity type. */
@@ -3706,7 +3716,7 @@ export type Document = Node & {
   updatedBy?: Maybe<User>;
   /** The canonical url for the document. */
   url: Scalars["String"];
-  /** [Internal] What people who can open a document in a public team, or in a project with a public team, but are not members of its teams can do with it: edit, comment, or view. Never above general access. Null means the same as general access, and is always null on a personal document. */
+  /** What people who can open a document in a public team, or in a project with a public team, but are not members of its teams can do with it: edit, comment, or view. Never above general access. Null means the same as general access, and is always null on a personal document. */
   workspaceAccess?: Maybe<DocumentShareRole>;
 };
 
@@ -3902,6 +3912,8 @@ export type DocumentCreateInput = {
   lastAppliedTemplateId?: InputMaybe<Scalars["String"]>;
   /** The UUID of an active, non-app user who can access the document. Defaults to the acting user for human-authored requests and to no owner for app-authored requests. Pass null to create it without an owner; assigning an owner also subscribes them. */
   ownerId?: InputMaybe<Scalars["String"]>;
+  /** Creates the document in this user's private documents. Must be the acting user, or for a sub-document the owner of its private parent document. */
+  personalUserId?: InputMaybe<Scalars["String"]>;
   /** UUID or identifier of the containing project, such as P-LIN-123. Cannot be combined with another parent resource. */
   projectId?: InputMaybe<Scalars["String"]>;
   /** UUID of the containing release. Cannot be combined with another parent resource. */
@@ -4071,6 +4083,8 @@ export type DocumentSearchResult = Node & {
   creator?: Maybe<User>;
   /** The UUID of the document’s separate content record. Use this ID for document-content history or comments attached to the content, rather than the document’s own UUID. Null if no content record exists. */
   documentContentId?: Maybe<Scalars["String"]>;
+  /** What users other than the owner can do with a document that is not personal: edit, comment, or view. People shared on the document with a higher role keep it. Null on a personal document, which only its owner and the people it is shared with can access. */
+  generalAccess?: Maybe<DocumentShareRole>;
   /** The time the document was hidden from its default resource view. Null when it is not hidden. Hiding is separate from trashing or archiving and does not remove the document’s content. */
   hiddenAt?: Maybe<Scalars["DateTime"]>;
   /** The icon of the document, either a decorative icon type or an emoji string. Null if no icon has been set. */
@@ -4087,6 +4101,8 @@ export type DocumentSearchResult = Node & {
   metadata: Scalars["JSONObject"];
   /** The user responsible for the document. Assigning an owner also subscribes them to updates. Null if no owner is assigned or the account was deleted; ownership is distinct from who last edited the document. */
   owner?: Maybe<User>;
+  /** The user whose personal space holds the document, who owns and manages it. Null if the document belongs to a different parent entity type. */
+  personalUser?: Maybe<User>;
   /** The project that the document is associated with. Null if the document belongs to a different parent entity type. */
   project?: Maybe<Project>;
   /** The release that the document is associated with. Null if the document belongs to a different parent entity type. */
@@ -4107,7 +4123,7 @@ export type DocumentSearchResult = Node & {
   updatedBy?: Maybe<User>;
   /** The canonical url for the document. */
   url: Scalars["String"];
-  /** [Internal] What people who can open a document in a public team, or in a project with a public team, but are not members of its teams can do with it: edit, comment, or view. Never above general access. Null means the same as general access, and is always null on a personal document. */
+  /** What people who can open a document in a public team, or in a project with a public team, but are not members of its teams can do with it: edit, comment, or view. Never above general access. Null means the same as general access, and is always null on a personal document. */
   workspaceAccess?: Maybe<DocumentShareRole>;
 };
 
@@ -4191,6 +4207,8 @@ export type DocumentUpdateInput = {
   lastAppliedTemplateId?: InputMaybe<Scalars["String"]>;
   /** The UUID of an active, non-app user who can access the document. Assigning an owner also subscribes them. Pass null to clear ownership where the document’s access settings allow it; personal documents keep their owner. */
   ownerId?: InputMaybe<Scalars["String"]>;
+  /** Moves the document and its sub-documents into this user's personal space. Must be the acting user. */
+  personalUserId?: InputMaybe<Scalars["String"]>;
   /** UUID or identifier of the destination project, such as P-LIN-123. Moves the document out of its previous container. Omitted or null values do not move it. */
   projectId?: InputMaybe<Scalars["String"]>;
   /** UUID of the destination release. Moves the document out of its previous container. Omitted or null values do not move it. */
@@ -6417,8 +6435,8 @@ export type InitiativeNotificationSubscription = Entity &
     id: Scalars["ID"];
     /** Whether initiative update notifications also include updates from sub-initiatives. Applies only when initiative updates are enabled and the workspace supports sub-initiatives. */
     includeSubInitiativeUpdates: Scalars["Boolean"];
-    /** The initiative subscribed to. */
-    initiative: Initiative;
+    /** The initiative subscribed to. Null if the subscriber can no longer access it. */
+    initiative?: Maybe<Initiative>;
     /** The issue label that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
     label?: Maybe<IssueLabel>;
     /** The notification event types that this subscription will deliver to the subscriber. */
@@ -10251,8 +10269,8 @@ export type LabelNotificationSubscription = Entity &
     includeSubInitiativeUpdates: Scalars["Boolean"];
     /** The initiative that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
     initiative?: Maybe<Initiative>;
-    /** The label subscribed to. */
-    label: IssueLabel;
+    /** The label subscribed to. Null if the subscriber can no longer access it. */
+    label?: Maybe<IssueLabel>;
     /** The notification event types that this subscription will deliver to the subscriber. */
     notificationSubscriptionTypes: Array<Scalars["String"]>;
     /** The project that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
@@ -10416,7 +10434,7 @@ export type Mutation = {
   customerUnsync: CustomerPayload;
   /** Updates the supplied customer fields, leaving omitted fields unchanged. For a customer managed by an integration, only fields that are editable in Linear are applied; managed fields are ignored. The request fails if none of the supplied fields are editable. */
   customerUpdate: CustomerPayload;
-  /** Finds a customer using the supplied UUID, external ID, Slack channel, or domains, and updates it; otherwise creates one. A name is required when no customer matches. Unlike customerUpdate, this operation can override integration-managed fields, and a tierName can create a new customer tier. */
+  /** Finds a customer using the supplied UUID, external ID, Slack channel, or domains, and updates it; otherwise creates one. A name is required when no customer matches. Unlike customerUpdate, this operation can override integration-managed fields, and a tierName can create a new customer tier when the caller has permission to manage customer settings. */
   customerUpsert: CustomerPayload;
   /** Archives a cycle and removes its current issues from it. The issues themselves are not archived. An inherited cycle must be managed through its parent team. Requires permission to manage the team. */
   cycleArchive: CycleArchivePayload;
@@ -10431,15 +10449,21 @@ export type Mutation = {
   cycleStartUpcomingCycleToday: CyclePayload;
   /** Updates a cycle’s name, description, or schedule and returns the resulting cycle. Date changes can shorten adjacent cycles to prevent overlap. You cannot change an active cycle’s start or a completed cycle’s dates, or edit inherited cycles directly. Requires permission to manage the team. */
   cycleUpdate: CyclePayload;
-  /** Creates a document in a project, issue, or release, with optional initial Markdown content. The returned document includes its assigned UUID and metadata; select content to read the resulting body. */
+  /** Creates a document in a project, issue, or release, or in your private documents with personalUserId, with optional initial Markdown content. The returned document includes its assigned UUID and metadata; select content to read the resulting body. */
   documentCreate: DocumentPayload;
-  /** Moves a document to the trash and archives it, including the sub-documents covered by its archive cascade. It is not permanently removed by this mutation. You must be allowed to manage the document; use documentUnarchive to restore it. */
+  /** Moves a document to the trash and archives it, including the sub-documents covered by its archive cascade. It is not permanently removed by this mutation. You must be allowed to manage the document, or to edit it when it is a page of a private document; use documentUnarchive to restore it. */
   documentDelete: DocumentArchivePayload;
-  /** Restores a trashed document and its eligible sub-documents. You must be allowed to manage the restored documents. If the containing resource is archived, restore that resource first. */
+  /** Shares a document and its sub-documents with workspace members at a role. On a personal document only the owner can share it. On any other document the owner, an owner of one of its teams, or a workspace admin can, the people must be able to see the document, and the role must be above its general access. People it is newly shared with are subscribed to the document. Users who already have another role move to the given one. */
+  documentShare: DocumentPayload;
+  /** Restores a trashed document and its eligible sub-documents. You must be allowed to manage the restored documents, or to edit them when they are pages of a private document. If the containing resource is archived, restore that resource first. */
   documentUnarchive: DocumentArchivePayload;
+  /** Stops sharing a document and its sub-documents with users. Whoever can manage access to the document can remove anyone it is shared with; anyone else can only remove themselves. */
+  documentUnshare: DocumentPayload;
   /** Updates a document’s metadata or replaces its Markdown body. You must have edit access to the document. Supplying a different container moves the document there, which can affect access; omitted fields are left unchanged. */
   documentUpdate: DocumentPayload;
-  /** [Internal] Changes what people outside a document's teams can do with a document in a public team or in a project with a public team: edit, comment, or view. It can't be above the document's general access. Only the owner of the document, an owner of one of its teams, or a workspace admin can change it. Comment and view need an owner who can access the document. */
+  /** Changes what users other than the owner can do with a document that is not personal: edit, comment, or view. Only the owner of the document, an owner of one of its teams, or a workspace admin can change it. Comment and view need an owner who can access the document. */
+  documentUpdateGeneralAccess: DocumentPayload;
+  /** Changes what people outside a document's teams can do with a document in a public team or in a project with a public team: edit, comment, or view. It can't be above the document's general access. Only the owner of the document, an owner of one of its teams, or a workspace admin can change it. Comment and view need an owner who can access the document. */
   documentUpdateWorkspaceAccess: DocumentPayload;
   /** Creates an address that accepts email for one team or issue template. For team and template types, an existing active address for that destination is returned instead of creating another. Use the returned emailAddress as the forwarding destination in your mail provider. Asks creation requires the appropriate plan and integration management permission; team and template addresses require permission to manage their destination. Form templates cannot be used for template intake. */
   emailIntakeAddressCreate: EmailIntakeAddressPayload;
@@ -10663,9 +10687,9 @@ export type Mutation = {
   issueImportCreateJira: IssueImportPayload;
   /** Schedules deletion of an import and the data it created, then returns the job with status deleting. This is available within 14 days for eligible imports awaiting configuration, completed imports, or failed imports. You must be the creator or an admin with the destination team’s deletion permission, and another import from the same service must not be processing. */
   issueImportDelete: IssueImportDeletePayload;
-  /** Saves the supplied mappings and schedules creation of Linear records from the fetched source data. The import must be inProgress; otherwise the mappings are saved but success is false. A successful response means processing was accepted, not that it has finished. Linear-to-Linear migrations can only be managed from the Linear app. */
+  /** Saves the supplied mappings and schedules creation of Linear records from the fetched source data. Fails without saving the mappings when an external-service import has not finished fetching its source data. The import must be inProgress; otherwise the mappings are saved but success is false. A successful response means processing was accepted, not that it has finished. Linear-to-Linear migrations can only be managed from the Linear app. */
   issueImportProcess: IssueImportPayload;
-  /** Saves mapping choices without starting the import. For external-service imports, supply the full replacement mapping. Requires workspace import permission; Linear-to-Linear migrations can only be managed from the Linear app. */
+  /** Saves mapping choices without starting the import. For external-service imports, supply the full replacement mapping, and wait until the import has fetched its source data. Requires workspace import permission; Linear-to-Linear migrations can only be managed from the Linear app. */
   issueImportUpdate: IssueImportPayload;
   /** Create a workspace or team label. Requires permission to manage labels in its scope. */
   issueLabelCreate: IssueLabelPayload;
@@ -10746,7 +10770,7 @@ export type Mutation = {
   oauthApplicationArchive: OAuthApplicationArchivePayload;
   /** [ALPHA] Creates an OAuth application private to the current workspace and managed by the calling OAuth application. The caller needs workspace API management permission. Save clientSecret and any webhookSecret from the first successful response. Retrying with the same idempotency key returns the existing unarchived application without updating it and with secrets omitted. Use the application’s id for later management operations and clientId for OAuth flows. */
   oauthApplicationCreate: OAuthApplicationCreatePayload;
-  /** [ALPHA] Replaces the client secret for an application created by the caller and returns the new secret. Store it before discarding the response; it cannot be retrieved later. Tokens issued through client_credentials are revoked, while tokens from the authorization-code flow remain valid. The caller must be able to manage the application’s credentials, including its private-team access, as well as have workspace API management permission. */
+  /** [ALPHA] Replaces the client secret for an application created by the caller and returns the new secret. Store it before discarding the response; it cannot be retrieved later. The old secret stops working at once, as does a previous secret that a planned rotation kept working. Tokens issued through client_credentials are revoked, while tokens from the authorization-code flow remain valid. The caller must be able to manage the application’s credentials, including its private-team access, as well as have workspace API management permission. */
   oauthApplicationRotateSecret: OAuthApplicationRotateSecretPayload;
   /** [ALPHA] Rotates the webhook signing secret for an OAuth application created by the calling OAuth application. */
   oauthApplicationRotateWebhookSecret: OAuthApplicationRotateWebhookSecretPayload;
@@ -11348,13 +11372,32 @@ export type MutationDocumentDeleteArgs = {
   ifParentDocumentId?: InputMaybe<Scalars["String"]>;
 };
 
+export type MutationDocumentShareArgs = {
+  id: Scalars["String"];
+  role?: InputMaybe<DocumentShareRole>;
+  userIds: Array<Scalars["String"]>;
+};
+
 export type MutationDocumentUnarchiveArgs = {
   id: Scalars["String"];
+};
+
+export type MutationDocumentUnshareArgs = {
+  id: Scalars["String"];
+  userIds: Array<Scalars["String"]>;
 };
 
 export type MutationDocumentUpdateArgs = {
   id: Scalars["String"];
   input: DocumentUpdateInput;
+};
+
+export type MutationDocumentUpdateGeneralAccessArgs = {
+  applyToSubDocuments?: InputMaybe<Scalars["Boolean"]>;
+  generalAccess: Scalars["String"];
+  id: Scalars["String"];
+  previousGeneralAccess?: InputMaybe<Scalars["String"]>;
+  removeCollaboratorIds?: InputMaybe<Array<Scalars["String"]>>;
 };
 
 export type MutationDocumentUpdateWorkspaceAccessArgs = {
@@ -11625,6 +11668,7 @@ export type MutationIntegrationGitHubPersonalArgs = {
 };
 
 export type MutationIntegrationGithubConnectArgs = {
+  addLinkingInstallation?: InputMaybe<Scalars["Boolean"]>;
   code: Scalars["String"];
   codeAccess?: InputMaybe<Scalars["Boolean"]>;
   confirmReplace?: InputMaybe<Scalars["Boolean"]>;
@@ -13256,6 +13300,10 @@ export type NullableDateComparator = {
   nin?: InputMaybe<Array<Scalars["DateTimeOrDuration"]>>;
   /** Set to true to match resources with no value, or false to require a value. For example, `{ null: true }` finds unset values; `{ eq: null }` is not a substitute. */
   null?: InputMaybe<Scalars["Boolean"]>;
+  /** Timezone for calendar dates. Saved views use one timezone for all date filters. */
+  timezone?: InputMaybe<Scalars["String"]>;
+  /** Matches today's calendar day, or its complement when false. Uses timezone, defaulting to UTC. */
+  today?: InputMaybe<Scalars["Boolean"]>;
 };
 
 /** Conditions on an optional document content relation. Use null to test whether the relation is set, or supply document content fields to filter the related record. Combine conditions with `and` or `or`. */
@@ -13860,6 +13908,10 @@ export type NullableTimelessDateComparator = {
   nin?: InputMaybe<Array<Scalars["TimelessDateOrDuration"]>>;
   /** Set to true to match resources with no value, or false to require a value. For example, `{ null: true }` finds unset values; `{ eq: null }` is not a substitute. */
   null?: InputMaybe<Scalars["Boolean"]>;
+  /** Timezone for calendar dates. Saved views use one timezone for all date filters. */
+  timezone?: InputMaybe<Scalars["String"]>;
+  /** Matches today's calendar day, or its complement when false. Uses timezone, defaulting to UTC. */
+  today?: InputMaybe<Scalars["Boolean"]>;
 };
 
 /** Filters an optional relation to users. Use null to test whether the relation is set, or supply property conditions to filter the related object. */
@@ -16484,8 +16536,8 @@ export type ProjectNotificationSubscription = Entity &
     label?: Maybe<IssueLabel>;
     /** The notification event types that this subscription will deliver to the subscriber. */
     notificationSubscriptionTypes: Array<Scalars["String"]>;
-    /** The project subscribed to. */
-    project: Project;
+    /** The project subscribed to. Null if the subscriber can no longer access it. */
+    project?: Maybe<Project>;
     /** The user who will receive notifications from this subscription. */
     subscriber: User;
     /** The team that this notification subscription is scoped to. Null if the subscription targets a different entity type. */
@@ -21960,8 +22012,8 @@ export type TeamNotificationSubscription = Entity &
     project?: Maybe<Project>;
     /** The user who will receive notifications from this subscription. */
     subscriber: User;
-    /** The team subscribed to. */
-    team: Team;
+    /** The team subscribed to. Null if the subscriber can no longer access it. */
+    team?: Maybe<Team>;
     /** When the resource was last meaningfully updated, in UTC. Some background or housekeeping changes do not advance this timestamp. */
     updatedAt: Scalars["DateTime"];
     /** The user that this notification subscription is scoped to, for user-specific view subscriptions. Null if the subscription targets a different entity type. */
@@ -23216,8 +23268,8 @@ export type UserNotificationSubscription = Entity &
     team?: Maybe<Team>;
     /** When the resource was last meaningfully updated, in UTC. Some background or housekeeping changes do not advance this timestamp. */
     updatedAt: Scalars["DateTime"];
-    /** The user subscribed to. */
-    user: User;
+    /** The user subscribed to. Null if the subscriber can no longer access it. */
+    user?: Maybe<User>;
     /** The type of user-specific view that further scopes a user notification subscription. Null if the subscription is not associated with a user view type. */
     userContextViewType?: Maybe<UserContextViewType>;
   };
@@ -23982,6 +24034,8 @@ export type ViewPreferencesValues = {
   reviewFieldRepository?: Maybe<Scalars["Boolean"]>;
   /** Whether to show reviewer avatars on review list items. Null if the preference is unset. */
   reviewFieldReviewers?: Maybe<Scalars["Boolean"]>;
+  /** Whether to show the pull request risk level on review list items. Null if the preference is unset. */
+  reviewFieldRisk?: Maybe<Scalars["Boolean"]>;
   /** Whether to show the most pressing SLA from connected issues on review list items. Null if the preference is unset. */
   reviewFieldSla?: Maybe<Scalars["Boolean"]>;
   /** Whether to show review status details on a second line. */
@@ -25133,6 +25187,8 @@ export type DocumentFragment = { __typename: "Document" } & Pick<
   | "title"
   | "trashed"
   | "slugId"
+  | "workspaceAccess"
+  | "generalAccess"
   | "archivedAt"
   | "updatedAt"
 > & {
@@ -25144,6 +25200,7 @@ export type DocumentFragment = { __typename: "Document" } & Pick<
     owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+    personalUser?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
 
 export type DocumentSearchResultFragment = { __typename: "DocumentSearchResult" } & Pick<
@@ -25160,6 +25217,8 @@ export type DocumentSearchResultFragment = { __typename: "DocumentSearchResult" 
   | "title"
   | "trashed"
   | "slugId"
+  | "workspaceAccess"
+  | "generalAccess"
   | "archivedAt"
   | "updatedAt"
   | "metadata"
@@ -25172,6 +25231,7 @@ export type DocumentSearchResultFragment = { __typename: "DocumentSearchResult" 
     owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+    personalUser?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
 
 export type FacetFragment = { __typename: "Facet" } & Pick<
@@ -26045,8 +26105,9 @@ export type IssueNotificationFragment = { __typename: "IssueNotification" } & Pi
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
-              customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+              customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
               cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
               initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -26066,9 +26127,10 @@ export type IssueNotificationFragment = { __typename: "IssueNotification" } & Pi
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-              customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+              customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
               cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
               initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
               label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -26087,10 +26149,11 @@ export type IssueNotificationFragment = { __typename: "IssueNotification" } & Pi
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-              cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+              cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
               initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
               label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -26108,11 +26171,12 @@ export type IssueNotificationFragment = { __typename: "IssueNotification" } & Pi
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
               cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-              initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+              initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
               label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
               team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -26129,12 +26193,13 @@ export type IssueNotificationFragment = { __typename: "IssueNotification" } & Pi
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
               cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
               initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-              label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+              label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
               team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
               user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -26150,13 +26215,14 @@ export type IssueNotificationFragment = { __typename: "IssueNotification" } & Pi
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
               cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
               initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
               label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-              project: { __typename?: "Project" } & Pick<Project, "id">;
+              project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
               team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
               user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -26171,6 +26237,7 @@ export type IssueNotificationFragment = { __typename: "IssueNotification" } & Pi
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -26178,7 +26245,7 @@ export type IssueNotificationFragment = { __typename: "IssueNotification" } & Pi
               initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
               label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-              team: { __typename?: "Team" } & Pick<Team, "id">;
+              team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
               user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               subscriber: { __typename?: "User" } & Pick<User, "id">;
             })
@@ -26192,6 +26259,7 @@ export type IssueNotificationFragment = { __typename: "IssueNotification" } & Pi
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -26200,7 +26268,7 @@ export type IssueNotificationFragment = { __typename: "IssueNotification" } & Pi
               label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
               team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-              user: { __typename?: "User" } & Pick<User, "id">;
+              user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               subscriber: { __typename?: "User" } & Pick<User, "id">;
             })
       >
@@ -26223,7 +26291,7 @@ export type CustomViewNotificationSubscriptionFragment = { __typename: "CustomVi
   | "includeSubInitiativeUpdates"
   | "active"
 > & {
-    customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -26247,7 +26315,7 @@ export type CustomerNotificationSubscriptionFragment = { __typename: "CustomerNo
   | "active"
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-    customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -26271,7 +26339,7 @@ export type CycleNotificationSubscriptionFragment = { __typename: "CycleNotifica
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-    cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -26295,7 +26363,7 @@ export type InitiativeNotificationSubscriptionFragment = { __typename: "Initiati
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-    initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -26319,7 +26387,7 @@ export type LabelNotificationSubscriptionFragment = { __typename: "LabelNotifica
     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-    label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -26343,7 +26411,7 @@ export type ProjectNotificationSubscriptionFragment = { __typename: "ProjectNoti
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-    project: { __typename?: "Project" } & Pick<Project, "id">;
+    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -26367,7 +26435,7 @@ export type TeamNotificationSubscriptionFragment = { __typename: "TeamNotificati
     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-    team: { __typename?: "Team" } & Pick<Team, "id">;
+    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     subscriber: { __typename?: "User" } & Pick<User, "id">;
   };
@@ -26391,7 +26459,7 @@ export type UserNotificationSubscriptionFragment = { __typename: "UserNotificati
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-    user: { __typename?: "User" } & Pick<User, "id">;
+    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     subscriber: { __typename?: "User" } & Pick<User, "id">;
   };
 
@@ -26422,6 +26490,8 @@ export type DocumentSearchPayloadFragment = { __typename: "DocumentSearchPayload
         | "title"
         | "trashed"
         | "slugId"
+        | "workspaceAccess"
+        | "generalAccess"
         | "archivedAt"
         | "updatedAt"
         | "metadata"
@@ -26434,6 +26504,7 @@ export type DocumentSearchPayloadFragment = { __typename: "DocumentSearchPayload
           owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          personalUser?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
         }
     >;
   };
@@ -27235,6 +27306,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
             | "projectFieldDateUpdated"
             | "timelineShowProjectsAside"
             | "reviewFieldOpenedAt"
+            | "reviewFieldRisk"
             | "fieldPullRequests"
             | "reviewFieldQuickToReview"
             | "continuousPipelineReleaseFieldReleaseDate"
@@ -27518,6 +27590,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "projectFieldDateUpdated"
                 | "timelineShowProjectsAside"
                 | "reviewFieldOpenedAt"
+                | "reviewFieldRisk"
                 | "fieldPullRequests"
                 | "reviewFieldQuickToReview"
                 | "continuousPipelineReleaseFieldReleaseDate"
@@ -27798,6 +27871,7 @@ export type CustomViewConnectionFragment = { __typename: "CustomViewConnection" 
                 | "projectFieldDateUpdated"
                 | "timelineShowProjectsAside"
                 | "reviewFieldOpenedAt"
+                | "reviewFieldRisk"
                 | "fieldPullRequests"
                 | "reviewFieldQuickToReview"
                 | "continuousPipelineReleaseFieldReleaseDate"
@@ -28042,6 +28116,8 @@ export type DocumentConnectionFragment = { __typename: "DocumentConnection" } & 
       | "title"
       | "trashed"
       | "slugId"
+      | "workspaceAccess"
+      | "generalAccess"
       | "archivedAt"
       | "updatedAt"
     > & {
@@ -28053,6 +28129,7 @@ export type DocumentConnectionFragment = { __typename: "DocumentConnection" } & 
         owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
         creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
         updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+        personalUser?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
       }
   >;
 };
@@ -29233,8 +29310,9 @@ export type NotificationConnectionFragment = { __typename: "NotificationConnecti
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
-                    customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -29254,9 +29332,10 @@ export type NotificationConnectionFragment = { __typename: "NotificationConnecti
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-                    customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -29275,10 +29354,11 @@ export type NotificationConnectionFragment = { __typename: "NotificationConnecti
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-                    cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -29296,11 +29376,12 @@ export type NotificationConnectionFragment = { __typename: "NotificationConnecti
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-                    initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -29317,12 +29398,13 @@ export type NotificationConnectionFragment = { __typename: "NotificationConnecti
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                    label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -29338,13 +29420,14 @@ export type NotificationConnectionFragment = { __typename: "NotificationConnecti
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-                    project: { __typename?: "Project" } & Pick<Project, "id">;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                     subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -29359,6 +29442,7 @@ export type NotificationConnectionFragment = { __typename: "NotificationConnecti
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -29366,7 +29450,7 @@ export type NotificationConnectionFragment = { __typename: "NotificationConnecti
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                    team: { __typename?: "Team" } & Pick<Team, "id">;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                     subscriber: { __typename?: "User" } & Pick<User, "id">;
                   })
@@ -29380,6 +29464,7 @@ export type NotificationConnectionFragment = { __typename: "NotificationConnecti
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -29388,7 +29473,7 @@ export type NotificationConnectionFragment = { __typename: "NotificationConnecti
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-                    user: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                     subscriber: { __typename?: "User" } & Pick<User, "id">;
                   })
             >
@@ -29717,8 +29802,9 @@ export type NotificationSubscriptionConnectionFragment = { __typename: "Notifica
         | "updatedAt"
         | "includeSubInitiativeUpdates"
         | "active"
+        | "notificationSubscriptionTypes"
       > & {
-          customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+          customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
           customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
           cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
           initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -29738,9 +29824,10 @@ export type NotificationSubscriptionConnectionFragment = { __typename: "Notifica
         | "updatedAt"
         | "includeSubInitiativeUpdates"
         | "active"
+        | "notificationSubscriptionTypes"
       > & {
           customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-          customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+          customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
           cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
           initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
           label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -29759,10 +29846,11 @@ export type NotificationSubscriptionConnectionFragment = { __typename: "Notifica
         | "updatedAt"
         | "includeSubInitiativeUpdates"
         | "active"
+        | "notificationSubscriptionTypes"
       > & {
           customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
           customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-          cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+          cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
           initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
           label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
           project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -29780,11 +29868,12 @@ export type NotificationSubscriptionConnectionFragment = { __typename: "Notifica
         | "updatedAt"
         | "includeSubInitiativeUpdates"
         | "active"
+        | "notificationSubscriptionTypes"
       > & {
           customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
           customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
           cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-          initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+          initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
           label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
           project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
           team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -29801,12 +29890,13 @@ export type NotificationSubscriptionConnectionFragment = { __typename: "Notifica
         | "updatedAt"
         | "includeSubInitiativeUpdates"
         | "active"
+        | "notificationSubscriptionTypes"
       > & {
           customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
           customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
           cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
           initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-          label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+          label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
           project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
           team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
           user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -29822,13 +29912,14 @@ export type NotificationSubscriptionConnectionFragment = { __typename: "Notifica
         | "updatedAt"
         | "includeSubInitiativeUpdates"
         | "active"
+        | "notificationSubscriptionTypes"
       > & {
           customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
           customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
           cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
           initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
           label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-          project: { __typename?: "Project" } & Pick<Project, "id">;
+          project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
           team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
           user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -29843,6 +29934,7 @@ export type NotificationSubscriptionConnectionFragment = { __typename: "Notifica
         | "updatedAt"
         | "includeSubInitiativeUpdates"
         | "active"
+        | "notificationSubscriptionTypes"
       > & {
           customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
           customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -29850,7 +29942,7 @@ export type NotificationSubscriptionConnectionFragment = { __typename: "Notifica
           initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
           label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
           project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-          team: { __typename?: "Team" } & Pick<Team, "id">;
+          team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
           user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           subscriber: { __typename?: "User" } & Pick<User, "id">;
         })
@@ -29864,6 +29956,7 @@ export type NotificationSubscriptionConnectionFragment = { __typename: "Notifica
         | "updatedAt"
         | "includeSubInitiativeUpdates"
         | "active"
+        | "notificationSubscriptionTypes"
       > & {
           customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
           customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -29872,7 +29965,7 @@ export type NotificationSubscriptionConnectionFragment = { __typename: "Notifica
           label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
           project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
           team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-          user: { __typename?: "User" } & Pick<User, "id">;
+          user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           subscriber: { __typename?: "User" } & Pick<User, "id">;
         })
   >;
@@ -32166,6 +32259,7 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
       | "projectFieldDateUpdated"
       | "timelineShowProjectsAside"
       | "reviewFieldOpenedAt"
+      | "reviewFieldRisk"
       | "fieldPullRequests"
       | "reviewFieldQuickToReview"
       | "continuousPipelineReleaseFieldReleaseDate"
@@ -32461,6 +32555,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
         | "projectFieldDateUpdated"
         | "timelineShowProjectsAside"
         | "reviewFieldOpenedAt"
+        | "reviewFieldRisk"
         | "fieldPullRequests"
         | "reviewFieldQuickToReview"
         | "continuousPipelineReleaseFieldReleaseDate"
@@ -32744,6 +32839,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "projectFieldDateUpdated"
             | "timelineShowProjectsAside"
             | "reviewFieldOpenedAt"
+            | "reviewFieldRisk"
             | "fieldPullRequests"
             | "reviewFieldQuickToReview"
             | "continuousPipelineReleaseFieldReleaseDate"
@@ -33024,6 +33120,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
             | "projectFieldDateUpdated"
             | "timelineShowProjectsAside"
             | "reviewFieldOpenedAt"
+            | "reviewFieldRisk"
             | "fieldPullRequests"
             | "reviewFieldQuickToReview"
             | "continuousPipelineReleaseFieldReleaseDate"
@@ -33696,8 +33793,9 @@ type NotificationSubscription_CustomViewNotificationSubscription_Fragment = {
   | "updatedAt"
   | "includeSubInitiativeUpdates"
   | "active"
+  | "notificationSubscriptionTypes"
 > & {
-    customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -33720,9 +33818,10 @@ type NotificationSubscription_CustomerNotificationSubscription_Fragment = {
   | "updatedAt"
   | "includeSubInitiativeUpdates"
   | "active"
+  | "notificationSubscriptionTypes"
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-    customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -33744,10 +33843,11 @@ type NotificationSubscription_CycleNotificationSubscription_Fragment = {
   | "updatedAt"
   | "includeSubInitiativeUpdates"
   | "active"
+  | "notificationSubscriptionTypes"
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-    cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -33768,11 +33868,12 @@ type NotificationSubscription_InitiativeNotificationSubscription_Fragment = {
   | "updatedAt"
   | "includeSubInitiativeUpdates"
   | "active"
+  | "notificationSubscriptionTypes"
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-    initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -33792,12 +33893,13 @@ type NotificationSubscription_LabelNotificationSubscription_Fragment = {
   | "updatedAt"
   | "includeSubInitiativeUpdates"
   | "active"
+  | "notificationSubscriptionTypes"
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-    label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -33816,13 +33918,14 @@ type NotificationSubscription_ProjectNotificationSubscription_Fragment = {
   | "updatedAt"
   | "includeSubInitiativeUpdates"
   | "active"
+  | "notificationSubscriptionTypes"
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-    project: { __typename?: "Project" } & Pick<Project, "id">;
+    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -33840,6 +33943,7 @@ type NotificationSubscription_TeamNotificationSubscription_Fragment = {
   | "updatedAt"
   | "includeSubInitiativeUpdates"
   | "active"
+  | "notificationSubscriptionTypes"
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -33847,7 +33951,7 @@ type NotificationSubscription_TeamNotificationSubscription_Fragment = {
     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-    team: { __typename?: "Team" } & Pick<Team, "id">;
+    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     subscriber: { __typename?: "User" } & Pick<User, "id">;
   };
@@ -33864,6 +33968,7 @@ type NotificationSubscription_UserNotificationSubscription_Fragment = {
   | "updatedAt"
   | "includeSubInitiativeUpdates"
   | "active"
+  | "notificationSubscriptionTypes"
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -33872,7 +33977,7 @@ type NotificationSubscription_UserNotificationSubscription_Fragment = {
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-    user: { __typename?: "User" } & Pick<User, "id">;
+    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     subscriber: { __typename?: "User" } & Pick<User, "id">;
   };
 
@@ -34435,8 +34540,9 @@ type Notification_IssueNotification_Fragment = { __typename: "IssueNotification"
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
-              customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+              customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
               cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
               initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -34456,9 +34562,10 @@ type Notification_IssueNotification_Fragment = { __typename: "IssueNotification"
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-              customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+              customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
               cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
               initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
               label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -34477,10 +34584,11 @@ type Notification_IssueNotification_Fragment = { __typename: "IssueNotification"
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-              cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+              cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
               initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
               label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -34498,11 +34606,12 @@ type Notification_IssueNotification_Fragment = { __typename: "IssueNotification"
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
               cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-              initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+              initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
               label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
               team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -34519,12 +34628,13 @@ type Notification_IssueNotification_Fragment = { __typename: "IssueNotification"
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
               cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
               initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-              label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+              label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
               team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
               user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -34540,13 +34650,14 @@ type Notification_IssueNotification_Fragment = { __typename: "IssueNotification"
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
               cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
               initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
               label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-              project: { __typename?: "Project" } & Pick<Project, "id">;
+              project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
               team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
               user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -34561,6 +34672,7 @@ type Notification_IssueNotification_Fragment = { __typename: "IssueNotification"
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -34568,7 +34680,7 @@ type Notification_IssueNotification_Fragment = { __typename: "IssueNotification"
               initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
               label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-              team: { __typename?: "Team" } & Pick<Team, "id">;
+              team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
               user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               subscriber: { __typename?: "User" } & Pick<User, "id">;
             })
@@ -34582,6 +34694,7 @@ type Notification_IssueNotification_Fragment = { __typename: "IssueNotification"
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -34590,7 +34703,7 @@ type Notification_IssueNotification_Fragment = { __typename: "IssueNotification"
               label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
               team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-              user: { __typename?: "User" } & Pick<User, "id">;
+              user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               subscriber: { __typename?: "User" } & Pick<User, "id">;
             })
       >
@@ -35866,6 +35979,7 @@ export type ViewPreferencesValuesFragment = { __typename: "ViewPreferencesValues
   | "projectFieldDateUpdated"
   | "timelineShowProjectsAside"
   | "reviewFieldOpenedAt"
+  | "reviewFieldRisk"
   | "fieldPullRequests"
   | "reviewFieldQuickToReview"
   | "continuousPipelineReleaseFieldReleaseDate"
@@ -37913,8 +38027,9 @@ export type NotificationBatchActionPayloadFragment = { __typename: "Notification
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
-                      customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                      customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -37934,9 +38049,10 @@ export type NotificationBatchActionPayloadFragment = { __typename: "Notification
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-                      customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                      customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -37955,10 +38071,11 @@ export type NotificationBatchActionPayloadFragment = { __typename: "Notification
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-                      cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                      cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -37976,11 +38093,12 @@ export type NotificationBatchActionPayloadFragment = { __typename: "Notification
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-                      initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                      initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -37997,12 +38115,13 @@ export type NotificationBatchActionPayloadFragment = { __typename: "Notification
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                      label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                      label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                       user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -38018,13 +38137,14 @@ export type NotificationBatchActionPayloadFragment = { __typename: "Notification
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-                      project: { __typename?: "Project" } & Pick<Project, "id">;
+                      project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                       user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                       subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -38039,6 +38159,7 @@ export type NotificationBatchActionPayloadFragment = { __typename: "Notification
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -38046,7 +38167,7 @@ export type NotificationBatchActionPayloadFragment = { __typename: "Notification
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                      team: { __typename?: "Team" } & Pick<Team, "id">;
+                      team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                       user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                       subscriber: { __typename?: "User" } & Pick<User, "id">;
                     })
@@ -38060,6 +38181,7 @@ export type NotificationBatchActionPayloadFragment = { __typename: "Notification
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -38068,7 +38190,7 @@ export type NotificationBatchActionPayloadFragment = { __typename: "Notification
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-                      user: { __typename?: "User" } & Pick<User, "id">;
+                      user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                       subscriber: { __typename?: "User" } & Pick<User, "id">;
                     })
               >
@@ -38626,8 +38748,9 @@ export type InboxNotificationUpdatePayloadFragment = { __typename: "InboxNotific
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
-                      customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                      customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -38647,9 +38770,10 @@ export type InboxNotificationUpdatePayloadFragment = { __typename: "InboxNotific
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-                      customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                      customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -38668,10 +38792,11 @@ export type InboxNotificationUpdatePayloadFragment = { __typename: "InboxNotific
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-                      cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                      cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -38689,11 +38814,12 @@ export type InboxNotificationUpdatePayloadFragment = { __typename: "InboxNotific
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-                      initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                      initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -38710,12 +38836,13 @@ export type InboxNotificationUpdatePayloadFragment = { __typename: "InboxNotific
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                      label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                      label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                       user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -38731,13 +38858,14 @@ export type InboxNotificationUpdatePayloadFragment = { __typename: "InboxNotific
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-                      project: { __typename?: "Project" } & Pick<Project, "id">;
+                      project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                       user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                       subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -38752,6 +38880,7 @@ export type InboxNotificationUpdatePayloadFragment = { __typename: "InboxNotific
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -38759,7 +38888,7 @@ export type InboxNotificationUpdatePayloadFragment = { __typename: "InboxNotific
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                      team: { __typename?: "Team" } & Pick<Team, "id">;
+                      team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                       user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                       subscriber: { __typename?: "User" } & Pick<User, "id">;
                     })
@@ -38773,6 +38902,7 @@ export type InboxNotificationUpdatePayloadFragment = { __typename: "InboxNotific
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -38781,7 +38911,7 @@ export type InboxNotificationUpdatePayloadFragment = { __typename: "InboxNotific
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-                      user: { __typename?: "User" } & Pick<User, "id">;
+                      user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                       subscriber: { __typename?: "User" } & Pick<User, "id">;
                     })
               >
@@ -39270,8 +39400,9 @@ export type InboxNotificationUpdatePayloadFragment = { __typename: "InboxNotific
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
-                      customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                      customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -39291,9 +39422,10 @@ export type InboxNotificationUpdatePayloadFragment = { __typename: "InboxNotific
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-                      customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                      customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -39312,10 +39444,11 @@ export type InboxNotificationUpdatePayloadFragment = { __typename: "InboxNotific
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-                      cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                      cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -39333,11 +39466,12 @@ export type InboxNotificationUpdatePayloadFragment = { __typename: "InboxNotific
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-                      initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                      initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -39354,12 +39488,13 @@ export type InboxNotificationUpdatePayloadFragment = { __typename: "InboxNotific
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                      label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                      label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                       user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -39375,13 +39510,14 @@ export type InboxNotificationUpdatePayloadFragment = { __typename: "InboxNotific
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-                      project: { __typename?: "Project" } & Pick<Project, "id">;
+                      project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                       user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                       subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -39396,6 +39532,7 @@ export type InboxNotificationUpdatePayloadFragment = { __typename: "InboxNotific
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -39403,7 +39540,7 @@ export type InboxNotificationUpdatePayloadFragment = { __typename: "InboxNotific
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                      team: { __typename?: "Team" } & Pick<Team, "id">;
+                      team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                       user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                       subscriber: { __typename?: "User" } & Pick<User, "id">;
                     })
@@ -39417,6 +39554,7 @@ export type InboxNotificationUpdatePayloadFragment = { __typename: "InboxNotific
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -39425,7 +39563,7 @@ export type InboxNotificationUpdatePayloadFragment = { __typename: "InboxNotific
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-                      user: { __typename?: "User" } & Pick<User, "id">;
+                      user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                       subscriber: { __typename?: "User" } & Pick<User, "id">;
                     })
               >
@@ -39919,8 +40057,9 @@ export type NotificationPayloadFragment = { __typename: "NotificationPayload" } 
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
-                      customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                      customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -39940,9 +40079,10 @@ export type NotificationPayloadFragment = { __typename: "NotificationPayload" } 
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-                      customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                      customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -39961,10 +40101,11 @@ export type NotificationPayloadFragment = { __typename: "NotificationPayload" } 
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-                      cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                      cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -39982,11 +40123,12 @@ export type NotificationPayloadFragment = { __typename: "NotificationPayload" } 
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-                      initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                      initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -40003,12 +40145,13 @@ export type NotificationPayloadFragment = { __typename: "NotificationPayload" } 
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                      label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                      label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                       user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -40024,13 +40167,14 @@ export type NotificationPayloadFragment = { __typename: "NotificationPayload" } 
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-                      project: { __typename?: "Project" } & Pick<Project, "id">;
+                      project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                       user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                       subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -40045,6 +40189,7 @@ export type NotificationPayloadFragment = { __typename: "NotificationPayload" } 
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -40052,7 +40197,7 @@ export type NotificationPayloadFragment = { __typename: "NotificationPayload" } 
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                      team: { __typename?: "Team" } & Pick<Team, "id">;
+                      team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                       user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                       subscriber: { __typename?: "User" } & Pick<User, "id">;
                     })
@@ -40066,6 +40211,7 @@ export type NotificationPayloadFragment = { __typename: "NotificationPayload" } 
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -40074,7 +40220,7 @@ export type NotificationPayloadFragment = { __typename: "NotificationPayload" } 
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-                      user: { __typename?: "User" } & Pick<User, "id">;
+                      user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                       subscriber: { __typename?: "User" } & Pick<User, "id">;
                     })
               >
@@ -40707,8 +40853,9 @@ export type NotificationSubscriptionPayloadFragment = { __typename: "Notificatio
           | "updatedAt"
           | "includeSubInitiativeUpdates"
           | "active"
+          | "notificationSubscriptionTypes"
         > & {
-            customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+            customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
             customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
             cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
             initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -40728,9 +40875,10 @@ export type NotificationSubscriptionPayloadFragment = { __typename: "Notificatio
           | "updatedAt"
           | "includeSubInitiativeUpdates"
           | "active"
+          | "notificationSubscriptionTypes"
         > & {
             customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-            customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+            customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
             cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
             initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
             label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -40749,10 +40897,11 @@ export type NotificationSubscriptionPayloadFragment = { __typename: "Notificatio
           | "updatedAt"
           | "includeSubInitiativeUpdates"
           | "active"
+          | "notificationSubscriptionTypes"
         > & {
             customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
             customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-            cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+            cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
             initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
             label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -40770,11 +40919,12 @@ export type NotificationSubscriptionPayloadFragment = { __typename: "Notificatio
           | "updatedAt"
           | "includeSubInitiativeUpdates"
           | "active"
+          | "notificationSubscriptionTypes"
         > & {
             customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
             customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
             cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-            initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+            initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
             label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
             team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -40791,12 +40941,13 @@ export type NotificationSubscriptionPayloadFragment = { __typename: "Notificatio
           | "updatedAt"
           | "includeSubInitiativeUpdates"
           | "active"
+          | "notificationSubscriptionTypes"
         > & {
             customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
             customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
             cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
             initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-            label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+            label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
             team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
             user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -40812,13 +40963,14 @@ export type NotificationSubscriptionPayloadFragment = { __typename: "Notificatio
           | "updatedAt"
           | "includeSubInitiativeUpdates"
           | "active"
+          | "notificationSubscriptionTypes"
         > & {
             customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
             customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
             cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
             initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
             label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-            project: { __typename?: "Project" } & Pick<Project, "id">;
+            project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
             team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
             user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -40833,6 +40985,7 @@ export type NotificationSubscriptionPayloadFragment = { __typename: "Notificatio
           | "updatedAt"
           | "includeSubInitiativeUpdates"
           | "active"
+          | "notificationSubscriptionTypes"
         > & {
             customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
             customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -40840,7 +40993,7 @@ export type NotificationSubscriptionPayloadFragment = { __typename: "Notificatio
             initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
             label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-            team: { __typename?: "Team" } & Pick<Team, "id">;
+            team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
             user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             subscriber: { __typename?: "User" } & Pick<User, "id">;
           })
@@ -40854,6 +41007,7 @@ export type NotificationSubscriptionPayloadFragment = { __typename: "Notificatio
           | "updatedAt"
           | "includeSubInitiativeUpdates"
           | "active"
+          | "notificationSubscriptionTypes"
         > & {
             customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
             customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -40862,7 +41016,7 @@ export type NotificationSubscriptionPayloadFragment = { __typename: "Notificatio
             label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
             team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-            user: { __typename?: "User" } & Pick<User, "id">;
+            user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             subscriber: { __typename?: "User" } & Pick<User, "id">;
           });
   };
@@ -41230,6 +41384,7 @@ export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPaylo
           | "projectFieldDateUpdated"
           | "timelineShowProjectsAside"
           | "reviewFieldOpenedAt"
+          | "reviewFieldRisk"
           | "fieldPullRequests"
           | "reviewFieldQuickToReview"
           | "continuousPipelineReleaseFieldReleaseDate"
@@ -41624,8 +41779,9 @@ export type NotificationArchivePayloadFragment = { __typename: "NotificationArch
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
-                      customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                      customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -41645,9 +41801,10 @@ export type NotificationArchivePayloadFragment = { __typename: "NotificationArch
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-                      customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                      customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -41666,10 +41823,11 @@ export type NotificationArchivePayloadFragment = { __typename: "NotificationArch
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-                      cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                      cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -41687,11 +41845,12 @@ export type NotificationArchivePayloadFragment = { __typename: "NotificationArch
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-                      initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                      initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -41708,12 +41867,13 @@ export type NotificationArchivePayloadFragment = { __typename: "NotificationArch
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                      label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                      label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                       user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -41729,13 +41889,14 @@ export type NotificationArchivePayloadFragment = { __typename: "NotificationArch
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-                      project: { __typename?: "Project" } & Pick<Project, "id">;
+                      project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                       user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                       subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -41750,6 +41911,7 @@ export type NotificationArchivePayloadFragment = { __typename: "NotificationArch
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -41757,7 +41919,7 @@ export type NotificationArchivePayloadFragment = { __typename: "NotificationArch
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                      team: { __typename?: "Team" } & Pick<Team, "id">;
+                      team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                       user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                       subscriber: { __typename?: "User" } & Pick<User, "id">;
                     })
@@ -41771,6 +41933,7 @@ export type NotificationArchivePayloadFragment = { __typename: "NotificationArch
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -41779,7 +41942,7 @@ export type NotificationArchivePayloadFragment = { __typename: "NotificationArch
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-                      user: { __typename?: "User" } & Pick<User, "id">;
+                      user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                       subscriber: { __typename?: "User" } & Pick<User, "id">;
                     })
               >
@@ -42354,8 +42517,9 @@ type ArchivePayload_NotificationArchivePayload_Fragment = { __typename: "Notific
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
-                      customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                      customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -42375,9 +42539,10 @@ type ArchivePayload_NotificationArchivePayload_Fragment = { __typename: "Notific
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-                      customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                      customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -42396,10 +42561,11 @@ type ArchivePayload_NotificationArchivePayload_Fragment = { __typename: "Notific
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-                      cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                      cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -42417,11 +42583,12 @@ type ArchivePayload_NotificationArchivePayload_Fragment = { __typename: "Notific
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-                      initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                      initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -42438,12 +42605,13 @@ type ArchivePayload_NotificationArchivePayload_Fragment = { __typename: "Notific
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                      label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                      label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                       user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -42459,13 +42627,14 @@ type ArchivePayload_NotificationArchivePayload_Fragment = { __typename: "Notific
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-                      project: { __typename?: "Project" } & Pick<Project, "id">;
+                      project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                       user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                       subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -42480,6 +42649,7 @@ type ArchivePayload_NotificationArchivePayload_Fragment = { __typename: "Notific
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -42487,7 +42657,7 @@ type ArchivePayload_NotificationArchivePayload_Fragment = { __typename: "Notific
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                      team: { __typename?: "Team" } & Pick<Team, "id">;
+                      team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                       user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                       subscriber: { __typename?: "User" } & Pick<User, "id">;
                     })
@@ -42501,6 +42671,7 @@ type ArchivePayload_NotificationArchivePayload_Fragment = { __typename: "Notific
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -42509,7 +42680,7 @@ type ArchivePayload_NotificationArchivePayload_Fragment = { __typename: "Notific
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-                      user: { __typename?: "User" } & Pick<User, "id">;
+                      user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                       subscriber: { __typename?: "User" } & Pick<User, "id">;
                     })
               >
@@ -43861,8 +44032,9 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
-                    customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -43882,9 +44054,10 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-                    customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -43903,10 +44076,11 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-                    cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -43924,11 +44098,12 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-                    initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -43945,12 +44120,13 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                    label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -43966,13 +44142,14 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-                    project: { __typename?: "Project" } & Pick<Project, "id">;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                     subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -43987,6 +44164,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -43994,7 +44172,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                    team: { __typename?: "Team" } & Pick<Team, "id">;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                     subscriber: { __typename?: "User" } & Pick<User, "id">;
                   })
@@ -44008,6 +44186,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -44016,7 +44195,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-                    user: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                     subscriber: { __typename?: "User" } & Pick<User, "id">;
                   })
             >
@@ -44504,8 +44683,9 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
-                    customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -44525,9 +44705,10 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-                    customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -44546,10 +44727,11 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-                    cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -44567,11 +44749,12 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-                    initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -44588,12 +44771,13 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                    label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -44609,13 +44793,14 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-                    project: { __typename?: "Project" } & Pick<Project, "id">;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                     subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -44630,6 +44815,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -44637,7 +44823,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                    team: { __typename?: "Team" } & Pick<Team, "id">;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                     subscriber: { __typename?: "User" } & Pick<User, "id">;
                   })
@@ -44651,6 +44837,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -44659,7 +44846,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-                    user: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                     subscriber: { __typename?: "User" } & Pick<User, "id">;
                   })
             >
@@ -45147,8 +45334,9 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
-                    customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -45168,9 +45356,10 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-                    customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -45189,10 +45378,11 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-                    cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -45210,11 +45400,12 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-                    initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -45231,12 +45422,13 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                    label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -45252,13 +45444,14 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-                    project: { __typename?: "Project" } & Pick<Project, "id">;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                     subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -45273,6 +45466,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -45280,7 +45474,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                    team: { __typename?: "Team" } & Pick<Team, "id">;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                     subscriber: { __typename?: "User" } & Pick<User, "id">;
                   })
@@ -45294,6 +45488,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -45302,7 +45497,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-                    user: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                     subscriber: { __typename?: "User" } & Pick<User, "id">;
                   })
             >
@@ -45790,8 +45985,9 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
-                    customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -45811,9 +46007,10 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-                    customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -45832,10 +46029,11 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-                    cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -45853,11 +46051,12 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-                    initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -45874,12 +46073,13 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                    label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -45895,13 +46095,14 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-                    project: { __typename?: "Project" } & Pick<Project, "id">;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                     subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -45916,6 +46117,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -45923,7 +46125,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                    team: { __typename?: "Team" } & Pick<Team, "id">;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                     subscriber: { __typename?: "User" } & Pick<User, "id">;
                   })
@@ -45937,6 +46139,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -45945,7 +46148,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-                    user: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                     subscriber: { __typename?: "User" } & Pick<User, "id">;
                   })
             >
@@ -46433,8 +46636,9 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
-                    customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -46454,9 +46658,10 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-                    customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -46475,10 +46680,11 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-                    cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -46496,11 +46702,12 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-                    initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -46517,12 +46724,13 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                    label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -46538,13 +46746,14 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-                    project: { __typename?: "Project" } & Pick<Project, "id">;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                     subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -46559,6 +46768,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -46566,7 +46776,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                    team: { __typename?: "Team" } & Pick<Team, "id">;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                     subscriber: { __typename?: "User" } & Pick<User, "id">;
                   })
@@ -46580,6 +46790,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -46588,7 +46799,7 @@ export type SubscriptionFragment = { __typename: "Subscription" } & {
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-                    user: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                     subscriber: { __typename?: "User" } & Pick<User, "id">;
                   })
             >
@@ -48445,6 +48656,8 @@ export type AttachmentIssue_DocumentsQuery = { __typename?: "Query" } & {
           | "title"
           | "trashed"
           | "slugId"
+          | "workspaceAccess"
+          | "generalAccess"
           | "archivedAt"
           | "updatedAt"
         > & {
@@ -48456,6 +48669,7 @@ export type AttachmentIssue_DocumentsQuery = { __typename?: "Query" } & {
             owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            personalUser?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           }
       >;
     };
@@ -50431,6 +50645,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
           | "projectFieldDateUpdated"
           | "timelineShowProjectsAside"
           | "reviewFieldOpenedAt"
+          | "reviewFieldRisk"
           | "fieldPullRequests"
           | "reviewFieldQuickToReview"
           | "continuousPipelineReleaseFieldReleaseDate"
@@ -50714,6 +50929,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "projectFieldDateUpdated"
               | "timelineShowProjectsAside"
               | "reviewFieldOpenedAt"
+              | "reviewFieldRisk"
               | "fieldPullRequests"
               | "reviewFieldQuickToReview"
               | "continuousPipelineReleaseFieldReleaseDate"
@@ -50994,6 +51210,7 @@ export type CustomViewQuery = { __typename?: "Query" } & {
               | "projectFieldDateUpdated"
               | "timelineShowProjectsAside"
               | "reviewFieldOpenedAt"
+              | "reviewFieldRisk"
               | "fieldPullRequests"
               | "reviewFieldQuickToReview"
               | "continuousPipelineReleaseFieldReleaseDate"
@@ -51537,6 +51754,7 @@ export type CustomView_OrganizationViewPreferencesQuery = { __typename?: "Query"
             | "projectFieldDateUpdated"
             | "timelineShowProjectsAside"
             | "reviewFieldOpenedAt"
+            | "reviewFieldRisk"
             | "fieldPullRequests"
             | "reviewFieldQuickToReview"
             | "continuousPipelineReleaseFieldReleaseDate"
@@ -51823,6 +52041,7 @@ export type CustomView_OrganizationViewPreferences_PreferencesQuery = { __typena
           | "projectFieldDateUpdated"
           | "timelineShowProjectsAside"
           | "reviewFieldOpenedAt"
+          | "reviewFieldRisk"
           | "fieldPullRequests"
           | "reviewFieldQuickToReview"
           | "continuousPipelineReleaseFieldReleaseDate"
@@ -52241,6 +52460,7 @@ export type CustomView_UserViewPreferencesQuery = { __typename?: "Query" } & {
             | "projectFieldDateUpdated"
             | "timelineShowProjectsAside"
             | "reviewFieldOpenedAt"
+            | "reviewFieldRisk"
             | "fieldPullRequests"
             | "reviewFieldQuickToReview"
             | "continuousPipelineReleaseFieldReleaseDate"
@@ -52527,6 +52747,7 @@ export type CustomView_UserViewPreferences_PreferencesQuery = { __typename?: "Qu
           | "projectFieldDateUpdated"
           | "timelineShowProjectsAside"
           | "reviewFieldOpenedAt"
+          | "reviewFieldRisk"
           | "fieldPullRequests"
           | "reviewFieldQuickToReview"
           | "continuousPipelineReleaseFieldReleaseDate"
@@ -52812,6 +53033,7 @@ export type CustomView_ViewPreferencesValuesQuery = { __typename?: "Query" } & {
         | "projectFieldDateUpdated"
         | "timelineShowProjectsAside"
         | "reviewFieldOpenedAt"
+        | "reviewFieldRisk"
         | "fieldPullRequests"
         | "reviewFieldQuickToReview"
         | "continuousPipelineReleaseFieldReleaseDate"
@@ -53138,6 +53360,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
               | "projectFieldDateUpdated"
               | "timelineShowProjectsAside"
               | "reviewFieldOpenedAt"
+              | "reviewFieldRisk"
               | "fieldPullRequests"
               | "reviewFieldQuickToReview"
               | "continuousPipelineReleaseFieldReleaseDate"
@@ -53421,6 +53644,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "projectFieldDateUpdated"
                   | "timelineShowProjectsAside"
                   | "reviewFieldOpenedAt"
+                  | "reviewFieldRisk"
                   | "fieldPullRequests"
                   | "reviewFieldQuickToReview"
                   | "continuousPipelineReleaseFieldReleaseDate"
@@ -53701,6 +53925,7 @@ export type CustomViewsQuery = { __typename?: "Query" } & {
                   | "projectFieldDateUpdated"
                   | "timelineShowProjectsAside"
                   | "reviewFieldOpenedAt"
+                  | "reviewFieldRisk"
                   | "fieldPullRequests"
                   | "reviewFieldQuickToReview"
                   | "continuousPipelineReleaseFieldReleaseDate"
@@ -54532,6 +54757,8 @@ export type DocumentQuery = { __typename?: "Query" } & {
     | "title"
     | "trashed"
     | "slugId"
+    | "workspaceAccess"
+    | "generalAccess"
     | "archivedAt"
     | "updatedAt"
   > & {
@@ -54543,6 +54770,7 @@ export type DocumentQuery = { __typename?: "Query" } & {
       owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
       creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
       updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+      personalUser?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     };
 };
 
@@ -54789,6 +55017,8 @@ export type DocumentsQuery = { __typename?: "Query" } & {
         | "title"
         | "trashed"
         | "slugId"
+        | "workspaceAccess"
+        | "generalAccess"
         | "archivedAt"
         | "updatedAt"
       > & {
@@ -54800,6 +55030,7 @@ export type DocumentsQuery = { __typename?: "Query" } & {
           owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          personalUser?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
         }
     >;
   };
@@ -55567,8 +55798,9 @@ export type InboxNotificationsQuery = { __typename?: "Query" } & {
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
-                      customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                      customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -55588,9 +55820,10 @@ export type InboxNotificationsQuery = { __typename?: "Query" } & {
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-                      customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                      customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -55609,10 +55842,11 @@ export type InboxNotificationsQuery = { __typename?: "Query" } & {
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-                      cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                      cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -55630,11 +55864,12 @@ export type InboxNotificationsQuery = { __typename?: "Query" } & {
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-                      initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                      initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -55651,12 +55886,13 @@ export type InboxNotificationsQuery = { __typename?: "Query" } & {
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                      label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                      label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                       user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -55672,13 +55908,14 @@ export type InboxNotificationsQuery = { __typename?: "Query" } & {
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-                      project: { __typename?: "Project" } & Pick<Project, "id">;
+                      project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                       user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                       subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -55693,6 +55930,7 @@ export type InboxNotificationsQuery = { __typename?: "Query" } & {
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -55700,7 +55938,7 @@ export type InboxNotificationsQuery = { __typename?: "Query" } & {
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                      team: { __typename?: "Team" } & Pick<Team, "id">;
+                      team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                       user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                       subscriber: { __typename?: "User" } & Pick<User, "id">;
                     })
@@ -55714,6 +55952,7 @@ export type InboxNotificationsQuery = { __typename?: "Query" } & {
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -55722,7 +55961,7 @@ export type InboxNotificationsQuery = { __typename?: "Query" } & {
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-                      user: { __typename?: "User" } & Pick<User, "id">;
+                      user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                       subscriber: { __typename?: "User" } & Pick<User, "id">;
                     })
               >
@@ -56207,6 +56446,8 @@ export type Initiative_DocumentsQuery = { __typename?: "Query" } & {
           | "title"
           | "trashed"
           | "slugId"
+          | "workspaceAccess"
+          | "generalAccess"
           | "archivedAt"
           | "updatedAt"
         > & {
@@ -56218,6 +56459,7 @@ export type Initiative_DocumentsQuery = { __typename?: "Query" } & {
             owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            personalUser?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           }
       >;
     };
@@ -57844,6 +58086,8 @@ export type Issue_DocumentsQuery = { __typename?: "Query" } & {
           | "title"
           | "trashed"
           | "slugId"
+          | "workspaceAccess"
+          | "generalAccess"
           | "archivedAt"
           | "updatedAt"
         > & {
@@ -57855,6 +58099,7 @@ export type Issue_DocumentsQuery = { __typename?: "Query" } & {
             owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            personalUser?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           }
       >;
     };
@@ -59945,6 +60190,8 @@ export type IssueVcsBranchSearch_DocumentsQuery = { __typename?: "Query" } & {
             | "title"
             | "trashed"
             | "slugId"
+            | "workspaceAccess"
+            | "generalAccess"
             | "archivedAt"
             | "updatedAt"
           > & {
@@ -59956,6 +60203,7 @@ export type IssueVcsBranchSearch_DocumentsQuery = { __typename?: "Query" } & {
               owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+              personalUser?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             }
         >;
       };
@@ -61266,8 +61514,9 @@ export type NotificationQuery = { __typename?: "Query" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
-                    customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -61287,9 +61536,10 @@ export type NotificationQuery = { __typename?: "Query" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-                    customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                    customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -61308,10 +61558,11 @@ export type NotificationQuery = { __typename?: "Query" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-                    cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -61329,11 +61580,12 @@ export type NotificationQuery = { __typename?: "Query" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-                    initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -61350,12 +61602,13 @@ export type NotificationQuery = { __typename?: "Query" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                    label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -61371,13 +61624,14 @@ export type NotificationQuery = { __typename?: "Query" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-                    project: { __typename?: "Project" } & Pick<Project, "id">;
+                    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                     subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -61392,6 +61646,7 @@ export type NotificationQuery = { __typename?: "Query" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -61399,7 +61654,7 @@ export type NotificationQuery = { __typename?: "Query" } & {
                     initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                    team: { __typename?: "Team" } & Pick<Team, "id">;
+                    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                     subscriber: { __typename?: "User" } & Pick<User, "id">;
                   })
@@ -61413,6 +61668,7 @@ export type NotificationQuery = { __typename?: "Query" } & {
                   | "updatedAt"
                   | "includeSubInitiativeUpdates"
                   | "active"
+                  | "notificationSubscriptionTypes"
                 > & {
                     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -61421,7 +61677,7 @@ export type NotificationQuery = { __typename?: "Query" } & {
                     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-                    user: { __typename?: "User" } & Pick<User, "id">;
+                    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                     subscriber: { __typename?: "User" } & Pick<User, "id">;
                   })
             >
@@ -61749,8 +62005,9 @@ export type NotificationSubscriptionQuery = { __typename?: "Query" } & {
         | "updatedAt"
         | "includeSubInitiativeUpdates"
         | "active"
+        | "notificationSubscriptionTypes"
       > & {
-          customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+          customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
           customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
           cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
           initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -61770,9 +62027,10 @@ export type NotificationSubscriptionQuery = { __typename?: "Query" } & {
         | "updatedAt"
         | "includeSubInitiativeUpdates"
         | "active"
+        | "notificationSubscriptionTypes"
       > & {
           customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-          customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+          customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
           cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
           initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
           label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -61791,10 +62049,11 @@ export type NotificationSubscriptionQuery = { __typename?: "Query" } & {
         | "updatedAt"
         | "includeSubInitiativeUpdates"
         | "active"
+        | "notificationSubscriptionTypes"
       > & {
           customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
           customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-          cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+          cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
           initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
           label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
           project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -61812,11 +62071,12 @@ export type NotificationSubscriptionQuery = { __typename?: "Query" } & {
         | "updatedAt"
         | "includeSubInitiativeUpdates"
         | "active"
+        | "notificationSubscriptionTypes"
       > & {
           customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
           customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
           cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-          initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+          initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
           label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
           project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
           team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -61833,12 +62093,13 @@ export type NotificationSubscriptionQuery = { __typename?: "Query" } & {
         | "updatedAt"
         | "includeSubInitiativeUpdates"
         | "active"
+        | "notificationSubscriptionTypes"
       > & {
           customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
           customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
           cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
           initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-          label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+          label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
           project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
           team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
           user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -61854,13 +62115,14 @@ export type NotificationSubscriptionQuery = { __typename?: "Query" } & {
         | "updatedAt"
         | "includeSubInitiativeUpdates"
         | "active"
+        | "notificationSubscriptionTypes"
       > & {
           customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
           customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
           cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
           initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
           label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-          project: { __typename?: "Project" } & Pick<Project, "id">;
+          project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
           team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
           user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -61875,6 +62137,7 @@ export type NotificationSubscriptionQuery = { __typename?: "Query" } & {
         | "updatedAt"
         | "includeSubInitiativeUpdates"
         | "active"
+        | "notificationSubscriptionTypes"
       > & {
           customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
           customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -61882,7 +62145,7 @@ export type NotificationSubscriptionQuery = { __typename?: "Query" } & {
           initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
           label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
           project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-          team: { __typename?: "Team" } & Pick<Team, "id">;
+          team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
           user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           subscriber: { __typename?: "User" } & Pick<User, "id">;
         })
@@ -61896,6 +62159,7 @@ export type NotificationSubscriptionQuery = { __typename?: "Query" } & {
         | "updatedAt"
         | "includeSubInitiativeUpdates"
         | "active"
+        | "notificationSubscriptionTypes"
       > & {
           customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
           customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -61904,7 +62168,7 @@ export type NotificationSubscriptionQuery = { __typename?: "Query" } & {
           label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
           project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
           team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-          user: { __typename?: "User" } & Pick<User, "id">;
+          user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           subscriber: { __typename?: "User" } & Pick<User, "id">;
         });
 };
@@ -61935,8 +62199,9 @@ export type NotificationSubscriptionsQuery = { __typename?: "Query" } & {
           | "updatedAt"
           | "includeSubInitiativeUpdates"
           | "active"
+          | "notificationSubscriptionTypes"
         > & {
-            customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+            customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
             customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
             cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
             initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -61956,9 +62221,10 @@ export type NotificationSubscriptionsQuery = { __typename?: "Query" } & {
           | "updatedAt"
           | "includeSubInitiativeUpdates"
           | "active"
+          | "notificationSubscriptionTypes"
         > & {
             customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-            customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+            customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
             cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
             initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
             label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -61977,10 +62243,11 @@ export type NotificationSubscriptionsQuery = { __typename?: "Query" } & {
           | "updatedAt"
           | "includeSubInitiativeUpdates"
           | "active"
+          | "notificationSubscriptionTypes"
         > & {
             customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
             customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-            cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+            cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
             initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
             label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -61998,11 +62265,12 @@ export type NotificationSubscriptionsQuery = { __typename?: "Query" } & {
           | "updatedAt"
           | "includeSubInitiativeUpdates"
           | "active"
+          | "notificationSubscriptionTypes"
         > & {
             customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
             customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
             cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-            initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+            initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
             label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
             team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -62019,12 +62287,13 @@ export type NotificationSubscriptionsQuery = { __typename?: "Query" } & {
           | "updatedAt"
           | "includeSubInitiativeUpdates"
           | "active"
+          | "notificationSubscriptionTypes"
         > & {
             customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
             customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
             cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
             initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-            label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+            label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
             team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
             user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -62040,13 +62309,14 @@ export type NotificationSubscriptionsQuery = { __typename?: "Query" } & {
           | "updatedAt"
           | "includeSubInitiativeUpdates"
           | "active"
+          | "notificationSubscriptionTypes"
         > & {
             customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
             customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
             cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
             initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
             label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-            project: { __typename?: "Project" } & Pick<Project, "id">;
+            project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
             team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
             user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -62061,6 +62331,7 @@ export type NotificationSubscriptionsQuery = { __typename?: "Query" } & {
           | "updatedAt"
           | "includeSubInitiativeUpdates"
           | "active"
+          | "notificationSubscriptionTypes"
         > & {
             customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
             customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -62068,7 +62339,7 @@ export type NotificationSubscriptionsQuery = { __typename?: "Query" } & {
             initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
             label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-            team: { __typename?: "Team" } & Pick<Team, "id">;
+            team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
             user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             subscriber: { __typename?: "User" } & Pick<User, "id">;
           })
@@ -62082,6 +62353,7 @@ export type NotificationSubscriptionsQuery = { __typename?: "Query" } & {
           | "updatedAt"
           | "includeSubInitiativeUpdates"
           | "active"
+          | "notificationSubscriptionTypes"
         > & {
             customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
             customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -62090,7 +62362,7 @@ export type NotificationSubscriptionsQuery = { __typename?: "Query" } & {
             label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
             project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
             team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-            user: { __typename?: "User" } & Pick<User, "id">;
+            user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             subscriber: { __typename?: "User" } & Pick<User, "id">;
           })
     >;
@@ -62291,8 +62563,9 @@ export type NotificationsQuery = { __typename?: "Query" } & {
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
-                      customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                      customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -62312,9 +62585,10 @@ export type NotificationsQuery = { __typename?: "Query" } & {
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-                      customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                      customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -62333,10 +62607,11 @@ export type NotificationsQuery = { __typename?: "Query" } & {
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-                      cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                      cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -62354,11 +62629,12 @@ export type NotificationsQuery = { __typename?: "Query" } & {
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-                      initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                      initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -62375,12 +62651,13 @@ export type NotificationsQuery = { __typename?: "Query" } & {
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                      label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                      label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                       user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -62396,13 +62673,14 @@ export type NotificationsQuery = { __typename?: "Query" } & {
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                       cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-                      project: { __typename?: "Project" } & Pick<Project, "id">;
+                      project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                       user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                       subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -62417,6 +62695,7 @@ export type NotificationsQuery = { __typename?: "Query" } & {
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -62424,7 +62703,7 @@ export type NotificationsQuery = { __typename?: "Query" } & {
                       initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                      team: { __typename?: "Team" } & Pick<Team, "id">;
+                      team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                       user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                       subscriber: { __typename?: "User" } & Pick<User, "id">;
                     })
@@ -62438,6 +62717,7 @@ export type NotificationsQuery = { __typename?: "Query" } & {
                     | "updatedAt"
                     | "includeSubInitiativeUpdates"
                     | "active"
+                    | "notificationSubscriptionTypes"
                   > & {
                       customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                       customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -62446,7 +62726,7 @@ export type NotificationsQuery = { __typename?: "Query" } & {
                       label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                       project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-                      user: { __typename?: "User" } & Pick<User, "id">;
+                      user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                       subscriber: { __typename?: "User" } & Pick<User, "id">;
                     })
               >
@@ -63724,6 +64004,8 @@ export type Project_DocumentsQuery = { __typename?: "Query" } & {
           | "title"
           | "trashed"
           | "slugId"
+          | "workspaceAccess"
+          | "generalAccess"
           | "archivedAt"
           | "updatedAt"
         > & {
@@ -63735,6 +64017,7 @@ export type Project_DocumentsQuery = { __typename?: "Query" } & {
             owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            personalUser?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           }
       >;
     };
@@ -65728,6 +66011,8 @@ export type Release_DocumentsQuery = { __typename?: "Query" } & {
           | "title"
           | "trashed"
           | "slugId"
+          | "workspaceAccess"
+          | "generalAccess"
           | "archivedAt"
           | "updatedAt"
         > & {
@@ -65739,6 +66024,7 @@ export type Release_DocumentsQuery = { __typename?: "Query" } & {
             owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            personalUser?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           }
       >;
     };
@@ -66989,6 +67275,8 @@ export type SearchDocumentsQuery = { __typename?: "Query" } & {
           | "title"
           | "trashed"
           | "slugId"
+          | "workspaceAccess"
+          | "generalAccess"
           | "archivedAt"
           | "updatedAt"
           | "metadata"
@@ -67001,6 +67289,7 @@ export type SearchDocumentsQuery = { __typename?: "Query" } & {
             owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
             updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+            personalUser?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           }
       >;
     };
@@ -70497,6 +70786,7 @@ export type UserViewPreferencesQuery = { __typename?: "Query" } & {
           | "projectFieldDateUpdated"
           | "timelineShowProjectsAside"
           | "reviewFieldOpenedAt"
+          | "reviewFieldRisk"
           | "fieldPullRequests"
           | "reviewFieldQuickToReview"
           | "continuousPipelineReleaseFieldReleaseDate"
@@ -70781,6 +71071,7 @@ export type UserViewPreferences_PreferencesQuery = { __typename?: "Query" } & {
         | "projectFieldDateUpdated"
         | "timelineShowProjectsAside"
         | "reviewFieldOpenedAt"
+        | "reviewFieldRisk"
         | "fieldPullRequests"
         | "reviewFieldQuickToReview"
         | "continuousPipelineReleaseFieldReleaseDate"
@@ -72606,6 +72897,18 @@ export type DeleteDocumentMutation = { __typename?: "Mutation" } & {
     };
 };
 
+export type DocumentShareMutationVariables = Exact<{
+  id: Scalars["String"];
+  role?: InputMaybe<DocumentShareRole>;
+  userIds: Array<Scalars["String"]> | Scalars["String"];
+}>;
+
+export type DocumentShareMutation = { __typename?: "Mutation" } & {
+  documentShare: { __typename: "DocumentPayload" } & Pick<DocumentPayload, "lastSyncId" | "success"> & {
+      document: { __typename?: "Document" } & Pick<Document, "id">;
+    };
+};
+
 export type UnarchiveDocumentMutationVariables = Exact<{
   id: Scalars["String"];
 }>;
@@ -72617,6 +72920,17 @@ export type UnarchiveDocumentMutation = { __typename?: "Mutation" } & {
   > & { entity?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">> };
 };
 
+export type DocumentUnshareMutationVariables = Exact<{
+  id: Scalars["String"];
+  userIds: Array<Scalars["String"]> | Scalars["String"];
+}>;
+
+export type DocumentUnshareMutation = { __typename?: "Mutation" } & {
+  documentUnshare: { __typename: "DocumentPayload" } & Pick<DocumentPayload, "lastSyncId" | "success"> & {
+      document: { __typename?: "Document" } & Pick<Document, "id">;
+    };
+};
+
 export type UpdateDocumentMutationVariables = Exact<{
   id: Scalars["String"];
   input: DocumentUpdateInput;
@@ -72624,6 +72938,33 @@ export type UpdateDocumentMutationVariables = Exact<{
 
 export type UpdateDocumentMutation = { __typename?: "Mutation" } & {
   documentUpdate: { __typename: "DocumentPayload" } & Pick<DocumentPayload, "lastSyncId" | "success"> & {
+      document: { __typename?: "Document" } & Pick<Document, "id">;
+    };
+};
+
+export type DocumentUpdateGeneralAccessMutationVariables = Exact<{
+  applyToSubDocuments?: InputMaybe<Scalars["Boolean"]>;
+  generalAccess: Scalars["String"];
+  id: Scalars["String"];
+  previousGeneralAccess?: InputMaybe<Scalars["String"]>;
+  removeCollaboratorIds?: InputMaybe<Array<Scalars["String"]> | Scalars["String"]>;
+}>;
+
+export type DocumentUpdateGeneralAccessMutation = { __typename?: "Mutation" } & {
+  documentUpdateGeneralAccess: { __typename: "DocumentPayload" } & Pick<DocumentPayload, "lastSyncId" | "success"> & {
+      document: { __typename?: "Document" } & Pick<Document, "id">;
+    };
+};
+
+export type DocumentUpdateWorkspaceAccessMutationVariables = Exact<{
+  applyToSubDocuments?: InputMaybe<Scalars["Boolean"]>;
+  id: Scalars["String"];
+  previousWorkspaceAccess?: InputMaybe<Scalars["String"]>;
+  workspaceAccess: Scalars["String"];
+}>;
+
+export type DocumentUpdateWorkspaceAccessMutation = { __typename?: "Mutation" } & {
+  documentUpdateWorkspaceAccess: { __typename: "DocumentPayload" } & Pick<DocumentPayload, "lastSyncId" | "success"> & {
       document: { __typename?: "Document" } & Pick<Document, "id">;
     };
 };
@@ -73414,8 +73755,9 @@ export type UpdateInboxNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
-                        customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                        customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -73435,9 +73777,10 @@ export type UpdateInboxNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-                        customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                        customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -73456,10 +73799,11 @@ export type UpdateInboxNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-                        cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                        cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -73477,11 +73821,12 @@ export type UpdateInboxNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-                        initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                        initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -73498,12 +73843,13 @@ export type UpdateInboxNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                        label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                        label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -73519,13 +73865,14 @@ export type UpdateInboxNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-                        project: { __typename?: "Project" } & Pick<Project, "id">;
+                        project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -73540,6 +73887,7 @@ export type UpdateInboxNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -73547,7 +73895,7 @@ export type UpdateInboxNotificationMutation = { __typename?: "Mutation" } & {
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                        team: { __typename?: "Team" } & Pick<Team, "id">;
+                        team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
                       })
@@ -73561,6 +73909,7 @@ export type UpdateInboxNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -73569,7 +73918,7 @@ export type UpdateInboxNotificationMutation = { __typename?: "Mutation" } & {
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-                        user: { __typename?: "User" } & Pick<User, "id">;
+                        user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
                       })
                 >
@@ -74058,8 +74407,9 @@ export type UpdateInboxNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
-                        customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                        customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -74079,9 +74429,10 @@ export type UpdateInboxNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-                        customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                        customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -74100,10 +74451,11 @@ export type UpdateInboxNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-                        cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                        cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -74121,11 +74473,12 @@ export type UpdateInboxNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-                        initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                        initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -74142,12 +74495,13 @@ export type UpdateInboxNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                        label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                        label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -74163,13 +74517,14 @@ export type UpdateInboxNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-                        project: { __typename?: "Project" } & Pick<Project, "id">;
+                        project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -74184,6 +74539,7 @@ export type UpdateInboxNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -74191,7 +74547,7 @@ export type UpdateInboxNotificationMutation = { __typename?: "Mutation" } & {
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                        team: { __typename?: "Team" } & Pick<Team, "id">;
+                        team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
                       })
@@ -74205,6 +74561,7 @@ export type UpdateInboxNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -74213,7 +74570,7 @@ export type UpdateInboxNotificationMutation = { __typename?: "Mutation" } & {
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-                        user: { __typename?: "User" } & Pick<User, "id">;
+                        user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
                       })
                 >
@@ -74911,6 +75268,7 @@ export type CreateIntegrationGithubCommitMutation = { __typename?: "Mutation" } 
 };
 
 export type IntegrationGithubConnectMutationVariables = Exact<{
+  addLinkingInstallation?: InputMaybe<Scalars["Boolean"]>;
   code: Scalars["String"];
   codeAccess?: InputMaybe<Scalars["Boolean"]>;
   confirmReplace?: InputMaybe<Scalars["Boolean"]>;
@@ -76555,8 +76913,9 @@ export type ArchiveNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
-                        customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                        customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -76576,9 +76935,10 @@ export type ArchiveNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-                        customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                        customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -76597,10 +76957,11 @@ export type ArchiveNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-                        cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                        cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -76618,11 +76979,12 @@ export type ArchiveNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-                        initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                        initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -76639,12 +77001,13 @@ export type ArchiveNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                        label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                        label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -76660,13 +77023,14 @@ export type ArchiveNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-                        project: { __typename?: "Project" } & Pick<Project, "id">;
+                        project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -76681,6 +77045,7 @@ export type ArchiveNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -76688,7 +77053,7 @@ export type ArchiveNotificationMutation = { __typename?: "Mutation" } & {
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                        team: { __typename?: "Team" } & Pick<Team, "id">;
+                        team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
                       })
@@ -76702,6 +77067,7 @@ export type ArchiveNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -76710,7 +77076,7 @@ export type ArchiveNotificationMutation = { __typename?: "Mutation" } & {
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-                        user: { __typename?: "User" } & Pick<User, "id">;
+                        user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
                       })
                 >
@@ -77211,8 +77577,9 @@ export type NotificationArchiveAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
-                        customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                        customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -77232,9 +77599,10 @@ export type NotificationArchiveAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-                        customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                        customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -77253,10 +77621,11 @@ export type NotificationArchiveAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-                        cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                        cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -77274,11 +77643,12 @@ export type NotificationArchiveAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-                        initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                        initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -77295,12 +77665,13 @@ export type NotificationArchiveAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                        label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                        label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -77316,13 +77687,14 @@ export type NotificationArchiveAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-                        project: { __typename?: "Project" } & Pick<Project, "id">;
+                        project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -77337,6 +77709,7 @@ export type NotificationArchiveAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -77344,7 +77717,7 @@ export type NotificationArchiveAllMutation = { __typename?: "Mutation" } & {
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                        team: { __typename?: "Team" } & Pick<Team, "id">;
+                        team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
                       })
@@ -77358,6 +77731,7 @@ export type NotificationArchiveAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -77366,7 +77740,7 @@ export type NotificationArchiveAllMutation = { __typename?: "Mutation" } & {
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-                        user: { __typename?: "User" } & Pick<User, "id">;
+                        user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
                       })
                 >
@@ -77881,8 +78255,9 @@ export type NotificationMarkReadAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
-                        customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                        customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -77902,9 +78277,10 @@ export type NotificationMarkReadAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-                        customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                        customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -77923,10 +78299,11 @@ export type NotificationMarkReadAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-                        cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                        cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -77944,11 +78321,12 @@ export type NotificationMarkReadAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-                        initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                        initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -77965,12 +78343,13 @@ export type NotificationMarkReadAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                        label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                        label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -77986,13 +78365,14 @@ export type NotificationMarkReadAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-                        project: { __typename?: "Project" } & Pick<Project, "id">;
+                        project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -78007,6 +78387,7 @@ export type NotificationMarkReadAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -78014,7 +78395,7 @@ export type NotificationMarkReadAllMutation = { __typename?: "Mutation" } & {
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                        team: { __typename?: "Team" } & Pick<Team, "id">;
+                        team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
                       })
@@ -78028,6 +78409,7 @@ export type NotificationMarkReadAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -78036,7 +78418,7 @@ export type NotificationMarkReadAllMutation = { __typename?: "Mutation" } & {
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-                        user: { __typename?: "User" } & Pick<User, "id">;
+                        user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
                       })
                 >
@@ -78537,8 +78919,9 @@ export type NotificationMarkUnreadAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
-                        customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                        customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -78558,9 +78941,10 @@ export type NotificationMarkUnreadAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-                        customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                        customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -78579,10 +78963,11 @@ export type NotificationMarkUnreadAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-                        cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                        cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -78600,11 +78985,12 @@ export type NotificationMarkUnreadAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-                        initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                        initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -78621,12 +79007,13 @@ export type NotificationMarkUnreadAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                        label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                        label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -78642,13 +79029,14 @@ export type NotificationMarkUnreadAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-                        project: { __typename?: "Project" } & Pick<Project, "id">;
+                        project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -78663,6 +79051,7 @@ export type NotificationMarkUnreadAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -78670,7 +79059,7 @@ export type NotificationMarkUnreadAllMutation = { __typename?: "Mutation" } & {
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                        team: { __typename?: "Team" } & Pick<Team, "id">;
+                        team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
                       })
@@ -78684,6 +79073,7 @@ export type NotificationMarkUnreadAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -78692,7 +79082,7 @@ export type NotificationMarkUnreadAllMutation = { __typename?: "Mutation" } & {
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-                        user: { __typename?: "User" } & Pick<User, "id">;
+                        user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
                       })
                 >
@@ -79194,8 +79584,9 @@ export type NotificationSnoozeAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
-                        customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                        customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -79215,9 +79606,10 @@ export type NotificationSnoozeAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-                        customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                        customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -79236,10 +79628,11 @@ export type NotificationSnoozeAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-                        cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                        cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -79257,11 +79650,12 @@ export type NotificationSnoozeAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-                        initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                        initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -79278,12 +79672,13 @@ export type NotificationSnoozeAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                        label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                        label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -79299,13 +79694,14 @@ export type NotificationSnoozeAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-                        project: { __typename?: "Project" } & Pick<Project, "id">;
+                        project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -79320,6 +79716,7 @@ export type NotificationSnoozeAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -79327,7 +79724,7 @@ export type NotificationSnoozeAllMutation = { __typename?: "Mutation" } & {
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                        team: { __typename?: "Team" } & Pick<Team, "id">;
+                        team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
                       })
@@ -79341,6 +79738,7 @@ export type NotificationSnoozeAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -79349,7 +79747,7 @@ export type NotificationSnoozeAllMutation = { __typename?: "Mutation" } & {
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-                        user: { __typename?: "User" } & Pick<User, "id">;
+                        user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
                       })
                 >
@@ -79683,8 +80081,9 @@ export type CreateNotificationSubscriptionMutation = { __typename?: "Mutation" }
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
-              customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+              customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
               cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
               initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -79704,9 +80103,10 @@ export type CreateNotificationSubscriptionMutation = { __typename?: "Mutation" }
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-              customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+              customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
               cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
               initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
               label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -79725,10 +80125,11 @@ export type CreateNotificationSubscriptionMutation = { __typename?: "Mutation" }
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-              cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+              cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
               initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
               label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -79746,11 +80147,12 @@ export type CreateNotificationSubscriptionMutation = { __typename?: "Mutation" }
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
               cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-              initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+              initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
               label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
               team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -79767,12 +80169,13 @@ export type CreateNotificationSubscriptionMutation = { __typename?: "Mutation" }
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
               cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
               initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-              label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+              label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
               team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
               user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -79788,13 +80191,14 @@ export type CreateNotificationSubscriptionMutation = { __typename?: "Mutation" }
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
               cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
               initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
               label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-              project: { __typename?: "Project" } & Pick<Project, "id">;
+              project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
               team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
               user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -79809,6 +80213,7 @@ export type CreateNotificationSubscriptionMutation = { __typename?: "Mutation" }
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -79816,7 +80221,7 @@ export type CreateNotificationSubscriptionMutation = { __typename?: "Mutation" }
               initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
               label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-              team: { __typename?: "Team" } & Pick<Team, "id">;
+              team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
               user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               subscriber: { __typename?: "User" } & Pick<User, "id">;
             })
@@ -79830,6 +80235,7 @@ export type CreateNotificationSubscriptionMutation = { __typename?: "Mutation" }
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -79838,7 +80244,7 @@ export type CreateNotificationSubscriptionMutation = { __typename?: "Mutation" }
               label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
               team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-              user: { __typename?: "User" } & Pick<User, "id">;
+              user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               subscriber: { __typename?: "User" } & Pick<User, "id">;
             });
     };
@@ -79876,8 +80282,9 @@ export type UpdateNotificationSubscriptionMutation = { __typename?: "Mutation" }
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
-              customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+              customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
               cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
               initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -79897,9 +80304,10 @@ export type UpdateNotificationSubscriptionMutation = { __typename?: "Mutation" }
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-              customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+              customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
               cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
               initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
               label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -79918,10 +80326,11 @@ export type UpdateNotificationSubscriptionMutation = { __typename?: "Mutation" }
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-              cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+              cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
               initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
               label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -79939,11 +80348,12 @@ export type UpdateNotificationSubscriptionMutation = { __typename?: "Mutation" }
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
               cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-              initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+              initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
               label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
               team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -79960,12 +80370,13 @@ export type UpdateNotificationSubscriptionMutation = { __typename?: "Mutation" }
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
               cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
               initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-              label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+              label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
               team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
               user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -79981,13 +80392,14 @@ export type UpdateNotificationSubscriptionMutation = { __typename?: "Mutation" }
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
               cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
               initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
               label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-              project: { __typename?: "Project" } & Pick<Project, "id">;
+              project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
               team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
               user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -80002,6 +80414,7 @@ export type UpdateNotificationSubscriptionMutation = { __typename?: "Mutation" }
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -80009,7 +80422,7 @@ export type UpdateNotificationSubscriptionMutation = { __typename?: "Mutation" }
               initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
               label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-              team: { __typename?: "Team" } & Pick<Team, "id">;
+              team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
               user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               subscriber: { __typename?: "User" } & Pick<User, "id">;
             })
@@ -80023,6 +80436,7 @@ export type UpdateNotificationSubscriptionMutation = { __typename?: "Mutation" }
             | "updatedAt"
             | "includeSubInitiativeUpdates"
             | "active"
+            | "notificationSubscriptionTypes"
           > & {
               customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
               customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -80031,7 +80445,7 @@ export type UpdateNotificationSubscriptionMutation = { __typename?: "Mutation" }
               label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
               project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
               team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-              user: { __typename?: "User" } & Pick<User, "id">;
+              user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
               subscriber: { __typename?: "User" } & Pick<User, "id">;
             });
     };
@@ -80224,8 +80638,9 @@ export type UnarchiveNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
-                        customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                        customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -80245,9 +80660,10 @@ export type UnarchiveNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-                        customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                        customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -80266,10 +80682,11 @@ export type UnarchiveNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-                        cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                        cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -80287,11 +80704,12 @@ export type UnarchiveNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-                        initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                        initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -80308,12 +80726,13 @@ export type UnarchiveNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                        label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                        label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -80329,13 +80748,14 @@ export type UnarchiveNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-                        project: { __typename?: "Project" } & Pick<Project, "id">;
+                        project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -80350,6 +80770,7 @@ export type UnarchiveNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -80357,7 +80778,7 @@ export type UnarchiveNotificationMutation = { __typename?: "Mutation" } & {
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                        team: { __typename?: "Team" } & Pick<Team, "id">;
+                        team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
                       })
@@ -80371,6 +80792,7 @@ export type UnarchiveNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -80379,7 +80801,7 @@ export type UnarchiveNotificationMutation = { __typename?: "Mutation" } & {
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-                        user: { __typename?: "User" } & Pick<User, "id">;
+                        user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
                       })
                 >
@@ -80881,8 +81303,9 @@ export type NotificationUnsnoozeAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
-                        customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                        customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -80902,9 +81325,10 @@ export type NotificationUnsnoozeAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-                        customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                        customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -80923,10 +81347,11 @@ export type NotificationUnsnoozeAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-                        cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                        cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -80944,11 +81369,12 @@ export type NotificationUnsnoozeAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-                        initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                        initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -80965,12 +81391,13 @@ export type NotificationUnsnoozeAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                        label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                        label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -80986,13 +81413,14 @@ export type NotificationUnsnoozeAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-                        project: { __typename?: "Project" } & Pick<Project, "id">;
+                        project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -81007,6 +81435,7 @@ export type NotificationUnsnoozeAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -81014,7 +81443,7 @@ export type NotificationUnsnoozeAllMutation = { __typename?: "Mutation" } & {
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                        team: { __typename?: "Team" } & Pick<Team, "id">;
+                        team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
                       })
@@ -81028,6 +81457,7 @@ export type NotificationUnsnoozeAllMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -81036,7 +81466,7 @@ export type NotificationUnsnoozeAllMutation = { __typename?: "Mutation" } & {
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-                        user: { __typename?: "User" } & Pick<User, "id">;
+                        user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
                       })
                 >
@@ -81535,8 +81965,9 @@ export type UpdateNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
-                        customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
+                        customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
@@ -81556,9 +81987,10 @@ export type UpdateNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
-                        customer: { __typename?: "Customer" } & Pick<Customer, "id">;
+                        customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -81577,10 +82009,11 @@ export type UpdateNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
-                        cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+                        cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -81598,11 +82031,12 @@ export type UpdateNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
-                        initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+                        initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -81619,12 +82053,13 @@ export type UpdateNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
-                        label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
+                        label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -81640,13 +82075,14 @@ export type UpdateNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
                         cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
-                        project: { __typename?: "Project" } & Pick<Project, "id">;
+                        project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
@@ -81661,6 +82097,7 @@ export type UpdateNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -81668,7 +82105,7 @@ export type UpdateNotificationMutation = { __typename?: "Mutation" } & {
                         initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-                        team: { __typename?: "Team" } & Pick<Team, "id">;
+                        team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
                         user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
                       })
@@ -81682,6 +82119,7 @@ export type UpdateNotificationMutation = { __typename?: "Mutation" } & {
                       | "updatedAt"
                       | "includeSubInitiativeUpdates"
                       | "active"
+                      | "notificationSubscriptionTypes"
                     > & {
                         customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
                         customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
@@ -81690,7 +82128,7 @@ export type UpdateNotificationMutation = { __typename?: "Mutation" } & {
                         label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
                         project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
                         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-                        user: { __typename?: "User" } & Pick<User, "id">;
+                        user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
                         subscriber: { __typename?: "User" } & Pick<User, "id">;
                       })
                 >
@@ -83548,6 +83986,7 @@ export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "projectFieldDateUpdated"
             | "timelineShowProjectsAside"
             | "reviewFieldOpenedAt"
+            | "reviewFieldRisk"
             | "fieldPullRequests"
             | "reviewFieldQuickToReview"
             | "continuousPipelineReleaseFieldReleaseDate"
@@ -83847,6 +84286,7 @@ export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
             | "projectFieldDateUpdated"
             | "timelineShowProjectsAside"
             | "reviewFieldOpenedAt"
+            | "reviewFieldRisk"
             | "fieldPullRequests"
             | "reviewFieldQuickToReview"
             | "continuousPipelineReleaseFieldReleaseDate"
@@ -84066,358 +84506,6 @@ export const IssuePriorityValueFragmentDoc = /*#__PURE__*/ new TypedDocumentStri
     `,
   { fragmentName: "IssuePriorityValue" }
 ) as unknown as TypedDocumentString<IssuePriorityValueFragment, unknown>;
-export const CustomViewNotificationSubscriptionFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
-  `
-    fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
-  __typename
-  customView {
-    id
-  }
-  customer {
-    id
-  }
-  cycle {
-    id
-  }
-  initiative {
-    id
-  }
-  label {
-    id
-  }
-  notificationSubscriptionTypes
-  project {
-    id
-  }
-  id
-  createdAt
-  team {
-    id
-  }
-  contextViewType
-  userContextViewType
-  user {
-    id
-  }
-  subscriber {
-    id
-  }
-  archivedAt
-  updatedAt
-  includeSubInitiativeUpdates
-  active
-}
-    `,
-  { fragmentName: "CustomViewNotificationSubscription" }
-) as unknown as TypedDocumentString<CustomViewNotificationSubscriptionFragment, unknown>;
-export const CustomerNotificationSubscriptionFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
-  `
-    fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
-  __typename
-  customView {
-    id
-  }
-  customer {
-    id
-  }
-  cycle {
-    id
-  }
-  initiative {
-    id
-  }
-  label {
-    id
-  }
-  notificationSubscriptionTypes
-  project {
-    id
-  }
-  id
-  createdAt
-  team {
-    id
-  }
-  contextViewType
-  userContextViewType
-  user {
-    id
-  }
-  subscriber {
-    id
-  }
-  archivedAt
-  updatedAt
-  includeSubInitiativeUpdates
-  active
-}
-    `,
-  { fragmentName: "CustomerNotificationSubscription" }
-) as unknown as TypedDocumentString<CustomerNotificationSubscriptionFragment, unknown>;
-export const CycleNotificationSubscriptionFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
-  `
-    fragment CycleNotificationSubscription on CycleNotificationSubscription {
-  __typename
-  customView {
-    id
-  }
-  customer {
-    id
-  }
-  cycle {
-    id
-  }
-  initiative {
-    id
-  }
-  label {
-    id
-  }
-  notificationSubscriptionTypes
-  project {
-    id
-  }
-  id
-  createdAt
-  team {
-    id
-  }
-  contextViewType
-  userContextViewType
-  user {
-    id
-  }
-  subscriber {
-    id
-  }
-  archivedAt
-  updatedAt
-  includeSubInitiativeUpdates
-  active
-}
-    `,
-  { fragmentName: "CycleNotificationSubscription" }
-) as unknown as TypedDocumentString<CycleNotificationSubscriptionFragment, unknown>;
-export const InitiativeNotificationSubscriptionFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
-  `
-    fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
-  __typename
-  customView {
-    id
-  }
-  customer {
-    id
-  }
-  cycle {
-    id
-  }
-  initiative {
-    id
-  }
-  label {
-    id
-  }
-  notificationSubscriptionTypes
-  project {
-    id
-  }
-  id
-  createdAt
-  team {
-    id
-  }
-  contextViewType
-  userContextViewType
-  user {
-    id
-  }
-  subscriber {
-    id
-  }
-  archivedAt
-  updatedAt
-  includeSubInitiativeUpdates
-  active
-}
-    `,
-  { fragmentName: "InitiativeNotificationSubscription" }
-) as unknown as TypedDocumentString<InitiativeNotificationSubscriptionFragment, unknown>;
-export const LabelNotificationSubscriptionFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
-  `
-    fragment LabelNotificationSubscription on LabelNotificationSubscription {
-  __typename
-  customView {
-    id
-  }
-  customer {
-    id
-  }
-  cycle {
-    id
-  }
-  initiative {
-    id
-  }
-  label {
-    id
-  }
-  notificationSubscriptionTypes
-  project {
-    id
-  }
-  id
-  createdAt
-  team {
-    id
-  }
-  contextViewType
-  userContextViewType
-  user {
-    id
-  }
-  subscriber {
-    id
-  }
-  archivedAt
-  updatedAt
-  includeSubInitiativeUpdates
-  active
-}
-    `,
-  { fragmentName: "LabelNotificationSubscription" }
-) as unknown as TypedDocumentString<LabelNotificationSubscriptionFragment, unknown>;
-export const ProjectNotificationSubscriptionFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
-  `
-    fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
-  __typename
-  customView {
-    id
-  }
-  customer {
-    id
-  }
-  cycle {
-    id
-  }
-  initiative {
-    id
-  }
-  label {
-    id
-  }
-  notificationSubscriptionTypes
-  project {
-    id
-  }
-  id
-  createdAt
-  team {
-    id
-  }
-  contextViewType
-  userContextViewType
-  user {
-    id
-  }
-  subscriber {
-    id
-  }
-  archivedAt
-  updatedAt
-  includeSubInitiativeUpdates
-  active
-}
-    `,
-  { fragmentName: "ProjectNotificationSubscription" }
-) as unknown as TypedDocumentString<ProjectNotificationSubscriptionFragment, unknown>;
-export const TeamNotificationSubscriptionFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
-  `
-    fragment TeamNotificationSubscription on TeamNotificationSubscription {
-  __typename
-  customView {
-    id
-  }
-  customer {
-    id
-  }
-  cycle {
-    id
-  }
-  initiative {
-    id
-  }
-  label {
-    id
-  }
-  notificationSubscriptionTypes
-  project {
-    id
-  }
-  id
-  createdAt
-  team {
-    id
-  }
-  contextViewType
-  userContextViewType
-  user {
-    id
-  }
-  subscriber {
-    id
-  }
-  archivedAt
-  updatedAt
-  includeSubInitiativeUpdates
-  active
-}
-    `,
-  { fragmentName: "TeamNotificationSubscription" }
-) as unknown as TypedDocumentString<TeamNotificationSubscriptionFragment, unknown>;
-export const UserNotificationSubscriptionFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
-  `
-    fragment UserNotificationSubscription on UserNotificationSubscription {
-  __typename
-  customView {
-    id
-  }
-  customer {
-    id
-  }
-  cycle {
-    id
-  }
-  initiative {
-    id
-  }
-  label {
-    id
-  }
-  notificationSubscriptionTypes
-  project {
-    id
-  }
-  id
-  createdAt
-  team {
-    id
-  }
-  contextViewType
-  userContextViewType
-  user {
-    id
-  }
-  subscriber {
-    id
-  }
-  archivedAt
-  updatedAt
-  includeSubInitiativeUpdates
-  active
-}
-    `,
-  { fragmentName: "UserNotificationSubscription" }
-) as unknown as TypedDocumentString<UserNotificationSubscriptionFragment, unknown>;
 export const PageInfoFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
   `
     fragment PageInfo on PageInfo {
@@ -84480,8 +84568,13 @@ export const DocumentSearchResultFragmentDoc = /*#__PURE__*/ new TypedDocumentSt
   updatedBy {
     id
   }
+  personalUser {
+    id
+  }
   trashed
   slugId
+  workspaceAccess
+  generalAccess
   archivedAt
   updatedAt
   metadata
@@ -84540,8 +84633,13 @@ export const DocumentSearchPayloadFragmentDoc = /*#__PURE__*/ new TypedDocumentS
   updatedBy {
     id
   }
+  personalUser {
+    id
+  }
   trashed
   slugId
+  workspaceAccess
+  generalAccess
   archivedAt
   updatedAt
   metadata
@@ -87010,6 +87108,7 @@ export const ViewPreferencesValuesFragmentDoc = /*#__PURE__*/ new TypedDocumentS
   projectFieldDateUpdated
   timelineShowProjectsAside
   reviewFieldOpenedAt
+  reviewFieldRisk
   fieldPullRequests
   reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
@@ -87308,6 +87407,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldDateUpdated
   timelineShowProjectsAside
   reviewFieldOpenedAt
+  reviewFieldRisk
   fieldPullRequests
   reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
@@ -87636,6 +87736,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldDateUpdated
   timelineShowProjectsAside
   reviewFieldOpenedAt
+  reviewFieldRisk
   fieldPullRequests
   reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
@@ -87980,6 +88081,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldDateUpdated
   timelineShowProjectsAside
   reviewFieldOpenedAt
+  reviewFieldRisk
   fieldPullRequests
   reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
@@ -88578,8 +88680,13 @@ export const DocumentFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
   updatedBy {
     id
   }
+  personalUser {
+    id
+  }
   trashed
   slugId
+  workspaceAccess
+  generalAccess
   archivedAt
   updatedAt
 }
@@ -88633,8 +88740,13 @@ export const DocumentConnectionFragmentDoc = /*#__PURE__*/ new TypedDocumentStri
   updatedBy {
     id
   }
+  personalUser {
+    id
+  }
   trashed
   slugId
+  workspaceAccess
+  generalAccess
   archivedAt
   updatedAt
 }
@@ -91862,6 +91974,358 @@ export const InitiativeNotificationFragmentDoc = /*#__PURE__*/ new TypedDocument
 }`,
   { fragmentName: "InitiativeNotification" }
 ) as unknown as TypedDocumentString<InitiativeNotificationFragment, unknown>;
+export const CustomViewNotificationSubscriptionFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
+  `
+    fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+    `,
+  { fragmentName: "CustomViewNotificationSubscription" }
+) as unknown as TypedDocumentString<CustomViewNotificationSubscriptionFragment, unknown>;
+export const CustomerNotificationSubscriptionFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
+  `
+    fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+    `,
+  { fragmentName: "CustomerNotificationSubscription" }
+) as unknown as TypedDocumentString<CustomerNotificationSubscriptionFragment, unknown>;
+export const CycleNotificationSubscriptionFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
+  `
+    fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+    `,
+  { fragmentName: "CycleNotificationSubscription" }
+) as unknown as TypedDocumentString<CycleNotificationSubscriptionFragment, unknown>;
+export const InitiativeNotificationSubscriptionFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
+  `
+    fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+    `,
+  { fragmentName: "InitiativeNotificationSubscription" }
+) as unknown as TypedDocumentString<InitiativeNotificationSubscriptionFragment, unknown>;
+export const LabelNotificationSubscriptionFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
+  `
+    fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+    `,
+  { fragmentName: "LabelNotificationSubscription" }
+) as unknown as TypedDocumentString<LabelNotificationSubscriptionFragment, unknown>;
+export const ProjectNotificationSubscriptionFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
+  `
+    fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+    `,
+  { fragmentName: "ProjectNotificationSubscription" }
+) as unknown as TypedDocumentString<ProjectNotificationSubscriptionFragment, unknown>;
+export const TeamNotificationSubscriptionFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
+  `
+    fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+    `,
+  { fragmentName: "TeamNotificationSubscription" }
+) as unknown as TypedDocumentString<TeamNotificationSubscriptionFragment, unknown>;
+export const UserNotificationSubscriptionFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
+  `
+    fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+    `,
+  { fragmentName: "UserNotificationSubscription" }
+) as unknown as TypedDocumentString<UserNotificationSubscriptionFragment, unknown>;
 export const NotificationSubscriptionFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
   `
     fragment NotificationSubscription on NotificationSubscription {
@@ -91901,8 +92365,343 @@ export const NotificationSubscriptionFragmentDoc = /*#__PURE__*/ new TypedDocume
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
-    `,
+    fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}`,
   { fragmentName: "NotificationSubscription" }
 ) as unknown as TypedDocumentString<NotificationSubscriptionFragment, unknown>;
 export const IssueNotificationFragmentDoc = /*#__PURE__*/ new TypedDocumentString(
@@ -91951,7 +92750,319 @@ export const IssueNotificationFragmentDoc = /*#__PURE__*/ new TypedDocumentStrin
   archivedAt
   updatedAt
 }
-    fragment NotificationSubscription on NotificationSubscription {
+    fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment NotificationSubscription on NotificationSubscription {
   __typename
   customView {
     id
@@ -91988,6 +93099,30 @@ export const IssueNotificationFragmentDoc = /*#__PURE__*/ new TypedDocumentStrin
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 fragment ActorBot on ActorBot {
   __typename
@@ -93039,6 +94174,318 @@ fragment IssueNotification on IssueNotification {
   archivedAt
   updatedAt
 }
+fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
 fragment ProductAnnouncement on ProductAnnouncement {
   __typename
   description
@@ -93103,6 +94550,30 @@ fragment NotificationSubscription on NotificationSubscription {
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
   __typename
@@ -93668,6 +95139,318 @@ fragment IssueNotification on IssueNotification {
   archivedAt
   updatedAt
 }
+fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
 fragment ProductAnnouncement on ProductAnnouncement {
   __typename
   description
@@ -93732,6 +95515,30 @@ fragment NotificationSubscription on NotificationSubscription {
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
   __typename
@@ -93921,7 +95728,319 @@ export const NotificationSubscriptionConnectionFragmentDoc = /*#__PURE__*/ new T
     ...NotificationSubscription
   }
 }
-    fragment NotificationSubscription on NotificationSubscription {
+    fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment NotificationSubscription on NotificationSubscription {
   __typename
   customView {
     id
@@ -93958,6 +96077,30 @@ export const NotificationSubscriptionConnectionFragmentDoc = /*#__PURE__*/ new T
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 fragment PageInfo on PageInfo {
   __typename
@@ -101323,6 +103466,318 @@ fragment IssueNotification on IssueNotification {
   archivedAt
   updatedAt
 }
+fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
 fragment ProductAnnouncement on ProductAnnouncement {
   __typename
   description
@@ -101387,6 +103842,30 @@ fragment NotificationSubscription on NotificationSubscription {
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
   __typename
@@ -102164,6 +104643,318 @@ fragment IssueNotification on IssueNotification {
   archivedAt
   updatedAt
 }
+fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
 fragment ProductAnnouncement on ProductAnnouncement {
   __typename
   description
@@ -102228,6 +105019,30 @@ fragment NotificationSubscription on NotificationSubscription {
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
   __typename
@@ -102862,6 +105677,318 @@ fragment IssueNotification on IssueNotification {
   archivedAt
   updatedAt
 }
+fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
 fragment ProductAnnouncement on ProductAnnouncement {
   __typename
   description
@@ -102926,6 +106053,30 @@ fragment NotificationSubscription on NotificationSubscription {
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
   __typename
@@ -103582,7 +106733,319 @@ export const NotificationSubscriptionPayloadFragmentDoc = /*#__PURE__*/ new Type
   }
   success
 }
-    fragment NotificationSubscription on NotificationSubscription {
+    fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment NotificationSubscription on NotificationSubscription {
   __typename
   customView {
     id
@@ -103619,6 +107082,30 @@ export const NotificationSubscriptionPayloadFragmentDoc = /*#__PURE__*/ new Type
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }`,
   { fragmentName: "NotificationSubscriptionPayload" }
 ) as unknown as TypedDocumentString<NotificationSubscriptionPayloadFragment, unknown>;
@@ -104222,6 +107709,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldDateUpdated
   timelineShowProjectsAside
   reviewFieldOpenedAt
+  reviewFieldRisk
   fieldPullRequests
   reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
@@ -105086,6 +108574,318 @@ fragment IssueNotification on IssueNotification {
   archivedAt
   updatedAt
 }
+fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
 fragment ProductAnnouncement on ProductAnnouncement {
   __typename
   description
@@ -105150,6 +108950,30 @@ fragment NotificationSubscription on NotificationSubscription {
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
   __typename
@@ -105949,6 +109773,318 @@ fragment IssueNotification on IssueNotification {
   archivedAt
   updatedAt
 }
+fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
 fragment ProductAnnouncement on ProductAnnouncement {
   __typename
   description
@@ -106013,6 +110149,30 @@ fragment NotificationSubscription on NotificationSubscription {
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
   __typename
@@ -107768,6 +111928,318 @@ fragment IssueNotification on IssueNotification {
   archivedAt
   updatedAt
 }
+fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
 fragment User on User {
   __typename
   description
@@ -108009,6 +112481,30 @@ fragment NotificationSubscription on NotificationSubscription {
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
   __typename
@@ -109872,8 +114368,13 @@ export const AttachmentIssue_DocumentsDocument = /*#__PURE__*/ new TypedDocument
   updatedBy {
     id
   }
+  personalUser {
+    id
+  }
   trashed
   slugId
+  workspaceAccess
+  generalAccess
   archivedAt
   updatedAt
 }
@@ -112501,6 +117002,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldDateUpdated
   timelineShowProjectsAside
   reviewFieldOpenedAt
+  reviewFieldRisk
   fieldPullRequests
   reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
@@ -113188,6 +117690,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldDateUpdated
   timelineShowProjectsAside
   reviewFieldOpenedAt
+  reviewFieldRisk
   fieldPullRequests
   reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
@@ -113473,6 +117976,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldDateUpdated
   timelineShowProjectsAside
   reviewFieldOpenedAt
+  reviewFieldRisk
   fieldPullRequests
   reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
@@ -113970,6 +118474,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldDateUpdated
   timelineShowProjectsAside
   reviewFieldOpenedAt
+  reviewFieldRisk
   fieldPullRequests
   reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
@@ -114255,6 +118760,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldDateUpdated
   timelineShowProjectsAside
   reviewFieldOpenedAt
+  reviewFieldRisk
   fieldPullRequests
   reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
@@ -114538,6 +119044,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldDateUpdated
   timelineShowProjectsAside
   reviewFieldOpenedAt
+  reviewFieldRisk
   fieldPullRequests
   reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
@@ -114906,6 +119413,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldDateUpdated
   timelineShowProjectsAside
   reviewFieldOpenedAt
+  reviewFieldRisk
   fieldPullRequests
   reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
@@ -116095,8 +120603,13 @@ export const DocumentDocument = /*#__PURE__*/ new TypedDocumentString(`
   updatedBy {
     id
   }
+  personalUser {
+    id
+  }
   trashed
   slugId
+  workspaceAccess
+  generalAccess
   archivedAt
   updatedAt
 }`) as unknown as TypedDocumentString<DocumentQuery, DocumentQueryVariables>;
@@ -116480,8 +120993,13 @@ export const DocumentsDocument = /*#__PURE__*/ new TypedDocumentString(`
   updatedBy {
     id
   }
+  personalUser {
+    id
+  }
   trashed
   slugId
+  workspaceAccess
+  generalAccess
   archivedAt
   updatedAt
 }
@@ -117842,6 +122360,318 @@ fragment IssueNotification on IssueNotification {
   archivedAt
   updatedAt
 }
+fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
 fragment NotificationConnection on NotificationConnection {
   __typename
   pageInfo {
@@ -117915,6 +122745,30 @@ fragment NotificationSubscription on NotificationSubscription {
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
   __typename
@@ -118364,8 +123218,13 @@ export const Initiative_DocumentsDocument = /*#__PURE__*/ new TypedDocumentStrin
   updatedBy {
     id
   }
+  personalUser {
+    id
+  }
   trashed
   slugId
+  workspaceAccess
+  generalAccess
   archivedAt
   updatedAt
 }
@@ -120916,8 +125775,13 @@ export const Issue_DocumentsDocument = /*#__PURE__*/ new TypedDocumentString(`
   updatedBy {
     id
   }
+  personalUser {
+    id
+  }
   trashed
   slugId
+  workspaceAccess
+  generalAccess
   archivedAt
   updatedAt
 }
@@ -123865,8 +128729,13 @@ export const IssueVcsBranchSearch_DocumentsDocument = /*#__PURE__*/ new TypedDoc
   updatedBy {
     id
   }
+  personalUser {
+    id
+  }
   trashed
   slugId
+  workspaceAccess
+  generalAccess
   archivedAt
   updatedAt
 }
@@ -125765,6 +130634,318 @@ fragment IssueNotification on IssueNotification {
   archivedAt
   updatedAt
 }
+fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
 fragment ProductAnnouncement on ProductAnnouncement {
   __typename
   description
@@ -125829,6 +131010,30 @@ fragment NotificationSubscription on NotificationSubscription {
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
   __typename
@@ -126004,7 +131209,319 @@ export const NotificationSubscriptionDocument = /*#__PURE__*/ new TypedDocumentS
     ...NotificationSubscription
   }
 }
-    fragment NotificationSubscription on NotificationSubscription {
+    fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment NotificationSubscription on NotificationSubscription {
   __typename
   customView {
     id
@@ -126041,6 +131558,30 @@ export const NotificationSubscriptionDocument = /*#__PURE__*/ new TypedDocumentS
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }`) as unknown as TypedDocumentString<NotificationSubscriptionQuery, NotificationSubscriptionQueryVariables>;
 export const NotificationSubscriptionsDocument = /*#__PURE__*/ new TypedDocumentString(`
     query notificationSubscriptions($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
@@ -126055,7 +131596,319 @@ export const NotificationSubscriptionsDocument = /*#__PURE__*/ new TypedDocument
     ...NotificationSubscriptionConnection
   }
 }
-    fragment NotificationSubscriptionConnection on NotificationSubscriptionConnection {
+    fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment NotificationSubscriptionConnection on NotificationSubscriptionConnection {
   __typename
   pageInfo {
     ...PageInfo
@@ -126101,6 +131954,30 @@ fragment NotificationSubscription on NotificationSubscription {
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 fragment PageInfo on PageInfo {
   __typename
@@ -126576,6 +132453,318 @@ fragment IssueNotification on IssueNotification {
   archivedAt
   updatedAt
 }
+fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
 fragment NotificationConnection on NotificationConnection {
   __typename
   pageInfo {
@@ -126649,6 +132838,30 @@ fragment NotificationSubscription on NotificationSubscription {
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
   __typename
@@ -128206,8 +134419,13 @@ export const Project_DocumentsDocument = /*#__PURE__*/ new TypedDocumentString(`
   updatedBy {
     id
   }
+  personalUser {
+    id
+  }
   trashed
   slugId
+  workspaceAccess
+  generalAccess
   archivedAt
   updatedAt
 }
@@ -131317,8 +137535,13 @@ export const Release_DocumentsDocument = /*#__PURE__*/ new TypedDocumentString(`
   updatedBy {
     id
   }
+  personalUser {
+    id
+  }
   trashed
   slugId
+  workspaceAccess
+  generalAccess
   archivedAt
   updatedAt
 }
@@ -133266,8 +139489,13 @@ export const SearchDocumentsDocument = /*#__PURE__*/ new TypedDocumentString(`
   updatedBy {
     id
   }
+  personalUser {
+    id
+  }
   trashed
   slugId
+  workspaceAccess
+  generalAccess
   archivedAt
   updatedAt
   metadata
@@ -138062,6 +144290,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldDateUpdated
   timelineShowProjectsAside
   reviewFieldOpenedAt
+  reviewFieldRisk
   fieldPullRequests
   reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
@@ -138342,6 +144571,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldDateUpdated
   timelineShowProjectsAside
   reviewFieldOpenedAt
+  reviewFieldRisk
   fieldPullRequests
   reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
@@ -140954,6 +147184,20 @@ export const DeleteDocumentDocument = /*#__PURE__*/ new TypedDocumentString(`
   }
   success
 }`) as unknown as TypedDocumentString<DeleteDocumentMutation, DeleteDocumentMutationVariables>;
+export const DocumentShareDocument = /*#__PURE__*/ new TypedDocumentString(`
+    mutation documentShare($id: String!, $role: DocumentShareRole, $userIds: [String!]!) {
+  documentShare(id: $id, role: $role, userIds: $userIds) {
+    ...DocumentPayload
+  }
+}
+    fragment DocumentPayload on DocumentPayload {
+  __typename
+  lastSyncId
+  document {
+    id
+  }
+  success
+}`) as unknown as TypedDocumentString<DocumentShareMutation, DocumentShareMutationVariables>;
 export const UnarchiveDocumentDocument = /*#__PURE__*/ new TypedDocumentString(`
     mutation unarchiveDocument($id: String!) {
   documentUnarchive(id: $id) {
@@ -140968,6 +147212,20 @@ export const UnarchiveDocumentDocument = /*#__PURE__*/ new TypedDocumentString(`
   }
   success
 }`) as unknown as TypedDocumentString<UnarchiveDocumentMutation, UnarchiveDocumentMutationVariables>;
+export const DocumentUnshareDocument = /*#__PURE__*/ new TypedDocumentString(`
+    mutation documentUnshare($id: String!, $userIds: [String!]!) {
+  documentUnshare(id: $id, userIds: $userIds) {
+    ...DocumentPayload
+  }
+}
+    fragment DocumentPayload on DocumentPayload {
+  __typename
+  lastSyncId
+  document {
+    id
+  }
+  success
+}`) as unknown as TypedDocumentString<DocumentUnshareMutation, DocumentUnshareMutationVariables>;
 export const UpdateDocumentDocument = /*#__PURE__*/ new TypedDocumentString(`
     mutation updateDocument($id: String!, $input: DocumentUpdateInput!) {
   documentUpdate(id: $id, input: $input) {
@@ -140982,6 +147240,51 @@ export const UpdateDocumentDocument = /*#__PURE__*/ new TypedDocumentString(`
   }
   success
 }`) as unknown as TypedDocumentString<UpdateDocumentMutation, UpdateDocumentMutationVariables>;
+export const DocumentUpdateGeneralAccessDocument = /*#__PURE__*/ new TypedDocumentString(`
+    mutation documentUpdateGeneralAccess($applyToSubDocuments: Boolean, $generalAccess: String!, $id: String!, $previousGeneralAccess: String, $removeCollaboratorIds: [String!]) {
+  documentUpdateGeneralAccess(
+    applyToSubDocuments: $applyToSubDocuments
+    generalAccess: $generalAccess
+    id: $id
+    previousGeneralAccess: $previousGeneralAccess
+    removeCollaboratorIds: $removeCollaboratorIds
+  ) {
+    ...DocumentPayload
+  }
+}
+    fragment DocumentPayload on DocumentPayload {
+  __typename
+  lastSyncId
+  document {
+    id
+  }
+  success
+}`) as unknown as TypedDocumentString<
+  DocumentUpdateGeneralAccessMutation,
+  DocumentUpdateGeneralAccessMutationVariables
+>;
+export const DocumentUpdateWorkspaceAccessDocument = /*#__PURE__*/ new TypedDocumentString(`
+    mutation documentUpdateWorkspaceAccess($applyToSubDocuments: Boolean, $id: String!, $previousWorkspaceAccess: String, $workspaceAccess: String!) {
+  documentUpdateWorkspaceAccess(
+    applyToSubDocuments: $applyToSubDocuments
+    id: $id
+    previousWorkspaceAccess: $previousWorkspaceAccess
+    workspaceAccess: $workspaceAccess
+  ) {
+    ...DocumentPayload
+  }
+}
+    fragment DocumentPayload on DocumentPayload {
+  __typename
+  lastSyncId
+  document {
+    id
+  }
+  success
+}`) as unknown as TypedDocumentString<
+  DocumentUpdateWorkspaceAccessMutation,
+  DocumentUpdateWorkspaceAccessMutationVariables
+>;
 export const CreateEmailIntakeAddressDocument = /*#__PURE__*/ new TypedDocumentString(`
     mutation createEmailIntakeAddress($input: EmailIntakeAddressCreateInput!) {
   emailIntakeAddressCreate(input: $input) {
@@ -142039,6 +148342,318 @@ fragment IssueNotification on IssueNotification {
   archivedAt
   updatedAt
 }
+fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
 fragment ProductAnnouncement on ProductAnnouncement {
   __typename
   description
@@ -142103,6 +148718,30 @@ fragment NotificationSubscription on NotificationSubscription {
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
   __typename
@@ -142805,8 +149444,9 @@ fragment GitHubIntegrationConnectDetails on GitHubIntegrationConnectDetails {
   CreateIntegrationGithubCommitMutationVariables
 >;
 export const IntegrationGithubConnectDocument = /*#__PURE__*/ new TypedDocumentString(`
-    mutation integrationGithubConnect($code: String!, $codeAccess: Boolean, $confirmReplace: Boolean, $githubHost: String, $installationId: String!) {
+    mutation integrationGithubConnect($addLinkingInstallation: Boolean, $code: String!, $codeAccess: Boolean, $confirmReplace: Boolean, $githubHost: String, $installationId: String!) {
   integrationGithubConnect(
+    addLinkingInstallation: $addLinkingInstallation
     code: $code
     codeAccess: $codeAccess
     confirmReplace: $confirmReplace
@@ -145278,6 +151918,318 @@ fragment IssueNotification on IssueNotification {
   archivedAt
   updatedAt
 }
+fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
 fragment ProductAnnouncement on ProductAnnouncement {
   __typename
   description
@@ -145342,6 +152294,30 @@ fragment NotificationSubscription on NotificationSubscription {
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
   __typename
@@ -145978,6 +152954,318 @@ fragment IssueNotification on IssueNotification {
   archivedAt
   updatedAt
 }
+fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
 fragment ProductAnnouncement on ProductAnnouncement {
   __typename
   description
@@ -146042,6 +153330,30 @@ fragment NotificationSubscription on NotificationSubscription {
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
   __typename
@@ -146696,6 +154008,318 @@ fragment IssueNotification on IssueNotification {
   archivedAt
   updatedAt
 }
+fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
 fragment ProductAnnouncement on ProductAnnouncement {
   __typename
   description
@@ -146760,6 +154384,30 @@ fragment NotificationSubscription on NotificationSubscription {
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
   __typename
@@ -147396,6 +155044,318 @@ fragment IssueNotification on IssueNotification {
   archivedAt
   updatedAt
 }
+fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
 fragment ProductAnnouncement on ProductAnnouncement {
   __typename
   description
@@ -147460,6 +155420,30 @@ fragment NotificationSubscription on NotificationSubscription {
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
   __typename
@@ -148096,6 +156080,318 @@ fragment IssueNotification on IssueNotification {
   archivedAt
   updatedAt
 }
+fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
 fragment ProductAnnouncement on ProductAnnouncement {
   __typename
   description
@@ -148160,6 +156456,30 @@ fragment NotificationSubscription on NotificationSubscription {
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
   __typename
@@ -148343,7 +156663,319 @@ export const CreateNotificationSubscriptionDocument = /*#__PURE__*/ new TypedDoc
     ...NotificationSubscriptionPayload
   }
 }
-    fragment NotificationSubscription on NotificationSubscription {
+    fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment NotificationSubscription on NotificationSubscription {
   __typename
   customView {
     id
@@ -148380,6 +157012,30 @@ export const CreateNotificationSubscriptionDocument = /*#__PURE__*/ new TypedDoc
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 fragment NotificationSubscriptionPayload on NotificationSubscriptionPayload {
   __typename
@@ -148413,7 +157069,319 @@ export const UpdateNotificationSubscriptionDocument = /*#__PURE__*/ new TypedDoc
     ...NotificationSubscriptionPayload
   }
 }
-    fragment NotificationSubscription on NotificationSubscription {
+    fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment NotificationSubscription on NotificationSubscription {
   __typename
   customView {
     id
@@ -148450,6 +157418,30 @@ export const UpdateNotificationSubscriptionDocument = /*#__PURE__*/ new TypedDoc
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 fragment NotificationSubscriptionPayload on NotificationSubscriptionPayload {
   __typename
@@ -148921,6 +157913,318 @@ fragment IssueNotification on IssueNotification {
   archivedAt
   updatedAt
 }
+fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
 fragment ProductAnnouncement on ProductAnnouncement {
   __typename
   description
@@ -148985,6 +158289,30 @@ fragment NotificationSubscription on NotificationSubscription {
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
   __typename
@@ -149621,6 +158949,318 @@ fragment IssueNotification on IssueNotification {
   archivedAt
   updatedAt
 }
+fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
 fragment ProductAnnouncement on ProductAnnouncement {
   __typename
   description
@@ -149685,6 +159325,30 @@ fragment NotificationSubscription on NotificationSubscription {
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
   __typename
@@ -150321,6 +159985,318 @@ fragment IssueNotification on IssueNotification {
   archivedAt
   updatedAt
 }
+fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment TeamNotificationSubscription on TeamNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  customView {
+    id
+  }
+  customer {
+    id
+  }
+  cycle {
+    id
+  }
+  initiative {
+    id
+  }
+  label {
+    id
+  }
+  notificationSubscriptionTypes
+  project {
+    id
+  }
+  id
+  createdAt
+  team {
+    id
+  }
+  contextViewType
+  userContextViewType
+  user {
+    id
+  }
+  subscriber {
+    id
+  }
+  archivedAt
+  updatedAt
+  includeSubInitiativeUpdates
+  active
+}
 fragment ProductAnnouncement on ProductAnnouncement {
   __typename
   description
@@ -150385,6 +160361,30 @@ fragment NotificationSubscription on NotificationSubscription {
   updatedAt
   includeSubInitiativeUpdates
   active
+  ... on CustomViewNotificationSubscription {
+    ...CustomViewNotificationSubscription
+  }
+  ... on CustomerNotificationSubscription {
+    ...CustomerNotificationSubscription
+  }
+  ... on CycleNotificationSubscription {
+    ...CycleNotificationSubscription
+  }
+  ... on InitiativeNotificationSubscription {
+    ...InitiativeNotificationSubscription
+  }
+  ... on LabelNotificationSubscription {
+    ...LabelNotificationSubscription
+  }
+  ... on ProjectNotificationSubscription {
+    ...ProjectNotificationSubscription
+  }
+  ... on TeamNotificationSubscription {
+    ...TeamNotificationSubscription
+  }
+  ... on UserNotificationSubscription {
+    ...UserNotificationSubscription
+  }
 }
 fragment WorkspaceAnnouncementNotification on WorkspaceAnnouncementNotification {
   __typename
@@ -152418,6 +162418,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldDateUpdated
   timelineShowProjectsAside
   reviewFieldOpenedAt
+  reviewFieldRisk
   fieldPullRequests
   reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate
@@ -152728,6 +162729,7 @@ fragment ViewPreferencesValues on ViewPreferencesValues {
   projectFieldDateUpdated
   timelineShowProjectsAside
   reviewFieldOpenedAt
+  reviewFieldRisk
   fieldPullRequests
   reviewFieldQuickToReview
   continuousPipelineReleaseFieldReleaseDate

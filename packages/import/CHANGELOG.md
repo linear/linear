@@ -1,5 +1,13 @@
 # Change Log
 
+## 4.0.10
+
+### Patch Changes
+
+- 2582f0e: fix(import): import every comment of a GitHub issue. Only the first 100 were fetched, so the rest of a longer discussion was dropped without a warning.
+- Updated dependencies
+  - @linear/sdk@104.0.0
+
 ## 4.0.9
 
 ### Patch Changes
