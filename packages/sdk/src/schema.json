@@ -903,7 +903,7 @@
             "args": [],
             "type": {
               "kind": "SCALAR",
-              "name": "JSON",
+              "name": "JSONObject",
               "ofType": null
             },
             "isDeprecated": false,
@@ -2115,7 +2115,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "JSON",
+                "name": "JSONObject",
                 "ofType": null
               }
             },
@@ -2272,7 +2272,7 @@
             "args": [],
             "type": {
               "kind": "SCALAR",
-              "name": "JSON",
+              "name": "JSONObject",
               "ofType": null
             },
             "isDeprecated": false,
@@ -2312,7 +2312,7 @@
             "args": [],
             "type": {
               "kind": "SCALAR",
-              "name": "JSON",
+              "name": "JSONObject",
               "ofType": null
             },
             "isDeprecated": false,
@@ -11458,6 +11458,18 @@
             "deprecationReason": null
           },
           {
+            "name": "filterTimezone",
+            "description": "[Internal] The timezone captured when the view was created. Missing values use UTC.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "filters",
             "description": "The legacy serialized filters applied to issues in the custom view.",
             "args": [],
@@ -12696,16 +12708,12 @@
           },
           {
             "name": "customView",
-            "description": "The custom view subscribed to.",
+            "description": "The custom view subscribed to. Null if the subscriber can no longer access it.",
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "CustomView",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "CustomView",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -16352,16 +16360,12 @@
           },
           {
             "name": "customer",
-            "description": "The customer subscribed to.",
+            "description": "The customer subscribed to. Null if the subscriber can no longer access it.",
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Customer",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "Customer",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -18629,7 +18633,7 @@
           },
           {
             "name": "tierName",
-            "description": "The customer tier’s name or display name. An existing matching tier is reused; otherwise a tier is created. Use this when importing named tiers, or use tierId to select a known tier. The two fields cannot be combined.",
+            "description": "The customer tier’s name or display name. An existing matching tier is reused; otherwise a tier is created, which requires permission to manage customer settings. Use this when importing named tiers, or use tierId to select a known tier. The two fields cannot be combined.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -20281,16 +20285,12 @@
           },
           {
             "name": "cycle",
-            "description": "The cycle subscribed to.",
+            "description": "The cycle subscribed to. Null if the subscriber can no longer access it.",
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Cycle",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "Cycle",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -21262,7 +21262,7 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "DateComparator",
-        "description": "Compares timestamps at millisecond precision. Accepts ISO 8601 timestamps or durations relative to when the filter runs; `{ gte: \"-P7D\" }` includes times from seven days ago onward. Combine `gte` and `lt` for a time window. A YYYY-MM-DD value means midnight UTC, so equality with a date does not match the whole day.",
+        "description": "Compares timestamps at millisecond precision. Accepts ISO 8601 timestamps or durations relative to when the filter runs; `{ gte: \"-P7D\" }` includes times from seven days ago onward. Combine `gte` and `lt` for a time window. A YYYY-MM-DD value means midnight in `timezone`, or UTC by default, so equality with a date does not match the whole day. Use `today` to match the whole current day.",
         "fields": null,
         "inputFields": [
           {
@@ -21372,6 +21372,30 @@
                   "ofType": null
                 }
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "timezone",
+            "description": "Timezone for calendar dates. Saved views use one timezone for all date filters.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "today",
+            "description": "Matches today's calendar day, or its complement when false. Uses timezone, defaulting to UTC.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -21955,6 +21979,18 @@
             "deprecationReason": null
           },
           {
+            "name": "generalAccess",
+            "description": "What users other than the owner can do with a document that is not personal: edit, comment, or view. People shared on the document with a higher role keep it. Null on a personal document, which only its owner and the people it is shared with can access.",
+            "args": [],
+            "type": {
+              "kind": "ENUM",
+              "name": "DocumentShareRole",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "hiddenAt",
             "description": "The time the document was hidden from its default resource view. Null when it is not hidden. Hiding is separate from trashing or archiving and does not remove the document’s content.",
             "args": [],
@@ -22033,6 +22069,18 @@
           {
             "name": "owner",
             "description": "The user responsible for the document. Assigning an owner also subscribes them to updates. Null if no owner is assigned or the account was deleted; ownership is distinct from who last edited the document.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "User",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "personalUser",
+            "description": "The user whose personal space holds the document, who owns and manages it. Null if the document belongs to a different parent entity type.",
             "args": [],
             "type": {
               "kind": "OBJECT",
@@ -22285,7 +22333,7 @@
           },
           {
             "name": "workspaceAccess",
-            "description": "[Internal] What people who can open a document in a public team, or in a project with a public team, but are not members of its teams can do with it: edit, comment, or view. Never above general access. Null means the same as general access, and is always null on a personal document.",
+            "description": "What people who can open a document in a public team, or in a project with a public team, but are not members of its teams can do with it: edit, comment, or view. Never above general access. Null means the same as general access, and is always null on a personal document.",
             "args": [],
             "type": {
               "kind": "ENUM",
@@ -23327,6 +23375,18 @@
           {
             "name": "ownerId",
             "description": "The UUID of an active, non-app user who can access the document. Defaults to the acting user for human-authored requests and to no owner for app-authored requests. Pass null to create it without an owner; assigning an owner also subscribes them.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "personalUserId",
+            "description": "Creates the document in this user's private documents. Must be the acting user, or for a sub-document the owner of its private parent document.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -24404,6 +24464,18 @@
             "deprecationReason": null
           },
           {
+            "name": "generalAccess",
+            "description": "What users other than the owner can do with a document that is not personal: edit, comment, or view. People shared on the document with a higher role keep it. Null on a personal document, which only its owner and the people it is shared with can access.",
+            "args": [],
+            "type": {
+              "kind": "ENUM",
+              "name": "DocumentShareRole",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "hiddenAt",
             "description": "The time the document was hidden from its default resource view. Null when it is not hidden. Hiding is separate from trashing or archiving and does not remove the document’s content.",
             "args": [],
@@ -24498,6 +24570,18 @@
           {
             "name": "owner",
             "description": "The user responsible for the document. Assigning an owner also subscribes them to updates. Null if no owner is assigned or the account was deleted; ownership is distinct from who last edited the document.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "User",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "personalUser",
+            "description": "The user whose personal space holds the document, who owns and manages it. Null if the document belongs to a different parent entity type.",
             "args": [],
             "type": {
               "kind": "OBJECT",
@@ -24750,7 +24834,7 @@
           },
           {
             "name": "workspaceAccess",
-            "description": "[Internal] What people who can open a document in a public team, or in a project with a public team, but are not members of its teams can do with it: edit, comment, or view. Never above general access. Null means the same as general access, and is always null on a personal document.",
+            "description": "What people who can open a document in a public team, or in a project with a public team, but are not members of its teams can do with it: edit, comment, or view. Never above general access. Null means the same as general access, and is always null on a personal document.",
             "args": [],
             "type": {
               "kind": "ENUM",
@@ -25031,6 +25115,18 @@
           {
             "name": "ownerId",
             "description": "The UUID of an active, non-app user who can access the document. Assigning an owner also subscribes them. Pass null to clear ownership where the document’s access settings allow it; personal documents keep their owner.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "personalUserId",
+            "description": "Moves the document and its sub-documents into this user's personal space. Must be the acting user.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -38265,16 +38361,12 @@
           },
           {
             "name": "initiative",
-            "description": "The initiative subscribed to.",
+            "description": "The initiative subscribed to. Null if the subscriber can no longer access it.",
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Initiative",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "Initiative",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -61868,16 +61960,12 @@
           },
           {
             "name": "label",
-            "description": "The label subscribed to.",
+            "description": "The label subscribed to. Null if the subscriber can no longer access it.",
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "IssueLabel",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "IssueLabel",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -62637,7 +62725,7 @@
               },
               {
                 "name": "id",
-                "description": "Optional attachment ID that may be provided through the API.",
+                "description": "The identifier in UUID format. If none is provided, the backend will generate one.",
                 "type": {
                   "kind": "SCALAR",
                   "name": "String",
@@ -62766,7 +62854,7 @@
               },
               {
                 "name": "id",
-                "description": "Optional attachment ID that may be provided through the API.",
+                "description": "The identifier in UUID format. If none is provided, the backend will generate one.",
                 "type": {
                   "kind": "SCALAR",
                   "name": "String",
@@ -62847,7 +62935,7 @@
               },
               {
                 "name": "id",
-                "description": "Optional attachment ID that may be provided through the API.",
+                "description": "The identifier in UUID format. If none is provided, the backend will generate one.",
                 "type": {
                   "kind": "SCALAR",
                   "name": "String",
@@ -62944,7 +63032,7 @@
               },
               {
                 "name": "id",
-                "description": "Optional attachment ID that may be provided through the API.",
+                "description": "The identifier in UUID format. If none is provided, the backend will generate one.",
                 "type": {
                   "kind": "SCALAR",
                   "name": "String",
@@ -63053,7 +63141,7 @@
               },
               {
                 "name": "id",
-                "description": "Optional attachment ID that may be provided through the API.",
+                "description": "The identifier in UUID format. If none is provided, the backend will generate one.",
                 "type": {
                   "kind": "SCALAR",
                   "name": "String",
@@ -63198,7 +63286,7 @@
               },
               {
                 "name": "id",
-                "description": "Optional attachment ID that may be provided through the API.",
+                "description": "The identifier in UUID format. If none is provided, the backend will generate one.",
                 "type": {
                   "kind": "SCALAR",
                   "name": "String",
@@ -63291,7 +63379,7 @@
               },
               {
                 "name": "id",
-                "description": "Optional attachment ID that may be provided through the API.",
+                "description": "The identifier in UUID format. If none is provided, the backend will generate one.",
                 "type": {
                   "kind": "SCALAR",
                   "name": "String",
@@ -63400,7 +63488,7 @@
               },
               {
                 "name": "id",
-                "description": "Optional attachment ID that may be provided through the API.",
+                "description": "The identifier in UUID format. If none is provided, the backend will generate one.",
                 "type": {
                   "kind": "SCALAR",
                   "name": "String",
@@ -63497,7 +63585,7 @@
               },
               {
                 "name": "id",
-                "description": "Optional attachment ID that may be provided through the API.",
+                "description": "The identifier in UUID format. If none is provided, the backend will generate one.",
                 "type": {
                   "kind": "SCALAR",
                   "name": "String",
@@ -63606,7 +63694,7 @@
               },
               {
                 "name": "id",
-                "description": "The id for the attachment.",
+                "description": "The identifier in UUID format. If none is provided, the backend will generate one.",
                 "type": {
                   "kind": "SCALAR",
                   "name": "String",
@@ -63703,7 +63791,7 @@
               },
               {
                 "name": "id",
-                "description": "Optional attachment ID that may be provided through the API.",
+                "description": "The identifier in UUID format. If none is provided, the backend will generate one.",
                 "type": {
                   "kind": "SCALAR",
                   "name": "String",
@@ -65031,7 +65119,7 @@
           },
           {
             "name": "customerUpsert",
-            "description": "Finds a customer using the supplied UUID, external ID, Slack channel, or domains, and updates it; otherwise creates one. A name is required when no customer matches. Unlike customerUpdate, this operation can override integration-managed fields, and a tierName can create a new customer tier.",
+            "description": "Finds a customer using the supplied UUID, external ID, Slack channel, or domains, and updates it; otherwise creates one. A name is required when no customer matches. Unlike customerUpdate, this operation can override integration-managed fields, and a tierName can create a new customer tier when the caller has permission to manage customer settings.",
             "args": [
               {
                 "name": "input",
@@ -65245,7 +65333,7 @@
           },
           {
             "name": "documentCreate",
-            "description": "Creates a document in a project, issue, or release, with optional initial Markdown content. The returned document includes its assigned UUID and metadata; select content to read the resulting body.",
+            "description": "Creates a document in a project, issue, or release, or in your private documents with personalUserId, with optional initial Markdown content. The returned document includes its assigned UUID and metadata; select content to read the resulting body.",
             "args": [
               {
                 "name": "input",
@@ -65278,7 +65366,7 @@
           },
           {
             "name": "documentDelete",
-            "description": "Moves a document to the trash and archives it, including the sub-documents covered by its archive cascade. It is not permanently removed by this mutation. You must be allowed to manage the document; use documentUnarchive to restore it.",
+            "description": "Moves a document to the trash and archives it, including the sub-documents covered by its archive cascade. It is not permanently removed by this mutation. You must be allowed to manage the document, or to edit it when it is a page of a private document; use documentUnarchive to restore it.",
             "args": [
               {
                 "name": "id",
@@ -65322,8 +65410,77 @@
             "deprecationReason": null
           },
           {
+            "name": "documentShare",
+            "description": "Shares a document and its sub-documents with workspace members at a role. On a personal document only the owner can share it. On any other document the owner, an owner of one of its teams, or a workspace admin can, the people must be able to see the document, and the role must be above its general access. People it is newly shared with are subscribed to the document. Users who already have another role move to the given one.",
+            "args": [
+              {
+                "name": "id",
+                "description": "The identifier of the document to share.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "role",
+                "description": "The role to share the document at. Defaults to edit.",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "DocumentShareRole",
+                  "ofType": null
+                },
+                "defaultValue": "edit",
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "userIds",
+                "description": "The identifiers of the users to share the document with.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DocumentPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "documentUnarchive",
-            "description": "Restores a trashed document and its eligible sub-documents. You must be allowed to manage the restored documents. If the containing resource is archived, restore that resource first.",
+            "description": "Restores a trashed document and its eligible sub-documents. You must be allowed to manage the restored documents, or to edit them when they are pages of a private document. If the containing resource is archived, restore that resource first.",
             "args": [
               {
                 "name": "id",
@@ -65348,6 +65505,63 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "DocumentArchivePayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentUnshare",
+            "description": "Stops sharing a document and its sub-documents with users. Whoever can manage access to the document can remove anyone it is shared with; anyone else can only remove themselves.",
+            "args": [
+              {
+                "name": "id",
+                "description": "The identifier of the document to stop sharing.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "userIds",
+                "description": "The identifiers of the users to remove from the document.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DocumentPayload",
                 "ofType": null
               }
             },
@@ -65404,8 +65618,101 @@
             "deprecationReason": null
           },
           {
+            "name": "documentUpdateGeneralAccess",
+            "description": "Changes what users other than the owner can do with a document that is not personal: edit, comment, or view. Only the owner of the document, an owner of one of its teams, or a workspace admin can change it. Comment and view need an owner who can access the document.",
+            "args": [
+              {
+                "name": "applyToSubDocuments",
+                "description": "Whether to also change the sub-documents whose level equals the document's level before the change. Sub-documents with another level, without an owner who can access them, or that the user cannot loosen keep their level.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": "false",
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "generalAccess",
+                "description": "The new general access level: edit, comment, or view.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "id",
+                "description": "The identifier of the document.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "previousGeneralAccess",
+                "description": "The general access level of this document when the change was confirmed. When given, the change fails if the document has another level now.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "removeCollaboratorIds",
+                "description": "The users whose roles to remove where this change makes the role give more access than the new level. It removes only those roles from this document and from each sub-document this change also changes. It leaves roles that were already above the document's previous level. Users who can't open the document's container keep their roles, because a role is their only access to it. If the change leaves a document's levels as they are, no role is removed from it.",
+                "type": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DocumentPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "documentUpdateWorkspaceAccess",
-            "description": "[Internal] Changes what people outside a document's teams can do with a document in a public team or in a project with a public team: edit, comment, or view. It can't be above the document's general access. Only the owner of the document, an owner of one of its teams, or a workspace admin can change it. Comment and view need an owner who can access the document.",
+            "description": "Changes what people outside a document's teams can do with a document in a public team or in a project with a public team: edit, comment, or view. It can't be above the document's general access. Only the owner of the document, an owner of one of its teams, or a workspace admin can change it. Comment and view need an owner who can access the document.",
             "args": [
               {
                 "name": "applyToSubDocuments",
@@ -67834,6 +68141,18 @@
             "name": "integrationGithubConnect",
             "description": "Connects a GitHub App installation to the workspace using its installation ID and OAuth grant. If replacing a connection would make repositories used by GitHub Issues sync inaccessible, the call stops and returns gitHub.lostRepositoryNames. Review that list, then repeat with confirmReplace set to true to accept the change. GitHub Enterprise Cloud connections require the corresponding workspace plan feature.",
             "args": [
+              {
+                "name": "addLinkingInstallation",
+                "description": "[Internal] Set to true to keep the organization's code access integration and use this basic GitHub App installation for pull request linking and GitHub Issues sync in the repositories that the code access app cannot read.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": "false",
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
               {
                 "name": "code",
                 "description": "The GitHub grant code that's exchanged for OAuth tokens.",
@@ -70627,7 +70946,7 @@
           },
           {
             "name": "issueImportProcess",
-            "description": "Saves the supplied mappings and schedules creation of Linear records from the fetched source data. The import must be inProgress; otherwise the mappings are saved but success is false. A successful response means processing was accepted, not that it has finished. Linear-to-Linear migrations can only be managed from the Linear app.",
+            "description": "Saves the supplied mappings and schedules creation of Linear records from the fetched source data. Fails without saving the mappings when an external-service import has not finished fetching its source data. The import must be inProgress; otherwise the mappings are saved but success is false. A successful response means processing was accepted, not that it has finished. Linear-to-Linear migrations can only be managed from the Linear app.",
             "args": [
               {
                 "name": "issueImportId",
@@ -70676,7 +70995,7 @@
           },
           {
             "name": "issueImportUpdate",
-            "description": "Saves mapping choices without starting the import. For external-service imports, supply the full replacement mapping. Requires workspace import permission; Linear-to-Linear migrations can only be managed from the Linear app.",
+            "description": "Saves mapping choices without starting the import. For external-service imports, supply the full replacement mapping, and wait until the import has fetched its source data. Requires workspace import permission; Linear-to-Linear migrations can only be managed from the Linear app.",
             "args": [
               {
                 "name": "id",
@@ -72291,7 +72610,7 @@
           },
           {
             "name": "oauthApplicationRotateSecret",
-            "description": "[ALPHA] Replaces the client secret for an application created by the caller and returns the new secret. Store it before discarding the response; it cannot be retrieved later. Tokens issued through client_credentials are revoked, while tokens from the authorization-code flow remain valid. The caller must be able to manage the application’s credentials, including its private-team access, as well as have workspace API management permission.",
+            "description": "[ALPHA] Replaces the client secret for an application created by the caller and returns the new secret. Store it before discarding the response; it cannot be retrieved later. The old secret stops working at once, as does a previous secret that a planned rotation kept working. Tokens issued through client_credentials are revoked, while tokens from the authorization-code flow remain valid. The caller must be able to manage the application’s credentials, including its private-team access, as well as have workspace API management permission.",
             "args": [
               {
                 "name": "id",
@@ -81478,6 +81797,30 @@
             "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "timezone",
+            "description": "Timezone for calendar dates. Saved views use one timezone for all date filters.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "today",
+            "description": "Matches today's calendar day, or its complement when false. Uses timezone, defaulting to UTC.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "interfaces": null,
@@ -85136,6 +85479,30 @@
           {
             "name": "null",
             "description": "Set to true to match resources with no value, or false to require a value. For example, `{ null: true }` finds unset values; `{ eq: null }` is not a substitute.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "timezone",
+            "description": "Timezone for calendar dates. Saved views use one timezone for all date filters.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "today",
+            "description": "Matches today's calendar day, or its complement when false. Uses timezone, defaulting to UTC.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -101324,16 +101691,12 @@
           },
           {
             "name": "project",
-            "description": "The project subscribed to.",
+            "description": "The project subscribed to. Null if the subscriber can no longer access it.",
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Project",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "Project",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -136881,16 +137244,12 @@
           },
           {
             "name": "team",
-            "description": "The team subscribed to.",
+            "description": "The team subscribed to. Null if the subscriber can no longer access it.",
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Team",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "Team",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -144335,16 +144694,12 @@
           },
           {
             "name": "user",
-            "description": "The user subscribed to.",
+            "description": "The user subscribed to. Null if the subscriber can no longer access it.",
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "User",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "User",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -148765,6 +149120,18 @@
           {
             "name": "reviewFieldReviewers",
             "description": "Whether to show reviewer avatars on review list items. Null if the preference is unset.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "reviewFieldRisk",
+            "description": "Whether to show the pull request risk level on review list items. Null if the preference is unset.",
             "args": [],
             "type": {
               "kind": "SCALAR",

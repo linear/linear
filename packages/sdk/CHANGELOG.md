@@ -1,5 +1,131 @@
 # Change Log
 
+## 104.0.0
+
+### Major Changes
+
+- feat(schema): [breaking] Field 'AgentActivity.sourceMetadata' changed type from 'JSON' to 'JSONObject' (AgentActivity.sourceMetadata)
+
+  feat(schema): [breaking] Field 'AgentSession.context' changed type from 'JSON!' to 'JSONObject!' (AgentSession.context)
+
+  feat(schema): [breaking] Field 'AgentSession.plan' changed type from 'JSON' to 'JSONObject' (AgentSession.plan)
+
+  feat(schema): [breaking] Field 'AgentSession.sourceMetadata' changed type from 'JSON' to 'JSONObject' (AgentSession.sourceMetadata)
+
+  feat(schema): [breaking] Field 'CustomViewNotificationSubscription.customView' changed type from 'CustomView!' to 'CustomView' (CustomViewNotificationSubscription.customView)
+
+  feat(schema): [breaking] Field 'CustomerNotificationSubscription.customer' changed type from 'Customer!' to 'Customer' (CustomerNotificationSubscription.customer)
+
+  feat(schema): [breaking] Field 'CycleNotificationSubscription.cycle' changed type from 'Cycle!' to 'Cycle' (CycleNotificationSubscription.cycle)
+
+  feat(schema): [breaking] Field 'InitiativeNotificationSubscription.initiative' changed type from 'Initiative!' to 'Initiative' (InitiativeNotificationSubscription.initiative)
+
+  feat(schema): [breaking] Field 'LabelNotificationSubscription.label' changed type from 'IssueLabel!' to 'IssueLabel' (LabelNotificationSubscription.label)
+
+  feat(schema): [breaking] Field 'ProjectNotificationSubscription.project' changed type from 'Project!' to 'Project' (ProjectNotificationSubscription.project)
+
+  feat(schema): [breaking] Field 'TeamNotificationSubscription.team' changed type from 'Team!' to 'Team' (TeamNotificationSubscription.team)
+
+  feat(schema): [breaking] Field 'UserNotificationSubscription.user' changed type from 'User!' to 'User' (UserNotificationSubscription.user)
+
+  feat(schema): [dangerous] Input field 'timezone' was added to input object type 'DateComparator' (DateComparator.timezone)
+
+  feat(schema): [dangerous] Input field 'today' was added to input object type 'DateComparator' (DateComparator.today)
+
+  feat(schema): [dangerous] Input field 'personalUserId' was added to input object type 'DocumentCreateInput' (DocumentCreateInput.personalUserId)
+
+  feat(schema): [dangerous] Input field 'personalUserId' was added to input object type 'DocumentUpdateInput' (DocumentUpdateInput.personalUserId)
+
+  feat(schema): [dangerous] Argument 'addLinkingInstallation: Boolean' added to field 'Mutation.integrationGithubConnect' (Mutation.integrationGithubConnect.addLinkingInstallation)
+
+  feat(schema): [dangerous] Input field 'timezone' was added to input object type 'NullableDateComparator' (NullableDateComparator.timezone)
+
+  feat(schema): [dangerous] Input field 'today' was added to input object type 'NullableDateComparator' (NullableDateComparator.today)
+
+  feat(schema): [dangerous] Input field 'timezone' was added to input object type 'NullableTimelessDateComparator' (NullableTimelessDateComparator.timezone)
+
+  feat(schema): [dangerous] Input field 'today' was added to input object type 'NullableTimelessDateComparator' (NullableTimelessDateComparator.today)
+
+  feat(schema): [non_breaking] Field 'filterTimezone' was added to object type 'CustomView' (CustomView.filterTimezone)
+
+  feat(schema): [non_breaking] Field 'CustomViewNotificationSubscription.customView' description changed from 'The custom view subscribed to.' to 'The custom view subscribed to. Null if the subscriber can no longer access it.' (CustomViewNotificationSubscription.customView)
+
+  feat(schema): [non_breaking] Field 'CustomerNotificationSubscription.customer' description changed from 'The customer subscribed to.' to 'The customer subscribed to. Null if the subscriber can no longer access it.' (CustomerNotificationSubscription.customer)
+
+  feat(schema): [non_breaking] Input field 'CustomerUpsertInput.tierName' description changed from 'The customer tier’s name or display name. An existing matching tier is reused; otherwise a tier is created. Use this when importing named tiers, or use tierId to select a known tier. The two fields cannot be combined.' to 'The customer tier’s name or display name. An existing matching tier is reused; otherwise a tier is created, which requires permission to manage customer settings. Use this when importing named tiers, or use tierId to select a known tier. The two fields cannot be combined.' (CustomerUpsertInput.tierName)
+
+  feat(schema): [non_breaking] Field 'CycleNotificationSubscription.cycle' description changed from 'The cycle subscribed to.' to 'The cycle subscribed to. Null if the subscriber can no longer access it.' (CycleNotificationSubscription.cycle)
+
+  feat(schema): [non_breaking] Description 'Compares timestamps at millisecond precision. Accepts ISO 8601 timestamps or durations relative to when the filter runs; `{ gte: "-P7D" }` includes times from seven days ago onward. Combine `gte` and `lt` for a time window. A YYYY-MM-DD value means midnight UTC, so equality with a date does not match the whole day.' on type 'DateComparator' has changed to 'Compares timestamps at millisecond precision. Accepts ISO 8601 timestamps or durations relative to when the filter runs; `{ gte: "-P7D" }` includes times from seven days ago onward. Combine `gte` and `lt` for a time window. A YYYY-MM-DD value means midnight in `timezone`, or UTC by default, so equality with a date does not match the whole day. Use `today` to match the whole current day.' (DateComparator)
+
+  feat(schema): [non_breaking] Field 'generalAccess' was added to object type 'Document' (Document.generalAccess)
+
+  feat(schema): [non_breaking] Field 'personalUser' was added to object type 'Document' (Document.personalUser)
+
+  feat(schema): [non_breaking] Field 'Document.workspaceAccess' description changed from '[Internal] What people who can open a document in a public team, or in a project with a public team, but are not members of its teams can do with it: edit, comment, or view. Never above general access. Null means the same as general access, and is always null on a personal document.' to 'What people who can open a document in a public team, or in a project with a public team, but are not members of its teams can do with it: edit, comment, or view. Never above general access. Null means the same as general access, and is always null on a personal document.' (Document.workspaceAccess)
+
+  feat(schema): [non_breaking] Field 'generalAccess' was added to object type 'DocumentSearchResult' (DocumentSearchResult.generalAccess)
+
+  feat(schema): [non_breaking] Field 'personalUser' was added to object type 'DocumentSearchResult' (DocumentSearchResult.personalUser)
+
+  feat(schema): [non_breaking] Field 'DocumentSearchResult.workspaceAccess' description changed from '[Internal] What people who can open a document in a public team, or in a project with a public team, but are not members of its teams can do with it: edit, comment, or view. Never above general access. Null means the same as general access, and is always null on a personal document.' to 'What people who can open a document in a public team, or in a project with a public team, but are not members of its teams can do with it: edit, comment, or view. Never above general access. Null means the same as general access, and is always null on a personal document.' (DocumentSearchResult.workspaceAccess)
+
+  feat(schema): [non_breaking] Field 'InitiativeNotificationSubscription.initiative' description changed from 'The initiative subscribed to.' to 'The initiative subscribed to. Null if the subscriber can no longer access it.' (InitiativeNotificationSubscription.initiative)
+
+  feat(schema): [non_breaking] Field 'LabelNotificationSubscription.label' description changed from 'The label subscribed to.' to 'The label subscribed to. Null if the subscriber can no longer access it.' (LabelNotificationSubscription.label)
+
+  feat(schema): [non_breaking] Field 'documentShare' was added to object type 'Mutation' (Mutation.documentShare)
+
+  feat(schema): [non_breaking] Field 'documentUnshare' was added to object type 'Mutation' (Mutation.documentUnshare)
+
+  feat(schema): [non_breaking] Field 'documentUpdateGeneralAccess' was added to object type 'Mutation' (Mutation.documentUpdateGeneralAccess)
+
+  feat(schema): [non_breaking] Description for argument 'id' on field 'Mutation.attachmentLinkDiscord' changed from 'Optional attachment ID that may be provided through the API.' to 'The identifier in UUID format. If none is provided, the backend will generate one.' (Mutation.attachmentLinkDiscord.id)
+
+  feat(schema): [non_breaking] Description for argument 'id' on field 'Mutation.attachmentLinkFront' changed from 'Optional attachment ID that may be provided through the API.' to 'The identifier in UUID format. If none is provided, the backend will generate one.' (Mutation.attachmentLinkFront.id)
+
+  feat(schema): [non_breaking] Description for argument 'id' on field 'Mutation.attachmentLinkGitHubIssue' changed from 'Optional attachment ID that may be provided through the API.' to 'The identifier in UUID format. If none is provided, the backend will generate one.' (Mutation.attachmentLinkGitHubIssue.id)
+
+  feat(schema): [non_breaking] Description for argument 'id' on field 'Mutation.attachmentLinkGitHubPR' changed from 'Optional attachment ID that may be provided through the API.' to 'The identifier in UUID format. If none is provided, the backend will generate one.' (Mutation.attachmentLinkGitHubPR.id)
+
+  feat(schema): [non_breaking] Description for argument 'id' on field 'Mutation.attachmentLinkGitLabMR' changed from 'Optional attachment ID that may be provided through the API.' to 'The identifier in UUID format. If none is provided, the backend will generate one.' (Mutation.attachmentLinkGitLabMR.id)
+
+  feat(schema): [non_breaking] Description for argument 'id' on field 'Mutation.attachmentLinkIntercom' changed from 'Optional attachment ID that may be provided through the API.' to 'The identifier in UUID format. If none is provided, the backend will generate one.' (Mutation.attachmentLinkIntercom.id)
+
+  feat(schema): [non_breaking] Description for argument 'id' on field 'Mutation.attachmentLinkJiraIssue' changed from 'Optional attachment ID that may be provided through the API.' to 'The identifier in UUID format. If none is provided, the backend will generate one.' (Mutation.attachmentLinkJiraIssue.id)
+
+  feat(schema): [non_breaking] Description for argument 'id' on field 'Mutation.attachmentLinkSalesforce' changed from 'Optional attachment ID that may be provided through the API.' to 'The identifier in UUID format. If none is provided, the backend will generate one.' (Mutation.attachmentLinkSalesforce.id)
+
+  feat(schema): [non_breaking] Description for argument 'id' on field 'Mutation.attachmentLinkSlack' changed from 'Optional attachment ID that may be provided through the API.' to 'The identifier in UUID format. If none is provided, the backend will generate one.' (Mutation.attachmentLinkSlack.id)
+
+  feat(schema): [non_breaking] Description for argument 'id' on field 'Mutation.attachmentLinkURL' changed from 'The id for the attachment.' to 'The identifier in UUID format. If none is provided, the backend will generate one.' (Mutation.attachmentLinkURL.id)
+
+  feat(schema): [non_breaking] Description for argument 'id' on field 'Mutation.attachmentLinkZendesk' changed from 'Optional attachment ID that may be provided through the API.' to 'The identifier in UUID format. If none is provided, the backend will generate one.' (Mutation.attachmentLinkZendesk.id)
+
+  feat(schema): [non_breaking] Field 'Mutation.customerUpsert' description changed from 'Finds a customer using the supplied UUID, external ID, Slack channel, or domains, and updates it; otherwise creates one. A name is required when no customer matches. Unlike customerUpdate, this operation can override integration-managed fields, and a tierName can create a new customer tier.' to 'Finds a customer using the supplied UUID, external ID, Slack channel, or domains, and updates it; otherwise creates one. A name is required when no customer matches. Unlike customerUpdate, this operation can override integration-managed fields, and a tierName can create a new customer tier when the caller has permission to manage customer settings.' (Mutation.customerUpsert)
+
+  feat(schema): [non_breaking] Field 'Mutation.documentCreate' description changed from 'Creates a document in a project, issue, or release, with optional initial Markdown content. The returned document includes its assigned UUID and metadata; select content to read the resulting body.' to 'Creates a document in a project, issue, or release, or in your private documents with personalUserId, with optional initial Markdown content. The returned document includes its assigned UUID and metadata; select content to read the resulting body.' (Mutation.documentCreate)
+
+  feat(schema): [non_breaking] Field 'Mutation.documentDelete' description changed from 'Moves a document to the trash and archives it, including the sub-documents covered by its archive cascade. It is not permanently removed by this mutation. You must be allowed to manage the document; use documentUnarchive to restore it.' to 'Moves a document to the trash and archives it, including the sub-documents covered by its archive cascade. It is not permanently removed by this mutation. You must be allowed to manage the document, or to edit it when it is a page of a private document; use documentUnarchive to restore it.' (Mutation.documentDelete)
+
+  feat(schema): [non_breaking] Field 'Mutation.documentUnarchive' description changed from 'Restores a trashed document and its eligible sub-documents. You must be allowed to manage the restored documents. If the containing resource is archived, restore that resource first.' to 'Restores a trashed document and its eligible sub-documents. You must be allowed to manage the restored documents, or to edit them when they are pages of a private document. If the containing resource is archived, restore that resource first.' (Mutation.documentUnarchive)
+
+  feat(schema): [non_breaking] Field 'Mutation.documentUpdateWorkspaceAccess' description changed from '[Internal] Changes what people outside a document's teams can do with a document in a public team or in a project with a public team: edit, comment, or view. It can't be above the document's general access. Only the owner of the document, an owner of one of its teams, or a workspace admin can change it. Comment and view need an owner who can access the document.' to 'Changes what people outside a document's teams can do with a document in a public team or in a project with a public team: edit, comment, or view. It can't be above the document's general access. Only the owner of the document, an owner of one of its teams, or a workspace admin can change it. Comment and view need an owner who can access the document.' (Mutation.documentUpdateWorkspaceAccess)
+
+  feat(schema): [non_breaking] Field 'Mutation.issueImportProcess' description changed from 'Saves the supplied mappings and schedules creation of Linear records from the fetched source data. The import must be inProgress; otherwise the mappings are saved but success is false. A successful response means processing was accepted, not that it has finished. Linear-to-Linear migrations can only be managed from the Linear app.' to 'Saves the supplied mappings and schedules creation of Linear records from the fetched source data. Fails without saving the mappings when an external-service import has not finished fetching its source data. The import must be inProgress; otherwise the mappings are saved but success is false. A successful response means processing was accepted, not that it has finished. Linear-to-Linear migrations can only be managed from the Linear app.' (Mutation.issueImportProcess)
+
+  feat(schema): [non_breaking] Field 'Mutation.issueImportUpdate' description changed from 'Saves mapping choices without starting the import. For external-service imports, supply the full replacement mapping. Requires workspace import permission; Linear-to-Linear migrations can only be managed from the Linear app.' to 'Saves mapping choices without starting the import. For external-service imports, supply the full replacement mapping, and wait until the import has fetched its source data. Requires workspace import permission; Linear-to-Linear migrations can only be managed from the Linear app.' (Mutation.issueImportUpdate)
+
+  feat(schema): [non_breaking] Field 'Mutation.oauthApplicationRotateSecret' description changed from '[ALPHA] Replaces the client secret for an application created by the caller and returns the new secret. Store it before discarding the response; it cannot be retrieved later. Tokens issued through client_credentials are revoked, while tokens from the authorization-code flow remain valid. The caller must be able to manage the application’s credentials, including its private-team access, as well as have workspace API management permission.' to '[ALPHA] Replaces the client secret for an application created by the caller and returns the new secret. Store it before discarding the response; it cannot be retrieved later. The old secret stops working at once, as does a previous secret that a planned rotation kept working. Tokens issued through client_credentials are revoked, while tokens from the authorization-code flow remain valid. The caller must be able to manage the application’s credentials, including its private-team access, as well as have workspace API management permission.' (Mutation.oauthApplicationRotateSecret)
+
+  feat(schema): [non_breaking] Field 'ProjectNotificationSubscription.project' description changed from 'The project subscribed to.' to 'The project subscribed to. Null if the subscriber can no longer access it.' (ProjectNotificationSubscription.project)
+
+  feat(schema): [non_breaking] Field 'TeamNotificationSubscription.team' description changed from 'The team subscribed to.' to 'The team subscribed to. Null if the subscriber can no longer access it.' (TeamNotificationSubscription.team)
+
+  feat(schema): [non_breaking] Field 'UserNotificationSubscription.user' description changed from 'The user subscribed to.' to 'The user subscribed to. Null if the subscriber can no longer access it.' (UserNotificationSubscription.user)
+
+  feat(schema): [non_breaking] Field 'reviewFieldRisk' was added to object type 'ViewPreferencesValues' (ViewPreferencesValues.reviewFieldRisk)
+
 ## 103.0.0
 
 ### Major Changes
