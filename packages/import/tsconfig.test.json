@@ -6,5 +6,5 @@
     "skipLibCheck": true,
     "allowImportingTsExtensions": true
   },
-  "include": ["src/_tests"]
+  "include": ["src/_tests", "src/_types"]
 }
